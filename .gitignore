@@ -1,5 +1,11 @@
+# Javascript Environment
+/node_modules/
+
 # Python Environment
 /.venv/
 
 # IDE Configuration
 /.idea/
+
+# Build files
+/build/
