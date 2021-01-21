@@ -1,11 +1,12 @@
 const paths = require('./paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack');
 
 module.exports = {
     mode: "development",
 
     entry: {
-        app: [ paths.appIndex ]
+        app: [ paths.appIndex, 'webpack-hot-middleware/client' ]
     },
 
     // Which extensions Webpack will resolve when files import other files
@@ -41,5 +42,6 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
+        new webpack.HotModuleReplacementPlugin(),
     ],
 }
