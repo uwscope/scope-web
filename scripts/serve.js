@@ -18,6 +18,8 @@ app.use(
     })
 );
 
+app.use(require("webpack-hot-middleware")(compiler));
+
 app.listen(3000, function () {
         console.log(`Listening on http://localhost:${3000}/.`)
     }

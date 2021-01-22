@@ -1,35 +1,33 @@
 {
-  "name": "scope-web",
-
-  "@comment dependencies": [
-  ],
-  "dependencies": {
-    "mobx": "6.0.x",
-    "mobx-react": "7.0.x",
-    "react": "17.0.x",
-    "react-dom": "17.0.x"
-  },
-
-  "@comment devDependencies": [
-  ],
-  "devDependencies": {
-    "@babel/core": "7.12.x",
-    "@babel/preset-env": "7.12.x",
-    "@babel/preset-react": "7.12.x",
-    "babel-loader": "8.2.x",
-    "html-webpack-plugin": "4.5.x",
-    "express": "4.17.x",
-    "rimraf": "3.0.x",
-    "ts-loader": "8.0.x",
-    "@types/react": "17.0.x",
-    "@types/react-dom": "17.0.x",
-    "typescript": "4.1.x",
-    "webpack": "5.14.x",
-    "webpack-cli": "4.3.x",
-    "webpack-dev-middleware": "4.0.x"
-  },
-
-  "scripts": {
-    "serve": "node scripts/serve.js"
-  }
+    "name": "scope-web",
+    "@comment dependencies": [],
+    "dependencies": {
+        "mobx": "6.0.x",
+        "mobx-react": "7.0.x",
+        "react": "17.0.x",
+        "react-dom": "17.0.x"
+    },
+    "@comment devDependencies": [],
+    "devDependencies": {
+        "@babel/core": "7.12.x",
+        "@babel/preset-env": "7.12.x",
+        "@babel/preset-react": "7.12.x",
+        "@types/react": "17.0.x",
+        "@types/react-dom": "17.0.x",
+        "babel-loader": "8.2.x",
+        "express": "4.17.x",
+        "html-webpack-plugin": "4.5.x",
+        "rimraf": "3.0.x",
+        "ts-loader": "8.0.x",
+        "tslint": "6.1.x",
+        "typescript": "4.1.x",
+        "webpack": "5.14.x",
+        "webpack-cli": "4.3.x",
+        "webpack-dev-middleware": "4.0.x",
+        "webpack-hot-middleware": "2.25.x"
+    },
+    "scripts": {
+        "serve": "node scripts/serve.js",
+        "start": "npm run serve"
+    }
 }
