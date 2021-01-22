@@ -1,27 +1,34 @@
-import { configure } from "mobx";
+import { CssBaseline } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import { RootStore } from "./stores/RootStore";
-import { StoreProvider } from "./stores/stores";
-
+import { RootStore } from './stores/RootStore';
+import { StoreProvider } from './stores/stores';
 
 // Strict enforcements for mobx
 configure({
-    enforceActions: "always",
+    enforceActions: 'always',
     computedRequiresReaction: true,
     reactionRequiresObservable: true,
     observableRequiresReaction: true,
-    disableErrorBoundaries: true
-})
+    disableErrorBoundaries: true,
+});
 
 const store = new RootStore();
 
+const theme = createMuiTheme();
+
 ReactDOM.render(
     <React.StrictMode>
-        <StoreProvider store={store}>
-            <App />
-        </StoreProvider>
+        <CssBaseline>
+            <StoreProvider store={store}>
+                <ThemeProvider theme={theme}>
+                    <App />
+                </ThemeProvider>
+            </StoreProvider>
+        </CssBaseline>
     </React.StrictMode>,
     document.getElementById('root')
 );
