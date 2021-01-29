@@ -1,7 +1,8 @@
 import { Container, Typography } from '@material-ui/core';
-import { styled, withTheme } from '@material-ui/core/styles';
+import { withTheme } from '@material-ui/core/styles';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import styled from 'styled-components';
 
 const Disclaimer = styled(Typography)({
     flexGrow: 1,
@@ -9,8 +10,8 @@ const Disclaimer = styled(Typography)({
 
 const FooterContainer = withTheme(
     styled(Container)((props) => ({
-        height: 80,
-        borderTop: 'solid 1px #eee',
+        height: props.theme.spacing(10),
+        borderTop: `solid 1px ${props.theme.customPalette.subtle}`,
         alignItems: 'center',
         display: 'flex',
     }))

@@ -1,18 +1,19 @@
-import { observer } from "mobx-react";
-import React, { FunctionComponent } from "react";
-import Chrome from "./components/Chrome";
-import { useStores } from "./stores/stores";
-
+import { observer } from 'mobx-react';
+import React, { FunctionComponent } from 'react';
+import Chrome from './components/Chrome';
+import { useStores } from './stores/stores';
 
 export const App: FunctionComponent = observer(() => {
     const rootStore = useStores();
     return (
         <Chrome>
-            <div className="App">
+            <div>
                 <p>{rootStore.userStore.name}</p>
-                {rootStore.authStore.loggedIn ?
-                    <button onClick={() => rootStore.logout()}>Logout</button> :
-                    <button onClick={() => rootStore.login()}>Login</button>}
+                {rootStore.authStore.loggedIn ? (
+                    <button onClick={() => rootStore.logout()}>Logout</button>
+                ) : (
+                    <button onClick={() => rootStore.login()}>Login</button>
+                )}
             </div>
         </Chrome>
     );

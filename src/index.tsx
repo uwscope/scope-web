@@ -1,11 +1,12 @@
 import { CssBaseline } from '@material-ui/core';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { RootStore } from './stores/RootStore';
 import { StoreProvider } from './stores/stores';
+import createAppTheme from './styles/theme';
 
 // Strict enforcements for mobx
 configure({
@@ -18,7 +19,7 @@ configure({
 
 const store = new RootStore();
 
-const theme = createMuiTheme();
+const theme = createAppTheme();
 
 ReactDOM.render(
     <React.StrictMode>

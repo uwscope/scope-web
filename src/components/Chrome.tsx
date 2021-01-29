@@ -1,24 +1,25 @@
-import { Container } from '@material-ui/core';
+import { Container, withTheme } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import styled, { withTheme } from 'styled-components';
+import styled from 'styled-components';
 import Footer from './Footer';
 import Header from './Header';
 
+// Theme can be passed to styles. Not being used now.
 const MainContainer = withTheme(
     styled(Container)((props) => ({
         height: '100%',
-        marginTop: 24,
-        marginBottom: 48,
+        marginTop: props.theme.spacing(3),
+        marginBottom: props.theme.spacing(6),
     }))
 );
 
-export const Chrome: FunctionComponent = observer(() => {
+export const Chrome: FunctionComponent = observer((props) => {
     return (
         <div>
             <Header></Header>
             <main>
-                <MainContainer>This is the main part of the page</MainContainer>
+                <MainContainer>{props.children}</MainContainer>
             </main>
             <Footer></Footer>
         </div>

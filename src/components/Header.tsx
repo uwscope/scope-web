@@ -11,16 +11,18 @@ import styled from 'styled-components';
 import { useStores } from '../stores/stores';
 
 const Container = styled.div({
-    flexGrow: 1
-})
+    flexGrow: 1,
+});
 
-const MenuButton = withTheme(styled(IconButton)((props) => ({
-    marginRight: props.theme.spacing(2),
-})));
+const MenuButton = withTheme(
+    styled(IconButton)((props) => ({
+        marginRight: props.theme.spacing(2),
+    }))
+);
 
 const AppTitle = styled(Typography)({
-    flexGrow: 1
-})
+    flexGrow: 1,
+});
 
 export const Header: FunctionComponent = observer(() => {
     const rootStore = useStores();
@@ -32,9 +34,7 @@ export const Header: FunctionComponent = observer(() => {
                     <MenuButton edge="start" color="inherit" aria-label="menu">
                         <MenuIcon />
                     </MenuButton>
-                    <AppTitle variant="h6">
-                        {rootStore.appTitle}
-                    </AppTitle>
+                    <AppTitle variant="h6">{rootStore.appTitle}</AppTitle>
                     <Button color="inherit">Login</Button>
                 </Toolbar>
             </AppBar>
