@@ -1,10 +1,6 @@
-import { Avatar, Grid, Menu, MenuItem, withTheme } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
+import { Avatar, Grid, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -13,12 +9,6 @@ import Logo from '../assets/scope-logo.png';
 import { LoginStatus } from '../stores/RootStore';
 import { useStores } from '../stores/stores';
 import PatientSearch from './PatientSearch';
-
-const MenuButton = withTheme(
-    styled(IconButton)((props) => ({
-        marginRight: props.theme.spacing(2),
-    }))
-);
 
 const Title = styled(Grid)({
     flexGrow: 1,
@@ -32,7 +22,7 @@ export interface IHeaderProps {
     onDrawerOpen: () => void;
 }
 
-export const Header: FunctionComponent<IHeaderProps> = observer((props: IHeaderProps) => {
+export const HeaderContent: FunctionComponent = observer(() => {
     const rootStore = useStores();
 
     const onPatientSelect = (name: string) => {
@@ -79,29 +69,22 @@ export const Header: FunctionComponent<IHeaderProps> = observer((props: IHeaderP
     };
 
     return (
-        <AppBar position="static">
-            <Toolbar>
-                <MenuButton edge="start" color="inherit" aria-label="menu" onClick={props.onDrawerOpen}>
-                    <MenuIcon />
-                </MenuButton>
-                <Grid container direction="row" justify="flex-start" alignItems="center" spacing={2}>
-                    <Grid item>
-                        <Avatar alt="Scope logo" src={Logo} />
-                    </Grid>
-                    <Title item>
-                        <Typography variant="h6">{rootStore.appTitle}</Typography>
-                    </Title>
-                    <Grid item>
-                        <PatientSearch
-                            options={rootStore.patientsStore.patients.map((p) => p.name)}
-                            onSelect={onPatientSelect}
-                        />
-                    </Grid>
-                    {loginButton()}
-                </Grid>
-            </Toolbar>
-        </AppBar>
+        <Grid container direction="row" justify="flex-start" alignItems="center" spacing={2}>
+            <Grid item>
+                <Avatar alt="Scope logo" src={Logo} />
+            </Grid>
+            <Title item>
+                <Typography variant="h6">{rootStore.appTitle}</Typography>
+            </Title>
+            <Grid item>
+                <PatientSearch
+                    options={rootStore.patientsStore.patients.map((p) => p.name)}
+                    onSelect={onPatientSelect}
+                />
+            </Grid>
+            {loginButton()}
+        </Grid>
     );
 });
 
-export default Header;
+export default HeaderContent;
