@@ -8,6 +8,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
+import Logo from '../assets/scope-logo.png';
 import { useStores } from '../stores/stores';
 import PatientSearch from './PatientSearch';
 
@@ -43,7 +44,7 @@ export const Header: FunctionComponent = observer(() => {
                     </MenuButton>
                     <Grid container direction="row" justify="flex-start" alignItems="center" spacing={2}>
                         <Grid item>
-                            <Avatar alt="Scope logo" src="/assets/scope-logo.png" />
+                            <Avatar alt="Scope logo" src={Logo} />
                         </Grid>
                         <Title item>
                             <Typography variant="h6">{rootStore.appTitle}</Typography>
