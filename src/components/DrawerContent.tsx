@@ -6,17 +6,18 @@ import HomeIcon from '@material-ui/icons/Home';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 export const DrawerContent: FunctionComponent = observer(() => {
     return (
         <List>
-            <ListItem button key="Home">
+            <ListItem button key="Home" component={RouterLink} to="/">
                 <ListItemIcon>
                     <HomeIcon />
                 </ListItemIcon>
                 <ListItemText primary="Home" />
             </ListItem>
-            <ListItem button key="Caseload">
+            <ListItem button key="Caseload" component={RouterLink} to="/caseload">
                 <ListItemIcon>
                     <TableChartIcon />
                 </ListItemIcon>
