@@ -66,5 +66,6 @@ export class RootStore implements IRootStore {
     public load() {
         const patients = RegistryServiceInstance.getPatients();
         this.patientsStore.updatePatients(patients);
+        this.patientsStore.selectCareManager(this.userStore.name);
     }
 }

@@ -19,6 +19,9 @@ configure({
 
 const store = new RootStore();
 
+// TODO: Temporary login
+store.login();
+
 const theme = createAppTheme();
 
 ReactDOM.render(

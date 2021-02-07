@@ -11,10 +11,14 @@ class RegistryService implements IRegistryService {
             {
                 firstName: 'Tinker',
                 lastName: 'Bell',
+                primaryCareManagerName: 'Luke Skywalker',
+                clinicCode: 'Transplant',
             },
             {
                 firstName: 'Prince',
                 lastName: 'Charming',
+                primaryCareManagerName: 'Luke Skywalker',
+                clinicCode: 'Transplant',
             },
         ];
 
