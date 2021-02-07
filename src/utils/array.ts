@@ -5,3 +5,7 @@ export const unique = <T>(array: T[]) => {
 export const contains = <T>(array: T[], value: T) => {
     return array.indexOf(value) >= 0;
 };
+
+export const selectRandom = <T>(array: T[]) => {
+    return array[Math.floor(Math.random() * array.length)];
+};

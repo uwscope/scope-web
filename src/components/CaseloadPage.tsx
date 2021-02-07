@@ -52,7 +52,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
         <div>
             <PageHeaderContainer>
                 <TitleSelectContainer>
-                    <PageHeaderTitle variant="h4">Caseload for</PageHeaderTitle>
+                    <PageHeaderTitle>Caseload for</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
                             value={rootStore.patientsStore.selectedCareManager}
@@ -68,7 +68,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                             ))}
                         </SelectInput>
                     </SelectForm>
-                    <PageHeaderTitle variant="h4">in</PageHeaderTitle>
+                    <PageHeaderTitle>in</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
                             value={rootStore.patientsStore.selectedClinic}
