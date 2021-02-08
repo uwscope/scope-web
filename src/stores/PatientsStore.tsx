@@ -1,59 +1,71 @@
 import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
-import { IPatient } from '../services/types';
+import { ClinicCode, DiscussionFlag, FollowupSchedule, IPatient, TreatmentStatus } from '../services/types';
 import { contains, unique } from '../utils/array';
 
 export interface IPatientStore {
+    readonly mrn: number;
     readonly firstName: string;
     readonly lastName: string;
     readonly name: string;
     readonly primaryCareManagerName: string;
-    readonly clinicCode: string;
+    readonly treatmentStatus: TreatmentStatus;
+    readonly clinicCode: ClinicCode;
+    readonly followupSchedule: FollowupSchedule;
+    readonly discussionFlag: DiscussionFlag;
 }
+
+export class PatientStore implements IPatientStore {
+    public mrn: number;
+    public firstName: string;
+    public lastName: string;
+    public name: string;
+    public primaryCareManagerName: string;
+    public treatmentStatus: TreatmentStatus;
+    public clinicCode: ClinicCode;
+    public followupSchedule: FollowupSchedule;
+    public discussionFlag: DiscussionFlag;
+
+    constructor(patient: IPatient) {
+        this.mrn = patient.MRN;
+        this.firstName = patient.firstName;
+        this.lastName = patient.lastName;
+        this.name = `${this.firstName} ${this.lastName}`;
+        this.primaryCareManagerName = patient.primaryCareManagerName;
+        this.treatmentStatus = patient.treatmentStatus;
+        this.clinicCode = patient.clinicCode;
+        this.followupSchedule = patient.followupSchedule;
+        this.discussionFlag = patient.discussionFlag;
+
+        makeAutoObservable(this);
+    }
+}
+
+export type AllClinicCode = 'All Clinics';
 
 export interface IPatientsStore {
     readonly patients: ReadonlyArray<IPatientStore>;
     readonly careManagers: ReadonlyArray<string>;
-    readonly clinics: ReadonlyArray<string>;
+    readonly clinics: ReadonlyArray<ClinicCode>;
     readonly selectedCareManager: string;
-    readonly selectedClinic: string;
+    readonly selectedClinic: ClinicCode | AllClinicCode;
     readonly selectedPatients: ReadonlyArray<IPatientStore>;
 
     updatePatients: (patients: IPatient[]) => void;
     selectCareManager: (careManager: string) => void;
-    selectClinic: (clinic: string) => void;
-}
-
-export class PatientStore implements IPatientStore {
-    public firstName: string;
-    public lastName: string;
-    public primaryCareManagerName: string;
-    public clinicCode: string;
-
-    constructor(patient: IPatient) {
-        makeAutoObservable(this);
-        this.firstName = patient.firstName;
-        this.lastName = patient.lastName;
-        this.primaryCareManagerName = patient.primaryCareManagerName;
-        this.clinicCode = patient.clinicCode;
-    }
-
-    public get name() {
-        return `${this.firstName} ${this.lastName}`;
-    }
+    selectClinic: (clinic: ClinicCode | AllClinicCode) => void;
 }
 
 export class PatientsStore implements IPatientsStore {
     @observable public patients: IObservableArray<IPatientStore>;
     @observable public selectedCareManager: string;
-    @observable public selectedClinic: string;
+    @observable public selectedClinic: ClinicCode | AllClinicCode;
 
     private readonly AllCareManagers = 'All Care Managers';
-    private readonly AllClinics = 'All Clinics';
 
     constructor() {
         this.patients = observable.array([]);
         this.selectedCareManager = this.AllCareManagers;
-        this.selectedClinic = this.AllClinics;
+        this.selectedClinic = 'All Clinics';
         makeAutoObservable(this);
     }
 
@@ -67,7 +79,6 @@ export class PatientsStore implements IPatientsStore {
     @computed
     public get clinics() {
         const cc = unique(this.patients.map((p) => p.clinicCode)).sort();
-        cc.push(this.AllClinics);
         return cc;
     }
 
@@ -86,11 +97,11 @@ export class PatientsStore implements IPatientsStore {
     }
 
     @action.bound
-    public selectClinic(clinicCode: string) {
+    public selectClinic(clinicCode: ClinicCode | AllClinicCode) {
         if (contains(this.clinics, clinicCode)) {
             this.selectedClinic = clinicCode;
         } else {
-            this.selectedClinic = this.AllClinics;
+            this.selectedClinic = 'All Clinics';
         }
     }
 
@@ -101,7 +112,7 @@ export class PatientsStore implements IPatientsStore {
             filteredPatients = filteredPatients.filter((p) => p.primaryCareManagerName == this.selectedCareManager);
         }
 
-        if (this.selectedClinic != this.AllClinics) {
+        if (this.selectedClinic != 'All Clinics') {
             filteredPatients = filteredPatients.filter((p) => p.clinicCode == this.selectedClinic);
         }
 

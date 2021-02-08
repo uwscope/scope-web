@@ -9,7 +9,7 @@ export const PageHeaderContainer = withTheme(
 );
 
 const Title = styled(Typography)({
-    height: 48,
+    minHeight: 48,
 });
 
 export const PageHeaderTitle: FunctionComponent = (props) => {

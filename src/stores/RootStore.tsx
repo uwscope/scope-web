@@ -32,11 +32,11 @@ export class RootStore implements IRootStore {
     @observable public loginStatus = LoginStatus.LoggedOut;
 
     constructor() {
-        makeAutoObservable(this);
-
         this.userStore = new UserStore();
         this.authStore = new AuthStore();
         this.patientsStore = new PatientsStore();
+
+        makeAutoObservable(this);
     }
 
     @action.bound

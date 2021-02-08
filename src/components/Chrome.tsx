@@ -13,11 +13,20 @@ const RootContainer = styled.div({
     display: 'flex',
 });
 
-const MainContainer = withTheme(
-    styled.main((props) => ({
+const ContentContainer = withTheme(
+    styled.div((props) => ({
         flexGrow: 1,
         padding: props.theme.spacing(3),
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
     }))
+);
+
+const MainContainer = withTheme(
+    styled.main({
+        flexGrow: 1,
+    })
 );
 
 const ToobarContainer = withTheme(
@@ -139,11 +148,13 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
                 <Divider />
                 {props.drawerContent}
             </MiniDrawer>
-            <MainContainer>
-                <ToobarContainer />
-                {props.children}
-            </MainContainer>
-            <Footer></Footer>
+            <ContentContainer>
+                <MainContainer>
+                    <ToobarContainer />
+                    {props.children}
+                </MainContainer>
+                <Footer></Footer>
+            </ContentContainer>
         </RootContainer>
     );
 });
