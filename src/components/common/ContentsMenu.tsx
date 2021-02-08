@@ -25,7 +25,7 @@ const MenuContainer = withTheme(
 const ContentListItem = withTheme(
     styled(ListItem)((props: ThemedStyledProps<ListItemProps & { $active: boolean; $top: boolean }, any>) => ({
         borderLeft: '4px solid',
-        borderLeftColor: props.$active ? '#eee' : 'white',
+        borderLeftColor: props.$active ? props.theme.palette.primary.light : 'white',
         paddingLeft: props.$top ? props.theme.spacing(2) : props.theme.spacing(4),
     }))
 );
