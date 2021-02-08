@@ -10,7 +10,7 @@ const Disclaimer = styled(Typography)({
 
 const FooterContainer = withTheme(
     styled(Container)((props) => ({
-        height: props.theme.spacing(10),
+        minHeight: props.theme.customSizes.footerHeight,
         borderTop: `solid 1px ${props.theme.customPalette.subtle}`,
         alignItems: 'center',
         display: 'flex',

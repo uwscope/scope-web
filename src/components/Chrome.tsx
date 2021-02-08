@@ -11,22 +11,20 @@ import Footer from './Footer';
 
 const RootContainer = styled.div({
     display: 'flex',
+    flexDirection: 'column',
+    height: 'calc(100vh)',
 });
 
-const ContentContainer = withTheme(
-    styled.div((props) => ({
-        flexGrow: 1,
-        padding: props.theme.spacing(3),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'stretch',
-    }))
-);
-
 const MainContainer = withTheme(
-    styled.main({
+    styled.main((props) => ({
         flexGrow: 1,
-    })
+        marginLeft: 73,
+        marginTop: props.theme.customSizes.headerHeight,
+        height: `calc(100% - ${props.theme.customSizes.headerHeight + props.theme.customSizes.footerHeight}px)`,
+        padding: props.theme.spacing(3),
+        overflowX: 'hidden',
+        overflowY: 'auto',
+    }))
 );
 
 const ToobarContainer = withTheme(
@@ -148,13 +146,8 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
                 <Divider />
                 {props.drawerContent}
             </MiniDrawer>
-            <ContentContainer>
-                <MainContainer>
-                    <ToobarContainer />
-                    {props.children}
-                </MainContainer>
-                <Footer></Footer>
-            </ContentContainer>
+            <MainContainer>{props.children}</MainContainer>
+            <Footer></Footer>
         </RootContainer>
     );
 });
