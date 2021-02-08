@@ -7,6 +7,9 @@ declare module '@material-ui/core/styles/createMuiTheme' {
         };
         customSizes: {
             drawerWidth: number;
+            contentsMenuWidth: number;
+            headerHeight: number;
+            footerHeight: number;
         };
     }
     interface ThemeOptions {
