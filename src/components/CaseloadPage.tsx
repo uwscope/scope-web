@@ -1,6 +1,7 @@
 import { FormControl, MenuItem, Select, withTheme } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { ClinicCode } from '../services/types';
 import { AllClinicCode } from '../stores/PatientsStore';
@@ -36,6 +37,7 @@ const SelectInput = withTheme(
 
 export const CaseloadPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
+    const history = useHistory();
 
     const onCareManagerSelect = (event: React.ChangeEvent<{ name?: string; value: string }>) => {
         const careManager = event.target.value;
@@ -52,6 +54,10 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     };
 
     const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
+
+    const onPatientClick = (mrn: number) => {
+        history.push(`/patient/${mrn}`);
+    };
 
     return (
         <div>
@@ -92,7 +98,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                 </TitleSelectContainer>
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>
-            <CaseloadTable patients={rootStore.patientsStore.selectedPatients} />
+            <CaseloadTable patients={rootStore.patientsStore.selectedPatients} onPatientClick={onPatientClick} />
         </div>
     );
 });

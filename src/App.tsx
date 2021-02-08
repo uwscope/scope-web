@@ -6,6 +6,7 @@ import Chrome from './components/Chrome';
 import DrawerContent from './components/DrawerContent';
 import HeaderContent from './components/HeaderContent';
 import HomePage from './components/HomePage';
+import PatientDetailPage from './components/PatientDetailPage';
 
 export const App: FunctionComponent = observer(() => {
     return (
@@ -14,6 +15,9 @@ export const App: FunctionComponent = observer(() => {
                 <RouterSwitch>
                     <Route path="/caseload">
                         <CaseloadPage />
+                    </Route>
+                    <Route path="/patient/:mrn">
+                        <PatientDetailPage />
                     </Route>
                     {/* Leave default route to last */}
                     <Route path="/">

@@ -5,11 +5,17 @@ import { IPatientStore } from '../stores/PatientsStore';
 
 export interface ICaseloadTableProps {
     patients: ReadonlyArray<IPatientStore>;
-    onPatientClick?: (patient: IPatientStore) => void;
+    onPatientClick?: (mrn: number) => void;
 }
 
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
-    const { patients } = props;
+    const { patients, onPatientClick } = props;
+
+    const onRowClick = (rowData: string[]) => {
+        if (!!onPatientClick) {
+            onPatientClick(Number(rowData[0]));
+        }
+    };
 
     // Column names map to IPatientStore property names
     const columns = [
@@ -26,6 +32,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
     const options = {
         filterType: 'checkbox',
         selectableRows: 'none',
+        onRowClick: onRowClick,
     } as MUIDataTableOptions;
 
     return (
