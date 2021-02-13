@@ -18,6 +18,7 @@ import styled, { ThemedStyledProps } from 'styled-components';
 const MenuContainer = withTheme(
     styled.div((props) => ({
         width: props.theme.customSizes.contentsMenuWidth,
+        marginLeft: props.theme.spacing(3),
     }))
 );
 

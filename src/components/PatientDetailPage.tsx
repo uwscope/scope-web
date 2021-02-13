@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 import { ContentsMenu, IContentItem } from './common/ContentsMenu';
+import PatientInformation from './PatientDetail/PatientInformation';
 
 const DetailPageContainer = withTheme(
     styled.div({
@@ -27,12 +28,15 @@ const MenuContainer = withTheme(
     })
 );
 
+type IContent = IContentItem & { content?: React.ReactNode };
+
 export const PatientDetailPage: FunctionComponent = observer(() => {
     const contents = [
         {
             hash: 'patient',
             label: 'Patient',
             top: true,
+            content: <PatientInformation />,
         },
         {
             hash: 'basic-info',
@@ -51,7 +55,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             label: 'Progress',
             top: true,
         },
-    ] as IContentItem[];
+    ] as IContent[];
 
     React.useLayoutEffect(() => {
         const handleScroll = () => {
@@ -67,8 +71,8 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
         <DetailPageContainer>
             <ContentContainer>
                 {contents.map((c) => (
-                    <div style={{ height: '600px' }} id={c.hash} key={c.hash}>
-                        <Typography variant={c.top ? 'h5' : 'h6'}>{c.label}</Typography>
+                    <div style={{ minHeight: '600px' }} id={c.hash} key={c.hash}>
+                        {c.content ? c.content : <Typography variant={c.top ? 'h5' : 'h6'}>{c.label}</Typography>}
                     </div>
                 ))}
             </ContentContainer>
