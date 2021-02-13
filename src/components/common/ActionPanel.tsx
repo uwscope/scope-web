@@ -23,14 +23,15 @@ export interface IActionPanelProps {
     actionButtons?: IActionButton[];
     title: string;
     children?: React.ReactNode;
+    id: string;
 }
 
 export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props) => {
-    const { actionButtons, title, children } = props;
+    const { id, actionButtons, title, children } = props;
     return (
-        <Card>
+        <Card id={id}>
             <CardTitle>
-                <Typography variant="h6" component="h2" noWrap={true}>
+                <Typography variant="button" noWrap={true}>
                     {title}
                 </Typography>
                 <CardActions>

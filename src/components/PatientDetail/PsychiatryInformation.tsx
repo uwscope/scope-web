@@ -13,6 +13,7 @@ export const PsychiatryInformation: FunctionComponent<IPsychiatryInformationProp
     const { editable } = props;
     return (
         <ActionPanel
+            id="psychiatry"
             title="Psychiatry Information"
             actionButtons={[{ icon: <EditIcon />, text: 'Edit' } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">

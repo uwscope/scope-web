@@ -13,6 +13,7 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
     const { editable } = props;
     return (
         <ActionPanel
+            id="medical"
             title="Medical Information"
             actionButtons={[{ icon: <EditIcon />, text: 'Edit' } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">

@@ -17,12 +17,12 @@ export const PageHeaderContainer = withTheme(
     }))
 );
 
-const Title = styled(Typography)({
+const PageTitle = styled(Typography)({
     minHeight: 48,
 });
 
 export const PageHeaderTitle: FunctionComponent = (props) => {
-    return <Title variant="h4">{props.children}</Title>;
+    return <PageTitle variant="h4">{props.children}</PageTitle>;
 };
 
 export const PageHeaderSubtitle: FunctionComponent = (props) => {

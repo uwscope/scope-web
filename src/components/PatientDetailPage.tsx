@@ -24,6 +24,18 @@ const ContentContainer = withTheme(
     }))
 );
 
+const Section = withTheme(
+    styled.div((props) => ({
+        marginBottom: props.theme.spacing(5),
+        minHeight: 600,
+    }))
+);
+
+const SectionTitle = styled(Typography)({
+    minHeight: 48,
+    textTransform: 'uppercase',
+});
+
 type IContent = IContentItem & { content?: React.ReactNode };
 
 export const PatientDetailPage: FunctionComponent = observer(() => {
@@ -35,11 +47,15 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             content: <PatientInformation />,
         },
         {
-            hash: 'basic-info',
-            label: 'Basic information',
+            hash: 'medical',
+            label: 'Medical information',
         },
         {
-            hash: 'treatment-info',
+            hash: 'psychiatry',
+            label: 'Psychiatry information',
+        },
+        {
+            hash: 'treatment',
             label: 'Treatment information',
         },
         {
@@ -67,11 +83,14 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
         <DetailPageContainer>
             <ContentsMenu contents={contents} contentId="#scroll-content" />
             <ContentContainer id="scroll-content">
-                {contents.map((c) => (
-                    <div style={{ minHeight: '600px' }} id={c.hash} key={c.hash}>
-                        {c.content ? c.content : <Typography variant={c.top ? 'h5' : 'h6'}>{c.label}</Typography>}
-                    </div>
-                ))}
+                {contents
+                    .filter((c) => c.top)
+                    .map((c) => (
+                        <Section id={c.hash} key={c.hash}>
+                            <SectionTitle variant="h6">{c.label}</SectionTitle>
+                            {c.content ? c.content : null}
+                        </Section>
+                    ))}
             </ContentContainer>
         </DetailPageContainer>
     );
