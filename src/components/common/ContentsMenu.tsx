@@ -3,7 +3,7 @@ import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import styled, { ThemedStyledProps } from 'styled-components';
+import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
 const MenuContainer = withTheme(
     styled(Paper)((props) => ({
@@ -17,12 +17,14 @@ const TitleContainer = withTheme(
     }))
 );
 
-// TODO: issue prevents setting text transform https://github.com/mui-org/material-ui/issues/16307
 const ContentListItem = withTheme(
     styled(ListItem)((props: ThemedStyledProps<ListItemProps & { $active: boolean; $top: boolean }, any>) => ({
         borderLeft: '4px solid',
         borderLeftColor: props.$active ? props.theme.palette.primary.light : 'white',
         paddingLeft: props.$top ? props.theme.spacing(2) : props.theme.spacing(4),
+        '>.MuiListItemText-root': {
+            textTransform: props.$top ? 'uppercase' : null,
+        } as CSSObject,
     }))
 );
 
