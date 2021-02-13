@@ -8,6 +8,8 @@ import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 const MenuContainer = withTheme(
     styled(Paper)((props) => ({
         width: props.theme.customSizes.contentsMenuWidth,
+        overflowX: 'hidden',
+        overflowY: 'auto',
     }))
 );
 

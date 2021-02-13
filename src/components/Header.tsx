@@ -8,10 +8,10 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import Logo from 'src/assets/scope-logo.png';
+import { LoginStatus } from 'src/stores/RootStore';
+import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
-import Logo from '../assets/scope-logo.png';
-import { LoginStatus } from '../stores/RootStore';
-import { useStores } from '../stores/stores';
 import PatientSearch from './PatientSearch';
 
 const MenuButton = withTheme(

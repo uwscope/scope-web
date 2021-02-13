@@ -1,6 +1,6 @@
 import { action, makeAutoObservable, observable } from 'mobx';
-import { AuthServiceInstance } from '../services/authService';
-import { RegistryServiceInstance } from '../services/registryService';
+import { AuthServiceInstance } from 'src/services/authService';
+import { RegistryServiceInstance } from 'src/services/registryService';
 import { AuthStore, IAuthStore } from './AuthStore';
 import { IPatientsStore, PatientsStore } from './PatientsStore';
 import { IUserStore, UserStore } from './UserStore';

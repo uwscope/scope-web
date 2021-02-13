@@ -8,5 +8,6 @@ module.exports = {
     appBuild: resolveProject('build'),
     appIndex: resolveProject('src/index.tsx'),
     appIndexTemplate: resolveProject('public/index.html'),
+    tsconfig: resolveProject('tsconfig.json'),
     webpackConfig: resolveProject('config/webpack.config.js')
 };

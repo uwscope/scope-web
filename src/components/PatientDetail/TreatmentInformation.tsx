@@ -2,14 +2,14 @@ import { Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
+import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
     discussionFlagValues,
     followupScheduleValues,
     referralValues,
     treatmentStatusValues,
-} from '../../services/enums';
-import ActionPanel, { IActionButton } from '../common/ActionPanel';
-import { GridDropdownField, GridTextField } from '../common/GridField';
+} from 'src/services/enums';
 
 export interface ITreatmentInformationProps {
     editable?: boolean;
