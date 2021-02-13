@@ -11,12 +11,17 @@ import Footer from './Footer';
 
 const RootContainer = styled.div({
     display: 'flex',
+    flexDirection: 'column',
+    height: 'calc(100vh)',
 });
 
 const MainContainer = withTheme(
     styled.main((props) => ({
         flexGrow: 1,
-        padding: props.theme.spacing(3),
+        marginLeft: 73,
+        marginTop: props.theme.customSizes.headerHeight,
+        height: `calc(100% - ${props.theme.customSizes.headerHeight + props.theme.customSizes.footerHeight}px)`,
+        overflow: 'hidden',
     }))
 );
 
@@ -139,10 +144,7 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
                 <Divider />
                 {props.drawerContent}
             </MiniDrawer>
-            <MainContainer>
-                <ToobarContainer />
-                {props.children}
-            </MainContainer>
+            <MainContainer>{props.children}</MainContainer>
             <Footer></Footer>
         </RootContainer>
     );

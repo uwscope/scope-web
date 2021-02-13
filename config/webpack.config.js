@@ -1,6 +1,7 @@
 const paths = require('./paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
     mode: "development",
@@ -9,11 +10,14 @@ module.exports = {
         app: [ paths.appIndex, 'webpack-hot-middleware/client' ]
     },
 
+    devtool: 'inline-source-map',
+
     // Which extensions Webpack will resolve when files import other files
     resolve: {
         extensions: [
-            '.tsx', '.ts', '.jsx', '.js'
-        ]
+            '.tsx', '.ts', '.js'
+        ],
+        plugins: [new TsconfigPathsPlugin({ configFile: paths.tsconfig})]
     },
 
     output: {
@@ -35,7 +39,8 @@ module.exports = {
                         }
                     },
                     'ts-loader'
-                ]
+                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.png/,

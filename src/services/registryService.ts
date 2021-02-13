@@ -1,3 +1,4 @@
+import { getRandomFakePatients } from 'src/utils/fake';
 import { IPatient } from './types';
 
 export interface IRegistryService {
@@ -7,18 +8,9 @@ export interface IRegistryService {
 
 class RegistryService implements IRegistryService {
     public getPatients() {
-        const patients = [
-            {
-                firstName: 'Tinker',
-                lastName: 'Bell',
-            },
-            {
-                firstName: 'Prince',
-                lastName: 'Charming',
-            },
-        ];
+        const patients = getRandomFakePatients();
 
-        return patients; //Promise.resolve(user);
+        return patients; //Promise.resolve(patients);
     }
 }
 

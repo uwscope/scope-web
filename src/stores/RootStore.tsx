@@ -1,6 +1,6 @@
 import { action, makeAutoObservable, observable } from 'mobx';
-import { AuthServiceInstance } from '../services/authService';
-import { RegistryServiceInstance } from '../services/registryService';
+import { AuthServiceInstance } from 'src/services/authService';
+import { RegistryServiceInstance } from 'src/services/registryService';
 import { AuthStore, IAuthStore } from './AuthStore';
 import { IPatientsStore, PatientsStore } from './PatientsStore';
 import { IUserStore, UserStore } from './UserStore';
@@ -32,11 +32,11 @@ export class RootStore implements IRootStore {
     @observable public loginStatus = LoginStatus.LoggedOut;
 
     constructor() {
-        makeAutoObservable(this);
-
         this.userStore = new UserStore();
         this.authStore = new AuthStore();
         this.patientsStore = new PatientsStore();
+
+        makeAutoObservable(this);
     }
 
     @action.bound
@@ -66,5 +66,6 @@ export class RootStore implements IRootStore {
     public load() {
         const patients = RegistryServiceInstance.getPatients();
         this.patientsStore.updatePatients(patients);
+        this.patientsStore.selectCareManager(this.userStore.name);
     }
 }
