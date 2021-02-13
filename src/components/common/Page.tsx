@@ -2,6 +2,15 @@ import { Typography, withTheme } from '@material-ui/core';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+export const Page = withTheme(
+    styled.div((props) => ({
+        padding: props.theme.spacing(3),
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        height: '100%',
+    }))
+);
+
 export const PageHeaderContainer = withTheme(
     styled.div((props) => ({
         marginBottom: props.theme.spacing(2),

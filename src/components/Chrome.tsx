@@ -21,9 +21,7 @@ const MainContainer = withTheme(
         marginLeft: 73,
         marginTop: props.theme.customSizes.headerHeight,
         height: `calc(100% - ${props.theme.customSizes.headerHeight + props.theme.customSizes.footerHeight}px)`,
-        padding: props.theme.spacing(3),
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        overflow: 'hidden',
     }))
 );
 

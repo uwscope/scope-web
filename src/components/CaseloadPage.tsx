@@ -8,7 +8,7 @@ import { AllClinicCode } from '../stores/PatientsStore';
 import { useStores } from '../stores/stores';
 import { getTodayString } from '../utils/formatter';
 import CaseloadTable from './CaseloadTable';
-import { PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from './common/PageHeader';
+import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from './common/Page';
 
 const TitleSelectContainer = withTheme(
     styled.div({
@@ -60,7 +60,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     };
 
     return (
-        <div>
+        <Page>
             <PageHeaderContainer>
                 <TitleSelectContainer>
                     <PageHeaderTitle>Caseload for</PageHeaderTitle>
@@ -99,7 +99,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>
             <CaseloadTable patients={rootStore.patientsStore.selectedPatients} onPatientClick={onPatientClick} />
-        </div>
+        </Page>
     );
 });
 

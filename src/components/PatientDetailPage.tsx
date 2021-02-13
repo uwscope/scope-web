@@ -10,22 +10,18 @@ const DetailPageContainer = withTheme(
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'stretch',
+        height: '100%',
+        overflow: 'hidden',
     })
 );
 
 const ContentContainer = withTheme(
-    styled.div({
+    styled.div((props) => ({
         flex: 1,
-    })
-);
-
-const MenuContainer = withTheme(
-    styled.div({
-        position: 'sticky',
-        height: '100%',
-        display: 'block',
-        top: 0,
-    })
+        padding: props.theme.spacing(3),
+        overflowX: 'hidden',
+        overflowY: 'auto',
+    }))
 );
 
 type IContent = IContentItem & { content?: React.ReactNode };
@@ -69,16 +65,14 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
 
     return (
         <DetailPageContainer>
-            <ContentContainer>
+            <ContentsMenu contents={contents} contentId="#scroll-content" />
+            <ContentContainer id="scroll-content">
                 {contents.map((c) => (
                     <div style={{ minHeight: '600px' }} id={c.hash} key={c.hash}>
                         {c.content ? c.content : <Typography variant={c.top ? 'h5' : 'h6'}>{c.label}</Typography>}
                     </div>
                 ))}
             </ContentContainer>
-            <MenuContainer>
-                <ContentsMenu contents={contents} />
-            </MenuContainer>
         </DetailPageContainer>
     );
 });

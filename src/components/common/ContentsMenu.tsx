@@ -1,14 +1,4 @@
-import {
-    Card,
-    CardContent,
-    List,
-    ListItem,
-    ListItemProps,
-    ListItemText,
-    Typography,
-    useTheme,
-    withTheme,
-} from '@material-ui/core';
+import { List, ListItem, ListItemProps, ListItemText, Paper, Typography, useTheme, withTheme } from '@material-ui/core';
 import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -16,9 +6,14 @@ import React, { FunctionComponent } from 'react';
 import styled, { ThemedStyledProps } from 'styled-components';
 
 const MenuContainer = withTheme(
-    styled.div((props) => ({
+    styled(Paper)((props) => ({
         width: props.theme.customSizes.contentsMenuWidth,
-        marginLeft: props.theme.spacing(3),
+    }))
+);
+
+const TitleContainer = withTheme(
+    styled.div((props) => ({
+        padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
     }))
 );
 
@@ -39,11 +34,12 @@ export interface IContentItem {
 
 export interface IContentsMenuProps {
     contents: IContentItem[];
+    contentId: string;
 }
 
 const noop = () => {};
 
-const useThrottledOnScroll = (callback: any, delay: number) => {
+const useThrottledOnScroll = (callback: any, delay: number, contentId: string) => {
     const throttledCallback = React.useMemo(() => (callback ? throttle(callback, delay) : noop), [
         callback,
         delay,
@@ -54,7 +50,7 @@ const useThrottledOnScroll = (callback: any, delay: number) => {
             return undefined;
         }
 
-        const mainBody = document.querySelector('main');
+        const mainBody = document.querySelector(contentId);
         if (!!mainBody) {
             mainBody.addEventListener('scroll', throttledCallback);
         }
@@ -79,7 +75,7 @@ const setActiveHash = (hash: string | undefined) => {
 type ContentMenuItem = IContentItem & { node: HTMLElement | null };
 
 export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((props) => {
-    const { contents } = props;
+    const { contents, contentId } = props;
     const theme = useTheme();
 
     const itemsClientRef = React.useRef<ContentMenuItem[]>([]);
@@ -105,7 +101,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
             return;
         }
 
-        const mainBody = document.querySelector('main') as HTMLElement;
+        const mainBody = document.querySelector(contentId) as HTMLElement;
 
         let active: ContentMenuItem | undefined;
         for (let i = itemsClientRef.current.length - 1; i >= 0; i -= 1) {
@@ -131,7 +127,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
     }, [state.activeHash, contents]);
 
     // Corresponds to 10 frames at 60 Hz
-    useThrottledOnScroll(contents.length > 0 ? action(findActiveIndex) : null, 166);
+    useThrottledOnScroll(contents.length > 0 ? action(findActiveIndex) : null, 166, contentId);
 
     const handleClick = (hash: string) => {
         // Used to disable findActiveIndex if the page scrolls due to a click
@@ -143,7 +139,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
         if (state.activeHash !== hash) {
             setActiveHash(hash);
 
-            const mainBody = document.querySelector('main');
+            const mainBody = document.querySelector(contentId);
             if (!!mainBody) {
                 const element = document.getElementById(hash);
 
@@ -172,19 +168,19 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
                 $active={state.activeHash == content.hash}
                 $top={content.top}
                 onClick={action(() => handleClick(content.hash))}>
-                <ListItemText primary={content.label} />
+                <ListItemText disableTypography={true}>
+                    <Typography variant="body2">{content.label}</Typography>
+                </ListItemText>
             </ContentListItem>
         );
     };
 
     return (
-        <MenuContainer>
-            <Card>
-                <CardContent>
-                    <Typography variant="h6">Contents</Typography>
-                    <List dense={true}>{contents.map(createListItem)}</List>
-                </CardContent>
-            </Card>
+        <MenuContainer elevation={3} square>
+            <TitleContainer>
+                <Typography variant="button">Contents</Typography>
+            </TitleContainer>
+            <List dense={true}>{contents.map(createListItem)}</List>
         </MenuContainer>
     );
 });
