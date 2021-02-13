@@ -4,8 +4,8 @@ import {
     followupScheduleValues,
     patientSexValues,
     treatmentStatusValues,
-} from '../services/enums';
-import { IPatient } from '../services/types';
+} from 'src/services/enums';
+import { IPatient } from 'src/services/types';
 import { selectRandom } from './array';
 
 export const getRandomFakePatients = () => {

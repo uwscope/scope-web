@@ -1,8 +1,8 @@
 import Typography from '@material-ui/core/Typography';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { useStores } from '../stores/stores';
-import { getTodayString } from '../utils/formatter';
+import { useStores } from 'src/stores/stores';
+import { getTodayString } from 'src/utils/formatter';
 import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from './common/Page';
 
 export const HomePage: FunctionComponent = observer(() => {

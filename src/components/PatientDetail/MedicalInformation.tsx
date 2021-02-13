@@ -3,9 +3,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { clinicCodeValues, treatmentRegimenValues } from '../../services/enums';
-import ActionPanel, { IActionButton } from '../common/ActionPanel';
-import { GridDropdownField, GridTextField } from '../common/GridField';
+import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
+import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
+import { clinicCodeValues, treatmentRegimenValues } from 'src/services/enums';
 
 export interface IMedicalInformationProps {
     editable?: boolean;

@@ -1,8 +1,8 @@
 import { Typography, withTheme } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import styled from 'styled-components';
-import { ContentsMenu, IContentItem } from './common/ContentsMenu';
 import PatientInformation from './PatientDetail/PatientInformation';
 
 const DetailPageContainer = withTheme(
@@ -63,21 +63,40 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             label: 'Sessions',
         },
         {
+            hash: 'assessments',
+            label: 'Assessments',
+        },
+        {
             hash: 'progress',
             label: 'Progress',
             top: true,
         },
+        {
+            hash: 'phq9',
+            label: 'PHQ-9',
+        },
+        {
+            hash: 'gad7',
+            label: 'GAD-7',
+        },
+        {
+            hash: 'mood',
+            label: 'Mood Trends',
+        },
+        {
+            hash: 'behavioral',
+            label: 'Behavioral Activation',
+            top: true,
+        },
+        {
+            hash: 'checklist',
+            label: 'Checklist',
+        },
+        {
+            hash: 'activities',
+            label: 'Activities',
+        },
     ] as IContent[];
-
-    React.useLayoutEffect(() => {
-        const handleScroll = () => {
-            console.log('scroll');
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => window.removeEventListener('scroll', handleScroll);
-    });
 
     return (
         <DetailPageContainer>

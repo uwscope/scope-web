@@ -3,18 +3,24 @@
         "target": "es6",
         "module": "es6",
 
+        "baseUrl": ".",
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "jsx": "preserve",
+        "jsx": "react",
         "moduleResolution": "node",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
+        "outDir": "./build/",
+        "paths": {
+            "src/*": ["src/*"]
+        },
         "sourceMap": true,
         "strict": true
     },
 
-    "include": ["**/*"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
 }

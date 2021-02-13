@@ -2,13 +2,13 @@ import { FormControl, MenuItem, Select, withTheme } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
+import CaseloadTable from 'src/components/CaseloadTable';
+import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from 'src/components/common/Page';
+import { ClinicCode } from 'src/services/enums';
+import { AllClinicCode } from 'src/stores/PatientsStore';
+import { useStores } from 'src/stores/stores';
+import { getTodayString } from 'src/utils/formatter';
 import styled from 'styled-components';
-import { ClinicCode } from '../services/enums';
-import { AllClinicCode } from '../stores/PatientsStore';
-import { useStores } from '../stores/stores';
-import { getTodayString } from '../utils/formatter';
-import CaseloadTable from './CaseloadTable';
-import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from './common/Page';
 
 const TitleSelectContainer = withTheme(
     styled.div({

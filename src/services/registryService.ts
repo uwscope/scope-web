@@ -1,4 +1,4 @@
-import { getRandomFakePatients } from '../utils/fake';
+import { getRandomFakePatients } from 'src/utils/fake';
 import { IPatient } from './types';
 
 export interface IRegistryService {
