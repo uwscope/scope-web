@@ -1,4 +1,13 @@
-import { Button, Card, CardActions, CardContent, Divider, Typography, withTheme } from '@material-ui/core';
+import {
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Divider,
+    LinearProgress,
+    Typography,
+    withTheme,
+} from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
@@ -13,6 +22,8 @@ const CardTitle = withTheme(
     }))
 );
 
+const Loading = withTheme(styled(LinearProgress)({ height: 1 }));
+
 export interface IActionButton {
     icon?: React.ReactNode;
     text: string;
@@ -24,10 +35,11 @@ export interface IActionPanelProps {
     title: string;
     children?: React.ReactNode;
     id: string;
+    loading?: boolean;
 }
 
 export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props) => {
-    const { id, actionButtons, title, children } = props;
+    const { id, actionButtons, title, children, loading = false } = props;
     return (
         <Card id={id}>
             <CardTitle>
@@ -37,14 +49,20 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props
                 <CardActions>
                     {!!actionButtons
                         ? actionButtons.map((a) => (
-                              <Button variant="outlined" size="small" color="primary" startIcon={a.icon}>
+                              <Button
+                                  variant="outlined"
+                                  size="small"
+                                  color="primary"
+                                  startIcon={a.icon}
+                                  disabled={loading}
+                                  onClick={a.onClick}>
                                   {a.text}
                               </Button>
                           ))
                         : null}
                 </CardActions>
             </CardTitle>
-            <Divider variant="middle" />
+            {loading ? <Loading /> : <Divider variant="middle" />}
             <CardContent>{children}</CardContent>
         </Card>
     );
