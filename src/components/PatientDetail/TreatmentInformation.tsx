@@ -2,6 +2,12 @@ import { Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import {
+    discussionFlagValues,
+    followupScheduleValues,
+    referralValues,
+    treatmentStatusValues,
+} from '../../services/enums';
 import ActionPanel, { IActionButton } from '../common/ActionPanel';
 import { GridDropdownField, GridTextField } from '../common/GridField';
 
@@ -20,22 +26,27 @@ export const TreatmentInformation: FunctionComponent<ITreatmentInformationProps>
                 <GridDropdownField
                     editable={editable}
                     label="Treatment Status"
-                    defaultValue="1"
-                    options={['1', '2', '3']}
+                    defaultValue="Active Distressed"
+                    options={treatmentStatusValues}
                 />
                 <GridDropdownField
                     editable={editable}
                     label="Follow-up Schedule"
-                    defaultValue="1"
-                    options={['1', '2', '3']}
+                    defaultValue="2-week follow-up"
+                    options={followupScheduleValues}
                 />
                 <GridDropdownField
                     editable={editable}
                     label="Flag for Discussion"
-                    defaultValue="1"
-                    options={['1', '2', '3']}
+                    defaultValue="Flag as safety risk"
+                    options={discussionFlagValues}
                 />
-                <GridDropdownField editable={editable} label="Referrals" defaultValue="1" options={['1', '2', '3']} />
+                <GridDropdownField
+                    editable={editable}
+                    label="Referrals"
+                    defaultValue="Pt Navigation"
+                    options={referralValues}
+                />
 
                 <GridTextField
                     fullWidth={true}

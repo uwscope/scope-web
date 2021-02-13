@@ -1,5 +1,6 @@
 import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
-import { ClinicCode, DiscussionFlag, FollowupSchedule, IPatient, TreatmentStatus } from '../services/types';
+import { ClinicCode, DiscussionFlag, FollowupSchedule, TreatmentStatus } from '../services/enums';
+import { IPatient } from '../services/types';
 import { contains, unique } from '../utils/array';
 
 export interface IPatientStore {

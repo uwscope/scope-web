@@ -2,6 +2,7 @@ import { Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { clinicCodeValues, treatmentRegimenValues } from '../../services/enums';
 import ActionPanel, { IActionButton } from '../common/ActionPanel';
 import { GridDropdownField, GridTextField } from '../common/GridField';
 
@@ -21,12 +22,17 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
                 <GridTextField editable={editable} label="Sex" defaultValue="Male" />
                 <GridTextField editable={editable} label="Date of Birth" defaultValue="1/2/1987" />
                 <GridTextField editable={editable} label="Age" defaultValue="30" />
-                <GridDropdownField editable={editable} label="Clinic code" defaultValue="1" options={['1', '2', '3']} />
+                <GridDropdownField
+                    editable={editable}
+                    label="Clinic code"
+                    defaultValue="GI"
+                    options={clinicCodeValues}
+                />
                 <GridDropdownField
                     editable={editable}
                     label="Treatment Regimen"
-                    defaultValue="1"
-                    options={['1', '2', '3']}
+                    defaultValue="Immunotherapy"
+                    options={treatmentRegimenValues}
                 />
                 <GridTextField
                     fullWidth={true}
@@ -34,7 +40,7 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
                     multiline={true}
                     maxLine={4}
                     label="Primary Medical Diagnosis"
-                    defaultValue="1234567890"
+                    defaultValue="Lorem Ipsum"
                 />
             </Grid>
         </ActionPanel>

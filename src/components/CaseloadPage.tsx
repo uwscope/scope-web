@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { ClinicCode } from '../services/types';
+import { ClinicCode } from '../services/enums';
 import { AllClinicCode } from '../stores/PatientsStore';
 import { useStores } from '../stores/stores';
 import { getTodayString } from '../utils/formatter';

@@ -78,7 +78,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((p
     };
 
     return (
-        <Grid item xs={12} sm={fullWidth ? 12 : 6}>
+        <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
             <EditableTextField
                 $editable={editable}
                 multiline={multiline}
@@ -96,7 +96,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((p
 });
 
 export interface IGridDropdownFieldProps extends IGridFieldProps {
-    options: string[];
+    options: ReadonlyArray<string>;
 }
 
 export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = observer((props) => {
@@ -109,7 +109,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = obs
     };
 
     return (
-        <Grid item xs={12} sm={fullWidth ? 12 : 6}>
+        <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
             <SelectForm>
                 <InputLabel>{label}</InputLabel>
                 <SelectField
