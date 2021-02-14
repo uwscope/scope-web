@@ -6,7 +6,6 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import Logo from 'src/assets/scope-logo.png';
 import PatientSearch from 'src/components/PatientSearch';
-import { LoginStatus } from 'src/stores/RootStore';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -43,13 +42,13 @@ export const HeaderContent: FunctionComponent = observer(() => {
     });
 
     const loginButton = () => {
-        if (rootStore.loginStatus == LoginStatus.LoggedOut) {
+        if (rootStore.loginState == 'Unknown') {
             return (
                 <Button color="inherit" onClick={() => rootStore.login()}>
                     Log in
                 </Button>
             );
-        } else if (rootStore.loginStatus == LoginStatus.LoggedIn) {
+        } else if (rootStore.loginState == 'Pending') {
             return (
                 <div>
                     <Menu

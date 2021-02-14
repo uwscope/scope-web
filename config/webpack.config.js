@@ -7,7 +7,7 @@ module.exports = {
     mode: "development",
 
     entry: {
-        app: [ paths.appIndex, 'webpack-hot-middleware/client' ]
+        app: ['@babel/polyfill', paths.appIndex, 'webpack-hot-middleware/client' ]
     },
 
     devtool: 'inline-source-map',

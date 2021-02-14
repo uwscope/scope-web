@@ -1,6 +1,6 @@
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
-import { configure } from 'mobx';
+import { action, configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from 'src/App';
@@ -13,14 +13,14 @@ configure({
     enforceActions: 'always',
     computedRequiresReaction: true,
     reactionRequiresObservable: true,
-    observableRequiresReaction: true,
+    // observableRequiresReaction: true,
     disableErrorBoundaries: true,
 });
 
 const store = new RootStore();
 
 // TODO: Temporary login
-store.login();
+action(() => store.load())();
 
 const theme = createAppTheme();
 

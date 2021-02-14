@@ -26,6 +26,8 @@ export const clinicCodeValues = [
 ] as const;
 export type ClinicCode = typeof clinicCodeValues[number];
 
+export type AllClinicCode = 'All Clinics';
+
 export const treatmentStatusValues = [
     'Active',
     'Active Distressed',

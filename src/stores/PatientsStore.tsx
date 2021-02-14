@@ -1,101 +1,10 @@
-import { differenceInYears } from 'date-fns';
 import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
-import {
-    ClinicCode,
-    DiscussionFlag,
-    FollowupSchedule,
-    PatientSex,
-    Referral,
-    TreatmentRegimen,
-    TreatmentStatus,
-} from 'src/services/enums';
-import { IActivity, IAssessment, IPatient, ISession } from 'src/services/types';
+import { AllClinicCode, ClinicCode } from 'src/services/enums';
+import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { useServices } from 'src/services/services';
+import { IPatient } from 'src/services/types';
+import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains, unique } from 'src/utils/array';
-
-export interface IPatientStore extends IPatient {
-    readonly name: string;
-    readonly age: number;
-}
-
-export class PatientStore implements IPatientStore {
-    // Medical information
-    public MRN: number;
-    public firstName: string;
-    public lastName: string;
-    public name: string;
-    public birthdate: Date;
-    public sex: PatientSex;
-    public clinicCode: ClinicCode;
-    public treatmentRegimen: TreatmentRegimen;
-    public medicalDiagnosis: string;
-
-    // Treatment Information
-    public primaryCareManagerName: string;
-    public treatmentStatus: TreatmentStatus;
-    public followupSchedule: FollowupSchedule;
-    public discussionFlag: DiscussionFlag;
-    public referral: Referral;
-    public treatmentPlan: string;
-
-    // Psychiatry
-    public psychHistory: string;
-    public substanceUse: string;
-    public psychMedications: string;
-    public psychDiagnosis: string;
-
-    // Sessions
-    public sessions: ISession[];
-
-    // Assessments
-    public assessments: IAssessment[];
-
-    // Activities
-    public activities: IActivity[];
-
-    constructor(patient: IPatient) {
-        // Medical information
-        this.MRN = patient.MRN;
-        this.firstName = patient.firstName;
-        this.lastName = patient.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
-        this.birthdate = patient.birthdate;
-        this.sex = patient.sex;
-        this.clinicCode = patient.clinicCode;
-        this.treatmentRegimen = patient.treatmentRegimen;
-        this.medicalDiagnosis = patient.medicalDiagnosis;
-
-        // Treatment information
-        this.primaryCareManagerName = patient.primaryCareManagerName;
-        this.treatmentStatus = patient.treatmentStatus;
-        this.followupSchedule = patient.followupSchedule;
-        this.discussionFlag = patient.discussionFlag;
-        this.referral = patient.referral;
-        this.treatmentPlan = patient.treatmentPlan;
-
-        // Psychiatry
-        this.psychHistory = patient.psychHistory;
-        this.substanceUse = patient.substanceUse;
-        this.psychMedications = patient.psychMedications;
-        this.psychDiagnosis = patient.psychDiagnosis;
-
-        // Sessions
-        this.sessions = patient.sessions;
-
-        // Assessments
-        this.assessments = patient.assessments;
-
-        // Activities
-        this.activities = patient.activities;
-
-        makeAutoObservable(this);
-    }
-
-    @computed get age() {
-        return differenceInYears(new Date(), this.birthdate);
-    }
-}
-
-export type AllClinicCode = 'All Clinics';
 
 export interface IPatientsStore {
     readonly patients: ReadonlyArray<IPatientStore>;
@@ -104,8 +13,9 @@ export interface IPatientsStore {
     readonly filteredCareManager: string;
     readonly filteredClinic: ClinicCode | AllClinicCode;
     readonly filteredPatients: ReadonlyArray<IPatientStore>;
+    readonly state: PromiseState;
 
-    updatePatients: (patients: IPatient[]) => void;
+    getPatients: () => void;
     filterCareManager: (careManager: string) => void;
     filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
 }
@@ -115,12 +25,16 @@ export class PatientsStore implements IPatientsStore {
     @observable public filteredCareManager: string;
     @observable public filteredClinic: ClinicCode | AllClinicCode;
 
+    private readonly loadPatientsQuery: PromiseQuery<IPatient[]>;
     private readonly AllCareManagers = 'All Care Managers';
 
     constructor() {
         this.patients = observable.array([]);
         this.filteredCareManager = this.AllCareManagers;
         this.filteredClinic = 'All Clinics';
+
+        this.loadPatientsQuery = new PromiseQuery([], 'loadPatients');
+
         makeAutoObservable(this);
     }
 
@@ -132,14 +46,27 @@ export class PatientsStore implements IPatientsStore {
     }
 
     @computed
+    public get state() {
+        return this.loadPatientsQuery.state;
+    }
+
+    @computed
     public get clinics() {
         const cc = unique(this.patients.map((p) => p.clinicCode)).sort();
         return cc;
     }
 
     @action.bound
-    public updatePatients(patients: IPatient[]) {
-        this.patients.replace(patients.map((p) => new PatientStore(p)));
+    public async getPatients() {
+        if (this.state != 'Pending') {
+            const { registryService } = useServices();
+            const promise = registryService.getPatients();
+            const patients = await this.loadPatientsQuery.fromPromise(promise);
+            action(() => {
+                this.patients.replace(patients.map((p) => new PatientStore(p)));
+                this.filterCareManager(this.filteredCareManager);
+            })();
+        }
     }
 
     @action.bound

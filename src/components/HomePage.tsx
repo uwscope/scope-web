@@ -7,9 +7,13 @@ import { getTodayString } from 'src/utils/formatter';
 
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
+    React.useEffect(() => {
+        rootStore.patientsStore.getPatients();
+    }, []);
+
     return (
         <Page>
-            <PageHeaderContainer>
+            <PageHeaderContainer loading={rootStore.patientsStore.state == 'Pending'}>
                 <PageHeaderTitle>{`Welcome ${rootStore.userStore.name}`}</PageHeaderTitle>
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>

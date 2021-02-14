@@ -1,20 +1,36 @@
-import { IUser } from "./types";
+import axios, { AxiosInstance } from 'axios';
+import { IUser } from './types';
 
 export interface IAuthService {
-    // TODO: async/await: Need babel polyfill
-    login(): IUser; //Promise<IUser>;
+    login(): Promise<IUser>;
 }
 
 class AuthService implements IAuthService {
+    private readonly axiosInstance: AxiosInstance;
 
-    public login() {
-        const user = {
-            name: 'Luke Skywalker',
-            authToken: 'my token'
-        } as IUser;
+    constructor(baseUrl: string) {
+        this.axiosInstance = axios.create({
+            baseURL: baseUrl,
+            timeout: 1000,
+            headers: { 'X-Custom-Header': 'foobar' },
+        });
+    }
 
-        return user; //Promise.resolve(user);
+    public async login(): Promise<IUser> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.get<IUser>('/auth');
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            const user = {
+                name: 'Luke Skywalker',
+                authToken: 'my token',
+            } as IUser;
+
+            return user;
+        }
     }
 }
 
-export const AuthServiceInstance = new AuthService() as IAuthService;
+export const getAuthServiceInstance = (baseUrl: string) => new AuthService(baseUrl) as IAuthService;

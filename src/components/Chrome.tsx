@@ -1,4 +1,13 @@
-import { CssBaseline, Divider, Drawer, IconButton, withTheme } from '@material-ui/core';
+import {
+    CircularProgress,
+    CssBaseline,
+    Dialog,
+    Divider,
+    Drawer,
+    IconButton,
+    Typography,
+    withTheme,
+} from '@material-ui/core';
 import AppBar, { AppBarProps } from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -7,6 +16,7 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import Footer from 'src/components/Footer';
+import { useStores } from 'src/stores/stores';
 import styled, { ThemedStyledProps } from 'styled-components';
 
 const RootContainer = styled.div({
@@ -14,6 +24,15 @@ const RootContainer = styled.div({
     flexDirection: 'column',
     height: 'calc(100vh)',
 });
+
+const LoadingContainer = withTheme(
+    styled.div((props) => ({
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: props.theme.spacing(3),
+    }))
+);
 
 const MainContainer = withTheme(
     styled.main((props) => ({
@@ -118,8 +137,16 @@ export interface IChromeProps {
 }
 
 export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
+    const rootStore = useStores();
+
     return (
         <RootContainer>
+            <Dialog open={rootStore.appState != 'Fulfilled'}>
+                <LoadingContainer>
+                    <CircularProgress />
+                    <Typography variant="h6">Loading Registry</Typography>
+                </LoadingContainer>
+            </Dialog>
             <CssBaseline />
             <AppBarContainer position="fixed" open={state.drawerOpen}>
                 <Toolbar>

@@ -10,6 +10,7 @@ import {
     TextFieldProps,
     withTheme,
 } from '@material-ui/core';
+import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
@@ -71,11 +72,11 @@ export interface IGridTextFieldProps extends IGridFieldProps {
 export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((props) => {
     const { editable, label, defaultValue, multiline = false, maxLine = 1, fullWidth = false, onChange } = props;
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
             onChange(event.target.value);
         }
-    };
+    });
 
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
@@ -102,11 +103,13 @@ export interface IGridDropdownFieldProps extends IGridFieldProps {
 export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = observer((props) => {
     const { editable, label, defaultValue, options, onChange, fullWidth = false } = props;
 
-    const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    const handleChange = action((event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
         if (!!onChange) {
             onChange(event.target.value as string);
         }
-    };
+    });
+
+    console.log(defaultValue);
 
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>

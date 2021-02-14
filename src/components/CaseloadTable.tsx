@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import MUIDataTable, { MUIDataTableColumnDef, MUIDataTableOptions } from 'mui-datatables';
 import React, { FunctionComponent } from 'react';
-import { IPatientStore } from 'src/stores/PatientsStore';
+import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface ICaseloadTableProps {
     patients: ReadonlyArray<IPatientStore>;

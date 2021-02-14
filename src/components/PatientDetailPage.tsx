@@ -39,6 +39,15 @@ const SectionTitle = styled(Typography)({
 type IContent = IContentItem & { content?: React.ReactNode };
 
 export const PatientDetailPage: FunctionComponent = observer(() => {
+    // const rootStore = useStores();
+
+    // React.useEffect(
+    //     action(() => {
+    //         rootStore.currentPatient?.getPatientData();
+    //     }),
+    //     []
+    // );
+
     const contents = [
         {
             hash: 'patient',
