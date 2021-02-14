@@ -1,11 +1,13 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
+import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import { clinicCodeValues, treatmentRegimenValues } from 'src/services/enums';
+import { useStores } from 'src/stores/stores';
 
 export interface IMedicalInformationProps {
     editable?: boolean;
@@ -14,29 +16,44 @@ export interface IMedicalInformationProps {
 
 const MedicalInformationContent: FunctionComponent<IMedicalInformationProps> = observer((props) => {
     const { editable } = props;
-    return (
-        <Grid container spacing={2} alignItems="stretch">
-            <GridTextField editable={editable} label="MRN" defaultValue="1234567890" />
-            <GridTextField editable={editable} label="Sex" defaultValue="Male" />
-            <GridTextField editable={editable} label="Date of Birth" defaultValue="1/2/1987" />
-            <GridTextField editable={editable} label="Age" defaultValue="30" />
-            <GridDropdownField editable={editable} label="Clinic code" defaultValue="GI" options={clinicCodeValues} />
-            <GridDropdownField
-                editable={editable}
-                label="Treatment Regimen"
-                defaultValue="Immunotherapy"
-                options={treatmentRegimenValues}
-            />
-            <GridTextField
-                fullWidth={true}
-                editable={editable}
-                multiline={true}
-                maxLine={4}
-                label="Primary Medical Diagnosis"
-                defaultValue="Lorem Ipsum"
-            />
-        </Grid>
-    );
+    const { currentPatient } = useStores();
+
+    if (!!currentPatient) {
+        return (
+            <Grid container spacing={2} alignItems="stretch">
+                <GridTextField editable={editable} label="MRN" defaultValue={currentPatient.MRN} />
+                <GridTextField editable={editable} label="Sex" defaultValue={currentPatient.sex} />
+                <GridTextField
+                    editable={editable}
+                    label="Date of Birth"
+                    defaultValue={format(currentPatient.birthdate, 'MM/dd/yyyy')}
+                />
+                <GridTextField editable={editable} label="Age" defaultValue={currentPatient.age} />
+                <GridDropdownField
+                    editable={editable}
+                    label="Clinic code"
+                    defaultValue={currentPatient.clinicCode}
+                    options={clinicCodeValues}
+                />
+                <GridDropdownField
+                    editable={editable}
+                    label="Treatment Regimen"
+                    defaultValue={currentPatient.treatmentRegimen}
+                    options={treatmentRegimenValues}
+                />
+                <GridTextField
+                    fullWidth={true}
+                    editable={editable}
+                    multiline={true}
+                    maxLine={4}
+                    label="Primary Medical Diagnosis"
+                    defaultValue={currentPatient.medicalDiagnosis}
+                />
+            </Grid>
+        );
+    } else {
+        return <Typography variant="h1">Error</Typography>;
+    }
 });
 
 const state = observable<{ open: boolean }>({

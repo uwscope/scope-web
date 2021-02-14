@@ -1,3 +1,5 @@
+export type OtherSpecify = 'Other';
+
 export const patientSexValues = ['Male', 'Female'] as const;
 export type PatientSex = typeof patientSexValues[number];
 
@@ -56,9 +58,8 @@ export const treatmentRegimenValues = [
     'CAR-T',
     'Endocrine',
     'Surveillance',
-    'Other',
 ] as const;
-export type TreatmentRegimen = typeof treatmentRegimenValues[number];
+export type TreatmentRegimen = typeof treatmentRegimenValues[number] & OtherSpecify;
 
 export const referralValues = [
     'Psychiatry',
@@ -67,6 +68,39 @@ export const referralValues = [
     'Integrative Medicine',
     'Spiritual Care',
     'Palliative Care',
-    'Other',
 ] as const;
-export type Referral = typeof referralValues[number];
+export type Referral = typeof referralValues[number] & OtherSpecify;
+
+export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
+export type SessionType = typeof sessionTypeValues[number] & OtherSpecify;
+
+export const treatmentPlanValues = [
+    'Maintain current treatment',
+    'Adjust treatment plan',
+    'Monitor only',
+    'No further follow-up',
+    'Refer to community',
+] as const;
+export type TreatmentPlan = typeof treatmentPlanValues[number];
+
+export const treatmentChangeValues = ['Medication', 'Counseling'] as const;
+export type TreatmentChange = typeof treatmentChangeValues[number] & OtherSpecify;
+
+export const behavioralActivationChecklistValues = [
+    'Review of the BA model',
+    'Values and goals assessment',
+    'Activity scheduling',
+    'Mood and activity monitoring',
+    'Relaxation',
+    'Contingency management',
+    'Managing avoidance behaviors',
+    'Problem-solving',
+] as const;
+
+export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
+
+export const assessmentTypeValues = ['PHQ-9', 'GAD-7', 'Mood logging'] as const;
+export type AssessmentType = typeof assessmentTypeValues[number];
+
+export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
+export type AssessmentFrequency = typeof assessmentFrequencyValues[number];

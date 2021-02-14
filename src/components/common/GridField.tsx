@@ -58,7 +58,7 @@ const SelectField = withTheme(
 interface IGridFieldProps {
     editable?: boolean;
     label: string;
-    defaultValue: string;
+    defaultValue: string | number;
     onChange?: (text: string) => void;
     fullWidth?: boolean;
 }

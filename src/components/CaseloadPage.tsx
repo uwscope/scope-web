@@ -42,20 +42,21 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     const onCareManagerSelect = (event: React.ChangeEvent<{ name?: string; value: string }>) => {
         const careManager = event.target.value;
         if (!!careManager) {
-            rootStore.patientsStore.selectCareManager(careManager);
+            rootStore.patientsStore.filterCareManager(careManager);
         }
     };
 
     const onClinicSelect = (event: React.ChangeEvent<{ name?: string; value: ClinicCode | AllClinicCode }>) => {
         const clinic = event.target.value;
         if (!!clinic) {
-            rootStore.patientsStore.selectClinic(clinic);
+            rootStore.patientsStore.filterClinic(clinic);
         }
     };
 
     const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
 
     const onPatientClick = (mrn: number) => {
+        rootStore.setCurrentPatient(mrn);
         history.push(`/patient/${mrn}`);
     };
 
@@ -66,7 +67,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                     <PageHeaderTitle>Caseload for</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
-                            value={rootStore.patientsStore.selectedCareManager}
+                            value={rootStore.patientsStore.filteredCareManager}
                             onChange={onCareManagerSelect}
                             inputProps={{
                                 name: 'caremanager',
@@ -82,7 +83,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                     <PageHeaderTitle>in</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
-                            value={rootStore.patientsStore.selectedClinic}
+                            value={rootStore.patientsStore.filteredClinic}
                             onChange={onClinicSelect}
                             inputProps={{
                                 name: 'clinic',
@@ -98,7 +99,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                 </TitleSelectContainer>
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>
-            <CaseloadTable patients={rootStore.patientsStore.selectedPatients} onPatientClick={onPatientClick} />
+            <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
         </Page>
     );
 });

@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -10,6 +10,7 @@ import {
     referralValues,
     treatmentStatusValues,
 } from 'src/services/enums';
+import { useStores } from 'src/stores/stores';
 
 export interface ITreatmentInformationProps {
     editable?: boolean;
@@ -17,48 +18,54 @@ export interface ITreatmentInformationProps {
 
 export const TreatmentInformation: FunctionComponent<ITreatmentInformationProps> = observer((props) => {
     const { editable } = props;
-    return (
-        <ActionPanel
-            id="treatment"
-            title="Treatment Information"
-            actionButtons={[{ icon: <EditIcon />, text: 'Edit' } as IActionButton]}>
-            <Grid container spacing={2} alignItems="stretch">
-                <GridDropdownField
-                    editable={editable}
-                    label="Treatment Status"
-                    defaultValue="Active Distressed"
-                    options={treatmentStatusValues}
-                />
-                <GridDropdownField
-                    editable={editable}
-                    label="Follow-up Schedule"
-                    defaultValue="2-week follow-up"
-                    options={followupScheduleValues}
-                />
-                <GridDropdownField
-                    editable={editable}
-                    label="Flag for Discussion"
-                    defaultValue="Flag as safety risk"
-                    options={discussionFlagValues}
-                />
-                <GridDropdownField
-                    editable={editable}
-                    label="Referrals"
-                    defaultValue="Pt Navigation"
-                    options={referralValues}
-                />
+    const { currentPatient } = useStores();
 
-                <GridTextField
-                    fullWidth={true}
-                    editable={editable}
-                    multiline={true}
-                    maxLine={4}
-                    label="Treatment Plan"
-                    defaultValue="None"
-                />
-            </Grid>
-        </ActionPanel>
-    );
+    if (!!currentPatient) {
+        return (
+            <ActionPanel
+                id="treatment"
+                title="Treatment Information"
+                actionButtons={[{ icon: <EditIcon />, text: 'Edit' } as IActionButton]}>
+                <Grid container spacing={2} alignItems="stretch">
+                    <GridDropdownField
+                        editable={editable}
+                        label="Treatment Status"
+                        defaultValue={currentPatient.treatmentStatus}
+                        options={treatmentStatusValues}
+                    />
+                    <GridDropdownField
+                        editable={editable}
+                        label="Follow-up Schedule"
+                        defaultValue={currentPatient.followupSchedule}
+                        options={followupScheduleValues}
+                    />
+                    <GridDropdownField
+                        editable={editable}
+                        label="Flag for Discussion"
+                        defaultValue={currentPatient.discussionFlag}
+                        options={discussionFlagValues}
+                    />
+                    <GridDropdownField
+                        editable={editable}
+                        label="Referrals"
+                        defaultValue={currentPatient.referral}
+                        options={referralValues}
+                    />
+
+                    <GridTextField
+                        fullWidth={true}
+                        editable={editable}
+                        multiline={true}
+                        maxLine={4}
+                        label="Treatment Plan"
+                        defaultValue={currentPatient.treatmentPlan}
+                    />
+                </Grid>
+            </ActionPanel>
+        );
+    } else {
+        return <Typography variant="h1">Error</Typography>;
+    }
 });
 
 export default TreatmentInformation;
