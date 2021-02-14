@@ -27,5 +27,7 @@
     },
     "[typescript]": {
         "editor.formatOnSave": true
-    }
+    },
+    "javascript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.quoteStyle": "single"
 }

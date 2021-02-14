@@ -2,8 +2,8 @@ import { Typography, withTheme } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
+import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import styled from 'styled-components';
-import PatientInformation from './PatientDetail/PatientInformation';
 
 const DetailPageContainer = withTheme(
     styled.div({

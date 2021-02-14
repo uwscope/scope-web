@@ -12,7 +12,7 @@ import {
     TreatmentPlan,
     TreatmentRegimen,
     TreatmentStatus,
-} from './enums';
+} from 'src/services/enums';
 
 export interface IUser {
     readonly name: string;

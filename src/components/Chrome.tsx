@@ -6,8 +6,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
+import Footer from 'src/components/Footer';
 import styled, { ThemedStyledProps } from 'styled-components';
-import Footer from './Footer';
 
 const RootContainer = styled.div({
     display: 'flex',

@@ -1,9 +1,9 @@
 import { Grid } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import MedicalInformation from './MedicalInformation';
-import PsychiatryInformation from './PsychiatryInformation';
-import TreatmentInformation from './TreatmentInformation';
+import MedicalInformation from 'src/components/PatientDetail/MedicalInformation';
+import PsychiatryInformation from 'src/components/PatientDetail/PsychiatryInformation';
+import TreatmentInformation from 'src/components/PatientDetail/TreatmentInformation';
 
 export const PatientInformation: FunctionComponent = observer(() => {
     return (

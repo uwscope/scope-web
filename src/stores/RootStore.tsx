@@ -1,9 +1,9 @@
 import { action, makeAutoObservable, observable } from 'mobx';
 import { AuthServiceInstance } from 'src/services/authService';
 import { RegistryServiceInstance } from 'src/services/registryService';
-import { AuthStore, IAuthStore } from './AuthStore';
-import { IPatientsStore, IPatientStore, PatientsStore } from './PatientsStore';
-import { IUserStore, UserStore } from './UserStore';
+import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
+import { IPatientsStore, IPatientStore, PatientsStore } from 'src/stores/PatientsStore';
+import { IUserStore, UserStore } from 'src/stores/UserStore';
 
 export interface IRootStore {
     userStore: IUserStore;

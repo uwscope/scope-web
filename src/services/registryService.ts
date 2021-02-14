@@ -1,5 +1,5 @@
+import { IPatient } from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
-import { IPatient } from './types';
 
 export interface IRegistryService {
     // TODO: async/await: Need babel polyfill

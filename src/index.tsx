@@ -3,10 +3,10 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import { RootStore } from './stores/RootStore';
-import { StoreProvider } from './stores/stores';
-import createAppTheme from './styles/theme';
+import App from 'src/App';
+import { RootStore } from 'src/stores/RootStore';
+import { StoreProvider } from 'src/stores/stores';
+import createAppTheme from 'src/styles/theme';
 
 // Strict enforcements for mobx
 configure({

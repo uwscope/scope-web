@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { BrowserRouter, Route, Switch as RouterSwitch } from 'react-router-dom';
-import CaseloadPage from './components/CaseloadPage';
-import Chrome from './components/Chrome';
-import DrawerContent from './components/DrawerContent';
-import HeaderContent from './components/HeaderContent';
-import HomePage from './components/HomePage';
-import PatientDetailPage from './components/PatientDetailPage';
+import CaseloadPage from 'src/components/CaseloadPage';
+import Chrome from 'src/components/Chrome';
+import DrawerContent from 'src/components/DrawerContent';
+import HeaderContent from 'src/components/HeaderContent';
+import HomePage from 'src/components/HomePage';
+import PatientDetailPage from 'src/components/PatientDetailPage';
 
 export const App: FunctionComponent = observer(() => {
     return (
