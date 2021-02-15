@@ -1,11 +1,10 @@
 import { Grid } from '@material-ui/core';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import MedicalInformation from 'src/components/PatientDetail/MedicalInformation';
-import PsychiatryInformation from 'src/components/PatientDetail/PsychiatryInformation';
-import TreatmentInformation from 'src/components/PatientDetail/TreatmentInformation';
+import { MedicalInformation } from 'src/components/PatientDetail/MedicalInformation';
+import { PsychiatryInformation } from 'src/components/PatientDetail/PsychiatryInformation';
+import { TreatmentInformation } from 'src/components/PatientDetail/TreatmentInformation';
 
-export const PatientInformation: FunctionComponent = observer(() => {
+export const PatientInformation: FunctionComponent = () => {
     return (
         <Grid container spacing={3} alignItems="stretch" direction="row">
             <Grid item xs={12} sm={6}>
@@ -22,6 +21,6 @@ export const PatientInformation: FunctionComponent = observer(() => {
             </Grid>
         </Grid>
     );
-});
+};
 
 export default PatientInformation;

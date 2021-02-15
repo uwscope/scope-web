@@ -1,8 +1,9 @@
 import { Typography, withTheme } from '@material-ui/core';
-import { observer } from 'mobx-react';
+import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
+import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
 const DetailPageContainer = withTheme(
@@ -38,15 +39,15 @@ const SectionTitle = styled(Typography)({
 
 type IContent = IContentItem & { content?: React.ReactNode };
 
-export const PatientDetailPage: FunctionComponent = observer(() => {
-    // const rootStore = useStores();
+export const PatientDetailPage: FunctionComponent = () => {
+    const rootStore = useStores();
 
-    // React.useEffect(
-    //     action(() => {
-    //         rootStore.currentPatient?.getPatientData();
-    //     }),
-    //     []
-    // );
+    React.useEffect(
+        action(() => {
+            rootStore.currentPatient?.getPatientData();
+        }),
+        []
+    );
 
     const contents = [
         {
@@ -122,6 +123,6 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             </ContentContainer>
         </DetailPageContainer>
     );
-});
+};
 
 export default PatientDetailPage;

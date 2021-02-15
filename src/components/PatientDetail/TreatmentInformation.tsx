@@ -30,25 +30,25 @@ export const TreatmentInformation: FunctionComponent<ITreatmentInformationProps>
                     <GridDropdownField
                         editable={editable}
                         label="Treatment Status"
-                        defaultValue={currentPatient.treatmentStatus}
+                        value={currentPatient.treatmentStatus}
                         options={treatmentStatusValues}
                     />
                     <GridDropdownField
                         editable={editable}
                         label="Follow-up Schedule"
-                        defaultValue={currentPatient.followupSchedule}
+                        value={currentPatient.followupSchedule}
                         options={followupScheduleValues}
                     />
                     <GridDropdownField
                         editable={editable}
                         label="Flag for Discussion"
-                        defaultValue={currentPatient.discussionFlag}
+                        value={currentPatient.discussionFlag}
                         options={discussionFlagValues}
                     />
                     <GridDropdownField
                         editable={editable}
                         label="Referrals"
-                        defaultValue={currentPatient.referral}
+                        value={currentPatient.referral}
                         options={referralValues}
                     />
 
@@ -58,7 +58,7 @@ export const TreatmentInformation: FunctionComponent<ITreatmentInformationProps>
                         multiline={true}
                         maxLine={4}
                         label="Treatment Plan"
-                        defaultValue={currentPatient.treatmentPlan}
+                        value={currentPatient.treatmentPlan}
                     />
                 </Grid>
             </ActionPanel>

@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import { clinicCodeValues, treatmentRegimenValues } from 'src/services/enums';
+import { clinicCodeValues, patientSexValues, treatmentRegimenValues } from 'src/services/enums';
 import { useStores } from 'src/stores/stores';
 
 export interface IMedicalInformationProps {
@@ -21,24 +21,29 @@ const MedicalInformationContent: FunctionComponent<IMedicalInformationProps> = o
     if (!!currentPatient) {
         return (
             <Grid container spacing={2} alignItems="stretch">
-                <GridTextField editable={editable} label="MRN" defaultValue={currentPatient.MRN} />
-                <GridTextField editable={editable} label="Sex" defaultValue={currentPatient.sex} />
+                <GridTextField editable={editable} label="MRN" value={currentPatient.MRN} />
+                <GridDropdownField
+                    editable={editable}
+                    label="Sex"
+                    value={currentPatient.sex}
+                    options={patientSexValues}
+                />
                 <GridTextField
                     editable={editable}
                     label="Date of Birth"
-                    defaultValue={format(currentPatient.birthdate, 'MM/dd/yyyy')}
+                    value={format(currentPatient.birthdate, 'MM/dd/yyyy')}
                 />
-                <GridTextField editable={editable} label="Age" defaultValue={currentPatient.age} />
+                <GridTextField editable={editable} label="Age" value={currentPatient.age} />
                 <GridDropdownField
                     editable={editable}
                     label="Clinic code"
-                    defaultValue={currentPatient.clinicCode}
+                    value={currentPatient.clinicCode}
                     options={clinicCodeValues}
                 />
                 <GridDropdownField
                     editable={editable}
                     label="Treatment Regimen"
-                    defaultValue={currentPatient.treatmentRegimen}
+                    value={currentPatient.treatmentRegimen}
                     options={treatmentRegimenValues}
                 />
                 <GridTextField
@@ -47,7 +52,7 @@ const MedicalInformationContent: FunctionComponent<IMedicalInformationProps> = o
                     multiline={true}
                     maxLine={4}
                     label="Primary Medical Diagnosis"
-                    defaultValue={currentPatient.medicalDiagnosis}
+                    value={currentPatient.medicalDiagnosis}
                 />
             </Grid>
         );
@@ -60,7 +65,7 @@ const state = observable<{ open: boolean }>({
     open: false,
 });
 
-export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = observer((props) => {
+export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = (props) => {
     const { editable, loading } = props;
 
     const handleClose = action(() => {
@@ -95,6 +100,6 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
             </Dialog>
         </ActionPanel>
     );
-});
+};
 
 export default MedicalInformation;

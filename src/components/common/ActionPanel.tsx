@@ -8,7 +8,6 @@ import {
     Typography,
     withTheme,
 } from '@material-ui/core';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -38,7 +37,7 @@ export interface IActionPanelProps {
     loading?: boolean;
 }
 
-export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props) => {
+export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
     const { id, actionButtons, title, children, loading = false } = props;
     return (
         <Card id={id}>
@@ -55,7 +54,8 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props
                                   color="primary"
                                   startIcon={a.icon}
                                   disabled={loading}
-                                  onClick={a.onClick}>
+                                  onClick={a.onClick}
+                                  key={a.text}>
                                   {a.text}
                               </Button>
                           ))
@@ -66,6 +66,6 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = observer((props
             <CardContent>{children}</CardContent>
         </Card>
     );
-});
+};
 
 export default ActionPanel;

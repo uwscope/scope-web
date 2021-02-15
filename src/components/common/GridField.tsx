@@ -11,7 +11,6 @@ import {
     withTheme,
 } from '@material-ui/core';
 import { action } from 'mobx';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
@@ -59,7 +58,7 @@ const SelectField = withTheme(
 interface IGridFieldProps {
     editable?: boolean;
     label: string;
-    defaultValue: string | number;
+    value: string | number;
     onChange?: (text: string) => void;
     fullWidth?: boolean;
 }
@@ -69,8 +68,8 @@ export interface IGridTextFieldProps extends IGridFieldProps {
     maxLine?: number;
 }
 
-export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((props) => {
-    const { editable, label, defaultValue, multiline = false, maxLine = 1, fullWidth = false, onChange } = props;
+export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
+    const { editable, label, value, multiline = false, maxLine = 1, fullWidth = false, onChange } = props;
 
     const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
@@ -88,20 +87,20 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((p
                     readOnly: !editable,
                 }}
                 label={label}
-                defaultValue={defaultValue}
+                value={value}
                 onChange={handleChange}
                 fullWidth
             />
         </Grid>
     );
-});
+};
 
 export interface IGridDropdownFieldProps extends IGridFieldProps {
     options: ReadonlyArray<string>;
 }
 
-export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = observer((props) => {
-    const { editable, label, defaultValue, options, onChange, fullWidth = false } = props;
+export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (props) => {
+    const { editable, label, value, options, onChange, fullWidth = false } = props;
 
     const handleChange = action((event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
         if (!!onChange) {
@@ -109,15 +108,13 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = obs
         }
     });
 
-    console.log(defaultValue);
-
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
             <SelectForm>
                 <InputLabel>{label}</InputLabel>
                 <SelectField
                     $editable={editable}
-                    defaultValue={defaultValue}
+                    value={value}
                     label={label}
                     onChange={handleChange}
                     inputProps={{ readOnly: !editable }}>
@@ -132,4 +129,4 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = obs
             </SelectForm>
         </Grid>
     );
-});
+};

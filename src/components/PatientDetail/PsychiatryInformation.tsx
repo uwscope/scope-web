@@ -27,7 +27,7 @@ export const PsychiatryInformation: FunctionComponent<IPsychiatryInformationProp
                         multiline={true}
                         maxLine={5}
                         label="Psychiatric History"
-                        defaultValue={currentPatient.psychHistory}
+                        value={currentPatient.psychHistory}
                     />
                     <GridTextField
                         fullWidth={true}
@@ -35,7 +35,7 @@ export const PsychiatryInformation: FunctionComponent<IPsychiatryInformationProp
                         multiline={true}
                         maxLine={5}
                         label="Substance Use"
-                        defaultValue={currentPatient.substanceUse}
+                        value={currentPatient.substanceUse}
                     />
                     <GridTextField
                         fullWidth={true}
@@ -43,7 +43,7 @@ export const PsychiatryInformation: FunctionComponent<IPsychiatryInformationProp
                         multiline={true}
                         maxLine={5}
                         label="Psychiatric Medications"
-                        defaultValue={currentPatient.psychMedications}
+                        value={currentPatient.psychMedications}
                     />
                     <GridTextField
                         fullWidth={true}
@@ -51,7 +51,7 @@ export const PsychiatryInformation: FunctionComponent<IPsychiatryInformationProp
                         multiline={true}
                         maxLine={5}
                         label="Psychiatric Diagnosis"
-                        defaultValue={currentPatient.psychDiagnosis}
+                        value={currentPatient.psychDiagnosis}
                     />
                 </Grid>
             </ActionPanel>
