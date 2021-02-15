@@ -1,11 +1,11 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { format } from 'date-fns';
+import { differenceInYears } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
-import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
+import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
     ClinicCode,
     clinicCodeValues,
@@ -24,7 +24,6 @@ export interface IMedicalInformationProps {
 interface IMedicalInfo {
     primaryCareManager: string;
     sex: PatientSex;
-    age: number;
     birthdate: Date;
     clinicCode: ClinicCode;
     treatmentRegimen: TreatmentRegimen;
@@ -40,7 +39,6 @@ const MedicalInformationContent: FunctionComponent<IMedicalInformationContentPro
         editable,
         primaryCareManager,
         sex,
-        age,
         birthdate,
         clinicCode,
         treatmentRegimen,
@@ -63,13 +61,17 @@ const MedicalInformationContent: FunctionComponent<IMedicalInformationContentPro
                 options={patientSexValues}
                 onChange={(text) => onValueChange('sex', text)}
             />
-            <GridTextField
+            <GridDateField
                 editable={editable}
                 label="Date of Birth"
-                value={!!birthdate ? format(birthdate, 'MM/dd/yyyy') : 'unknown'}
+                value={birthdate}
                 onChange={(text) => onValueChange('birthdate', text)}
             />
-            <GridTextField editable={false} label="Age" value={age} />
+            <GridTextField
+                editable={false}
+                label="Age"
+                value={differenceInYears(new Date(), birthdate ?? new Date())}
+            />
             <GridDropdownField
                 editable={editable}
                 label="Clinic code"
@@ -101,7 +103,6 @@ const state = observable<{ open: boolean } & IMedicalInfo>({
     open: false,
     primaryCareManager: '',
     sex: 'Male',
-    age: -1,
     birthdate: new Date(),
     clinicCode: 'Breast',
     treatmentRegimen: 'Other',
@@ -122,7 +123,6 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
 
     const handleOpen = action(() => {
         if (!!currentPatient) {
-            state.age = currentPatient.age;
             state.primaryCareManager = currentPatient.primaryCareManager;
             state.sex = currentPatient.sex;
             state.birthdate = currentPatient.birthdate;
@@ -148,7 +148,6 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <MedicalInformationContent
                 editable={editable}
-                age={currentPatient?.age}
                 primaryCareManager={currentPatient?.primaryCareManager}
                 sex={currentPatient?.sex}
                 birthdate={currentPatient?.birthdate}

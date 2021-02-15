@@ -1,3 +1,4 @@
+import DateFnsUtils from '@date-io/date-fns';
 import {
     FormControl,
     FormControlProps,
@@ -10,6 +11,8 @@ import {
     TextFieldProps,
     withTheme,
 } from '@material-ui/core';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { format } from 'date-fns';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
@@ -55,11 +58,19 @@ const SelectField = withTheme(
     )
 );
 
+const DatePickerContainer = styled(KeyboardDatePicker)({
+    width: '100%',
+    margin: 0,
+    '>.MuiFormLabel-root': {
+        textTransform: 'uppercase',
+    },
+});
+
 interface IGridFieldProps {
     editable?: boolean;
     label: string;
-    value: string | number | undefined;
-    onChange?: (text: string) => void;
+    value: string | number | Date | undefined;
+    onChange?: (text: string | number | Date) => void;
     fullWidth?: boolean;
 }
 
@@ -129,4 +140,43 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
             </SelectForm>
         </Grid>
     );
+};
+
+export interface IGridDateField extends IGridFieldProps {}
+
+export const GridDateField: FunctionComponent<IGridDateField> = (props) => {
+    const { editable, label, value, onChange, fullWidth = false } = props;
+
+    const handleChange = action((date: Date | null) => {
+        if (!!onChange && !!date) {
+            onChange(date);
+        }
+    });
+
+    if (editable) {
+        return (
+            <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <DatePickerContainer
+                        disableToolbar
+                        variant="inline"
+                        format="MM/dd/yyyy"
+                        margin="normal"
+                        label={label}
+                        value={value}
+                        onChange={handleChange}
+                    />
+                </MuiPickersUtilsProvider>
+            </Grid>
+        );
+    } else {
+        return (
+            <GridTextField
+                editable={false}
+                label={label}
+                value={!!value ? format(value as Date, 'MM/dd/yyyy') : 'unknown'}
+                onChange={onChange}
+            />
+        );
+    }
 };
