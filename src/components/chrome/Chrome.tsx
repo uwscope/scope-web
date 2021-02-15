@@ -15,7 +15,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
-import Footer from 'src/components/Footer';
+import Footer from 'src/components/chrome/Footer';
 import { useStores } from 'src/stores/stores';
 import styled, { ThemedStyledProps } from 'styled-components';
 

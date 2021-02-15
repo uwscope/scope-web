@@ -21,7 +21,7 @@ const MedicalInformationContent: FunctionComponent<IMedicalInformationProps> = o
     if (!!currentPatient) {
         return (
             <Grid container spacing={2} alignItems="stretch">
-                <GridTextField editable={editable} label="MRN" value={currentPatient.MRN} />
+                <GridTextField editable={editable} label="Care Manager" value={currentPatient.primaryCareManagerName} />
                 <GridDropdownField
                     editable={editable}
                     label="Sex"
@@ -65,7 +65,7 @@ const state = observable<{ open: boolean }>({
     open: false,
 });
 
-export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = (props) => {
+export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = observer((props) => {
     const { editable, loading } = props;
 
     const handleClose = action(() => {
@@ -100,6 +100,6 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = (
             </Dialog>
         </ActionPanel>
     );
-};
+});
 
 export default MedicalInformation;

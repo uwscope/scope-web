@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemProps, ListItemText, Paper, Typography, useTheme, withTheme } from '@material-ui/core';
+import { List, ListItem, ListItemProps, ListItemText, Typography, useTheme, withTheme } from '@material-ui/core';
 import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -6,7 +6,7 @@ import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
 const MenuContainer = withTheme(
-    styled(Paper)((props) => ({
+    styled.div((props) => ({
         width: props.theme.customSizes.contentsMenuWidth,
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -180,7 +180,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
     };
 
     return (
-        <MenuContainer elevation={3} square>
+        <MenuContainer>
             <TitleContainer>
                 <Typography variant="button">Contents</Typography>
             </TitleContainer>

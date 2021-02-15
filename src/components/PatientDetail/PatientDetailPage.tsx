@@ -1,4 +1,4 @@
-import { Typography, withTheme } from '@material-ui/core';
+import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
@@ -14,6 +14,22 @@ const DetailPageContainer = withTheme(
         height: '100%',
         overflow: 'hidden',
     })
+);
+
+const LeftPaneContainer = withTheme(
+    styled(Paper)({
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        height: '100%',
+        overflow: 'hidden',
+    })
+);
+
+const PatientCard = withTheme(
+    styled.div((props) => ({
+        padding: props.theme.spacing(2.5),
+    }))
 );
 
 const ContentContainer = withTheme(
@@ -41,6 +57,7 @@ type IContent = IContentItem & { content?: React.ReactNode };
 
 export const PatientDetailPage: FunctionComponent = () => {
     const rootStore = useStores();
+    const { currentPatient } = rootStore;
 
     React.useEffect(
         action(() => {
@@ -110,7 +127,14 @@ export const PatientDetailPage: FunctionComponent = () => {
 
     return (
         <DetailPageContainer>
-            <ContentsMenu contents={contents} contentId="#scroll-content" />
+            <LeftPaneContainer elevation={3} square>
+                <PatientCard>
+                    <Typography variant="h5">{currentPatient?.name}</Typography>
+                    <Typography variant="body1">{`MRN: ${currentPatient?.MRN}`}</Typography>
+                </PatientCard>
+                <Divider variant="middle" />
+                <ContentsMenu contents={contents} contentId="#scroll-content" />
+            </LeftPaneContainer>
             <ContentContainer id="scroll-content">
                 {contents
                     .filter((c) => c.top)

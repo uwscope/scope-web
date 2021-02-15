@@ -3,7 +3,7 @@ import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
-import CaseloadTable from 'src/components/CaseloadTable';
+import CaseloadTable from 'src/components/caseload/CaseloadTable';
 import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from 'src/components/common/Page';
 import { AllClinicCode, ClinicCode } from 'src/services/enums';
 import { useStores } from 'src/stores/stores';

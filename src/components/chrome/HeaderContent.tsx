@@ -5,7 +5,7 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import Logo from 'src/assets/scope-logo.png';
-import PatientSearch from 'src/components/PatientSearch';
+import PatientSearch from 'src/components/chrome/PatientSearch';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
