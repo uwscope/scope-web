@@ -45,6 +45,7 @@ export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '
 export type FollowupSchedule = typeof followupScheduleValues[number];
 
 export const discussionFlagValues = [
+    'None',
     'Flag as safety risk',
     'Flag for discussion',
     'Flag for discussion & safety risk',
@@ -64,6 +65,7 @@ export const treatmentRegimenValues = [
 export type TreatmentRegimen = typeof treatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
+    'None',
     'Psychiatry',
     'Psychology',
     'Pt Navigation',

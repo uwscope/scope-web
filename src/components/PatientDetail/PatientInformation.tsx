@@ -8,10 +8,7 @@ export const PatientInformation: FunctionComponent = () => {
     return (
         <Grid container spacing={3} alignItems="stretch" direction="row">
             <Grid item xs={12} sm={6}>
-                <MedicalInformation loading={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-                <MedicalInformation loading={false} />
+                <MedicalInformation />
             </Grid>
             <Grid item xs={12} sm={6}>
                 <PsychiatryInformation />

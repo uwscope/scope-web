@@ -16,11 +16,6 @@ import {
 } from 'src/services/enums';
 import { useStores } from 'src/stores/stores';
 
-export interface IMedicalInformationProps {
-    editable?: boolean;
-    loading?: boolean;
-}
-
 interface IMedicalInfo {
     primaryCareManager: string;
     sex: PatientSex;
@@ -30,7 +25,8 @@ interface IMedicalInfo {
     medicalDiagnosis: string;
 }
 
-interface IMedicalInformationContentProps extends IMedicalInformationProps, Partial<IMedicalInfo> {
+interface IMedicalInformationContentProps extends Partial<IMedicalInfo> {
+    editable?: boolean;
     onValueChange: (key: string, value: any) => void;
 }
 
@@ -109,8 +105,7 @@ const state = observable<{ open: boolean } & IMedicalInfo>({
     medicalDiagnosis: '',
 });
 
-export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = observer((props) => {
-    const { editable, loading } = props;
+export const MedicalInformation: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     const onValueChange = action((key: string, value: any) => {
@@ -144,10 +139,10 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
         <ActionPanel
             id="medical"
             title="Medical Information"
-            loading={loading}
+            loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <MedicalInformationContent
-                editable={editable}
+                editable={false}
                 primaryCareManager={currentPatient?.primaryCareManager}
                 sex={currentPatient?.sex}
                 birthdate={currentPatient?.birthdate}
