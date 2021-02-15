@@ -6,31 +6,20 @@ import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
-    DiscussionFlag,
     discussionFlagValues,
-    FollowupSchedule,
     followupScheduleValues,
-    Referral,
     referralValues,
-    TreatmentStatus,
     treatmentStatusValues,
 } from 'src/services/enums';
+import { ITreatmentInfo } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
-
-interface ITreatmentInfo {
-    treatmentStatus: TreatmentStatus;
-    followupSchedule: FollowupSchedule;
-    discussionFlag: DiscussionFlag;
-    referral: Referral;
-    treatmentPlan: string;
-}
 
 interface ITreatmentInfoContentProps extends Partial<ITreatmentInfo> {
     editable?: boolean;
     onValueChange: (key: string, value: any) => void;
 }
 
-const TreatmentInformationContent: FunctionComponent<ITreatmentInfoContentProps> = observer((props) => {
+const TreatmentInformationContent: FunctionComponent<ITreatmentInfoContentProps> = (props) => {
     const {
         editable,
         treatmentStatus,
@@ -83,7 +72,7 @@ const TreatmentInformationContent: FunctionComponent<ITreatmentInfoContentProps>
             />
         </Grid>
     );
-});
+};
 
 const state = observable<{ open: boolean } & ITreatmentInfo>({
     open: false,

@@ -5,21 +5,15 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
+import { IPsychiatryInfo } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
-
-interface IPsychiatryInfo {
-    psychHistory: string;
-    substanceUse: string;
-    psychMedications: string;
-    psychDiagnosis: string;
-}
 
 interface IPsychiatryInfoContentProps extends Partial<IPsychiatryInfo> {
     editable?: boolean;
     onValueChange: (key: string, value: any) => void;
 }
 
-const PsychiatryInformationContent: FunctionComponent<IPsychiatryInfoContentProps> = observer((props) => {
+const PsychiatryInformationContent: FunctionComponent<IPsychiatryInfoContentProps> = (props) => {
     const { editable, psychHistory, substanceUse, psychMedications, psychDiagnosis, onValueChange } = props;
 
     return (
@@ -62,7 +56,7 @@ const PsychiatryInformationContent: FunctionComponent<IPsychiatryInfoContentProp
             />
         </Grid>
     );
-});
+};
 
 const state = observable<{ open: boolean } & IPsychiatryInfo>({
     open: false,

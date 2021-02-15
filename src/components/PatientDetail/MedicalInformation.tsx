@@ -6,24 +6,9 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import {
-    ClinicCode,
-    clinicCodeValues,
-    PatientSex,
-    patientSexValues,
-    TreatmentRegimen,
-    treatmentRegimenValues,
-} from 'src/services/enums';
+import { clinicCodeValues, patientSexValues, treatmentRegimenValues } from 'src/services/enums';
+import { IMedicalInfo } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
-
-interface IMedicalInfo {
-    primaryCareManager: string;
-    sex: PatientSex;
-    birthdate: Date;
-    clinicCode: ClinicCode;
-    treatmentRegimen: TreatmentRegimen;
-    medicalDiagnosis: string;
-}
 
 interface IMedicalInformationContentProps extends Partial<IMedicalInfo> {
     editable?: boolean;

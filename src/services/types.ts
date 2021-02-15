@@ -47,30 +47,34 @@ export interface IActivity {
     readonly moodData: IAssessmentDataPoint[];
 }
 
-export interface IPatient {
-    // Medical information
+export interface IMedicalInfo {
+    primaryCareManager: string;
+    sex: PatientSex;
+    birthdate: Date;
+    clinicCode: ClinicCode;
+    treatmentRegimen: TreatmentRegimen;
+    medicalDiagnosis: string;
+}
+
+export interface ITreatmentInfo {
+    treatmentStatus: TreatmentStatus;
+    followupSchedule: FollowupSchedule;
+    discussionFlag: DiscussionFlag;
+    referral: Referral;
+    treatmentPlan: string;
+}
+
+export interface IPsychiatryInfo {
+    psychHistory: string;
+    substanceUse: string;
+    psychMedications: string;
+    psychDiagnosis: string;
+}
+
+export interface IPatient extends IMedicalInfo, ITreatmentInfo, IPsychiatryInfo {
     readonly MRN: number;
     readonly firstName: string;
     readonly lastName: string;
-    readonly birthdate: Date;
-    readonly sex: PatientSex;
-    readonly clinicCode: ClinicCode;
-    readonly treatmentRegimen: TreatmentRegimen;
-    readonly medicalDiagnosis: string;
-
-    // Treatment information
-    readonly primaryCareManager: string;
-    readonly treatmentStatus: TreatmentStatus;
-    readonly followupSchedule: FollowupSchedule;
-    readonly discussionFlag: DiscussionFlag;
-    readonly referral: Referral;
-    readonly treatmentPlan: string;
-
-    // Psychiatry
-    readonly psychHistory: string;
-    readonly substanceUse: string;
-    readonly psychMedications: string;
-    readonly psychDiagnosis: string;
 
     // Sessions
     readonly sessions: ISession[];

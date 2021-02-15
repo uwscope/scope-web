@@ -90,6 +90,8 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
                 node: document.getElementById(c.hash),
             };
         });
+
+        action(() => (state.activeHash = undefined))();
     }, [contents]);
 
     const clickedRef = React.useRef(false);

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { IPatient } from 'src/services/types';
+import { IPatient, ISession } from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -7,6 +7,7 @@ export interface IRegistryService {
     getPatients(): Promise<IPatient[]>;
     getPatientData(mrn: number): Promise<IPatient>;
     updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
+    addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
 }
 
 class RegistryService implements IRegistryService {
@@ -50,6 +51,17 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return patient as IPatient;
+        }
+    }
+
+    public async addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<ISession>(`/patient/${mrn}/session`, session);
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return session as ISession;
         }
     }
 }

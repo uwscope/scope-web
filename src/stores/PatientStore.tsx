@@ -17,9 +17,11 @@ export interface IPatientStore extends IPatient {
     readonly name: string;
     readonly age: number;
     readonly state: PromiseState;
+    readonly addSessionState: PromiseState;
 
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
+    addSession: (session: Partial<ISession>) => void;
 }
 
 export class PatientStore implements IPatientStore {
@@ -58,6 +60,7 @@ export class PatientStore implements IPatientStore {
     public activities: IActivity[];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
+    private readonly addSessionQuery: PromiseQuery<ISession>;
 
     constructor(patient: IPatient) {
         // Can't refactor due to initialization error
@@ -96,6 +99,7 @@ export class PatientStore implements IPatientStore {
         this.activities = patient.activities;
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
+        this.addSessionQuery = new PromiseQuery(patient.sessions[0], 'addSession');
 
         makeAutoObservable(this);
     }
@@ -106,6 +110,10 @@ export class PatientStore implements IPatientStore {
 
     @computed get state() {
         return this.loadPatientDataQuery.state;
+    }
+
+    @computed get addSessionState() {
+        return this.addSessionQuery.state;
     }
 
     @action.bound
@@ -126,6 +134,31 @@ export class PatientStore implements IPatientStore {
             this.loadPatientDataQuery.fromPromise(promise).then((patientData) => {
                 action(() => {
                     this.setPatientData(patientData);
+                })();
+            });
+        };
+
+        if (this.state == 'Pending') {
+            when(() => {
+                return this.state != 'Pending';
+            }, effect);
+        } else {
+            effect();
+        }
+    }
+
+    @action.bound
+    public async addSession(session: Partial<ISession>) {
+        const effect = () => {
+            const { registryService } = useServices();
+            const promise = registryService.addPatientSession(this.MRN, session);
+            this.addSessionQuery.fromPromise(promise).then((session) => {
+                action(() => {
+                    const addedSession = {
+                        ...session,
+                        sessionId: this.sessions.length,
+                    };
+                    this.sessions.push(addedSession);
                 })();
             });
         };

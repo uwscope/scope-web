@@ -72,6 +72,7 @@ interface IGridFieldProps {
     value: string | number | Date | undefined;
     onChange?: (text: string | number | Date) => void;
     fullWidth?: boolean;
+    placeholder?: string;
 }
 
 export interface IGridTextFieldProps extends IGridFieldProps {
@@ -80,7 +81,7 @@ export interface IGridTextFieldProps extends IGridFieldProps {
 }
 
 export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
-    const { editable, label, value, multiline = false, maxLine = 1, fullWidth = false, onChange } = props;
+    const { editable, label, value, multiline = false, maxLine = 1, fullWidth = false, onChange, placeholder } = props;
 
     const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
@@ -101,6 +102,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
                 value={value}
                 onChange={handleChange}
                 fullWidth
+                placeholder={placeholder}
             />
         </Grid>
     );

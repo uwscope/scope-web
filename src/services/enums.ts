@@ -87,7 +87,7 @@ export const treatmentPlanValues = [
 ] as const;
 export type TreatmentPlan = typeof treatmentPlanValues[number];
 
-export const treatmentChangeValues = ['Medication', 'Counseling'] as const;
+export const treatmentChangeValues = ['None', 'Medication', 'Counseling'] as const;
 export type TreatmentChange = typeof treatmentChangeValues[number] | OtherSpecify;
 
 export const behavioralActivationChecklistValues = [

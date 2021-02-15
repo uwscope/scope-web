@@ -9,6 +9,7 @@ import {
     followupScheduleValues,
     patientSexValues,
     referralValues,
+    sessionTypeValues,
     treatmentRegimenValues,
     treatmentStatusValues,
 } from 'src/services/enums';
@@ -106,8 +107,10 @@ const getFakeSessions = () => {
     return [...Array(sessionCount).keys()].map(
         (_, idx) =>
             ({
-                sessionId: idx,
+                sessionId: idx == 0 ? 'Initial assessment' : idx,
                 date: addDays(new Date(), -(getRandomInteger(-2, 2) + (sessionCount - idx) * getRandomInteger(13, 18))),
+                sessionType: getRandomItem(sessionTypeValues),
+                billableMinutes: getRandomItem([30, 45, 60, 80]),
             } as ISession)
     );
 };
