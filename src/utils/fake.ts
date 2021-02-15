@@ -46,7 +46,7 @@ const getFakePatient = () => {
         medicalDiagnosis: lorem.generateSentences(2),
 
         // Treatment information
-        primaryCareManagerName: getRandomItem(careManagers),
+        primaryCareManager: getRandomItem(careManagers),
         treatmentStatus: getRandomItem(treatmentStatusValues),
         followupSchedule: getRandomItem(followupScheduleValues),
         discussionFlag: getRandomItem(discussionFlagValues),

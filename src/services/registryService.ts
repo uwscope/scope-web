@@ -6,6 +6,7 @@ import { getRandomFakePatients } from 'src/utils/fake';
 export interface IRegistryService {
     getPatients(): Promise<IPatient[]>;
     getPatientData(mrn: number): Promise<IPatient>;
+    updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
 }
 
 class RegistryService implements IRegistryService {
@@ -38,6 +39,17 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return getRandomFakePatients()[0];
+        }
+    }
+
+    public async updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<IPatient>(`/patient/${mrn}`, patient);
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return patient as IPatient;
         }
     }
 }

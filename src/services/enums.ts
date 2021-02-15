@@ -61,7 +61,7 @@ export const treatmentRegimenValues = [
     'Endocrine',
     'Surveillance',
 ] as const;
-export type TreatmentRegimen = typeof treatmentRegimenValues[number] & OtherSpecify;
+export type TreatmentRegimen = typeof treatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
     'Psychiatry',
@@ -71,10 +71,10 @@ export const referralValues = [
     'Spiritual Care',
     'Palliative Care',
 ] as const;
-export type Referral = typeof referralValues[number] & OtherSpecify;
+export type Referral = typeof referralValues[number] | OtherSpecify;
 
 export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
-export type SessionType = typeof sessionTypeValues[number] & OtherSpecify;
+export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
 
 export const treatmentPlanValues = [
     'Maintain current treatment',
@@ -86,7 +86,7 @@ export const treatmentPlanValues = [
 export type TreatmentPlan = typeof treatmentPlanValues[number];
 
 export const treatmentChangeValues = ['Medication', 'Counseling'] as const;
-export type TreatmentChange = typeof treatmentChangeValues[number] & OtherSpecify;
+export type TreatmentChange = typeof treatmentChangeValues[number] | OtherSpecify;
 
 export const behavioralActivationChecklistValues = [
     'Review of the BA model',

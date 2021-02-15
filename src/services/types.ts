@@ -59,7 +59,7 @@ export interface IPatient {
     readonly medicalDiagnosis: string;
 
     // Treatment information
-    readonly primaryCareManagerName: string;
+    readonly primaryCareManager: string;
     readonly treatmentStatus: TreatmentStatus;
     readonly followupSchedule: FollowupSchedule;
     readonly discussionFlag: DiscussionFlag;

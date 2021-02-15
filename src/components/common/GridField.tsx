@@ -16,7 +16,7 @@ import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
 const EditableTextField = withTheme(
     styled(TextField)(
-        (props: ThemedStyledProps<TextFieldProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<TextFieldProps & { $editable: boolean }, any>) =>
             ({
                 minWidth: 160,
                 '>.MuiInput-underline:before': {
@@ -30,7 +30,7 @@ const EditableTextField = withTheme(
 );
 const SelectForm = withTheme(
     styled(FormControl)(
-        (props: ThemedStyledProps<FormControlProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
             ({
                 width: '100%',
                 minWidth: 160,
@@ -46,7 +46,7 @@ const SelectForm = withTheme(
 
 const SelectField = withTheme(
     styled(Select)(
-        (props: ThemedStyledProps<SelectProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<SelectProps & { $editable: boolean }, any>) =>
             ({
                 '>.MuiSelect-icon': {
                     display: props.$editable ? undefined : 'none',
@@ -58,7 +58,7 @@ const SelectField = withTheme(
 interface IGridFieldProps {
     editable?: boolean;
     label: string;
-    value: string | number;
+    value: string | number | undefined;
     onChange?: (text: string) => void;
     fullWidth?: boolean;
 }
@@ -110,7 +110,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
 
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
-            <SelectForm>
+            <SelectForm $editable={editable}>
                 <InputLabel>{label}</InputLabel>
                 <SelectField
                     $editable={editable}

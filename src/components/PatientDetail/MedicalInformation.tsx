@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { format } from 'date-fns';
 import { action, observable } from 'mobx';
@@ -6,7 +6,14 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import { clinicCodeValues, patientSexValues, treatmentRegimenValues } from 'src/services/enums';
+import {
+    ClinicCode,
+    clinicCodeValues,
+    PatientSex,
+    patientSexValues,
+    TreatmentRegimen,
+    treatmentRegimenValues,
+} from 'src/services/enums';
 import { useStores } from 'src/stores/stores';
 
 export interface IMedicalInformationProps {
@@ -14,66 +21,123 @@ export interface IMedicalInformationProps {
     loading?: boolean;
 }
 
-const MedicalInformationContent: FunctionComponent<IMedicalInformationProps> = observer((props) => {
-    const { editable } = props;
-    const { currentPatient } = useStores();
+interface IMedicalInfo {
+    primaryCareManager: string;
+    sex: PatientSex;
+    age: number;
+    birthdate: Date;
+    clinicCode: ClinicCode;
+    treatmentRegimen: TreatmentRegimen;
+    medicalDiagnosis: string;
+}
 
-    if (!!currentPatient) {
-        return (
-            <Grid container spacing={2} alignItems="stretch">
-                <GridTextField editable={editable} label="Care Manager" value={currentPatient.primaryCareManagerName} />
-                <GridDropdownField
-                    editable={editable}
-                    label="Sex"
-                    value={currentPatient.sex}
-                    options={patientSexValues}
-                />
-                <GridTextField
-                    editable={editable}
-                    label="Date of Birth"
-                    value={format(currentPatient.birthdate, 'MM/dd/yyyy')}
-                />
-                <GridTextField editable={editable} label="Age" value={currentPatient.age} />
-                <GridDropdownField
-                    editable={editable}
-                    label="Clinic code"
-                    value={currentPatient.clinicCode}
-                    options={clinicCodeValues}
-                />
-                <GridDropdownField
-                    editable={editable}
-                    label="Treatment Regimen"
-                    value={currentPatient.treatmentRegimen}
-                    options={treatmentRegimenValues}
-                />
-                <GridTextField
-                    fullWidth={true}
-                    editable={editable}
-                    multiline={true}
-                    maxLine={4}
-                    label="Primary Medical Diagnosis"
-                    value={currentPatient.medicalDiagnosis}
-                />
-            </Grid>
-        );
-    } else {
-        return <Typography variant="h1">Error</Typography>;
-    }
-});
+interface IMedicalInformationContentProps extends IMedicalInformationProps, Partial<IMedicalInfo> {
+    onValueChange: (key: string, value: any) => void;
+}
 
-const state = observable<{ open: boolean }>({
+const MedicalInformationContent: FunctionComponent<IMedicalInformationContentProps> = (props) => {
+    const {
+        editable,
+        primaryCareManager,
+        sex,
+        age,
+        birthdate,
+        clinicCode,
+        treatmentRegimen,
+        medicalDiagnosis,
+        onValueChange,
+    } = props;
+
+    return (
+        <Grid container spacing={2} alignItems="stretch">
+            <GridTextField
+                editable={editable}
+                label="Care Manager"
+                value={primaryCareManager}
+                onChange={(text) => onValueChange('primaryCareManager', text)}
+            />
+            <GridDropdownField
+                editable={editable}
+                label="Sex"
+                value={sex}
+                options={patientSexValues}
+                onChange={(text) => onValueChange('sex', text)}
+            />
+            <GridTextField
+                editable={editable}
+                label="Date of Birth"
+                value={!!birthdate ? format(birthdate, 'MM/dd/yyyy') : 'unknown'}
+                onChange={(text) => onValueChange('birthdate', text)}
+            />
+            <GridTextField editable={false} label="Age" value={age} />
+            <GridDropdownField
+                editable={editable}
+                label="Clinic code"
+                value={clinicCode}
+                options={clinicCodeValues}
+                onChange={(text) => onValueChange('clinicCode', text)}
+            />
+            <GridDropdownField
+                editable={editable}
+                label="Treatment Regimen"
+                value={treatmentRegimen}
+                options={treatmentRegimenValues}
+                onChange={(text) => onValueChange('treatmentRegimen', text)}
+            />
+            <GridTextField
+                fullWidth={true}
+                editable={editable}
+                multiline={true}
+                maxLine={4}
+                label="Primary Medical Diagnosis"
+                value={medicalDiagnosis}
+                onChange={(text) => onValueChange('medicalDiagnosis', text)}
+            />
+        </Grid>
+    );
+};
+
+const state = observable<{ open: boolean } & IMedicalInfo>({
     open: false,
+    primaryCareManager: '',
+    sex: 'Male',
+    age: -1,
+    birthdate: new Date(),
+    clinicCode: 'Breast',
+    treatmentRegimen: 'Other',
+    medicalDiagnosis: '',
 });
 
 export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = observer((props) => {
     const { editable, loading } = props;
+    const { currentPatient } = useStores();
+
+    const onValueChange = action((key: string, value: any) => {
+        (state as any)[key] = value;
+    });
 
     const handleClose = action(() => {
         state.open = false;
     });
 
     const handleOpen = action(() => {
+        if (!!currentPatient) {
+            state.age = currentPatient.age;
+            state.primaryCareManager = currentPatient.primaryCareManager;
+            state.sex = currentPatient.sex;
+            state.birthdate = currentPatient.birthdate;
+            state.clinicCode = currentPatient.clinicCode;
+            state.treatmentRegimen = currentPatient.treatmentRegimen;
+            state.medicalDiagnosis = currentPatient.medicalDiagnosis;
+        }
+
         state.open = true;
+    });
+
+    const onSave = action(() => {
+        const { open, ...patientData } = { ...state };
+        currentPatient?.updatePatientData(patientData);
+        state.open = false;
     });
 
     return (
@@ -82,18 +146,28 @@ export const MedicalInformation: FunctionComponent<IMedicalInformationProps> = o
             title="Medical Information"
             loading={loading}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <MedicalInformationContent editable={editable} />
+            <MedicalInformationContent
+                editable={editable}
+                age={currentPatient?.age}
+                primaryCareManager={currentPatient?.primaryCareManager}
+                sex={currentPatient?.sex}
+                birthdate={currentPatient?.birthdate}
+                clinicCode={currentPatient?.clinicCode}
+                treatmentRegimen={currentPatient?.treatmentRegimen}
+                medicalDiagnosis={currentPatient?.medicalDiagnosis}
+                onValueChange={onValueChange}
+            />
 
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Medical Information</DialogTitle>
                 <DialogContent>
-                    <MedicalInformationContent editable={true} />
+                    <MedicalInformationContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleClose} color="primary">
+                    <Button onClick={onSave} color="primary">
                         Save
                     </Button>
                 </DialogActions>

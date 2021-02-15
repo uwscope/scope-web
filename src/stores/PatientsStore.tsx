@@ -40,7 +40,7 @@ export class PatientsStore implements IPatientsStore {
 
     @computed
     public get careManagers() {
-        const cm = unique(this.patients.map((p) => p.primaryCareManagerName)).sort();
+        const cm = unique(this.patients.map((p) => p.primaryCareManager)).sort();
         cm.push(this.AllCareManagers);
         return cm;
     }
@@ -91,7 +91,7 @@ export class PatientsStore implements IPatientsStore {
     public get filteredPatients() {
         var filteredPatients = this.patients.map((p) => p);
         if (this.filteredCareManager != this.AllCareManagers) {
-            filteredPatients = filteredPatients.filter((p) => p.primaryCareManagerName == this.filteredCareManager);
+            filteredPatients = filteredPatients.filter((p) => p.primaryCareManager == this.filteredCareManager);
         }
 
         if (this.filteredClinic != 'All Clinics') {
