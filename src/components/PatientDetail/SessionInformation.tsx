@@ -18,6 +18,7 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
+import GridChecklist from 'src/components/common/GridChecklist';
 import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
     BehavioralActivationChecklistItem,
@@ -32,13 +33,13 @@ import { ISession } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 
 interface ISessionEditState {
-    readonly date: Date;
-    readonly sessionType: SessionType;
-    readonly billableMinutes: number;
-    readonly treatmentPlan: TreatmentPlan;
-    readonly treatmentChange: TreatmentChange;
-    readonly behavioralActivationChecklist: { [item in BehavioralActivationChecklistItem]: boolean };
-    readonly sessionNote: string;
+    date: Date;
+    sessionType: SessionType;
+    billableMinutes: number;
+    treatmentPlan: TreatmentPlan;
+    treatmentChange: TreatmentChange;
+    behavioralActivationChecklist: { [item in BehavioralActivationChecklistItem]: boolean };
+    sessionNote: string;
 }
 
 const defaultSession: ISessionEditState = {
@@ -69,6 +70,10 @@ const state = observable<{ open: boolean; isNew: boolean } & ISessionEditState>(
 const SessionEdit: FunctionComponent = observer(() => {
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
+    });
+
+    const onChecklistChange = action((key: string, value: boolean) => {
+        state.behavioralActivationChecklist[key as BehavioralActivationChecklistItem] = value;
     });
 
     return (
@@ -115,6 +120,13 @@ const SessionEdit: FunctionComponent = observer(() => {
                 value={state.sessionNote}
                 placeholder="Write session notes here"
                 onChange={(text) => onValueChange('sessionNote', text)}
+            />
+            <GridChecklist
+                fullWidth={true}
+                editable={true}
+                label="Behavioral Activation Checklist"
+                values={state.behavioralActivationChecklist}
+                onCheck={onChecklistChange}
             />
         </Grid>
     );

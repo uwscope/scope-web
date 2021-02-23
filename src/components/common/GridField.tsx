@@ -31,6 +31,7 @@ const EditableTextField = withTheme(
             } as CSSObject)
     )
 );
+
 const SelectForm = withTheme(
     styled(FormControl)(
         (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>

@@ -6,6 +6,12 @@ export const getRandomItem = <T>(array: ReadonlyArray<T>) => {
     return array[getRandomInteger(0, array.length)];
 };
 
+export const getRandomFlags = (array: ReadonlyArray<string>) => {
+    const flags: { [key: string]: boolean } = {};
+    array.forEach((k) => (flags[k] = getRandomInteger(0, array.length) <= 1));
+    return flags;
+};
+
 export const sample = <T>(array: ReadonlyArray<T>, count: number) => {
     const shuffledIdx = [...Array(array.length).keys()]
         .map((_, idx) => [idx, Math.random()])

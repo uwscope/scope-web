@@ -4,17 +4,20 @@ import {
     assessmentFrequencyValues,
     AssessmentType,
     assessmentTypeValues,
+    behavioralActivationChecklistValues,
     clinicCodeValues,
     discussionFlagValues,
     followupScheduleValues,
     patientSexValues,
     referralValues,
     sessionTypeValues,
+    treatmentChangeValues,
+    treatmentPlanValues,
     treatmentRegimenValues,
     treatmentStatusValues,
 } from 'src/services/enums';
 import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
-import { getRandomInteger, getRandomItem, sample } from 'src/utils/random';
+import { getRandomFlags, getRandomInteger, getRandomItem, sample } from 'src/utils/random';
 
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -111,6 +114,10 @@ const getFakeSessions = () => {
                 date: addDays(new Date(), -(getRandomInteger(-2, 2) + (sessionCount - idx) * getRandomInteger(13, 18))),
                 sessionType: getRandomItem(sessionTypeValues),
                 billableMinutes: getRandomItem([30, 45, 60, 80]),
+                treatmentPlan: getRandomItem(treatmentPlanValues),
+                treatmentChange: getRandomItem(treatmentChangeValues),
+                behavioralActivationChecklist: getRandomFlags(behavioralActivationChecklistValues),
+                sessionNote: lorem.generateSentences(getRandomInteger(4, 7)),
             } as ISession)
     );
 };
