@@ -2,6 +2,7 @@ import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
+import BAInformation from 'src/components/PatientDetail/BAInformation';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
@@ -114,6 +115,7 @@ export const PatientDetailPage: FunctionComponent = () => {
             hash: 'behavioral',
             label: 'Behavioral Activation',
             top: true,
+            content: <BAInformation />,
         },
         {
             hash: 'checklist',

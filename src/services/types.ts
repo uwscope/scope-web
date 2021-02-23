@@ -43,6 +43,7 @@ export interface IAssessmentDataPoint {
 }
 
 export interface IActivity {
+    readonly activityId: string;
     readonly activityName: string;
     readonly moodData: IAssessmentDataPoint[];
 }

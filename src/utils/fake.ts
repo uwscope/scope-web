@@ -126,8 +126,9 @@ const getFakeActivities = () => {
     const activityCount = getRandomInteger(1, 3);
 
     return [...Array(activityCount).keys()].map(
-        () =>
+        (idx) =>
             ({
+                activityId: String(idx),
                 activityName: lorem.generateWords(getRandomInteger(2, 5)),
                 moodData: getAssessmentDataPoints('Mood logging'),
             } as IActivity)
