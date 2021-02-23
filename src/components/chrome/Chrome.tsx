@@ -1,4 +1,5 @@
 import {
+    Button,
     CircularProgress,
     CssBaseline,
     Dialog,
@@ -142,10 +143,18 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
     return (
         <RootContainer>
             <Dialog open={rootStore.appState != 'Fulfilled'}>
-                <LoadingContainer>
-                    <CircularProgress />
-                    <Typography variant="h6">Loading Registry</Typography>
-                </LoadingContainer>
+                {rootStore.appState == 'Pending' ? (
+                    <LoadingContainer>
+                        <CircularProgress />
+                        <Typography variant="h6">Loading Registry</Typography>
+                    </LoadingContainer>
+                ) : (
+                    <LoadingContainer>
+                        <Button color="inherit" onClick={() => rootStore.login()}>
+                            Log in
+                        </Button>
+                    </LoadingContainer>
+                )}
             </Dialog>
             <CssBaseline />
             <AppBarContainer position="fixed" open={state.drawerOpen}>

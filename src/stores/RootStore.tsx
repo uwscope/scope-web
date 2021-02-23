@@ -91,7 +91,7 @@ export class RootStore implements IRootStore {
 
     @action.bound
     public logout() {
-        this.loginQuery.state == 'Unknown';
+        this.loginQuery.state = 'Unknown';
 
         this.userStore.updateUser('');
         this.authStore.setAuthToken('');

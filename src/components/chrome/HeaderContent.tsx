@@ -42,13 +42,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
     });
 
     const loginButton = () => {
-        if (rootStore.loginState == 'Unknown') {
-            return (
-                <Button color="inherit" onClick={() => rootStore.login()}>
-                    Log in
-                </Button>
-            );
-        } else if (rootStore.loginState == 'Pending') {
+        if (rootStore.loginState == 'Fulfilled') {
             return (
                 <div>
                     <Menu
@@ -63,6 +57,12 @@ export const HeaderContent: FunctionComponent = observer(() => {
                         {rootStore.userStore.name}
                     </Button>
                 </div>
+            );
+        } else {
+            return (
+                <Button color="inherit" onClick={() => rootStore.login()}>
+                    Log in
+                </Button>
             );
         }
     };
