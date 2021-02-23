@@ -4,39 +4,38 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { useStores } from 'src/stores/stores';
-import { last, mean } from 'src/utils/array';
+import { last } from 'src/utils/array';
 
-export const BAActivities: FunctionComponent = observer(() => {
+export const AssessmentInfo: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     return (
-        <ActionPanel id="activities" title="Activities" loading={currentPatient?.state == 'Pending'} actionButtons={[]}>
+        <ActionPanel
+            id="assessments"
+            title="Assessments"
+            loading={currentPatient?.state == 'Pending'}
+            actionButtons={[]}>
             <Grid container spacing={2} alignItems="stretch">
                 <TableContainer>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Activity</TableCell>
-                                <TableCell>Mood pattern</TableCell>
-                                <TableCell>Average mood</TableCell>
-                                <TableCell>Completion rate</TableCell>
+                                <TableCell>Assessment</TableCell>
+                                <TableCell>Frequency</TableCell>
                                 <TableCell>Last completed</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {currentPatient?.activities.map((activity) => {
-                                const moodAvg = mean(activity.moodData.map((m) => m.pointValue));
+                            {currentPatient?.assessments.map((a) => {
                                 return (
-                                    <TableRow key={activity.activityId}>
+                                    <TableRow key={a.assessmentType}>
                                         <TableCell component="th" scope="row">
-                                            {activity.activityName}
+                                            {a.assessmentType}
                                         </TableCell>
-                                        <TableCell>TBD</TableCell>
-                                        <TableCell>{activity.moodData.length > 0 ? moodAvg : 'NA'}</TableCell>
-                                        <TableCell>TBD</TableCell>
+                                        <TableCell>{a.frequency}</TableCell>
                                         <TableCell>
-                                            {activity.moodData.length > 0
-                                                ? format(last(activity.moodData)?.date as Date, 'MM/dd/yyyy')
+                                            {a.data.length > 0
+                                                ? format(last(a.data)?.date as Date, 'MM/dd/yyyy')
                                                 : 'NA'}
                                         </TableCell>
                                     </TableRow>
@@ -50,4 +49,4 @@ export const BAActivities: FunctionComponent = observer(() => {
     );
 });
 
-export default BAActivities;
+export default AssessmentInfo;

@@ -13,7 +13,7 @@ interface IPsychiatryInfoContentProps extends Partial<IPsychiatryInfo> {
     onValueChange: (key: string, value: any) => void;
 }
 
-const PsychiatryInformationContent: FunctionComponent<IPsychiatryInfoContentProps> = (props) => {
+const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (props) => {
     const { editable, psychHistory, substanceUse, psychMedications, psychDiagnosis, onValueChange } = props;
 
     return (
@@ -66,7 +66,7 @@ const state = observable<{ open: boolean } & IPsychiatryInfo>({
     psychDiagnosis: '',
 });
 
-export const PsychiatryInformation: FunctionComponent = observer(() => {
+export const PsychiatryInfo: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     const onValueChange = action((key: string, value: any) => {
@@ -100,7 +100,7 @@ export const PsychiatryInformation: FunctionComponent = observer(() => {
             title="Psychiatry Information"
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <PsychiatryInformationContent
+            <PsychiatryInfoContent
                 editable={false}
                 psychHistory={currentPatient?.psychHistory}
                 substanceUse={currentPatient?.substanceUse}
@@ -112,7 +112,7 @@ export const PsychiatryInformation: FunctionComponent = observer(() => {
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Psychiatry Information</DialogTitle>
                 <DialogContent>
-                    <PsychiatryInformationContent editable={true} {...state} onValueChange={onValueChange} />
+                    <PsychiatryInfoContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -127,4 +127,4 @@ export const PsychiatryInformation: FunctionComponent = observer(() => {
     );
 });
 
-export default PsychiatryInformation;
+export default PsychiatryInfo;

@@ -132,7 +132,7 @@ const SessionEdit: FunctionComponent = observer(() => {
     );
 });
 
-export const SessionInformation: FunctionComponent = observer(() => {
+export const SessionInfo: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     const handleClose = action(() => {
@@ -206,4 +206,4 @@ export const SessionInformation: FunctionComponent = observer(() => {
     );
 });
 
-export default SessionInformation;
+export default SessionInfo;

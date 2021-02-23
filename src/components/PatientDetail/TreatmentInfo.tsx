@@ -19,7 +19,7 @@ interface ITreatmentInfoContentProps extends Partial<ITreatmentInfo> {
     onValueChange: (key: string, value: any) => void;
 }
 
-const TreatmentInformationContent: FunctionComponent<ITreatmentInfoContentProps> = (props) => {
+const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (props) => {
     const {
         editable,
         treatmentStatus,
@@ -83,7 +83,7 @@ const state = observable<{ open: boolean } & ITreatmentInfo>({
     treatmentPlan: '',
 });
 
-export const TreatmentInformation: FunctionComponent = observer(() => {
+export const TreatmentInfo: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -116,7 +116,7 @@ export const TreatmentInformation: FunctionComponent = observer(() => {
             id="treatment"
             title="Treatment Information"
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <TreatmentInformationContent
+            <TreatmentInfoContent
                 editable={false}
                 treatmentStatus={currentPatient?.treatmentStatus}
                 followupSchedule={currentPatient?.followupSchedule}
@@ -129,7 +129,7 @@ export const TreatmentInformation: FunctionComponent = observer(() => {
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Treatment Information</DialogTitle>
                 <DialogContent>
-                    <TreatmentInformationContent editable={true} {...state} onValueChange={onValueChange} />
+                    <TreatmentInfoContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -144,4 +144,4 @@ export const TreatmentInformation: FunctionComponent = observer(() => {
     );
 });
 
-export default TreatmentInformation;
+export default TreatmentInfo;

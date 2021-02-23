@@ -10,12 +10,12 @@ import { clinicCodeValues, patientSexValues, treatmentRegimenValues } from 'src/
 import { IMedicalInfo } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 
-interface IMedicalInformationContentProps extends Partial<IMedicalInfo> {
+interface IMedicalInfoContentProps extends Partial<IMedicalInfo> {
     editable?: boolean;
     onValueChange: (key: string, value: any) => void;
 }
 
-const MedicalInformationContent: FunctionComponent<IMedicalInformationContentProps> = (props) => {
+const MedicalInfoContent: FunctionComponent<IMedicalInfoContentProps> = (props) => {
     const {
         editable,
         primaryCareManager,
@@ -90,7 +90,7 @@ const state = observable<{ open: boolean } & IMedicalInfo>({
     medicalDiagnosis: '',
 });
 
-export const MedicalInformation: FunctionComponent = observer(() => {
+export const MedicalInfo: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     const onValueChange = action((key: string, value: any) => {
@@ -126,7 +126,7 @@ export const MedicalInformation: FunctionComponent = observer(() => {
             title="Medical Information"
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <MedicalInformationContent
+            <MedicalInfoContent
                 editable={false}
                 primaryCareManager={currentPatient?.primaryCareManager}
                 sex={currentPatient?.sex}
@@ -140,7 +140,7 @@ export const MedicalInformation: FunctionComponent = observer(() => {
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Medical Information</DialogTitle>
                 <DialogContent>
-                    <MedicalInformationContent editable={true} {...state} onValueChange={onValueChange} />
+                    <MedicalInfoContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -155,4 +155,4 @@ export const MedicalInformation: FunctionComponent = observer(() => {
     );
 });
 
-export default MedicalInformation;
+export default MedicalInfo;
