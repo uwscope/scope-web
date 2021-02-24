@@ -4,6 +4,7 @@ import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BAInformation from 'src/components/PatientDetail/BAInformation';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
+import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -98,6 +99,7 @@ export const PatientDetailPage: FunctionComponent = () => {
             hash: 'progress',
             label: 'Progress',
             top: true,
+            content: <ProgressInformation />,
         },
         {
             hash: 'phq9',

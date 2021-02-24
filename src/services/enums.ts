@@ -100,7 +100,6 @@ export const behavioralActivationChecklistValues = [
     'Managing avoidance behaviors',
     'Problem-solving',
 ] as const;
-
 export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
 
 export const assessmentTypeValues = ['PHQ-9', 'GAD-7', 'Mood logging'] as const;
@@ -108,3 +107,27 @@ export type AssessmentType = typeof assessmentTypeValues[number];
 
 export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
 export type AssessmentFrequency = typeof assessmentFrequencyValues[number];
+
+export const phq9ItemValues = [
+    'Interest',
+    'Feeling',
+    'Sleep',
+    'Tired',
+    'Apetite',
+    'Failure',
+    'Concentrating',
+    'Slowness',
+    'Suicide',
+] as const;
+export type PHQ9Item = typeof phq9ItemValues[number];
+
+export const gad7ItemValues = [
+    'Anxious',
+    'Constant worrying',
+    'Worrying too much',
+    'Trouble relaxing',
+    'Restless',
+    'Irritable',
+    'Afraid',
+] as const;
+export type GAD7Item = typeof gad7ItemValues[number];

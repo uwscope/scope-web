@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
+import { MoodMap } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { last, mean } from 'src/utils/array';
 
@@ -25,7 +26,7 @@ export const BAActivities: FunctionComponent = observer(() => {
                         </TableHead>
                         <TableBody>
                             {currentPatient?.activities.map((activity) => {
-                                const moodAvg = mean(activity.moodData.map((m) => m.pointValue));
+                                const moodAvg = mean(activity.moodData.map((m) => (m.pointValues as MoodMap)['Mood']));
                                 return (
                                     <TableRow key={activity.activityId}>
                                         <TableCell component="th" scope="row">

@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { IPatient, ISession } from 'src/services/types';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { IAssessmentDataPoint, IPatient, ISession, PHQ9Map } from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -8,6 +8,7 @@ export interface IRegistryService {
     getPatientData(mrn: number): Promise<IPatient>;
     updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
     addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
+    addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint>;
 }
 
 class RegistryService implements IRegistryService {
@@ -62,6 +63,24 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return session as ISession;
+        }
+    }
+
+    public async addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<PHQ9Map, AxiosResponse<IAssessmentDataPoint>>(
+                `/patient/${mrn}/phq9`,
+                phq9
+            );
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return {
+                date: new Date(),
+                pointValues: phq9,
+                comment: 'added my care manager',
+            } as IAssessmentDataPoint;
         }
     }
 }

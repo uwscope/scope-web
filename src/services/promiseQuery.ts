@@ -3,7 +3,7 @@ import { action, computed, makeAutoObservable, observable } from 'mobx';
 export type PromiseState = 'Unknown' | 'Pending' | 'Fulfilled' | 'Rejected';
 
 export interface IPromiseQuery<T> {
-    readonly value: T;
+    readonly value: T | undefined;
     readonly state: PromiseState;
     readonly error: boolean;
     readonly pending: boolean;
@@ -13,10 +13,10 @@ export interface IPromiseQuery<T> {
 export class PromiseQuery<T> implements IPromiseQuery<T> {
     private _name: string;
 
-    @observable public value: T;
+    @observable public value: T | undefined;
     @observable public state: PromiseState = 'Unknown';
 
-    constructor(defaultValue: T, name: string) {
+    constructor(defaultValue: T | undefined, name: string) {
         this.value = defaultValue;
         this._name = name;
 

@@ -5,7 +5,9 @@ import {
     ClinicCode,
     DiscussionFlag,
     FollowupSchedule,
+    GAD7Item,
     PatientSex,
+    PHQ9Item,
     Referral,
     SessionType,
     TreatmentChange,
@@ -19,6 +21,7 @@ export interface IUser {
     readonly authToken: string;
 }
 
+export type BAChecklistMap = { [item in BehavioralActivationChecklistItem]: boolean };
 export interface ISession {
     readonly sessionId: number;
     readonly date: Date;
@@ -26,7 +29,7 @@ export interface ISession {
     readonly billableMinutes: number;
     readonly treatmentPlan: TreatmentPlan;
     readonly treatmentChange: TreatmentChange;
-    readonly behavioralActivationChecklist: { [item in BehavioralActivationChecklistItem]: boolean };
+    readonly behavioralActivationChecklist: BAChecklistMap;
     readonly sessionNote: string;
 }
 
@@ -36,9 +39,13 @@ export interface IAssessment {
     readonly data: IAssessmentDataPoint[];
 }
 
+export type PHQ9Map = { [item in PHQ9Item]: number | undefined };
+export type GAD7Map = { [item in GAD7Item]: number | undefined };
+export type MoodMap = { ['Mood']: number };
+
 export interface IAssessmentDataPoint {
     readonly date: Date;
-    readonly pointValue: number;
+    readonly pointValues: PHQ9Map | GAD7Map | MoodMap;
     readonly comment: string;
 }
 

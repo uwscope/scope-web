@@ -8,7 +8,9 @@ import {
     clinicCodeValues,
     discussionFlagValues,
     followupScheduleValues,
+    gad7ItemValues,
     patientSexValues,
+    phq9ItemValues,
     referralValues,
     sessionTypeValues,
     treatmentChangeValues,
@@ -85,20 +87,26 @@ const getFakeAssessments = () => {
     );
 };
 
-const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
-    let pointValueMax = 5;
-
+const getFakeAssessmentDataPoint = (assessmentType: AssessmentType) => {
     if (assessmentType == 'PHQ-9') {
-        pointValueMax = 27;
+        const points: { [key: string]: number } = {};
+        phq9ItemValues.forEach((p) => (points[p] = getRandomInteger(0, 4)));
+        return points;
     } else if (assessmentType == 'GAD-7') {
-        pointValueMax = 21;
+        const points: { [key: string]: number } = {};
+        gad7ItemValues.forEach((p) => (points[p] = getRandomInteger(0, 4)));
+        return points;
+    } else {
+        return { Mood: getRandomInteger(0, 5) };
     }
+};
 
-    return [...Array(getRandomInteger(1, 10)).keys()].map(
+const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
+    return [...Array(getRandomInteger(0, 10)).keys()].map(
         (_, idx) =>
             ({
                 date: addDays(new Date(), -(getRandomInteger(0, 3) + idx * getRandomInteger(5, 8))),
-                pointValue: getRandomInteger(1, pointValueMax),
+                pointValues: getFakeAssessmentDataPoint(assessmentType),
                 comment: lorem.generateSentences(1),
             } as IAssessmentDataPoint)
     );
