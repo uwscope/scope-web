@@ -5,10 +5,9 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import Logo from 'src/assets/scope-logo.png';
-import { LoginStatus } from 'src/stores/RootStore';
+import PatientSearch from 'src/components/chrome/PatientSearch';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
-import PatientSearch from './PatientSearch';
 
 const Title = styled(Grid)({
     flexGrow: 1,
@@ -43,13 +42,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
     });
 
     const loginButton = () => {
-        if (rootStore.loginStatus == LoginStatus.LoggedOut) {
-            return (
-                <Button color="inherit" onClick={() => rootStore.login()}>
-                    Log in
-                </Button>
-            );
-        } else if (rootStore.loginStatus == LoginStatus.LoggedIn) {
+        if (rootStore.loginState == 'Fulfilled') {
             return (
                 <div>
                     <Menu
@@ -64,6 +57,12 @@ export const HeaderContent: FunctionComponent = observer(() => {
                         {rootStore.userStore.name}
                     </Button>
                 </div>
+            );
+        } else {
+            return (
+                <Button color="inherit" onClick={() => rootStore.login()}>
+                    Log in
+                </Button>
             );
         }
     };

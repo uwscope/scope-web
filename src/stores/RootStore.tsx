@@ -1,71 +1,110 @@
-import { action, makeAutoObservable, observable } from 'mobx';
-import { AuthServiceInstance } from 'src/services/authService';
-import { RegistryServiceInstance } from 'src/services/registryService';
-import { AuthStore, IAuthStore } from './AuthStore';
-import { IPatientsStore, PatientsStore } from './PatientsStore';
-import { IUserStore, UserStore } from './UserStore';
+import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { useServices } from 'src/services/services';
+import { IUser } from 'src/services/types';
+import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
+import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
+import { IPatientStore } from 'src/stores/PatientStore';
+import { IUserStore, UserStore } from 'src/stores/UserStore';
 
 export interface IRootStore {
+    // Stores
     userStore: IUserStore;
     authStore: IAuthStore;
     patientsStore: IPatientsStore;
+
+    // App metadata
     appTitle: string;
-    loginStatus: LoginStatus;
+
+    // UI states
+    appState: PromiseState;
+    loginState: PromiseState;
+    currentPatient: IPatientStore | undefined;
+
+    // Methods
     login: () => void;
     logout: () => void;
     load: () => void;
-}
 
-export enum LoginStatus {
-    LoggingOut,
-    LoggedOut,
-    LoggingIn,
-    LoggedIn,
+    setCurrentPatient: (mrn: number) => void;
 }
 
 export class RootStore implements IRootStore {
+    // Stores
     public userStore: IUserStore;
     public authStore: IAuthStore;
     public patientsStore: IPatientsStore;
+
+    // App metadata
     public appTitle = 'SCOPE Registry';
 
-    @observable public loginStatus = LoginStatus.LoggedOut;
+    // UI states
+    @observable public currentPatient: IPatientStore | undefined = undefined;
+
+    // Promise queries
+    private readonly loginQuery: PromiseQuery<IUser | undefined>;
 
     constructor() {
         this.userStore = new UserStore();
         this.authStore = new AuthStore();
         this.patientsStore = new PatientsStore();
 
+        this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
+
         makeAutoObservable(this);
     }
 
+    @computed
+    public get appState() {
+        const { loginState, patientsStore } = this;
+        if (loginState == 'Fulfilled' && patientsStore.patients.length > 0) {
+            return 'Fulfilled';
+        } else if (loginState == 'Pending') {
+            return 'Pending';
+        }
+
+        return 'Unknown';
+    }
+
+    @computed
+    public get loginState() {
+        return this.loginQuery.state;
+    }
+
     @action.bound
-    public login() {
-        this.loginStatus = LoginStatus.LoggingIn;
+    public async load() {
+        await this.login();
+        await this.patientsStore.getPatients();
+    }
 
-        const user = AuthServiceInstance.login();
+    @action.bound
+    public async login() {
+        const { authService } = useServices();
+        const promise = authService.login();
+        const user = await this.loginQuery.fromPromise(promise);
 
-        this.userStore.updateUser(user.name);
-        this.authStore.setAuthToken(user.authToken);
-
-        this.loginStatus = LoginStatus.LoggedIn;
-        this.load();
+        if (!!user) {
+            this.userStore.updateUser(user.name);
+            this.authStore.setAuthToken(user.authToken);
+        }
     }
 
     @action.bound
     public logout() {
-        this.loginStatus = LoginStatus.LoggingOut;
+        this.loginQuery.state = 'Unknown';
 
         this.userStore.updateUser('');
         this.authStore.setAuthToken('');
-
-        this.loginStatus = LoginStatus.LoggedOut;
     }
 
     @action.bound
-    public load() {
-        const patients = RegistryServiceInstance.getPatients();
-        this.patientsStore.updatePatients(patients);
-        this.patientsStore.selectCareManager(this.userStore.name);
+    public setCurrentPatient(mrn: number) {
+        if (mrn > 0) {
+            const patient = this.patientsStore.patients.filter((p) => p.MRN == mrn)[0];
+
+            this.currentPatient = patient;
+        } else {
+            this.currentPatient = undefined;
+        }
     }
 }

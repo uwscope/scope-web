@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import MUIDataTable, { MUIDataTableColumnDef, MUIDataTableOptions } from 'mui-datatables';
 import React, { FunctionComponent } from 'react';
-import { IPatientStore } from 'src/stores/PatientsStore';
+import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface ICaseloadTableProps {
     patients: ReadonlyArray<IPatientStore>;
@@ -19,7 +19,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     // Column names map to IPatientStore property names
     const columns = [
-        { name: 'mrn', label: 'MRN', options: { filter: false } },
+        { name: 'MRN', label: 'MRN', options: { filter: false } },
         { name: 'name', label: 'Name', options: { filter: false } },
         { name: 'treatmentStatus', label: 'Treatment Status' },
         { name: 'clinicCode', label: 'Clinic Code' },

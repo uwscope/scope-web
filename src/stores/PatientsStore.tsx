@@ -1,80 +1,53 @@
 import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
-import { ClinicCode, DiscussionFlag, FollowupSchedule, TreatmentStatus } from 'src/services/enums';
+import { AllClinicCode, ClinicCode } from 'src/services/enums';
+import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { useServices } from 'src/services/services';
 import { IPatient } from 'src/services/types';
+import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains, unique } from 'src/utils/array';
-
-export interface IPatientStore {
-    readonly mrn: number;
-    readonly firstName: string;
-    readonly lastName: string;
-    readonly name: string;
-    readonly primaryCareManagerName: string;
-    readonly treatmentStatus: TreatmentStatus;
-    readonly clinicCode: ClinicCode;
-    readonly followupSchedule: FollowupSchedule;
-    readonly discussionFlag: DiscussionFlag;
-}
-
-export class PatientStore implements IPatientStore {
-    public mrn: number;
-    public firstName: string;
-    public lastName: string;
-    public name: string;
-    public primaryCareManagerName: string;
-    public treatmentStatus: TreatmentStatus;
-    public clinicCode: ClinicCode;
-    public followupSchedule: FollowupSchedule;
-    public discussionFlag: DiscussionFlag;
-
-    constructor(patient: IPatient) {
-        this.mrn = patient.MRN;
-        this.firstName = patient.firstName;
-        this.lastName = patient.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
-        this.primaryCareManagerName = patient.primaryCareManagerName;
-        this.treatmentStatus = patient.treatmentStatus;
-        this.clinicCode = patient.clinicCode;
-        this.followupSchedule = patient.followupSchedule;
-        this.discussionFlag = patient.discussionFlag;
-
-        makeAutoObservable(this);
-    }
-}
-
-export type AllClinicCode = 'All Clinics';
 
 export interface IPatientsStore {
     readonly patients: ReadonlyArray<IPatientStore>;
     readonly careManagers: ReadonlyArray<string>;
     readonly clinics: ReadonlyArray<ClinicCode>;
-    readonly selectedCareManager: string;
-    readonly selectedClinic: ClinicCode | AllClinicCode;
-    readonly selectedPatients: ReadonlyArray<IPatientStore>;
+    readonly filteredCareManager: string;
+    readonly filteredClinic: ClinicCode | AllClinicCode;
+    readonly filteredPatients: ReadonlyArray<IPatientStore>;
+    readonly state: PromiseState;
 
-    updatePatients: (patients: IPatient[]) => void;
-    selectCareManager: (careManager: string) => void;
-    selectClinic: (clinic: ClinicCode | AllClinicCode) => void;
+    getPatients: () => void;
+    filterCareManager: (careManager: string) => void;
+    filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
 }
 
 export class PatientsStore implements IPatientsStore {
     @observable public patients: IObservableArray<IPatientStore>;
-    @observable public selectedCareManager: string;
-    @observable public selectedClinic: ClinicCode | AllClinicCode;
+    @observable public filteredCareManager: string;
+    @observable public filteredClinic: ClinicCode | AllClinicCode;
 
+    private readonly loadPatientsQuery: PromiseQuery<IPatient[]>;
     private readonly AllCareManagers = 'All Care Managers';
 
     constructor() {
         this.patients = observable.array([]);
-        this.selectedCareManager = this.AllCareManagers;
-        this.selectedClinic = 'All Clinics';
+        this.filteredCareManager = this.AllCareManagers;
+        this.filteredClinic = 'All Clinics';
+
+        this.loadPatientsQuery = new PromiseQuery([], 'loadPatients');
+
         makeAutoObservable(this);
     }
 
     @computed
     public get careManagers() {
-        const cm = unique(this.patients.map((p) => p.primaryCareManagerName)).sort();
+        const cm = unique(this.patients.map((p) => p.primaryCareManager)).sort();
         cm.push(this.AllCareManagers);
         return cm;
+    }
+
+    @computed
+    public get state() {
+        return this.loadPatientsQuery.state;
     }
 
     @computed
@@ -84,37 +57,45 @@ export class PatientsStore implements IPatientsStore {
     }
 
     @action.bound
-    public updatePatients(patients: IPatient[]) {
-        this.patients.replace(patients.map((p) => new PatientStore(p)));
-    }
-
-    @action.bound
-    public selectCareManager(careManager: string) {
-        if (contains(this.careManagers, careManager)) {
-            this.selectedCareManager = careManager;
-        } else {
-            this.selectedCareManager = this.AllCareManagers;
+    public async getPatients() {
+        if (this.state != 'Pending') {
+            const { registryService } = useServices();
+            const promise = registryService.getPatients();
+            const patients = await this.loadPatientsQuery.fromPromise(promise);
+            action(() => {
+                this.patients.replace(patients.map((p) => new PatientStore(p)));
+                this.filterCareManager(this.filteredCareManager);
+            })();
         }
     }
 
     @action.bound
-    public selectClinic(clinicCode: ClinicCode | AllClinicCode) {
-        if (contains(this.clinics, clinicCode)) {
-            this.selectedClinic = clinicCode;
+    public filterCareManager(careManager: string) {
+        if (contains(this.careManagers, careManager)) {
+            this.filteredCareManager = careManager;
         } else {
-            this.selectedClinic = 'All Clinics';
+            this.filteredCareManager = this.AllCareManagers;
+        }
+    }
+
+    @action.bound
+    public filterClinic(clinicCode: ClinicCode | AllClinicCode) {
+        if (contains(this.clinics, clinicCode)) {
+            this.filteredClinic = clinicCode;
+        } else {
+            this.filteredClinic = 'All Clinics';
         }
     }
 
     @computed
-    public get selectedPatients() {
+    public get filteredPatients() {
         var filteredPatients = this.patients.map((p) => p);
-        if (this.selectedCareManager != this.AllCareManagers) {
-            filteredPatients = filteredPatients.filter((p) => p.primaryCareManagerName == this.selectedCareManager);
+        if (this.filteredCareManager != this.AllCareManagers) {
+            filteredPatients = filteredPatients.filter((p) => p.primaryCareManager == this.filteredCareManager);
         }
 
-        if (this.selectedClinic != 'All Clinics') {
-            filteredPatients = filteredPatients.filter((p) => p.clinicCode == this.selectedClinic);
+        if (this.filteredClinic != 'All Clinics') {
+            filteredPatients = filteredPatients.filter((p) => p.clinicCode == this.filteredClinic);
         }
 
         return filteredPatients;

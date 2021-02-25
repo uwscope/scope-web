@@ -1,7 +1,6 @@
 import { fade, InputBase, withTheme } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { Autocomplete } from '@material-ui/lab';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -53,7 +52,7 @@ export interface IPatientSearchProps {
     onSelect?: (option: string) => void;
 }
 
-export const PatientSearch: FunctionComponent<IPatientSearchProps> = observer((params) => {
+export const PatientSearch: FunctionComponent<IPatientSearchProps> = (params) => {
     const onChange = (_: any, newValue: string | null) => {
         if (!!newValue && params.onSelect) {
             params.onSelect(newValue);
@@ -83,6 +82,6 @@ export const PatientSearch: FunctionComponent<IPatientSearchProps> = observer((p
             }}
         />
     );
-});
+};
 
 export default PatientSearch;

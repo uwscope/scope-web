@@ -1,3 +1,4 @@
+import DateFnsUtils from '@date-io/date-fns';
 import {
     FormControl,
     FormControlProps,
@@ -10,13 +11,15 @@ import {
     TextFieldProps,
     withTheme,
 } from '@material-ui/core';
-import { observer } from 'mobx-react';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { format } from 'date-fns';
+import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
 const EditableTextField = withTheme(
     styled(TextField)(
-        (props: ThemedStyledProps<TextFieldProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<TextFieldProps & { $editable: boolean }, any>) =>
             ({
                 minWidth: 160,
                 '>.MuiInput-underline:before': {
@@ -28,9 +31,10 @@ const EditableTextField = withTheme(
             } as CSSObject)
     )
 );
+
 const SelectForm = withTheme(
     styled(FormControl)(
-        (props: ThemedStyledProps<FormControlProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
             ({
                 width: '100%',
                 minWidth: 160,
@@ -46,7 +50,7 @@ const SelectForm = withTheme(
 
 const SelectField = withTheme(
     styled(Select)(
-        (props: ThemedStyledProps<SelectProps & { $editable: boolean; $top: boolean }, any>) =>
+        (props: ThemedStyledProps<SelectProps & { $editable: boolean }, any>) =>
             ({
                 '>.MuiSelect-icon': {
                     display: props.$editable ? undefined : 'none',
@@ -55,12 +59,21 @@ const SelectField = withTheme(
     )
 );
 
+const DatePickerContainer = styled(KeyboardDatePicker)({
+    width: '100%',
+    margin: 0,
+    '>.MuiFormLabel-root': {
+        textTransform: 'uppercase',
+    },
+});
+
 interface IGridFieldProps {
     editable?: boolean;
     label: string;
-    defaultValue: string;
-    onChange?: (text: string) => void;
+    value: string | number | Date | undefined;
+    onChange?: (text: string | number | Date) => void;
     fullWidth?: boolean;
+    placeholder?: string;
 }
 
 export interface IGridTextFieldProps extends IGridFieldProps {
@@ -68,14 +81,14 @@ export interface IGridTextFieldProps extends IGridFieldProps {
     maxLine?: number;
 }
 
-export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((props) => {
-    const { editable, label, defaultValue, multiline = false, maxLine = 1, fullWidth = false, onChange } = props;
+export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
+    const { editable, label, value, multiline = false, maxLine = 1, fullWidth = false, onChange, placeholder } = props;
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
             onChange(event.target.value);
         }
-    };
+    });
 
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
@@ -87,34 +100,35 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = observer((p
                     readOnly: !editable,
                 }}
                 label={label}
-                defaultValue={defaultValue}
+                value={value}
                 onChange={handleChange}
                 fullWidth
+                placeholder={placeholder}
             />
         </Grid>
     );
-});
+};
 
 export interface IGridDropdownFieldProps extends IGridFieldProps {
     options: ReadonlyArray<string>;
 }
 
-export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = observer((props) => {
-    const { editable, label, defaultValue, options, onChange, fullWidth = false } = props;
+export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (props) => {
+    const { editable, label, value, options, onChange, fullWidth = false } = props;
 
-    const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    const handleChange = action((event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
         if (!!onChange) {
             onChange(event.target.value as string);
         }
-    };
+    });
 
     return (
         <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
-            <SelectForm>
+            <SelectForm $editable={editable}>
                 <InputLabel>{label}</InputLabel>
                 <SelectField
                     $editable={editable}
-                    defaultValue={defaultValue}
+                    value={value}
                     label={label}
                     onChange={handleChange}
                     inputProps={{ readOnly: !editable }}>
@@ -129,4 +143,43 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = obs
             </SelectForm>
         </Grid>
     );
-});
+};
+
+export interface IGridDateField extends IGridFieldProps {}
+
+export const GridDateField: FunctionComponent<IGridDateField> = (props) => {
+    const { editable, label, value, onChange, fullWidth = false } = props;
+
+    const handleChange = action((date: Date | null) => {
+        if (!!onChange && !!date) {
+            onChange(date);
+        }
+    });
+
+    if (editable) {
+        return (
+            <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <DatePickerContainer
+                        disableToolbar
+                        variant="inline"
+                        format="MM/dd/yyyy"
+                        margin="normal"
+                        label={label}
+                        value={value}
+                        onChange={handleChange}
+                    />
+                </MuiPickersUtilsProvider>
+            </Grid>
+        );
+    } else {
+        return (
+            <GridTextField
+                editable={false}
+                label={label}
+                value={!!value ? format(value as Date, 'MM/dd/yyyy') : 'unknown'}
+                onChange={onChange}
+            />
+        );
+    }
+};

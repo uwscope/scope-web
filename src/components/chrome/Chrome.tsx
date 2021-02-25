@@ -1,4 +1,14 @@
-import { CssBaseline, Divider, Drawer, IconButton, withTheme } from '@material-ui/core';
+import {
+    Button,
+    CircularProgress,
+    CssBaseline,
+    Dialog,
+    Divider,
+    Drawer,
+    IconButton,
+    Typography,
+    withTheme,
+} from '@material-ui/core';
 import AppBar, { AppBarProps } from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -6,14 +16,24 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
+import Footer from 'src/components/chrome/Footer';
+import { useStores } from 'src/stores/stores';
 import styled, { ThemedStyledProps } from 'styled-components';
-import Footer from './Footer';
 
 const RootContainer = styled.div({
     display: 'flex',
     flexDirection: 'column',
     height: 'calc(100vh)',
 });
+
+const LoadingContainer = withTheme(
+    styled.div((props) => ({
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: props.theme.spacing(3),
+    }))
+);
 
 const MainContainer = withTheme(
     styled.main((props) => ({
@@ -118,8 +138,24 @@ export interface IChromeProps {
 }
 
 export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
+    const rootStore = useStores();
+
     return (
         <RootContainer>
+            <Dialog open={rootStore.appState != 'Fulfilled'}>
+                {rootStore.appState == 'Pending' ? (
+                    <LoadingContainer>
+                        <CircularProgress />
+                        <Typography variant="h6">Loading Registry</Typography>
+                    </LoadingContainer>
+                ) : (
+                    <LoadingContainer>
+                        <Button color="inherit" onClick={() => rootStore.login()}>
+                            Log in
+                        </Button>
+                    </LoadingContainer>
+                )}
+            </Dialog>
             <CssBaseline />
             <AppBarContainer position="fixed" open={state.drawerOpen}>
                 <Toolbar>

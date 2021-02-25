@@ -1,14 +1,13 @@
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { BrowserRouter, Route, Switch as RouterSwitch } from 'react-router-dom';
-import CaseloadPage from './components/CaseloadPage';
-import Chrome from './components/Chrome';
-import DrawerContent from './components/DrawerContent';
-import HeaderContent from './components/HeaderContent';
-import HomePage from './components/HomePage';
-import PatientDetailPage from './components/PatientDetailPage';
+import CaseloadPage from './components/caseload/CaseloadPage';
+import Chrome from './components/chrome/Chrome';
+import DrawerContent from './components/chrome/DrawerContent';
+import HeaderContent from './components/chrome/HeaderContent';
+import HomePage from './components/home/HomePage';
+import PatientDetailPage from './components/PatientDetail/PatientDetailPage';
 
-export const App: FunctionComponent = observer(() => {
+export const App: FunctionComponent = () => {
     return (
         <BrowserRouter>
             <Chrome drawerContent={<DrawerContent />} headerContent={<HeaderContent />}>
@@ -27,6 +26,6 @@ export const App: FunctionComponent = observer(() => {
             </Chrome>
         </BrowserRouter>
     );
-});
+};
 
 export default App;

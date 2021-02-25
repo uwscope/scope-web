@@ -1,11 +1,11 @@
 import { FormControl, MenuItem, Select, withTheme } from '@material-ui/core';
+import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
-import CaseloadTable from 'src/components/CaseloadTable';
+import CaseloadTable from 'src/components/caseload/CaseloadTable';
 import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from 'src/components/common/Page';
-import { ClinicCode } from 'src/services/enums';
-import { AllClinicCode } from 'src/stores/PatientsStore';
+import { AllClinicCode, ClinicCode } from 'src/services/enums';
 import { useStores } from 'src/stores/stores';
 import { getTodayString } from 'src/utils/formatter';
 import styled from 'styled-components';
@@ -39,34 +39,39 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const history = useHistory();
 
-    const onCareManagerSelect = (event: React.ChangeEvent<{ name?: string; value: string }>) => {
+    const onCareManagerSelect = action((event: React.ChangeEvent<{ name?: string; value: string }>) => {
         const careManager = event.target.value;
         if (!!careManager) {
-            rootStore.patientsStore.selectCareManager(careManager);
+            rootStore.patientsStore.filterCareManager(careManager);
         }
-    };
+    });
 
-    const onClinicSelect = (event: React.ChangeEvent<{ name?: string; value: ClinicCode | AllClinicCode }>) => {
+    const onClinicSelect = action((event: React.ChangeEvent<{ name?: string; value: ClinicCode | AllClinicCode }>) => {
         const clinic = event.target.value;
         if (!!clinic) {
-            rootStore.patientsStore.selectClinic(clinic);
+            rootStore.patientsStore.filterClinic(clinic);
         }
-    };
+    });
 
     const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
 
     const onPatientClick = (mrn: number) => {
+        rootStore.setCurrentPatient(mrn);
         history.push(`/patient/${mrn}`);
     };
 
+    React.useEffect(() => {
+        rootStore.patientsStore.getPatients();
+    }, []);
+
     return (
         <Page>
-            <PageHeaderContainer>
+            <PageHeaderContainer loading={rootStore.patientsStore.state == 'Pending'}>
                 <TitleSelectContainer>
                     <PageHeaderTitle>Caseload for</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
-                            value={rootStore.patientsStore.selectedCareManager}
+                            value={rootStore.patientsStore.filteredCareManager}
                             onChange={onCareManagerSelect}
                             inputProps={{
                                 name: 'caremanager',
@@ -82,7 +87,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                     <PageHeaderTitle>in</PageHeaderTitle>
                     <SelectForm>
                         <SelectInput
-                            value={rootStore.patientsStore.selectedClinic}
+                            value={rootStore.patientsStore.filteredClinic}
                             onChange={onClinicSelect}
                             inputProps={{
                                 name: 'clinic',
@@ -98,7 +103,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                 </TitleSelectContainer>
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>
-            <CaseloadTable patients={rootStore.patientsStore.selectedPatients} onPatientClick={onPatientClick} />
+            <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
         </Page>
     );
 });

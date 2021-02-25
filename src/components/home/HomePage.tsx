@@ -1,15 +1,19 @@
 import Typography from '@material-ui/core/Typography';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from 'src/components/common/Page';
 import { useStores } from 'src/stores/stores';
 import { getTodayString } from 'src/utils/formatter';
-import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from './common/Page';
 
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
+    React.useEffect(() => {
+        rootStore.patientsStore.getPatients();
+    }, []);
+
     return (
         <Page>
-            <PageHeaderContainer>
+            <PageHeaderContainer loading={rootStore.patientsStore.state == 'Pending'}>
                 <PageHeaderTitle>{`Welcome ${rootStore.userStore.name}`}</PageHeaderTitle>
                 <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>

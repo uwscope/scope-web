@@ -1,3 +1,5 @@
+export type OtherSpecify = 'Other';
+
 export const patientSexValues = ['Male', 'Female'] as const;
 export type PatientSex = typeof patientSexValues[number];
 
@@ -24,6 +26,8 @@ export const clinicCodeValues = [
 ] as const;
 export type ClinicCode = typeof clinicCodeValues[number];
 
+export type AllClinicCode = 'All Clinics';
+
 export const treatmentStatusValues = [
     'Active',
     'Active Distressed',
@@ -41,6 +45,7 @@ export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '
 export type FollowupSchedule = typeof followupScheduleValues[number];
 
 export const discussionFlagValues = [
+    'None',
     'Flag as safety risk',
     'Flag for discussion',
     'Flag for discussion & safety risk',
@@ -56,17 +61,73 @@ export const treatmentRegimenValues = [
     'CAR-T',
     'Endocrine',
     'Surveillance',
-    'Other',
 ] as const;
-export type TreatmentRegimen = typeof treatmentRegimenValues[number];
+export type TreatmentRegimen = typeof treatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
+    'None',
     'Psychiatry',
     'Psychology',
     'Pt Navigation',
     'Integrative Medicine',
     'Spiritual Care',
     'Palliative Care',
-    'Other',
 ] as const;
-export type Referral = typeof referralValues[number];
+export type Referral = typeof referralValues[number] | OtherSpecify;
+
+export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
+export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
+
+export const treatmentPlanValues = [
+    'Maintain current treatment',
+    'Adjust treatment plan',
+    'Monitor only',
+    'No further follow-up',
+    'Refer to community',
+] as const;
+export type TreatmentPlan = typeof treatmentPlanValues[number];
+
+export const treatmentChangeValues = ['None', 'Medication', 'Counseling'] as const;
+export type TreatmentChange = typeof treatmentChangeValues[number] | OtherSpecify;
+
+export const behavioralActivationChecklistValues = [
+    'Review of the BA model',
+    'Values and goals assessment',
+    'Activity scheduling',
+    'Mood and activity monitoring',
+    'Relaxation',
+    'Contingency management',
+    'Managing avoidance behaviors',
+    'Problem-solving',
+] as const;
+export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
+
+export const assessmentTypeValues = ['PHQ-9', 'GAD-7', 'Mood logging'] as const;
+export type AssessmentType = typeof assessmentTypeValues[number];
+
+export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
+export type AssessmentFrequency = typeof assessmentFrequencyValues[number];
+
+export const phq9ItemValues = [
+    'Interest',
+    'Feeling',
+    'Sleep',
+    'Tired',
+    'Apetite',
+    'Failure',
+    'Concentrating',
+    'Slowness',
+    'Suicide',
+] as const;
+export type PHQ9Item = typeof phq9ItemValues[number];
+
+export const gad7ItemValues = [
+    'Anxious',
+    'Constant worrying',
+    'Worrying too much',
+    'Trouble relaxing',
+    'Restless',
+    'Irritable',
+    'Afraid',
+] as const;
+export type GAD7Item = typeof gad7ItemValues[number];

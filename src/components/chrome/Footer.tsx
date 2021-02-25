@@ -1,6 +1,5 @@
 import { Box, Typography } from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -23,12 +22,12 @@ const FooterContainer = withTheme(
     }))
 );
 
-export const Footer: FunctionComponent = observer(() => {
+export const Footer: FunctionComponent = () => {
     return (
         <FooterContainer>
             <Disclaimer>Prototype by UW</Disclaimer>
         </FooterContainer>
     );
-});
+};
 
 export default Footer;

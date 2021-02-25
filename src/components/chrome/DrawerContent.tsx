@@ -4,11 +4,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import TableChartIcon from '@material-ui/icons/TableChart';
-import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
-export const DrawerContent: FunctionComponent = observer(() => {
+export const DrawerContent: FunctionComponent = () => {
     return (
         <List>
             <ListItem button key="Home" component={RouterLink} to="/">
@@ -25,6 +24,6 @@ export const DrawerContent: FunctionComponent = observer(() => {
             </ListItem>
         </List>
     );
-});
+};
 
 export default DrawerContent;

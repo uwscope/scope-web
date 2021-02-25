@@ -1,26 +1,26 @@
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
-import { configure } from 'mobx';
+import { action, configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import { RootStore } from './stores/RootStore';
-import { StoreProvider } from './stores/stores';
-import createAppTheme from './styles/theme';
+import App from 'src/App';
+import { RootStore } from 'src/stores/RootStore';
+import { StoreProvider } from 'src/stores/stores';
+import createAppTheme from 'src/styles/theme';
 
 // Strict enforcements for mobx
 configure({
     enforceActions: 'always',
     computedRequiresReaction: true,
     reactionRequiresObservable: true,
-    observableRequiresReaction: true,
+    // observableRequiresReaction: true,
     disableErrorBoundaries: true,
 });
 
 const store = new RootStore();
 
 // TODO: Temporary login
-store.login();
+action(() => store.load())();
 
 const theme = createAppTheme();
 
