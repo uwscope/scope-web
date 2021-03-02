@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { IAssessmentDataPoint, IPatient, ISession, PHQ9Map } from 'src/services/types';
+import { AssessmentData, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -8,7 +8,7 @@ export interface IRegistryService {
     getPatientData(mrn: number): Promise<IPatient>;
     updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
     addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
-    addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint>;
+    addPatientPHQ9Record(mrn: number, phq9: AssessmentData): Promise<IAssessmentDataPoint>;
 }
 
 class RegistryService implements IRegistryService {
@@ -66,10 +66,10 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint> {
+    public async addPatientPHQ9Record(mrn: number, phq9: AssessmentData): Promise<IAssessmentDataPoint> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.put<PHQ9Map, AxiosResponse<IAssessmentDataPoint>>(
+            const response = await this.axiosInstance.put<AssessmentData, AxiosResponse<IAssessmentDataPoint>>(
                 `/patient/${mrn}/phq9`,
                 phq9
             );

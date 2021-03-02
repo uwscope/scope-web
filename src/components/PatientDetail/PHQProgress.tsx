@@ -14,16 +14,17 @@ import {
     Typography,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
+import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import Questionnaire from 'src/components/common/Questionnaire';
-import { PHQ9Item, phq9ItemValues } from 'src/services/enums';
-import { PHQ9Map } from 'src/services/types';
+import { phq9ItemValues } from 'src/services/enums';
+import { AssessmentData, IAssessmentDataPoint } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
-import { sum } from 'src/utils/array';
+import { getAssessmentScore } from 'src/utils/assessment';
 
 const phqInstruction = 'Over the last 2 weeks, how often have you been bothered by any of the following problems?';
 const phqQuestions = [
@@ -66,7 +67,7 @@ const phqOptions = [
     },
 ];
 
-const defaultPHQ = {
+const defaultPHQ: AssessmentData = {
     Interest: undefined,
     Feeling: undefined,
     Sleep: undefined,
@@ -78,18 +79,15 @@ const defaultPHQ = {
     Suicide: undefined,
 };
 
-const state = observable<{ open: boolean } & PHQ9Map>({
+const state = observable<{ open: boolean; phq: AssessmentData }>({
     open: false,
-    ...defaultPHQ,
+    phq: defaultPHQ,
 });
 
 export const PHQProgress: FunctionComponent = observer(() => {
     const { currentPatient } = useStores();
 
     const phqAssessment = currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9');
-    const getPhqScore = (pointValues: PHQ9Map) => {
-        return sum(Object.keys(pointValues).map((k) => pointValues[k as PHQ9Item] || 0));
-    };
 
     const handleClose = action(() => {
         state.open = false;
@@ -101,17 +99,22 @@ export const PHQProgress: FunctionComponent = observer(() => {
     });
 
     const onSave = action(() => {
-        const { open, ...phqData } = { ...state };
-        currentPatient?.addPHQ9Record(phqData);
+        const { phq } = state;
+        currentPatient?.addPHQ9Record(phq);
         state.open = false;
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
-        state[qid as PHQ9Item] = value;
+        state.phq[qid] = value;
     });
 
-    const selectedValues = phqQuestions.map((q) => state[q.id as PHQ9Item]);
+    const selectedValues = phqQuestions.map((q) => state.phq[q.id]);
     const saveDisabled = selectedValues.findIndex((v) => v == undefined) >= 0;
+
+    const phqData = (currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9')
+        ?.data as IAssessmentDataPoint[])
+        ?.slice()
+        .sort((a, b) => compareDesc(a.date, b.date));
 
     return (
         <ActionPanel
@@ -120,7 +123,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!!phqAssessment ? (
+                {!!phqAssessment && (
                     <TableContainer>
                         <Table>
                             <TableHead>
@@ -139,9 +142,9 @@ export const PHQProgress: FunctionComponent = observer(() => {
                                             <TableCell component="th" scope="row">
                                                 {format(d.date, 'MM/dd/yyyy')}
                                             </TableCell>
-                                            <TableCell>{getPhqScore(d.pointValues as PHQ9Map)}</TableCell>
+                                            <TableCell>{getAssessmentScore(d.pointValues)}</TableCell>
                                             {phq9ItemValues.map((p) => (
-                                                <TableCell key={p}>{(d.pointValues as PHQ9Map)[p]}</TableCell>
+                                                <TableCell key={p}>{d.pointValues[p]}</TableCell>
                                             ))}
                                         </TableRow>
                                     );
@@ -149,7 +152,13 @@ export const PHQProgress: FunctionComponent = observer(() => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                ) : (
+                )}
+                {!!phqData && phqData.length > 0 && (
+                    <Grid item xs={12}>
+                        <AssessmentVis data={phqData} />
+                    </Grid>
+                )}
+                {(!phqData || phqData.length == 0) && (
                     <Grid item xs={12}>
                         <Typography>There are no PHQ-9 scores submitted for this patient</Typography>
                     </Grid>

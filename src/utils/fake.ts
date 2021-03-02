@@ -102,7 +102,7 @@ const getFakeAssessmentDataPoint = (assessmentType: AssessmentType) => {
 };
 
 const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
-    return [...Array(getRandomInteger(0, 10)).keys()].map(
+    return [...Array(getRandomInteger(5, 10)).keys()].map(
         (_, idx) =>
             ({
                 date: addDays(new Date(), -(getRandomInteger(0, 3) + idx * getRandomInteger(5, 8))),

@@ -11,7 +11,7 @@ import {
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession, PHQ9Map } from 'src/services/types';
+import { AssessmentData, IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
@@ -22,7 +22,7 @@ export interface IPatientStore extends IPatient {
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
     addSession: (session: Partial<ISession>) => void;
-    addPHQ9Record: (phq9Data: PHQ9Map) => void;
+    addPHQ9Record: (phq9Data: AssessmentData) => void;
 }
 
 export class PatientStore implements IPatientStore {
@@ -164,7 +164,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public addPHQ9Record(phq9Data: PHQ9Map) {
+    public addPHQ9Record(phq9Data: AssessmentData) {
         const effect = () => {
             const { registryService } = useServices();
             const promise = registryService.addPatientPHQ9Record(this.MRN, phq9Data);

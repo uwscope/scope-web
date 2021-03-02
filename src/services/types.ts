@@ -5,9 +5,7 @@ import {
     ClinicCode,
     DiscussionFlag,
     FollowupSchedule,
-    GAD7Item,
     PatientSex,
-    PHQ9Item,
     Referral,
     SessionType,
     TreatmentChange,
@@ -15,6 +13,8 @@ import {
     TreatmentRegimen,
     TreatmentStatus,
 } from 'src/services/enums';
+
+export type KeyedMap<T> = { [key: string]: T };
 
 export interface IUser {
     readonly name: string;
@@ -39,13 +39,10 @@ export interface IAssessment {
     readonly data: IAssessmentDataPoint[];
 }
 
-export type PHQ9Map = { [item in PHQ9Item]: number | undefined };
-export type GAD7Map = { [item in GAD7Item]: number | undefined };
-export type MoodMap = { ['Mood']: number };
-
+export type AssessmentData = KeyedMap<number | undefined>;
 export interface IAssessmentDataPoint {
     readonly date: Date;
-    readonly pointValues: PHQ9Map | GAD7Map | MoodMap;
+    readonly pointValues: AssessmentData;
     readonly comment: string;
 }
 
