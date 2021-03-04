@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -14,7 +15,7 @@ import {
     Typography,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { compareDesc, format } from 'date-fns';
+import { compareAsc, format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -67,6 +68,12 @@ const phqOptions = [
     },
 ];
 
+const ClickableTableRow = styled(TableRow)({
+    '&:hover': {
+        cursor: 'pointer',
+    },
+});
+
 const defaultPHQ: AssessmentData = {
     Interest: undefined,
     Feeling: undefined,
@@ -79,9 +86,10 @@ const defaultPHQ: AssessmentData = {
     Suicide: undefined,
 };
 
-const state = observable<{ open: boolean; phq: AssessmentData }>({
+const state = observable<{ open: boolean; phq: AssessmentData; date: Date }>({
     open: false,
     phq: defaultPHQ,
+    date: new Date(),
 });
 
 export const PHQProgress: FunctionComponent = observer(() => {
@@ -95,17 +103,34 @@ export const PHQProgress: FunctionComponent = observer(() => {
 
     const handleAddRecord = action(() => {
         state.open = true;
-        Object.assign(state, defaultPHQ);
+        state.date = new Date();
+        Object.assign(state.phq, defaultPHQ);
     });
 
+    const handleEditRecord = (data: IAssessmentDataPoint) =>
+        action(() => {
+            state.open = true;
+            state.date = data.date;
+            Object.assign(state.phq, data.pointValues);
+        });
+
     const onSave = action(() => {
-        const { phq } = state;
-        currentPatient?.addPHQ9Record(phq);
+        const { phq, date } = state;
+        currentPatient?.addAssessmentRecord({
+            assessmentType: 'PHQ-9',
+            date,
+            pointValues: phq,
+            comment: 'Submitted by CM',
+        });
         state.open = false;
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
         state.phq[qid] = value;
+    });
+
+    const onDateChange = action((date: Date) => {
+        state.date = date;
     });
 
     const selectedValues = phqQuestions.map((q) => state.phq[q.id]);
@@ -114,7 +139,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
     const phqData = (currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9')
         ?.data as IAssessmentDataPoint[])
         ?.slice()
-        .sort((a, b) => compareDesc(a.date, b.date));
+        .sort((a, b) => compareAsc(a.date, b.date));
 
     return (
         <ActionPanel
@@ -130,15 +155,15 @@ export const PHQProgress: FunctionComponent = observer(() => {
                                 <TableRow>
                                     <TableCell>Date</TableCell>
                                     <TableCell>Score</TableCell>
-                                    {phq9ItemValues.map((p, idx) => (
-                                        <TableCell key={p}>{`${idx + 1}. ${p}`}</TableCell>
+                                    {phq9ItemValues.map((p) => (
+                                        <TableCell key={p}>{p}</TableCell>
                                     ))}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {phqAssessment.data.map((d, idx) => {
                                     return (
-                                        <TableRow key={idx}>
+                                        <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
                                             <TableCell component="th" scope="row">
                                                 {format(d.date, 'MM/dd/yyyy')}
                                             </TableCell>
@@ -146,7 +171,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
                                             {phq9ItemValues.map((p) => (
                                                 <TableCell key={p}>{d.pointValues[p]}</TableCell>
                                             ))}
-                                        </TableRow>
+                                        </ClickableTableRow>
                                     );
                                 })}
                             </TableBody>
@@ -172,8 +197,10 @@ export const PHQProgress: FunctionComponent = observer(() => {
                         questions={phqQuestions}
                         options={phqOptions}
                         selectedValues={selectedValues}
+                        selectedDate={state.date}
                         instruction={phqInstruction}
                         onSelect={onQuestionSelect}
+                        onDateChange={onDateChange}
                     />
                 </DialogContent>
                 <DialogActions>

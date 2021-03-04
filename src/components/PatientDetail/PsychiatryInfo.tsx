@@ -19,7 +19,7 @@ const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (p
     return (
         <Grid container spacing={2} alignItems="stretch">
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}
@@ -28,7 +28,7 @@ const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (p
                 onChange={(text) => onValueChange('psychHistory', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}
@@ -37,7 +37,7 @@ const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (p
                 onChange={(text) => onValueChange('substanceUse', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}
@@ -46,7 +46,7 @@ const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (p
                 onChange={(text) => onValueChange('psychMedications', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}

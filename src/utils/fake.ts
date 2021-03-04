@@ -105,6 +105,7 @@ const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
     return [...Array(getRandomInteger(5, 10)).keys()].map(
         (_, idx) =>
             ({
+                assessmentType: assessmentType,
                 date: addDays(new Date(), -(getRandomInteger(0, 3) + idx * getRandomInteger(5, 8))),
                 pointValues: getFakeAssessmentDataPoint(assessmentType),
                 comment: lorem.generateSentences(1),

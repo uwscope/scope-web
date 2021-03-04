@@ -8,7 +8,10 @@ export interface IRegistryService {
     getPatientData(mrn: number): Promise<IPatient>;
     updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
     addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
-    addPatientPHQ9Record(mrn: number, phq9: AssessmentData): Promise<IAssessmentDataPoint>;
+    addPatientAssessmentRecord(mrn: number, assessmentData: IAssessmentDataPoint): Promise<IAssessmentDataPoint>;
+
+    // TODO:
+    // Get assessment questionnaires from server
 }
 
 class RegistryService implements IRegistryService {
@@ -66,21 +69,20 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async addPatientPHQ9Record(mrn: number, phq9: AssessmentData): Promise<IAssessmentDataPoint> {
+    public async addPatientAssessmentRecord(
+        mrn: number,
+        assessmentData: IAssessmentDataPoint
+    ): Promise<IAssessmentDataPoint> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<AssessmentData, AxiosResponse<IAssessmentDataPoint>>(
-                `/patient/${mrn}/phq9`,
-                phq9
+                `/patient/${mrn}/assessment`,
+                assessmentData
             );
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return {
-                date: new Date(),
-                pointValues: phq9,
-                comment: 'added my care manager',
-            } as IAssessmentDataPoint;
+            return assessmentData;
         }
     }
 }

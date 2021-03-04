@@ -41,6 +41,7 @@ export interface IAssessment {
 
 export type AssessmentData = KeyedMap<number | undefined>;
 export interface IAssessmentDataPoint {
+    readonly assessmentType: AssessmentType; // Redundant, but otherwise, this info needs to be carried some other way.
     readonly date: Date;
     readonly pointValues: AssessmentData;
     readonly comment: string;

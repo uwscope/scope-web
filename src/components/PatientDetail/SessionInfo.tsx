@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -31,6 +32,12 @@ import {
 } from 'src/services/enums';
 import { ISession } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
+
+const ClickableTableRow = styled(TableRow)({
+    '&:hover': {
+        cursor: 'pointer',
+    },
+});
 
 interface ISessionEditState {
     date: Date;
@@ -112,7 +119,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 onChange={(text) => onValueChange('treatmentChange', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={true}
                 multiline={true}
                 maxLine={4}
@@ -175,14 +182,14 @@ export const SessionInfo: FunctionComponent = observer(() => {
                     </TableHead>
                     <TableBody>
                         {currentPatient?.sessions.map((session) => (
-                            <TableRow key={session.sessionId} onClick={() => handleEditSession(session)}>
+                            <ClickableTableRow hover key={session.sessionId} onClick={() => handleEditSession(session)}>
                                 <TableCell component="th" scope="row">
                                     {session.sessionId}
                                 </TableCell>
                                 <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
                                 <TableCell>{session.sessionType}</TableCell>
                                 <TableCell>{session.billableMinutes}</TableCell>
-                            </TableRow>
+                            </ClickableTableRow>
                         ))}
                     </TableBody>
                 </Table>

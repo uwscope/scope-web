@@ -11,7 +11,7 @@ import {
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { AssessmentData, IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
+import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
@@ -22,7 +22,7 @@ export interface IPatientStore extends IPatient {
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
     addSession: (session: Partial<ISession>) => void;
-    addPHQ9Record: (phq9Data: AssessmentData) => void;
+    addAssessmentRecord: (assessment: IAssessmentDataPoint) => void;
 }
 
 export class PatientStore implements IPatientStore {
@@ -164,13 +164,13 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public addPHQ9Record(phq9Data: AssessmentData) {
+    public addAssessmentRecord(assessmentData: IAssessmentDataPoint) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.addPatientPHQ9Record(this.MRN, phq9Data);
+            const promise = registryService.addPatientAssessmentRecord(this.MRN, assessmentData);
             this.addAssessmentRecordQuery.fromPromise(promise).then((data) => {
                 action(() => {
-                    const phqAssessment = this.assessments.find((a) => a.assessmentType == 'PHQ-9');
+                    const phqAssessment = this.assessments.find((a) => a.assessmentType == data.assessmentType);
 
                     if (phqAssessment) {
                         phqAssessment.data.push(data);

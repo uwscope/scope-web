@@ -3,6 +3,7 @@ import {
     FormControl,
     FormControlProps,
     Grid,
+    GridSize,
     InputLabel,
     MenuItem,
     Select,
@@ -72,8 +73,9 @@ interface IGridFieldProps {
     label: string;
     value: string | number | Date | undefined;
     onChange?: (text: string | number | Date) => void;
-    fullWidth?: boolean;
     placeholder?: string;
+    xs?: GridSize;
+    sm?: GridSize;
 }
 
 export interface IGridTextFieldProps extends IGridFieldProps {
@@ -82,7 +84,7 @@ export interface IGridTextFieldProps extends IGridFieldProps {
 }
 
 export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
-    const { editable, label, value, multiline = false, maxLine = 1, fullWidth = false, onChange, placeholder } = props;
+    const { editable, label, value, multiline = false, maxLine = 1, onChange, placeholder, xs, sm } = props;
 
     const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
@@ -91,7 +93,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
     });
 
     return (
-        <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
+        <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
             <EditableTextField
                 $editable={editable}
                 multiline={multiline}
@@ -114,7 +116,7 @@ export interface IGridDropdownFieldProps extends IGridFieldProps {
 }
 
 export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (props) => {
-    const { editable, label, value, options, onChange, fullWidth = false } = props;
+    const { editable, label, value, options, onChange, xs, sm } = props;
 
     const handleChange = action((event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
         if (!!onChange) {
@@ -123,7 +125,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
     });
 
     return (
-        <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
+        <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
             <SelectForm $editable={editable}>
                 <InputLabel>{label}</InputLabel>
                 <SelectField
@@ -148,7 +150,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
 export interface IGridDateField extends IGridFieldProps {}
 
 export const GridDateField: FunctionComponent<IGridDateField> = (props) => {
-    const { editable, label, value, onChange, fullWidth = false } = props;
+    const { editable, label, value, onChange, xs, sm } = props;
 
     const handleChange = action((date: Date | null) => {
         if (!!onChange && !!date) {
@@ -158,7 +160,7 @@ export const GridDateField: FunctionComponent<IGridDateField> = (props) => {
 
     if (editable) {
         return (
-            <Grid item xs={12} sm={fullWidth ? 12 : 6} xl={4}>
+            <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DatePickerContainer
                         disableToolbar

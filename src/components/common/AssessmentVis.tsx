@@ -107,7 +107,6 @@ const onNearestX = throttle(
     action((point: Point, { index }: RVNearestXData<Point>) => {
         state.hoveredPoint = point;
         state.hoveredIndex = index;
-        console.log(point, index);
     }),
     500
 );
@@ -120,7 +119,6 @@ export const AssessmentVis = withTheme(
 
         const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
 
-        console.log('render');
         const toggleExpand = action(() => {
             state.expanded = !state.expanded;
 

@@ -28,7 +28,7 @@ export const AssessmentInfo: FunctionComponent = observer(() => {
                         <TableBody>
                             {currentPatient?.assessments.map((a) => {
                                 return (
-                                    <TableRow key={a.assessmentType}>
+                                    <TableRow hover key={a.assessmentType}>
                                         <TableCell component="th" scope="row">
                                             {a.assessmentType}
                                         </TableCell>

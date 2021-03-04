@@ -68,7 +68,7 @@ const MedicalInfoContent: FunctionComponent<IMedicalInfoContentProps> = (props) 
                 onChange={(text) => onValueChange('treatmentRegimen', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={4}
