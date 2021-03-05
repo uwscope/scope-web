@@ -23,8 +23,6 @@ import { useResize } from 'src/utils/hooks';
 import { clearTime } from 'src/utils/time';
 import styled, { ThemedStyledProps } from 'styled-components';
 
-const assessmentMax = 3;
-
 const Container = withTheme(
     styled.div({
         display: 'flex',
@@ -80,6 +78,7 @@ const getColoredSwitch = (color: string) =>
 
 export interface IAssessmentChartProps {
     data: Array<IAssessmentDataPoint>;
+    maxValue: number;
 }
 
 type Point = LineMarkSeriesPoint;
@@ -115,7 +114,7 @@ export const AssessmentVis = withTheme(
     observer((props: ThemedStyledProps<IAssessmentChartProps, any>) => {
         const ref = React.useRef(null);
         const { width } = useResize(ref);
-        const { data } = props;
+        const { data, maxValue } = props;
 
         const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
 
@@ -165,7 +164,7 @@ export const AssessmentVis = withTheme(
                 );
 
             const minXTicks = Math.max(width / 200, 3);
-            const yDomain = [0, state.expanded ? assessmentMax + 1 : assessmentMax * dataKeys.length + 1];
+            const yDomain = [0, state.expanded ? maxValue + 1 : maxValue * dataKeys.length + 1];
             const xDomain = [
                 addDays(clearTime(new Date(dataPoints[0].x)), -1).getTime(),
                 addDays(clearTime(new Date(dataPoints[dataPoints.length - 1].x)), 2).getTime(),
@@ -186,7 +185,7 @@ export const AssessmentVis = withTheme(
                             <XAxis title="Submitted date" on0={true} tickTotal={minXTicks} />
                             <YAxis
                                 title="Score"
-                                tickTotal={state.expanded ? assessmentMax + 1 : (assessmentMax * dataKeys.length) / 5}
+                                tickTotal={state.expanded ? maxValue + 1 : (maxValue * dataKeys.length) / 5}
                             />
                             {state.expanded ? (
                                 state.visibility
@@ -208,7 +207,7 @@ export const AssessmentVis = withTheme(
                             {!state.expanded && state.hoveredPoint && (
                                 <MarkSeries data={[state.hoveredPoint]} animation={false} />
                             )}
-                            {state.hoveredPoint && (
+                            {state.hoveredPoint && data[state.hoveredIndex as number] && (
                                 <Crosshair values={[state.hoveredPoint]}>
                                     <CrosshairContainer>
                                         <div>Date: {format(data[state.hoveredIndex as number].date, 'MM/dd/yyyy')}</div>
@@ -222,33 +221,35 @@ export const AssessmentVis = withTheme(
                             )}
                         </XYPlot>
                     </ChartContainer>
-                    <LegendContainer>
-                        <FormControlLabel
-                            control={<Switch color="primary" checked={state.expanded} onChange={toggleExpand} />}
-                            label="Expand"
-                        />
-                        {state.expanded && (
-                            <LegendArea>
-                                <LegendTitle>Legend</LegendTitle>
-                                {state.visibility.map(({ title, color, visible }) => {
-                                    const ColoredSwitch = getColoredSwitch(color);
-                                    return (
-                                        <FormControlLabel
-                                            key={title}
-                                            control={
-                                                <ColoredSwitch
-                                                    size="small"
-                                                    checked={visible}
-                                                    onChange={() => toggleVisibility(title)}
-                                                />
-                                            }
-                                            label={title}
-                                        />
-                                    );
-                                })}
-                            </LegendArea>
-                        )}
-                    </LegendContainer>
+                    {dataKeys.length > 1 && (
+                        <LegendContainer>
+                            <FormControlLabel
+                                control={<Switch color="primary" checked={state.expanded} onChange={toggleExpand} />}
+                                label="Expand"
+                            />
+                            {state.expanded && (
+                                <LegendArea>
+                                    <LegendTitle>Legend</LegendTitle>
+                                    {state.visibility.map(({ title, color, visible }) => {
+                                        const ColoredSwitch = getColoredSwitch(color);
+                                        return (
+                                            <FormControlLabel
+                                                key={title}
+                                                control={
+                                                    <ColoredSwitch
+                                                        size="small"
+                                                        checked={visible}
+                                                        onChange={() => toggleVisibility(title)}
+                                                    />
+                                                }
+                                                label={title}
+                                            />
+                                        );
+                                    })}
+                                </LegendArea>
+                            )}
+                        </LegendContainer>
+                    )}
                 </Container>
             );
         } else {

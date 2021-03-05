@@ -102,7 +102,7 @@ export const behavioralActivationChecklistValues = [
 ] as const;
 export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
 
-export const assessmentTypeValues = ['PHQ-9', 'GAD-7', 'Mood logging'] as const;
+export const assessmentTypeValues = ['PHQ-9', 'GAD-7', 'Mood Logging'] as const;
 export type AssessmentType = typeof assessmentTypeValues[number];
 
 export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;

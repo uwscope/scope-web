@@ -21,6 +21,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField } from 'src/components/common/GridField';
+import { sortAssessment } from 'src/services/assessments';
 import {
     AssessmentFrequency,
     assessmentFrequencyValues,
@@ -143,24 +144,27 @@ export const AssessmentInfo: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {currentPatient?.assessments.map((a) => {
-                                    return (
-                                        <ClickableTableRow
-                                            hover
-                                            key={a.assessmentType}
-                                            onClick={() => handleEditAssessment(a)}>
-                                            <TableCell component="th" scope="row">
-                                                {a.assessmentType}
-                                            </TableCell>
-                                            <TableCell>{a.frequency}</TableCell>
-                                            <TableCell>
-                                                {a.data.length > 0
-                                                    ? format(last(a.data)?.date as Date, 'MM/dd/yyyy')
-                                                    : 'NA'}
-                                            </TableCell>
-                                        </ClickableTableRow>
-                                    );
-                                })}
+                                {currentPatient?.assessments
+                                    .slice()
+                                    .sort(sortAssessment)
+                                    .map((a) => {
+                                        return (
+                                            <ClickableTableRow
+                                                hover
+                                                key={a.assessmentType}
+                                                onClick={() => handleEditAssessment(a)}>
+                                                <TableCell component="th" scope="row">
+                                                    {a.assessmentType}
+                                                </TableCell>
+                                                <TableCell>{a.frequency}</TableCell>
+                                                <TableCell>
+                                                    {a.data.length > 0
+                                                        ? format(last(a.data)?.date as Date, 'MM/dd/yyyy')
+                                                        : 'NA'}
+                                                </TableCell>
+                                            </ClickableTableRow>
+                                        );
+                                    })}
                             </TableBody>
                         </Table>
                     </TableContainer>

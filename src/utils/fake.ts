@@ -98,7 +98,7 @@ const getFakeAssessmentDataPoint = (assessmentType: AssessmentType) => {
         gad7ItemValues.forEach((p) => (points[p] = getRandomInteger(0, 4)));
         return points;
     } else {
-        return { Mood: getRandomInteger(0, 5) };
+        return { Mood: getRandomInteger(1, 6) };
     }
 };
 
@@ -141,7 +141,7 @@ const getFakeActivities = () => {
             ({
                 activityId: String(idx),
                 activityName: lorem.generateWords(getRandomInteger(2, 5)),
-                moodData: getAssessmentDataPoints('Mood logging'),
+                moodData: getAssessmentDataPoints('Mood Logging'),
             } as IActivity)
     );
 };
