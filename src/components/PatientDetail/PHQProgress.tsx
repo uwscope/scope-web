@@ -86,8 +86,9 @@ const defaultPHQ: AssessmentData = {
     Suicide: undefined,
 };
 
-const state = observable<{ open: boolean; phq: AssessmentData; date: Date }>({
+const state = observable<{ open: boolean; dataId: string | undefined; phq: AssessmentData; date: Date }>({
     open: false,
+    dataId: undefined,
     phq: defaultPHQ,
     date: new Date(),
 });
@@ -104,6 +105,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
     const handleAddRecord = action(() => {
         state.open = true;
         state.date = new Date();
+        state.dataId = undefined;
         Object.assign(state.phq, defaultPHQ);
     });
 
@@ -111,12 +113,14 @@ export const PHQProgress: FunctionComponent = observer(() => {
         action(() => {
             state.open = true;
             state.date = data.date;
+            state.dataId = data.assessmentDataId;
             Object.assign(state.phq, data.pointValues);
         });
 
     const onSave = action(() => {
-        const { phq, date } = state;
-        currentPatient?.addAssessmentRecord({
+        const { phq, date, dataId } = state;
+        currentPatient?.updateAssessmentRecord({
+            assessmentDataId: dataId,
             assessmentType: 'PHQ-9',
             date,
             pointValues: phq,
@@ -136,10 +140,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
     const selectedValues = phqQuestions.map((q) => state.phq[q.id]);
     const saveDisabled = selectedValues.findIndex((v) => v == undefined) >= 0;
 
-    const phqData = (currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9')
-        ?.data as IAssessmentDataPoint[])
-        ?.slice()
-        .sort((a, b) => compareAsc(a.date, b.date));
+    const phqData = (phqAssessment?.data as IAssessmentDataPoint[])?.slice().sort((a, b) => compareAsc(a.date, b.date));
 
     return (
         <ActionPanel
@@ -148,7 +149,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!!phqAssessment && (
+                {!!phqData && (
                     <TableContainer>
                         <Table>
                             <TableHead>
@@ -161,7 +162,7 @@ export const PHQProgress: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {phqAssessment.data.map((d, idx) => {
+                                {phqData.map((d, idx) => {
                                     return (
                                         <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
                                             <TableCell component="th" scope="row">

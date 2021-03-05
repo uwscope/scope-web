@@ -151,6 +151,8 @@ export const AssessmentVis = withTheme(
         };
 
         if (!!data && data.length > 0) {
+            // TODO: Limit to 14-15 data points per view and allow horizontal scrolling
+
             const dataPoints = data
                 .slice()
                 .sort((a, b) => compareAsc(a.date, b.date))

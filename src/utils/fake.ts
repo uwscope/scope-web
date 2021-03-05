@@ -80,6 +80,7 @@ const getFakeAssessments = () => {
     return sample(assessmentTypeValues, getRandomInteger(1, 3)).map(
         (a) =>
             ({
+                assessmentId: a,
                 assessmentType: a,
                 frequency: getRandomItem(assessmentFrequencyValues),
                 data: getAssessmentDataPoints(a),
@@ -105,6 +106,7 @@ const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
     return [...Array(getRandomInteger(5, 10)).keys()].map(
         (_, idx) =>
             ({
+                assessmentDataId: `${assessmentType}-${idx}`,
                 assessmentType: assessmentType,
                 date: addDays(new Date(), -(getRandomInteger(0, 3) + idx * getRandomInteger(5, 8))),
                 pointValues: getFakeAssessmentDataPoint(assessmentType),
@@ -119,7 +121,7 @@ const getFakeSessions = () => {
     return [...Array(sessionCount).keys()].map(
         (_, idx) =>
             ({
-                sessionId: idx == 0 ? 'Initial assessment' : idx,
+                sessionId: idx == 0 ? 'Initial assessment' : `session-${idx}`,
                 date: addDays(new Date(), -(getRandomInteger(-2, 2) + (sessionCount - idx) * getRandomInteger(13, 18))),
                 sessionType: getRandomItem(sessionTypeValues),
                 billableMinutes: getRandomItem([30, 45, 60, 80]),

@@ -1,5 +1,6 @@
 import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
 import { action } from 'mobx';
+import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BAInformation from 'src/components/PatientDetail/BAInformation';
@@ -57,7 +58,7 @@ const SectionTitle = styled(Typography)({
 
 type IContent = IContentItem & { content?: React.ReactNode };
 
-export const PatientDetailPage: FunctionComponent = () => {
+export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { currentPatient } = rootStore;
 
@@ -68,7 +69,9 @@ export const PatientDetailPage: FunctionComponent = () => {
         []
     );
 
-    const contents = [
+    const contentMenu: IContent[] = [];
+
+    const patientInfoMenu = [
         {
             hash: 'patient',
             label: 'Patient',
@@ -95,24 +98,33 @@ export const PatientDetailPage: FunctionComponent = () => {
             hash: 'assessments',
             label: 'Assessments',
         },
-        {
-            hash: 'progress',
-            label: 'Progress',
-            top: true,
-            content: <ProgressInformation />,
-        },
-        {
-            hash: 'phq9',
-            label: 'PHQ-9',
-        },
-        {
-            hash: 'gad7',
-            label: 'GAD-7',
-        },
-        {
-            hash: 'mood',
-            label: 'Mood Trends',
-        },
+    ] as IContent[];
+    contentMenu.push.apply(contentMenu, patientInfoMenu);
+
+    if (currentPatient?.assessments && currentPatient?.assessments.length > 0) {
+        const progressMenu = [
+            {
+                hash: 'progress',
+                label: 'Progress',
+                top: true,
+                content: <ProgressInformation />,
+            },
+        ] as IContent[];
+
+        progressMenu.push.apply(
+            progressMenu,
+            currentPatient?.assessments.map(
+                (a) =>
+                    ({
+                        hash: a.assessmentType.replace('-', '').toLocaleLowerCase(),
+                        label: a.assessmentType,
+                    } as IContent)
+            )
+        );
+        contentMenu.push.apply(contentMenu, progressMenu);
+    }
+
+    const baMenu = [
         {
             hash: 'behavioral',
             label: 'Behavioral Activation',
@@ -128,6 +140,7 @@ export const PatientDetailPage: FunctionComponent = () => {
             label: 'Activities',
         },
     ] as IContent[];
+    contentMenu.push.apply(contentMenu, baMenu);
 
     return (
         <DetailPageContainer>
@@ -137,10 +150,10 @@ export const PatientDetailPage: FunctionComponent = () => {
                     <Typography variant="body1">{`MRN: ${currentPatient?.MRN}`}</Typography>
                 </PatientCard>
                 <Divider variant="middle" />
-                <ContentsMenu contents={contents} contentId="#scroll-content" />
+                <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
             </LeftPaneContainer>
             <ContentContainer id="scroll-content">
-                {contents
+                {contentMenu
                     .filter((c) => c.top)
                     .map((c) => (
                         <Section id={c.hash} key={c.hash}>
@@ -151,6 +164,6 @@ export const PatientDetailPage: FunctionComponent = () => {
             </ContentContainer>
         </DetailPageContainer>
     );
-};
+});
 
 export default PatientDetailPage;

@@ -40,6 +40,7 @@ const ClickableTableRow = styled(TableRow)({
 });
 
 interface ISessionEditState {
+    sessionId: string | undefined;
     date: Date;
     sessionType: SessionType;
     billableMinutes: number;
@@ -50,6 +51,7 @@ interface ISessionEditState {
 }
 
 const defaultSession: ISessionEditState = {
+    sessionId: undefined,
     date: new Date(),
     sessionType: 'In person at clinic',
     billableMinutes: 0,
@@ -150,6 +152,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         Object.assign(state, defaultSession);
         state.open = true;
         state.isNew = true;
+        state.sessionId = undefined;
     });
 
     const handleEditSession = action((session: ISession) => {
@@ -160,7 +163,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const onSave = action(() => {
         const { open, ...sessionData } = { ...state };
-        currentPatient?.addSession(sessionData);
+        currentPatient?.updateSession(sessionData);
         state.open = false;
     });
 
@@ -181,10 +184,10 @@ export const SessionInfo: FunctionComponent = observer(() => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {currentPatient?.sessions.map((session) => (
+                        {currentPatient?.sessions.map((session, idx) => (
                             <ClickableTableRow hover key={session.sessionId} onClick={() => handleEditSession(session)}>
                                 <TableCell component="th" scope="row">
-                                    {session.sessionId}
+                                    {idx == 0 ? 'Initial assessment' : `${idx}`}
                                 </TableCell>
                                 <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
                                 <TableCell>{session.sessionType}</TableCell>

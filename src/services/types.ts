@@ -23,7 +23,7 @@ export interface IUser {
 
 export type BAChecklistMap = { [item in BehavioralActivationChecklistItem]: boolean };
 export interface ISession {
-    readonly sessionId: number;
+    readonly sessionId: string;
     readonly date: Date;
     readonly sessionType: SessionType;
     readonly billableMinutes: number;
@@ -34,6 +34,7 @@ export interface ISession {
 }
 
 export interface IAssessment {
+    readonly assessmentId: string;
     readonly assessmentType: AssessmentType;
     readonly frequency: AssessmentFrequency;
     readonly data: IAssessmentDataPoint[];
@@ -41,6 +42,7 @@ export interface IAssessment {
 
 export type AssessmentData = KeyedMap<number | undefined>;
 export interface IAssessmentDataPoint {
+    readonly assessmentDataId: string;
     readonly assessmentType: AssessmentType; // Redundant, but otherwise, this info needs to be carried some other way.
     readonly date: Date;
     readonly pointValues: AssessmentData;
