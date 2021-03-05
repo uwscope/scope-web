@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -32,7 +33,14 @@ import {
 import { ISession } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 
+const ClickableTableRow = styled(TableRow)({
+    '&:hover': {
+        cursor: 'pointer',
+    },
+});
+
 interface ISessionEditState {
+    sessionId: string | undefined;
     date: Date;
     sessionType: SessionType;
     billableMinutes: number;
@@ -43,6 +51,7 @@ interface ISessionEditState {
 }
 
 const defaultSession: ISessionEditState = {
+    sessionId: undefined,
     date: new Date(),
     sessionType: 'In person at clinic',
     billableMinutes: 0,
@@ -112,7 +121,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 onChange={(text) => onValueChange('treatmentChange', text)}
             />
             <GridTextField
-                fullWidth={true}
+                sm={12}
                 editable={true}
                 multiline={true}
                 maxLine={4}
@@ -143,6 +152,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         Object.assign(state, defaultSession);
         state.open = true;
         state.isNew = true;
+        state.sessionId = undefined;
     });
 
     const handleEditSession = action((session: ISession) => {
@@ -153,7 +163,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const onSave = action(() => {
         const { open, ...sessionData } = { ...state };
-        currentPatient?.addSession(sessionData);
+        currentPatient?.updateSession(sessionData);
         state.open = false;
     });
 
@@ -174,15 +184,15 @@ export const SessionInfo: FunctionComponent = observer(() => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {currentPatient?.sessions.map((session) => (
-                            <TableRow key={session.sessionId} onClick={() => handleEditSession(session)}>
+                        {currentPatient?.sessions.map((session, idx) => (
+                            <ClickableTableRow hover key={session.sessionId} onClick={() => handleEditSession(session)}>
                                 <TableCell component="th" scope="row">
-                                    {session.sessionId}
+                                    {idx == 0 ? 'Initial assessment' : `${idx}`}
                                 </TableCell>
                                 <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
                                 <TableCell>{session.sessionType}</TableCell>
                                 <TableCell>{session.billableMinutes}</TableCell>
-                            </TableRow>
+                            </ClickableTableRow>
                         ))}
                     </TableBody>
                 </Table>

@@ -80,6 +80,7 @@ const getFakeAssessments = () => {
     return sample(assessmentTypeValues, getRandomInteger(1, 3)).map(
         (a) =>
             ({
+                assessmentId: a,
                 assessmentType: a,
                 frequency: getRandomItem(assessmentFrequencyValues),
                 data: getAssessmentDataPoints(a),
@@ -97,14 +98,16 @@ const getFakeAssessmentDataPoint = (assessmentType: AssessmentType) => {
         gad7ItemValues.forEach((p) => (points[p] = getRandomInteger(0, 4)));
         return points;
     } else {
-        return { Mood: getRandomInteger(0, 5) };
+        return { Mood: getRandomInteger(1, 6) };
     }
 };
 
 const getAssessmentDataPoints = (assessmentType: AssessmentType) => {
-    return [...Array(getRandomInteger(0, 10)).keys()].map(
+    return [...Array(getRandomInteger(5, 10)).keys()].map(
         (_, idx) =>
             ({
+                assessmentDataId: `${assessmentType}-${idx}`,
+                assessmentType: assessmentType,
                 date: addDays(new Date(), -(getRandomInteger(0, 3) + idx * getRandomInteger(5, 8))),
                 pointValues: getFakeAssessmentDataPoint(assessmentType),
                 comment: lorem.generateSentences(1),
@@ -118,7 +121,7 @@ const getFakeSessions = () => {
     return [...Array(sessionCount).keys()].map(
         (_, idx) =>
             ({
-                sessionId: idx == 0 ? 'Initial assessment' : idx,
+                sessionId: idx == 0 ? 'Initial assessment' : `session-${idx}`,
                 date: addDays(new Date(), -(getRandomInteger(-2, 2) + (sessionCount - idx) * getRandomInteger(13, 18))),
                 sessionType: getRandomItem(sessionTypeValues),
                 billableMinutes: getRandomItem([30, 45, 60, 80]),
@@ -138,7 +141,7 @@ const getFakeActivities = () => {
             ({
                 activityId: String(idx),
                 activityName: lorem.generateWords(getRandomInteger(2, 5)),
-                moodData: getAssessmentDataPoints('Mood logging'),
+                moodData: getAssessmentDataPoints('Mood Logging'),
             } as IActivity)
     );
 };

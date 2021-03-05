@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { IAssessmentDataPoint, IPatient, ISession, PHQ9Map } from 'src/services/types';
+import { AssessmentData, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -7,8 +7,15 @@ export interface IRegistryService {
     getPatients(): Promise<IPatient[]>;
     getPatientData(mrn: number): Promise<IPatient>;
     updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
-    addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
-    addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint>;
+    updatePatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
+    updatePatientAssessment(mrn: number, assessment: Partial<IAssessment>): Promise<IAssessment>;
+    updatePatientAssessmentRecord(
+        mrn: number,
+        assessmentData: Partial<IAssessmentDataPoint>
+    ): Promise<IAssessmentDataPoint>;
+
+    // TODO:
+    // Get assessment questionnaires from server
 }
 
 class RegistryService implements IRegistryService {
@@ -55,7 +62,7 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async addPatientSession(mrn: number, session: Partial<ISession>): Promise<ISession> {
+    public async updatePatientSession(mrn: number, session: Partial<ISession>): Promise<ISession> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<ISession>(`/patient/${mrn}/session`, session);
@@ -66,21 +73,31 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async addPatientPHQ9Record(mrn: number, phq9: PHQ9Map): Promise<IAssessmentDataPoint> {
+    public async updatePatientAssessment(mrn: number, assessment: Partial<IAssessment>): Promise<IAssessment> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.put<PHQ9Map, AxiosResponse<IAssessmentDataPoint>>(
-                `/patient/${mrn}/phq9`,
-                phq9
+            const response = await this.axiosInstance.put<IAssessment>(`/patient/${mrn}/assessment`, assessment);
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return assessment as IAssessment;
+        }
+    }
+
+    public async updatePatientAssessmentRecord(
+        mrn: number,
+        assessmentData: IAssessmentDataPoint
+    ): Promise<IAssessmentDataPoint> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<AssessmentData, AxiosResponse<IAssessmentDataPoint>>(
+                `/patient/${mrn}/assessment`,
+                assessmentData
             );
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return {
-                date: new Date(),
-                pointValues: phq9,
-                comment: 'added my care manager',
-            } as IAssessmentDataPoint;
+            return assessmentData;
         }
     }
 }

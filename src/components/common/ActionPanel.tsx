@@ -53,7 +53,7 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
                                   size="small"
                                   color="primary"
                                   startIcon={a.icon}
-                                  disabled={loading}
+                                  disabled={loading || !a.onClick}
                                   onClick={a.onClick}
                                   key={a.text}>
                                   {a.text}

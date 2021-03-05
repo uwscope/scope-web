@@ -25,3 +25,7 @@ export const last = <T>(array: T[]) => {
         return undefined;
     }
 };
+
+export const max = (array: number[]) => {
+    return array.reduce((prev, cur) => Math.max(prev, cur), 0);
+};

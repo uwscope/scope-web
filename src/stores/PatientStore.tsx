@@ -11,18 +11,18 @@ import {
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession, PHQ9Map } from 'src/services/types';
+import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
     readonly age: number;
     readonly state: PromiseState;
-    readonly addSessionState: PromiseState;
 
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
-    addSession: (session: Partial<ISession>) => void;
-    addPHQ9Record: (phq9Data: PHQ9Map) => void;
+    updateSession: (session: Partial<ISession>) => void;
+    updateAssessment: (assessment: Partial<IAssessment>) => void;
+    updateAssessmentRecord: (assessmentData: Partial<IAssessmentDataPoint>) => void;
 }
 
 export class PatientStore implements IPatientStore {
@@ -61,8 +61,9 @@ export class PatientStore implements IPatientStore {
     public activities: IActivity[];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
-    private readonly addSessionQuery: PromiseQuery<ISession>;
-    private readonly addAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
+    private readonly updateSessionQuery: PromiseQuery<ISession>;
+    private readonly updateAssessmentQuery: PromiseQuery<IAssessment>;
+    private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
 
     constructor(patient: IPatient) {
         // Can't refactor due to initialization error
@@ -101,8 +102,9 @@ export class PatientStore implements IPatientStore {
         this.activities = patient.activities;
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
-        this.addSessionQuery = new PromiseQuery(patient.sessions[0], 'addSession');
-        this.addAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'addAssessmentRecord');
+        this.updateSessionQuery = new PromiseQuery(patient.sessions[0], 'updateSession');
+        this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
+        this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
 
         makeAutoObservable(this);
     }
@@ -113,10 +115,6 @@ export class PatientStore implements IPatientStore {
 
     @computed get state() {
         return this.loadPatientDataQuery.state;
-    }
-
-    @computed get addSessionState() {
-        return this.addSessionQuery.state;
     }
 
     @action.bound
@@ -145,16 +143,27 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async addSession(session: Partial<ISession>) {
+    public async updateSession(session: Partial<ISession>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.addPatientSession(this.MRN, session);
-            this.addSessionQuery.fromPromise(promise).then((session) => {
+            const promise = registryService.updatePatientSession(this.MRN, session);
+            this.updateSessionQuery.fromPromise(promise).then((session) => {
                 action(() => {
+                    if (!!session.sessionId) {
+                        const existing = this.sessions.find((s) => s.sessionId == session.sessionId);
+
+                        if (!!existing) {
+                            Object.assign(existing, session);
+                            return;
+                        }
+                    }
+
+                    // TODO: server should return appropriate id
                     const addedSession = {
                         ...session,
-                        sessionId: this.sessions.length,
+                        sessionId: session.sessionId || `session-${this.sessions.length}`,
                     };
+
                     this.sessions.push(addedSession);
                 })();
             });
@@ -164,16 +173,62 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public addPHQ9Record(phq9Data: PHQ9Map) {
+    public async updateAssessment(assessment: Partial<IAssessment>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.addPatientPHQ9Record(this.MRN, phq9Data);
-            this.addAssessmentRecordQuery.fromPromise(promise).then((data) => {
+            const promise = registryService.updatePatientAssessment(this.MRN, assessment);
+            this.updateAssessmentQuery.fromPromise(promise).then((assessment) => {
                 action(() => {
-                    const phqAssessment = this.assessments.find((a) => a.assessmentType == 'PHQ-9');
+                    if (!!assessment.assessmentId) {
+                        const existing = this.assessments.find((a) => a.assessmentId == assessment.assessmentId);
 
-                    if (phqAssessment) {
-                        phqAssessment.data.push(data);
+                        if (!!existing) {
+                            Object.assign(existing, assessment);
+                            return;
+                        }
+                    }
+
+                    // TODO: server should return appropriate id
+                    const addedAssessment = {
+                        ...assessment,
+                        assessmentId: assessment.assessmentId || assessment.assessmentType,
+                    };
+
+                    this.assessments.push(addedAssessment);
+                })();
+            });
+        };
+
+        this.runAfterLoad(effect);
+    }
+
+    @action.bound
+    public updateAssessmentRecord(assessmentData: Partial<IAssessmentDataPoint>) {
+        const effect = () => {
+            const { registryService } = useServices();
+            const promise = registryService.updatePatientAssessmentRecord(this.MRN, assessmentData);
+            this.updateAssessmentRecordQuery.fromPromise(promise).then((data) => {
+                action(() => {
+                    const assessment = this.assessments.find((a) => a.assessmentType == data.assessmentType);
+
+                    if (!!assessment) {
+                        if (!!data.assessmentDataId) {
+                            const existing = assessment.data.find((d) => d.assessmentDataId == data.assessmentDataId);
+
+                            if (!!existing) {
+                                Object.assign(existing, data);
+                                return;
+                            }
+                        }
+
+                        // TODO: server should return appropriate id
+                        const addedAssessmentData = {
+                            ...data,
+                            assessmentDataId:
+                                data.assessmentDataId || `${data.assessmentType}-${assessment?.data.length}`,
+                        };
+
+                        assessment.data.push(addedAssessmentData);
                     }
                 })();
             });
