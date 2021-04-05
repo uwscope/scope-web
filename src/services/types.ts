@@ -93,3 +93,7 @@ export interface IPatient extends IMedicalInfo, ITreatmentInfo, IPsychiatryInfo 
     // Activities
     readonly activities: IActivity[];
 }
+
+export interface IPatientList {
+    readonly patients: IPatient[];
+}

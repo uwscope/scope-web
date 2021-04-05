@@ -35,8 +35,8 @@ export const treatmentStatusValues = [
     'Discharged',
     'Followed by Outside MHP ONLY',
     'Followed by Psych ONLY',
-    'Relapse Prevention (already included)',
-    'Inactive (already included)',
+    'Relapse Prevention',
+    'Inactive',
     'Continued',
 ] as const;
 export type TreatmentStatus = typeof treatmentStatusValues[number];

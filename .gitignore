@@ -9,3 +9,6 @@
 
 # Build files
 /build/
+
+# Python cache
+*/__pycache__/

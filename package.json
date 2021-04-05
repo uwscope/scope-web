@@ -53,6 +53,7 @@
     },
     "scripts": {
         "serve": "node scripts/serve.js",
-        "start": "npm run serve"
+        "start": "npm run serve",
+        "server": "cd server && flask run"
     }
 }

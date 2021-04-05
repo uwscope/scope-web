@@ -1,6 +1,14 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { AssessmentData, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
+import {
+    AssessmentData,
+    IAssessment,
+    IAssessmentDataPoint,
+    IPatient,
+    IPatientList,
+    ISession,
+} from 'src/services/types';
 import { getRandomFakePatients } from 'src/utils/fake';
+import { handleDates } from 'src/utils/time';
 
 // TODO: https://github.com/axios/axios#interceptors
 export interface IRegistryService {
@@ -16,6 +24,8 @@ export interface IRegistryService {
 
     // TODO:
     // Get assessment questionnaires from server
+    // Add patient
+    // Separate add from update?
 }
 
 class RegistryService implements IRegistryService {
@@ -27,13 +37,18 @@ class RegistryService implements IRegistryService {
             timeout: 1000,
             headers: { 'X-Custom-Header': 'foobar' },
         });
+
+        this.axiosInstance.interceptors.response.use((response) => {
+            handleDates(response.data);
+            return response;
+        });
     }
 
     public async getPatients(): Promise<IPatient[]> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.get<IPatient[]>('/patients');
-            return response.data;
+            const response = await this.axiosInstance.get<IPatientList>('/patients');
+            return response.data && response.data.patients;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return getRandomFakePatients();

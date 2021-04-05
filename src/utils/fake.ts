@@ -146,8 +146,6 @@ const getFakeActivities = () => {
     );
 };
 
-// Below are temporary TEST methods for generating fake data
-
 const firstNames = [
     'Paisley',
     'Vince',

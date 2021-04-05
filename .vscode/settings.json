@@ -29,5 +29,6 @@
         "editor.formatOnSave": true
     },
     "javascript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.quoteStyle": "single"
+    "javascript.preferences.quoteStyle": "single",
+    "python.formatting.provider": "black"
 }

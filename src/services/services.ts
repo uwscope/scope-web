@@ -1,9 +1,8 @@
 import { getAuthServiceInstance, IAuthService } from 'src/services/authService';
 import { getRegistryServiceInstance, IRegistryService } from 'src/services/registryService';
 
-// TODO: Dummy base url. Read from config
-const registryService = getRegistryServiceInstance('http://www.uw.edu');
-const authService = getAuthServiceInstance('http://www.uw.edu');
+const registryService = getRegistryServiceInstance(__API__);
+const authService = getAuthServiceInstance(__API__);
 
 export interface IRootService {
     registryService: IRegistryService;
