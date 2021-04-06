@@ -1,6 +1,5 @@
 import {
     AssessmentFrequency,
-    AssessmentType,
     BehavioralActivationChecklistItem,
     ClinicCode,
     DiscussionFlag,
@@ -35,7 +34,7 @@ export interface ISession {
 
 export interface IAssessment {
     readonly assessmentId: string;
-    readonly assessmentType: AssessmentType;
+    readonly assessmentType: string;
     readonly frequency: AssessmentFrequency;
     readonly data: IAssessmentDataPoint[];
 }
@@ -43,7 +42,7 @@ export interface IAssessment {
 export type AssessmentData = KeyedMap<number | undefined>;
 export interface IAssessmentDataPoint {
     readonly assessmentDataId: string;
-    readonly assessmentType: AssessmentType; // Redundant, but otherwise, this info needs to be carried some other way.
+    readonly assessmentType: string; // Redundant, but otherwise, this info needs to be carried some other way.
     readonly date: Date;
     readonly pointValues: AssessmentData;
     readonly comment: string;
@@ -96,4 +95,15 @@ export interface IPatient extends IMedicalInfo, ITreatmentInfo, IPsychiatryInfo 
 
 export interface IPatientList {
     readonly patients: IPatient[];
+}
+
+export interface IAppConfig {
+    assessments: IAssessmentContent[];
+}
+
+export interface IAssessmentContent {
+    readonly name: string;
+    readonly instruction: string;
+    readonly questions: { question: string; id: string }[];
+    readonly options: { text: string; value: number }[];
 }

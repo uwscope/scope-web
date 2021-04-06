@@ -5,7 +5,6 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    styled,
     Table,
     TableBody,
     TableCell,
@@ -21,28 +20,18 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField } from 'src/components/common/GridField';
-import { sortAssessment } from 'src/services/assessments';
-import {
-    AssessmentFrequency,
-    assessmentFrequencyValues,
-    AssessmentType,
-    assessmentTypeValues,
-} from 'src/services/enums';
+import { ClickableTableRow } from 'src/components/common/Table';
+import { AssessmentFrequency, assessmentFrequencyValues } from 'src/services/enums';
 import { IAssessment } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { last } from 'src/utils/array';
-
-const ClickableTableRow = styled(TableRow)({
-    '&:hover': {
-        cursor: 'pointer',
-    },
-});
+import { sortAssessment } from 'src/utils/assessment';
 
 interface IAssessmentEditState {
     assessmentId: string | undefined;
-    assessmentType: AssessmentType;
+    assessmentType: string;
     frequency: AssessmentFrequency;
-    availableAssessments: AssessmentType[];
+    availableAssessments: string[];
 }
 
 const state = observable<{ open: boolean; isNew: boolean } & IAssessmentEditState>({
@@ -84,11 +73,15 @@ const AssessmentEdit: FunctionComponent = observer(() => {
 });
 
 export const AssessmentInfo: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const {
+        currentPatient,
+        appConfig: { assessments },
+    } = useStores();
 
-    const availableAssessments = assessmentTypeValues.filter(
-        (t) => !currentPatient?.assessments?.map((a) => a.assessmentType).includes(t)
-    );
+    const validAssessmentNames = assessments.map((a) => a.name);
+    const patientAssessmentNames = currentPatient?.assessments?.map((a) => a.assessmentType) || [];
+
+    const availableAssessments = validAssessmentNames.filter((t) => !patientAssessmentNames.includes(t));
 
     const handleClose = action(() => {
         state.open = false;
@@ -108,7 +101,7 @@ export const AssessmentInfo: FunctionComponent = observer(() => {
         state.assessmentId = assessment.assessmentId;
         state.assessmentType = assessment.assessmentType;
         state.frequency = assessment.frequency;
-        state.availableAssessments = assessmentTypeValues.slice();
+        state.availableAssessments = [assessment.assessmentType];
         state.isNew = false;
     });
 

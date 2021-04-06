@@ -1,4 +1,5 @@
 phq9Assessment = {
+    "name": "PHQ-9",
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
         {"question": "Little interest or pleasure in doing things", "id": "Interest"},
@@ -47,6 +48,7 @@ phq9Assessment = {
 }
 
 gad7Assessment = {
+    "name": "GAD-7",
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
         {"question": "Feeling nervous, anxious or on edge", "id": "Anxious"},
@@ -90,6 +92,7 @@ gad7Assessment = {
 }
 
 moodAssessment = {
+    "name": "Mood Logging",
     "questions": [{"question": "Please rate your mood", "id": "Mood"}],
     "options": [
         {
@@ -114,3 +117,7 @@ moodAssessment = {
         },
     ],
 }
+
+
+def get_supported_assessments():
+    return [phq9Assessment, gad7Assessment, moodAssessment]

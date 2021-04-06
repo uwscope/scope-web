@@ -7,7 +7,6 @@ import {
     IPatientList,
     ISession,
 } from 'src/services/types';
-import { getRandomFakePatients } from 'src/utils/fake';
 import { handleDates } from 'src/utils/time';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -45,25 +44,13 @@ class RegistryService implements IRegistryService {
     }
 
     public async getPatients(): Promise<IPatient[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IPatientList>('/patients');
-            return response.data && response.data.patients;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return getRandomFakePatients();
-        }
+        const response = await this.axiosInstance.get<IPatientList>('/patients');
+        return response.data && response.data.patients;
     }
 
     public async getPatientData(mrn: number): Promise<IPatient> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IPatient>(`/patient/${mrn}`);
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return getRandomFakePatients()[0];
-        }
+        const response = await this.axiosInstance.get<IPatient>(`/patient/${mrn}`);
+        return response.data;
     }
 
     public async updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient> {

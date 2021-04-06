@@ -1,7 +1,8 @@
 import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IUser } from 'src/services/types';
+import { IAppConfig, IUser } from 'src/services/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 import { IPatientStore } from 'src/stores/PatientStore';
@@ -15,6 +16,7 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
+    appConfig: IAppConfig;
 
     // UI states
     appState: PromiseState;
@@ -43,6 +45,7 @@ export class RootStore implements IRootStore {
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
+    private readonly configQuery: PromiseQuery<IAppConfig>;
 
     constructor() {
         this.userStore = new UserStore();
@@ -50,6 +53,7 @@ export class RootStore implements IRootStore {
         this.patientsStore = new PatientsStore();
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
+        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
 
         makeAutoObservable(this);
     }
@@ -71,9 +75,15 @@ export class RootStore implements IRootStore {
         return this.loginQuery.state;
     }
 
+    @computed
+    public get appConfig() {
+        return this.configQuery.value || defaultAppConfig;
+    }
+
     @action.bound
     public async load() {
         await this.login();
+        await this.loadAppConfig();
         await this.patientsStore.getPatients();
     }
 
@@ -95,6 +105,13 @@ export class RootStore implements IRootStore {
 
         this.userStore.updateUser('');
         this.authStore.setAuthToken('');
+    }
+
+    @action.bound
+    public async loadAppConfig() {
+        const { appService } = useServices();
+        const promise = appService.getAppConfig();
+        await this.configQuery.fromPromise(promise);
     }
 
     @action.bound

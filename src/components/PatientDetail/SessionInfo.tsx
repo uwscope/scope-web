@@ -5,7 +5,6 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    styled,
     Table,
     TableBody,
     TableCell,
@@ -21,6 +20,7 @@ import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import GridChecklist from 'src/components/common/GridChecklist';
 import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
+import { ClickableTableRow } from 'src/components/common/Table';
 import {
     BehavioralActivationChecklistItem,
     SessionType,
@@ -32,12 +32,6 @@ import {
 } from 'src/services/enums';
 import { ISession } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
-
-const ClickableTableRow = styled(TableRow)({
-    '&:hover': {
-        cursor: 'pointer',
-    },
-});
 
 interface ISessionEditState {
     sessionId: string | undefined;
