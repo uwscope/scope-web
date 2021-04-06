@@ -28,31 +28,16 @@ export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const treatmentStatusValues = [
-    'Active',
-    'Active Distressed',
-    'Deceased',
-    'Discharged',
-    'Followed by Outside MHP ONLY',
-    'Followed by Psych ONLY',
-    'Relapse Prevention',
-    'Inactive',
-    'Continued',
-] as const;
-export type TreatmentStatus = typeof treatmentStatusValues[number];
+export const depressionTreatmentStatusValues = ['CoCM', 'CoCM Relapse Prevention', 'Discharged', 'Pending'] as const;
+export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number];
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;
 export type FollowupSchedule = typeof followupScheduleValues[number];
 
-export const discussionFlagValues = [
-    'None',
-    'Flag as safety risk',
-    'Flag for discussion',
-    'Flag for discussion & safety risk',
-] as const;
+export const discussionFlagValues = ['Flag as safety risk', 'Flag for discussion'] as const;
 export type DiscussionFlag = typeof discussionFlagValues[number];
 
-export const treatmentRegimenValues = [
+export const cancerTreatmentRegimenValues = [
     'Surgery',
     'Chemotherapy',
     'Radiation',
@@ -61,8 +46,9 @@ export const treatmentRegimenValues = [
     'CAR-T',
     'Endocrine',
     'Surveillance',
+    'Other',
 ] as const;
-export type TreatmentRegimen = typeof treatmentRegimenValues[number] | OtherSpecify;
+export type CancerTreatmentRegimen = typeof cancerTreatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
     'None',

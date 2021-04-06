@@ -28,16 +28,11 @@ class PatientSex(Enum):
     Female = "Female"
 
 
-class TreatmentStatus(Enum):
-    Active = "Active"
-    ActiveDistressed = "Active Distressed"
-    Deceased = "Deceased"
+class DepressionTreatmentStatus(Enum):
+    CoCM = "CoCM"
+    CoCMRelapse = "CoCM Relapse Prevention"
     Discharged = "Discharged"
-    FollowedByOutside = "Followed by Outside MHP ONLY"
-    FollowedByPsych = "Followed by Psych ONLY"
-    RelapsePrevention = "Relapse Prevention"
-    Inactive = "Inactive"
-    Continued = "Continued"
+    Pending = "Pending"
 
 
 class FollowupSchedule(Enum):
@@ -47,13 +42,11 @@ class FollowupSchedule(Enum):
 
 
 class DiscussionFlag(Enum):
-    NoFlag = "None"
     SafetyRisk = "Flag as safety risk"
     Discussion = "Flag for discussion"
-    SafetyRiskDiscussion = "Flag for discussion & safety risk"
 
 
-class TreatmentRegimen(Enum):
+class CancerTreatmentRegimen(Enum):
     Surgery = "Surgery"
     Chemotherapy = "Chemotherapy"
     Radiation = "Radiation"
@@ -62,6 +55,7 @@ class TreatmentRegimen(Enum):
     CART = "CAR-T"
     Endocrine = "Endocrine"
     Surveillance = "Surveillance"
+    Other = "Other"
 
 
 class Referral(Enum):

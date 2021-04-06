@@ -1,16 +1,15 @@
 import {
     AssessmentFrequency,
     BehavioralActivationChecklistItem,
+    CancerTreatmentRegimen,
     ClinicCode,
+    DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
     PatientSex,
-    Referral,
     SessionType,
     TreatmentChange,
     TreatmentPlan,
-    TreatmentRegimen,
-    TreatmentStatus,
 } from 'src/services/enums';
 
 export type KeyedMap<T> = { [key: string]: T };
@@ -59,26 +58,26 @@ export interface IMedicalInfo {
     sex: PatientSex;
     birthdate: Date;
     clinicCode: ClinicCode;
-    treatmentRegimen: TreatmentRegimen;
-    medicalDiagnosis: string;
 }
 
+export interface IClinicalHistory {
+    primaryCancerDiagnosis: string;
+    pastPsychHistory: string;
+    pastSubstanceUse: string;
+}
+
+export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
+export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
 export interface ITreatmentInfo {
-    treatmentStatus: TreatmentStatus;
-    followupSchedule: FollowupSchedule;
-    discussionFlag: DiscussionFlag;
-    referral: Referral;
-    treatmentPlan: string;
-}
-
-export interface IPsychiatryInfo {
-    psychHistory: string;
-    substanceUse: string;
-    psychMedications: string;
+    currentTreatmentRegimen: CancerTreatmentRegimenFlags;
+    currentTreatmentRegimenOther: string;
+    depressionTreatmentStatus: DepressionTreatmentStatus;
     psychDiagnosis: string;
+    discussionFlag: DiscussionFlags;
+    followupSchedule: FollowupSchedule;
 }
 
-export interface IPatient extends IMedicalInfo, ITreatmentInfo, IPsychiatryInfo {
+export interface IPatient extends IMedicalInfo, IClinicalHistory, ITreatmentInfo {
     readonly MRN: number;
     readonly firstName: string;
     readonly lastName: string;

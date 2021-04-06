@@ -28,7 +28,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                     const assessmentContent = validAssessments[a.assessmentType];
                     const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
                     return (
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={12} sm={12} key={a.assessmentType}>
                             <AssessmentProgress
                                 assessment={a}
                                 instruction={assessmentContent.instruction}

@@ -1,3 +1,4 @@
+import { compareDesc } from 'date-fns';
 import { AssessmentData, IAssessment } from 'src/services/types';
 import { sum } from 'src/utils/array';
 
@@ -18,4 +19,15 @@ export const sortAssessment = (a: IAssessment, b: IAssessment) => {
 
 export const getAssessmentScore = (pointValues: AssessmentData) => {
     return sum(Object.keys(pointValues).map((k) => pointValues[k] || 0));
+};
+
+export const getLatestScores = (assessments: IAssessment[]) => {
+    return assessments
+        .filter((a) => a.data.length > 0)
+        .map((a) => {
+            return `${a.assessmentType}=${getAssessmentScore(
+                a.data.slice().sort((a, b) => compareDesc(a.date, b.date))[0].pointValues
+            )}`;
+        })
+        .join('; ');
 };

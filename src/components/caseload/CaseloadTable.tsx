@@ -21,10 +21,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
     const columns = [
         { name: 'MRN', label: 'MRN', options: { filter: false } },
         { name: 'name', label: 'Name', options: { filter: false } },
-        { name: 'treatmentStatus', label: 'Treatment Status' },
+        { name: 'depressionTreatmentStatus', label: 'Depression Treatment Status' },
         { name: 'clinicCode', label: 'Clinic Code' },
         { name: 'followupSchedule', label: 'Follow-up Schedule' },
-        { name: 'discussionFlag', label: 'Discussion Flag' },
     ] as MUIDataTableColumnDef[];
 
     const data = patients.map((p) => Object.assign({}, p));

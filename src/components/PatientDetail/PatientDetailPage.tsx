@@ -84,8 +84,8 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             label: 'Medical information',
         },
         {
-            hash: 'psychiatry',
-            label: 'Psychiatry information',
+            hash: 'clinical-history',
+            label: 'Clinical History',
         },
         {
             hash: 'treatment',

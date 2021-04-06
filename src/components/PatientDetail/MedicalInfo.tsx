@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import { clinicCodeValues, patientSexValues, treatmentRegimenValues } from 'src/services/enums';
+import { clinicCodeValues, patientSexValues } from 'src/services/enums';
 import { IMedicalInfo } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 
@@ -16,16 +16,7 @@ interface IMedicalInfoContentProps extends Partial<IMedicalInfo> {
 }
 
 const MedicalInfoContent: FunctionComponent<IMedicalInfoContentProps> = (props) => {
-    const {
-        editable,
-        primaryCareManager,
-        sex,
-        birthdate,
-        clinicCode,
-        treatmentRegimen,
-        medicalDiagnosis,
-        onValueChange,
-    } = props;
+    const { editable, primaryCareManager, sex, birthdate, clinicCode, onValueChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -60,22 +51,6 @@ const MedicalInfoContent: FunctionComponent<IMedicalInfoContentProps> = (props) 
                 options={clinicCodeValues}
                 onChange={(text) => onValueChange('clinicCode', text)}
             />
-            <GridDropdownField
-                editable={editable}
-                label="Treatment Regimen"
-                value={treatmentRegimen}
-                options={treatmentRegimenValues}
-                onChange={(text) => onValueChange('treatmentRegimen', text)}
-            />
-            <GridTextField
-                sm={12}
-                editable={editable}
-                multiline={true}
-                maxLine={4}
-                label="Primary Medical Diagnosis"
-                value={medicalDiagnosis}
-                onChange={(text) => onValueChange('medicalDiagnosis', text)}
-            />
         </Grid>
     );
 };
@@ -86,8 +61,6 @@ const state = observable<{ open: boolean } & IMedicalInfo>({
     sex: 'Male',
     birthdate: new Date(),
     clinicCode: 'Breast',
-    treatmentRegimen: 'Other',
-    medicalDiagnosis: '',
 });
 
 export const MedicalInfo: FunctionComponent = observer(() => {
@@ -107,8 +80,6 @@ export const MedicalInfo: FunctionComponent = observer(() => {
             state.sex = currentPatient.sex;
             state.birthdate = currentPatient.birthdate;
             state.clinicCode = currentPatient.clinicCode;
-            state.treatmentRegimen = currentPatient.treatmentRegimen;
-            state.medicalDiagnosis = currentPatient.medicalDiagnosis;
         }
 
         state.open = true;
@@ -132,8 +103,6 @@ export const MedicalInfo: FunctionComponent = observer(() => {
                 sex={currentPatient?.sex}
                 birthdate={currentPatient?.birthdate}
                 clinicCode={currentPatient?.clinicCode}
-                treatmentRegimen={currentPatient?.treatmentRegimen}
-                medicalDiagnosis={currentPatient?.medicalDiagnosis}
                 onValueChange={onValueChange}
             />
 

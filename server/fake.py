@@ -1,4 +1,4 @@
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 from lorem.text import TextLorem
@@ -8,7 +8,9 @@ from enums import (
     AssessmentFrequency,
     AssessmentType,
     BehavioralActivationChecklist,
+    CancerTreatmentRegimen,
     ClinicCode,
+    DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
     PatientSex,
@@ -16,8 +18,6 @@ from enums import (
     SessionType,
     TreatmentChange,
     TreatmentPlan,
-    TreatmentRegimen,
-    TreatmentStatus,
 )
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
@@ -89,16 +89,21 @@ def getFakePatient():
         ),
         "sex": getRandomItem(PatientSex).value,
         "clinicCode": getRandomItem(ClinicCode).value,
-        "treatmentRegimen": getRandomItem(TreatmentRegimen).value,
-        "medicalDiagnosis": shortLorem.paragraph(),
+        # Clinical history
+        "primaryCancerDiagnosis": shortLorem.paragraph(),
+        "pastPsychHistory": shortLorem.paragraph(),
+        "pastSubstanceUse": shortLorem.paragraph(),
         # Treatment information
         "primaryCareManager": getRandomItem(careManagers),
-        "treatmentStatus": getRandomItem(TreatmentStatus).value,
+        "currentTreatmentRegimen": getRandomFlags(CancerTreatmentRegimen),
+        "currentTreatmentRegimenOther": shortLorem.sentence(),
+        "depressionTreatmentStatus": getRandomItem(DepressionTreatmentStatus).value,
+        "psychDiagnosis": shortLorem.paragraph(),
+        "discussionFlag": getRandomFlags(DiscussionFlag),
         "followupSchedule": getRandomItem(FollowupSchedule).value,
-        "discussionFlag": getRandomItem(DiscussionFlag).value,
+        # TBD
         "referral": getRandomItem(Referral).value,
         "treatmentPlan": shortLorem.paragraph(),
-        # Psychiatry
         "psychHistory": shortLorem.paragraph(),
         "substanceUse": shortLorem.paragraph(),
         "psychMedications": shortLorem.paragraph(),
