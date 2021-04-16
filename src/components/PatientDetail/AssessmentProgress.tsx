@@ -5,7 +5,6 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    styled,
     Table,
     TableBody,
     TableCell,
@@ -22,15 +21,10 @@ import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import Questionnaire from 'src/components/common/Questionnaire';
+import { ClickableTableRow } from 'src/components/common/Table';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
-
-const ClickableTableRow = styled(TableRow)({
-    '&:hover': {
-        cursor: 'pointer',
-    },
-});
 
 export interface IAssessmentProgressProps {
     instruction?: string;

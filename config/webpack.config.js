@@ -52,5 +52,8 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
         new webpack.HotModuleReplacementPlugin(),
+        new webpack.DefinePlugin({
+            __API__: paths.localDevServerHost
+        })
     ],
 }

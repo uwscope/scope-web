@@ -1,16 +1,24 @@
+import _ from 'lodash';
 import { getAuthServiceInstance, IAuthService } from 'src/services/authService';
+import { getAppServiceInstance, IAppService } from 'src/services/configService';
 import { getRegistryServiceInstance, IRegistryService } from 'src/services/registryService';
 
-// TODO: Dummy base url. Read from config
-const registryService = getRegistryServiceInstance('http://www.uw.edu');
-const authService = getAuthServiceInstance('http://www.uw.edu');
+const combineUrl = (baseUrl: string, path: string) => {
+    return [baseUrl, path].map((s) => _.trim(s, '/')).join('/');
+};
+
+const registryService = getRegistryServiceInstance(__API__);
+const authService = getAuthServiceInstance(__API__);
+const appService = getAppServiceInstance(combineUrl(__API__, 'app'));
 
 export interface IRootService {
     registryService: IRegistryService;
     authService: IAuthService;
+    appService: IAppService;
 }
 
 export const useServices = () => ({
     registryService,
     authService,
+    appService,
 });

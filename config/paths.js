@@ -9,5 +9,6 @@ module.exports = {
     appIndex: resolveProject('src/index.tsx'),
     appIndexTemplate: resolveProject('public/index.html'),
     tsconfig: resolveProject('tsconfig.json'),
-    webpackConfig: resolveProject('config/webpack.config.js')
+    webpackConfig: resolveProject('config/webpack.config.js'),
+    localDevServerHost: "'http://localhost:4000/'"
 };

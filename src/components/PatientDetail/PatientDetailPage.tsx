@@ -6,8 +6,8 @@ import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BAInformation from 'src/components/PatientDetail/BAInformation';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
-import { sortAssessment } from 'src/services/assessments';
 import { useStores } from 'src/stores/stores';
+import { sortAssessment } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const DetailPageContainer = withTheme(
