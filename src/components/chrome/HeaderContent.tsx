@@ -17,10 +17,6 @@ const state = observable<{ anchorEl: HTMLElement | null }>({
     anchorEl: null,
 });
 
-export interface IHeaderProps {
-    onDrawerOpen: () => void;
-}
-
 export const HeaderContent: FunctionComponent = observer(() => {
     const rootStore = useStores();
 

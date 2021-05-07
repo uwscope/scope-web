@@ -7,7 +7,6 @@ declare module '@material-ui/core/styles/createMuiTheme' {
             discrete10: string[];
         };
         customSizes: {
-            drawerWidth: number;
             contentsMenuWidth: number;
             headerHeight: number;
             footerHeight: number;
@@ -19,7 +18,6 @@ declare module '@material-ui/core/styles/createMuiTheme' {
             discrete10: string[];
         };
         customSizes: {
-            drawerWidth: number;
             contentsMenuWidth: number;
             headerHeight: number;
             footerHeight: number;
@@ -45,7 +43,6 @@ export default function createAppTheme() {
             ],
         },
         customSizes: {
-            drawerWidth: 240,
             contentsMenuWidth: 240,
             headerHeight: 64,
             footerHeight: 80,

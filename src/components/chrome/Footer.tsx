@@ -13,12 +13,8 @@ const FooterContainer = withTheme(
         borderTop: `solid 1px ${props.theme.customPalette.subtle}`,
         alignItems: 'center',
         display: 'flex',
-        marginLeft: props.theme.spacing(7) + 1,
         padding: props.theme.spacing(1, 3),
         backgroundColor: 'white',
-        [props.theme.breakpoints.up('sm')]: {
-            marginLeft: props.theme.spacing(9) + 1,
-        },
     }))
 );
 
