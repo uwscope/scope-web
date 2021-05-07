@@ -49,11 +49,13 @@
         "webpack": "5.14.x",
         "webpack-cli": "4.3.x",
         "webpack-dev-middleware": "4.0.x",
-        "webpack-hot-middleware": "2.25.x"
+        "webpack-hot-middleware": "2.25.x",
+        "webpack-merge": "^5.7.3"
     },
     "scripts": {
+        "build": "node scripts/build.js",
         "serve": "node scripts/serve.js",
-        "start": "npm run serve",
+        "start": "node scripts/start.js",
         "server": "cd server && flask run"
     }
 }

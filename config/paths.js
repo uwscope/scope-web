@@ -5,10 +5,12 @@ const projectDirectory = fs.realpathSync(process.cwd());
 const resolveProject = (relativePath) => path.resolve(projectDirectory, relativePath);
 
 module.exports = {
-    appBuild: resolveProject('build'),
+    appBuildDev: resolveProject('build'),
+    appBuildProd: resolveProject('dist'),
     appIndex: resolveProject('src/index.tsx'),
     appIndexTemplate: resolveProject('public/index.html'),
     tsconfig: resolveProject('tsconfig.json'),
-    webpackConfig: resolveProject('config/webpack.config.js'),
+    webpackConfigDev: resolveProject('config/webpack.dev.js'),
+    webpackConfigProd: resolveProject('config/webpack.prod.js'),
     localDevServerHost: "'http://localhost:4000/'"
 };
