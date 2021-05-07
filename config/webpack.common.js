@@ -4,15 +4,11 @@ const webpack = require('webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
-    mode: "development",
-
     entry: {
-        app: ['@babel/polyfill', paths.appIndex, 'webpack-hot-middleware/client' ]
+        app: ['@babel/polyfill', paths.appIndex]
     },
 
-    devtool: 'inline-source-map',
-
-    // Which extensions Webpack will resolve when files import other files
+    // Extensions Webpack will resolve when files import other files
     resolve: {
         extensions: [
             '.tsx', '.ts', '.js'
@@ -21,14 +17,13 @@ module.exports = {
     },
 
     output: {
-        path: paths.appBuild,
         publicPath: "/",
         filename: '[name].[fullhash].js'
     },
 
     module: {
         rules: [
-            // Our primary Typescript loader, loading .tsx or .ts
+            // Primary Typescript loader, loading .tsx or .ts
             {
                 test: /\.tsx?$/,
                 use: [
@@ -42,6 +37,7 @@ module.exports = {
                 ],
                 exclude: /node_modules/,
             },
+            // Image resources
             {
                 test: /\.png/,
                 type: 'asset/resource',
@@ -51,7 +47,7 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
-        new webpack.HotModuleReplacementPlugin(),
+        // TODO resolve server paths in dev/prod
         new webpack.DefinePlugin({
             __API__: paths.localDevServerHost
         })
