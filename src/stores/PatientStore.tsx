@@ -66,13 +66,13 @@ export class PatientStore implements IPatientStore {
     // public psychMedications: string;
 
     // Sessions
-    public sessions: ISession[];
+    public sessions: ISession[] = [];
 
     // Assessments
-    public assessments: IAssessment[];
+    public assessments: IAssessment[] = [];
 
     // Activities
-    public activities: IActivity[];
+    public activities: IActivity[] = [];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly updateSessionQuery: PromiseQuery<ISession>;
@@ -129,7 +129,7 @@ export class PatientStore implements IPatientStore {
         this.activities = patient.activities;
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
-        this.updateSessionQuery = new PromiseQuery(patient.sessions[0], 'updateSession');
+        this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
         this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
         this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
 

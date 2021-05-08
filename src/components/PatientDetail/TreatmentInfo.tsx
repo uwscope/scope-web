@@ -7,7 +7,7 @@ import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 import { depressionTreatmentStatusValues, followupScheduleValues } from 'src/services/enums';
 import { ITreatmentInfo } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 import { getLatestScores } from 'src/utils/assessment';
 
 interface ITreatmentInfoContentProps extends Partial<ITreatmentInfo> {
@@ -104,7 +104,7 @@ const state = observable<{ open: boolean; latestScores: string } & ITreatmentInf
 });
 
 export const TreatmentInfo: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
     const latestScores = !!currentPatient ? getLatestScores(currentPatient.assessments) : '';
 
     const onValueChange = action((key: string, value: any) => {

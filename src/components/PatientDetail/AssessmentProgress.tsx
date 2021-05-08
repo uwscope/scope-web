@@ -23,7 +23,7 @@ import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { ClickableTableRow } from 'src/components/common/Table';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 
 export interface IAssessmentProgressProps {
@@ -36,7 +36,7 @@ export interface IAssessmentProgressProps {
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
     const { instruction, questions, options, assessment, maxValue, onSaveAssessmentData } = props;
 
     const state = useLocalObservable<{ open: boolean; dataId: string | undefined; data: AssessmentData; date: Date }>(

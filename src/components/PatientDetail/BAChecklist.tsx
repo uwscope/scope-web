@@ -4,10 +4,10 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { BehavioralActivationChecklistItem, behavioralActivationChecklistValues } from 'src/services/enums';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 
 export const BAChecklist: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
 
     const baCompletion: { [key: string]: Date | undefined } = {};
     currentPatient?.sessions.forEach((s) => {

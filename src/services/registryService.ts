@@ -5,6 +5,7 @@ import {
     IAssessmentDataPoint,
     IPatient,
     IPatientList,
+    IPatientProfile,
     ISession,
 } from 'src/services/types';
 import { handleDates } from 'src/utils/time';
@@ -20,6 +21,7 @@ export interface IRegistryService {
         mrn: string,
         assessmentData: Partial<IAssessmentDataPoint>
     ): Promise<IAssessmentDataPoint>;
+    addPatient(patient: Partial<IPatientProfile>): Promise<IPatient>;
 
     // TODO:
     // Get assessment questionnaires from server
@@ -100,6 +102,20 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return assessmentData;
+        }
+    }
+
+    public async addPatient(patient: Partial<IPatientProfile>): Promise<IPatient> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<IPatientProfile, AxiosResponse<IPatient>>(
+                '/patient',
+                patient
+            );
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return patient as IPatient;
         }
     }
 }

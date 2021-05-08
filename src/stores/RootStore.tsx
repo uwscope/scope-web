@@ -1,4 +1,4 @@
-import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { action, computed, makeAutoObservable } from 'mobx';
 import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -21,14 +21,11 @@ export interface IRootStore {
     // UI states
     appState: PromiseState;
     loginState: PromiseState;
-    currentPatient: IPatientStore | undefined;
 
     // Methods
     login: () => void;
     logout: () => void;
     load: () => void;
-
-    setCurrentPatient: (mrn: string) => void;
 
     getPatientByMRN: (mrn: string | undefined) => IPatientStore | undefined;
 }
@@ -41,9 +38,6 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE Registry';
-
-    // UI states
-    @observable public currentPatient: IPatientStore | undefined = undefined;
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
@@ -114,17 +108,6 @@ export class RootStore implements IRootStore {
         const { appService } = useServices();
         const promise = appService.getAppConfig();
         await this.configQuery.fromPromise(promise);
-    }
-
-    @action.bound
-    public setCurrentPatient(mrn: string) {
-        if (!!mrn) {
-            const patient = this.patientsStore.patients.filter((p) => p.MRN == mrn)[0];
-
-            this.currentPatient = patient;
-        } else {
-            this.currentPatient = undefined;
-        }
     }
 
     public getPatientByMRN(mrn: string | undefined) {

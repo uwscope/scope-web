@@ -6,7 +6,7 @@ import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
 import { IClinicalHistory } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 
 interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {
     editable?: boolean;
@@ -14,13 +14,7 @@ interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {
 }
 
 const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = (props) => {
-    const {
-        editable,
-        primaryCancerDiagnosis,
-        pastPsychHistory,
-        pastSubstanceUse,
-        onValueChange,
-    } = props;
+    const { editable, primaryCancerDiagnosis, pastPsychHistory, pastSubstanceUse, onValueChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -33,24 +27,24 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 value={primaryCancerDiagnosis}
                 onChange={(text) => onValueChange('primaryCancerDiagnosis', text)}
             />
-                       <GridTextField
-            sm={12}
-            editable={editable}
-            multiline={true}
-            maxLine={5}
-            label="Past Psychiatric History"
-            value={pastPsychHistory}
-            onChange={(text) => onValueChange('pastPsychHistory', text)}
-        />
-        <GridTextField
-            sm={12}
-            editable={editable}
-            multiline={true}
-            maxLine={5}
-            label="Past Substance Use"
-            value={pastSubstanceUse}
-            onChange={(text) => onValueChange('pastSubstanceUse', text)}
-        />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                maxLine={5}
+                label="Past Psychiatric History"
+                value={pastPsychHistory}
+                onChange={(text) => onValueChange('pastPsychHistory', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                maxLine={5}
+                label="Past Substance Use"
+                value={pastSubstanceUse}
+                onChange={(text) => onValueChange('pastSubstanceUse', text)}
+            />
         </Grid>
     );
 };
@@ -63,7 +57,7 @@ const state = observable<{ open: boolean } & IClinicalHistory>({
 });
 
 export const ClinicalHistory: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;

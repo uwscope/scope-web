@@ -3,11 +3,11 @@ import { format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 import { last, mean } from 'src/utils/array';
 
 export const BAActivities: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
 
     return (
         <ActionPanel id="activities" title="Activities" loading={currentPatient?.state == 'Pending'} actionButtons={[]}>

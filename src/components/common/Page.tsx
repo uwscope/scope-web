@@ -16,7 +16,7 @@ const PageTitle = styled(Typography)({
 });
 
 export const PageHeaderTitle: FunctionComponent = (props) => {
-    return <PageTitle variant="h4">{props.children}</PageTitle>;
+    return <PageTitle variant="h5">{props.children}</PageTitle>;
 };
 
 export const PageHeaderSubtitle: FunctionComponent = (props) => {

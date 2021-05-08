@@ -31,7 +31,7 @@ import {
     treatmentPlanValues,
 } from 'src/services/enums';
 import { ISession } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 
 interface ISessionEditState {
     sessionId: string | undefined;
@@ -136,7 +136,7 @@ const SessionEdit: FunctionComponent = observer(() => {
 });
 
 export const SessionInfo: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
 
     const handleClose = action(() => {
         state.open = false;
