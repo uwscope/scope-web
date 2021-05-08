@@ -84,7 +84,7 @@ def getFakePatient():
     return {
         # Patient profile
         "name": "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames)),
-        "MRN": getRandomInteger(10000, 1000000),
+        "MRN": "%s" % getRandomInteger(10000, 1000000),
         "clinicCode": getRandomItem(ClinicCode).value,
         "depressionTreatmentStatus": getRandomItem(DepressionTreatmentStatus).value,
         "birthdate": datetime(

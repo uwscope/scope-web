@@ -89,7 +89,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
     return (
         <Grid container spacing={2} alignItems="stretch">
             {getTextField('Patient Name', name, 'name')}
-            {getTextField('MRN', MRN, 'mrn')}
+            {getTextField('MRN', MRN, 'MRN')}
             {getDropdownField('Clinic Code', clinicCode, clinicCodeValues, 'clinicCode')}
             {getDropdownField(
                 'Treatment Status',
