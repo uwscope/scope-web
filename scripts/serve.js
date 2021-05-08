@@ -11,7 +11,7 @@ app.use(express.static(paths.appBuildProd));
 
 // This allows redirecting to home to handle routing
 app.get('/*', function (req, res) {
-    res.sendFile(path.join(paths.appBuild, 'index.html'));
+    res.sendFile(path.join(paths.appBuildProd, 'index.html'));
 });
 
 port = 3000;

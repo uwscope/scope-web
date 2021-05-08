@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
+const path = require('path');
 const paths = require('../config/paths');
 const webpackConfig = require(paths.webpackConfigDev);
 
@@ -17,14 +18,18 @@ rimraf.sync(paths.appBuildDev);
 app.use(
     webpackDevMiddleware(compiler, {
         publicPath: webpackConfig.output.publicPath,
-        writeToDisk: true
+        writeToDisk: true,
     })
 );
 
 app.use(webpackHotMiddleware(compiler));
 
-port = 3000
+// This allows redirecting to home to handle routing
+app.get('/*', function (req, res) {
+    res.sendFile(path.join(paths.appBuildDev, 'index.html'));
+});
+
+port = 3000;
 app.listen(port, function () {
-        console.log(`Listening on http://localhost:${port}/.`);
-    }
-);
+    console.log(`Listening on http://localhost:${port}/.`);
+});
