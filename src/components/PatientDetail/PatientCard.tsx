@@ -191,7 +191,7 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
             <LabeledField label="care manager" value={patient.primaryCareManager} />
 
             <Dialog open={state.open} onClose={handleClose}>
-                <DialogTitle>Edit Medical Information</DialogTitle>
+                <DialogTitle>Edit Patient Information</DialogTitle>
                 <DialogContent>
                     <EditPatientProfileContent {...state} onValueChange={onValueChange} />
                 </DialogContent>
