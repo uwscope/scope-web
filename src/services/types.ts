@@ -1,6 +1,7 @@
 import {
     AssessmentFrequency,
     BehavioralActivationChecklistItem,
+    BehavioralStrategyChecklistItem,
     CancerTreatmentRegimen,
     ClinicCode,
     DepressionTreatmentStatus,
@@ -10,9 +11,9 @@ import {
     PatientPronoun,
     PatientRaceEthnicity,
     PatientSex,
+    Referral,
+    ReferralStatus,
     SessionType,
-    TreatmentChange,
-    TreatmentPlan,
 } from 'src/services/enums';
 
 export type KeyedMap<T> = { [key: string]: T };
@@ -22,16 +23,31 @@ export interface IUser {
     readonly authToken: string;
 }
 
-export type BAChecklistMap = { [item in BehavioralActivationChecklistItem]: boolean };
+export type BAChecklistFlags = { [item in BehavioralActivationChecklistItem]: boolean };
+export type BehavioralStrategyChecklistFlags = { [item in BehavioralStrategyChecklistItem]: boolean };
+export type ReferralStatusFlags = { [item in Referral]: ReferralStatus };
+
 export interface ISession {
-    readonly sessionId: string;
-    readonly date: Date;
-    readonly sessionType: SessionType;
-    readonly billableMinutes: number;
-    readonly treatmentPlan: TreatmentPlan;
-    readonly treatmentChange: TreatmentChange;
-    readonly behavioralActivationChecklist: BAChecklistMap;
-    readonly sessionNote: string;
+    sessionId: string;
+    date: Date;
+    sessionType: SessionType;
+    billableMinutes: number;
+
+    // Medications
+    medicationChange: string;
+    currentMedications: string;
+
+    // Behavioral strategies
+    behavioralStrategyChecklist: BehavioralStrategyChecklistFlags;
+    behavioralStrategyOther: string;
+    behavioralActivationChecklist: BAChecklistFlags;
+
+    // Referrals
+    referralStatus: ReferralStatusFlags;
+    referralOther: string;
+
+    otherRecommendations: string;
+    sessionNote: string;
 }
 
 export interface IAssessment {

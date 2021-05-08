@@ -18,39 +18,35 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
-import GridChecklist from 'src/components/common/GridChecklist';
-import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import { ClickableTableRow } from 'src/components/common/Table';
 import {
-    BehavioralActivationChecklistItem,
-    SessionType,
-    sessionTypeValues,
-    TreatmentChange,
-    treatmentChangeValues,
-    TreatmentPlan,
-    treatmentPlanValues,
-} from 'src/services/enums';
+    GridDateField,
+    GridDropdownField,
+    GridMultiOptionsField,
+    GridMultiSelectField,
+    GridTextField,
+} from 'src/components/common/GridField';
+import { ClickableTableRow } from 'src/components/common/Table';
+import { referralStatusValues, sessionTypeValues } from 'src/services/enums';
 import { ISession } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
-interface ISessionEditState {
-    sessionId: string | undefined;
-    date: Date;
-    sessionType: SessionType;
-    billableMinutes: number;
-    treatmentPlan: TreatmentPlan;
-    treatmentChange: TreatmentChange;
-    behavioralActivationChecklist: { [item in BehavioralActivationChecklistItem]: boolean };
-    sessionNote: string;
-}
-
-const defaultSession: ISessionEditState = {
-    sessionId: undefined,
+const defaultSession: ISession = {
+    sessionId: 'new',
     date: new Date(),
     sessionType: 'In person at clinic',
     billableMinutes: 0,
-    treatmentPlan: 'Maintain current treatment',
-    treatmentChange: 'None',
+    medicationChange: '',
+    currentMedications: '',
+    behavioralStrategyChecklist: {
+        'Behavioral Activation': false,
+        'Motivational Interviewing': false,
+        'Problem Solving Therapy': false,
+        'Cognitive Therapy': false,
+        'Mindfulness Strategies': false,
+        'Supportive Therapy': false,
+        Other: false,
+    },
+    behavioralStrategyOther: '',
     behavioralActivationChecklist: {
         'Review of the BA model': false,
         'Values and goals assessment': false,
@@ -61,10 +57,21 @@ const defaultSession: ISessionEditState = {
         'Managing avoidance behaviors': false,
         'Problem-solving': false,
     },
+    referralStatus: {
+        Psychiatry: 'Not Referred',
+        Psychology: 'Not Referred',
+        'Patient Navigation': 'Not Referred',
+        'Integrative Medicine': 'Not Referred',
+        'Spiritual Care': 'Not Referred',
+        'Palliative Care': 'Not Referred',
+        Other: 'Not Referred',
+    },
+    referralOther: '',
+    otherRecommendations: '',
     sessionNote: '',
 };
 
-const state = observable<{ open: boolean; isNew: boolean } & ISessionEditState>({
+const state = observable<{ open: boolean; isNew: boolean } & ISession>({
     open: false,
     isNew: false,
     ...defaultSession,
@@ -73,10 +80,6 @@ const state = observable<{ open: boolean; isNew: boolean } & ISessionEditState>(
 const SessionEdit: FunctionComponent = observer(() => {
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
-    });
-
-    const onChecklistChange = action((key: string, value: boolean) => {
-        state.behavioralActivationChecklist[key as BehavioralActivationChecklistItem] = value;
     });
 
     return (
@@ -100,36 +103,68 @@ const SessionEdit: FunctionComponent = observer(() => {
                 value={state.billableMinutes}
                 onChange={(text) => onValueChange('billableMinutes', text)}
             />
-            <GridDropdownField
+            <GridTextField
+                sm={12}
                 editable={true}
-                label="Treatment Plan"
-                value={state.treatmentPlan}
-                options={treatmentPlanValues}
-                onChange={(text) => onValueChange('treatmentPlan', text)}
-            />
-            <GridDropdownField
-                editable={true}
-                label="Treatment Change"
-                value={state.treatmentChange}
-                options={treatmentChangeValues}
-                onChange={(text) => onValueChange('treatmentChange', text)}
+                multiline={true}
+                maxLine={4}
+                label="Medication changes"
+                value={state.medicationChange}
+                placeholder="Leave blank if no change in current medications"
+                onChange={(text) => onValueChange('medicationChange', text)}
             />
             <GridTextField
                 sm={12}
                 editable={true}
                 multiline={true}
                 maxLine={4}
+                label="Current medications"
+                value={state.currentMedications}
+                onChange={(text) => onValueChange('currentMedications', text)}
+            />
+            <GridMultiSelectField
+                sm={12}
+                editable={true}
+                label="Behavioral Strategies"
+                flags={state.behavioralStrategyChecklist}
+                other={state.behavioralStrategyOther}
+                onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
+            />
+            <GridMultiSelectField
+                sm={12}
+                editable={true}
+                disabled={!state.behavioralStrategyChecklist['Behavioral Activation']}
+                label="Behavioral Activation Checklist"
+                flags={state.behavioralActivationChecklist}
+                onChange={(flags) => onValueChange('behavioralActivationChecklist', flags)}
+            />
+            <GridMultiOptionsField
+                sm={12}
+                editable={true}
+                label="Referrals"
+                flags={state.referralStatus}
+                options={referralStatusValues.filter((r) => r != 'Not Referred')}
+                notOption="Not Referred"
+                onChange={(flags) => onValueChange('referralStatus', flags)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                maxLine={4}
+                label="Other recommendations / action items"
+                value={state.otherRecommendations}
+                onChange={(text) => onValueChange('otherRecommendations', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                maxLine={10}
                 label="Session Note"
                 value={state.sessionNote}
                 placeholder="Write session notes here"
                 onChange={(text) => onValueChange('sessionNote', text)}
-            />
-            <GridChecklist
-                fullWidth={true}
-                editable={true}
-                label="Behavioral Activation Checklist"
-                values={state.behavioralActivationChecklist}
-                onCheck={onChecklistChange}
             />
         </Grid>
     );
@@ -146,7 +181,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         Object.assign(state, defaultSession);
         state.open = true;
         state.isNew = true;
-        state.sessionId = undefined;
+        state.sessionId = 'new';
     });
 
     const handleEditSession = action((session: ISession) => {
@@ -192,7 +227,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 </Table>
             </TableContainer>
 
-            <Dialog open={state.open} onClose={handleClose}>
+            <Dialog open={state.open} onClose={handleClose} maxWidth="md">
                 <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} Session Information`}</DialogTitle>
                 <DialogContent>
                     <SessionEdit />

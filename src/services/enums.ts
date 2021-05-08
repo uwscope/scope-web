@@ -38,14 +38,8 @@ export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const depressionTreatmentStatusValues = [
-    'CoCM',
-    'CoCM Relapse Prevention',
-    'Discharged',
-    'Pending',
-    'Other',
-] as const;
-export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number];
+export const depressionTreatmentStatusValues = ['CoCM', 'CoCM Relapse Prevention', 'Discharged', 'Pending'] as const;
+export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number] | OtherSpecify;
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;
 export type FollowupSchedule = typeof followupScheduleValues[number];
@@ -62,20 +56,21 @@ export const cancerTreatmentRegimenValues = [
     'CAR-T',
     'Endocrine',
     'Surveillance',
-    'Other',
 ] as const;
 export type CancerTreatmentRegimen = typeof cancerTreatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
-    'None',
     'Psychiatry',
     'Psychology',
-    'Pt Navigation',
+    'Patient Navigation',
     'Integrative Medicine',
     'Spiritual Care',
     'Palliative Care',
 ] as const;
 export type Referral = typeof referralValues[number] | OtherSpecify;
+
+export const referralStatusValues = ['Not Referred', 'Pending', 'Active', 'Completed'] as const;
+export type ReferralStatus = typeof referralStatusValues[number];
 
 export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
 export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
@@ -103,6 +98,16 @@ export const behavioralActivationChecklistValues = [
     'Problem-solving',
 ] as const;
 export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
+
+export const behavioralStrategyChecklistValues = [
+    'Behavioral Activation',
+    'Motivational Interviewing',
+    'Problem Solving Therapy',
+    'Cognitive Therapy',
+    'Mindfulness Strategies',
+    'Supportive Therapy',
+] as const;
+export type BehavioralStrategyChecklistItem = typeof behavioralStrategyChecklistValues[number] | OtherSpecify;
 
 export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
 export type AssessmentFrequency = typeof assessmentFrequencyValues[number];

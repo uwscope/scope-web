@@ -10,6 +10,8 @@ import {
     Input,
     InputLabel,
     MenuItem,
+    Radio,
+    RadioGroup,
     Select,
     SelectProps,
     withTheme,
@@ -53,22 +55,6 @@ const EditableFormControl = withTheme(
     )
 );
 
-// const SelectForm = withTheme(
-//     styled(FormControl)(
-//         (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
-//             ({
-//                 width: '100%',
-//                 minWidth: 160,
-//                 '>.MuiInput-underline:before': {
-//                     border: props.$editable ? undefined : 'none',
-//                 },
-//                 '>.MuiFormLabel-root': {
-//                     textTransform: 'uppercase',
-//                 },
-//             } as CSSObject)
-//     )
-// );
-
 const SelectField = withTheme(
     styled(Select)(
         (props: ThemedStyledProps<SelectProps & { $editable: boolean }, any>) =>
@@ -97,6 +83,14 @@ const OtherGrid = styled(Grid)({
 const MultiSelectCheckbox = withTheme(
     styled(FormControlLabel)((props) => ({
         '>.MuiCheckbox-root': {
+            padding: props.theme.spacing(0.5, 1),
+        },
+    }))
+);
+
+const MultiSelectRadio = withTheme(
+    styled(FormControlLabel)((props) => ({
+        '>.MuiRadio-root': {
             padding: props.theme.spacing(0.5, 1),
         },
     }))
@@ -142,7 +136,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
     });
 
     return (
-        <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
+        <Grid item xs={xs || 12} sm={sm || 6}>
             <EditableFormControl fullWidth $editable={editable}>
                 <InputLabel shrink>{label}</InputLabel>
                 {!!helperText ? <FormHelperText>{`(${helperText})`}</FormHelperText> : null}
@@ -174,7 +168,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
     });
 
     return (
-        <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
+        <Grid item xs={xs || 12} sm={sm || 6}>
             <EditableFormControl fullWidth $editable={editable}>
                 <InputLabel shrink>{label}</InputLabel>
                 {editable ? (
@@ -213,7 +207,7 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
 
     if (editable) {
         return (
-            <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
+            <Grid item xs={xs || 12} sm={sm || 6}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DatePickerContainer
                         disableToolbar
@@ -248,10 +242,11 @@ export interface IGridMultiSelectFieldProps extends IGridFieldBaseProps {
     other?: string | undefined;
     onOtherChange?: (other: string) => void;
     maxLine?: number;
+    disabled?: boolean;
 }
 
 export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps> = (props) => {
-    const { editable, label, flags, other, onChange, onOtherChange, xs, sm, maxLine } = props;
+    const { editable, label, flags, other, onChange, onOtherChange, xs, sm, maxLine, disabled } = props;
 
     const handleChange = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,8 +269,8 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
 
         if (editable) {
             return (
-                <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
-                    <EditableFormControl fullWidth $editable={true}>
+                <Grid item xs={xs || 12} sm={sm || 6}>
+                    <EditableFormControl disabled={disabled} fullWidth $editable={true}>
                         <InputLabel shrink>{label}</InputLabel>
                         <Grid container>
                             {Object.keys(flags)
@@ -322,7 +317,132 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                 .filter((k) => flags[k] && k != 'Other')
                 .join('\n');
             if (flags['Other']) {
-                concatValues = [concatValues, other].join('; ');
+                concatValues = [concatValues, other].join('\n');
+            }
+
+            return (
+                <GridTextField
+                    xs={xs || 12}
+                    sm={sm || 6}
+                    editable={false}
+                    label={label}
+                    value={concatValues || 'None'}
+                    multiline={true}
+                    maxLine={maxLine}
+                />
+            );
+        }
+    }
+
+    return null;
+};
+
+export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
+    flags: KeyedMap<string> | undefined;
+    options: readonly string[];
+    notOption: string;
+    onChange?: (flags: KeyedMap<string>) => void;
+    other?: string | undefined;
+    onOtherChange?: (other: string) => void;
+    maxLine?: number;
+    disabled?: boolean;
+}
+
+export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProps> = (props) => {
+    const {
+        editable,
+        label,
+        flags,
+        options,
+        notOption,
+        other,
+        onChange,
+        onOtherChange,
+        xs,
+        sm,
+        maxLine,
+        disabled,
+    } = props;
+
+    const handleCheck = (flag: string) =>
+        action((event: React.ChangeEvent<HTMLInputElement>) => {
+            if (!!onChange && !!flags) {
+                const newFlags: KeyedMap<string> = {};
+                Object.assign(newFlags, flags);
+                newFlags[flag] = (event.target as HTMLInputElement).checked ? options[0] : notOption;
+                onChange(newFlags);
+            }
+        });
+
+    const handleChange = (flag: string) =>
+        action((event: React.ChangeEvent<HTMLInputElement>) => {
+            if (!!onChange && !!flags) {
+                const newFlags: KeyedMap<string> = {};
+                Object.assign(newFlags, flags);
+                newFlags[flag] = (event.target as HTMLInputElement).value;
+                onChange(newFlags);
+            }
+        });
+
+    const handleOtherChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!onOtherChange) {
+            onOtherChange(event.target.value);
+        }
+    });
+
+    if (!!flags) {
+        if (editable) {
+            return (
+                <Grid item xs={xs || 12} sm={sm || 6}>
+                    <EditableFormControl disabled={disabled} fullWidth $editable={true}>
+                        <InputLabel shrink>{label}</InputLabel>
+                        {Object.keys(flags).map((key) => (
+                            <Grid container key={key}>
+                                <Grid item xs={6}>
+                                    <MultiSelectCheckbox
+                                        control={
+                                            <Checkbox
+                                                checked={flags[key] != notOption}
+                                                onChange={handleCheck(key)}
+                                                name={key}
+                                            />
+                                        }
+                                        label={key}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={6}>
+                                    <RadioGroup
+                                        row
+                                        aria-label="gender"
+                                        name="gender1"
+                                        value={flags[key]}
+                                        onChange={handleChange(key)}>
+                                        {options.map((option) => (
+                                            <MultiSelectRadio
+                                                key={option}
+                                                value={option}
+                                                control={<Radio />}
+                                                label={option}
+                                            />
+                                        ))}
+                                    </RadioGroup>
+                                </Grid>
+                            </Grid>
+                        ))}
+                        <FormControl fullWidth disabled={flags['Other'] == notOption}>
+                            <Input multiline={false} value={other} onChange={handleOtherChange} fullWidth />
+                        </FormControl>
+                    </EditableFormControl>
+                </Grid>
+            );
+        } else {
+            var concatValues = Object.keys(flags)
+                .filter((k) => flags[k] && k != notOption)
+                .map((k) => `${k}-${flags[k]}`)
+                .join('\n');
+            if (flags['Other'] != notOption) {
+                concatValues = [concatValues, `${other}-${flags['Other']}`].join('\n');
             }
 
             return (
