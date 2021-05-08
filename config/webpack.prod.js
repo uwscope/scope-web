@@ -13,5 +13,9 @@ module.exports = merge(common, {
     },
 
     plugins: [
+        // Local execution of the app server
+        new webpack.DefinePlugin({
+            __API__: paths.appServerProd
+        }),
     ],
 });
