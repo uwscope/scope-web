@@ -9,7 +9,6 @@ import {
     TableBody,
     TableCell,
     TableCellProps,
-    TableContainer,
     TableHead,
     TableRow,
     Typography,
@@ -29,12 +28,23 @@ import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled, { ThemedStyledProps } from 'styled-components';
 
+const CenteredTableCell = styled(TableCell)({
+    minWidth: 120,
+    textAlign: 'center',
+});
+
 const ColoredTabledCell = withTheme(
-    styled(TableCell)((props: ThemedStyledProps<TableCellProps & { $color: string }, any>) => ({
+    styled(CenteredTableCell)((props: ThemedStyledProps<TableCellProps & { $color: string }, any>) => ({
         color: props.theme.customPalette.scoreColors[props.$color],
         fontWeight: 600,
     }))
 );
+
+const HorizontalScrollTable = styled(Table)({
+    overflowX: 'auto',
+    width: '100%',
+    display: 'block',
+});
 
 export interface IAssessmentProgressProps {
     instruction?: string;
@@ -115,38 +125,36 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">
                 {!!assessmentData && assessmentData.length > 0 && (
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    {questionIds.map((p) => (
-                                        <TableCell key={p}>{p}</TableCell>
-                                    ))}
-                                    {questionIds.length > 1 ? <TableCell>Total</TableCell> : null}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {assessmentData.map((d, idx) => {
-                                    const totalScore = getAssessmentScore(d.pointValues);
-                                    const scoreColor = getAssessmentScoreColorName(d.assessmentType, totalScore);
-                                    return (
-                                        <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
-                                            <TableCell component="th" scope="row">
-                                                {format(d.date, 'MM/dd/yyyy')}
-                                            </TableCell>
-                                            {questionIds.map((p) => (
-                                                <TableCell key={p}>{d.pointValues[p]}</TableCell>
-                                            ))}
-                                            {questionIds.length > 1 ? (
-                                                <ColoredTabledCell $color={scoreColor}>{totalScore}</ColoredTabledCell>
-                                            ) : null}
-                                        </ClickableTableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <HorizontalScrollTable size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Date</TableCell>
+                                {questionIds.length > 1 ? <CenteredTableCell>Total</CenteredTableCell> : null}
+                                {questionIds.map((p) => (
+                                    <CenteredTableCell key={p}>{p}</CenteredTableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {assessmentData.map((d, idx) => {
+                                const totalScore = getAssessmentScore(d.pointValues);
+                                const scoreColor = getAssessmentScoreColorName(d.assessmentType, totalScore);
+                                return (
+                                    <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
+                                        <TableCell component="th" scope="row">
+                                            {format(d.date, 'MM/dd/yyyy')}
+                                        </TableCell>
+                                        {questionIds.length > 1 ? (
+                                            <ColoredTabledCell $color={scoreColor}>{totalScore}</ColoredTabledCell>
+                                        ) : null}
+                                        {questionIds.map((p) => (
+                                            <CenteredTableCell key={p}>{d.pointValues[p]}</CenteredTableCell>
+                                        ))}
+                                    </ClickableTableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </HorizontalScrollTable>
                 )}
                 {!!assessmentData && assessmentData.length > 0 && (
                     <Grid item xs={12}>

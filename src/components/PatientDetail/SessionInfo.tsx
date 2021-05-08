@@ -8,8 +8,10 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableCellProps,
     TableHead,
     TableRow,
+    withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { compareDesc, format } from 'date-fns';
@@ -28,6 +30,19 @@ import { ClickableTableRow } from 'src/components/common/Table';
 import { referralStatusValues, sessionTypeValues } from 'src/services/enums';
 import { ISession, KeyedMap } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
+import styled, { ThemedStyledProps } from 'styled-components';
+
+const SizableTableCell = withTheme(
+    styled(TableCell)((props: ThemedStyledProps<TableCellProps & { $width: number }, any>) => ({
+        minWidth: props.$width,
+    }))
+);
+
+const HorizontalScrollTable = styled(Table)({
+    overflowX: 'auto',
+    width: '100%',
+    display: 'block',
+});
 
 const defaultSession: ISession = {
     sessionId: 'new',
@@ -214,37 +229,41 @@ export const SessionInfo: FunctionComponent = observer(() => {
             title="Sessions"
             loading={currentPatient.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton]}>
-            <Table size="medium">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Billable Minutes</TableCell>
-                        <TableCell>Medications</TableCell>
-                        <TableCell>Behavioral Strategies</TableCell>
-                        <TableCell>Referrals</TableCell>
-                        <TableCell>Other Reco/Action Items</TableCell>
-                        <TableCell>Notes</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {sortedSessions.map((session, idx) => (
-                        <ClickableTableRow hover key={idx} onClick={() => handleEditSession(session)}>
-                            <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
-                            <TableCell>{session.sessionType}</TableCell>
-                            <TableCell>{session.billableMinutes}</TableCell>
-                            <TableCell>{session.medicationChange}</TableCell>
-                            <TableCell>
-                                {generateFlagText(session.behavioralStrategyChecklist, session.behavioralStrategyOther)}
-                            </TableCell>
-                            <TableCell>{generateFlagText(session.referralStatus, session.referralOther)}</TableCell>
-                            <TableCell>{session.otherRecommendations}</TableCell>
-                            <TableCell>{session.sessionNote}</TableCell>
-                        </ClickableTableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
+            <Grid container alignItems="stretch">
+                <HorizontalScrollTable size="small">
+                    <TableHead>
+                        <TableRow>
+                            <SizableTableCell $width={80}>Date</SizableTableCell>
+                            <SizableTableCell $width={80}>Type</SizableTableCell>
+                            <SizableTableCell $width={80}>Billable Minutes</SizableTableCell>
+                            <SizableTableCell $width={120}>Medications</SizableTableCell>
+                            <SizableTableCell $width={200}>Behavioral Strategies</SizableTableCell>
+                            <SizableTableCell $width={200}>Referrals</SizableTableCell>
+                            <SizableTableCell $width={200}>Other Reco/Action Items</SizableTableCell>
+                            <SizableTableCell $width={300}>Notes</SizableTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {sortedSessions.map((session, idx) => (
+                            <ClickableTableRow hover key={idx} onClick={() => handleEditSession(session)}>
+                                <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
+                                <TableCell>{session.sessionType}</TableCell>
+                                <TableCell>{session.billableMinutes}</TableCell>
+                                <TableCell>{session.medicationChange}</TableCell>
+                                <TableCell>
+                                    {generateFlagText(
+                                        session.behavioralStrategyChecklist,
+                                        session.behavioralStrategyOther
+                                    )}
+                                </TableCell>
+                                <TableCell>{generateFlagText(session.referralStatus, session.referralOther)}</TableCell>
+                                <TableCell>{session.otherRecommendations}</TableCell>
+                                <TableCell>{session.sessionNote}</TableCell>
+                            </ClickableTableRow>
+                        ))}
+                    </TableBody>
+                </HorizontalScrollTable>
+            </Grid>
             <Dialog open={state.open} onClose={handleClose} maxWidth="md">
                 <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} Session Information`}</DialogTitle>
                 <DialogContent>
