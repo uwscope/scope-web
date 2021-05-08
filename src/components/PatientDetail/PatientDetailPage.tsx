@@ -81,10 +81,6 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             content: <PatientInformation />,
         },
         {
-            hash: 'medical',
-            label: 'Medical information',
-        },
-        {
             hash: 'clinical-history',
             label: 'Clinical History',
         },

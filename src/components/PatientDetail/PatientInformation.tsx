@@ -8,10 +8,10 @@ import { TreatmentInfo } from 'src/components/PatientDetail/TreatmentInfo';
 export const PatientInformation: FunctionComponent = () => {
     return (
         <Grid container spacing={3} alignItems="stretch" direction="row">
-            <Grid item xs={12} sm={12}>
+            <Grid item xs={12} sm={6}>
                 <ClinicalHistory />
             </Grid>
-            <Grid item xs={12} sm={12}>
+            <Grid item xs={12} sm={6}>
                 <TreatmentInfo />
             </Grid>
             <Grid item xs={12} sm={12}>

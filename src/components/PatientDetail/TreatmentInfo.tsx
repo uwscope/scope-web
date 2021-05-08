@@ -29,6 +29,7 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
     return (
         <Grid container spacing={2} alignItems="stretch">
             <GridMultiSelectField
+                sm={12}
                 editable={editable}
                 label="Current Treatment Regimen"
                 flags={currentTreatmentRegimen}
@@ -41,7 +42,7 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 editable={editable}
                 multiline={true}
                 maxLine={5}
-                label="Treatment Notes"
+                label="Treatment Regimen Notes"
                 value={currentTreatmentRegimenNotes}
                 onChange={(text) => onValueChange('currentTreatmentRegimenNotes', text)}
             />
@@ -55,12 +56,14 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 onChange={(text) => onValueChange('psychDiagnosis', text)}
             />
             <GridMultiSelectField
+                sm={12}
                 editable={editable}
                 label="Safety and Discussion Flags"
                 flags={discussionFlag}
                 onChange={(flags) => onValueChange('discussionFlag', flags)}
             />
             <GridDropdownField
+                sm={12}
                 editable={editable}
                 label="Follow-up Schedule"
                 value={followupSchedule}

@@ -4,15 +4,14 @@ import {
     FormControl,
     FormControlLabel,
     FormControlProps,
-    FormGroup,
+    FormHelperText,
     Grid,
     GridSize,
+    Input,
     InputLabel,
     MenuItem,
     Select,
     SelectProps,
-    TextField,
-    TextFieldProps,
     withTheme,
 } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -22,9 +21,9 @@ import React, { FunctionComponent } from 'react';
 import { KeyedMap } from 'src/services/types';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
-const EditableTextField = withTheme(
-    styled(TextField)(
-        (props: ThemedStyledProps<TextFieldProps & { $editable: boolean }, any>) =>
+const EditableFormControl = withTheme(
+    styled(FormControl)(
+        (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
             ({
                 minWidth: 160,
                 '>.MuiInput-underline:before': {
@@ -32,26 +31,43 @@ const EditableTextField = withTheme(
                 },
                 '>.MuiFormLabel-root': {
                     textTransform: 'uppercase',
+                    position: 'relative',
+                },
+                '>.MuiFormLabel-root.Mui-focused': {
+                    color: props.$editable ? undefined : 'rgba(0, 0, 0, 0.54)',
+                },
+                '>.MuiInput-underline:hover:not(.Mui-disabled):before': {
+                    border: props.$editable ? undefined : 'none',
+                },
+                '>.MuiInput-underline:after': {
+                    border: props.$editable ? undefined : 'none',
+                },
+                '>.MuiFormHelperText-root': {
+                    lineHeight: 1,
+                    margin: 0,
+                },
+                '>.MuiInput-root': {
+                    margin: 0,
                 },
             } as CSSObject)
     )
 );
 
-const SelectForm = withTheme(
-    styled(FormControl)(
-        (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
-            ({
-                width: '100%',
-                minWidth: 160,
-                '>.MuiInput-underline:before': {
-                    border: props.$editable ? undefined : 'none',
-                },
-                '>.MuiFormLabel-root': {
-                    textTransform: 'uppercase',
-                },
-            } as CSSObject)
-    )
-);
+// const SelectForm = withTheme(
+//     styled(FormControl)(
+//         (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
+//             ({
+//                 width: '100%',
+//                 minWidth: 160,
+//                 '>.MuiInput-underline:before': {
+//                     border: props.$editable ? undefined : 'none',
+//                 },
+//                 '>.MuiFormLabel-root': {
+//                     textTransform: 'uppercase',
+//                 },
+//             } as CSSObject)
+//     )
+// );
 
 const SelectField = withTheme(
     styled(Select)(
@@ -72,9 +88,24 @@ const DatePickerContainer = styled(KeyboardDatePicker)({
     },
 });
 
+const OtherGrid = styled(Grid)({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+});
+
+const MultiSelectCheckbox = withTheme(
+    styled(FormControlLabel)((props) => ({
+        '>.MuiCheckbox-root': {
+            padding: props.theme.spacing(0.5, 1),
+        },
+    }))
+);
+
 interface IGridFieldBaseProps {
     editable?: boolean;
     label: string;
+    helperText?: string;
     xs?: GridSize;
     sm?: GridSize;
 }
@@ -91,7 +122,18 @@ export interface IGridTextFieldProps extends IGridFieldProps {
 }
 
 export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
-    const { editable, label, value, multiline = false, maxLine = 1, onChange, placeholder = 'No data', xs, sm } = props;
+    const {
+        editable,
+        label,
+        value,
+        multiline = false,
+        maxLine,
+        onChange,
+        placeholder = 'No data',
+        helperText,
+        xs,
+        sm,
+    } = props;
 
     const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
         if (!!onChange) {
@@ -101,19 +143,19 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
 
     return (
         <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
-            <EditableTextField
-                $editable={editable}
-                multiline={multiline}
-                rowsMax={maxLine}
-                InputProps={{
-                    readOnly: !editable,
-                }}
-                label={label}
-                value={value}
-                onChange={handleChange}
-                fullWidth
-                placeholder={placeholder}
-            />
+            <EditableFormControl fullWidth $editable={editable}>
+                <InputLabel shrink>{label}</InputLabel>
+                {!!helperText ? <FormHelperText>{`(${helperText})`}</FormHelperText> : null}
+                <Input
+                    multiline={multiline}
+                    rowsMax={maxLine}
+                    readOnly={!editable}
+                    value={value}
+                    onChange={handleChange}
+                    fullWidth
+                    placeholder={placeholder}
+                />
+            </EditableFormControl>
         </Grid>
     );
 };
@@ -133,23 +175,27 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
 
     return (
         <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
-            <SelectForm $editable={editable}>
-                <InputLabel>{label}</InputLabel>
-                <SelectField
-                    $editable={editable}
-                    value={value}
-                    label={label}
-                    onChange={handleChange}
-                    inputProps={{ readOnly: !editable }}>
-                    {!!options
-                        ? options.map((o) => (
-                              <MenuItem key={o} value={o}>
-                                  {o}
-                              </MenuItem>
-                          ))
-                        : null}
-                </SelectField>
-            </SelectForm>
+            <EditableFormControl fullWidth $editable={editable}>
+                <InputLabel shrink>{label}</InputLabel>
+                {editable ? (
+                    <SelectField
+                        $editable={editable}
+                        value={value}
+                        label={label}
+                        onChange={handleChange}
+                        inputProps={{ readOnly: !editable }}>
+                        {!!options
+                            ? options.map((o) => (
+                                  <MenuItem key={o} value={o}>
+                                      {o}
+                                  </MenuItem>
+                              ))
+                            : null}
+                    </SelectField>
+                ) : (
+                    <Input readOnly value={value} fullWidth />
+                )}
+            </EditableFormControl>
         </Grid>
     );
 };
@@ -177,6 +223,9 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
                         label={label}
                         value={value}
                         onChange={handleChange}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
                     />
                 </MuiPickersUtilsProvider>
             </Grid>
@@ -198,16 +247,19 @@ export interface IGridMultiSelectFieldProps extends IGridFieldBaseProps {
     onChange?: (flags: KeyedMap<boolean>) => void;
     other?: string | undefined;
     onOtherChange?: (other: string) => void;
+    maxLine?: number;
 }
 
 export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps> = (props) => {
-    const { editable, label, flags, other, onChange, onOtherChange, xs, sm } = props;
+    const { editable, label, flags, other, onChange, onOtherChange, xs, sm, maxLine } = props;
 
     const handleChange = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {
             if (!!onChange && !!flags) {
-                flags[flag] = event.target.checked;
-                onChange(flags);
+                const newFlags: KeyedMap<boolean> = {};
+                Object.assign(newFlags, flags);
+                newFlags[flag] = event.target.checked;
+                onChange(newFlags);
             }
         });
 
@@ -218,44 +270,72 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
     });
 
     if (!!flags) {
+        const showOther = Object.keys(flags).filter((f) => f == 'Other').length > 0;
+
         if (editable) {
             return (
                 <Grid item xs={xs || 12} sm={sm || 6} xl={4}>
-                    <FormGroup row>
-                        {Object.keys(flags).map((key) => {
-                            return (
-                                <FormControlLabel
-                                    key={key}
-                                    control={<Checkbox checked={flags[key]} onChange={handleChange(key)} name={key} />}
-                                    label={key}
-                                />
-                            );
-                        })}
-                        {flags['Other'] ?? (
-                            <EditableTextField
-                                $editable={editable}
-                                multiline={false}
-                                InputProps={{
-                                    readOnly: !editable,
-                                }}
-                                label={label}
-                                value={other}
-                                onChange={handleOtherChange}
-                                fullWidth
-                            />
-                        )}
-                    </FormGroup>
+                    <EditableFormControl fullWidth $editable={true}>
+                        <InputLabel shrink>{label}</InputLabel>
+                        <Grid container>
+                            {Object.keys(flags)
+                                .filter((f) => f != 'Other')
+                                .map((key) => {
+                                    return (
+                                        <Grid item xs={6} key={key}>
+                                            <MultiSelectCheckbox
+                                                control={
+                                                    <Checkbox
+                                                        checked={flags[key]}
+                                                        onChange={handleChange(key)}
+                                                        name={key}
+                                                    />
+                                                }
+                                                label={key}
+                                            />
+                                        </Grid>
+                                    );
+                                })}
+                            {showOther ? (
+                                <OtherGrid item xs={12} key={'Other'}>
+                                    <MultiSelectCheckbox
+                                        control={
+                                            <Checkbox
+                                                checked={flags['Other']}
+                                                onChange={handleChange('Other')}
+                                                name="Other"
+                                            />
+                                        }
+                                        label="Other"
+                                    />
+                                    <FormControl fullWidth disabled={!flags['Other']}>
+                                        <Input multiline={false} value={other} onChange={handleOtherChange} fullWidth />
+                                    </FormControl>
+                                </OtherGrid>
+                            ) : null}
+                        </Grid>
+                    </EditableFormControl>
                 </Grid>
             );
         } else {
             var concatValues = Object.keys(flags)
                 .filter((k) => flags[k] && k != 'Other')
-                .join('; ');
+                .join('\n');
             if (flags['Other']) {
                 concatValues = [concatValues, other].join('; ');
             }
 
-            return <GridTextField editable={false} label={label} value={concatValues} multiline={true} maxLine={2} />;
+            return (
+                <GridTextField
+                    xs={xs || 12}
+                    sm={sm || 6}
+                    editable={false}
+                    label={label}
+                    value={concatValues || 'None'}
+                    multiline={true}
+                    maxLine={maxLine}
+                />
+            );
         }
     }
 
