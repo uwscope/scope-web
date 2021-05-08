@@ -6,6 +6,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
             subtle: React.CSSProperties['color'];
             label: React.CSSProperties['color'];
             discrete10: string[];
+            scoreColors: { [key: string]: string };
         };
         customSizes: {
             contentsMenuWidth: number;
@@ -18,6 +19,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
             subtle: React.CSSProperties['color'];
             label: React.CSSProperties['color'];
             discrete10: string[];
+            scoreColors: { [key: string]: string };
         };
         customSizes: {
             contentsMenuWidth: number;
@@ -44,6 +46,11 @@ export default function createAppTheme() {
                 '#bcbd22',
                 '#17becf',
             ],
+            scoreColors: {
+                bad: '#bf2e2e',
+                warning: '#ffbf00',
+                good: '#20ab41',
+            },
         },
         customSizes: {
             contentsMenuWidth: 300,

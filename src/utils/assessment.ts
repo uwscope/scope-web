@@ -31,3 +31,23 @@ export const getLatestScores = (assessments: IAssessment[]) => {
         })
         .join('; ');
 };
+
+export const getAssessmentScoreColorName = (assessmentType: string, totalScore: number) => {
+    if (assessmentType == 'PHQ-9' || assessmentType == 'GAD-7') {
+        if (totalScore > 15) {
+            return 'bad';
+        } else if (totalScore > 10) {
+            return 'warning';
+        }
+    }
+
+    if (assessmentType == 'Mood Logging') {
+        if (totalScore < 2) {
+            return 'bad';
+        } else if (totalScore < 4) {
+            return 'warning';
+        }
+    }
+
+    return 'good';
+};
