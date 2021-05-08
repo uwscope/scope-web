@@ -3,6 +3,15 @@ export type OtherSpecify = 'Other';
 export const patientSexValues = ['Male', 'Female'] as const;
 export type PatientSex = typeof patientSexValues[number];
 
+export const patientGenderValues = ['Male', 'Female'] as const;
+export type PatientGender = typeof patientGenderValues[number];
+
+export const patientPronounValues = ['He/Him', 'She/Her', 'They/Them'] as const;
+export type PatientPronoun = typeof patientPronounValues[number];
+
+export const patientRaceEthnicityValues = ['White', 'Black'] as const;
+export type PatientRaceEthnicity = typeof patientRaceEthnicityValues[number];
+
 export const clinicCodeValues = [
     'Breast',
     'Endocrine',
@@ -23,12 +32,19 @@ export const clinicCodeValues = [
     'Transplant – CAR-T',
     'Transplant – LTFU',
     'Transplant – TTC',
+    'Other',
 ] as const;
 export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const depressionTreatmentStatusValues = ['CoCM', 'CoCM Relapse Prevention', 'Discharged', 'Pending'] as const;
+export const depressionTreatmentStatusValues = [
+    'CoCM',
+    'CoCM Relapse Prevention',
+    'Discharged',
+    'Pending',
+    'Other',
+] as const;
 export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number];
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;

@@ -55,7 +55,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
 
     const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
 
-    const onPatientClick = (mrn: number) => {
+    const onPatientClick = (mrn: string) => {
         rootStore.setCurrentPatient(mrn);
         history.push(`/patient/${mrn}`);
     };

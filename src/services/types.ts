@@ -6,6 +6,9 @@ import {
     DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
     PatientSex,
     SessionType,
     TreatmentChange,
@@ -53,13 +56,6 @@ export interface IActivity {
     readonly moodData: IAssessmentDataPoint[];
 }
 
-export interface IMedicalInfo {
-    primaryCareManager: string;
-    sex: PatientSex;
-    birthdate: Date;
-    clinicCode: ClinicCode;
-}
-
 export interface IClinicalHistory {
     primaryCancerDiagnosis: string;
     pastPsychHistory: string;
@@ -71,17 +67,27 @@ export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
 export interface ITreatmentInfo {
     currentTreatmentRegimen: CancerTreatmentRegimenFlags;
     currentTreatmentRegimenOther: string;
-    depressionTreatmentStatus: DepressionTreatmentStatus;
+    depressionTreatmentStatus: DepressionTreatmentStatus; // Remove
     psychDiagnosis: string;
     discussionFlag: DiscussionFlags;
     followupSchedule: FollowupSchedule;
 }
 
-export interface IPatient extends IMedicalInfo, IClinicalHistory, ITreatmentInfo {
-    readonly MRN: number;
-    readonly firstName: string;
-    readonly lastName: string;
+export interface IPatientProfile {
+    name: string;
+    MRN: string;
+    clinicCode: ClinicCode;
+    depressionTreatmentStatus: DepressionTreatmentStatus;
+    birthdate: Date;
+    sex: PatientSex;
+    gender: PatientGender;
+    pronoun: PatientPronoun;
+    race: PatientRaceEthnicity;
+    primaryOncologyProvider: string;
+    primaryCareManager: string;
+}
 
+export interface IPatient extends IPatientProfile, IClinicalHistory, ITreatmentInfo {
     // Sessions
     readonly sessions: ISession[];
 

@@ -5,14 +5,6 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
-const MenuContainer = withTheme(
-    styled.div((props) => ({
-        width: props.theme.customSizes.contentsMenuWidth,
-        overflowX: 'hidden',
-        overflowY: 'auto',
-    }))
-);
-
 const TitleContainer = withTheme(
     styled.div((props) => ({
         padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
@@ -182,12 +174,12 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
     };
 
     return (
-        <MenuContainer>
+        <div>
             <TitleContainer>
                 <Typography variant="button">Contents</Typography>
             </TitleContainer>
             <List dense={true}>{contents.map(createListItem)}</List>
-        </MenuContainer>
+        </div>
     );
 });
 

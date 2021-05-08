@@ -1,6 +1,14 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, when } from 'mobx';
-import { ClinicCode, DepressionTreatmentStatus, FollowupSchedule, PatientSex } from 'src/services/enums';
+import {
+    ClinicCode,
+    DepressionTreatmentStatus,
+    FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
+    PatientSex,
+} from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import {
@@ -26,14 +34,18 @@ export interface IPatientStore extends IPatient {
 }
 
 export class PatientStore implements IPatientStore {
-    // Medical information
-    public MRN: number;
-    public firstName: string;
-    public lastName: string;
+    // IPatientProfile
     public name: string;
+    public MRN: string;
+    public clinicCode: ClinicCode;
+    public depressionTreatmentStatus: DepressionTreatmentStatus;
     public birthdate: Date;
     public sex: PatientSex;
-    public clinicCode: ClinicCode;
+    public gender: PatientGender;
+    public pronoun: PatientPronoun;
+    public race: PatientRaceEthnicity;
+    public primaryOncologyProvider: string;
+    public primaryCareManager: string;
 
     // Clinical History
     public primaryCancerDiagnosis: string;
@@ -41,10 +53,9 @@ export class PatientStore implements IPatientStore {
     public pastSubstanceUse: string;
 
     // Treatment Information
-    public primaryCareManager: string;
+    // public primaryCareManager: string;
     public currentTreatmentRegimen: CancerTreatmentRegimenFlags;
     public currentTreatmentRegimenOther: string;
-    public depressionTreatmentStatus: DepressionTreatmentStatus;
     public psychDiagnosis: string;
     public discussionFlag: DiscussionFlags;
     public followupSchedule: FollowupSchedule;
@@ -69,15 +80,25 @@ export class PatientStore implements IPatientStore {
     private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
 
     constructor(patient: IPatient) {
-        // Can't refactor due to initialization error
-        // Medical information
+        // IPatientProfile
+        this.name = patient.name;
         this.MRN = patient.MRN;
-        this.firstName = patient.firstName;
-        this.lastName = patient.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
+        this.clinicCode = patient.clinicCode;
+        this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.birthdate = patient.birthdate;
         this.sex = patient.sex;
-        this.clinicCode = patient.clinicCode;
+        this.gender = patient.gender;
+        this.pronoun = patient.pronoun;
+        this.race = patient.race;
+        this.primaryOncologyProvider = patient.primaryOncologyProvider;
+        this.primaryCareManager = patient.primaryCareManager;
+
+        // Medical information
+        // this.MRN = patient.MRN;
+        // this.name = patient.name;
+        // this.birthdate = patient.birthdate;
+        // this.sex = patient.sex;
+        // this.clinicCode = patient.clinicCode;
 
         // Clinical History
         this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis;
@@ -85,10 +106,10 @@ export class PatientStore implements IPatientStore {
         this.pastSubstanceUse = patient.pastSubstanceUse;
 
         // Treatment information
-        this.primaryCareManager = patient.primaryCareManager;
+        // this.primaryCareManager = patient.primaryCareManager;
         this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
         this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
-        this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
+        // this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.psychDiagnosis = patient.psychDiagnosis;
         this.discussionFlag = patient.discussionFlag;
         this.followupSchedule = patient.followupSchedule;
@@ -246,11 +267,11 @@ export class PatientStore implements IPatientStore {
     private setPatientData(patient: IPatient) {
         console.log(patient);
 
+        Object.assign(this, patient);
+
         // Medical information
         this.MRN = patient.MRN ?? this.MRN;
-        this.firstName = patient.firstName ?? this.firstName;
-        this.lastName = patient.lastName ?? this.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
+        this.name = patient.name;
         this.birthdate = patient.birthdate ?? this.birthdate;
         this.sex = patient.sex ?? this.sex;
         this.clinicCode = patient.clinicCode ?? this.clinicCode;

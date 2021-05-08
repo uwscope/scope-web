@@ -13,6 +13,9 @@ from enums import (
     DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
     PatientSex,
     Referral,
     SessionType,
@@ -70,6 +73,7 @@ lastNames = [
 ]
 
 careManagers = ["Luke Skywalker", "Leia Organa", "Han Solo", "Padme Amidala"]
+oncologyProviders = ["Darth Vader", "Chewbacca", "R2-D2", "Obi-Wan Kenobi"]
 
 
 def getRandomFakePatients():
@@ -78,26 +82,29 @@ def getRandomFakePatients():
 
 def getFakePatient():
     return {
-        # Medical information
+        # Patient profile
+        "name": "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames)),
         "MRN": getRandomInteger(10000, 1000000),
-        "firstName": getRandomItem(firstNames),
-        "lastName": getRandomItem(lastNames),
+        "clinicCode": getRandomItem(ClinicCode).value,
+        "depressionTreatmentStatus": getRandomItem(DepressionTreatmentStatus).value,
         "birthdate": datetime(
             getRandomInteger(1930, 2000),
             getRandomInteger(1, 13),
             getRandomInteger(1, 28),
         ),
         "sex": getRandomItem(PatientSex).value,
-        "clinicCode": getRandomItem(ClinicCode).value,
+        "gender": getRandomItem(PatientGender).value,
+        "race": getRandomItem(PatientRaceEthnicity).value,
+        "pronoun": getRandomItem(PatientPronoun).value,
+        "primaryOncologyProvider": getRandomItem(oncologyProviders),
+        "primaryCareManager": getRandomItem(careManagers),
         # Clinical history
         "primaryCancerDiagnosis": shortLorem.paragraph(),
         "pastPsychHistory": shortLorem.paragraph(),
         "pastSubstanceUse": shortLorem.paragraph(),
         # Treatment information
-        "primaryCareManager": getRandomItem(careManagers),
         "currentTreatmentRegimen": getRandomFlags(CancerTreatmentRegimen),
         "currentTreatmentRegimenOther": shortLorem.sentence(),
-        "depressionTreatmentStatus": getRandomItem(DepressionTreatmentStatus).value,
         "psychDiagnosis": shortLorem.paragraph(),
         "discussionFlag": getRandomFlags(DiscussionFlag),
         "followupSchedule": getRandomItem(FollowupSchedule).value,

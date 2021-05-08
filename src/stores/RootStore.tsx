@@ -28,7 +28,9 @@ export interface IRootStore {
     logout: () => void;
     load: () => void;
 
-    setCurrentPatient: (mrn: number) => void;
+    setCurrentPatient: (mrn: string) => void;
+
+    getPatientByMRN: (mrn: string | undefined) => IPatientStore | undefined;
 }
 
 export class RootStore implements IRootStore {
@@ -115,13 +117,23 @@ export class RootStore implements IRootStore {
     }
 
     @action.bound
-    public setCurrentPatient(mrn: number) {
-        if (mrn > 0) {
+    public setCurrentPatient(mrn: string) {
+        if (!!mrn) {
             const patient = this.patientsStore.patients.filter((p) => p.MRN == mrn)[0];
 
             this.currentPatient = patient;
         } else {
             this.currentPatient = undefined;
         }
+    }
+
+    public getPatientByMRN(mrn: string | undefined) {
+        if (!!mrn) {
+            const patient = this.patientsStore.patients.filter((p) => p.MRN == mrn)[0];
+
+            return patient;
+        }
+
+        return undefined;
     }
 }

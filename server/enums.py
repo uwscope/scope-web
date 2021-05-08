@@ -3,24 +3,25 @@ from enum import Enum
 
 class ClinicCode(Enum):
     Breast = "Breast"
-    Endocrine = ("Endocrine",)
-    GI = ("GI",)
-    GIPancreatic = ("GI – Pancreatic",)
-    GU = ("GU",)
-    GYN = ("GYN",)
-    HEME = ("HEME",)
-    HEMESickleCell = ("HEME – Sickle Cell",)
-    HNL = ("HNL",)
-    Immunotherapy = ("Immunotherapy",)
-    MelanomaRenal = ("Melanoma/Renal",)
-    Neuro = ("Neuro",)
-    NWHospital = ("NW Hospital",)
-    Sarcoma = ("Sarcoma",)
-    TransplantAuto = ("Transplant – Auto",)
-    TransplantAllo = ("Transplant – Allo",)
-    TransplantCART = ("Transplant – CAR-T",)
-    TransplantLTFU = ("Transplant – LTFU",)
-    TransplantTTC = ("Transplant – TTC",)
+    Endocrine = "Endocrine"
+    GI = "GI"
+    GIPancreatic = "GI – Pancreatic"
+    GU = "GU"
+    GYN = "GYN"
+    HEME = "HEME"
+    HEMESickleCell = "HEME – Sickle Cell"
+    HNL = "HNL"
+    Immunotherapy = "Immunotherapy"
+    MelanomaRenal = "Melanoma/Renal"
+    Neuro = "Neuro"
+    NWHospital = "NW Hospital"
+    Sarcoma = "Sarcoma"
+    TransplantAuto = "Transplant – Auto"
+    TransplantAllo = "Transplant – Allo"
+    TransplantCART = "Transplant – CAR-T"
+    TransplantLTFU = "Transplant – LTFU"
+    TransplantTTC = "Transplant – TTC"
+    Other = "Other"
 
 
 class PatientSex(Enum):
@@ -28,11 +29,28 @@ class PatientSex(Enum):
     Female = "Female"
 
 
+class PatientGender(Enum):
+    Male = "Male"
+    Female = "Female"
+
+
+class PatientRaceEthnicity(Enum):
+    White = "White"
+    Black = "Black"
+
+
+class PatientPronoun(Enum):
+    HeHim = "He/Him"
+    SheHer = "She/Her"
+    TheyThem = "They/Them"
+
+
 class DepressionTreatmentStatus(Enum):
     CoCM = "CoCM"
     CoCMRelapse = "CoCM Relapse Prevention"
     Discharged = "Discharged"
     Pending = "Pending"
+    Other = "Other"
 
 
 class FollowupSchedule(Enum):

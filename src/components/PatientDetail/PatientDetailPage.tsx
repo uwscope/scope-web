@@ -2,8 +2,10 @@ import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { useParams } from 'react-router-dom';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BAInformation from 'src/components/PatientDetail/BAInformation';
+import PatientCard from 'src/components/PatientDetail/PatientCard';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
 import { useStores } from 'src/stores/stores';
@@ -21,18 +23,14 @@ const DetailPageContainer = withTheme(
 );
 
 const LeftPaneContainer = withTheme(
-    styled(Paper)({
+    styled(Paper)((props) => ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
         height: '100%',
-        overflow: 'hidden',
-    })
-);
-
-const PatientCard = withTheme(
-    styled.div((props) => ({
-        padding: props.theme.spacing(2.5),
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        maxWidth: props.theme.customSizes.contentsMenuWidth,
     }))
 );
 
@@ -61,11 +59,15 @@ type IContent = IContentItem & { content?: React.ReactNode };
 
 export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const { currentPatient } = rootStore;
+
+    const { mrn } = useParams<{ mrn: string | undefined }>();
+    const currentPatient = rootStore.getPatientByMRN(mrn);
 
     React.useEffect(
         action(() => {
-            rootStore.currentPatient?.getPatientData();
+            if (currentPatient) {
+                currentPatient.getPatientData();
+            }
         }),
         []
     );
@@ -146,28 +148,29 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     ] as IContent[];
     contentMenu.push.apply(contentMenu, baMenu);
 
-    return (
-        <DetailPageContainer>
-            <LeftPaneContainer elevation={3} square>
-                <PatientCard>
-                    <Typography variant="h5">{currentPatient?.name}</Typography>
-                    <Typography variant="body1">{`MRN: ${currentPatient?.MRN}`}</Typography>
-                </PatientCard>
-                <Divider variant="middle" />
-                <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
-            </LeftPaneContainer>
-            <ContentContainer id="scroll-content">
-                {contentMenu
-                    .filter((c) => c.top)
-                    .map((c) => (
-                        <Section id={c.hash} key={c.hash}>
-                            <SectionTitle variant="h6">{c.label}</SectionTitle>
-                            {c.content ? c.content : null}
-                        </Section>
-                    ))}
-            </ContentContainer>
-        </DetailPageContainer>
-    );
+    if (!!currentPatient) {
+        return (
+            <DetailPageContainer>
+                <LeftPaneContainer elevation={3} square>
+                    <PatientCard patient={currentPatient} />
+                    <Divider variant="middle" />
+                    <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
+                </LeftPaneContainer>
+                <ContentContainer id="scroll-content">
+                    {contentMenu
+                        .filter((c) => c.top)
+                        .map((c) => (
+                            <Section id={c.hash} key={c.hash}>
+                                <SectionTitle variant="h6">{c.label}</SectionTitle>
+                                {c.content ? c.content : null}
+                            </Section>
+                        ))}
+                </ContentContainer>
+            </DetailPageContainer>
+        );
+    } else {
+        return null;
+    }
 });
 
 export default PatientDetailPage;
