@@ -77,13 +77,20 @@ class CancerTreatmentRegimen(Enum):
 
 
 class Referral(Enum):
-    NoReferral = "None"
     Psychiatry = "Psychiatry"
     Psychology = "Psychology"
     PtNavigation = "Pt Navigation"
     IntegrativeMedicine = "Integrative Medicine"
     SpiritualCare = "Spiritual Care"
     PalliativeCare = "Palliative Care"
+    Other = "Other"
+
+
+class ReferralStatus(Enum):
+    NotReferral = "Not Referred"
+    Pending = "Pending"
+    Active = "Active"
+    Completed = "Completed"
 
 
 class SessionType(Enum):
@@ -117,6 +124,16 @@ class BehavioralActivationChecklist(Enum):
     ContingencyManagement = "Contingency management"
     ManagingAvoidance = "Managing avoidance behaviors"
     ProblemSolving = "Problem-solving"
+
+
+class BehavioralStrategyChecklist(Enum):
+    BehavioralActivation = "Behavioral Activation"
+    MotivationalInterviewing = "Motivational Interviewing"
+    ProblemSolvingTherapy = "Problem Solving Therapy"
+    CognitiveTherapy = "Cognitive Therapy"
+    MindfulnessStrategies = "Mindfulness Strategies"
+    SupportiveTherapy = "Supportive Therapy"
+    Other = "Other"
 
 
 class AssessmentType(Enum):

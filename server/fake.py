@@ -8,6 +8,7 @@ from enums import (
     AssessmentFrequency,
     AssessmentType,
     BehavioralActivationChecklist,
+    BehavioralStrategyChecklist,
     CancerTreatmentRegimen,
     ClinicCode,
     DepressionTreatmentStatus,
@@ -18,6 +19,7 @@ from enums import (
     PatientRaceEthnicity,
     PatientSex,
     Referral,
+    ReferralStatus,
     SessionType,
     TreatmentChange,
     TreatmentPlan,
@@ -149,6 +151,14 @@ def getRandomFlags(enum):
     return flags
 
 
+def getRandomStates(enum, options):
+    flags = dict()
+    for key in enum:
+        flags[key.value] = getRandomItem(options).value
+
+    return flags
+
+
 def getFakeAssessments():
     return [
         {
@@ -201,11 +211,17 @@ def getFakeSessions():
             ),
             "sessionType": getRandomItem(SessionType).value,
             "billableMinutes": int(getRandomItem([30, 45, 60, 80])),
-            "treatmentPlan": getRandomItem(TreatmentPlan).value,
-            "treatmentChange": getRandomItem(TreatmentChange).value,
+            "medicationChange": shortLorem.sentence() if getRandomBoolean() else "",
+            "currentMedications": shortLorem.sentence() if getRandomBoolean() else "",
+            "behavioralStrategyChecklist": getRandomFlags(BehavioralStrategyChecklist),
+            "behavioralStrategyOther": shortLorem.sentence()
+            if getRandomBoolean()
+            else "",
             "behavioralActivationChecklist": getRandomFlags(
                 BehavioralActivationChecklist
             ),
+            "referralStatus": getRandomStates(Referral, ReferralStatus),
+            "otherRecommendations": shortLorem.sentence(),
             "sessionNote": lorem.paragraph(),
         }
         for idx in range(sessionCount)
