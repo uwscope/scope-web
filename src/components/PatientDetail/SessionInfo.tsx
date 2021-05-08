@@ -8,12 +8,11 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableContainer,
     TableHead,
     TableRow,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -27,7 +26,7 @@ import {
 } from 'src/components/common/GridField';
 import { ClickableTableRow } from 'src/components/common/Table';
 import { referralStatusValues, sessionTypeValues } from 'src/services/enums';
-import { ISession } from 'src/services/types';
+import { ISession, KeyedMap } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 const defaultSession: ISession = {
@@ -192,40 +191,59 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const onSave = action(() => {
         const { open, ...sessionData } = { ...state };
-        currentPatient?.updateSession(sessionData);
+        currentPatient.updateSession(sessionData);
         state.open = false;
     });
+
+    const generateFlagText = (flags: KeyedMap<boolean | string>, other: string) => {
+        var concatValues = Object.keys(flags)
+            .filter((k) => flags[k] && k != 'Other')
+            .join('\n');
+        if (flags['Other']) {
+            concatValues = [concatValues, other].join('\n');
+        }
+
+        return concatValues;
+    };
+
+    const sortedSessions = currentPatient.sessions.slice().sort((a, b) => compareDesc(a.date, b.date));
 
     return (
         <ActionPanel
             id="sessions"
             title="Sessions"
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton]}>
-            <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Session Id</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Billable Minutes</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {currentPatient?.sessions.map((session, idx) => (
-                            <ClickableTableRow hover key={session.sessionId} onClick={() => handleEditSession(session)}>
-                                <TableCell component="th" scope="row">
-                                    {idx == 0 ? 'Initial assessment' : `${idx}`}
-                                </TableCell>
-                                <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
-                                <TableCell>{session.sessionType}</TableCell>
-                                <TableCell>{session.billableMinutes}</TableCell>
-                            </ClickableTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Table size="medium">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Billable Minutes</TableCell>
+                        <TableCell>Medications</TableCell>
+                        <TableCell>Behavioral Strategies</TableCell>
+                        <TableCell>Referrals</TableCell>
+                        <TableCell>Other Reco/Action Items</TableCell>
+                        <TableCell>Notes</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {sortedSessions.map((session, idx) => (
+                        <ClickableTableRow hover key={idx} onClick={() => handleEditSession(session)}>
+                            <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
+                            <TableCell>{session.sessionType}</TableCell>
+                            <TableCell>{session.billableMinutes}</TableCell>
+                            <TableCell>{session.medicationChange}</TableCell>
+                            <TableCell>
+                                {generateFlagText(session.behavioralStrategyChecklist, session.behavioralStrategyOther)}
+                            </TableCell>
+                            <TableCell>{generateFlagText(session.referralStatus, session.referralOther)}</TableCell>
+                            <TableCell>{session.otherRecommendations}</TableCell>
+                            <TableCell>{session.sessionNote}</TableCell>
+                        </ClickableTableRow>
+                    ))}
+                </TableBody>
+            </Table>
 
             <Dialog open={state.open} onClose={handleClose} maxWidth="md">
                 <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} Session Information`}</DialogTitle>
