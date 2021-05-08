@@ -8,6 +8,7 @@ import BAInformation from 'src/components/PatientDetail/BAInformation';
 import PatientCard from 'src/components/PatientDetail/PatientCard';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
+import SessionInformation from 'src/components/PatientDetail/SessionInformation';
 import { PatientStoreProvider, useStores } from 'src/stores/stores';
 import { sortAssessment } from 'src/utils/assessment';
 import styled from 'styled-components';
@@ -88,16 +89,22 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             hash: 'treatment',
             label: 'Treatment information',
         },
+    ] as IContent[];
+    contentMenu.push.apply(contentMenu, patientInfoMenu);
+
+    const sessionInfoMenu = [
+        {
+            hash: 'session-info',
+            label: 'Session Information',
+            top: true,
+            content: <SessionInformation />,
+        },
         {
             hash: 'sessions',
             label: 'Sessions',
         },
-        {
-            hash: 'assessments',
-            label: 'Assessments',
-        },
     ] as IContent[];
-    contentMenu.push.apply(contentMenu, patientInfoMenu);
+    contentMenu.push.apply(contentMenu, sessionInfoMenu);
 
     if (currentPatient?.assessments && currentPatient?.assessments.length > 0) {
         const progressMenu = [
@@ -106,6 +113,10 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                 label: 'Progress',
                 top: true,
                 content: <ProgressInformation />,
+            },
+            {
+                hash: 'assessments',
+                label: 'Assessments',
             },
         ] as IContent[];
 
