@@ -8,49 +8,59 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableContainer,
+    TableCellProps,
     TableHead,
     TableRow,
+    withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
-import GridChecklist from 'src/components/common/GridChecklist';
-import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
-import { ClickableTableRow } from 'src/components/common/Table';
 import {
-    BehavioralActivationChecklistItem,
-    SessionType,
-    sessionTypeValues,
-    TreatmentChange,
-    treatmentChangeValues,
-    TreatmentPlan,
-    treatmentPlanValues,
-} from 'src/services/enums';
-import { ISession } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+    GridDateField,
+    GridDropdownField,
+    GridMultiOptionsField,
+    GridMultiSelectField,
+    GridTextField,
+} from 'src/components/common/GridField';
+import { ClickableTableRow } from 'src/components/common/Table';
+import { referralStatusValues, sessionTypeValues } from 'src/services/enums';
+import { ISession, KeyedMap } from 'src/services/types';
+import { usePatient } from 'src/stores/stores';
+import styled, { ThemedStyledProps } from 'styled-components';
 
-interface ISessionEditState {
-    sessionId: string | undefined;
-    date: Date;
-    sessionType: SessionType;
-    billableMinutes: number;
-    treatmentPlan: TreatmentPlan;
-    treatmentChange: TreatmentChange;
-    behavioralActivationChecklist: { [item in BehavioralActivationChecklistItem]: boolean };
-    sessionNote: string;
-}
+const SizableTableCell = withTheme(
+    styled(TableCell)((props: ThemedStyledProps<TableCellProps & { $width: number }, any>) => ({
+        minWidth: props.$width,
+    }))
+);
 
-const defaultSession: ISessionEditState = {
-    sessionId: undefined,
+const HorizontalScrollTable = styled(Table)({
+    overflowX: 'auto',
+    width: '100%',
+    display: 'block',
+});
+
+const defaultSession: ISession = {
+    sessionId: 'new',
     date: new Date(),
     sessionType: 'In person at clinic',
     billableMinutes: 0,
-    treatmentPlan: 'Maintain current treatment',
-    treatmentChange: 'None',
+    medicationChange: '',
+    currentMedications: '',
+    behavioralStrategyChecklist: {
+        'Behavioral Activation': false,
+        'Motivational Interviewing': false,
+        'Problem Solving Therapy': false,
+        'Cognitive Therapy': false,
+        'Mindfulness Strategies': false,
+        'Supportive Therapy': false,
+        Other: false,
+    },
+    behavioralStrategyOther: '',
     behavioralActivationChecklist: {
         'Review of the BA model': false,
         'Values and goals assessment': false,
@@ -61,10 +71,21 @@ const defaultSession: ISessionEditState = {
         'Managing avoidance behaviors': false,
         'Problem-solving': false,
     },
+    referralStatus: {
+        Psychiatry: 'Not Referred',
+        Psychology: 'Not Referred',
+        'Patient Navigation': 'Not Referred',
+        'Integrative Medicine': 'Not Referred',
+        'Spiritual Care': 'Not Referred',
+        'Palliative Care': 'Not Referred',
+        Other: 'Not Referred',
+    },
+    referralOther: '',
+    otherRecommendations: '',
     sessionNote: '',
 };
 
-const state = observable<{ open: boolean; isNew: boolean } & ISessionEditState>({
+const state = observable<{ open: boolean; isNew: boolean } & ISession>({
     open: false,
     isNew: false,
     ...defaultSession,
@@ -73,10 +94,6 @@ const state = observable<{ open: boolean; isNew: boolean } & ISessionEditState>(
 const SessionEdit: FunctionComponent = observer(() => {
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
-    });
-
-    const onChecklistChange = action((key: string, value: boolean) => {
-        state.behavioralActivationChecklist[key as BehavioralActivationChecklistItem] = value;
     });
 
     return (
@@ -100,43 +117,75 @@ const SessionEdit: FunctionComponent = observer(() => {
                 value={state.billableMinutes}
                 onChange={(text) => onValueChange('billableMinutes', text)}
             />
-            <GridDropdownField
+            <GridTextField
+                sm={12}
                 editable={true}
-                label="Treatment Plan"
-                value={state.treatmentPlan}
-                options={treatmentPlanValues}
-                onChange={(text) => onValueChange('treatmentPlan', text)}
-            />
-            <GridDropdownField
-                editable={true}
-                label="Treatment Change"
-                value={state.treatmentChange}
-                options={treatmentChangeValues}
-                onChange={(text) => onValueChange('treatmentChange', text)}
+                multiline={true}
+                maxLine={4}
+                label="Medication changes"
+                value={state.medicationChange}
+                placeholder="Leave blank if no change in current medications"
+                onChange={(text) => onValueChange('medicationChange', text)}
             />
             <GridTextField
                 sm={12}
                 editable={true}
                 multiline={true}
                 maxLine={4}
+                label="Current medications"
+                value={state.currentMedications}
+                onChange={(text) => onValueChange('currentMedications', text)}
+            />
+            <GridMultiSelectField
+                sm={12}
+                editable={true}
+                label="Behavioral Strategies"
+                flags={state.behavioralStrategyChecklist}
+                other={state.behavioralStrategyOther}
+                onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
+            />
+            <GridMultiSelectField
+                sm={12}
+                editable={true}
+                disabled={!state.behavioralStrategyChecklist['Behavioral Activation']}
+                label="Behavioral Activation Checklist"
+                flags={state.behavioralActivationChecklist}
+                onChange={(flags) => onValueChange('behavioralActivationChecklist', flags)}
+            />
+            <GridMultiOptionsField
+                sm={12}
+                editable={true}
+                label="Referrals"
+                flags={state.referralStatus}
+                options={referralStatusValues.filter((r) => r != 'Not Referred')}
+                notOption="Not Referred"
+                onChange={(flags) => onValueChange('referralStatus', flags)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                maxLine={4}
+                label="Other recommendations / action items"
+                value={state.otherRecommendations}
+                onChange={(text) => onValueChange('otherRecommendations', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                maxLine={10}
                 label="Session Note"
                 value={state.sessionNote}
                 placeholder="Write session notes here"
                 onChange={(text) => onValueChange('sessionNote', text)}
-            />
-            <GridChecklist
-                fullWidth={true}
-                editable={true}
-                label="Behavioral Activation Checklist"
-                values={state.behavioralActivationChecklist}
-                onCheck={onChecklistChange}
             />
         </Grid>
     );
 });
 
 export const SessionInfo: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
 
     const handleClose = action(() => {
         state.open = false;
@@ -146,7 +195,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         Object.assign(state, defaultSession);
         state.open = true;
         state.isNew = true;
-        state.sessionId = undefined;
+        state.sessionId = 'new';
     });
 
     const handleEditSession = action((session: ISession) => {
@@ -157,42 +206,65 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const onSave = action(() => {
         const { open, ...sessionData } = { ...state };
-        currentPatient?.updateSession(sessionData);
+        currentPatient.updateSession(sessionData);
         state.open = false;
     });
+
+    const generateFlagText = (flags: KeyedMap<boolean | string>, other: string) => {
+        var concatValues = Object.keys(flags)
+            .filter((k) => flags[k] && k != 'Other')
+            .join('\n');
+        if (flags['Other']) {
+            concatValues = [concatValues, other].join('\n');
+        }
+
+        return concatValues;
+    };
+
+    const sortedSessions = currentPatient.sessions.slice().sort((a, b) => compareDesc(a.date, b.date));
 
     return (
         <ActionPanel
             id="sessions"
             title="Sessions"
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton]}>
-            <TableContainer>
-                <Table>
+            <Grid container alignItems="stretch">
+                <HorizontalScrollTable size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell>Session Id</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Billable Minutes</TableCell>
+                            <SizableTableCell $width={80}>Date</SizableTableCell>
+                            <SizableTableCell $width={80}>Type</SizableTableCell>
+                            <SizableTableCell $width={80}>Billable Minutes</SizableTableCell>
+                            <SizableTableCell $width={120}>Medications</SizableTableCell>
+                            <SizableTableCell $width={200}>Behavioral Strategies</SizableTableCell>
+                            <SizableTableCell $width={200}>Referrals</SizableTableCell>
+                            <SizableTableCell $width={200}>Other Reco/Action Items</SizableTableCell>
+                            <SizableTableCell $width={300}>Notes</SizableTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {currentPatient?.sessions.map((session, idx) => (
-                            <ClickableTableRow hover key={session.sessionId} onClick={() => handleEditSession(session)}>
-                                <TableCell component="th" scope="row">
-                                    {idx == 0 ? 'Initial assessment' : `${idx}`}
-                                </TableCell>
+                        {sortedSessions.map((session, idx) => (
+                            <ClickableTableRow hover key={idx} onClick={() => handleEditSession(session)}>
                                 <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
                                 <TableCell>{session.sessionType}</TableCell>
                                 <TableCell>{session.billableMinutes}</TableCell>
+                                <TableCell>{session.medicationChange}</TableCell>
+                                <TableCell>
+                                    {generateFlagText(
+                                        session.behavioralStrategyChecklist,
+                                        session.behavioralStrategyOther
+                                    )}
+                                </TableCell>
+                                <TableCell>{generateFlagText(session.referralStatus, session.referralOther)}</TableCell>
+                                <TableCell>{session.otherRecommendations}</TableCell>
+                                <TableCell>{session.sessionNote}</TableCell>
                             </ClickableTableRow>
                         ))}
                     </TableBody>
-                </Table>
-            </TableContainer>
-
-            <Dialog open={state.open} onClose={handleClose}>
+                </HorizontalScrollTable>
+            </Grid>
+            <Dialog open={state.open} onClose={handleClose} maxWidth="md">
                 <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} Session Information`}</DialogTitle>
                 <DialogContent>
                     <SessionEdit />

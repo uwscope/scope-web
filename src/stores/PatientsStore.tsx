@@ -2,7 +2,7 @@ import { action, computed, IObservableArray, makeAutoObservable, observable } fr
 import { AllClinicCode, ClinicCode } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IPatient } from 'src/services/types';
+import { IPatient, IPatientProfile } from 'src/services/types';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains, unique } from 'src/utils/array';
 
@@ -16,6 +16,8 @@ export interface IPatientsStore {
     readonly state: PromiseState;
 
     getPatients: () => void;
+    addPatient: (patient: IPatientProfile) => void;
+
     filterCareManager: (careManager: string) => void;
     filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
 }
@@ -26,6 +28,8 @@ export class PatientsStore implements IPatientsStore {
     @observable public filteredClinic: ClinicCode | AllClinicCode;
 
     private readonly loadPatientsQuery: PromiseQuery<IPatient[]>;
+    private readonly addPatientQuery: PromiseQuery<IPatient>;
+
     private readonly AllCareManagers = 'All Care Managers';
 
     constructor() {
@@ -34,6 +38,7 @@ export class PatientsStore implements IPatientsStore {
         this.filteredClinic = 'All Clinics';
 
         this.loadPatientsQuery = new PromiseQuery([], 'loadPatients');
+        this.addPatientQuery = new PromiseQuery<IPatient>(undefined, 'addPatient');
 
         makeAutoObservable(this);
     }
@@ -67,6 +72,17 @@ export class PatientsStore implements IPatientsStore {
                 this.filterCareManager(this.filteredCareManager);
             })();
         }
+    }
+
+    @action.bound
+    public async addPatient(patient: IPatientProfile) {
+        const { registryService } = useServices();
+        const promise = registryService.addPatient(patient);
+        const newPatient = await this.addPatientQuery.fromPromise(promise);
+        action(() => {
+            this.patients.push(new PatientStore(newPatient));
+            this.filterCareManager(this.filteredCareManager);
+        })();
     }
 
     @action.bound

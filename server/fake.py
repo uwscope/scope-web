@@ -1,4 +1,4 @@
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 
 import numpy as np
 from lorem.text import TextLorem
@@ -8,16 +8,21 @@ from enums import (
     AssessmentFrequency,
     AssessmentType,
     BehavioralActivationChecklist,
+    BehavioralStrategyChecklist,
+    CancerTreatmentRegimen,
     ClinicCode,
+    DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
     PatientSex,
     Referral,
+    ReferralStatus,
     SessionType,
     TreatmentChange,
     TreatmentPlan,
-    TreatmentRegimen,
-    TreatmentStatus,
 )
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
@@ -70,6 +75,7 @@ lastNames = [
 ]
 
 careManagers = ["Luke Skywalker", "Leia Organa", "Han Solo", "Padme Amidala"]
+oncologyProviders = ["Darth Vader", "Chewbacca", "R2-D2", "Obi-Wan Kenobi"]
 
 
 def getRandomFakePatients():
@@ -78,27 +84,36 @@ def getRandomFakePatients():
 
 def getFakePatient():
     return {
-        # Medical information
-        "MRN": getRandomInteger(10000, 1000000),
-        "firstName": getRandomItem(firstNames),
-        "lastName": getRandomItem(lastNames),
+        # Patient profile
+        "name": "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames)),
+        "MRN": "%s" % getRandomInteger(10000, 1000000),
+        "clinicCode": getRandomItem(ClinicCode).value,
+        "depressionTreatmentStatus": getRandomItem(DepressionTreatmentStatus).value,
         "birthdate": datetime(
             getRandomInteger(1930, 2000),
             getRandomInteger(1, 13),
             getRandomInteger(1, 28),
         ),
         "sex": getRandomItem(PatientSex).value,
-        "clinicCode": getRandomItem(ClinicCode).value,
-        "treatmentRegimen": getRandomItem(TreatmentRegimen).value,
-        "medicalDiagnosis": shortLorem.paragraph(),
-        # Treatment information
+        "gender": getRandomItem(PatientGender).value,
+        "race": getRandomItem(PatientRaceEthnicity).value,
+        "pronoun": getRandomItem(PatientPronoun).value,
+        "primaryOncologyProvider": getRandomItem(oncologyProviders),
         "primaryCareManager": getRandomItem(careManagers),
-        "treatmentStatus": getRandomItem(TreatmentStatus).value,
+        # Clinical history
+        "primaryCancerDiagnosis": shortLorem.paragraph(),
+        "pastPsychHistory": shortLorem.paragraph(),
+        "pastSubstanceUse": shortLorem.paragraph(),
+        # Treatment information
+        "currentTreatmentRegimen": getRandomFlags(CancerTreatmentRegimen),
+        "currentTreatmentRegimenOther": shortLorem.sentence(),
+        "currentTreatmentRegimenNotes": shortLorem.sentence(),
+        "psychDiagnosis": shortLorem.paragraph(),
+        "discussionFlag": getRandomFlags(DiscussionFlag),
         "followupSchedule": getRandomItem(FollowupSchedule).value,
-        "discussionFlag": getRandomItem(DiscussionFlag).value,
+        # TBD
         "referral": getRandomItem(Referral).value,
         "treatmentPlan": shortLorem.paragraph(),
-        # Psychiatry
         "psychHistory": shortLorem.paragraph(),
         "substanceUse": shortLorem.paragraph(),
         "psychMedications": shortLorem.paragraph(),
@@ -132,6 +147,14 @@ def getRandomFlags(enum):
     flags = dict()
     for key in enum:
         flags[key.value] = getRandomBoolean()
+
+    return flags
+
+
+def getRandomStates(enum, options):
+    flags = dict()
+    for key in enum:
+        flags[key.value] = getRandomItem(options).value
 
     return flags
 
@@ -188,11 +211,17 @@ def getFakeSessions():
             ),
             "sessionType": getRandomItem(SessionType).value,
             "billableMinutes": int(getRandomItem([30, 45, 60, 80])),
-            "treatmentPlan": getRandomItem(TreatmentPlan).value,
-            "treatmentChange": getRandomItem(TreatmentChange).value,
+            "medicationChange": shortLorem.sentence() if getRandomBoolean() else "",
+            "currentMedications": shortLorem.sentence() if getRandomBoolean() else "",
+            "behavioralStrategyChecklist": getRandomFlags(BehavioralStrategyChecklist),
+            "behavioralStrategyOther": shortLorem.sentence()
+            if getRandomBoolean()
+            else "",
             "behavioralActivationChecklist": getRandomFlags(
                 BehavioralActivationChecklist
             ),
+            "referralStatus": getRandomStates(Referral, ReferralStatus),
+            "otherRecommendations": shortLorem.sentence(),
             "sessionNote": lorem.paragraph(),
         }
         for idx in range(sessionCount)

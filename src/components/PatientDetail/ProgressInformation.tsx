@@ -3,14 +3,15 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import AssessmentProgress from 'src/components/PatientDetail/AssessmentProgress';
 import { IAssessmentContent, KeyedMap } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 import { contains } from 'src/utils/array';
 
 export const ProgressInformation: FunctionComponent = observer(() => {
     const {
-        currentPatient,
         appConfig: { assessments },
     } = useStores();
+
+    const currentPatient = usePatient();
 
     const validAssessments = assessments.reduce(
         (prev, curr) => ({ ...prev, [curr.name]: curr }),
@@ -28,7 +29,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                     const assessmentContent = validAssessments[a.assessmentType];
                     const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
                     return (
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={12} sm={12} key={a.assessmentType}>
                             <AssessmentProgress
                                 assessment={a}
                                 instruction={assessmentContent.instruction}

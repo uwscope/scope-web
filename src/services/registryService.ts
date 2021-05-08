@@ -5,6 +5,7 @@ import {
     IAssessmentDataPoint,
     IPatient,
     IPatientList,
+    IPatientProfile,
     ISession,
 } from 'src/services/types';
 import { handleDates } from 'src/utils/time';
@@ -12,14 +13,15 @@ import { handleDates } from 'src/utils/time';
 // TODO: https://github.com/axios/axios#interceptors
 export interface IRegistryService {
     getPatients(): Promise<IPatient[]>;
-    getPatientData(mrn: number): Promise<IPatient>;
-    updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient>;
-    updatePatientSession(mrn: number, session: Partial<ISession>): Promise<ISession>;
-    updatePatientAssessment(mrn: number, assessment: Partial<IAssessment>): Promise<IAssessment>;
+    getPatientData(mrn: string): Promise<IPatient>;
+    updatePatientData(mrn: string, patient: Partial<IPatient>): Promise<IPatient>;
+    updatePatientSession(mrn: string, session: Partial<ISession>): Promise<ISession>;
+    updatePatientAssessment(mrn: string, assessment: Partial<IAssessment>): Promise<IAssessment>;
     updatePatientAssessmentRecord(
-        mrn: number,
+        mrn: string,
         assessmentData: Partial<IAssessmentDataPoint>
     ): Promise<IAssessmentDataPoint>;
+    addPatient(patient: Partial<IPatientProfile>): Promise<IPatient>;
 
     // TODO:
     // Get assessment questionnaires from server
@@ -48,12 +50,12 @@ class RegistryService implements IRegistryService {
         return response.data && response.data.patients;
     }
 
-    public async getPatientData(mrn: number): Promise<IPatient> {
+    public async getPatientData(mrn: string): Promise<IPatient> {
         const response = await this.axiosInstance.get<IPatient>(`/patient/${mrn}`);
         return response.data;
     }
 
-    public async updatePatientData(mrn: number, patient: Partial<IPatient>): Promise<IPatient> {
+    public async updatePatientData(mrn: string, patient: Partial<IPatient>): Promise<IPatient> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<IPatient>(`/patient/${mrn}`, patient);
@@ -64,7 +66,7 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async updatePatientSession(mrn: number, session: Partial<ISession>): Promise<ISession> {
+    public async updatePatientSession(mrn: string, session: Partial<ISession>): Promise<ISession> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<ISession>(`/patient/${mrn}/session`, session);
@@ -75,7 +77,7 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async updatePatientAssessment(mrn: number, assessment: Partial<IAssessment>): Promise<IAssessment> {
+    public async updatePatientAssessment(mrn: string, assessment: Partial<IAssessment>): Promise<IAssessment> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<IAssessment>(`/patient/${mrn}/assessment`, assessment);
@@ -87,7 +89,7 @@ class RegistryService implements IRegistryService {
     }
 
     public async updatePatientAssessmentRecord(
-        mrn: number,
+        mrn: string,
         assessmentData: IAssessmentDataPoint
     ): Promise<IAssessmentDataPoint> {
         // Work around since backend doesn't exist
@@ -100,6 +102,20 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return assessmentData;
+        }
+    }
+
+    public async addPatient(patient: Partial<IPatientProfile>): Promise<IPatient> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<IPatientProfile, AxiosResponse<IPatient>>(
+                '/patient',
+                patient
+            );
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return patient as IPatient;
         }
     }
 }

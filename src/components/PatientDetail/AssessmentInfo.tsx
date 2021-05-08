@@ -23,7 +23,7 @@ import { GridDropdownField } from 'src/components/common/GridField';
 import { ClickableTableRow } from 'src/components/common/Table';
 import { AssessmentFrequency, assessmentFrequencyValues } from 'src/services/enums';
 import { IAssessment } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 import { last } from 'src/utils/array';
 import { sortAssessment } from 'src/utils/assessment';
 
@@ -74,9 +74,10 @@ const AssessmentEdit: FunctionComponent = observer(() => {
 
 export const AssessmentInfo: FunctionComponent = observer(() => {
     const {
-        currentPatient,
         appConfig: { assessments },
     } = useStores();
+
+    const currentPatient = usePatient();
 
     const validAssessmentNames = assessments.map((a) => a.name);
     const patientAssessmentNames = currentPatient?.assessments?.map((a) => a.assessmentType) || [];

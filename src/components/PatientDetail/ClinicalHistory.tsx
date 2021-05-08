@@ -5,16 +5,16 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
-import { IPsychiatryInfo } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
+import { IClinicalHistory } from 'src/services/types';
+import { usePatient } from 'src/stores/stores';
 
-interface IPsychiatryInfoContentProps extends Partial<IPsychiatryInfo> {
+interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {
     editable?: boolean;
     onValueChange: (key: string, value: any) => void;
 }
 
-const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (props) => {
-    const { editable, psychHistory, substanceUse, psychMedications, psychDiagnosis, onValueChange } = props;
+const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = (props) => {
+    const { editable, primaryCancerDiagnosis, pastPsychHistory, pastSubstanceUse, onValueChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -22,52 +22,43 @@ const PsychiatryInfoContent: FunctionComponent<IPsychiatryInfoContentProps> = (p
                 sm={12}
                 editable={editable}
                 multiline={true}
-                maxLine={5}
-                label="Psychiatric History"
-                value={psychHistory}
-                onChange={(text) => onValueChange('psychHistory', text)}
+                maxLine={2}
+                label="Primary Cancer Diagnosis"
+                value={primaryCancerDiagnosis}
+                onChange={(text) => onValueChange('primaryCancerDiagnosis', text)}
             />
             <GridTextField
                 sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}
-                label="Substance Use"
-                value={substanceUse}
-                onChange={(text) => onValueChange('substanceUse', text)}
+                label="Past Psychiatric History"
+                helperText="Include prior diagnosis, treatment, hospitalization, and suicide attempts"
+                value={pastPsychHistory}
+                onChange={(text) => onValueChange('pastPsychHistory', text)}
             />
             <GridTextField
                 sm={12}
                 editable={editable}
                 multiline={true}
                 maxLine={5}
-                label="Psychiatric Medications"
-                value={psychMedications}
-                onChange={(text) => onValueChange('psychMedications', text)}
-            />
-            <GridTextField
-                sm={12}
-                editable={editable}
-                multiline={true}
-                maxLine={5}
-                label="Psychiatric Diagnosis"
-                value={psychDiagnosis}
-                onChange={(text) => onValueChange('psychDiagnosis', text)}
+                label="Substance Use History"
+                value={pastSubstanceUse}
+                onChange={(text) => onValueChange('pastSubstanceUse', text)}
             />
         </Grid>
     );
 };
 
-const state = observable<{ open: boolean } & IPsychiatryInfo>({
+const state = observable<{ open: boolean } & IClinicalHistory>({
     open: false,
-    psychHistory: '',
-    substanceUse: '',
-    psychMedications: '',
-    psychDiagnosis: '',
+    primaryCancerDiagnosis: '',
+    pastPsychHistory: '',
+    pastSubstanceUse: '',
 });
 
-export const PsychiatryInfo: FunctionComponent = observer(() => {
-    const { currentPatient } = useStores();
+export const ClinicalHistory: FunctionComponent = observer(() => {
+    const currentPatient = usePatient();
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -79,10 +70,9 @@ export const PsychiatryInfo: FunctionComponent = observer(() => {
 
     const handleOpen = action(() => {
         if (!!currentPatient) {
-            state.psychHistory = currentPatient.psychHistory;
-            state.substanceUse = currentPatient.substanceUse;
-            state.psychMedications = currentPatient.psychMedications;
-            state.psychDiagnosis = currentPatient.psychDiagnosis;
+            state.primaryCancerDiagnosis = currentPatient.primaryCancerDiagnosis;
+            state.pastPsychHistory = currentPatient.pastPsychHistory;
+            state.pastSubstanceUse = currentPatient.pastSubstanceUse;
         }
 
         state.open = true;
@@ -96,23 +86,22 @@ export const PsychiatryInfo: FunctionComponent = observer(() => {
 
     return (
         <ActionPanel
-            id="psychiatry"
-            title="Psychiatry Information"
+            id="clinical-history"
+            title="Clinical History"
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <PsychiatryInfoContent
+            <ClinicalHistoryContent
                 editable={false}
-                psychHistory={currentPatient?.psychHistory}
-                substanceUse={currentPatient?.substanceUse}
-                psychMedications={currentPatient?.psychMedications}
-                psychDiagnosis={currentPatient?.psychDiagnosis}
+                primaryCancerDiagnosis={currentPatient?.primaryCancerDiagnosis}
+                pastPsychHistory={currentPatient?.pastPsychHistory}
+                pastSubstanceUse={currentPatient?.pastSubstanceUse}
                 onValueChange={onValueChange}
             />
 
             <Dialog open={state.open} onClose={handleClose}>
-                <DialogTitle>Edit Psychiatry Information</DialogTitle>
+                <DialogTitle>Edit Clinical History</DialogTitle>
                 <DialogContent>
-                    <PsychiatryInfoContent editable={true} {...state} onValueChange={onValueChange} />
+                    <ClinicalHistoryContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
@@ -127,4 +116,4 @@ export const PsychiatryInfo: FunctionComponent = observer(() => {
     );
 });
 
-export default PsychiatryInfo;
+export default ClinicalHistory;

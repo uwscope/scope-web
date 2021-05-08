@@ -3,24 +3,25 @@ from enum import Enum
 
 class ClinicCode(Enum):
     Breast = "Breast"
-    Endocrine = ("Endocrine",)
-    GI = ("GI",)
-    GIPancreatic = ("GI – Pancreatic",)
-    GU = ("GU",)
-    GYN = ("GYN",)
-    HEME = ("HEME",)
-    HEMESickleCell = ("HEME – Sickle Cell",)
-    HNL = ("HNL",)
-    Immunotherapy = ("Immunotherapy",)
-    MelanomaRenal = ("Melanoma/Renal",)
-    Neuro = ("Neuro",)
-    NWHospital = ("NW Hospital",)
-    Sarcoma = ("Sarcoma",)
-    TransplantAuto = ("Transplant – Auto",)
-    TransplantAllo = ("Transplant – Allo",)
-    TransplantCART = ("Transplant – CAR-T",)
-    TransplantLTFU = ("Transplant – LTFU",)
-    TransplantTTC = ("Transplant – TTC",)
+    Endocrine = "Endocrine"
+    GI = "GI"
+    GIPancreatic = "GI – Pancreatic"
+    GU = "GU"
+    GYN = "GYN"
+    HEME = "HEME"
+    HEMESickleCell = "HEME – Sickle Cell"
+    HNL = "HNL"
+    Immunotherapy = "Immunotherapy"
+    MelanomaRenal = "Melanoma/Renal"
+    Neuro = "Neuro"
+    NWHospital = "NW Hospital"
+    Sarcoma = "Sarcoma"
+    TransplantAuto = "Transplant – Auto"
+    TransplantAllo = "Transplant – Allo"
+    TransplantCART = "Transplant – CAR-T"
+    TransplantLTFU = "Transplant – LTFU"
+    TransplantTTC = "Transplant – TTC"
+    Other = "Other"
 
 
 class PatientSex(Enum):
@@ -28,16 +29,28 @@ class PatientSex(Enum):
     Female = "Female"
 
 
-class TreatmentStatus(Enum):
-    Active = "Active"
-    ActiveDistressed = "Active Distressed"
-    Deceased = "Deceased"
+class PatientGender(Enum):
+    Male = "Male"
+    Female = "Female"
+
+
+class PatientRaceEthnicity(Enum):
+    White = "White"
+    Black = "Black"
+
+
+class PatientPronoun(Enum):
+    HeHim = "He/Him"
+    SheHer = "She/Her"
+    TheyThem = "They/Them"
+
+
+class DepressionTreatmentStatus(Enum):
+    CoCM = "CoCM"
+    CoCMRelapse = "CoCM Relapse Prevention"
     Discharged = "Discharged"
-    FollowedByOutside = "Followed by Outside MHP ONLY"
-    FollowedByPsych = "Followed by Psych ONLY"
-    RelapsePrevention = "Relapse Prevention"
-    Inactive = "Inactive"
-    Continued = "Continued"
+    Pending = "Pending"
+    Other = "Other"
 
 
 class FollowupSchedule(Enum):
@@ -47,13 +60,11 @@ class FollowupSchedule(Enum):
 
 
 class DiscussionFlag(Enum):
-    NoFlag = "None"
     SafetyRisk = "Flag as safety risk"
     Discussion = "Flag for discussion"
-    SafetyRiskDiscussion = "Flag for discussion & safety risk"
 
 
-class TreatmentRegimen(Enum):
+class CancerTreatmentRegimen(Enum):
     Surgery = "Surgery"
     Chemotherapy = "Chemotherapy"
     Radiation = "Radiation"
@@ -62,16 +73,24 @@ class TreatmentRegimen(Enum):
     CART = "CAR-T"
     Endocrine = "Endocrine"
     Surveillance = "Surveillance"
+    Other = "Other"
 
 
 class Referral(Enum):
-    NoReferral = "None"
     Psychiatry = "Psychiatry"
     Psychology = "Psychology"
     PtNavigation = "Pt Navigation"
     IntegrativeMedicine = "Integrative Medicine"
     SpiritualCare = "Spiritual Care"
     PalliativeCare = "Palliative Care"
+    Other = "Other"
+
+
+class ReferralStatus(Enum):
+    NotReferral = "Not Referred"
+    Pending = "Pending"
+    Active = "Active"
+    Completed = "Completed"
 
 
 class SessionType(Enum):
@@ -105,6 +124,16 @@ class BehavioralActivationChecklist(Enum):
     ContingencyManagement = "Contingency management"
     ManagingAvoidance = "Managing avoidance behaviors"
     ProblemSolving = "Problem-solving"
+
+
+class BehavioralStrategyChecklist(Enum):
+    BehavioralActivation = "Behavioral Activation"
+    MotivationalInterviewing = "Motivational Interviewing"
+    ProblemSolvingTherapy = "Problem Solving Therapy"
+    CognitiveTherapy = "Cognitive Therapy"
+    MindfulnessStrategies = "Mindfulness Strategies"
+    SupportiveTherapy = "Supportive Therapy"
+    Other = "Other"
 
 
 class AssessmentType(Enum):

@@ -5,7 +5,7 @@ import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface ICaseloadTableProps {
     patients: ReadonlyArray<IPatientStore>;
-    onPatientClick?: (mrn: number) => void;
+    onPatientClick?: (mrn: string) => void;
 }
 
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
@@ -13,7 +13,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     const onRowClick = (rowData: string[]) => {
         if (!!onPatientClick) {
-            onPatientClick(Number(rowData[0]));
+            onPatientClick(rowData[0]);
         }
     };
 
@@ -21,10 +21,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
     const columns = [
         { name: 'MRN', label: 'MRN', options: { filter: false } },
         { name: 'name', label: 'Name', options: { filter: false } },
-        { name: 'treatmentStatus', label: 'Treatment Status' },
+        { name: 'depressionTreatmentStatus', label: 'Depression Treatment Status' },
         { name: 'clinicCode', label: 'Clinic Code' },
         { name: 'followupSchedule', label: 'Follow-up Schedule' },
-        { name: 'discussionFlag', label: 'Discussion Flag' },
     ] as MUIDataTableColumnDef[];
 
     const data = patients.map((p) => Object.assign({}, p));

@@ -8,10 +8,11 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableContainer,
+    TableCellProps,
     TableHead,
     TableRow,
     Typography,
+    withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { compareAsc, format } from 'date-fns';
@@ -23,8 +24,27 @@ import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { ClickableTableRow } from 'src/components/common/Table';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
-import { useStores } from 'src/stores/stores';
-import { getAssessmentScore } from 'src/utils/assessment';
+import { usePatient } from 'src/stores/stores';
+import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
+import styled, { ThemedStyledProps } from 'styled-components';
+
+const CenteredTableCell = styled(TableCell)({
+    minWidth: 120,
+    textAlign: 'center',
+});
+
+const ColoredTabledCell = withTheme(
+    styled(CenteredTableCell)((props: ThemedStyledProps<TableCellProps & { $color: string }, any>) => ({
+        color: props.theme.customPalette.scoreColors[props.$color],
+        fontWeight: 600,
+    }))
+);
+
+const HorizontalScrollTable = styled(Table)({
+    overflowX: 'auto',
+    width: '100%',
+    display: 'block',
+});
 
 export interface IAssessmentProgressProps {
     instruction?: string;
@@ -36,7 +56,7 @@ export interface IAssessmentProgressProps {
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
-    const { currentPatient } = useStores();
+    const currentPatient = usePatient();
     const { instruction, questions, options, assessment, maxValue, onSaveAssessmentData } = props;
 
     const state = useLocalObservable<{ open: boolean; dataId: string | undefined; data: AssessmentData; date: Date }>(
@@ -105,36 +125,36 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">
                 {!!assessmentData && assessmentData.length > 0 && (
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    {questionIds.length > 0 ?? <TableCell>Score</TableCell>}
-                                    {questionIds.map((p) => (
-                                        <TableCell key={p}>{p}</TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {assessmentData.map((d, idx) => {
-                                    return (
-                                        <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
-                                            <TableCell component="th" scope="row">
-                                                {format(d.date, 'MM/dd/yyyy')}
-                                            </TableCell>
-                                            {questionIds.length > 0 ?? (
-                                                <TableCell>{getAssessmentScore(d.pointValues)}</TableCell>
-                                            )}
-                                            {questionIds.map((p) => (
-                                                <TableCell key={p}>{d.pointValues[p]}</TableCell>
-                                            ))}
-                                        </ClickableTableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <HorizontalScrollTable size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Date</TableCell>
+                                {questionIds.length > 1 ? <CenteredTableCell>Total</CenteredTableCell> : null}
+                                {questionIds.map((p) => (
+                                    <CenteredTableCell key={p}>{p}</CenteredTableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {assessmentData.map((d, idx) => {
+                                const totalScore = getAssessmentScore(d.pointValues);
+                                const scoreColor = getAssessmentScoreColorName(d.assessmentType, totalScore);
+                                return (
+                                    <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
+                                        <TableCell component="th" scope="row">
+                                            {format(d.date, 'MM/dd/yyyy')}
+                                        </TableCell>
+                                        {questionIds.length > 1 ? (
+                                            <ColoredTabledCell $color={scoreColor}>{totalScore}</ColoredTabledCell>
+                                        ) : null}
+                                        {questionIds.map((p) => (
+                                            <CenteredTableCell key={p}>{d.pointValues[p]}</CenteredTableCell>
+                                        ))}
+                                    </ClickableTableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </HorizontalScrollTable>
                 )}
                 {!!assessmentData && assessmentData.length > 0 && (
                     <Grid item xs={12}>

@@ -2,16 +2,24 @@ import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, when } from 'mobx';
 import {
     ClinicCode,
-    DiscussionFlag,
+    DepressionTreatmentStatus,
     FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
     PatientSex,
-    Referral,
-    TreatmentRegimen,
-    TreatmentStatus,
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IActivity, IAssessment, IAssessmentDataPoint, IPatient, ISession } from 'src/services/types';
+import {
+    CancerTreatmentRegimenFlags,
+    DiscussionFlags,
+    IActivity,
+    IAssessment,
+    IAssessmentDataPoint,
+    IPatient,
+    ISession,
+} from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
@@ -26,39 +34,46 @@ export interface IPatientStore extends IPatient {
 }
 
 export class PatientStore implements IPatientStore {
-    // Medical information
-    public MRN: number;
-    public firstName: string;
-    public lastName: string;
+    // IPatientProfile
     public name: string;
+    public MRN: string;
+    public clinicCode: ClinicCode;
+    public depressionTreatmentStatus: DepressionTreatmentStatus;
     public birthdate: Date;
     public sex: PatientSex;
-    public clinicCode: ClinicCode;
-    public treatmentRegimen: TreatmentRegimen;
-    public medicalDiagnosis: string;
+    public gender: PatientGender;
+    public pronoun: PatientPronoun;
+    public race: PatientRaceEthnicity;
+    public primaryOncologyProvider: string;
+    public primaryCareManager: string;
+
+    // Clinical History
+    public primaryCancerDiagnosis: string;
+    public pastPsychHistory: string;
+    public pastSubstanceUse: string;
 
     // Treatment Information
-    public primaryCareManager: string;
-    public treatmentStatus: TreatmentStatus;
-    public followupSchedule: FollowupSchedule;
-    public discussionFlag: DiscussionFlag;
-    public referral: Referral;
-    public treatmentPlan: string;
-
-    // Psychiatry
-    public psychHistory: string;
-    public substanceUse: string;
-    public psychMedications: string;
+    // public primaryCareManager: string;
+    public currentTreatmentRegimen: CancerTreatmentRegimenFlags;
+    public currentTreatmentRegimenOther: string;
+    public currentTreatmentRegimenNotes: string;
     public psychDiagnosis: string;
+    public discussionFlag: DiscussionFlags;
+    public followupSchedule: FollowupSchedule;
+
+    // TBD
+    // public referral: Referral;
+    // public treatmentPlan: string;
+    // public psychMedications: string;
 
     // Sessions
-    public sessions: ISession[];
+    public sessions: ISession[] = [];
 
     // Assessments
-    public assessments: IAssessment[];
+    public assessments: IAssessment[] = [];
 
     // Activities
-    public activities: IActivity[];
+    public activities: IActivity[] = [];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly updateSessionQuery: PromiseQuery<ISession>;
@@ -66,31 +81,45 @@ export class PatientStore implements IPatientStore {
     private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
 
     constructor(patient: IPatient) {
-        // Can't refactor due to initialization error
-        // Medical information
+        // IPatientProfile
+        this.name = patient.name;
         this.MRN = patient.MRN;
-        this.firstName = patient.firstName;
-        this.lastName = patient.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
+        this.clinicCode = patient.clinicCode;
+        this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.birthdate = patient.birthdate;
         this.sex = patient.sex;
-        this.clinicCode = patient.clinicCode;
-        this.treatmentRegimen = patient.treatmentRegimen;
-        this.medicalDiagnosis = patient.medicalDiagnosis;
+        this.gender = patient.gender;
+        this.pronoun = patient.pronoun;
+        this.race = patient.race;
+        this.primaryOncologyProvider = patient.primaryOncologyProvider;
+        this.primaryCareManager = patient.primaryCareManager;
+
+        // Medical information
+        // this.MRN = patient.MRN;
+        // this.name = patient.name;
+        // this.birthdate = patient.birthdate;
+        // this.sex = patient.sex;
+        // this.clinicCode = patient.clinicCode;
+
+        // Clinical History
+        this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis;
+        this.pastPsychHistory = patient.pastPsychHistory;
+        this.pastSubstanceUse = patient.pastSubstanceUse;
 
         // Treatment information
-        this.primaryCareManager = patient.primaryCareManager;
-        this.treatmentStatus = patient.treatmentStatus;
-        this.followupSchedule = patient.followupSchedule;
-        this.discussionFlag = patient.discussionFlag;
-        this.referral = patient.referral;
-        this.treatmentPlan = patient.treatmentPlan;
-
-        // Psychiatry
-        this.psychHistory = patient.psychHistory;
-        this.substanceUse = patient.substanceUse;
-        this.psychMedications = patient.psychMedications;
+        // this.primaryCareManager = patient.primaryCareManager;
+        this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
+        this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
+        this.currentTreatmentRegimenNotes = patient.currentTreatmentRegimenNotes;
+        // this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.psychDiagnosis = patient.psychDiagnosis;
+        this.discussionFlag = patient.discussionFlag;
+        this.followupSchedule = patient.followupSchedule;
+
+        // TBD
+        // this.referral = patient.referral;
+        // this.treatmentPlan = patient.treatmentPlan;
+        // this.psychMedications = patient.psychMedications;
 
         // Sessions
         this.sessions = patient.sessions;
@@ -102,7 +131,7 @@ export class PatientStore implements IPatientStore {
         this.activities = patient.activities;
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
-        this.updateSessionQuery = new PromiseQuery(patient.sessions[0], 'updateSession');
+        this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
         this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
         this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
 
@@ -240,30 +269,33 @@ export class PatientStore implements IPatientStore {
     private setPatientData(patient: IPatient) {
         console.log(patient);
 
+        Object.assign(this, patient);
+
         // Medical information
         this.MRN = patient.MRN ?? this.MRN;
-        this.firstName = patient.firstName ?? this.firstName;
-        this.lastName = patient.lastName ?? this.lastName;
-        this.name = `${this.firstName} ${this.lastName}`;
+        this.name = patient.name;
         this.birthdate = patient.birthdate ?? this.birthdate;
         this.sex = patient.sex ?? this.sex;
         this.clinicCode = patient.clinicCode ?? this.clinicCode;
-        this.treatmentRegimen = patient.treatmentRegimen ?? this.treatmentPlan;
-        this.medicalDiagnosis = patient.medicalDiagnosis ?? this.medicalDiagnosis;
+
+        // Clinical History
+        this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis ?? this.primaryCancerDiagnosis;
+        this.pastPsychHistory = patient.pastPsychHistory ?? this.pastPsychHistory;
+        this.pastSubstanceUse = patient.pastSubstanceUse ?? this.pastSubstanceUse;
 
         // Treatment information
         this.primaryCareManager = patient.primaryCareManager ?? this.primaryCareManager;
-        this.treatmentStatus = patient.treatmentStatus ?? this.treatmentStatus;
-        this.followupSchedule = patient.followupSchedule ?? this.followupSchedule;
-        this.discussionFlag = patient.discussionFlag ?? this.discussionFlag;
-        this.referral = patient.referral ?? this.referral;
-        this.treatmentPlan = patient.treatmentPlan ?? this.treatmentPlan;
-
-        // Psychiatry
-        this.psychHistory = patient.psychHistory ?? this.psychHistory;
-        this.substanceUse = patient.substanceUse ?? this.substanceUse;
-        this.psychMedications = patient.psychMedications ?? this.psychMedications;
+        this.currentTreatmentRegimen = patient.currentTreatmentRegimen ?? this.currentTreatmentRegimen;
+        this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther ?? this.currentTreatmentRegimenOther;
+        this.depressionTreatmentStatus = patient.depressionTreatmentStatus ?? this.depressionTreatmentStatus;
         this.psychDiagnosis = patient.psychDiagnosis ?? this.psychDiagnosis;
+        this.discussionFlag = patient.discussionFlag ?? this.discussionFlag;
+        this.followupSchedule = patient.followupSchedule ?? this.followupSchedule;
+
+        // TBD
+        // this.referral = patient.referral ?? this.referral;
+        // this.treatmentPlan = patient.treatmentPlan ?? this.treatmentPlan;
+        // this.psychMedications = patient.psychMedications ?? this.psychMedications;
 
         // Sessions
         this.sessions = patient.sessions ?? this.sessions;

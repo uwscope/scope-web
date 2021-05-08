@@ -1,16 +1,19 @@
 import {
     AssessmentFrequency,
     BehavioralActivationChecklistItem,
+    BehavioralStrategyChecklistItem,
+    CancerTreatmentRegimen,
     ClinicCode,
+    DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
+    PatientGender,
+    PatientPronoun,
+    PatientRaceEthnicity,
     PatientSex,
     Referral,
+    ReferralStatus,
     SessionType,
-    TreatmentChange,
-    TreatmentPlan,
-    TreatmentRegimen,
-    TreatmentStatus,
 } from 'src/services/enums';
 
 export type KeyedMap<T> = { [key: string]: T };
@@ -20,16 +23,31 @@ export interface IUser {
     readonly authToken: string;
 }
 
-export type BAChecklistMap = { [item in BehavioralActivationChecklistItem]: boolean };
+export type BAChecklistFlags = { [item in BehavioralActivationChecklistItem]: boolean };
+export type BehavioralStrategyChecklistFlags = { [item in BehavioralStrategyChecklistItem]: boolean };
+export type ReferralStatusFlags = { [item in Referral]: ReferralStatus };
+
 export interface ISession {
-    readonly sessionId: string;
-    readonly date: Date;
-    readonly sessionType: SessionType;
-    readonly billableMinutes: number;
-    readonly treatmentPlan: TreatmentPlan;
-    readonly treatmentChange: TreatmentChange;
-    readonly behavioralActivationChecklist: BAChecklistMap;
-    readonly sessionNote: string;
+    sessionId: string;
+    date: Date;
+    sessionType: SessionType;
+    billableMinutes: number;
+
+    // Medications
+    medicationChange: string;
+    currentMedications: string;
+
+    // Behavioral strategies
+    behavioralStrategyChecklist: BehavioralStrategyChecklistFlags;
+    behavioralStrategyOther: string;
+    behavioralActivationChecklist: BAChecklistFlags;
+
+    // Referrals
+    referralStatus: ReferralStatusFlags;
+    referralOther: string;
+
+    otherRecommendations: string;
+    sessionNote: string;
 }
 
 export interface IAssessment {
@@ -54,35 +72,38 @@ export interface IActivity {
     readonly moodData: IAssessmentDataPoint[];
 }
 
-export interface IMedicalInfo {
-    primaryCareManager: string;
-    sex: PatientSex;
-    birthdate: Date;
+export interface IPatientProfile {
+    name: string;
+    MRN: string;
     clinicCode: ClinicCode;
-    treatmentRegimen: TreatmentRegimen;
-    medicalDiagnosis: string;
+    depressionTreatmentStatus: DepressionTreatmentStatus;
+    birthdate: Date;
+    sex: PatientSex;
+    gender: PatientGender;
+    pronoun: PatientPronoun;
+    race: PatientRaceEthnicity;
+    primaryOncologyProvider: string;
+    primaryCareManager: string;
 }
 
+export interface IClinicalHistory {
+    primaryCancerDiagnosis: string;
+    pastPsychHistory: string;
+    pastSubstanceUse: string;
+}
+
+export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
+export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
 export interface ITreatmentInfo {
-    treatmentStatus: TreatmentStatus;
-    followupSchedule: FollowupSchedule;
-    discussionFlag: DiscussionFlag;
-    referral: Referral;
-    treatmentPlan: string;
-}
-
-export interface IPsychiatryInfo {
-    psychHistory: string;
-    substanceUse: string;
-    psychMedications: string;
+    currentTreatmentRegimen: CancerTreatmentRegimenFlags;
+    currentTreatmentRegimenOther: string;
+    currentTreatmentRegimenNotes: string;
     psychDiagnosis: string;
+    discussionFlag: DiscussionFlags;
+    followupSchedule: FollowupSchedule;
 }
 
-export interface IPatient extends IMedicalInfo, ITreatmentInfo, IPsychiatryInfo {
-    readonly MRN: number;
-    readonly firstName: string;
-    readonly lastName: string;
-
+export interface IPatient extends IPatientProfile, IClinicalHistory, ITreatmentInfo {
     // Sessions
     readonly sessions: ISession[];
 

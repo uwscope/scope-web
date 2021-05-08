@@ -4,10 +4,11 @@ declare module '@material-ui/core/styles/createMuiTheme' {
     interface Theme {
         customPalette: {
             subtle: React.CSSProperties['color'];
+            label: React.CSSProperties['color'];
             discrete10: string[];
+            scoreColors: { [key: string]: string };
         };
         customSizes: {
-            drawerWidth: number;
             contentsMenuWidth: number;
             headerHeight: number;
             footerHeight: number;
@@ -16,10 +17,11 @@ declare module '@material-ui/core/styles/createMuiTheme' {
     interface ThemeOptions {
         customPalette: {
             subtle: React.CSSProperties['color'];
+            label: React.CSSProperties['color'];
             discrete10: string[];
+            scoreColors: { [key: string]: string };
         };
         customSizes: {
-            drawerWidth: number;
             contentsMenuWidth: number;
             headerHeight: number;
             footerHeight: number;
@@ -31,6 +33,7 @@ export default function createAppTheme() {
     return createMuiTheme({
         customPalette: {
             subtle: '#eeeeee',
+            label: '#00000088',
             discrete10: [
                 '#1f77b4',
                 '#ff7f0e',
@@ -43,10 +46,14 @@ export default function createAppTheme() {
                 '#bcbd22',
                 '#17becf',
             ],
+            scoreColors: {
+                bad: '#bf2e2e',
+                warning: '#ffbf00',
+                good: '#20ab41',
+            },
         },
         customSizes: {
-            drawerWidth: 240,
-            contentsMenuWidth: 240,
+            contentsMenuWidth: 300,
             headerHeight: 64,
             footerHeight: 80,
         },

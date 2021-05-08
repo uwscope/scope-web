@@ -3,6 +3,15 @@ export type OtherSpecify = 'Other';
 export const patientSexValues = ['Male', 'Female'] as const;
 export type PatientSex = typeof patientSexValues[number];
 
+export const patientGenderValues = ['Male', 'Female'] as const;
+export type PatientGender = typeof patientGenderValues[number];
+
+export const patientPronounValues = ['He/Him', 'She/Her', 'They/Them'] as const;
+export type PatientPronoun = typeof patientPronounValues[number];
+
+export const patientRaceEthnicityValues = ['White', 'Black'] as const;
+export type PatientRaceEthnicity = typeof patientRaceEthnicityValues[number];
+
 export const clinicCodeValues = [
     'Breast',
     'Endocrine',
@@ -23,36 +32,22 @@ export const clinicCodeValues = [
     'Transplant – CAR-T',
     'Transplant – LTFU',
     'Transplant – TTC',
+    'Other',
 ] as const;
 export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const treatmentStatusValues = [
-    'Active',
-    'Active Distressed',
-    'Deceased',
-    'Discharged',
-    'Followed by Outside MHP ONLY',
-    'Followed by Psych ONLY',
-    'Relapse Prevention',
-    'Inactive',
-    'Continued',
-] as const;
-export type TreatmentStatus = typeof treatmentStatusValues[number];
+export const depressionTreatmentStatusValues = ['CoCM', 'CoCM Relapse Prevention', 'Discharged', 'Pending'] as const;
+export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number] | OtherSpecify;
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;
 export type FollowupSchedule = typeof followupScheduleValues[number];
 
-export const discussionFlagValues = [
-    'None',
-    'Flag as safety risk',
-    'Flag for discussion',
-    'Flag for discussion & safety risk',
-] as const;
+export const discussionFlagValues = ['Flag as safety risk', 'Flag for discussion'] as const;
 export type DiscussionFlag = typeof discussionFlagValues[number];
 
-export const treatmentRegimenValues = [
+export const cancerTreatmentRegimenValues = [
     'Surgery',
     'Chemotherapy',
     'Radiation',
@@ -62,18 +57,20 @@ export const treatmentRegimenValues = [
     'Endocrine',
     'Surveillance',
 ] as const;
-export type TreatmentRegimen = typeof treatmentRegimenValues[number] | OtherSpecify;
+export type CancerTreatmentRegimen = typeof cancerTreatmentRegimenValues[number] | OtherSpecify;
 
 export const referralValues = [
-    'None',
     'Psychiatry',
     'Psychology',
-    'Pt Navigation',
+    'Patient Navigation',
     'Integrative Medicine',
     'Spiritual Care',
     'Palliative Care',
 ] as const;
 export type Referral = typeof referralValues[number] | OtherSpecify;
+
+export const referralStatusValues = ['Not Referred', 'Pending', 'Active', 'Completed'] as const;
+export type ReferralStatus = typeof referralStatusValues[number];
 
 export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
 export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
@@ -101,6 +98,16 @@ export const behavioralActivationChecklistValues = [
     'Problem-solving',
 ] as const;
 export type BehavioralActivationChecklistItem = typeof behavioralActivationChecklistValues[number];
+
+export const behavioralStrategyChecklistValues = [
+    'Behavioral Activation',
+    'Motivational Interviewing',
+    'Problem Solving Therapy',
+    'Cognitive Therapy',
+    'Mindfulness Strategies',
+    'Supportive Therapy',
+] as const;
+export type BehavioralStrategyChecklistItem = typeof behavioralStrategyChecklistValues[number] | OtherSpecify;
 
 export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
 export type AssessmentFrequency = typeof assessmentFrequencyValues[number];

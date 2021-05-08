@@ -40,12 +40,10 @@ def get_patients():
 @as_json
 def get_patient_data(mrn):
     if request.method == "GET":
-        patient_mrn = parseInt(escape(mrn))
-
-        if patient_mrn == None or patient_map.get(patient_mrn, None) == None:
+        if mrn == None or patient_map.get(mrn, None) == None:
             return "Patient not found", 404
 
-        return patient_map[patient_mrn]
+        return patient_map[mrn]
 
     else:
         return "Method not allowed", 405
