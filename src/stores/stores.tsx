@@ -45,4 +45,4 @@ export const PatientStoreProvider: PatientStoreComponent = ({ children, patient 
     return <PatientStoreContext.Provider value={patient}>{children}</PatientStoreContext.Provider>;
 };
 
-export const usePatient = () => useContext(PatientStoreContext);
+export const usePatient = () => useContext(PatientStoreContext) as IPatientStore;

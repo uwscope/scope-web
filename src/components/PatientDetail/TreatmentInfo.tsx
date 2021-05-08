@@ -5,15 +5,13 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
-import { depressionTreatmentStatusValues, followupScheduleValues } from 'src/services/enums';
+import { followupScheduleValues } from 'src/services/enums';
 import { ITreatmentInfo } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
-import { getLatestScores } from 'src/utils/assessment';
 
-interface ITreatmentInfoContentProps extends Partial<ITreatmentInfo> {
+interface ITreatmentInfoContentProps extends ITreatmentInfo {
     editable?: boolean;
     onValueChange: (key: string, value: any) => void;
-    latestScores: string;
 }
 
 const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (props) => {
@@ -21,12 +19,11 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
         editable,
         currentTreatmentRegimen,
         currentTreatmentRegimenOther,
-        depressionTreatmentStatus,
+        currentTreatmentRegimenNotes,
         psychDiagnosis,
         discussionFlag,
         followupSchedule,
         onValueChange,
-        latestScores,
     } = props;
 
     return (
@@ -39,12 +36,14 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 onChange={(flags) => onValueChange('currentTreatmentRegimen', flags)}
                 onOtherChange={(text) => onValueChange('currentTreatmentRegimenOther', text)}
             />
-            <GridDropdownField
+            <GridTextField
+                sm={12}
                 editable={editable}
-                label="Depression Treatment Status"
-                value={depressionTreatmentStatus}
-                options={depressionTreatmentStatusValues}
-                onChange={(text) => onValueChange('depressionTreatmentStatus', text)}
+                multiline={true}
+                maxLine={5}
+                label="Treatment Notes"
+                value={currentTreatmentRegimenNotes}
+                onChange={(text) => onValueChange('currentTreatmentRegimenNotes', text)}
             />
             <GridTextField
                 sm={12}
@@ -68,14 +67,6 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 options={followupScheduleValues}
                 onChange={(text) => onValueChange('followupSchedule', text)}
             />
-            <GridTextField
-                sm={12}
-                editable={false}
-                multiline={true}
-                maxLine={3}
-                label="Latest Assessment Scores"
-                value={latestScores}
-            />
         </Grid>
     );
 };
@@ -92,20 +83,18 @@ const defaultTreatmentRegimen = {
     Other: false,
 };
 
-const state = observable<{ open: boolean; latestScores: string } & ITreatmentInfo>({
+const state = observable<{ open: boolean } & ITreatmentInfo>({
     open: false,
     currentTreatmentRegimen: defaultTreatmentRegimen,
     currentTreatmentRegimenOther: '',
-    depressionTreatmentStatus: 'CoCM',
+    currentTreatmentRegimenNotes: '',
     psychDiagnosis: '',
     followupSchedule: '2-week follow-up',
     discussionFlag: { 'Flag as safety risk': false, 'Flag for discussion': false },
-    latestScores: '',
 });
 
 export const TreatmentInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
-    const latestScores = !!currentPatient ? getLatestScores(currentPatient.assessments) : '';
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -117,13 +106,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
 
     const handleOpen = action(() => {
         if (!!currentPatient) {
-            state.currentTreatmentRegimen = currentPatient.currentTreatmentRegimen;
-            state.currentTreatmentRegimenOther = currentPatient.currentTreatmentRegimenOther;
-            state.depressionTreatmentStatus = currentPatient.depressionTreatmentStatus;
-            state.psychDiagnosis = currentPatient.psychDiagnosis;
-            state.followupSchedule = currentPatient.followupSchedule;
-            state.discussionFlag = currentPatient.discussionFlag;
-            state.latestScores = latestScores;
+            Object.assign(state, currentPatient);
         }
 
         state.open = true;
@@ -142,14 +125,13 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <TreatmentInfoContent
                 editable={false}
-                currentTreatmentRegimen={currentPatient?.currentTreatmentRegimen}
-                currentTreatmentRegimenOther={currentPatient?.currentTreatmentRegimenOther}
-                depressionTreatmentStatus={currentPatient?.depressionTreatmentStatus}
-                psychDiagnosis={currentPatient?.psychDiagnosis}
-                discussionFlag={currentPatient?.discussionFlag}
-                followupSchedule={currentPatient?.followupSchedule}
+                currentTreatmentRegimen={currentPatient.currentTreatmentRegimen}
+                currentTreatmentRegimenOther={currentPatient.currentTreatmentRegimenOther}
+                currentTreatmentRegimenNotes={currentPatient.currentTreatmentRegimenNotes}
+                psychDiagnosis={currentPatient.psychDiagnosis}
+                discussionFlag={currentPatient.discussionFlag}
+                followupSchedule={currentPatient.followupSchedule}
                 onValueChange={onValueChange}
-                latestScores={latestScores}
             />
 
             <Dialog open={state.open} onClose={handleClose}>

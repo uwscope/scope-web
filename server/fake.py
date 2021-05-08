@@ -105,6 +105,7 @@ def getFakePatient():
         # Treatment information
         "currentTreatmentRegimen": getRandomFlags(CancerTreatmentRegimen),
         "currentTreatmentRegimenOther": shortLorem.sentence(),
+        "currentTreatmentRegimenNotes": shortLorem.sentence(),
         "psychDiagnosis": shortLorem.paragraph(),
         "discussionFlag": getRandomFlags(DiscussionFlag),
         "followupSchedule": getRandomItem(FollowupSchedule).value,

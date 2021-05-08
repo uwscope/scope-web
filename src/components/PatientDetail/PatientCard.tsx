@@ -7,7 +7,7 @@ import React, { FunctionComponent } from 'react';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
 import { IPatientProfile } from 'src/services/types';
-import { IPatientStore } from 'src/stores/PatientStore';
+import { usePatient } from 'src/stores/stores';
 import styled from 'styled-components';
 
 const Container = withTheme(
@@ -40,12 +40,12 @@ const state = observable<{ open: boolean }>({
 });
 
 export interface IPatientCardProps {
-    patient: IPatientStore;
     loading?: boolean;
 }
 
 export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props) => {
-    const { patient, loading } = props;
+    const { loading } = props;
+    const patient = usePatient();
 
     const handleClose = action(() => {
         state.open = false;

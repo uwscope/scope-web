@@ -56,23 +56,6 @@ export interface IActivity {
     readonly moodData: IAssessmentDataPoint[];
 }
 
-export interface IClinicalHistory {
-    primaryCancerDiagnosis: string;
-    pastPsychHistory: string;
-    pastSubstanceUse: string;
-}
-
-export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
-export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
-export interface ITreatmentInfo {
-    currentTreatmentRegimen: CancerTreatmentRegimenFlags;
-    currentTreatmentRegimenOther: string;
-    depressionTreatmentStatus: DepressionTreatmentStatus; // Remove
-    psychDiagnosis: string;
-    discussionFlag: DiscussionFlags;
-    followupSchedule: FollowupSchedule;
-}
-
 export interface IPatientProfile {
     name: string;
     MRN: string;
@@ -85,6 +68,23 @@ export interface IPatientProfile {
     race: PatientRaceEthnicity;
     primaryOncologyProvider: string;
     primaryCareManager: string;
+}
+
+export interface IClinicalHistory {
+    primaryCancerDiagnosis: string;
+    pastPsychHistory: string;
+    pastSubstanceUse: string;
+}
+
+export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
+export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
+export interface ITreatmentInfo {
+    currentTreatmentRegimen: CancerTreatmentRegimenFlags;
+    currentTreatmentRegimenOther: string;
+    currentTreatmentRegimenNotes: string;
+    psychDiagnosis: string;
+    discussionFlag: DiscussionFlags;
+    followupSchedule: FollowupSchedule;
 }
 
 export interface IPatient extends IPatientProfile, IClinicalHistory, ITreatmentInfo {

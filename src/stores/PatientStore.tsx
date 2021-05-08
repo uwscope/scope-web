@@ -56,6 +56,7 @@ export class PatientStore implements IPatientStore {
     // public primaryCareManager: string;
     public currentTreatmentRegimen: CancerTreatmentRegimenFlags;
     public currentTreatmentRegimenOther: string;
+    public currentTreatmentRegimenNotes: string;
     public psychDiagnosis: string;
     public discussionFlag: DiscussionFlags;
     public followupSchedule: FollowupSchedule;
@@ -109,6 +110,7 @@ export class PatientStore implements IPatientStore {
         // this.primaryCareManager = patient.primaryCareManager;
         this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
         this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
+        this.currentTreatmentRegimenNotes = patient.currentTreatmentRegimenNotes;
         // this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.psychDiagnosis = patient.psychDiagnosis;
         this.discussionFlag = patient.discussionFlag;

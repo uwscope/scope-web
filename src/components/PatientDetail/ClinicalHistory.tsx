@@ -32,7 +32,7 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 editable={editable}
                 multiline={true}
                 maxLine={5}
-                label="Past Psychiatric History"
+                label="Past Psychiatric History (Include prior diagnosis, treatment, hospitalization, and suicide attempts)"
                 value={pastPsychHistory}
                 onChange={(text) => onValueChange('pastPsychHistory', text)}
             />
@@ -41,7 +41,7 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 editable={editable}
                 multiline={true}
                 maxLine={5}
-                label="Past Substance Use"
+                label="Substance Use History"
                 value={pastSubstanceUse}
                 onChange={(text) => onValueChange('pastSubstanceUse', text)}
             />

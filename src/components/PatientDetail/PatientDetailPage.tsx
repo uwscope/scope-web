@@ -152,7 +152,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             <PatientStoreProvider patient={currentPatient}>
                 <DetailPageContainer>
                     <LeftPaneContainer elevation={3} square>
-                        <PatientCard patient={currentPatient} />
+                        <PatientCard loading={currentPatient.state == 'Pending'} />
                         <Divider variant="middle" />
                         <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
                     </LeftPaneContainer>
