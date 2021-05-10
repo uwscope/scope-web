@@ -47,9 +47,5 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
-        // TODO resolve server paths in dev/prod
-        new webpack.DefinePlugin({
-            __API__: paths.localDevServerHost
-        })
     ],
 }

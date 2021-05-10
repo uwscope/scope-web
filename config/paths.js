@@ -12,5 +12,7 @@ module.exports = {
     tsconfig: resolveProject('tsconfig.json'),
     webpackConfigDev: resolveProject('config/webpack.dev.js'),
     webpackConfigProd: resolveProject('config/webpack.prod.js'),
-    localDevServerHost: "'http://localhost:4000/'"
+
+    appServerProd: '//api/',
+    appServerLocalDev: "'http://localhost:4000/'"
 };
