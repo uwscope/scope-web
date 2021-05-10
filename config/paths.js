@@ -13,6 +13,6 @@ module.exports = {
     webpackConfigDev: resolveProject('config/webpack.dev.js'),
     webpackConfigProd: resolveProject('config/webpack.prod.js'),
 
-    appServerProd: '//api/',
+    appServerProd: '/api/',
     appServerLocalDev: 'http://localhost:4000/',
 };
