@@ -9,11 +9,11 @@ module.exports = merge(common, {
     devtool: 'inline-source-map',
 
     entry: {
-        app: ['webpack-hot-middleware/client']
+        app: ['webpack-hot-middleware/client'],
     },
 
     output: {
-        path: paths.appBuildDev
+        path: paths.appBuildDev,
     },
 
     plugins: [
@@ -21,7 +21,8 @@ module.exports = merge(common, {
         new webpack.HotModuleReplacementPlugin(),
         // Local execution of the app server
         new webpack.DefinePlugin({
-            __API__: paths.appServerLocalDev
+            // Quotes around strings for compile-time text substitution
+            __API__: "'" + paths.appServerLocalDev + "'",
         }),
     ],
 });

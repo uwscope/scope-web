@@ -14,5 +14,5 @@ module.exports = {
     webpackConfigProd: resolveProject('config/webpack.prod.js'),
 
     appServerProd: '//api/',
-    appServerLocalDev: "'http://localhost:4000/'"
+    appServerLocalDev: 'http://localhost:4000/',
 };

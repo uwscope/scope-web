@@ -11,14 +11,14 @@ module.exports = {
     // Extensions Webpack will resolve when files import other files
     resolve: {
         extensions: [
-            '.tsx', '.ts', '.js'
+            '.tsx', '.ts', '.js',
         ],
         plugins: [new TsconfigPathsPlugin({ configFile: paths.tsconfig})]
     },
 
     output: {
         publicPath: "/",
-        filename: '[name].[fullhash].js'
+        filename: '[name].[fullhash].js',
     },
 
     module: {
@@ -46,6 +46,8 @@ module.exports = {
     },
 
     plugins: [
-        new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
+        new HtmlWebpackPlugin({
+            template: paths.appIndexTemplate,
+        }),
     ],
 }

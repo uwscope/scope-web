@@ -9,13 +9,14 @@ module.exports = merge(common, {
     devtool: 'source-map',
 
     output: {
-        path: paths.appBuildProd
+        path: paths.appBuildProd,
     },
 
     plugins: [
         // Local execution of the app server
         new webpack.DefinePlugin({
-            __API__: paths.appServerProd
+            // Quotes around strings for compile-time text substitution
+            __API__: "'" + paths.appServerProd + "'",
         }),
     ],
 });
