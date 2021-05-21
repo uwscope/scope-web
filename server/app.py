@@ -22,7 +22,8 @@ patient_map = {p["MRN"]: p for p in patients}
 ## - check method
 ## - check parameters
 ## - return appropriate error message and code
-
+## - differentiate development versus production execution
+##   (e.g., should not have debugger running in production, for security reasons)
 
 @app.route("/auth")
 @as_json
