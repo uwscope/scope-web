@@ -8,6 +8,11 @@ module.exports = merge(common, {
     mode: 'production',
     devtool: 'source-map',
 
+    // Disable minification for easier debugging
+    optimization: {
+        minimize: false,
+    },
+
     output: {
         path: paths.appBuildProd,
     },
