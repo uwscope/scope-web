@@ -5,7 +5,7 @@ import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface ICaseloadTableProps {
     patients: ReadonlyArray<IPatientStore>;
-    onPatientClick?: (mrn: string) => void;
+    onPatientClick?: (recordId: string) => void;
 }
 
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
@@ -13,7 +13,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     const onRowClick = (rowData: string[]) => {
         if (!!onPatientClick) {
-            onPatientClick(rowData[0]);
+            const found = patients.find((p) => p.MRN == rowData[0]);
+
+            if (!!found) {
+                onPatientClick(found.recordId);
+            }
         }
     };
 

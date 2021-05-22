@@ -60,8 +60,8 @@ type IContent = IContentItem & { content?: React.ReactNode };
 
 export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const { mrn } = useParams<{ mrn: string | undefined }>();
-    const currentPatient = rootStore.getPatientByMRN(mrn);
+    const { recordId } = useParams<{ recordId: string | undefined }>();
+    const currentPatient = rootStore.getPatientByRecordId(recordId);
 
     React.useEffect(
         action(() => {

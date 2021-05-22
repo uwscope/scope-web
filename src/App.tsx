@@ -10,7 +10,7 @@ export const App: FunctionComponent = () => {
         <BrowserRouter>
             <Chrome headerContent={<HeaderContent />}>
                 <RouterSwitch>
-                    <Route path="/patient/:mrn">
+                    <Route path="/patient/:recordId">
                         <PatientDetailPage />
                     </Route>
                     {/* Leave default route to last */}

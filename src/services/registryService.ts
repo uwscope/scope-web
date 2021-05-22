@@ -13,12 +13,12 @@ import { handleDates } from 'src/utils/time';
 // TODO: https://github.com/axios/axios#interceptors
 export interface IRegistryService {
     getPatients(): Promise<IPatient[]>;
-    getPatientData(mrn: string): Promise<IPatient>;
-    updatePatientData(mrn: string, patient: Partial<IPatient>): Promise<IPatient>;
-    updatePatientSession(mrn: string, session: Partial<ISession>): Promise<ISession>;
-    updatePatientAssessment(mrn: string, assessment: Partial<IAssessment>): Promise<IAssessment>;
+    getPatientData(recordId: string): Promise<IPatient>;
+    updatePatientData(recordId: string, patient: Partial<IPatient>): Promise<IPatient>;
+    updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
+    updatePatientAssessment(recordId: string, assessment: Partial<IAssessment>): Promise<IAssessment>;
     updatePatientAssessmentRecord(
-        mrn: string,
+        recordId: string,
         assessmentData: Partial<IAssessmentDataPoint>
     ): Promise<IAssessmentDataPoint>;
     addPatient(patient: Partial<IPatientProfile>): Promise<IPatient>;
@@ -50,15 +50,15 @@ class RegistryService implements IRegistryService {
         return response.data && response.data.patients;
     }
 
-    public async getPatientData(mrn: string): Promise<IPatient> {
-        const response = await this.axiosInstance.get<IPatient>(`/patient/${mrn}`);
+    public async getPatientData(recordId: string): Promise<IPatient> {
+        const response = await this.axiosInstance.get<IPatient>(`/patient/${recordId}`);
         return response.data;
     }
 
-    public async updatePatientData(mrn: string, patient: Partial<IPatient>): Promise<IPatient> {
+    public async updatePatientData(recordId: string, patient: Partial<IPatient>): Promise<IPatient> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.put<IPatient>(`/patient/${mrn}`, patient);
+            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}`, patient);
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
@@ -66,10 +66,10 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async updatePatientSession(mrn: string, session: Partial<ISession>): Promise<ISession> {
+    public async updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.put<ISession>(`/patient/${mrn}/session`, session);
+            const response = await this.axiosInstance.put<ISession>(`/patient/${recordId}/session`, session);
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
@@ -77,10 +77,10 @@ class RegistryService implements IRegistryService {
         }
     }
 
-    public async updatePatientAssessment(mrn: string, assessment: Partial<IAssessment>): Promise<IAssessment> {
+    public async updatePatientAssessment(recordId: string, assessment: Partial<IAssessment>): Promise<IAssessment> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.put<IAssessment>(`/patient/${mrn}/assessment`, assessment);
+            const response = await this.axiosInstance.put<IAssessment>(`/patient/${recordId}/assessment`, assessment);
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
@@ -89,13 +89,13 @@ class RegistryService implements IRegistryService {
     }
 
     public async updatePatientAssessmentRecord(
-        mrn: string,
+        recordId: string,
         assessmentData: IAssessmentDataPoint
     ): Promise<IAssessmentDataPoint> {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<AssessmentData, AxiosResponse<IAssessmentDataPoint>>(
-                `/patient/${mrn}/assessment`,
+                `/patient/${recordId}/assessment`,
                 assessmentData
             );
             return response.data;

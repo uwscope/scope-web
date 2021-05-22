@@ -29,13 +29,13 @@ export const HeaderContent: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const history = useHistory();
 
-    let match = useRouteMatch('/patient/:mrn');
+    let match = useRouteMatch('/patient/:recordId');
 
     var patientName = '';
     if (!!match && !!match.params) {
-        const { mrn } = match?.params as any;
-        if (!!mrn) {
-            const currentPatient = rootStore.getPatientByMRN(mrn);
+        const { recordId } = match?.params as any;
+        if (!!recordId) {
+            const currentPatient = rootStore.getPatientByRecordId(recordId);
             if (!!currentPatient) {
                 patientName = currentPatient.name;
             }

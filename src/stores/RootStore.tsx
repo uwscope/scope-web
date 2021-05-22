@@ -27,7 +27,7 @@ export interface IRootStore {
     logout: () => void;
     load: () => void;
 
-    getPatientByMRN: (mrn: string | undefined) => IPatientStore | undefined;
+    getPatientByRecordId: (recordId: string | undefined) => IPatientStore | undefined;
 }
 
 export class RootStore implements IRootStore {
@@ -110,9 +110,9 @@ export class RootStore implements IRootStore {
         await this.configQuery.fromPromise(promise);
     }
 
-    public getPatientByMRN(mrn: string | undefined) {
-        if (!!mrn) {
-            const patient = this.patientsStore.patients.filter((p) => p.MRN == mrn)[0];
+    public getPatientByRecordId(recordId: string | undefined) {
+        if (!!recordId) {
+            const patient = this.patientsStore.patients.filter((p) => p.recordId == recordId)[0];
 
             return patient;
         }

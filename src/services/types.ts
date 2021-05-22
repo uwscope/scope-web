@@ -73,6 +73,7 @@ export interface IActivity {
 }
 
 export interface IPatientProfile {
+    recordId: string;
     name: string;
     MRN: string;
     clinicCode: ClinicCode;
