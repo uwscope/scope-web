@@ -4,7 +4,6 @@ import React, { FunctionComponent } from 'react';
 import AssessmentProgress from 'src/components/PatientDetail/AssessmentProgress';
 import { IAssessmentContent, KeyedMap } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
-import { contains } from 'src/utils/array';
 
 export const ProgressInformation: FunctionComponent = observer(() => {
     const {
@@ -18,36 +17,31 @@ export const ProgressInformation: FunctionComponent = observer(() => {
         {}
     ) as KeyedMap<IAssessmentContent>;
     const validAssessmentNames = Object.keys(validAssessments);
-    const patientAssessments = currentPatient?.assessments.filter((a) =>
-        contains(validAssessmentNames, a.assessmentType)
+
+    return (
+        <Grid container spacing={3} alignItems="stretch" direction="row">
+            {validAssessmentNames.map((assessmentName) => {
+                const assessmentContent = validAssessments[assessmentName];
+                const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
+                const assessmentData = currentPatient?.assessments.find((a) => a.assessmentType == assessmentName);
+                return (
+                    <Grid item xs={12} sm={12} key={assessmentName}>
+                        <AssessmentProgress
+                            assessmentType={assessmentName}
+                            assessment={assessmentData}
+                            instruction={assessmentContent.instruction}
+                            questions={assessmentContent.questions}
+                            options={assessmentContent.options}
+                            maxValue={assessmentMax}
+                            onSaveAssessmentData={(assessmentData) =>
+                                currentPatient?.updateAssessmentRecord(assessmentData)
+                            }
+                        />
+                    </Grid>
+                );
+            })}
+        </Grid>
     );
-
-    if (!!patientAssessments) {
-        return (
-            <Grid container spacing={3} alignItems="stretch" direction="row">
-                {patientAssessments.map((a) => {
-                    const assessmentContent = validAssessments[a.assessmentType];
-                    const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
-                    return (
-                        <Grid item xs={12} sm={12} key={a.assessmentType}>
-                            <AssessmentProgress
-                                assessment={a}
-                                instruction={assessmentContent.instruction}
-                                questions={assessmentContent.questions}
-                                options={assessmentContent.options}
-                                maxValue={assessmentMax}
-                                onSaveAssessmentData={(assessmentData) =>
-                                    currentPatient?.updateAssessmentRecord(assessmentData)
-                                }
-                            />
-                        </Grid>
-                    );
-                })}
-            </Grid>
-        );
-    }
-
-    return null;
 });
 
 export default ProgressInformation;

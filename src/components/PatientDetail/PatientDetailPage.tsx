@@ -10,7 +10,7 @@ import PatientInformation from 'src/components/PatientDetail/PatientInformation'
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
 import SessionInformation from 'src/components/PatientDetail/SessionInformation';
 import { PatientStoreProvider, useStores } from 'src/stores/stores';
-import { sortAssessment } from 'src/utils/assessment';
+import { sortAssessmentContent } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const DetailPageContainer = withTheme(
@@ -62,6 +62,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { recordId } = useParams<{ recordId: string | undefined }>();
     const currentPatient = rootStore.getPatientByRecordId(recordId);
+    const validAssessments = rootStore.appConfig.assessments;
 
     React.useEffect(
         action(() => {
@@ -106,35 +107,29 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     ] as IContent[];
     contentMenu.push.apply(contentMenu, sessionInfoMenu);
 
-    if (currentPatient?.assessments && currentPatient?.assessments.length > 0) {
-        const progressMenu = [
-            {
-                hash: 'progress',
-                label: 'Progress',
-                top: true,
-                content: <ProgressInformation />,
-            },
-            {
-                hash: 'assessments',
-                label: 'Assessments',
-            },
-        ] as IContent[];
+    const progressMenu = [
+        {
+            hash: 'progress',
+            label: 'Progress',
+            top: true,
+            content: <ProgressInformation />,
+        },
+    ] as IContent[];
 
-        progressMenu.push.apply(
-            progressMenu,
-            currentPatient?.assessments
-                .slice()
-                .sort(sortAssessment)
-                .map(
-                    (a) =>
-                        ({
-                            hash: a.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase(),
-                            label: a.assessmentType,
-                        } as IContent)
-                )
-        );
-        contentMenu.push.apply(contentMenu, progressMenu);
-    }
+    progressMenu.push.apply(
+        progressMenu,
+        validAssessments
+            .slice()
+            .sort(sortAssessmentContent)
+            .map(
+                (a) =>
+                    ({
+                        hash: a.name.replace('-', '').replace(' ', '_').toLocaleLowerCase(),
+                        label: a.name,
+                    } as IContent)
+            )
+    );
+    contentMenu.push.apply(contentMenu, progressMenu);
 
     const baMenu = [
         {

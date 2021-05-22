@@ -51,13 +51,14 @@ export interface IAssessmentProgressProps {
     questions: { question: string; id: string }[];
     options: { text: string; value: number }[];
     maxValue: number;
-    assessment: IAssessment;
+    assessmentType: string;
+    assessment?: IAssessment;
     onSaveAssessmentData?: (assessmentData: Partial<IAssessmentDataPoint>) => void;
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
     const currentPatient = usePatient();
-    const { instruction, questions, options, assessment, maxValue, onSaveAssessmentData } = props;
+    const { instruction, questions, options, assessmentType, assessment, maxValue, onSaveAssessmentData } = props;
 
     const state = useLocalObservable<{ open: boolean; dataId: string | undefined; data: AssessmentData; date: Date }>(
         () => ({
@@ -92,7 +93,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         onSaveAssessmentData &&
             onSaveAssessmentData({
                 assessmentDataId: dataId,
-                assessmentType: assessment.assessmentType,
+                assessmentType: assessmentType,
                 date,
                 pointValues: data,
                 comment: 'Submitted by CM',
@@ -119,12 +120,12 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     return (
         <ActionPanel
-            id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={assessment.assessmentType}
+            id={assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
+            title={assessmentType}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!!assessmentData && assessmentData.length > 0 && (
+                {assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
                     <HorizontalScrollTable size="small">
                         <TableHead>
                             <TableRow>
@@ -163,13 +164,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
                 {(!assessmentData || assessmentData.length == 0) && (
                     <Grid item xs={12}>
-                        <Typography>{`There are no ${assessment.assessmentType} scores submitted for this patient`}</Typography>
+                        <Typography>{`There are no ${assessmentType} scores submitted for this patient`}</Typography>
                     </Grid>
                 )}
             </Grid>
 
             <Dialog open={state.open} onClose={handleClose} fullWidth maxWidth="lg">
-                <DialogTitle>{`Add a new ${assessment.assessmentType} record`}</DialogTitle>
+                <DialogTitle>{`Add a new ${assessmentType} record`}</DialogTitle>
                 <DialogContent>
                     <Questionnaire
                         questions={questions}
