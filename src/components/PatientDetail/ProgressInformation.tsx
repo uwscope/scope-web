@@ -33,9 +33,6 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                             questions={assessmentContent.questions}
                             options={assessmentContent.options}
                             maxValue={assessmentMax}
-                            onSaveAssessmentData={(assessmentData) =>
-                                currentPatient?.updateAssessmentRecord(assessmentData)
-                            }
                         />
                     </Grid>
                 );

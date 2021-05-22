@@ -53,7 +53,7 @@ export interface ISession {
 export interface IAssessment {
     readonly assessmentId: string;
     readonly assessmentType: string;
-    readonly frequency: AssessmentFrequency;
+    frequency: AssessmentFrequency;
     readonly data: IAssessmentDataPoint[];
 }
 
