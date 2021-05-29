@@ -86,7 +86,7 @@ def getRandomFakePatients():
 def getFakePatient():
     return {
         # Patient profile
-        "recordId": uuid.uuid1(),
+        "recordId": str(uuid.uuid1()),
         "name": "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames)),
         "MRN": "%s" % getRandomInteger(10000, 1000000),
         "clinicCode": getRandomItem(ClinicCode).value,

@@ -42,6 +42,8 @@ export const getAssessmentScoreColorName = (assessmentType: string, totalScore: 
             return 'bad';
         } else if (totalScore > 10) {
             return 'warning';
+        } else if (totalScore >= 0) {
+            return 'good';
         }
     }
 
@@ -50,8 +52,10 @@ export const getAssessmentScoreColorName = (assessmentType: string, totalScore: 
             return 'bad';
         } else if (totalScore < 4) {
             return 'warning';
+        } else if (totalScore >= 0) {
+            return 'good';
         }
     }
 
-    return 'good';
+    return 'unknown';
 };

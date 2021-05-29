@@ -1,4 +1,5 @@
 import { parseISO, setHours, setMilliseconds, setMinutes, setSeconds } from 'date-fns';
+import { FollowupSchedule } from 'src/services/enums';
 
 export const clearTime = (date: Date) => {
     return setMilliseconds(setSeconds(setMinutes(setHours(date, 0), 0), 0), 0);
@@ -22,5 +23,18 @@ export const handleDates = (body: any) => {
         } else if (typeof value === 'object') {
             handleDates(value);
         }
+    }
+};
+
+export const getFollowupWeeks = (schedule: FollowupSchedule) => {
+    switch (schedule) {
+        case '1-week follow-up':
+            return 1;
+        case '2-week follow-up':
+            return 2;
+        case '4-week follow-up':
+            return 4;
+        default:
+            return 0;
     }
 };
