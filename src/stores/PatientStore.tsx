@@ -35,6 +35,7 @@ export interface IPatientStore extends IPatient {
 
 export class PatientStore implements IPatientStore {
     // IPatientProfile
+    public recordId: string;
     public name: string;
     public MRN: string;
     public clinicCode: ClinicCode;
@@ -82,6 +83,7 @@ export class PatientStore implements IPatientStore {
 
     constructor(patient: IPatient) {
         // IPatientProfile
+        this.recordId = patient.recordId;
         this.name = patient.name;
         this.MRN = patient.MRN;
         this.clinicCode = patient.clinicCode;
@@ -94,32 +96,18 @@ export class PatientStore implements IPatientStore {
         this.primaryOncologyProvider = patient.primaryOncologyProvider;
         this.primaryCareManager = patient.primaryCareManager;
 
-        // Medical information
-        // this.MRN = patient.MRN;
-        // this.name = patient.name;
-        // this.birthdate = patient.birthdate;
-        // this.sex = patient.sex;
-        // this.clinicCode = patient.clinicCode;
-
         // Clinical History
         this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis;
         this.pastPsychHistory = patient.pastPsychHistory;
         this.pastSubstanceUse = patient.pastSubstanceUse;
 
         // Treatment information
-        // this.primaryCareManager = patient.primaryCareManager;
         this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
         this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
         this.currentTreatmentRegimenNotes = patient.currentTreatmentRegimenNotes;
-        // this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
         this.psychDiagnosis = patient.psychDiagnosis;
         this.discussionFlag = patient.discussionFlag;
         this.followupSchedule = patient.followupSchedule;
-
-        // TBD
-        // this.referral = patient.referral;
-        // this.treatmentPlan = patient.treatmentPlan;
-        // this.psychMedications = patient.psychMedications;
 
         // Sessions
         this.sessions = patient.sessions;
@@ -150,7 +138,7 @@ export class PatientStore implements IPatientStore {
     public async getPatientData() {
         if (this.state != 'Pending') {
             const { registryService } = useServices();
-            const promise = registryService.getPatientData(this.MRN);
+            const promise = registryService.getPatientData(this.recordId);
             const patientData = await this.loadPatientDataQuery.fromPromise(promise);
             this.setPatientData(patientData);
         }
@@ -160,7 +148,7 @@ export class PatientStore implements IPatientStore {
     public async updatePatientData(patient: Partial<IPatient>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.updatePatientData(this.MRN, patient);
+            const promise = registryService.updatePatientData(this.recordId, patient);
             this.loadPatientDataQuery.fromPromise(promise).then((patientData) => {
                 action(() => {
                     this.setPatientData(patientData);
@@ -175,7 +163,7 @@ export class PatientStore implements IPatientStore {
     public async updateSession(session: Partial<ISession>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.updatePatientSession(this.MRN, session);
+            const promise = registryService.updatePatientSession(this.recordId, session);
             this.updateSessionQuery.fromPromise(promise).then((session) => {
                 action(() => {
                     if (!!session.sessionId) {
@@ -205,7 +193,7 @@ export class PatientStore implements IPatientStore {
     public async updateAssessment(assessment: Partial<IAssessment>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.updatePatientAssessment(this.MRN, assessment);
+            const promise = registryService.updatePatientAssessment(this.recordId, assessment);
             this.updateAssessmentQuery.fromPromise(promise).then((assessment) => {
                 action(() => {
                     if (!!assessment.assessmentId) {
@@ -235,7 +223,7 @@ export class PatientStore implements IPatientStore {
     public updateAssessmentRecord(assessmentData: Partial<IAssessmentDataPoint>) {
         const effect = () => {
             const { registryService } = useServices();
-            const promise = registryService.updatePatientAssessmentRecord(this.MRN, assessmentData);
+            const promise = registryService.updatePatientAssessmentRecord(this.recordId, assessmentData);
             this.updateAssessmentRecordQuery.fromPromise(promise).then((data) => {
                 action(() => {
                     const assessment = this.assessments.find((a) => a.assessmentType == data.assessmentType);
@@ -272,6 +260,7 @@ export class PatientStore implements IPatientStore {
         Object.assign(this, patient);
 
         // Medical information
+        this.recordId = patient.recordId ?? this.recordId;
         this.MRN = patient.MRN ?? this.MRN;
         this.name = patient.name;
         this.birthdate = patient.birthdate ?? this.birthdate;
@@ -291,11 +280,6 @@ export class PatientStore implements IPatientStore {
         this.psychDiagnosis = patient.psychDiagnosis ?? this.psychDiagnosis;
         this.discussionFlag = patient.discussionFlag ?? this.discussionFlag;
         this.followupSchedule = patient.followupSchedule ?? this.followupSchedule;
-
-        // TBD
-        // this.referral = patient.referral ?? this.referral;
-        // this.treatmentPlan = patient.treatmentPlan ?? this.treatmentPlan;
-        // this.psychMedications = patient.psychMedications ?? this.psychMedications;
 
         // Sessions
         this.sessions = patient.sessions ?? this.sessions;

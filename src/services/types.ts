@@ -53,7 +53,7 @@ export interface ISession {
 export interface IAssessment {
     readonly assessmentId: string;
     readonly assessmentType: string;
-    readonly frequency: AssessmentFrequency;
+    frequency: AssessmentFrequency;
     readonly data: IAssessmentDataPoint[];
 }
 
@@ -73,6 +73,7 @@ export interface IActivity {
 }
 
 export interface IPatientProfile {
+    recordId: string;
     name: string;
     MRN: string;
     clinicCode: ClinicCode;

@@ -50,6 +50,7 @@ export default function createAppTheme() {
                 bad: '#bf2e2e',
                 warning: '#ffbf00',
                 good: '#20ab41',
+                unknown: '#eee',
             },
         },
         customSizes: {

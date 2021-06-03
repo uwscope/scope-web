@@ -16,7 +16,7 @@ FlaskJSON(app)
 
 ## Temporary store for patients
 patients = getRandomFakePatients()
-patient_map = {p["MRN"]: p for p in patients}
+patient_map = {p["recordId"]: p for p in patients}
 
 ## API TODOs:
 ## - check method
@@ -37,14 +37,14 @@ def get_patients():
     return {"patients": patients}
 
 
-@app.route("/patient/<mrn>", methods=["GET"])
+@app.route("/patient/<recordId>", methods=["GET"])
 @as_json
-def get_patient_data(mrn):
+def get_patient_data(recordId):
     if request.method == "GET":
-        if mrn == None or patient_map.get(mrn, None) == None:
+        if recordId == None or patient_map.get(recordId, None) == None:
             return "Patient not found", 404
 
-        return patient_map[mrn]
+        return patient_map[recordId]
 
     else:
         return "Method not allowed", 405

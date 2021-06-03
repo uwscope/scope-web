@@ -15,14 +15,17 @@ import {
     withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
 import { compareAsc, format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
+import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { ClickableTableRow } from 'src/components/common/Table';
+import { AssessmentFrequency, assessmentFrequencyValues } from 'src/services/enums';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
@@ -51,29 +54,38 @@ export interface IAssessmentProgressProps {
     questions: { question: string; id: string }[];
     options: { text: string; value: number }[];
     maxValue: number;
-    assessment: IAssessment;
-    onSaveAssessmentData?: (assessmentData: Partial<IAssessmentDataPoint>) => void;
+    assessmentType: string;
+    assessment?: IAssessment;
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
     const currentPatient = usePatient();
-    const { instruction, questions, options, assessment, maxValue, onSaveAssessmentData } = props;
 
-    const state = useLocalObservable<{ open: boolean; dataId: string | undefined; data: AssessmentData; date: Date }>(
-        () => ({
-            open: false,
-            dataId: undefined,
-            data: {},
-            date: new Date(),
-        })
-    );
+    const { instruction, questions, options, assessmentType, assessment, maxValue } = props;
+
+    const state = useLocalObservable<{
+        openEdit: boolean;
+        openFreq: boolean;
+        frequency: AssessmentFrequency;
+        dataId: string | undefined;
+        data: AssessmentData;
+        date: Date;
+    }>(() => ({
+        openEdit: false,
+        openFreq: false,
+        frequency: 'Every 2 weeks',
+        dataId: undefined,
+        data: {},
+        date: new Date(),
+    }));
 
     const handleClose = action(() => {
-        state.open = false;
+        state.openEdit = false;
+        state.openFreq = false;
     });
 
     const handleAddRecord = action(() => {
-        state.open = true;
+        state.openEdit = true;
         state.date = new Date();
         state.dataId = undefined;
         state.data = {};
@@ -81,23 +93,35 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const handleEditRecord = (data: IAssessmentDataPoint) =>
         action(() => {
-            state.open = true;
+            state.openEdit = true;
             state.date = data.date;
             state.dataId = data.assessmentDataId;
             Object.assign(state.data, data.pointValues);
         });
 
-    const onSave = action(() => {
+    const handleEditFrequecy = action(() => {
+        state.openFreq = true;
+        state.frequency = assessment?.frequency || 'None';
+    });
+
+    const onSaveEditRecord = action(() => {
         const { data, date, dataId } = state;
-        onSaveAssessmentData &&
-            onSaveAssessmentData({
-                assessmentDataId: dataId,
-                assessmentType: assessment.assessmentType,
-                date,
-                pointValues: data,
-                comment: 'Submitted by CM',
-            });
-        state.open = false;
+        currentPatient.updateAssessmentRecord({
+            assessmentDataId: dataId,
+            assessmentType: assessmentType,
+            date,
+            pointValues: data,
+            comment: 'Submitted by CM',
+        });
+        state.openEdit = false;
+    });
+
+    const onSaveEditFrequency = action(() => {
+        const { frequency } = state;
+        var newAssessment = assessment || ({ assessmentType: assessmentType } as Partial<IAssessment>);
+        newAssessment.frequency = frequency;
+        currentPatient.updateAssessment(newAssessment);
+        state.openFreq = false;
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
@@ -106,6 +130,10 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const onDateChange = action((date: Date) => {
         state.date = date;
+    });
+
+    const onFrequencyChange = action((freq: AssessmentFrequency) => {
+        state.frequency = freq;
     });
 
     const selectedValues = questions.map((q) => state.data[q.id]);
@@ -117,14 +145,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const questionIds = questions.map((q) => q.id);
 
+    const recurrence = assessment?.frequency || 'Not assigned';
+
     return (
         <ActionPanel
-            id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={assessment.assessmentType}
+            id={assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
+            title={`${assessmentType} (${recurrence})`}
             loading={currentPatient?.state == 'Pending'}
-            actionButtons={[{ icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton]}>
+            actionButtons={[
+                { icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton,
+                { icon: <EditIcon />, text: 'Edit Frequency', onClick: handleEditFrequecy } as IActionButton,
+            ]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!!assessmentData && assessmentData.length > 0 && (
+                {assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
                     <HorizontalScrollTable size="small">
                         <TableHead>
                             <TableRow>
@@ -163,13 +196,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
                 {(!assessmentData || assessmentData.length == 0) && (
                     <Grid item xs={12}>
-                        <Typography>{`There are no ${assessment.assessmentType} scores submitted for this patient`}</Typography>
+                        <Typography>{`There are no ${assessmentType} scores submitted for this patient`}</Typography>
                     </Grid>
                 )}
             </Grid>
 
-            <Dialog open={state.open} onClose={handleClose} fullWidth maxWidth="lg">
-                <DialogTitle>{`Add a new ${assessment.assessmentType} record`}</DialogTitle>
+            <Dialog open={state.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
+                <DialogTitle>{`Add a new ${assessmentType} record`}</DialogTitle>
                 <DialogContent>
                     <Questionnaire
                         questions={questions}
@@ -185,7 +218,31 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={onSave} color="primary" disabled={saveDisabled}>
+                    <Button onClick={onSaveEditRecord} color="primary" disabled={saveDisabled}>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={state.openFreq} onClose={handleClose}>
+                <DialogTitle>Edit Assessment Frequency</DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2} alignItems="stretch">
+                        <GridDropdownField
+                            editable={true}
+                            label="Assessment Frequency"
+                            value={state.frequency}
+                            options={assessmentFrequencyValues}
+                            xs={12}
+                            sm={12}
+                            onChange={(text) => onFrequencyChange(text as AssessmentFrequency)}
+                        />
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={onSaveEditFrequency} color="primary">
                         Save
                     </Button>
                 </DialogActions>

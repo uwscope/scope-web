@@ -68,8 +68,8 @@ export const CaseloadPage: FunctionComponent = observer(() => {
 
     const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
 
-    const onPatientClick = (mrn: string) => {
-        history.push(`/patient/${mrn}`);
+    const onPatientClick = (recordId: string) => {
+        history.push(`/patient/${recordId}`);
     };
 
     const handleClose = action(() => {

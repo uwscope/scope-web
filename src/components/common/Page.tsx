@@ -8,6 +8,8 @@ export const Page = withTheme(
         overflowX: 'hidden',
         overflowY: 'auto',
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
     }))
 );
 

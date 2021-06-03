@@ -13,3 +13,5 @@
 
 # Python cache
 */__pycache__/
+.vscode/launch.json
+.vscode/settings.json

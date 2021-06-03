@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, datetime, timedelta
 
 import numpy as np
@@ -85,6 +86,7 @@ def getRandomFakePatients():
 def getFakePatient():
     return {
         # Patient profile
+        "recordId": str(uuid.uuid1()),
         "name": "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames)),
         "MRN": "%s" % getRandomInteger(10000, 1000000),
         "clinicCode": getRandomItem(ClinicCode).value,

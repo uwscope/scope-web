@@ -14,7 +14,9 @@ import {
     withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { compareDesc, format } from 'date-fns';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import { compareAsc, compareDesc, format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -42,6 +44,7 @@ const HorizontalScrollTable = styled(Table)({
     overflowX: 'auto',
     width: '100%',
     display: 'block',
+    maxHeight: '70vh',
 });
 
 const defaultSession: ISession = {
@@ -85,9 +88,10 @@ const defaultSession: ISession = {
     sessionNote: '',
 };
 
-const state = observable<{ open: boolean; isNew: boolean } & ISession>({
+const state = observable<{ open: boolean; isNew: boolean; dateAsc: boolean } & ISession>({
     open: false,
     isNew: false,
+    dateAsc: false,
     ...defaultSession,
 });
 
@@ -221,7 +225,13 @@ export const SessionInfo: FunctionComponent = observer(() => {
         return concatValues;
     };
 
-    const sortedSessions = currentPatient.sessions.slice().sort((a, b) => compareDesc(a.date, b.date));
+    const toggleDateOrder = action(() => {
+        state.dateAsc = !state.dateAsc;
+    });
+
+    const sortedSessions = currentPatient.sessions
+        .slice()
+        .sort((a, b) => (state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date)));
 
     return (
         <ActionPanel
@@ -233,13 +243,20 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 <HorizontalScrollTable size="small">
                     <TableHead>
                         <TableRow>
-                            <SizableTableCell $width={80}>Date</SizableTableCell>
-                            <SizableTableCell $width={80}>Type</SizableTableCell>
+                            <SizableTableCell $width={80}>
+                                <Button
+                                    size="small"
+                                    endIcon={state.dateAsc ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                                    onClick={toggleDateOrder}>
+                                    Date
+                                </Button>
+                            </SizableTableCell>
+                            <SizableTableCell $width={120}>Type</SizableTableCell>
                             <SizableTableCell $width={80}>Billable Minutes</SizableTableCell>
-                            <SizableTableCell $width={120}>Medications</SizableTableCell>
+                            <SizableTableCell $width={200}>Medications</SizableTableCell>
                             <SizableTableCell $width={200}>Behavioral Strategies</SizableTableCell>
                             <SizableTableCell $width={200}>Referrals</SizableTableCell>
-                            <SizableTableCell $width={200}>Other Reco/Action Items</SizableTableCell>
+                            <SizableTableCell $width={200}>Other Recommendations / Action Items</SizableTableCell>
                             <SizableTableCell $width={300}>Notes</SizableTableCell>
                         </TableRow>
                     </TableHead>

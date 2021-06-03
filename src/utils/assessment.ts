@@ -1,20 +1,24 @@
 import { compareDesc } from 'date-fns';
-import { AssessmentData, IAssessment } from 'src/services/types';
+import { AssessmentData, IAssessment, IAssessmentContent } from 'src/services/types';
 import { sum } from 'src/utils/array';
 
-export const sortAssessment = (a: IAssessment, b: IAssessment) => {
-    const getOrder = (assessment: IAssessment) => {
-        switch (assessment.assessmentType) {
-            case 'PHQ-9':
-                return 1;
-            case 'GAD-7':
-                return 2;
-            default:
-                return 3;
-        }
-    };
+const getOrder = (assessment: string) => {
+    switch (assessment) {
+        case 'PHQ-9':
+            return 1;
+        case 'GAD-7':
+            return 2;
+        default:
+            return 3;
+    }
+};
 
-    return getOrder(a) - getOrder(b);
+export const sortAssessment = (a: IAssessment, b: IAssessment) => {
+    return getOrder(a.assessmentType) - getOrder(b.assessmentType);
+};
+
+export const sortAssessmentContent = (a: IAssessmentContent, b: IAssessmentContent) => {
+    return getOrder(a.name) - getOrder(b.name);
 };
 
 export const getAssessmentScore = (pointValues: AssessmentData) => {
@@ -38,6 +42,8 @@ export const getAssessmentScoreColorName = (assessmentType: string, totalScore: 
             return 'bad';
         } else if (totalScore > 10) {
             return 'warning';
+        } else if (totalScore >= 0) {
+            return 'good';
         }
     }
 
@@ -46,8 +52,10 @@ export const getAssessmentScoreColorName = (assessmentType: string, totalScore: 
             return 'bad';
         } else if (totalScore < 4) {
             return 'warning';
+        } else if (totalScore >= 0) {
+            return 'good';
         }
     }
 
-    return 'good';
+    return 'unknown';
 };
