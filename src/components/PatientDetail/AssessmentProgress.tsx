@@ -16,7 +16,8 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
-import { compareAsc, format } from 'date-fns';
+import { format } from 'date-fns';
+import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -141,7 +142,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const assessmentData = (assessment?.data as IAssessmentDataPoint[])
         ?.slice()
-        .sort((a, b) => compareAsc(a.date, b.date));
+        .sort((a, b) => compareDesc(a.date, b.date));
 
     const questionIds = questions.map((q) => q.id);
 

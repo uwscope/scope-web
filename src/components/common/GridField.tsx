@@ -32,7 +32,6 @@ const EditableFormControl = withTheme(
                     border: props.$editable ? undefined : 'none',
                 },
                 '>.MuiFormLabel-root': {
-                    textTransform: 'uppercase',
                     position: 'relative',
                 },
                 '>.MuiFormLabel-root.Mui-focused': {
@@ -69,9 +68,6 @@ const SelectField = withTheme(
 const DatePickerContainer = styled(KeyboardDatePicker)({
     width: '100%',
     margin: 0,
-    '>.MuiFormLabel-root': {
-        textTransform: 'uppercase',
-    },
 });
 
 const OtherGrid = styled(Grid)({
@@ -349,20 +345,8 @@ export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
 }
 
 export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProps> = (props) => {
-    const {
-        editable,
-        label,
-        flags,
-        options,
-        notOption,
-        other,
-        onChange,
-        onOtherChange,
-        xs,
-        sm,
-        maxLine,
-        disabled,
-    } = props;
+    const { editable, label, flags, options, notOption, other, onChange, onOtherChange, xs, sm, maxLine, disabled } =
+        props;
 
     const handleCheck = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {

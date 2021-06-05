@@ -135,3 +135,7 @@ export const gad7ItemValues = [
     'Afraid',
 ] as const;
 export type GAD7Item = typeof gad7ItemValues[number];
+
+export type CaseReviewEntryType = 'Case Review';
+export type SessionEntryType = 'Session';
+export type EntryType = SessionEntryType | CaseReviewEntryType;

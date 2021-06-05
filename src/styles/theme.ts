@@ -1,3 +1,4 @@
+import { indigo } from '@material-ui/core/colors';
 import { createMuiTheme } from '@material-ui/core/styles';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
@@ -57,6 +58,14 @@ export default function createAppTheme() {
             contentsMenuWidth: 300,
             headerHeight: 64,
             footerHeight: 80,
+        },
+        overrides: {
+            MuiFormLabel: {
+                root: {
+                    color: indigo[500],
+                    textTransform: 'uppercase',
+                },
+            },
         },
     });
 }

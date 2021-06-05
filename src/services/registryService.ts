@@ -3,6 +3,7 @@ import {
     AssessmentData,
     IAssessment,
     IAssessmentDataPoint,
+    ICaseReview,
     IPatient,
     IPatientList,
     IPatientProfile,
@@ -16,6 +17,7 @@ export interface IRegistryService {
     getPatientData(recordId: string): Promise<IPatient>;
     updatePatientData(recordId: string, patient: Partial<IPatient>): Promise<IPatient>;
     updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
+    updatePatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview>;
     updatePatientAssessment(recordId: string, assessment: Partial<IAssessment>): Promise<IAssessment>;
     updatePatientAssessmentRecord(
         recordId: string,
@@ -74,6 +76,17 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return session as ISession;
+        }
+    }
+
+    public async updatePatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<ICaseReview>(`/patient/${recordId}/review`, caseReview);
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            return caseReview as ICaseReview;
         }
     }
 
