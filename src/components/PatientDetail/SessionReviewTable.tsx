@@ -32,14 +32,24 @@ const ColumnHeader = styled.div({
 
 const PHQCell = withTheme(
     styled.div<{ score: number }>((props) => ({
-        width: '100%',
+        width: 'calc(100% + 16px)',
+        lineHeight: '1rem',
+        height: '100%',
+        marginLeft: -8,
+        marginRight: -8,
+        padding: props.theme.spacing(1),
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('PHQ-9', props.score)],
     }))
 );
 
 const GADCell = withTheme(
     styled.div<{ score: number }>((props) => ({
-        width: '100%',
+        width: 'calc(100% + 16px)',
+        lineHeight: '1rem',
+        height: '100%',
+        marginLeft: -8,
+        marginRight: -8,
+        padding: props.theme.spacing(1),
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('GAD-7', props.score)],
     }))
 );
@@ -103,32 +113,89 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
 
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Id', width: 150, renderHeader, hide: true },
-        { field: 'date', headerName: 'Date', width: 150, renderHeader },
-        { field: 'type', headerName: 'Type', width: 150, renderHeader },
-        { field: 'billableMinutes', headerName: 'Billable Minutes', width: 150, renderHeader },
-        { field: 'flag', headerName: 'Billable Flag', width: 150, renderHeader },
+        {
+            field: 'id',
+            headerName: 'Id',
+            width: 50,
+            renderHeader,
+            hide: true,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'date',
+            headerName: 'Date',
+            width: 100,
+            renderHeader,
+            sortable: true,
+            hideSortIcons: false,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'type',
+            headerName: 'Type',
+            width: 100,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'billableMinutes',
+            headerName: 'Billable Minutes',
+            width: 80,
+            renderHeader,
+            renderCell: renderMultilineCell,
+            align: 'center',
+        },
         {
             field: 'phq9',
-            headerName: 'PHQ-9',
-            width: 120,
+            headerName: 'PHQ',
+            width: 60,
             renderHeader,
             renderCell: renderPHQCell,
             align: 'center',
         },
         {
             field: 'gad7',
-            headerName: 'GAD-7',
-            width: 120,
+            headerName: 'GAD',
+            width: 60,
             renderHeader,
             renderCell: renderGADCell,
             align: 'center',
         },
-        { field: 'medications', headerName: 'Medications', width: 150, renderHeader, renderCell: renderMultilineCell },
-        { field: 'behavioralStrategies', headerName: 'Behavioral Strategies', width: 150, renderHeader },
-        { field: 'referrals', headerName: 'Referrals', width: 150, renderHeader },
-        { field: 'otherRecommendations', headerName: 'Other Recommendations / Action Items', width: 150, renderHeader },
-        { field: 'note', headerName: 'Note', width: 150, renderHeader, renderCell: renderMultilineCell },
+        {
+            field: 'medications',
+            headerName: 'Medications',
+            width: 200,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'behavioralStrategies',
+            headerName: 'Behavioral Strategies',
+            width: 200,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'referrals',
+            headerName: 'Referrals',
+            width: 200,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'otherRecommendations',
+            headerName: 'Other Recommendations / Action Items',
+            width: 200,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
+        {
+            field: 'note',
+            headerName: 'Note',
+            width: 300,
+            renderHeader,
+            renderCell: renderMultilineCell,
+        },
     ];
 
     const phq9 = assessments
@@ -203,12 +270,20 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         <TableContainer>
             <Table
                 rows={data}
-                columns={columns}
+                columns={columns.map((c) => ({
+                    sortable: false,
+                    filterable: false,
+                    editable: false,
+                    hideSortIcons: true,
+                    disableColumnMenu: true,
+                    ...c,
+                }))}
                 autoPageSize
                 headerHeight={56}
-                rowHeight={100}
+                rowHeight={140}
                 onRowClick={onRowClick}
                 autoHeight={true}
+                isRowSelectable={(_) => false}
             />
         </TableContainer>
     );
