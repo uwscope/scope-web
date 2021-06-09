@@ -5,17 +5,12 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellProps,
-    TableHead,
-    TableRow,
     Typography,
     withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
+import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
 import { format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
@@ -25,30 +20,23 @@ import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
-import { ClickableTableRow } from 'src/components/common/Table';
+import { Table } from 'src/components/common/Table';
 import { AssessmentFrequency, assessmentFrequencyValues } from 'src/services/enums';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
-import styled, { ThemedStyledProps } from 'styled-components';
+import styled from 'styled-components';
 
-const CenteredTableCell = styled(TableCell)({
-    minWidth: 120,
-    textAlign: 'center',
-});
-
-const ColoredTabledCell = withTheme(
-    styled(CenteredTableCell)((props: ThemedStyledProps<TableCellProps & { $color: string }, any>) => ({
-        color: props.theme.customPalette.scoreColors[props.$color],
-        fontWeight: 600,
+const ScoreCell = withTheme(
+    styled.div<{ score: number; assessmentType: string }>((props) => ({
+        width: 'calc(100% + 16px)',
+        marginLeft: -8,
+        marginRight: -8,
+        padding: props.theme.spacing(1),
+        backgroundColor:
+            props.theme.customPalette.scoreColors[getAssessmentScoreColorName(props.assessmentType, props.score)],
     }))
 );
-
-const HorizontalScrollTable = styled(Table)({
-    overflowX: 'auto',
-    width: '100%',
-    display: 'block',
-});
 
 export interface IAssessmentProgressProps {
     instruction?: string;
@@ -91,14 +79,6 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.dataId = undefined;
         state.data = {};
     });
-
-    const handleEditRecord = (data: IAssessmentDataPoint) =>
-        action(() => {
-            state.openEdit = true;
-            state.date = data.date;
-            state.dataId = data.assessmentDataId;
-            Object.assign(state.data, data.pointValues);
-        });
 
     const handleEditFrequecy = action(() => {
         state.openFreq = true;
@@ -144,9 +124,58 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         ?.slice()
         .sort((a, b) => compareDesc(a.date, b.date));
 
+    const tableData = assessmentData?.map((a) => ({
+        date: format(a.date, 'MM/dd/yyyy'),
+        total: getAssessmentScore(a.pointValues),
+        id: a.assessmentDataId,
+        ...a.pointValues,
+    }));
     const questionIds = questions.map((q) => q.id);
 
     const recurrence = assessment?.frequency || 'Not assigned';
+
+    const renderScoreCell = (props: GridCellParams) => (
+        <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentType}>
+            {props.value}
+        </ScoreCell>
+    );
+    const columns: GridColDef[] = [
+        {
+            field: 'date',
+            headerName: 'Date',
+            width: 100,
+            sortable: true,
+            hideSortIcons: false,
+        },
+        {
+            field: 'total',
+            headerName: 'Total',
+            width: 80,
+            renderCell: renderScoreCell,
+            align: 'center',
+        },
+        ...questionIds.map(
+            (q) =>
+                ({
+                    field: q,
+                    headerName: q,
+                    width: 80,
+                    align: 'center',
+                } as GridColDef)
+        ),
+    ];
+
+    const onRowClick = action((param: GridRowParams) => {
+        const id = param.getValue(param.id, 'id') as string;
+        const data = assessmentData.find((a) => a.assessmentDataId == id);
+
+        if (!!data) {
+            state.openEdit = true;
+            state.date = data.date;
+            state.dataId = data.assessmentDataId;
+            Object.assign(state.data, data.pointValues);
+        }
+    });
 
     return (
         <ActionPanel
@@ -159,36 +188,21 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             ]}>
             <Grid container spacing={2} alignItems="stretch">
                 {assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
-                    <HorizontalScrollTable size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Date</TableCell>
-                                {questionIds.length > 1 ? <CenteredTableCell>Total</CenteredTableCell> : null}
-                                {questionIds.map((p) => (
-                                    <CenteredTableCell key={p}>{p}</CenteredTableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {assessmentData.map((d, idx) => {
-                                const totalScore = getAssessmentScore(d.pointValues);
-                                const scoreColor = getAssessmentScoreColorName(d.assessmentType, totalScore);
-                                return (
-                                    <ClickableTableRow hover key={idx} onClick={handleEditRecord(d)}>
-                                        <TableCell component="th" scope="row">
-                                            {format(d.date, 'MM/dd/yyyy')}
-                                        </TableCell>
-                                        {questionIds.length > 1 ? (
-                                            <ColoredTabledCell $color={scoreColor}>{totalScore}</ColoredTabledCell>
-                                        ) : null}
-                                        {questionIds.map((p) => (
-                                            <CenteredTableCell key={p}>{d.pointValues[p]}</CenteredTableCell>
-                                        ))}
-                                    </ClickableTableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </HorizontalScrollTable>
+                    <Table
+                        rows={tableData}
+                        columns={columns.map((c) => ({
+                            sortable: false,
+                            filterable: false,
+                            editable: false,
+                            hideSortIcons: true,
+                            disableColumnMenu: true,
+                            ...c,
+                        }))}
+                        autoPageSize
+                        onRowClick={onRowClick}
+                        autoHeight={true}
+                        isRowSelectable={(_) => false}
+                    />
                 )}
                 {!!assessmentData && assessmentData.length > 0 && (
                     <Grid item xs={12}>
