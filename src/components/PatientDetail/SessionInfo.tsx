@@ -13,7 +13,14 @@ import {
     GridTextField,
 } from 'src/components/common/GridField';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
-import { EntryType, referralStatusValues, sessionTypeValues } from 'src/services/enums';
+import {
+    behavioralActivationChecklistValues,
+    behavioralStrategyChecklistValues,
+    EntryType,
+    referralStatusValues,
+    referralValues,
+    sessionTypeValues,
+} from 'src/services/enums';
 import { ICaseReview, ISession, ISessionOrCaseReview } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
@@ -137,6 +144,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 label="Behavioral Strategies"
                 flags={state.session.behavioralStrategyChecklist}
+                flagOrder={[...behavioralStrategyChecklistValues]}
                 other={state.session.behavioralStrategyOther}
                 onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
                 onOtherChange={(text) => onValueChange('behavioralStrategyOther', text)}
@@ -147,6 +155,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 disabled={!state.session.behavioralStrategyChecklist['Behavioral Activation']}
                 label="Behavioral Activation Checklist"
                 flags={state.session.behavioralActivationChecklist}
+                flagOrder={[...behavioralActivationChecklistValues]}
                 onChange={(flags) => onValueChange('behavioralActivationChecklist', flags)}
             />
             <GridMultiOptionsField
@@ -154,9 +163,12 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 label="Referrals"
                 flags={state.session.referralStatus}
+                other={state.session.referralOther}
+                flagOrder={[...referralValues, 'Other']}
                 options={referralStatusValues}
                 notOption="Not Referred"
                 onChange={(flags) => onValueChange('referralStatus', flags)}
+                onOtherChange={(text) => onValueChange('referralOther', text)}
             />
             <GridTextField
                 sm={12}

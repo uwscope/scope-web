@@ -231,10 +231,11 @@ export interface IGridMultiSelectFieldProps extends IGridFieldBaseProps {
     onOtherChange?: (other: string) => void;
     maxLine?: number;
     disabled?: boolean;
+    flagOrder?: string[];
 }
 
 export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps> = (props) => {
-    const { editable, label, flags, other, onChange, onOtherChange, xs, sm, maxLine, disabled } = props;
+    const { editable, label, flags, flagOrder, other, onChange, onOtherChange, xs, sm, maxLine, disabled } = props;
 
     const handleChange = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,7 +262,7 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                     <EditableFormControl disabled={disabled} fullWidth $editable={true}>
                         <InputLabel shrink>{label}</InputLabel>
                         <Grid container>
-                            {Object.keys(flags)
+                            {(flagOrder || Object.keys(flags))
                                 .filter((f) => f != 'Other')
                                 .map((key) => {
                                     return (
@@ -340,11 +341,25 @@ export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
     onOtherChange?: (other: string) => void;
     maxLine?: number;
     disabled?: boolean;
+    flagOrder?: string[];
 }
 
 export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProps> = (props) => {
-    const { editable, label, flags, options, other, notOption, onChange, onOtherChange, xs, sm, maxLine, disabled } =
-        props;
+    const {
+        editable,
+        label,
+        flags,
+        flagOrder,
+        options,
+        other,
+        notOption,
+        onChange,
+        onOtherChange,
+        xs,
+        sm,
+        maxLine,
+        disabled,
+    } = props;
 
     const handleChange = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -368,7 +383,7 @@ export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProp
                 <Grid item xs={xs || 12} sm={sm || 6}>
                     <EditableFormControl disabled={disabled} fullWidth $editable={true}>
                         <InputLabel shrink>{label}</InputLabel>
-                        {Object.keys(flags).map((key) => (
+                        {(flagOrder || Object.keys(flags)).map((key) => (
                             <Grid container key={key} alignItems="center">
                                 <Grid item xs={4}>
                                     <RadioLabel>{key}</RadioLabel>
