@@ -64,6 +64,44 @@ export default function createAppTheme() {
                 root: {
                     color: indigo[500],
                     textTransform: 'uppercase',
+                    fontWeight: 700,
+                },
+            },
+            MuiInput: {
+                input: {
+                    padding: '6px 12px',
+                },
+                inputMultiline: {
+                    padding: '0 12px',
+                },
+                underline: {
+                    background: '#fafafa',
+                },
+            },
+            MuiFormControl: {
+                root: {
+                    paddingBottom: '24px',
+                },
+            },
+            MuiCheckbox: {
+                root: {},
+            },
+            MuiInputLabel: {
+                shrink: {
+                    transform: 'translate(0)',
+                    fontSize: 14,
+                    paddingBottom: 6,
+                },
+                formControl: {
+                    transform: 'translate(0)',
+                    fontSize: 14,
+                    paddingBottom: 6,
+                },
+            },
+            MuiFormControlLabel: {
+                label: {
+                    fontSize: 14,
+                    paddingBottom: 0,
                 },
             },
         },

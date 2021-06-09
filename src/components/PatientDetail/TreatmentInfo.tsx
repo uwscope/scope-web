@@ -41,7 +41,8 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 sm={12}
                 editable={editable}
                 multiline={true}
-                maxLine={5}
+                minLine={4}
+                maxLine={4}
                 label="Treatment Regimen Notes"
                 value={currentTreatmentRegimenNotes}
                 onChange={(text) => onValueChange('currentTreatmentRegimenNotes', text)}
@@ -50,7 +51,8 @@ const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (pro
                 sm={12}
                 editable={editable}
                 multiline={true}
-                maxLine={5}
+                minLine={4}
+                maxLine={4}
                 label="Psychiatric Diagnosis"
                 value={psychDiagnosis}
                 onChange={(text) => onValueChange('psychDiagnosis', text)}

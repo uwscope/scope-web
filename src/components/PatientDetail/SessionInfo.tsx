@@ -115,6 +115,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Medication changes"
                 value={state.session.medicationChange}
@@ -125,6 +126,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Current medications"
                 value={state.session.currentMedications}
@@ -137,6 +139,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 flags={state.session.behavioralStrategyChecklist}
                 other={state.session.behavioralStrategyOther}
                 onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
+                onOtherChange={(text) => onValueChange('behavioralStrategyOther', text)}
             />
             <GridMultiSelectField
                 sm={12}
@@ -151,7 +154,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 label="Referrals"
                 flags={state.session.referralStatus}
-                options={referralStatusValues.filter((r) => r != 'Not Referred')}
+                options={referralStatusValues}
                 notOption="Not Referred"
                 onChange={(flags) => onValueChange('referralStatus', flags)}
             />
@@ -159,6 +162,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Other recommendations / action items"
                 value={state.session.otherRecommendations}
@@ -168,6 +172,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={10}
                 label="Session Note"
                 value={state.session.sessionNote}
@@ -201,6 +206,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Medication changes"
                 value={state.review.medicationChange}
@@ -211,6 +217,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Behavioral strategy changes"
                 value={state.review.behavioralStrategyChange}
@@ -221,6 +228,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Referral changes"
                 value={state.review.referralsChange}
@@ -231,6 +239,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Other recommendations / action items"
                 value={state.review.otherRecommendations}
@@ -240,6 +249,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={10}
                 label="Review Note"
                 value={state.review.reviewNote}
