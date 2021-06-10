@@ -109,6 +109,7 @@ def flask_prod(context):
             command=' '.join([
                 'waitress-serve',
                 '--port=4000',
+                '--call "app:create_app"'
             ]),
             env={
                 'FLASK_ENV': 'production'
