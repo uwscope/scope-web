@@ -21,7 +21,7 @@ def web_dev(context):
     """
     Start a development build of the client, listening on `localhost:3000`.
 
-    Builds a development bundle according to 'config/webpack.dev.js', including hot reloading.
+    Builds according to 'config/webpack.dev.js', including hot reloading.
     """
 
     context.run(
@@ -37,7 +37,10 @@ def web_prod_build(context):
     """
     Build a production bundle of the client.
 
-    Invokes `scripts/build.js`, which builds a production bundle according to `config/webpack.prod.js`.
+    Builds according to 'config/webpack.prod.js', including hot reloading.
+
+    Is a thin wrapper around `scripts/web_prod_build.js`,
+    because that script will be executed in a production environment that does not include Python.
     """
 
     context.run(
@@ -52,6 +55,9 @@ def web_prod_build(context):
 def web_prod_serve(context):
     """
     Serve a production bundle of the client, listening on `localhost:3000`.
+
+    Is a thin wrapper around `scripts/web_prod_serve.js`,
+    because that script will be executed in a production environment that does not include Python.
     """
 
     context.run(
@@ -81,7 +87,7 @@ ns.add_collection(ns_web)
 @task
 def flask_dev(context):
     """
-    Start a development build of Flask, listening on `localhost:4000`.
+    Start a development build of Flask, listening on `localhost:4000`, including hot reloading.
     """
 
     with context.cd(Path('server', 'flask')):
