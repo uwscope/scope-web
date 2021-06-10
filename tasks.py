@@ -14,14 +14,10 @@ ns.configure(ns_config.configuration())
 #
 # Tasks for the web client
 #
-ns_web = Collection('web')
-
-# Tasks for development
-ns_web_dev = Collection('dev')
 
 
 @task
-def web_start(context):
+def web_dev(context):
     """
     Start a development build of the client, listening on `localhost:3000`.
 
@@ -36,14 +32,8 @@ def web_start(context):
     )
 
 
-ns_web_dev.add_task(web_start, name='start')
-
-# Tasks for production
-ns_web_prod = Collection('prod')
-
-
 @task
-def web_build(context):
+def web_prod_build(context):
     """
     Build a production bundle of the client.
 
@@ -59,7 +49,7 @@ def web_build(context):
 
 
 @task
-def web_serve(context):
+def web_prod_serve(context):
     """
     Serve a production bundle of the client, listening on `localhost:3000`.
     """
@@ -72,23 +62,24 @@ def web_serve(context):
     )
 
 
-ns_web_prod.add_task(web_build, name='build')
-ns_web_prod.add_task(web_serve, name='serve')
+ns_web = Collection('web')
 
-ns_web.add_collection(ns_web_dev)
+ns_web.add_task(web_dev, name='dev')
+
+ns_web_prod = Collection('prod')
+ns_web_prod.add_task(web_prod_build, name='build')
+ns_web_prod.add_task(web_prod_serve, name='serve')
 ns_web.add_collection(ns_web_prod)
+
 ns.add_collection(ns_web)
 
 #
 # Tasks for the Flask server
 #
-ns_flask = Collection('flask')
-
-ns_flask_dev = Collection('dev')
 
 
 @task
-def flask_start(context):
+def flask_dev(context):
     """
     Start a development build of Flask, listening on `localhost:4000`.
     """
@@ -98,11 +89,36 @@ def flask_start(context):
             command=' '.join([
                 'flask',
                 'run',
-            ])
+            ]),
+            env={
+                'FLASK_ENV': 'development',
+                'FLASK_RUN_HOST': 'localhost',
+                'FLASK_RUN_PORT': '4000',
+            }
         )
 
 
-ns_flask_dev.add_task(flask_start, name='start')
+@task
+def flask_prod(context):
+    """
+    Start a production build of Flask, listening on `0.0.0.0:4000`.
+    """
 
-ns_flask.add_collection(ns_flask_dev)
+    with context.cd(Path('server', 'flask')):
+        context.run(
+            command=' '.join([
+                'waitress-serve',
+                '--port=4000',
+            ]),
+            env={
+                'FLASK_ENV': 'production'
+            }
+        )
+
+
+ns_flask = Collection('flask')
+
+ns_flask.add_task(flask_dev, name='dev')
+ns_flask.add_task(flask_prod, name='prod')
+
 ns.add_collection(ns_flask)

@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, request
 from flask_cors import CORS
@@ -10,6 +11,17 @@ from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
 app = Flask(__name__)
+
+flask_environment = os.getenv('FLASK_ENV')
+if flask_environment == 'production':
+    from config.prod import Config
+    app.config.from_object(Config())
+elif flask_environment == 'development':
+    from config.dev import Config
+    app.config.from_object(Config())
+else:
+    raise ValueError
+
 CORS(app)
 FlaskJSON(app)
 
