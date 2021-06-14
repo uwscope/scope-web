@@ -19,15 +19,15 @@ ns.configure(ns_config.configuration())
 @task
 def web_dev(context):
     """
-    Start a development build of the client, listening on `localhost:3000`.
+    Start a development build of the client, listening on `localhost:3000`, including hot reloading.
 
-    Builds according to 'config/webpack.dev.js', including hot reloading.
+    Builds according to 'config/webpack.dev.js'.
     """
 
     context.run(
         command=' '.join([
             'yarn',
-            'start',
+            'web_dev',
         ])
     )
 
@@ -46,7 +46,7 @@ def web_prod_build(context):
     context.run(
         command=' '.join([
             'yarn',
-            'build',
+            'web_prod_build',
         ])
     )
 
@@ -54,7 +54,7 @@ def web_prod_build(context):
 @task
 def web_prod_serve(context):
     """
-    Serve a production bundle of the client, listening on `localhost:3000`.
+    Serve a production bundle of the client, listening on `0.0.0.0:3000`.
 
     Is a thin wrapper around `scripts/web_prod_serve.js`,
     because that script will be executed in a production environment that does not include Python.
@@ -63,7 +63,7 @@ def web_prod_serve(context):
     context.run(
         command=' '.join([
             'yarn',
-            'serve',
+            'web_prod_serve',
         ])
     )
 
