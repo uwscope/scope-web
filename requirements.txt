@@ -1,3 +1,5 @@
+# TODO: Move to pipenv to freeze versions
+
 appdirs==1.4.4
 black==20.8b1
 click==7.1.2
@@ -13,6 +15,7 @@ numpy==1.20.1
 pathspec==0.8.1
 python-dotenv==0.15.0
 regex==2020.11.13
+requests
 six==1.15.0
 toml==0.10.2
 typed-ast==1.4.2

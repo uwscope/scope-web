@@ -1,4 +1,5 @@
 import aws_infrastructure.task_templates.config
+import aws_infrastructure.task_templates.minikube_helm_instance
 from invoke import Collection
 from invoke import task
 from pathlib import Path
@@ -10,6 +11,7 @@ ns = Collection()
 ns_config = aws_infrastructure.task_templates.config.create_tasks()
 ns.add_collection(ns_config)
 ns.configure(ns_config.configuration())
+
 
 #
 # Tasks for the web client
@@ -79,6 +81,7 @@ ns_web.add_collection(ns_web_prod)
 
 ns.add_collection(ns_web)
 
+
 #
 # Tasks for the Flask server
 #
@@ -129,3 +132,32 @@ ns_flask.add_task(flask_dev, name='dev')
 ns_flask.add_task(flask_prod, name='prod')
 
 ns.add_collection(ns_flask)
+
+
+#
+# Tasks for forwarding to a server (e.g., for database access)
+#
+# TODO: Refactor instance tasks so this can be less of a hack
+
+CONFIG_KEY_FORWARD_PROD = 'server_prod'
+
+ns_instance = aws_infrastructure.task_templates.minikube_helm_instance.create_tasks(
+    config_key=CONFIG_KEY_FORWARD_PROD,
+    working_dir='.',
+    instance_dir=Path('serverconfig', 'prod')
+)
+
+
+@task
+def forward_prod(context):
+    """
+    Forward the production server's private entrypoint, listening on `localhost:8000`.
+    """
+
+    ns_instance.tasks['ssh-port-forward'](context, port=8000)
+
+
+ns_forward = Collection('forward')
+ns_forward.add_task(forward_prod, name='prod')
+
+ns.add_collection(ns_forward)

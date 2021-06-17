@@ -1,7 +1,10 @@
 import json
 import os
+import requests
+import sys
+from urllib.parse import urljoin
 
-from flask import Flask, request
+from flask import Flask, request, current_app
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
@@ -35,20 +38,16 @@ def create_app():
     ## - check method
     ## - check parameters
     ## - return appropriate error message and code
-    ## - differentiate development versus production execution
-    ##   (e.g., should not have debugger running in production, for security reasons)
 
     @app.route("/auth")
     @as_json
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
 
-
     @app.route("/patients")
     @as_json
     def get_patients():
         return {"patients": patients}
-
 
     @app.route("/patient/<recordId>", methods=["GET"])
     @as_json
@@ -62,7 +61,6 @@ def create_app():
         else:
             return "Method not allowed", 405
 
-
     @app.route("/app/config", methods=["GET"])
     @as_json
     def get_assessments():
@@ -71,5 +69,22 @@ def create_app():
 
         else:
             return "Method not allowed", 405
+
+    @app.route('/status')
+    @as_json
+    def status():
+        ## TODO - consistent method of initiating a backend request that will impose timeouts, retries, anything else
+
+        r = requests.get(
+            urljoin(
+                current_app.config['URI_DATABASE'],
+                ''
+            ),
+            timeout=30
+        )
+
+        return {
+            'couchdb': r.json(),
+        }
 
     return app
