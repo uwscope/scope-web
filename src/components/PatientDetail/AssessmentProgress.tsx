@@ -59,6 +59,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         dataId: string | undefined;
         data: AssessmentData;
         date: Date;
+        totalOnly: boolean;
+        total: number;
     }>(() => ({
         openEdit: false,
         openFreq: false,
@@ -66,6 +68,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         dataId: undefined,
         data: {},
         date: new Date(),
+        totalOnly: false,
+        total: 0,
     }));
 
     const handleClose = action(() => {
@@ -78,6 +82,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.date = new Date();
         state.dataId = undefined;
         state.data = {};
+        state.total = 0;
+        state.totalOnly = false;
     });
 
     const handleEditFrequecy = action(() => {
@@ -86,13 +92,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onSaveEditRecord = action(() => {
-        const { data, date, dataId } = state;
+        const { data, date, dataId, total } = state;
         currentPatient.updateAssessmentRecord({
             assessmentDataId: dataId,
             assessmentType: assessmentType,
             date,
             pointValues: data,
             comment: 'Submitted by CM',
+            totalScore: total,
         });
         state.openEdit = false;
     });
@@ -113,24 +120,35 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.date = date;
     });
 
+    const onTotalChange = action((value: number) => {
+        state.total = value;
+    });
+
+    const onToggleTotalOnly = action((value: boolean) => {
+        state.totalOnly = value;
+    });
+
     const onFrequencyChange = action((freq: AssessmentFrequency) => {
         state.frequency = freq;
     });
 
     const selectedValues = questions.map((q) => state.data[q.id]);
-    const saveDisabled = selectedValues.findIndex((v) => v == undefined) >= 0;
+    const saveDisabled = state.totalOnly ? !state.total : selectedValues.findIndex((v) => v == undefined) >= 0;
 
     const assessmentData = (assessment?.data as IAssessmentDataPoint[])
         ?.slice()
         .sort((a, b) => compareDesc(a.date, b.date));
 
-    const tableData = assessmentData?.map((a) => ({
-        date: format(a.date, 'MM/dd/yyyy'),
-        total: getAssessmentScore(a.pointValues),
-        id: a.assessmentDataId,
-        ...a.pointValues,
-    }));
     const questionIds = questions.map((q) => q.id);
+
+    const tableData = assessmentData?.map((a) => {
+        return {
+            date: format(a.date, 'MM/dd/yyyy'),
+            total: getAssessmentScore(a.pointValues) || a.totalScore,
+            id: a.assessmentDataId,
+            ...a.pointValues,
+        };
+    });
 
     const recurrence = assessment?.frequency || 'Not assigned';
 
@@ -174,6 +192,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             state.date = data.date;
             state.dataId = data.assessmentDataId;
             Object.assign(state.data, data.pointValues);
+            state.total = data.totalScore;
+            state.totalOnly = !!data.totalScore;
         }
     });
 
@@ -227,6 +247,10 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         instruction={instruction}
                         onSelect={onQuestionSelect}
                         onDateChange={onDateChange}
+                        onTotalChange={onTotalChange}
+                        onToggleTotalOnly={onToggleTotalOnly}
+                        totalOnly={state.totalOnly}
+                        totalScore={state.total}
                     />
                 </DialogContent>
                 <DialogActions>

@@ -13,6 +13,7 @@ import {
     RadioGroup,
     Select,
     SelectProps,
+    Switch,
     Typography,
     withTheme,
 } from '@material-ui/core';
@@ -444,4 +445,29 @@ export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProp
     }
 
     return null;
+};
+
+export interface IGridSwitchFieldProps extends IGridFieldBaseProps {
+    on: boolean;
+    onChange?: (on: boolean) => void;
+}
+
+export const GridSwitchField: FunctionComponent<IGridSwitchFieldProps> = (props) => {
+    const { editable, label, on, onChange, xs, sm } = props;
+
+    const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!onChange) {
+            const on = (event.target as HTMLInputElement).checked;
+            onChange(on);
+        }
+    });
+
+    return (
+        <Grid item xs={xs || 12} sm={sm || 6}>
+            <FormControlLabel
+                control={<Switch checked={on} onChange={handleChange} name={label} disabled={!editable} />}
+                label={label}
+            />
+        </Grid>
+    );
 };

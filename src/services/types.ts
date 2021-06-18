@@ -79,6 +79,7 @@ export interface IAssessmentDataPoint {
     readonly date: Date;
     readonly pointValues: AssessmentData;
     readonly comment: string;
+    readonly totalScore: number;
 }
 
 export interface IActivity {
