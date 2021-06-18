@@ -27,7 +27,7 @@ import { usePatient } from 'src/stores/stores';
 const defaultSession: ISession = {
     sessionId: 'new',
     date: new Date(),
-    sessionType: 'In person at clinic',
+    sessionType: 'In person',
     billableMinutes: 0,
     medicationChange: '',
     currentMedications: '',
@@ -329,7 +329,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     return (
         <ActionPanel
             id="sessions"
-            title="Sessions"
+            title="Sessions and Reviews"
             loading={currentPatient.state == 'Pending'}
             actionButtons={[
                 { icon: <AddIcon />, text: 'Add Case Review', onClick: handleAddReview } as IActionButton,

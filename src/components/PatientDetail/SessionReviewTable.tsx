@@ -116,15 +116,13 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'id',
             headerName: 'Id',
-            width: 50,
             renderHeader,
             hide: true,
-            renderCell: renderMultilineCell,
         },
         {
             field: 'date',
             headerName: 'Date',
-            width: 100,
+            width: 70,
             renderHeader,
             sortable: true,
             hideSortIcons: false,
@@ -133,14 +131,14 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'type',
             headerName: 'Type',
-            width: 100,
+            width: 70,
             renderHeader,
             renderCell: renderMultilineCell,
         },
         {
             field: 'billableMinutes',
-            headerName: 'Billable Minutes',
-            width: 80,
+            headerName: 'Bill Min',
+            width: 50,
             renderHeader,
             renderCell: renderMultilineCell,
             align: 'center',
@@ -164,28 +162,28 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'medications',
             headerName: 'Medications',
-            width: 200,
+            width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
         },
         {
             field: 'behavioralStrategies',
             headerName: 'Behavioral Strategies',
-            width: 200,
+            width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
         },
         {
             field: 'referrals',
             headerName: 'Referrals',
-            width: 200,
+            width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
         },
         {
             field: 'otherRecommendations',
             headerName: 'Other Recommendations / Action Items',
-            width: 200,
+            width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
         },
@@ -230,7 +228,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
 
     const getSessionData = (session: ISession): ISessionTableData => ({
         id: session.sessionId,
-        date: format(session.date, 'MM/dd/yyyy'),
+        date: `${format(session.date, 'MM/dd')}\n${format(session.date, 'yyyy')}`,
         type: session.sessionType,
         billableMinutes: session.billableMinutes,
         flag: 'TBD',
@@ -245,7 +243,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
 
     const getReviewData = (review: ICaseReview): ISessionTableData => ({
         id: review.reviewId,
-        date: format(review.date, 'MM/dd/yyyy'),
+        date: `${format(review.date, 'MM/dd')}\n${format(review.date, 'yyyy')}`,
         type: 'Case Review',
         billableMinutes: NA,
         flag: 'TBD',
