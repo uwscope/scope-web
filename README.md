@@ -28,12 +28,6 @@ pipenv shell
     pipenv run cmd
     ```
 
-Update existing dependencies, including updating `Pipfile.lock`:
-
-```
-pipenv update
-```
-
 Install a new dependency, including updating `Pipefile` and `Pipefile.lock`:
 
 ```
