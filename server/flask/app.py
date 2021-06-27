@@ -5,7 +5,7 @@ import sys
 from urllib.parse import urljoin
 
 from flask import Flask, request, current_app
-from flask_cors import CORS
+# from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
@@ -27,7 +27,9 @@ def create_app():
     else:
         raise ValueError
 
-    CORS(app)
+    # CORS should come from the ingress
+    #CORS(app)
+
     FlaskJSON(app)
 
     ## Temporary store for patients
