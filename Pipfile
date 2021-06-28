@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 aws-infrastructure = {git = "https://github.com/fogies/aws-infrastructure.git", subdirectory = "aws_infrastructure", editable = true}
 flask = "*"
+flask-cors = "*"
 flask-json = "*"
 lorem = "*"
 numpy = "*"

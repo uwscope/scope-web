@@ -2,7 +2,7 @@
 Tasks for accessing a database.
 """
 
-import aws_infrastructure.task_templates.minikube_helm_instance
+import aws_infrastructure.tasks.library.minikube_helm_instance
 from invoke import Collection
 from invoke import task
 from pathlib import Path
@@ -12,12 +12,12 @@ from pathlib import Path
 #
 # TODO: Refactor instance tasks so this can be less of a hack
 
-CONFIG_KEY_FORWARD_PROD = 'server_prod'
+CONFIG_KEY = 'server_prod'
 
-ns_instance = aws_infrastructure.task_templates.minikube_helm_instance.create_tasks(
-    config_key=CONFIG_KEY_FORWARD_PROD,
+ns_instance = aws_infrastructure.tasks.library.minikube_helm_instance.create_tasks(
+    config_key=CONFIG_KEY,
     working_dir='.',
-    instance_dir=Path('serverconfig', 'prod')
+    instance_dir=Path('secrets', 'server', 'prod')
 )
 
 
@@ -33,9 +33,9 @@ def forward_prod(context):
 
 
 # Build task collection
-ns = Collection()
+ns = Collection('database')
 
-ns_forward = Collection()
+ns_forward = Collection('forward')
 ns_forward.add_task(forward_prod, 'prod')
 
-ns.add_collection(ns_forward, 'forward')
+ns.add_collection(ns_forward)

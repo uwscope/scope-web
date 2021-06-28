@@ -47,7 +47,7 @@ def prod(context):
 
 
 # Build task collection
-ns = Collection()
+ns = Collection('flask')
 
 ns.add_task(dev, name='dev')
 ns.add_task(prod, name='prod')

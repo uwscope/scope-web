@@ -62,12 +62,12 @@ def prod_serve(context):
 
 
 # Build task collection
-ns = Collection()
+ns = Collection('web')
 
 ns.add_task(dev, name='dev')
 
-ns_prod = Collection()
+ns_prod = Collection('prod')
 ns_prod.add_task(prod_build, 'build')
 ns_prod.add_task(prod_serve, 'serve')
 
-ns.add_collection(ns_prod, 'prod')
+ns.add_collection(ns_prod)

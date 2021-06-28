@@ -1,4 +1,5 @@
-import aws_infrastructure.task_templates.config
+from aws_infrastructure.tasks.collection import compose_collection
+import aws_infrastructure.tasks.library.config
 from invoke import Collection
 
 import tasks.database
@@ -9,16 +10,17 @@ import tasks.web
 ns = Collection()
 
 # Tasks for Invoke configuration
-ns.add_collection(
-    aws_infrastructure.task_templates.config.create_tasks(),
+compose_collection(
+    ns,
+    aws_infrastructure.tasks.library.config.create_tasks(),
     name='config'
 )
 
-# Tasks from database.py
-ns.add_collection(tasks.database, name='database')
+# Compose from database.py
+compose_collection(ns, tasks.database.ns, name='database')
 
-# Tasks from flask.py
-ns.add_collection(tasks.flask, name='flask')
+# Compose from flask.py
+compose_collection(ns, tasks.flask.ns, name='flask')
 
-# Tasks from web.py
-ns.add_collection(tasks.web, name='web')
+# Compose from web.py
+compose_collection(ns, tasks.web.ns, name='web')

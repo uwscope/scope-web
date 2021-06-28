@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7e2a890abd6e2151023292d65539d216629171ad6d3b5e93a1723f1c9b55575f"
+            "sha256": "db8211d3c66785b76294469219c6bb691d58bfb82d574c040d60d759ba92f64d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -19,7 +19,7 @@
         "aws-infrastructure": {
             "editable": true,
             "git": "https://github.com/fogies/aws-infrastructure.git",
-            "ref": "53c9c831bb258358a485c9989c1ff49bc1db3a82",
+            "ref": "efaa59dfb7a39d256636171d24d16adcdb6b39bc",
             "subdirectory": "aws_infrastructure"
         },
         "bcrypt": {
@@ -145,6 +145,14 @@
             ],
             "index": "pypi",
             "version": "==2.0.1"
+        },
+        "flask-cors": {
+            "hashes": [
+                "sha256:74efc975af1194fc7891ff5cd85b0f7478be4f7f59fe158102e91abb72bb4438",
+                "sha256:b60839393f3b84a0f3746f6cdca56c1ad7426aa738b70d6c61375857823181de"
+            ],
+            "index": "pypi",
+            "version": "==3.0.10"
         },
         "flask-json": {
             "hashes": [
