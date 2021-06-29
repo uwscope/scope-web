@@ -8,6 +8,8 @@ because those scripts will be executed in a production environment that does not
 from invoke import Collection
 from invoke import task
 
+from tasks.terminal import run_new_terminal
+
 
 @task
 def dev(context):
@@ -15,13 +17,16 @@ def dev(context):
     Start a development build of the client, listening on `localhost:3000`, including hot reloading.
 
     Builds according to 'config/webpack.dev.js'.
+
+    For development purposes, asynchronously starts in a new terminal.
     """
 
-    context.run(
+    run_new_terminal(
+        context=context,
         command=' '.join([
             'yarn',
             'web_dev',
-        ])
+        ]),
     )
 
 
@@ -31,6 +36,8 @@ def prod_build(context):
     Build a production bundle of the client.
 
     Builds according to 'config/webpack.prod.js', including hot reloading.
+
+    For production purposes, synchronously executes in the current terminal.
 
     Is a thin wrapper around `scripts/web_prod_build.js`,
     because that script will be executed in a production environment that does not include Python.
@@ -48,6 +55,8 @@ def prod_build(context):
 def prod_serve(context):
     """
     Serve a production bundle of the client, listening on `0.0.0.0:3000`.
+
+    For production purposes, synchronously executes in the current terminal.
 
     Is a thin wrapper around `scripts/web_prod_serve.js`,
     because that script will be executed in a production environment that does not include Python.

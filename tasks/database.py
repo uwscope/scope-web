@@ -7,6 +7,8 @@ from invoke import Collection
 from invoke import task
 from pathlib import Path
 
+from tasks.terminal import spawn_new_terminal
+
 #
 # We just want one task ripped out from minikube_helm_instance
 #
@@ -26,10 +28,13 @@ def forward_prod(context):
     """
     Forward the database from our production server, listening on `localhost:8000`.
 
+    For development purposes, asynchronously spawns a new terminal.
+
     Access the database using SSH port forwarding and the server's `private` ingress entrypoint.
     """
 
-    ns_instance.tasks['ssh-port-forward'](context, port=8000)
+    if spawn_new_terminal(context=context):
+        ns_instance.tasks['ssh-port-forward'](context, port=8000)
 
 
 # Build task collection
