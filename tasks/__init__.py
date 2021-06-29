@@ -3,6 +3,7 @@ import aws_infrastructure.tasks.library.config
 from invoke import Collection
 
 import tasks.database
+import tasks.dependencies
 import tasks.flask
 import tasks.web
 
@@ -18,6 +19,9 @@ compose_collection(
 
 # Compose from database.py
 compose_collection(ns, tasks.database.ns, name='database')
+
+# Compose from dependencies.py
+compose_collection(ns, tasks.dependencies.ns, name='dependencies')
 
 # Compose from flask.py
 compose_collection(ns, tasks.flask.ns, name='flask')
