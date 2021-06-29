@@ -1,17 +1,22 @@
+# IDE Configuration
+/.idea/
+/.vscode/launch.json
+/.vscode/settings.json
+
 # Javascript Environment
 /node_modules/
 
-# Python Environment
-/.venv/
+# Python cache
+**/__pycache__/
 
-# IDE Configuration
-/.idea/
-
-# Build files
+# Web build files
 /build/
 /dist/
 
-# Python cache
-*/__pycache__/
-.vscode/launch.json
-.vscode/settings.json
+# Secrets, defined using /** so we can also define exceptions
+/secrets/**
+
+# Exception to create /secrets/server/prod
+!/secrets/server
+!/secrets/server/prod
+!/secrets/server/prod/.gitignore
