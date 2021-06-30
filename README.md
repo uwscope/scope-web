@@ -121,8 +121,6 @@ For example:
 ```
 Available tasks:
 
-Available tasks:
-
   config.display            Display the Invoke configuration.
   database.forward.prod     Forward the database from our production server, listening on `localhost:8000`.
   dependencies.ensure.dev   Ensure dependencies are installed, including development dependencies.
