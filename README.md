@@ -24,6 +24,10 @@ The web client will then be accessible at `http://localhost:3000/`.
 
 ## Installation of Dependencies
 
+Requires a `git` executable.
+
+- On Windows, development has used [Git for Windows](https://gitforwindows.org/).
+
 Requires installation of Javascript and Python dependencies.
 
 ### Javascript
@@ -76,35 +80,51 @@ This project uses [Pipenv](https://pipenv.pypa.io/en/latest/) to manage a virtua
 
 Ensure Pipenv is globally installed (as in [Installation of Dependences](#installation-of-dependencies)).
 
-Create a virtual environment and install the dependencies in `Pipfile.lock`, including development dependencies:
+First use Pipenv to create a virtual environment and install the `Pipfile.lock` dependencies, including development dependencies:
 
 ```
 pipenv sync --dev
 ```
 
-Activate a shell inside the environment:
+- On Windows, due to path configuration issues you may need to specify the full `pipenv` path:
+  
+  ```
+  C:\Python39\Scripts\pipenv sync --dev
+  ```  
+
+Then activate a shell inside the created environment:
 
 ```
 pipenv shell
 ```
 
-  - On Windows, the shell implementation has some limitations (e.g., lacks command history). You can instead:
+- On Windows, the Pipenv shell implementation has some limitations (e.g., lacks command history). You may prefer:
 
-    ```
-    pipenv run cmd
-    ```
+  ```
+  pipenv run cmd
+  ```
+    
+- On Windows, due to path configuration issues you may need to specify the full `pipenv` path:
+  
+  ```
+  C:\Python39\Scripts\pipenv run cmd
+  ```  
 
-Install a new dependency, including updating `Pipefile` and `Pipefile.lock`:
+From within the Pipenv shell, all commands will benefit from dependencies in `Pipefile` and `Pipefile.lock`.
+See examples commands in [Typical Development Environment](#typical-development-environment)
+and in [Using Invoke](#using-invoke).
 
-```
-pipenv install <package>
-```
+- To install a new dependency, including updating `Pipefile` and `Pipefile.lock`:
 
-Install a new development dependency, including updating `Pipefile` and `Pipefile.lock`:
+  ```
+  pipenv install <package>
+  ```
 
-```
-pipenv install --dev <package>
-```
+- To install a new development dependency, including updating `Pipefile` and `Pipefile.lock`:
+
+  ```
+  pipenv install --dev <package>
+  ```
 
 ## Using Invoke
 
