@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 aws-infrastructure = {git = "https://github.com/fogies/aws-infrastructure.git", subdirectory = "aws_infrastructure", editable = true}
+celery = "*"
 flask = "*"
 flask-cors = "*"
 flask-json = "*"
@@ -15,6 +16,8 @@ waitress = "*"
 
 [dev-packages]
 pipenv = "*"
+# Used by Celery filesystem broker on Windows
+pypiwin32 = {version = "*", sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.9"
