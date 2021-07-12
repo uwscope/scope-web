@@ -12,7 +12,7 @@ from tasks.terminal import run_new_terminal
 @task
 def dev(context):
     """
-    Start a development build of Flask, listening on `localhost:4000`, including hot reloading.
+    Start a development instance of Flask, listening on `localhost:4000`, including hot reloading.
 
     For development purposes, asynchronously starts in a new terminal.
     """

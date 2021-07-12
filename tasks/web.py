@@ -14,7 +14,7 @@ from tasks.terminal import run_new_terminal
 @task
 def dev(context):
     """
-    Start a development build of the client, listening on `localhost:3000`, including hot reloading.
+    Start a development instance of the client, listening on `localhost:3000`, including hot reloading.
 
     Builds according to 'config/webpack.dev.js'.
 

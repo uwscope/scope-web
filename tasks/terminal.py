@@ -15,7 +15,7 @@ def run_new_terminal(
     context: Context,
     command: str,                # Original non-augmented command string
     env: Dict[str, str] = None,  # Environment variables to pass through
-):
+) -> None:
     """
     Run a command, augmenting the command so it runs in a new terminal.
     """
