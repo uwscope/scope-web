@@ -8,7 +8,7 @@ because those scripts will be executed in a production environment that does not
 from invoke import Collection
 from invoke import task
 
-from tasks.terminal import run_new_terminal
+from tasks.terminal import spawn_new_terminal
 
 
 @task
@@ -21,13 +21,13 @@ def dev(context):
     For development purposes, asynchronously starts in a new terminal.
     """
 
-    run_new_terminal(
-        context=context,
-        command=' '.join([
-            'yarn',
-            'web_dev',
-        ]),
-    )
+    if spawn_new_terminal(context):
+        context.run(
+            command=' '.join([
+                'yarn',
+                'web_dev',
+            ])
+        )
 
 
 @task
