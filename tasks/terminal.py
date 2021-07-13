@@ -12,6 +12,14 @@ import stat
 import sys
 
 
+def _format_export(name: str, value: str) -> str:
+    """
+    Format a command to export an environment variable.
+    """
+
+    return '{}="{}"'.format(name, value)
+
+
 def spawn_new_terminal(
     context: Context,
 ) -> bool:
@@ -71,20 +79,20 @@ def spawn_new_terminal(
             # Write a command file
             file_command.writelines('{}\n'.format(line_current) for line_current in [
                 '# Set environment variable that we will detect from the new terminal',
-                'export INVOKE_SPAWN_NEW_TERMINAL=True',
+                _format_export('INVOKE_SPAWN_NEW_TERMINAL', 'True'),
                 '',
                 '# Restore the working directory',
                 'cd "{}"'.format(path_cwd),
                 '',
                 '# Restore environment variables that configure the virtual environment',
-                '# Based on a manual inspection on 7/13/2021, perhaps this could be done better',
-                'export {}={}'.format('PATH', os.getenv('PATH')),
-                'export {}={}'.format('PIPENV_ACTIVE', os.getenv('PIPENV_ACTIVE')),
-                'export {}={}'.format('PIP_DISABLE_PIP_VERSION_CHECK', os.getenv('PIP_DISABLE_PIP_VERSION_CHECK')),
-                'export {}={}'.format('PIP_PYTHON_PATH', os.getenv('PIP_PYTHON_PATH')),
-                'export {}={}'.format('PS1', os.getenv('PS1')),
-                'export {}={}'.format('PYTHONDONTWRITEBYTECODE', os.getenv('PYTHONDONTWRITEBYTECODE')),
-                'export {}={}'.format('VIRTUAL_ENV', os.getenv('VIRTUAL_ENV')),
+                '# Based on a manual inspection of relevant variables on 7/13/2021, perhaps this could be done better',
+                _format_export('PATH', os.getenv('PATH')),
+                _format_export('PIPENV_ACTIVE', os.getenv('PIPENV_ACTIVE')),
+                _format_export('PIP_DISABLE_PIP_VERSION_CHECK', os.getenv('PIP_DISABLE_PIP_VERSION_CHECK')),
+                _format_export('PIP_PYTHON_PATH', os.getenv('PIP_PYTHON_PATH')),
+                _format_export('PS1', os.getenv('PS1')),
+                _format_export('PYTHONDONTWRITEBYTECODE', os.getenv('PYTHONDONTWRITEBYTECODE')),
+                _format_export('VIRTUAL_ENV', os.getenv('VIRTUAL_ENV')),
                 '',
                 '# Delete this command file',
                 'rm -f "{}"'.format(path_command),
