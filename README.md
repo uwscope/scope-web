@@ -13,14 +13,21 @@ With prerequisites:
 - Secrets provided (as in [Providing Secrets](#providing-secrets))
 - Activating a Pipenv shell (as in [Using Pipenv](#using-pipenv)).
 
+A typical development environment then:
+
+- Opens a tunnel to the production database 
+  (i.e., because we cannot run the database locally, because production is still our only instance).
+- Runs a Flask application server development instance locally, with hot reloading.  
+- Runs a web client development instance locally, with hot reloading.  
+
 ```
-invoke dependencies.ensure.dev  # Ensure installation of dependencies
-invoke database.forward.prod    # Forwards the production database
-invoke flask.dev                # Runs the application server, with hot reloading
-invoke web.dev                  # Runs the web client, with hot reloading
+invoke dependencies.ensure.dev  # Ensure dependencies are installed, including development dependencies.
+invoke database.forward.prod    # Forward the database from our production server, listening on `localhost:8000`.
+invoke flask.dev                # Start a development build of Flask, listening on `localhost:4000`, including hot reloading.
+invoke web.dev                  # Start a development build of the client, listening on `localhost:3000`, including hot reloading.
 ```
 
-The web client will then be accessible at `http://localhost:3000/`.
+The web client development instance will then be accessible at `http://localhost:3000/`.
 
 ## Installation of Dependencies
 
