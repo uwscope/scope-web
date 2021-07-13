@@ -33,7 +33,7 @@ def spawn_new_terminal(
     for arg_current in sys.argv[1:]:
         command = '{} "{}"'.format(command, arg_current)
 
-    # According to platform, run the reconstructed command in a new terminal
+    # According to platform, prepare to execute the command
     platform_current = platform.system()
 
     if platform_current.casefold() == 'windows':
@@ -63,18 +63,28 @@ def spawn_new_terminal(
         # - Make that file executable.
         # - `open` it via a new `Terminal`
         #
-        # The new terminal will start in the person's home directory.
+        # The new terminal will start in the person's home directory and does not inherit environment variables.
 
         path_cwd = Path.cwd()
         path_command = Path(path_cwd, 'INVOKE_SPAWN_NEW_TERMINAL.command')
         with open(path_command, 'w') as file_command:
             # Write a command file
             file_command.writelines('{}\n'.format(line_current) for line_current in [
-                # '# Set environment variable that we will detect from the new terminal',
-                # 'export INVOKE_SPAWN_NEW_TERMINAL = True',
-                # '',
+                '# Set environment variable that we will detect from the new terminal',
+                'export INVOKE_SPAWN_NEW_TERMINAL=True',
+                '',
                 '# Restore the working directory',
                 'cd "{}"'.format(path_cwd),
+                '',
+                '# Restore environment variables that configure the virtual environment',
+                '# Based on a manual inspection on 7/13/2021, perhaps this could be done better',
+                'export {}={}'.format('PATH', os.getenv('PATH')),
+                'export {}={}'.format('PIPENV_ACTIVE', os.getenv('PIPENV_ACTIVE')),
+                'export {}={}'.format('PIP_DISABLE_PIP_VERSION_CHECK', os.getenv('PIP_DISABLE_PIP_VERSION_CHECK')),
+                'export {}={}'.format('PIP_PYTHON_PATH', os.getenv('PIP_PYTHON_PATH')),
+                'export {}={}'.format('PS1', os.getenv('PS1')),
+                'export {}={}'.format('PYTHONDONTWRITEBYTECODE', os.getenv('PYTHONDONTWRITEBYTECODE')),
+                'export {}={}'.format('VIRTUAL_ENV', os.getenv('VIRTUAL_ENV')),
                 '',
                 '# Delete this command file',
                 'rm -f "{}"'.format(path_command),
@@ -92,10 +102,6 @@ def spawn_new_terminal(
             # Spawn the new terminal
             context.run(
                 command=command,
-                # Set the INVOKE_SPAWN_NEW_TERMINAL environment variable we will detect from the new terminal
-                env={
-                    'INVOKE_SPAWN_NEW_TERMINAL': 'True'
-                },
                 # Asynchronously allow the task to proceed in the new terminal
                 disown=True
             )
