@@ -17,7 +17,7 @@ def _format_export(name: str, value: str) -> str:
     Format a command to export an environment variable.
     """
 
-    return '{}="{}"'.format(name, value)
+    return 'export {}="{}"'.format(name, value)
 
 
 def spawn_new_terminal(
