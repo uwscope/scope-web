@@ -11,14 +11,15 @@ With prerequisites:
 
 - Dependencies installed (as in [Installation of Dependences](#installation-of-dependencies)).
 - Secrets provided (as in [Providing Secrets](#providing-secrets))
-- Activating a Pipenv shell (as in [Using Pipenv](#using-pipenv)).
 
 A typical development environment then:
 
 - Opens a tunnel to the production database 
-  (i.e., because we cannot run the database locally, because production is still our only instance).
+  (i.e., because we cannot run the database locally, because production is currently our only instance).
 - Runs a Flask application server development instance locally, with hot reloading.  
 - Runs a web client development instance locally, with hot reloading.  
+
+Within a Pipenv shell (as in [Using Pipenv](#using-pipenv)):
 
 ```
 invoke dependencies.ensure.dev  # Ensure dependencies are installed, including development dependencies.
@@ -59,17 +60,40 @@ For Python components, Python and the Pipenv tool for managing virtual environme
 
 - [Python](https://www.python.org/)
 
-  Installers: <https://www.python.org/downloads/>
-  
-  Development has used version 3.9.x.
+  Development uses version 3.9.x.
 
+  On Windows, specific versions can be installed: <https://www.python.org/downloads/>
+  
+  On Mac, specific versions are managed using pyenv: <https://github.com/pyenv/pyenv>
+  
 - [Pipenv](https://pipenv.pypa.io/en/latest/)
 
-  In the root Python environment:
-
+  Pipenv manages the creation of a Python virtual environment and pip installation of dependencies in that environment.
+    
+  Pipenv must be installed in an existing Python installation, typically a global installation:  
+    
   ```
   pip install pipenv
   ```
+    
+  The `pipenv` command is then available in that Python installation. For example:
+    
+  ```
+  pipenv --version
+  ```
+    
+  Depending how a machine manages specific versions of Python, other possibilities for accessing the `pipenv` command include:
+    
+  - On Windows, using a full path to a specific version installation:
+    
+    ```
+    C:\Python39\Scripts\pip install pipenv
+    C:\Python39\Scripts\pipenv --version
+    ```  
+    
+  - On a Mac, Pipenv will detect pyenv and use it to ensure the desired version of Python in the created virtual environment.
+    
+  With Pipenv installed and access to the `pipenv` command, see [Using Pipenv](#using-pipenv).
 
 ## Providing Secrets
 
@@ -83,51 +107,43 @@ Runtime secrets are expected in the `secrets` directory.
 
 ## Using Pipenv
 
-This project uses [Pipenv](https://pipenv.pypa.io/en/latest/) to manage a virtual environment and dependencies.
+Ensure Pipenv is installed and the `pipenv` command is accessible, as in [Installation of Dependencies](#installation-of-dependencies):
 
-Ensure Pipenv is globally installed (as in [Installation of Dependences](#installation-of-dependencies)).
+```
+pipenv --version
+```
 
-First use Pipenv to create a virtual environment and install the `Pipfile.lock` dependencies, including development dependencies:
+Use the `pipenv` command to create a virtual environment and install the `Pipfile.lock` dependencies, including development dependencies:
 
 ```
 pipenv sync --dev
 ```
 
-- On Windows, due to path configuration issues you may need to specify the full `pipenv` path:
-  
-  ```
-  C:\Python39\Scripts\pipenv sync --dev
-  ```  
-
-Then activate a shell inside the created environment:
+Activate a shell inside the created virtual environment:
 
 ```
 pipenv shell
 ```
 
-- On Windows, the Pipenv shell implementation has some limitations (e.g., lacks command history). You may prefer:
+On Windows, the `pipenv shell` implementation has some limitations (e.g., lacks command history). You may prefer:
 
-  ```
-  pipenv run cmd
-  ```
-    
-- On Windows, due to path configuration issues you may need to specify the full `pipenv` path:
-  
-  ```
-  C:\Python39\Scripts\pipenv run cmd
-  ```  
+```
+pipenv run cmd
+```
 
-From within the Pipenv shell, all commands will benefit from dependencies in `Pipefile` and `Pipefile.lock`.
-See examples commands in [Typical Development Environment](#typical-development-environment)
+Within the resulting Pipenv shell, all commands will benefit from dependencies in `Pipefile` and `Pipefile.lock`.
+See examples in [Typical Development Environment](#typical-development-environment)
 and in [Using Invoke](#using-invoke).
+The development dependencies of this project also include Pipenv, 
+so the `pipenv` command is available locally (e.g., without a need to reference a specific global installation). 
 
-- To install a new dependency, including updating `Pipefile` and `Pipefile.lock`:
+- To install a new dependency, update versions of all dependencies, and update `Pipefile` and `Pipefile.lock`:
 
   ```
   pipenv install <package>
   ```
 
-- To install a new development dependency, including updating `Pipefile` and `Pipefile.lock`:
+- To install a new development dependency, update versions of all dependencies, and update `Pipefile` and `Pipefile.lock`:
 
   ```
   pipenv install --dev <package>
@@ -137,7 +153,7 @@ and in [Using Invoke](#using-invoke).
 
 This project uses [Invoke](https://www.pyinvoke.org/) for task execution.
 
-List available tasks:
+Within a Pipenv shell (as in [Using Pipenv](#using-pipenv)), list available tasks:
 
 ```
 invoke -l
