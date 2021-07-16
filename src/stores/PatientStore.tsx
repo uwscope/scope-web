@@ -17,6 +17,7 @@ import {
     IActivity,
     IAssessment,
     IAssessmentDataPoint,
+    ICaseReview,
     IPatient,
     ISession,
 } from 'src/services/types';
@@ -29,6 +30,7 @@ export interface IPatientStore extends IPatient {
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
     updateSession: (session: Partial<ISession>) => void;
+    updateCaseReview: (caseReview: Partial<ICaseReview>) => void;
     updateAssessment: (assessment: Partial<IAssessment>) => void;
     updateAssessmentRecord: (assessmentData: Partial<IAssessmentDataPoint>) => void;
 }
@@ -69,6 +71,7 @@ export class PatientStore implements IPatientStore {
 
     // Sessions
     public sessions: ISession[] = [];
+    public caseReviews: ICaseReview[] = [];
 
     // Assessments
     public assessments: IAssessment[] = [];
@@ -78,6 +81,7 @@ export class PatientStore implements IPatientStore {
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly updateSessionQuery: PromiseQuery<ISession>;
+    private readonly updateCaseReviewQuery: PromiseQuery<ICaseReview>;
     private readonly updateAssessmentQuery: PromiseQuery<IAssessment>;
     private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
 
@@ -110,16 +114,18 @@ export class PatientStore implements IPatientStore {
         this.followupSchedule = patient.followupSchedule;
 
         // Sessions
-        this.sessions = patient.sessions;
+        this.sessions = patient.sessions || [];
+        this.caseReviews = patient.caseReviews || [];
 
         // Assessments
-        this.assessments = patient.assessments;
+        this.assessments = patient.assessments || [];
 
         // Activities
-        this.activities = patient.activities;
+        this.activities = patient.activities || [];
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
         this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
+        this.updateCaseReviewQuery = new PromiseQuery<ICaseReview>(undefined, 'updateCaseReview');
         this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
         this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
 
@@ -182,6 +188,36 @@ export class PatientStore implements IPatientStore {
                     };
 
                     this.sessions.push(addedSession);
+                })();
+            });
+        };
+
+        this.runAfterLoad(effect);
+    }
+
+    @action.bound
+    public async updateCaseReview(caseReview: Partial<ICaseReview>) {
+        const effect = () => {
+            const { registryService } = useServices();
+            const promise = registryService.updatePatientCaseReview(this.recordId, caseReview);
+            this.updateCaseReviewQuery.fromPromise(promise).then((caseReview) => {
+                action(() => {
+                    if (!!caseReview.reviewNote) {
+                        const existing = this.caseReviews.find((s) => s.reviewId == caseReview.reviewId);
+
+                        if (!!existing) {
+                            Object.assign(existing, caseReview);
+                            return;
+                        }
+                    }
+
+                    // TODO: server should return appropriate id
+                    const addedCaseReview = {
+                        ...caseReview,
+                        reviewId: caseReview.reviewId || `review-${this.caseReviews.length}`,
+                    };
+
+                    this.caseReviews.push(addedCaseReview);
                 })();
             });
         };

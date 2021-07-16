@@ -72,7 +72,7 @@ export type Referral = typeof referralValues[number] | OtherSpecify;
 export const referralStatusValues = ['Not Referred', 'Pending', 'Active', 'Completed'] as const;
 export type ReferralStatus = typeof referralStatusValues[number];
 
-export const sessionTypeValues = ['In person at clinic', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
+export const sessionTypeValues = ['In person', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
 export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
 
 export const treatmentPlanValues = [
@@ -135,3 +135,7 @@ export const gad7ItemValues = [
     'Afraid',
 ] as const;
 export type GAD7Item = typeof gad7ItemValues[number];
+
+export type CaseReviewEntryType = 'Case Review';
+export type SessionEntryType = 'Session';
+export type EntryType = SessionEntryType | CaseReviewEntryType;

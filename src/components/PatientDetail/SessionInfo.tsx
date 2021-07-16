@@ -1,22 +1,6 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellProps,
-    TableHead,
-    TableRow,
-    withTheme,
-} from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
-import { compareAsc, compareDesc, format } from 'date-fns';
+import { compareAsc, compareDesc } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -28,29 +12,22 @@ import {
     GridMultiSelectField,
     GridTextField,
 } from 'src/components/common/GridField';
-import { ClickableTableRow } from 'src/components/common/Table';
-import { referralStatusValues, sessionTypeValues } from 'src/services/enums';
-import { ISession, KeyedMap } from 'src/services/types';
+import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
+import {
+    behavioralActivationChecklistValues,
+    behavioralStrategyChecklistValues,
+    EntryType,
+    referralStatusValues,
+    referralValues,
+    sessionTypeValues,
+} from 'src/services/enums';
+import { ICaseReview, ISession, ISessionOrCaseReview } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
-import styled, { ThemedStyledProps } from 'styled-components';
-
-const SizableTableCell = withTheme(
-    styled(TableCell)((props: ThemedStyledProps<TableCellProps & { $width: number }, any>) => ({
-        minWidth: props.$width,
-    }))
-);
-
-const HorizontalScrollTable = styled(Table)({
-    overflowX: 'auto',
-    width: '100%',
-    display: 'block',
-    maxHeight: '70vh',
-});
 
 const defaultSession: ISession = {
     sessionId: 'new',
     date: new Date(),
-    sessionType: 'In person at clinic',
+    sessionType: 'In person',
     billableMinutes: 0,
     medicationChange: '',
     currentMedications: '',
@@ -88,16 +65,36 @@ const defaultSession: ISession = {
     sessionNote: '',
 };
 
-const state = observable<{ open: boolean; isNew: boolean; dateAsc: boolean } & ISession>({
+const defaultReview: ICaseReview = {
+    reviewId: 'new',
+    date: new Date(),
+    consultingPsychiatrist: '',
+    medicationChange: '',
+    behavioralStrategyChange: '',
+    referralsChange: '',
+    otherRecommendations: '',
+    reviewNote: '',
+};
+
+const state = observable<{
+    open: boolean;
+    isNew: boolean;
+    dateAsc: boolean;
+    entryType: EntryType;
+    session: ISession;
+    review: ICaseReview;
+}>({
     open: false,
     isNew: false,
     dateAsc: false,
-    ...defaultSession,
+    session: defaultSession,
+    review: defaultReview,
+    entryType: 'Session',
 });
 
 const SessionEdit: FunctionComponent = observer(() => {
     const onValueChange = action((key: string, value: any) => {
-        (state as any)[key] = value;
+        (state.session as any)[key] = value;
     });
 
     return (
@@ -105,29 +102,30 @@ const SessionEdit: FunctionComponent = observer(() => {
             <GridDateField
                 editable={true}
                 label="Session Date"
-                value={state.date}
+                value={state.session.date}
                 onChange={(text) => onValueChange('date', text)}
             />
             <GridDropdownField
                 editable={true}
                 label="Session Type"
-                value={state.sessionType}
+                value={state.session.sessionType}
                 options={sessionTypeValues}
                 onChange={(text) => onValueChange('sessionType', text)}
             />
             <GridTextField
                 editable={true}
                 label="Billable Minutes"
-                value={state.billableMinutes}
+                value={state.session.billableMinutes}
                 onChange={(text) => onValueChange('billableMinutes', text)}
             />
             <GridTextField
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Medication changes"
-                value={state.medicationChange}
+                value={state.session.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onValueChange('medicationChange', text)}
             />
@@ -135,54 +133,140 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Current medications"
-                value={state.currentMedications}
+                value={state.session.currentMedications}
                 onChange={(text) => onValueChange('currentMedications', text)}
             />
             <GridMultiSelectField
                 sm={12}
                 editable={true}
                 label="Behavioral Strategies"
-                flags={state.behavioralStrategyChecklist}
-                other={state.behavioralStrategyOther}
+                flags={state.session.behavioralStrategyChecklist}
+                flagOrder={[...behavioralStrategyChecklistValues]}
+                other={state.session.behavioralStrategyOther}
                 onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
+                onOtherChange={(text) => onValueChange('behavioralStrategyOther', text)}
             />
             <GridMultiSelectField
                 sm={12}
                 editable={true}
-                disabled={!state.behavioralStrategyChecklist['Behavioral Activation']}
+                disabled={!state.session.behavioralStrategyChecklist['Behavioral Activation']}
                 label="Behavioral Activation Checklist"
-                flags={state.behavioralActivationChecklist}
+                flags={state.session.behavioralActivationChecklist}
+                flagOrder={[...behavioralActivationChecklistValues]}
                 onChange={(flags) => onValueChange('behavioralActivationChecklist', flags)}
             />
             <GridMultiOptionsField
                 sm={12}
                 editable={true}
                 label="Referrals"
-                flags={state.referralStatus}
-                options={referralStatusValues.filter((r) => r != 'Not Referred')}
+                flags={state.session.referralStatus}
+                other={state.session.referralOther}
+                flagOrder={[...referralValues, 'Other']}
+                options={referralStatusValues}
                 notOption="Not Referred"
                 onChange={(flags) => onValueChange('referralStatus', flags)}
+                onOtherChange={(text) => onValueChange('referralOther', text)}
             />
             <GridTextField
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={4}
                 label="Other recommendations / action items"
-                value={state.otherRecommendations}
+                value={state.session.otherRecommendations}
                 onChange={(text) => onValueChange('otherRecommendations', text)}
             />
             <GridTextField
                 sm={12}
                 editable={true}
                 multiline={true}
+                minLine={4}
                 maxLine={10}
                 label="Session Note"
-                value={state.sessionNote}
+                value={state.session.sessionNote}
                 placeholder="Write session notes here"
                 onChange={(text) => onValueChange('sessionNote', text)}
+            />
+        </Grid>
+    );
+});
+
+const ReviewEdit: FunctionComponent = observer(() => {
+    const onValueChange = action((key: string, value: any) => {
+        (state.review as any)[key] = value;
+    });
+
+    return (
+        <Grid container spacing={2} alignItems="stretch">
+            <GridDateField
+                editable={true}
+                label="Review Date"
+                value={state.review.date}
+                onChange={(text) => onValueChange('date', text)}
+            />
+            <GridTextField
+                editable={true}
+                label="Consulting Psychiatrist"
+                value={state.review.consultingPsychiatrist}
+                onChange={(text) => onValueChange('consultingPsychiatrist', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Medication changes"
+                value={state.review.medicationChange}
+                placeholder="Leave blank if no change in current medications"
+                onChange={(text) => onValueChange('medicationChange', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Behavioral strategy changes"
+                value={state.review.behavioralStrategyChange}
+                placeholder="Leave blank if no change to behavioral strategies"
+                onChange={(text) => onValueChange('behavioralStrategyChange', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Referral changes"
+                value={state.review.referralsChange}
+                placeholder="Leave blank if no change to referrals"
+                onChange={(text) => onValueChange('referralsChange', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Other recommendations / action items"
+                value={state.review.otherRecommendations}
+                onChange={(text) => onValueChange('otherRecommendations', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={true}
+                multiline={true}
+                minLine={4}
+                maxLine={10}
+                label="Review Note"
+                value={state.review.reviewNote}
+                placeholder="Write review notes here"
+                onChange={(text) => onValueChange('reviewNote', text)}
             />
         </Grid>
     );
@@ -196,96 +280,70 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const handleAddSession = action(() => {
-        Object.assign(state, defaultSession);
+        Object.assign(state.session, defaultSession);
         state.open = true;
         state.isNew = true;
-        state.sessionId = 'new';
+        state.entryType = 'Session';
+        state.session.sessionId = 'new';
     });
 
-    const handleEditSession = action((session: ISession) => {
-        Object.assign(state, session);
+    const handleAddReview = action(() => {
+        Object.assign(state.review, defaultReview);
+        state.open = true;
+        state.isNew = true;
+        state.entryType = 'Case Review';
+        state.review.reviewId = 'new';
+    });
+
+    const handleEditSession = action((sessionId: string) => {
+        const session = currentPatient.sessions.find((s) => s.sessionId == sessionId);
+        Object.assign(state.session, session);
         state.open = true;
         state.isNew = false;
+        state.entryType = 'Session';
+    });
+
+    const handleEditReview = action((reviewId: string) => {
+        const review = currentPatient.caseReviews.find((s) => s.reviewId == reviewId);
+        Object.assign(state.review, review);
+        state.open = true;
+        state.isNew = false;
+        state.entryType = 'Case Review';
     });
 
     const onSave = action(() => {
-        const { open, ...sessionData } = { ...state };
-        currentPatient.updateSession(sessionData);
+        const { session, review, entryType } = state;
+        if (entryType == 'Session') {
+            currentPatient.updateSession(session);
+        } else if (entryType == 'Case Review') {
+            currentPatient.updateCaseReview(review);
+        }
         state.open = false;
     });
 
-    const generateFlagText = (flags: KeyedMap<boolean | string>, other: string) => {
-        var concatValues = Object.keys(flags)
-            .filter((k) => flags[k] && k != 'Other')
-            .join('\n');
-        if (flags['Other']) {
-            concatValues = [concatValues, other].join('\n');
-        }
-
-        return concatValues;
-    };
-
-    const toggleDateOrder = action(() => {
-        state.dateAsc = !state.dateAsc;
-    });
-
-    const sortedSessions = currentPatient.sessions
+    const sortedSessionOrReviews = (currentPatient.sessions as ISessionOrCaseReview[])
+        .concat(currentPatient.caseReviews)
         .slice()
         .sort((a, b) => (state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date)));
 
     return (
         <ActionPanel
             id="sessions"
-            title="Sessions"
+            title="Sessions and Reviews"
             loading={currentPatient.state == 'Pending'}
-            actionButtons={[{ icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton]}>
-            <Grid container alignItems="stretch">
-                <HorizontalScrollTable size="small">
-                    <TableHead>
-                        <TableRow>
-                            <SizableTableCell $width={80}>
-                                <Button
-                                    size="small"
-                                    endIcon={state.dateAsc ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
-                                    onClick={toggleDateOrder}>
-                                    Date
-                                </Button>
-                            </SizableTableCell>
-                            <SizableTableCell $width={120}>Type</SizableTableCell>
-                            <SizableTableCell $width={80}>Billable Minutes</SizableTableCell>
-                            <SizableTableCell $width={200}>Medications</SizableTableCell>
-                            <SizableTableCell $width={200}>Behavioral Strategies</SizableTableCell>
-                            <SizableTableCell $width={200}>Referrals</SizableTableCell>
-                            <SizableTableCell $width={200}>Other Recommendations / Action Items</SizableTableCell>
-                            <SizableTableCell $width={300}>Notes</SizableTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {sortedSessions.map((session, idx) => (
-                            <ClickableTableRow hover key={idx} onClick={() => handleEditSession(session)}>
-                                <TableCell>{format(session.date, 'MM/dd/yyyy')}</TableCell>
-                                <TableCell>{session.sessionType}</TableCell>
-                                <TableCell>{session.billableMinutes}</TableCell>
-                                <TableCell>{session.medicationChange}</TableCell>
-                                <TableCell>
-                                    {generateFlagText(
-                                        session.behavioralStrategyChecklist,
-                                        session.behavioralStrategyOther
-                                    )}
-                                </TableCell>
-                                <TableCell>{generateFlagText(session.referralStatus, session.referralOther)}</TableCell>
-                                <TableCell>{session.otherRecommendations}</TableCell>
-                                <TableCell>{session.sessionNote}</TableCell>
-                            </ClickableTableRow>
-                        ))}
-                    </TableBody>
-                </HorizontalScrollTable>
-            </Grid>
+            actionButtons={[
+                { icon: <AddIcon />, text: 'Add Case Review', onClick: handleAddReview } as IActionButton,
+                { icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton,
+            ]}>
+            <SessionReviewTable
+                sessionOrReviews={sortedSessionOrReviews}
+                assessments={currentPatient.assessments}
+                onReviewClick={handleEditReview}
+                onSessionClick={handleEditSession}
+            />
             <Dialog open={state.open} onClose={handleClose} maxWidth="md">
-                <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} Session Information`}</DialogTitle>
-                <DialogContent>
-                    <SessionEdit />
-                </DialogContent>
+                <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} ${state.entryType} Information`}</DialogTitle>
+                <DialogContent>{state.entryType == 'Session' ? <SessionEdit /> : <ReviewEdit />}</DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
                         Cancel

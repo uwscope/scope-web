@@ -4,19 +4,22 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { BehavioralActivationChecklistItem, behavioralActivationChecklistValues } from 'src/services/enums';
+import { ISession } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export const BAChecklist: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
     const baCompletion: { [key: string]: Date | undefined } = {};
-    currentPatient?.sessions.forEach((s) => {
-        Object.keys(s.behavioralActivationChecklist).forEach((key) => {
-            if (s.behavioralActivationChecklist[key as BehavioralActivationChecklistItem]) {
-                baCompletion[key] = s.date;
-            }
+    currentPatient?.sessions
+        .map((s) => s as ISession)
+        .forEach((s) => {
+            Object.keys(s.behavioralActivationChecklist).forEach((key) => {
+                if (s.behavioralActivationChecklist[key as BehavioralActivationChecklistItem]) {
+                    baCompletion[key] = s.date;
+                }
+            });
         });
-    });
 
     return (
         <ActionPanel id="checklist" title="Checklist" loading={currentPatient?.state == 'Pending'} actionButtons={[]}>

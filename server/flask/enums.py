@@ -94,7 +94,7 @@ class ReferralStatus(Enum):
 
 
 class SessionType(Enum):
-    InPerson = "In person at clinic"
+    InPerson = "In person"
     Telehealth = "Telehealth"
     Phone = "Phone"
     Group = "Group"

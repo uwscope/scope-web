@@ -50,6 +50,21 @@ export interface ISession {
     sessionNote: string;
 }
 
+export interface ICaseReview {
+    reviewId: string;
+    date: Date;
+    consultingPsychiatrist: string;
+
+    medicationChange: string;
+    behavioralStrategyChange: string;
+    referralsChange: string;
+
+    otherRecommendations: string;
+    reviewNote: string;
+}
+
+export type ISessionOrCaseReview = ISession | ICaseReview;
+
 export interface IAssessment {
     readonly assessmentId: string;
     readonly assessmentType: string;
@@ -64,6 +79,7 @@ export interface IAssessmentDataPoint {
     readonly date: Date;
     readonly pointValues: AssessmentData;
     readonly comment: string;
+    readonly totalScore: number;
 }
 
 export interface IActivity {
@@ -107,6 +123,7 @@ export interface ITreatmentInfo {
 export interface IPatient extends IPatientProfile, IClinicalHistory, ITreatmentInfo {
     // Sessions
     readonly sessions: ISession[];
+    readonly caseReviews: ICaseReview[];
 
     // Assessments
     readonly assessments: IAssessment[];
@@ -129,3 +146,7 @@ export interface IAssessmentContent {
     readonly questions: { question: string; id: string }[];
     readonly options: { text: string; value: number }[];
 }
+
+export const isSession = (session: ISession | ICaseReview): session is ISession => {
+    return (session as ISession)?.sessionId !== undefined;
+};

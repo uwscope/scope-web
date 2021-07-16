@@ -1,8 +1,9 @@
 import { withTheme } from '@material-ui/core';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams, XGrid } from '@material-ui/x-grid';
+import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@material-ui/x-grid';
 import { addWeeks, differenceInWeeks, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import { getFollowupWeeks } from 'src/utils/time';
@@ -197,7 +198,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     return (
         <TableContainer>
-            <XGrid
+            <Table
                 rows={data}
                 columns={columns}
                 autoPageSize
