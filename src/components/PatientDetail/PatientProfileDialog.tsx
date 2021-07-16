@@ -5,7 +5,6 @@ import React, { FunctionComponent } from 'react';
 import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
     clinicCodeValues,
-    depressionTreatmentStatusValues,
     patientGenderValues,
     patientPronounValues,
     patientRaceEthnicityValues,
@@ -22,7 +21,6 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         name,
         MRN,
         clinicCode,
-        depressionTreatmentStatus,
         birthdate,
         race,
         sex,
@@ -52,12 +50,6 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
             {getTextField('Patient Name', name, 'name')}
             {getTextField('MRN', MRN, 'MRN')}
             {getDropdownField('Clinic Code', clinicCode, clinicCodeValues, 'clinicCode')}
-            {getDropdownField(
-                'Treatment Status',
-                depressionTreatmentStatus,
-                depressionTreatmentStatusValues,
-                'depressionTreatmentStatus'
-            )}
             <GridDateField
                 editable
                 label="Date of Birth"

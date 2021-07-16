@@ -84,7 +84,6 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
 
             <LabeledField label="mrn" value={patient.MRN} />
             <LabeledField label="clinic code" value={patient.clinicCode} />
-            <LabeledField label="treatment status" value={patient.depressionTreatmentStatus} />
             <br />
             <LabeledField label="dob" value={format(patient.birthdate, 'MM/dd/yyyy')} />
             <LabeledField label="age" value={differenceInYears(Date.now(), patient.birthdate)} />
@@ -93,8 +92,9 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
             <LabeledField label="gender" value={patient.gender} />
             <LabeledField label="pronouns" value={patient.pronoun} />
             <br />
-            <LabeledField label="oncology provider" value={patient.primaryOncologyProvider} />
-            <LabeledField label="care manager" value={patient.primaryCareManager} />
+
+            <LabeledField label="primary social worker" value={patient.primaryCareManager} />
+            <LabeledField label="primary oncology provider" value={patient.primaryOncologyProvider} />
 
             <EditPatientProfileDialog
                 patient={patient}
