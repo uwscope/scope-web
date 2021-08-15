@@ -27,12 +27,13 @@ export const getAssessmentScore = (pointValues: AssessmentData) => {
 
 export const getLatestScore = (assessment: IAssessment) => {
     if (assessment?.data && assessment.data.length > 0) {
-        const latest = assessment.data[assessment.data.length - 1];
+        const sortedAssessments = assessment.data.slice().sort((a, b) => compareDesc(a.date, b.date));
+        const latest = sortedAssessments[0];
 
         if (!!latest.totalScore) {
             return latest.totalScore;
         } else {
-            return getAssessmentScore(assessment.data[assessment.data.length - 1].pointValues);
+            return getAssessmentScore(latest.pointValues);
         }
     }
 
