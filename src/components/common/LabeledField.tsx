@@ -1,4 +1,5 @@
-import { styled, Typography, withTheme } from '@material-ui/core';
+import { IconButton, styled, Typography, withTheme } from '@material-ui/core';
+import FlagIcon from '@material-ui/icons/Flag';
 import React, { FunctionComponent } from 'react';
 
 const Label = withTheme(
@@ -21,6 +22,10 @@ const Value = withTheme(
     }))
 );
 
+const NoPaddingIconButton = styled(IconButton)({
+    padding: 0,
+});
+
 export interface ILabeledFieldProps {
     label: string;
     value: string | number | undefined;
@@ -33,6 +38,25 @@ export const LabeledField: FunctionComponent<ILabeledFieldProps> = (props) => {
             <Label>{label}</Label>
             {`: `}
             <Value>{value}</Value>
+        </div>
+    );
+};
+
+export interface IFlaggedFieldProps {
+    label: string;
+    flagged: boolean;
+    onClick: () => void;
+}
+
+export const FlaggedField: FunctionComponent<IFlaggedFieldProps> = (props) => {
+    const { label, flagged, onClick } = props;
+    return (
+        <div>
+            <Value>{label}</Value>
+            {`: `}
+            <NoPaddingIconButton aria-label="flag" size="small" onClick={onClick}>
+                <FlagIcon color={flagged ? 'error' : 'disabled'} fontSize="small" />
+            </NoPaddingIconButton>
         </div>
     );
 };

@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BAInformation from 'src/components/PatientDetail/BAInformation';
 import PatientCard from 'src/components/PatientDetail/PatientCard';
+import PatientCardExtended from 'src/components/PatientDetail/PatientCardExtended';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
 import SessionInformation from 'src/components/PatientDetail/SessionInformation';
@@ -155,6 +156,8 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                 <DetailPageContainer>
                     <LeftPaneContainer elevation={3} square>
                         <PatientCard loading={currentPatient.state == 'Pending'} />
+                        <Divider variant="middle" />
+                        <PatientCardExtended />
                         <Divider variant="middle" />
                         <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
                     </LeftPaneContainer>
