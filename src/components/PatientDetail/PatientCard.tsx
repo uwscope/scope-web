@@ -1,4 +1,4 @@
-import { Button, Typography, withTheme } from '@material-ui/core';
+import { Button, Divider, LinearProgress, Typography, withTheme } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { differenceInYears, format } from 'date-fns';
 import { action, observable } from 'mobx';
@@ -34,6 +34,8 @@ const Header = styled.div({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
 });
+
+const Loading = withTheme(styled(LinearProgress)({ height: 1 }));
 
 const state = observable<{ open: boolean }>({
     open: false,
@@ -82,6 +84,7 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                 </EditButton>
             </Header>
 
+            {loading ? <Loading /> : <Divider />}
             <LabeledField label="mrn" value={patient.MRN} />
             <LabeledField label="clinic code" value={patient.clinicCode} />
             <br />

@@ -18,8 +18,14 @@ const CardTitle = withTheme(
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: props.theme.spacing(1, 1, 1, 2),
+        height: 64,
     }))
 );
+
+const TitleType = styled(Typography)({
+    fontSize: '1rem',
+    fontWeight: 600,
+});
 
 const Loading = withTheme(styled(LinearProgress)({ height: 1 }));
 
@@ -42,9 +48,9 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
     return (
         <Card id={id}>
             <CardTitle>
-                <Typography variant="button" noWrap={true}>
+                <TitleType variant="button" noWrap={true}>
                     {title}
-                </Typography>
+                </TitleType>
                 <CardActions>
                     {!!actionButtons
                         ? actionButtons.map((a) => (
