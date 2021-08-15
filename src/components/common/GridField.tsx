@@ -4,6 +4,7 @@ import {
     FormControl,
     FormControlLabel,
     FormControlProps,
+    FormHelperText,
     Grid,
     GridSize,
     Input,
@@ -35,9 +36,7 @@ const EditableFormControl = withTheme(
                 '>.MuiFormLabel-root': {
                     position: 'relative',
                 },
-                '>.MuiFormLabel-root.Mui-focused': {
-                    color: props.$editable ? undefined : 'rgba(0, 0, 0, 0.54)',
-                },
+                '>.MuiFormLabel-root.Mui-focused': {},
                 '>.MuiInput-underline:hover:not(.Mui-disabled):before': {
                     border: props.$editable ? undefined : 'none',
                 },
@@ -46,7 +45,6 @@ const EditableFormControl = withTheme(
                 },
                 '>.MuiFormHelperText-root': {
                     lineHeight: 1,
-                    margin: 0,
                 },
                 '>.MuiInput-root': {
                     margin: 0,
@@ -96,6 +94,7 @@ interface IGridFieldProps extends IGridFieldBaseProps {
     value: string | number | Date | undefined;
     onChange?: (text: string | number | Date) => void;
     placeholder?: string;
+    helperText?: string;
 }
 
 export interface IGridTextFieldProps extends IGridFieldProps {
@@ -116,6 +115,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
         placeholder = 'No data',
         xs,
         sm,
+        helperText = '',
     } = props;
 
     const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,6 +138,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
                     fullWidth
                     placeholder={placeholder}
                 />
+                {!!helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
             </EditableFormControl>
         </Grid>
     );

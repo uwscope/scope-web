@@ -1,158 +1,107 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
-import { action, observable } from 'mobx';
+import { Grid } from '@material-ui/core';
+import { format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
-import { GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
-import { followupScheduleValues } from 'src/services/enums';
-import { ITreatmentInfo } from 'src/services/types';
+import ActionPanel from 'src/components/common/ActionPanel';
+import { GridTextField } from 'src/components/common/GridField';
+import { BehavioralStrategyChecklistItem, Referral } from 'src/services/enums';
+import { BehavioralStrategyChecklistFlags } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
-
-interface ITreatmentInfoContentProps extends ITreatmentInfo {
-    editable?: boolean;
-    onValueChange: (key: string, value: any) => void;
-}
-
-const TreatmentInfoContent: FunctionComponent<ITreatmentInfoContentProps> = (props) => {
-    const {
-        editable,
-        currentTreatmentRegimen,
-        currentTreatmentRegimenOther,
-        currentTreatmentRegimenNotes,
-        psychDiagnosis,
-        discussionFlag,
-        followupSchedule,
-        onValueChange,
-    } = props;
-
-    return (
-        <Grid container spacing={2} alignItems="stretch">
-            <GridMultiSelectField
-                sm={12}
-                editable={editable}
-                label="Current Treatment Regimen"
-                flags={currentTreatmentRegimen}
-                other={currentTreatmentRegimenOther}
-                onChange={(flags) => onValueChange('currentTreatmentRegimen', flags)}
-                onOtherChange={(text) => onValueChange('currentTreatmentRegimenOther', text)}
-            />
-            <GridTextField
-                sm={12}
-                editable={editable}
-                multiline={true}
-                minLine={4}
-                maxLine={4}
-                label="Treatment Regimen Notes"
-                value={currentTreatmentRegimenNotes}
-                onChange={(text) => onValueChange('currentTreatmentRegimenNotes', text)}
-            />
-            <GridTextField
-                sm={12}
-                editable={editable}
-                multiline={true}
-                minLine={4}
-                maxLine={4}
-                label="Psychiatric Diagnosis"
-                value={psychDiagnosis}
-                onChange={(text) => onValueChange('psychDiagnosis', text)}
-            />
-            <GridMultiSelectField
-                sm={12}
-                editable={editable}
-                label="Safety and Discussion Flags"
-                flags={discussionFlag}
-                onChange={(flags) => onValueChange('discussionFlag', flags)}
-            />
-            <GridDropdownField
-                sm={12}
-                editable={editable}
-                label="Follow-up Schedule"
-                value={followupSchedule}
-                options={followupScheduleValues}
-                onChange={(text) => onValueChange('followupSchedule', text)}
-            />
-        </Grid>
-    );
-};
-
-const defaultTreatmentRegimen = {
-    Surgery: false,
-    Chemotherapy: false,
-    Radiation: false,
-    'Stem Cell Transplant': false,
-    Immunotherapy: false,
-    'CAR-T': false,
-    Endocrine: false,
-    Surveillance: false,
-    Other: false,
-};
-
-const state = observable<{ open: boolean } & ITreatmentInfo>({
-    open: false,
-    currentTreatmentRegimen: defaultTreatmentRegimen,
-    currentTreatmentRegimenOther: '',
-    currentTreatmentRegimenNotes: '',
-    psychDiagnosis: '',
-    followupSchedule: '2-week follow-up',
-    discussionFlag: { 'Flag as safety risk': false, 'Flag for discussion': false },
-});
+import { getLatestScore } from 'src/utils/assessment';
 
 export const TreatmentInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
-    const onValueChange = action((key: string, value: any) => {
-        (state as any)[key] = value;
+    const latestPhQ = currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9');
+    const latestPhqScore = !!latestPhQ ? getLatestScore(latestPhQ) : -1;
+    const latestGAD = currentPatient?.assessments.find((a) => a.assessmentType == 'GAD-7');
+    const latestGadScore = !!latestGAD ? getLatestScore(latestGAD) : -1;
+
+    const latestSessionDate = currentPatient.latestSession?.date;
+    const currentMedications = currentPatient.latestSession?.currentMedications;
+    const behavioralStrategiesUsedFlags: BehavioralStrategyChecklistFlags = {
+        'Behavioral Activation': false,
+        'Motivational Interviewing': false,
+        'Problem Solving Therapy': false,
+        'Cognitive Therapy': false,
+        'Mindfulness Strategies': false,
+        'Supportive Therapy': false,
+        Other: false,
+    };
+
+    currentPatient.sessions.forEach((s) => {
+        Object.keys(s.behavioralStrategyChecklist).forEach((k) => {
+            if (!!s.behavioralStrategyChecklist[k as BehavioralStrategyChecklistItem]) {
+                behavioralStrategiesUsedFlags[k as BehavioralStrategyChecklistItem] = true;
+            }
+        });
     });
 
-    const handleClose = action(() => {
-        state.open = false;
-    });
-
-    const handleOpen = action(() => {
-        if (!!currentPatient) {
-            Object.assign(state, currentPatient);
+    const behavioralStrategiesUsedList: string[] = [];
+    Object.keys(behavioralStrategiesUsedFlags).forEach((k) => {
+        if (!!behavioralStrategiesUsedFlags[k as BehavioralStrategyChecklistItem]) {
+            behavioralStrategiesUsedList.push(k);
         }
-
-        state.open = true;
     });
 
-    const onSave = action(() => {
-        const { open, ...patientData } = { ...state };
-        currentPatient?.updatePatientData(patientData);
-        state.open = false;
-    });
+    const behavioralStrategiesUsed = behavioralStrategiesUsedList.join('\n');
+
+    const latestReferralsFlags = currentPatient.latestSession?.referralStatus;
+    const referralsList: string[] = [];
+    if (!!latestReferralsFlags) {
+        Object.keys(latestReferralsFlags).forEach((k) => {
+            if (latestReferralsFlags[k as Referral] != 'Not Referred') {
+                referralsList.push(`${k} - ${latestReferralsFlags[k as Referral]}`);
+            }
+        });
+    }
+
+    const referrals = referralsList.join('\n');
 
     return (
-        <ActionPanel
-            id="treatment"
-            title="Treatment Information"
-            actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <TreatmentInfoContent
-                editable={false}
-                currentTreatmentRegimen={currentPatient.currentTreatmentRegimen}
-                currentTreatmentRegimenOther={currentPatient.currentTreatmentRegimenOther}
-                currentTreatmentRegimenNotes={currentPatient.currentTreatmentRegimenNotes}
-                psychDiagnosis={currentPatient.psychDiagnosis}
-                discussionFlag={currentPatient.discussionFlag}
-                followupSchedule={currentPatient.followupSchedule}
-                onValueChange={onValueChange}
-            />
-
-            <Dialog open={state.open} onClose={handleClose}>
-                <DialogTitle>Edit Treatment Information</DialogTitle>
-                <DialogContent>
-                    <TreatmentInfoContent editable={true} {...state} onValueChange={onValueChange} />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={onSave} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
+        <ActionPanel id="treatment" title="Ongoing Treatment Information">
+            <Grid container spacing={2} alignItems="stretch">
+                <GridTextField
+                    sm={6}
+                    label="Latest PHQ-9 Score"
+                    value={latestPhqScore > 0 ? latestPhqScore : 'No data'}
+                    helperText={
+                        !!latestPhQ && latestPhQ.data.length > 0
+                            ? `Updated: ${format(latestPhQ.data[0].date, 'MM/dd/yyyy')}`
+                            : undefined
+                    }
+                />
+                <GridTextField
+                    sm={6}
+                    label="Latest GAD-7 Score"
+                    value={latestGadScore > 0 ? latestGadScore : 'No data'}
+                    helperText={
+                        !!latestGAD && latestGAD.data.length > 0
+                            ? `Updated: ${format(latestGAD.data[0].date, 'MM/dd/yyyy')}`
+                            : undefined
+                    }
+                />
+                <GridTextField
+                    sm={12}
+                    label="Current medications"
+                    value={currentMedications}
+                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                />
+                <GridTextField
+                    sm={12}
+                    label="Behavioral Strategies Used"
+                    value={behavioralStrategiesUsed}
+                    multiline={true}
+                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                />
+                <GridTextField
+                    sm={12}
+                    label="Referrals"
+                    value={referrals}
+                    multiline={true}
+                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                />
+            </Grid>
         </ActionPanel>
     );
 });

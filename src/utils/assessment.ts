@@ -25,6 +25,20 @@ export const getAssessmentScore = (pointValues: AssessmentData) => {
     return sum(Object.keys(pointValues).map((k) => pointValues[k] || 0));
 };
 
+export const getLatestScore = (assessment: IAssessment) => {
+    if (assessment?.data && assessment.data.length > 0) {
+        const latest = assessment.data[assessment.data.length - 1];
+
+        if (!!latest.totalScore) {
+            return latest.totalScore;
+        } else {
+            return getAssessmentScore(assessment.data[assessment.data.length - 1].pointValues);
+        }
+    }
+
+    return -1;
+};
+
 export const getLatestScores = (assessments: IAssessment[]) => {
     return assessments
         .filter((a) => a.data.length > 0)
