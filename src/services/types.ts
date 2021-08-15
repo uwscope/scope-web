@@ -93,7 +93,6 @@ export interface IPatientProfile {
     name: string;
     MRN: string;
     clinicCode: ClinicCode;
-    depressionTreatmentStatus: DepressionTreatmentStatus;
     birthdate: Date;
     sex: PatientSex;
     gender: PatientGender;
@@ -101,26 +100,27 @@ export interface IPatientProfile {
     race: PatientRaceEthnicity;
     primaryOncologyProvider: string;
     primaryCareManager: string;
+    discussionFlag: DiscussionFlags;
+    followupSchedule: FollowupSchedule;
+    depressionTreatmentStatus: DepressionTreatmentStatus;
 }
 
 export interface IClinicalHistory {
     primaryCancerDiagnosis: string;
-    pastPsychHistory: string;
-    pastSubstanceUse: string;
-}
-
-export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
-export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
-export interface ITreatmentInfo {
+    dateOfCancerDiagnosis: string;
     currentTreatmentRegimen: CancerTreatmentRegimenFlags;
     currentTreatmentRegimenOther: string;
     currentTreatmentRegimenNotes: string;
     psychDiagnosis: string;
-    discussionFlag: DiscussionFlags;
-    followupSchedule: FollowupSchedule;
+    pastPsychHistory: string;
+    pastSubstanceUse: string;
+    psychSocialBackground: string;
 }
 
-export interface IPatient extends IPatientProfile, IClinicalHistory, ITreatmentInfo {
+export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
+export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
+
+export interface IPatient extends IPatientProfile, IClinicalHistory {
     // Sessions
     readonly sessions: ISession[];
     readonly caseReviews: ICaseReview[];

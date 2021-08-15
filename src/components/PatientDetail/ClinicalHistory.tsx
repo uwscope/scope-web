@@ -4,7 +4,7 @@ import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
-import { GridTextField } from 'src/components/common/GridField';
+import { GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 import { IClinicalHistory } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
@@ -14,7 +14,19 @@ interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {
 }
 
 const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = (props) => {
-    const { editable, primaryCancerDiagnosis, pastPsychHistory, pastSubstanceUse, onValueChange } = props;
+    const {
+        editable,
+        primaryCancerDiagnosis,
+        dateOfCancerDiagnosis,
+        currentTreatmentRegimen,
+        currentTreatmentRegimenOther,
+        psychDiagnosis,
+        currentTreatmentRegimenNotes,
+        pastPsychHistory,
+        pastSubstanceUse,
+        psychSocialBackground,
+        onValueChange,
+    } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -26,6 +38,44 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 label="Primary Cancer Diagnosis"
                 value={primaryCancerDiagnosis}
                 onChange={(text) => onValueChange('primaryCancerDiagnosis', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                maxLine={2}
+                label="Date of Cancer Diagnosis"
+                value={dateOfCancerDiagnosis}
+                onChange={(text) => onValueChange('dateOfCancerDiagnosis', text)}
+            />
+            <GridMultiSelectField
+                sm={12}
+                editable={editable}
+                label="Current Treatment Regimen"
+                flags={currentTreatmentRegimen}
+                other={currentTreatmentRegimenOther}
+                onChange={(flags) => onValueChange('currentTreatmentRegimen', flags)}
+                onOtherChange={(text) => onValueChange('currentTreatmentRegimenOther', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Treatment Regimen Notes"
+                value={currentTreatmentRegimenNotes}
+                onChange={(text) => onValueChange('currentTreatmentRegimenNotes', text)}
+            />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Psychiatric Diagnosis"
+                value={psychDiagnosis}
+                onChange={(text) => onValueChange('psychDiagnosis', text)}
             />
             <GridTextField
                 sm={12}
@@ -48,15 +98,43 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 value={pastSubstanceUse}
                 onChange={(text) => onValueChange('pastSubstanceUse', text)}
             />
+            <GridTextField
+                sm={12}
+                editable={editable}
+                multiline={true}
+                minLine={4}
+                maxLine={4}
+                label="Psychosocial Background"
+                value={psychSocialBackground}
+                onChange={(text) => onValueChange('psychSocialBackground', text)}
+            />
         </Grid>
     );
+};
+
+const defaultTreatmentRegimen = {
+    Surgery: false,
+    Chemotherapy: false,
+    Radiation: false,
+    'Stem Cell Transplant': false,
+    Immunotherapy: false,
+    'CAR-T': false,
+    Endocrine: false,
+    Surveillance: false,
+    Other: false,
 };
 
 const state = observable<{ open: boolean } & IClinicalHistory>({
     open: false,
     primaryCancerDiagnosis: '',
+    currentTreatmentRegimen: defaultTreatmentRegimen,
+    currentTreatmentRegimenOther: '',
+    currentTreatmentRegimenNotes: '',
+    dateOfCancerDiagnosis: '',
+    psychDiagnosis: '',
     pastPsychHistory: '',
     pastSubstanceUse: '',
+    psychSocialBackground: '',
 });
 
 export const ClinicalHistory: FunctionComponent = observer(() => {
@@ -89,7 +167,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
     return (
         <ActionPanel
             id="clinical-history"
-            title="Clinical History"
+            title="Clinical History and Diagnosis"
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <ClinicalHistoryContent

@@ -10,7 +10,7 @@ import {
     GridDropdownField,
     GridMultiOptionsField,
     GridMultiSelectField,
-    GridTextField,
+    GridTextField
 } from 'src/components/common/GridField';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
 import {
@@ -19,7 +19,7 @@ import {
     EntryType,
     referralStatusValues,
     referralValues,
-    sessionTypeValues,
+    sessionTypeValues
 } from 'src/services/enums';
 import { ICaseReview, ISession, ISessionOrCaseReview } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
@@ -285,6 +285,19 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.isNew = true;
         state.entryType = 'Session';
         state.session.sessionId = 'new';
+
+        // Copy over current medications and referral status from the latest session
+        if (!!currentPatient.latestSession) {
+            state.session.currentMedications = currentPatient.latestSession.currentMedications;
+            state.session.referralOther = currentPatient.latestSession.referralOther;
+            state.session.referralStatus['Psychiatry'] = currentPatient.latestSession.referralStatus['Psychiatry'];
+            state.session.referralStatus['Psychology'] = currentPatient.latestSession.referralStatus['Psychology'];
+            state.session.referralStatus['Patient Navigation'] = currentPatient.latestSession.referralStatus['Patient Navigation'];
+            state.session.referralStatus['Integrative Medicine'] = currentPatient.latestSession.referralStatus['Integrative Medicine'];
+            state.session.referralStatus['Spiritual Care'] = currentPatient.latestSession.referralStatus['Spiritual Care'];
+            state.session.referralStatus['Palliative Care'] = currentPatient.latestSession.referralStatus['Palliative Care'];
+            state.session.referralStatus['Other'] = currentPatient.latestSession.referralStatus['Other'];
+        }
     });
 
     const handleAddReview = action(() => {

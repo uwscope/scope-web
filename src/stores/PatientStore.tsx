@@ -7,7 +7,7 @@ import {
     PatientGender,
     PatientPronoun,
     PatientRaceEthnicity,
-    PatientSex,
+    PatientSex
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -19,13 +19,15 @@ import {
     IAssessmentDataPoint,
     ICaseReview,
     IPatient,
-    ISession,
+    ISession
 } from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
     readonly age: number;
     readonly state: PromiseState;
+
+    readonly latestSession: ISession | undefined;
 
     getPatientData: () => void;
     updatePatientData: (patient: Partial<IPatient>) => void;
@@ -49,25 +51,19 @@ export class PatientStore implements IPatientStore {
     public race: PatientRaceEthnicity;
     public primaryOncologyProvider: string;
     public primaryCareManager: string;
+    public discussionFlag: DiscussionFlags;
+    public followupSchedule: FollowupSchedule;
 
-    // Clinical History
+    // Clinical History and Diagnosis
     public primaryCancerDiagnosis: string;
-    public pastPsychHistory: string;
-    public pastSubstanceUse: string;
-
-    // Treatment Information
-    // public primaryCareManager: string;
+    public dateOfCancerDiagnosis: string;
     public currentTreatmentRegimen: CancerTreatmentRegimenFlags;
     public currentTreatmentRegimenOther: string;
     public currentTreatmentRegimenNotes: string;
     public psychDiagnosis: string;
-    public discussionFlag: DiscussionFlags;
-    public followupSchedule: FollowupSchedule;
-
-    // TBD
-    // public referral: Referral;
-    // public treatmentPlan: string;
-    // public psychMedications: string;
+    public pastPsychHistory: string;
+    public pastSubstanceUse: string;
+    public psychSocialBackground: string;
 
     // Sessions
     public sessions: ISession[] = [];
@@ -99,19 +95,19 @@ export class PatientStore implements IPatientStore {
         this.race = patient.race;
         this.primaryOncologyProvider = patient.primaryOncologyProvider;
         this.primaryCareManager = patient.primaryCareManager;
+        this.discussionFlag = patient.discussionFlag;
+        this.followupSchedule = patient.followupSchedule;
 
         // Clinical History
         this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis;
+        this.dateOfCancerDiagnosis = patient.dateOfCancerDiagnosis;
         this.pastPsychHistory = patient.pastPsychHistory;
         this.pastSubstanceUse = patient.pastSubstanceUse;
-
-        // Treatment information
         this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
         this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
         this.currentTreatmentRegimenNotes = patient.currentTreatmentRegimenNotes;
         this.psychDiagnosis = patient.psychDiagnosis;
-        this.discussionFlag = patient.discussionFlag;
-        this.followupSchedule = patient.followupSchedule;
+        this.psychSocialBackground = patient.psychSocialBackground;
 
         // Sessions
         this.sessions = patient.sessions || [];
@@ -138,6 +134,14 @@ export class PatientStore implements IPatientStore {
 
     @computed get state() {
         return this.loadPatientDataQuery.state;
+    }
+
+    @computed get latestSession() {
+        if (this.sessions.length > 0) {
+            return this.sessions[this.sessions.length - 1];
+        }
+
+        return undefined;
     }
 
     @action.bound

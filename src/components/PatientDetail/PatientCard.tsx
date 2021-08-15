@@ -93,8 +93,10 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
             <LabeledField label="pronouns" value={patient.pronoun} />
             <br />
 
-            <LabeledField label="primary social worker" value={patient.primaryCareManager} />
             <LabeledField label="primary oncology provider" value={patient.primaryOncologyProvider} />
+            <LabeledField label="primary social worker" value={patient.primaryCareManager} />
+            <LabeledField label="treatment status" value={patient.depressionTreatmentStatus} />
+            <LabeledField label="follow-up schedule" value={patient.followupSchedule} />
 
             <EditPatientProfileDialog
                 patient={patient}
