@@ -4,7 +4,7 @@ from invoke import Collection
 
 import tasks.celery
 import tasks.database
-import tasks.dependencies
+import tasks.install_dependencies
 import tasks.flask
 import tasks.web
 
@@ -18,17 +18,47 @@ compose_collection(
     name='config'
 )
 
+# Collections for development and production
+ns_dev = Collection('dev')
+ns_prod = Collection('prod')
+
 # Compose from celery.py
-compose_collection(ns, tasks.celery.ns, name='celery')
+# compose_collection(ns, tasks.celery.ns, name='celery')
 
 # Compose from database.py
-compose_collection(ns, tasks.database.ns, name='database')
+# compose_collection(ns, tasks.database.ns, name='database')
 
 # Compose from dependencies.py
-compose_collection(ns, tasks.dependencies.ns, name='dependencies')
+compose_collection(
+    ns_dev,
+    tasks.install_dependencies.ns.collections['dev'],
+    sub=False,
+)
 
 # Compose from flask.py
-compose_collection(ns, tasks.flask.ns, name='flask')
+compose_collection(
+    ns_dev,
+    tasks.flask.ns.collections['dev'],
+    sub=False,
+)
+compose_collection(
+    ns_prod,
+    tasks.flask.ns.collections['prod'],
+    sub=False,
+)
 
 # Compose from web.py
-compose_collection(ns, tasks.web.ns, name='web')
+compose_collection(
+    ns_dev,
+    tasks.web.ns.collections['dev'],
+    sub=False,
+)
+compose_collection(
+    ns_prod,
+    tasks.web.ns.collections['prod'],
+    sub=False,
+)
+
+# Compose development and production
+compose_collection(ns, ns_dev, 'dev')
+compose_collection(ns, ns_prod, 'prod')

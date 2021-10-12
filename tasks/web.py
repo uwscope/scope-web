@@ -1,10 +1,11 @@
 """
 Tasks for the web client.
 
-These are intentionally thin wrappers around `scripts`,
-because those scripts will be executed in a production environment that does not include Python.
+These are intentionally thin wrappers around the scripts found in `scripts`,
+because those will be executed in a production environment that does not include Python.
 """
 
+from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection
 from invoke import task
 
@@ -12,9 +13,9 @@ from tasks.terminal import spawn_new_terminal
 
 
 @task
-def dev(context):
+def dev_web(context):
     """
-    Start a development instance of the client, listening on `localhost:3000`, including hot reloading.
+    Serve the client, listening on `localhost:3000`, including hot reloading.
 
     Builds according to 'config/webpack.dev.js'.
 
@@ -25,13 +26,13 @@ def dev(context):
         context.run(
             command=' '.join([
                 'yarn',
-                'web_dev',
+                'dev_web',
             ])
         )
 
 
 @task
-def prod_build(context):
+def prod_web_build(context):
     """
     Build a production bundle of the client.
 
@@ -46,13 +47,13 @@ def prod_build(context):
     context.run(
         command=' '.join([
             'yarn',
-            'web_prod_build',
+            'prod_web_build',
         ])
     )
 
 
 @task
-def prod_serve(context):
+def prod_web_serve(context):
     """
     Serve a production bundle of the client, listening on `0.0.0.0:3000`.
 
@@ -65,7 +66,7 @@ def prod_serve(context):
     context.run(
         command=' '.join([
             'yarn',
-            'web_prod_serve',
+            'prod_web_serve',
         ])
     )
 
@@ -73,10 +74,12 @@ def prod_serve(context):
 # Build task collection
 ns = Collection('web')
 
-ns.add_task(dev, name='dev')
+ns_dev = Collection('dev')
+ns_dev.add_task(dev_web, name='web')
 
 ns_prod = Collection('prod')
-ns_prod.add_task(prod_build, 'build')
-ns_prod.add_task(prod_serve, 'serve')
+ns_prod.add_task(prod_web_build, 'web_build')
+ns_prod.add_task(prod_web_serve, 'web_serve')
 
-ns.add_collection(ns_prod)
+compose_collection(ns, ns_dev, name='dev')
+compose_collection(ns, ns_prod, name='prod')

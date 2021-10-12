@@ -2,12 +2,13 @@
 Tasks for ensuring project dependencies are installed.
 """
 
+from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection
 from invoke import task
 
 
 @task
-def pipfile_sync_dev(context):
+def _dev_pipfile(context):
     """
     Execute a pipenv sync, including development dependencies.
     """
@@ -17,7 +18,7 @@ def pipfile_sync_dev(context):
 
 
 @task
-def yarn_install(context):
+def _dev_yarn(context):
     """
     Execute a yarn install.
     """
@@ -26,10 +27,10 @@ def yarn_install(context):
     )
 
 
-@task(pre=[pipfile_sync_dev, yarn_install])
-def dependencies_dev(context):
+@task(pre=[_dev_pipfile, _dev_yarn])
+def dev_install_dependencies(context):
     """
-    Ensure dependencies are installed, including development dependencies.
+    Ensure development dependencies are installed.
     """
 
     # Actual work is performed in the pre-requisites
@@ -37,9 +38,9 @@ def dependencies_dev(context):
 
 
 # Build task collection
-ns = Collection('dependencies')
+ns = Collection('install_dependencies')
 
-ns_ensure = Collection('ensure')
-ns_ensure.add_task(dependencies_dev, name='dev')
+ns_dev = Collection('dev')
+ns_dev.add_task(dev_install_dependencies, 'install_dependencies')
 
-ns.add_collection(ns_ensure)
+compose_collection(ns, ns_dev, name='dev')
