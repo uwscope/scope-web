@@ -3,15 +3,8 @@
 /.vscode/launch.json
 /.vscode/settings.json
 
-# Javascript Environment
-/node_modules/
-
-# Python cache
+# Python caches
 **/__pycache__/
-
-# Web build files
-/build/
-/dist/
 
 # Secrets, defined using /** so we can also define exceptions
 /secrets/**
