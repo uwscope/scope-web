@@ -1,24 +1,25 @@
 from aws_infrastructure.tasks.collection import compose_collection
-import aws_infrastructure.tasks.library.config
 from invoke import Collection
 
 import tasks.celery
 import tasks.database
-import tasks.install_dependencies
+import tasks.dependencies
 import tasks.flask
-import tasks.web
+import tasks.registry
 
 # Build our task collection
 ns = Collection()
 
-# Tasks for Invoke configuration
+# Compose from dependencies.py
 compose_collection(
     ns,
-    aws_infrastructure.tasks.library.config.create_tasks(),
-    name='config'
+    tasks.dependencies.ns,
+    name='depend',
 )
 
+#
 # Collections for development and production
+#
 ns_dev = Collection('dev')
 ns_prod = Collection('prod')
 
@@ -28,37 +29,45 @@ ns_prod = Collection('prod')
 # Compose from database.py
 # compose_collection(ns, tasks.database.ns, name='database')
 
-# Compose from dependencies.py
-compose_collection(
-    ns_dev,
-    tasks.install_dependencies.ns.collections['dev'],
-    sub=False,
-)
+#
+# A server collection in each of development and production
+#
+ns_dev_server = Collection('server')
+ns_prod_server = Collection('server')
 
 # Compose from flask.py
 compose_collection(
-    ns_dev,
+    ns_dev_server,
     tasks.flask.ns.collections['dev'],
-    sub=False,
+    name='flask',
 )
 compose_collection(
-    ns_prod,
+    ns_prod_server,
     tasks.flask.ns.collections['prod'],
-    sub=False,
+    name='flask',
 )
+
+compose_collection(ns_dev, ns_dev_server, 'server')
+compose_collection(ns_prod, ns_prod_server, 'server')
+
+#
+# A registry collection in each of development and production
+#
 
 # Compose from web.py
 compose_collection(
     ns_dev,
-    tasks.web.ns.collections['dev'],
-    sub=False,
+    tasks.registry.ns.collections['dev'],
+    name='registry',
 )
 compose_collection(
     ns_prod,
-    tasks.web.ns.collections['prod'],
-    sub=False,
+    tasks.registry.ns.collections['prod'],
+    name='registry',
 )
 
+#
 # Compose development and production
+#
 compose_collection(ns, ns_dev, 'dev')
 compose_collection(ns, ns_prod, 'prod')

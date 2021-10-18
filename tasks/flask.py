@@ -11,13 +11,13 @@ from pathlib import Path
 
 from tasks.terminal import spawn_new_terminal
 
-
+FLASK_DIR = './server_flask'
 SSH_CONFIG_PATH = './secrets/server/prod/ssh_config.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/server/prod/documentdb_config.yaml'
 
 
 @task
-def dev_flask(context):
+def dev_serve(context):
     """
     Start Flask, listening on `localhost:4000`, including hot reloading.
 
@@ -33,13 +33,12 @@ def dev_flask(context):
                 ssh_client=ssh_client,
                 remote_host=documentdb_config.endpoint,
                 remote_port=documentdb_config.port,
-            ) as ssh_port_forward:
-                # Run port forward in another thread
-                ssh_port_forward.forward_forever(threaded=True)
-
-                with context.cd(Path('server', 'flask')):
+            ):
+                with context.cd(Path(FLASK_DIR)):
                     context.run(
                         command=' '.join([
+                            'pipenv',
+                            'run',
                             'flask',
                             'run',
                         ]),
@@ -52,16 +51,18 @@ def dev_flask(context):
 
 
 @task
-def prod_flask(context):
+def prod_serve(context):
     """
     Start Flask, listening on `0.0.0.0:4000`.
 
     For production purposes, synchronously executes in the current terminal.
     """
 
-    with context.cd(Path('server', 'flask')):
+    with context.cd(Path(FLASK_DIR)):
         context.run(
             command=' '.join([
+                'pipenv',
+                'run',
                 'waitress-serve',
                 '--port=4000',
                 '--call "app:create_app"'
@@ -76,10 +77,10 @@ def prod_flask(context):
 ns = Collection('flask')
 
 ns_dev = Collection('dev')
-ns_dev.add_task(dev_flask, 'flask')
+ns_dev.add_task(dev_serve, 'serve')
 
 ns_prod = Collection('prod')
-ns_prod.add_task(prod_flask, 'flask')
+ns_prod.add_task(prod_serve, 'serve')
 
 compose_collection(ns, ns_dev, name='dev')
 compose_collection(ns, ns_prod, name='prod')

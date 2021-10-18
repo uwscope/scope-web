@@ -8,14 +8,17 @@ because those will be executed in a production environment that does not include
 from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection
 from invoke import task
+from pathlib import Path
 
 from tasks.terminal import spawn_new_terminal
 
+REGISTRY_DIR = './web_registry'
+
 
 @task
-def dev_web(context):
+def dev_registry_serve(context):
     """
-    Serve the client, listening on `localhost:3000`, including hot reloading.
+    Serve the registry client, listening on `localhost:3000`, including hot reloading.
 
     Builds according to 'config/webpack.dev.js'.
 
@@ -23,18 +26,19 @@ def dev_web(context):
     """
 
     if spawn_new_terminal(context):
-        context.run(
-            command=' '.join([
-                'yarn',
-                'dev_web',
-            ])
-        )
+        with context.cd(Path(REGISTRY_DIR)):
+            context.run(
+                command=' '.join([
+                    'yarn',
+                    'dev_serve',
+                ])
+            )
 
 
 @task
-def prod_web_build(context):
+def prod_registry_build(context):
     """
-    Build a production bundle of the client.
+    Build a bundle of the registry client.
 
     Builds according to 'config/webpack.prod.js', including hot reloading.
 
@@ -44,18 +48,19 @@ def prod_web_build(context):
     because that script will be executed in a production environment that does not include Python.
     """
 
-    context.run(
-        command=' '.join([
-            'yarn',
-            'prod_web_build',
-        ])
-    )
+    with context.cd(Path(REGISTRY_DIR)):
+        context.run(
+            command=' '.join([
+                'yarn',
+                'prod_build',
+            ])
+        )
 
 
 @task
-def prod_web_serve(context):
+def prod_registry_serve(context):
     """
-    Serve a production bundle of the client, listening on `0.0.0.0:3000`.
+    Serve a bundle of the registry client, listening on `0.0.0.0:3000`.
 
     For production purposes, synchronously executes in the current terminal.
 
@@ -63,23 +68,24 @@ def prod_web_serve(context):
     because that script will be executed in a production environment that does not include Python.
     """
 
-    context.run(
-        command=' '.join([
-            'yarn',
-            'prod_web_serve',
-        ])
-    )
+    with context.cd(Path(REGISTRY_DIR)):
+        context.run(
+            command=' '.join([
+                'yarn',
+                'prod_serve',
+            ])
+        )
 
 
 # Build task collection
-ns = Collection('web')
+ns = Collection('registry')
 
 ns_dev = Collection('dev')
-ns_dev.add_task(dev_web, name='web')
+ns_dev.add_task(dev_registry_serve, name='serve')
 
 ns_prod = Collection('prod')
-ns_prod.add_task(prod_web_build, 'web_build')
-ns_prod.add_task(prod_web_serve, 'web_serve')
+ns_prod.add_task(prod_registry_build, 'build')
+ns_prod.add_task(prod_registry_serve, 'serve')
 
 compose_collection(ns, ns_dev, name='dev')
 compose_collection(ns, ns_prod, name='prod')
