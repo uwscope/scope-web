@@ -1,46 +1,75 @@
 # scope-web
 
-Core Scope components, including:
+Core UW Scope components, including:
 
-- Web client for provider registry in `src`
-- Application Server in `server/flask`
+- Provider registry web client in `web_registry`.
+- Server components:
+  - Application server in `server_flask`.
 
-## Typical Development Environment
+## Development Environment
 
 With prerequisites:
 
-- Dependencies installed (as in [Installation of Dependences](#installation-of-dependencies)).
-- Secrets provided (as in [Providing Secrets](#providing-secrets))
+- System dependencies installed (as in [Installation of System Dependencies](#installation-of-system-dependencies)).
+- Within an activated Pipenv shell (as in [Initializing and Using Pipenv](#initializing-and-using-pipenv)).
+- Secrets provided (as in [Providing Secrets](#providing-secrets)).
 
-A typical development environment then:
+A typical registry development environment then:
 
-- Opens a tunnel to the production database 
-  (i.e., because we cannot run the database locally, because production is currently our only instance).
-- Runs a Flask application server development instance locally, with hot reloading.  
-- Runs a web client development instance locally, with hot reloading.  
-
-Within a Pipenv shell (as in [Using Pipenv](#using-pipenv)):
+- Runs a registry web client locally, with hot reloading.  
+- Runs a Flask application server locally, with hot reloading.  
 
 ```
-invoke dependencies.ensure.dev  # Ensure dependencies are installed, including development dependencies.
-invoke database.forward.prod    # Forward the database from our production server, listening on `localhost:8000`.
-invoke flask.dev                # Start a development build of Flask, listening on `localhost:4000`, including hot reloading.
-invoke web.dev                  # Start a development build of the client, listening on `localhost:3000`, including hot reloading.
+invoke depend.install.all        # Install all dependencies.
+invoke dev.registry.serve        # Serve the registry client, listening on `localhost:3000`, including hot reloading.
+invoke dev.server.flask.serve    # Start Flask, listening on `localhost:4000`, including hot reloading.
 ```
 
-The web client development instance will then be accessible at `http://localhost:3000/`.
+The registry web client will then be accessible at `http://localhost:3000/`.
 
-## Installation of Dependencies
+### Using Invoke
 
-Requires a `git` executable.
+This project uses [Invoke](https://www.pyinvoke.org/) for task execution.
 
-- On Windows, development has used [Git for Windows](https://gitforwindows.org/).
+```
+invoke -l
+```
 
-Requires installation of Javascript and Python dependencies.
+For example:
+
+```
+Available tasks:
+
+  depend.install.all        Install all dependencies.
+  depend.install.celery     Install celery dependencies.
+  depend.install.flask      Install flask dependencies.
+  depend.install.registry   Install registry dependencies.
+  depend.install.tasks      Install tasks dependencies.
+  depend.update.all         Update all dependencies.
+  depend.update.celery      Update celery dependencies.
+  depend.update.flask       Update flask dependencies.
+  depend.update.registry    Update registry dependencies.
+  depend.update.tasks       Update tasks dependencies.
+  dev.registry.serve        Serve the registry client, listening on `localhost:3000`, including hot reloading.
+  dev.server.flask.serve    Start Flask, listening on `localhost:4000`, including hot reloading.
+  prod.registry.build       Build a bundle of the registry client.
+  prod.registry.serve       Serve a bundle of the registry client, listening on `0.0.0.0:3000`.
+  prod.server.flask.serve   Start Flask, listening on `0.0.0.0:4000`.
+```
+
+## Installation of System Dependencies
+
+Requires availability of Git, of Javascript dependencies, and of Python dependencies.
+
+### Git
+
+Requires a Git executable on the path.
+
+- On Windows, development has used [Git for Windows](https://git-scm.com/download/win).
 
 ### Javascript
 
-For Javascript components, Node.js and the Yarn package manager.
+For Javascript components, requires Node.js and the Yarn package manager.
 
 - [Node.js](https://nodejs.org/)
 
@@ -56,7 +85,7 @@ For Javascript components, Node.js and the Yarn package manager.
 
 ### Python
 
-For Python components, Python and the Pipenv tool for managing virtual environments and dependencies.
+For Python components, requires Python and the Pipenv package manager.
 
 - [Python](https://www.python.org/)
 
@@ -68,7 +97,7 @@ For Python components, Python and the Pipenv tool for managing virtual environme
   
 - [Pipenv](https://pipenv.pypa.io/en/latest/)
 
-  Pipenv manages the creation of a Python virtual environment and pip installation of dependencies in that environment.
+  Pipenv manages creation of a Python virtual environment and pip installation of dependencies in that environment.
     
   Pipenv must be installed in an existing Python installation, typically a global installation:  
     
@@ -81,95 +110,125 @@ For Python components, Python and the Pipenv tool for managing virtual environme
   ```
   pipenv --version
   ```
+
+  or as a module:
+
+  ```
+  python -m pipenv --version
+  ```
+  
+  Depending how a machine manages specific versions of Python, possibilities for accessing Pipenv include:
     
-  Depending how a machine manages specific versions of Python, other possibilities for accessing the `pipenv` command include:
-    
-  - On Windows, using a full path to a specific version installation:
+  - On Windows, install a specific version of Python in a known directory.  
+    Then use a full path to that installation:
     
     ```
     C:\Python39\Scripts\pip install pipenv
     C:\Python39\Scripts\pipenv --version
     ```  
     
-  - On a Mac, Pipenv will detect pyenv and use it to ensure the desired version of Python in the created virtual environment.
+  - On a Mac:
+    - Install pyenv using Homebrew or [pyenv-installer](https://github.com/pyenv/pyenv-installer).
+    - Install Pipenv in any Python environment, such as the global environment.
     
-  With Pipenv installed and access to the `pipenv` command, see [Using Pipenv](#using-pipenv).
-
-## Providing Secrets
-
-Runtime secrets are expected in the `secrets` directory.
-
-- `secrets/server/prod/config.yaml`
-
-  Secret for accessing the production server. Used by:
+    Pipenv will detect a Pipfile's desired version of Python and use pyenv to create an appropriate virtual environment.
   
-  - `tasks/database.py`: For forwarding the database from the production server.
+    ```
+    pip install pipenv
+    pipenv --version
+    ```
+    
+  With Pipenv installed and access to the `pipenv` command, see [Initializing and Using Pipenv](#initializing-and-using-pipenv).
 
-## Using Pipenv
+## Initializing and Using Pipenv
 
-Ensure Pipenv is installed and the `pipenv` command is accessible, as in [Installation of Dependencies](#installation-of-dependencies):
+Pipenv creates a Python virtual environment that includes the dependencies in a `Pipfile.lock`.
+You must first initialize the virtual environment, then activate a shell within the virtual environment.
+
+### Initializing Pipenv
+
+Ensure Pipenv is installed and the `pipenv` command is accessible, as in [Installation of System Dependencies](#installation-of-system-dependencies):
 
 ```
 pipenv --version
 ```
 
-Use the `pipenv` command to create a virtual environment and install the `Pipfile.lock` dependencies, including development dependencies:
+Initialize a virtual environment by using the `pipenv` command to install the `Pipfile.lock` dependencies:
 
 ```
-pipenv sync --dev
+pipenv sync
 ```
 
-Activate a shell inside the created virtual environment:
+Then activate a shell inside the created virtual environment.
 
-```
-pipenv shell
-```
+On Windows:
 
-On Windows, the `pipenv shell` implementation has some limitations (e.g., lacks command history). You may prefer:
+- The `pipenv shell` implementation has issues (e.g., lacks command history). You may prefer:
 
-```
-pipenv run cmd
-```
+  ```
+  pipenv run cmd
+  ```
 
-Within the resulting Pipenv shell, all commands will benefit from dependencies in `Pipefile` and `Pipefile.lock`.
-See examples in [Typical Development Environment](#typical-development-environment)
-and in [Using Invoke](#using-invoke).
-The development dependencies of this project also include Pipenv, 
+- As a convenience, this project includes:
+
+  ```
+  pipenv_activate.bat
+  ```
+
+- When Pipenv is activated, the `cmd` environment will display `(Pipenv)`:
+
+  ```
+  C:\devel\scope-web (Pipenv)>
+  ```
+
+On a Mac:
+
+- The default `pipenv shell` works well.
+
+  ```
+  pipenv shell
+  ```
+
+### Using Pipenv
+
+Within a Pipenv shell, all commands benefit from dependencies in `Pipfile` and `Pipfile.lock`.
+See examples in [Development Environment](#development-environment) and in [Using Invoke](#using-invoke).
+
+This project's development dependencies also include Pipenv, 
 so the `pipenv` command is available locally (e.g., without a need to reference a specific global installation). 
 
-- To install a new dependency, update versions of all dependencies, and update `Pipefile` and `Pipefile.lock`:
+- To ensure all dependencies are current (i.e., match all `Pipfile.lock` and all `yarn.lock`):
 
   ```
+  invoke depend.install.all
+  ```
+
+- To install a new dependency, update versions of all dependencies, and update `Pipfile` and `Pipfile.lock`,
+  first change into the project directory and then issue use `pipenv install`:
+
+  ```
+  cd <directory>
   pipenv install <package>
+  cd ..
   ```
 
-- To install a new development dependency, update versions of all dependencies, and update `Pipefile` and `Pipefile.lock`:
+- To install a new development dependency, update versions of all dependencies, and update `Pipfile` and `Pipfile.lock`,
+  first change into the project directory and then issue use `pipenv install --dev`:
 
   ```
+  cd <directory>
   pipenv install --dev <package>
+  cd ..
   ```
 
-## Using Invoke
+## Providing Secrets
 
-This project uses [Invoke](https://www.pyinvoke.org/) for task execution.
+Runtime secrets are expected in the `secrets` directory.
 
-Within a Pipenv shell (as in [Using Pipenv](#using-pipenv)), list available tasks:
+- `secrets/server/prod/documentdb_config.yaml`
 
-```
-invoke -l
-```
+  Secret for DocumentDB credentials and endpoint.
 
-For example:
+- `secrets/server/prod/ssh_config.yaml`
 
-```
-Available tasks:
-
-  config.display            Display the Invoke configuration.
-  database.forward.prod     Forward the database from our production server, listening on `localhost:8000`.
-  dependencies.ensure.dev   Ensure dependencies are installed, including development dependencies.
-  flask.dev                 Start a development build of Flask, listening on `localhost:4000`, including hot reloading.
-  flask.prod                Start a production build of Flask, listening on `0.0.0.0:4000`.
-  web.dev                   Start a development build of the client, listening on `localhost:3000`, including hot reloading.
-  web.prod.build            Build a production bundle of the client.
-  web.prod.serve            Serve a production bundle of the client, listening on `0.0.0.0:3000`.
-```
+  Secret for SSH access to the AWS environment via bastion server.
