@@ -33,14 +33,14 @@ def create_app():
     CORS(app)
     FlaskJSON(app)
 
-    ## Temporary store for patients
+    # Temporary store for patients
     patients = getRandomFakePatients()
     patient_map = {p["recordId"]: p for p in patients}
 
-    ## API TODOs:
-    ## - check method
-    ## - check parameters
-    ## - return appropriate error message and code
+    # API TODO:
+    # - check method
+    # - check parameters
+    # - return appropriate error message and code
 
     @app.route("/auth")
     @as_json
