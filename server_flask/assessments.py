@@ -1,4 +1,5 @@
 phq9Assessment = {
+    "id": 'phq-9',
     "name": "PHQ-9",
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
@@ -45,9 +46,38 @@ phq9Assessment = {
             "value": 3,
         },
     ],
+    "interpretationName": 'Depression severity',
+    "interpretationTable": [
+        {
+            "score": '0-4',
+            "max": 4,
+            "interpretation": 'None/minimal',
+        },
+        {
+            "score": '5-9',
+            "max": 9,
+            "interpretation": 'Mild',
+        },
+        {
+            "score": '10-14',
+            "max": 14,
+            "interpretation": 'Moderate',
+        },
+        {
+            "score": '15-19',
+            "max": 19,
+            "interpretation": 'Moderately severe',
+        },
+        {
+            "score": '20-27',
+            "max": 27,
+            "interpretation": 'Severe',
+        },
+    ],
 }
 
 gad7Assessment = {
+    "id": 'gad-7',
     "name": "GAD-7",
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
@@ -89,9 +119,33 @@ gad7Assessment = {
             "value": 3,
         },
     ],
+    "interpretationName": 'Anxiety severity',
+    "interpretationTable": [
+        {
+            "score": '0-5',
+            "max": 5,
+            "interpretation": 'None',
+        },
+        {
+            "score": '6-10',
+            "max": 10,
+            "interpretation": 'Mild',
+        },
+        {
+            "score": '11-15',
+            "max": 15,
+            "interpretation": 'Moderate',
+        },
+        {
+            "score": '16-21',
+            "max": 21,
+            "interpretation": 'Severe',
+        },
+    ],
 }
 
 moodAssessment = {
+    "id": "mood",
     "name": "Mood Logging",
     "questions": [{"question": "Please rate your mood", "id": "Mood"}],
     "options": [
@@ -139,5 +193,24 @@ moodAssessment = {
 }
 
 
+
+medicationAssessment = {
+    "id": "medication",
+    "name": "Medication Tracking",
+    "instruction": "The following questions pertain to any medications you are taking for stress, mood, anxiety, sleep, or other psychological symptoms.",
+    "questions": [{"question": "In the past 7 days, did you take all your prescribed medications as scheduled?", "id": "adherence"}],
+    "options": [
+        {
+            "text": "Yes, I took my medications as scheduled",
+            "value": 1,
+        },
+        {
+            "text": "No, I did not take all my medications as scheduled",
+            "value": 0,
+        }
+    ],
+}
+
+
 def get_supported_assessments():
-    return [phq9Assessment, gad7Assessment, moodAssessment]
+    return [phq9Assessment, gad7Assessment, moodAssessment, medicationAssessment]

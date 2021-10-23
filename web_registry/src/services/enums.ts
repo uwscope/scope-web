@@ -139,3 +139,10 @@ export type GAD7Item = typeof gad7ItemValues[number];
 export type CaseReviewEntryType = 'Case Review';
 export type SessionEntryType = 'Session';
 export type EntryType = SessionEntryType | CaseReviewEntryType;
+
+export const daysOfWeekValues = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+
+export type DayOfWeek = typeof daysOfWeekValues[number];
+
+export const activitySuccessTypeValues = ['Yes', 'SomethingElse', 'No'];
+export type ActivitySuccessType = typeof activitySuccessTypeValues[number];

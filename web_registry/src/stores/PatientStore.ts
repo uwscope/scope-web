@@ -7,7 +7,7 @@ import {
     PatientGender,
     PatientPronoun,
     PatientRaceEthnicity,
-    PatientSex
+    PatientSex,
 } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -15,11 +15,12 @@ import {
     CancerTreatmentRegimenFlags,
     DiscussionFlags,
     IActivity,
+    IActivityLog,
     IAssessment,
     IAssessmentDataPoint,
     ICaseReview,
     IPatient,
-    ISession
+    ISession,
 } from 'src/services/types';
 
 export interface IPatientStore extends IPatient {
@@ -75,6 +76,9 @@ export class PatientStore implements IPatientStore {
     // Activities
     public activities: IActivity[] = [];
 
+    // Activity Logs
+    public activityLogs: IActivityLog[] = [];
+
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly updateSessionQuery: PromiseQuery<ISession>;
     private readonly updateCaseReviewQuery: PromiseQuery<ICaseReview>;
@@ -118,6 +122,9 @@ export class PatientStore implements IPatientStore {
 
         // Activities
         this.activities = patient.activities || [];
+
+        // Activity Logs
+        this.activityLogs = patient.activityLogs || [];
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
         this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
