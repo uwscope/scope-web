@@ -46,12 +46,13 @@ export interface IAssessmentProgressProps {
     maxValue: number;
     assessment: IAssessment;
     canAdd?: boolean;
+    useTime?: boolean;
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
     const currentPatient = usePatient();
 
-    const { instruction, questions, options, assessment, maxValue, canAdd } = props;
+    const { instruction, questions, options, assessment, maxValue, canAdd, useTime } = props;
 
     const state = useLocalObservable<{
         openEdit: boolean;
@@ -269,7 +270,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
                 {!!assessmentData && assessmentData.length > 0 && (
                     <Grid item xs={12}>
-                        <AssessmentVis data={assessmentData} maxValue={maxValue} />
+                        <AssessmentVis data={assessmentData} maxValue={maxValue} useTime={useTime} />
                     </Grid>
                 )}
                 {(!assessmentData || assessmentData.length == 0) && (
