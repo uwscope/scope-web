@@ -1,9 +1,11 @@
 import {
+    ActivitySuccessType,
     AssessmentFrequency,
     BehavioralActivationChecklistItem,
     BehavioralStrategyChecklistItem,
     CancerTreatmentRegimen,
     ClinicCode,
+    DayOfWeek,
     DepressionTreatmentStatus,
     DiscussionFlag,
     FollowupSchedule,
@@ -69,6 +71,7 @@ export interface IAssessment {
     readonly assessmentId: string;
     readonly assessmentType: string;
     frequency: AssessmentFrequency;
+    dayOfWeek: DayOfWeek;
     readonly data: IAssessmentDataPoint[];
 }
 
@@ -86,6 +89,18 @@ export interface IActivity {
     readonly activityId: string;
     readonly activityName: string;
     readonly moodData: IAssessmentDataPoint[];
+}
+
+export interface IActivityLog {
+    id: string;
+    date: Date;
+    activityId: string;
+    activityName: string;
+    success: ActivitySuccessType;
+    alternative: string;
+    pleasure: number;
+    accomplishment: number;
+    comment: string;
 }
 
 export interface IPatientProfile {
@@ -130,6 +145,9 @@ export interface IPatient extends IPatientProfile, IClinicalHistory {
 
     // Activities
     readonly activities: IActivity[];
+
+    // Activity logs
+    readonly activityLogs: IActivityLog[];
 }
 
 export interface IPatientList {
@@ -141,6 +159,7 @@ export interface IAppConfig {
 }
 
 export interface IAssessmentContent {
+    readonly id: string;
     readonly name: string;
     readonly instruction: string;
     readonly questions: { question: string; id: string }[];

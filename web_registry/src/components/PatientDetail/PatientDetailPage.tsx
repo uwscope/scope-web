@@ -10,6 +10,7 @@ import PatientCardExtended from 'src/components/PatientDetail/PatientCardExtende
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
 import ProgressInformation from 'src/components/PatientDetail/ProgressInformation';
 import SessionInformation from 'src/components/PatientDetail/SessionInformation';
+import { getString } from 'src/services/strings';
 import { PatientStoreProvider, useStores } from 'src/stores/stores';
 import { sortAssessmentContent } from 'src/utils/assessment';
 import styled from 'styled-components';
@@ -130,6 +131,12 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                     } as IContent)
             )
     );
+
+    progressMenu.push({
+        hash: getString('patient_progress_activity_hash'),
+        label: getString('patient_progress_activity_name'),
+    } as IContent);
+
     contentMenu.push.apply(contentMenu, progressMenu);
 
     const baMenu = [

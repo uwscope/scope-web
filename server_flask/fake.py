@@ -5,26 +5,13 @@ import numpy as np
 from lorem.text import TextLorem
 
 from assessments import gad7Assessment, moodAssessment, phq9Assessment
-from enums import (
-    AssessmentFrequency,
-    AssessmentType,
-    BehavioralActivationChecklist,
-    BehavioralStrategyChecklist,
-    CancerTreatmentRegimen,
-    ClinicCode,
-    DepressionTreatmentStatus,
-    DiscussionFlag,
-    FollowupSchedule,
-    PatientGender,
-    PatientPronoun,
-    PatientRaceEthnicity,
-    PatientSex,
-    Referral,
-    ReferralStatus,
-    SessionType,
-    TreatmentChange,
-    TreatmentPlan,
-)
+from enums import (AssessmentFrequency, AssessmentType,
+                   BehavioralActivationChecklist, BehavioralStrategyChecklist,
+                   CancerTreatmentRegimen, ClinicCode, DayOfWeek,
+                   DepressionTreatmentStatus, DiscussionFlag, FollowupSchedule,
+                   PatientGender, PatientPronoun, PatientRaceEthnicity,
+                   PatientSex, Referral, ReferralStatus, SessionType,
+                   TreatmentChange, TreatmentPlan)
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
 shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))
@@ -167,9 +154,10 @@ def getFakeAssessments():
             "assessmentId": a.value,
             "assessmentType": a.value,
             "frequency": getRandomItem(AssessmentFrequency).value,
+            "dayOfWeek": getRandomItem(DayOfWeek).value,
             "data": getAssessmentDataPoints(a.value),
         }
-        for a in sample(AssessmentType, getRandomInteger(1, 3))
+        for a in AssessmentType
     ]
 
 
@@ -183,8 +171,12 @@ def getFakeAssessmentDataPoint(assessmentType):
         for q in gad7Assessment.get("questions", []):
             points[q["id"]] = getRandomInteger(0, 4)
         return points
-    else:
+    elif assessmentType == "Mood Tracking":
         return {"Mood": getRandomInteger(1, 6)}
+    elif assessmentType == "Medication Tracking":
+        return {"Adherence": getRandomInteger(1, 6)}
+    else:
+        return {}
 
 
 def getAssessmentDataPoints(assessmentType):

@@ -9,7 +9,7 @@ import {
     withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import EditIcon from '@material-ui/icons/Edit';
+import SettingsIcon from '@material-ui/icons/Settings';
 import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
 import { format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
@@ -21,7 +21,8 @@ import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { Table } from 'src/components/common/Table';
-import { AssessmentFrequency, assessmentFrequencyValues } from 'src/services/enums';
+import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
+import { getString } from 'src/services/strings';
 import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
@@ -43,19 +44,20 @@ export interface IAssessmentProgressProps {
     questions: { question: string; id: string }[];
     options: { text: string; value: number }[];
     maxValue: number;
-    assessmentType: string;
-    assessment?: IAssessment;
+    assessment: IAssessment;
+    canAdd?: boolean;
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
     const currentPatient = usePatient();
 
-    const { instruction, questions, options, assessmentType, assessment, maxValue } = props;
+    const { instruction, questions, options, assessment, maxValue, canAdd } = props;
 
     const state = useLocalObservable<{
         openEdit: boolean;
-        openFreq: boolean;
+        openConfigure: boolean;
         frequency: AssessmentFrequency;
+        dayOfWeek: DayOfWeek;
         dataId: string | undefined;
         data: AssessmentData;
         date: Date;
@@ -63,8 +65,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         total: number;
     }>(() => ({
         openEdit: false,
-        openFreq: false,
+        openConfigure: false,
         frequency: 'Every 2 weeks',
+        dayOfWeek: 'Monday',
         dataId: undefined,
         data: {},
         date: new Date(),
@@ -74,7 +77,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const handleClose = action(() => {
         state.openEdit = false;
-        state.openFreq = false;
+        state.openConfigure = false;
     });
 
     const handleAddRecord = action(() => {
@@ -86,16 +89,17 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.totalOnly = false;
     });
 
-    const handleEditFrequecy = action(() => {
-        state.openFreq = true;
-        state.frequency = assessment?.frequency || 'None';
+    const handleConfigure = action(() => {
+        state.openConfigure = true;
+        state.frequency = assessment.frequency || 'None';
+        state.dayOfWeek = assessment.dayOfWeek || 'Monday';
     });
 
     const onSaveEditRecord = action(() => {
         const { data, date, dataId, total } = state;
         currentPatient.updateAssessmentRecord({
             assessmentDataId: dataId,
-            assessmentType: assessmentType,
+            assessmentType: assessment.assessmentType,
             date,
             pointValues: data,
             comment: 'Submitted by CM',
@@ -104,12 +108,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.openEdit = false;
     });
 
-    const onSaveEditFrequency = action(() => {
-        const { frequency } = state;
-        var newAssessment = assessment || ({ assessmentType: assessmentType } as Partial<IAssessment>);
+    const onSaveConfigure = action(() => {
+        const { frequency, dayOfWeek } = state;
+        var newAssessment = { ...assessment } as Partial<IAssessment>;
         newAssessment.frequency = frequency;
+        newAssessment.dayOfWeek = dayOfWeek;
         currentPatient.updateAssessment(newAssessment);
-        state.openFreq = false;
+        state.openConfigure = false;
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
@@ -132,10 +137,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.frequency = freq;
     });
 
+    const onDayOfWeekChange = action((dow: DayOfWeek) => {
+        state.dayOfWeek = dow;
+    });
+
     const selectedValues = questions.map((q) => state.data[q.id]);
     const saveDisabled = state.totalOnly ? !state.total : selectedValues.findIndex((v) => v == undefined) >= 0;
 
-    const assessmentData = (assessment?.data as IAssessmentDataPoint[])
+    const assessmentData = (assessment.data as IAssessmentDataPoint[])
         ?.slice()
         .sort((a, b) => compareDesc(a.date, b.date));
 
@@ -147,10 +156,11 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             total: getAssessmentScore(a.pointValues) || a.totalScore,
             id: a.assessmentDataId,
             ...a.pointValues,
+            comment: a.comment,
         };
     });
 
-    const recurrence = assessment?.frequency || 'Not assigned';
+    const recurrence = `${assessment.frequency} on ${assessment.dayOfWeek}s` || 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
         <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentType}>
@@ -181,6 +191,11 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     align: 'center',
                 } as GridColDef)
         ),
+        {
+            field: 'comment',
+            headerName: 'Comment',
+            width: 120,
+        },
     ];
 
     const onRowClick = action((param: GridRowParams) => {
@@ -199,15 +214,33 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     return (
         <ActionPanel
-            id={assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={`${assessmentType} (${recurrence})`}
+            id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
+            title={`${assessment.assessmentType} (${recurrence})`}
             loading={currentPatient?.state == 'Pending'}
-            actionButtons={[
-                { icon: <AddIcon />, text: 'Add Record', onClick: handleAddRecord } as IActionButton,
-                { icon: <EditIcon />, text: 'Edit Frequency', onClick: handleEditFrequecy } as IActionButton,
-            ]}>
+            actionButtons={
+                canAdd
+                    ? [
+                          {
+                              icon: <AddIcon />,
+                              text: getString('patient_progress_assessment_action_add'),
+                              onClick: handleAddRecord,
+                          } as IActionButton,
+                          {
+                              icon: <SettingsIcon />,
+                              text: getString('patient_progress_assessment_action_configure'),
+                              onClick: handleConfigure,
+                          } as IActionButton,
+                      ]
+                    : [
+                          {
+                              icon: <SettingsIcon />,
+                              text: getString('patient_progress_assessment_action_configure'),
+                              onClick: handleConfigure,
+                          } as IActionButton,
+                      ]
+            }>
             <Grid container spacing={2} alignItems="stretch">
-                {assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
+                {assessment.assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
                     <Table
                         rows={tableData}
                         columns={columns.map((c) => ({
@@ -231,13 +264,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
                 {(!assessmentData || assessmentData.length == 0) && (
                     <Grid item xs={12}>
-                        <Typography>{`There are no ${assessmentType} scores submitted for this patient`}</Typography>
+                        <Typography>{`There are no ${assessment.assessmentType} scores submitted for this patient`}</Typography>
                     </Grid>
                 )}
             </Grid>
 
             <Dialog open={state.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
-                <DialogTitle>{`Add a new ${assessmentType} record`}</DialogTitle>
+                <DialogTitle>{`Add a new ${assessment.assessmentType} record`}</DialogTitle>
                 <DialogContent>
                     <Questionnaire
                         questions={questions}
@@ -262,27 +295,36 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={state.openFreq} onClose={handleClose}>
-                <DialogTitle>Edit Assessment Frequency</DialogTitle>
+            <Dialog open={state.openConfigure} onClose={handleClose}>
+                <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}
-                            label="Assessment Frequency"
+                            label={getString('patient_progress_assessment_dialog_configure_frequency_label')}
                             value={state.frequency}
                             options={assessmentFrequencyValues}
                             xs={12}
                             sm={12}
                             onChange={(text) => onFrequencyChange(text as AssessmentFrequency)}
                         />
+                        <GridDropdownField
+                            editable={true}
+                            label={getString('patient_progress_assessment_dialog_configure_dayofweek_label')}
+                            value={state.dayOfWeek}
+                            options={daysOfWeekValues}
+                            xs={12}
+                            sm={12}
+                            onChange={(text) => onDayOfWeekChange(text as DayOfWeek)}
+                        />
                     </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
-                        Cancel
+                        {getString('dialog_action_cancel')}
                     </Button>
-                    <Button onClick={onSaveEditFrequency} color="primary">
-                        Save
+                    <Button onClick={onSaveConfigure} color="primary">
+                        {getString('dialog_action_save')}
                     </Button>
                 </DialogActions>
             </Dialog>

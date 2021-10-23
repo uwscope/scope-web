@@ -1,6 +1,7 @@
 import { IAppConfig, IAssessmentContent } from 'src/services/types';
 
 const phq9Assessment: IAssessmentContent = {
+    id: 'phq-9',
     name: 'PHQ-9',
     instruction: 'Over the last 2 weeks, how often have you been bothered by any of the following problems?',
     questions: [
@@ -51,6 +52,7 @@ const phq9Assessment: IAssessmentContent = {
 };
 
 const gad7Assessment: IAssessmentContent = {
+    id: 'gad-7',
     name: 'GAD-7',
     instruction: 'Over the last 2 weeks, how often have you been bothered by any of the following problems?',
     questions: [
@@ -95,6 +97,7 @@ const gad7Assessment: IAssessmentContent = {
 };
 
 const moodAssessment: IAssessmentContent = {
+    id: 'mood',
     name: 'Mood Logging',
     instruction: '',
     questions: [{ question: 'Please rate your mood', id: 'Mood' }],
@@ -142,6 +145,26 @@ const moodAssessment: IAssessmentContent = {
     ],
 };
 
+const medicationAssessment: IAssessmentContent = {
+    id: 'medication',
+    name: 'Medication Tracking',
+    instruction:
+        'The following questions pertain to any medications you are taking for stress, mood, anxiety, sleep, or other psychological symptoms.',
+    questions: [
+        { question: 'In the past 7 days, did you take all your prescribed medications as scheduled?', id: 'adherence' },
+    ],
+    options: [
+        {
+            text: 'Yes, I took my medications as scheduled',
+            value: 1,
+        },
+        {
+            text: 'No, I did not take all my medications as scheduled',
+            value: 0,
+        },
+    ],
+};
+
 export const defaultAppConfig: IAppConfig = {
-    assessments: [phq9Assessment, gad7Assessment, moodAssessment],
+    assessments: [phq9Assessment, gad7Assessment, moodAssessment, medicationAssessment],
 };

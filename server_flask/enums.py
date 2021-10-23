@@ -140,6 +140,7 @@ class AssessmentType(Enum):
     PHQ9 = "PHQ-9"
     GAD7 = "GAD-7"
     MoodLogging = "Mood Logging"
+    Medication = "Medication Tracking"
 
 
 class AssessmentFrequency(Enum):
@@ -147,3 +148,12 @@ class AssessmentFrequency(Enum):
     Weekly = "Once a week"
     Biweekly = "Every 2 weeks"
     Monthly = "Monthly"
+
+class DayOfWeek(Enum):
+    Monday = "Monday"
+    Tuesday = "Tuesday"
+    Wednesday = "Wednesday"
+    Thursday = "Thursday"
+    Friday = "Friday"
+    Saturday = "Saturday"
+    Sunday = "Sunday"
