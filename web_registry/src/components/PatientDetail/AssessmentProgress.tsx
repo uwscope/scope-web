@@ -63,6 +63,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         date: Date;
         totalOnly: boolean;
         total: number;
+        comment: string;
     }>(() => ({
         openEdit: false,
         openConfigure: false,
@@ -73,6 +74,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         date: new Date(),
         totalOnly: false,
         total: 0,
+        comment: '',
     }));
 
     const handleClose = action(() => {
@@ -87,6 +89,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.data = {};
         state.total = 0;
         state.totalOnly = false;
+        state.comment = '';
     });
 
     const handleConfigure = action(() => {
@@ -96,13 +99,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onSaveEditRecord = action(() => {
-        const { data, date, dataId, total } = state;
+        const { data, date, dataId, total, comment } = state;
         currentPatient.updateAssessmentRecord({
             assessmentDataId: dataId,
             assessmentType: assessment.assessmentType,
             date,
             pointValues: data,
-            comment: 'Submitted by CM',
+            comment: comment || getString('patient_progress_assessment_record_comment_default'),
             totalScore: total,
         });
         state.openEdit = false;
@@ -141,8 +144,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         state.dayOfWeek = dow;
     });
 
+    const onCommentChange = action((comment: string) => {
+        state.comment = comment;
+    });
+
     const selectedValues = questions.map((q) => state.data[q.id]);
-    const saveDisabled = state.totalOnly ? !state.total : selectedValues.findIndex((v) => v == undefined) >= 0;
+    const saveDisabled = state.totalOnly
+        ? state.total == undefined
+        : selectedValues.findIndex((v) => v == undefined) >= 0;
 
     const assessmentData = (assessment.data as IAssessmentDataPoint[])
         ?.slice()
@@ -209,6 +218,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             Object.assign(state.data, data.pointValues);
             state.total = data.totalScore;
             state.totalOnly = !!data.totalScore;
+            state.comment = data.comment;
         }
     });
 
@@ -284,6 +294,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         onToggleTotalOnly={onToggleTotalOnly}
                         totalOnly={state.totalOnly}
                         totalScore={state.total}
+                        comment={state.comment}
+                        onCommentChange={onCommentChange}
                     />
                 </DialogContent>
                 <DialogActions>

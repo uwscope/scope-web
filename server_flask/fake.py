@@ -171,7 +171,7 @@ def getFakeAssessmentDataPoint(assessmentType):
         for q in gad7Assessment.get("questions", []):
             points[q["id"]] = getRandomInteger(0, 4)
         return points
-    elif assessmentType == "Mood Tracking":
+    elif assessmentType == "Mood Logging":
         return {"Mood": getRandomInteger(1, 6)}
     elif assessmentType == "Medication Tracking":
         return {"Adherence": getRandomInteger(1, 6)}
