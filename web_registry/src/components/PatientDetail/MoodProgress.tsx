@@ -79,7 +79,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                 )}
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
                     <Grid item xs={12}>
-                        <AssessmentVis data={sortedMoodLogs} maxValue={maxValue} />
+                        <AssessmentVis data={sortedMoodLogs} maxValue={maxValue} useTime={true} />
                     </Grid>
                 )}
                 {(!sortedMoodLogs || sortedMoodLogs.length == 0) && (

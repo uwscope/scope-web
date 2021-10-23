@@ -1,6 +1,7 @@
 // import '../node_modules/react-vis/dist/style.css';
 import { FormControlLabel, InputLabel, Switch, withStyles, withTheme } from '@material-ui/core';
 import { addDays, compareAsc, format } from 'date-fns';
+import { addMonths } from 'date-fns/esm';
 import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -79,6 +80,7 @@ const getColoredSwitch = (color: string) =>
 export interface IAssessmentChartProps {
     data: Array<IAssessmentDataPoint>;
     maxValue: number;
+    useTime?: boolean;
 }
 
 type Point = LineMarkSeriesPoint;
@@ -114,7 +116,7 @@ export const AssessmentVis = withTheme(
     observer((props: ThemedStyledProps<IAssessmentChartProps, any>) => {
         const ref = React.useRef(null);
         const { width } = useResize(ref);
-        const { data, maxValue } = props;
+        const { data, maxValue, useTime } = props;
 
         const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
 
@@ -158,16 +160,17 @@ export const AssessmentVis = withTheme(
                 .map(
                     (d) =>
                         ({
-                            x: d.date.getTime(),
+                            x: (useTime ? d.date : clearTime(d.date)).getTime(),
                             y: getAssessmentScore(d.pointValues),
                         } as Point)
                 );
 
             const minXTicks = Math.max(width / 200, 3);
+            const minYTicks = state.expanded ? maxValue + 1 : (maxValue * dataKeys.length) / 5;
             const yDomain = [0, state.expanded ? maxValue + 1 : maxValue * dataKeys.length + 1];
             const xDomain = [
-                addDays(clearTime(new Date(dataPoints[0].x)), -1).getTime(),
-                addDays(clearTime(new Date(dataPoints[dataPoints.length - 1].x)), 2).getTime(),
+                addMonths(clearTime(new Date()), -2).getTime(),
+                addDays(clearTime(new Date()), 1).getTime(),
             ];
 
             return (
@@ -180,13 +183,10 @@ export const AssessmentVis = withTheme(
                             xDomain={xDomain}
                             yDomain={yDomain}
                             animation={{ duration: 100 }}>
-                            <VerticalGridLines tickTotal={minXTicks} />
+                            <VerticalGridLines />
                             <HorizontalGridLines />
                             <XAxis title="Submitted date" on0={true} tickTotal={minXTicks} />
-                            <YAxis
-                                title="Score"
-                                tickTotal={state.expanded ? maxValue + 1 : (maxValue * dataKeys.length) / 5}
-                            />
+                            <YAxis title="Score" tickTotal={minYTicks} />
                             {state.expanded ? (
                                 state.visibility
                                     .filter(({ visible }) => visible)
