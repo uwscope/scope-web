@@ -92,11 +92,14 @@ export interface IActivity {
     readonly moodData: IAssessmentDataPoint[];
 }
 
-export interface IActivityLog {
+export interface IScheduledActivity {
     id: string;
-    date: Date;
     activityId: string;
     activityName: string;
+    dueDate: Date;
+    reminderDate: Date;
+    completed: boolean;
+    recordedDate: Date;
     success: ActivitySuccessType;
     alternative: string;
     pleasure: number;
@@ -162,7 +165,7 @@ export interface IPatient extends IPatientProfile, IClinicalHistory {
     readonly activities: IActivity[];
 
     // Activity logs
-    readonly activityLogs: IActivityLog[];
+    readonly scheduledActivities: IScheduledActivity[];
 }
 
 export interface IPatientList {

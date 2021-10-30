@@ -22,5 +22,5 @@ export const sample = <T>(array: ReadonlyArray<T>, count: number) => {
 };
 
 export const getRandomBoolean = () => {
-    return getRandomInteger(0, 2) <= 1;
+    return Math.random() >= 0.5;
 };

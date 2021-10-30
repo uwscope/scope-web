@@ -15,15 +15,15 @@ import {
     CancerTreatmentRegimenFlags,
     DiscussionFlags,
     IActivity,
-    IActivityLog,
     IAssessment,
     IAssessmentDataPoint,
     ICaseReview,
     IPatient,
+    IScheduledActivity,
     ISession,
     IValuesInventory,
 } from 'src/services/types';
-import { getFakeLifeareaValues } from 'src/utils/fake';
+import { getFakeLifeareaValues, getFakeScheduledActivities } from 'src/utils/fake';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
@@ -87,7 +87,7 @@ export class PatientStore implements IPatientStore {
     public activities: IActivity[] = [];
 
     // Activity Logs
-    public activityLogs: IActivityLog[] = [];
+    public scheduledActivities: IScheduledActivity[] = [];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly updateSessionQuery: PromiseQuery<ISession>;
@@ -142,7 +142,7 @@ export class PatientStore implements IPatientStore {
         this.activities = patient.activities || [];
 
         // Activity Logs
-        this.activityLogs = patient.activityLogs || [];
+        this.scheduledActivities = patient.scheduledActivities || getFakeScheduledActivities(20, 2);
 
         this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
         this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
@@ -376,6 +376,9 @@ export class PatientStore implements IPatientStore {
 
         // Activities
         this.activities = patient.activities ?? this.activities;
+
+        // Activity logs
+        this.scheduledActivities = patient.scheduledActivities ?? this.scheduledActivities;
     }
 
     private runAfterLoad(fn: () => void) {

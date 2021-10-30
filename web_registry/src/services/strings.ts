@@ -18,6 +18,7 @@ const _strings = {
     patient_values_inventory_activity_lifearea_header: 'Life area',
     patient_values_inventory_activity_enjoyment_header: 'Enjoyment',
     patient_values_inventory_activity_importance_header: 'Importance',
+    patient_values_inventory_empty: 'There are no activities defined in the values inventory.',
 
     patient_progress_assessment_header_date: 'Date',
     patient_progress_assessment_header_comment: 'Note',
@@ -50,7 +51,8 @@ const _strings = {
     patient_progress_activity_hash: 'activity',
     patient_progress_activity_name: 'Activity Tracking',
     patient_progress_activity_header_activity: 'Activity',
-    patient_progress_activity_header_date: 'Date',
+    patient_progress_activity_header_due_date: 'Due date',
+    patient_progress_activity_header_submitted_date: 'Submitted date',
     patient_progress_activity_header_success: 'Completed',
     patient_progress_activity_header_pleasure: 'Pleasure',
     patient_progress_activity_header_accomplishment: 'Accomplishment',
