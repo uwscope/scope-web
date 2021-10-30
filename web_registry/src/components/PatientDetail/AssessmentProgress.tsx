@@ -11,7 +11,7 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
-import { format } from 'date-fns';
+import { compareAsc, format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -154,21 +154,21 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         ? state.total == undefined
         : selectedValues.findIndex((v) => v == undefined) >= 0;
 
-    const assessmentData = (assessment.data as IAssessmentDataPoint[])
-        ?.slice()
-        .sort((a, b) => compareDesc(a.date, b.date));
+    const assessmentData = (assessment.data as IAssessmentDataPoint[])?.slice();
 
     const questionIds = questions.map((q) => q.id);
 
-    const tableData = assessmentData?.map((a) => {
-        return {
-            date: format(a.date, 'MM/dd/yyyy'),
-            total: getAssessmentScore(a.pointValues) || a.totalScore,
-            id: a.assessmentDataId,
-            ...a.pointValues,
-            comment: a.comment,
-        };
-    });
+    const tableData = assessmentData
+        ?.sort((a, b) => compareDesc(a.date, b.date))
+        .map((a) => {
+            return {
+                date: format(a.date, 'MM/dd/yyyy'),
+                total: getAssessmentScore(a.pointValues) || a.totalScore,
+                id: a.assessmentDataId,
+                ...a.pointValues,
+                comment: a.comment,
+            };
+        });
 
     const recurrence = `${assessment.frequency} on ${assessment.dayOfWeek}s` || 'Not assigned';
 
@@ -271,7 +271,11 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
                 {!!assessmentData && assessmentData.length > 0 && (
                     <Grid item xs={12}>
-                        <AssessmentVis data={assessmentData} maxValue={maxValue} useTime={useTime} />
+                        <AssessmentVis
+                            data={assessmentData?.sort((a, b) => compareAsc(a.date, b.date))}
+                            maxValue={maxValue}
+                            useTime={useTime}
+                        />
                     </Grid>
                 )}
                 {(!assessmentData || assessmentData.length == 0) && (

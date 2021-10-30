@@ -172,7 +172,7 @@ def getFakeAssessmentDataPoint(assessmentType):
             points[q["id"]] = getRandomInteger(0, 4)
         return points
     elif assessmentType == "Mood Logging":
-        return {"Mood": getRandomInteger(1, 6)}
+        return {"Mood": getRandomInteger(1, 11)}
     elif assessmentType == "Medication Tracking":
         return {"Adherence": getRandomInteger(1, 6)}
     else:
@@ -180,17 +180,30 @@ def getFakeAssessmentDataPoint(assessmentType):
 
 
 def getAssessmentDataPoints(assessmentType):
-    return [
+    if assessmentType == "Mood Logging":
+        return [
         {
             "assessmentDataId": "%s-%d" % (assessmentType, idx),
             "assessmentType": assessmentType,
             "date": datetime.now()
-            - timedelta(days=getRandomInteger(0, 3) + idx * getRandomInteger(5, 8)),
+            - timedelta(hours=getRandomInteger(4, 48) + idx * getRandomInteger(0, 120)),
             "pointValues": getFakeAssessmentDataPoint(assessmentType),
             "comment": shortLorem.paragraph(),
         }
         for idx in range(getRandomInteger(5, 10))
     ]
+    else:
+        return [
+            {
+                "assessmentDataId": "%s-%d" % (assessmentType, idx),
+                "assessmentType": assessmentType,
+                "date": datetime.now()
+                - timedelta(days=getRandomInteger(0, 3) + idx * getRandomInteger(5, 8)),
+                "pointValues": getFakeAssessmentDataPoint(assessmentType),
+                "comment": shortLorem.paragraph(),
+            }
+            for idx in range(getRandomInteger(5, 10))
+        ]
 
 
 def getFakeSessions():
