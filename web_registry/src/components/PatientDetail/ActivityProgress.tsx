@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@material-ui/core';
 import { GridColDef } from '@material-ui/x-grid';
-import { format } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -13,7 +13,10 @@ import { usePatient } from 'src/stores/stores';
 export const ActivityProgress: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
-    const logs = currentPatient.activityLogs?.slice().sort((a, b) => compareDesc(a.date, b.date));
+    const logs = currentPatient.scheduledActivities
+        ?.slice()
+        .filter((a) => isBefore(a.dueDate, new Date()))
+        .sort((a, b) => compareDesc(a.dueDate, b.dueDate));
 
     const getCompleted = (success: ActivitySuccessType) => {
         switch (success) {
@@ -28,32 +31,41 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const tableData = logs?.map((log) => {
         return {
+            id: log.id,
             name: log.activityName,
-            date: format(log.date, 'MM/dd/yyyy'),
-            completed: getCompleted(log.success),
-            pleasure: log.pleasure,
-            accomplishment: log.accomplishment,
-            comment: log.comment,
+            dueDate: format(log.dueDate, 'MM/dd/yyyy'),
+            recordedDate: log.completed && log.recordedDate ? format(log.recordedDate, 'MM/dd/yyyy') : '--',
+            completed: log.completed ? getCompleted(log.success) : '--',
+            pleasure: log.completed ? log.pleasure : '--',
+            accomplishment: log.completed ? log.accomplishment : '--',
+            comment: log.completed ? log.comment : '--',
         };
     });
 
     const columns: GridColDef[] = [
         {
-            field: 'name',
-            headerName: getString('patient_progress_activity_header_activity'),
-            width: 100,
-        },
-        {
-            field: 'date',
-            headerName: getString('patient_progress_activity_header_date'),
+            field: 'dueDate',
+            headerName: getString('patient_progress_activity_header_due_date'),
             width: 100,
             sortable: true,
             hideSortIcons: false,
         },
         {
-            field: 'success',
-            headerName: getString('patient_progress_activity_header_success'),
+            field: 'recordedDate',
+            headerName: getString('patient_progress_activity_header_submitted_date'),
             width: 100,
+            sortable: true,
+            hideSortIcons: false,
+        },
+        {
+            field: 'name',
+            headerName: getString('patient_progress_activity_header_activity'),
+            width: 300,
+        },
+        {
+            field: 'completed',
+            headerName: getString('patient_progress_activity_header_success'),
+            width: 200,
             sortable: true,
             hideSortIcons: false,
         },
@@ -70,7 +82,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
         {
             field: 'comment',
             headerName: getString('patient_progress_activity_header_comment'),
-            width: 120,
+            width: 200,
         },
     ];
 

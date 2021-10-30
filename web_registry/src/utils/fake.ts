@@ -1,5 +1,20 @@
-import { ILifeAreaValue, ILifeAreaValueActivity } from 'src/services/types';
-import { getRandomInteger } from 'src/utils/random';
+import { addDays, addHours } from 'date-fns';
+import { flatten, random } from 'lodash';
+import { LoremIpsum } from 'lorem-ipsum';
+import { activitySuccessTypeValues } from 'src/services/enums';
+import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'src/services/types';
+import { getRandomBoolean, getRandomInteger, getRandomItem } from 'src/utils/random';
+
+const lorem = new LoremIpsum({
+    sentencesPerParagraph: {
+        max: 8,
+        min: 4,
+    },
+    wordsPerSentence: {
+        max: 16,
+        min: 4,
+    },
+});
 
 export const getFakeLifeareaValues = (): ILifeAreaValue[] => {
     return [
@@ -84,32 +99,36 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
 //     ];
 // };
 
-// export const getFakeScheduledItems = (daysBefore: number, daysAfter: number): IScheduledTaskItem[] => {
-//     const today = new Date();
+export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number): IScheduledActivity[] => {
+    const today = new Date();
 
-//     const items = flatten(
-//         [...Array(daysBefore + daysAfter).keys()].map((idx) => {
-//             const date = addDays(today, idx - daysBefore);
-//             const itemCount = random(0, 3);
+    const items = flatten(
+        [...Array(daysBefore + daysAfter).keys()].map((idx) => {
+            const date = addDays(today, idx - daysBefore);
+            const itemCount = random(0, 3);
 
-//             return [...Array(itemCount).keys()].map(
-//                 () =>
-//                     ({
-//                         sourceId: 'some-activity',
-//                         id: (date.getTime() + random(10000)).toString(),
-//                         dueType: getRandomItem(dueTypeValues),
-//                         due: date,
-//                         name: lorem.generateWords(random(2, 5)),
-//                         taskType: 'Activity',
-//                         reminder: date,
-//                         completed: random(0, 5) < 1,
-//                     } as IScheduledTaskItem)
-//             );
-//         })
-//     );
+            return [...Array(itemCount).keys()].map(
+                () =>
+                    ({
+                        id: (date.getTime() + random(10000)).toString(),
+                        activityId: (date.getTime() + random(10000)).toString(),
+                        activityName: lorem.generateWords(random(2, 5)),
+                        dueDate: date,
+                        reminderDate: date,
+                        completed: getRandomBoolean(),
+                        recordedDate: addHours(date, getRandomInteger(3, 72)),
+                        success: getRandomItem(activitySuccessTypeValues),
+                        alternative: lorem.generateWords(random(2, 5)),
+                        pleasure: getRandomInteger(1, 11),
+                        accomplishment: getRandomInteger(1, 11),
+                        comment: lorem.generateWords(random(2, 10)),
+                    } as IScheduledActivity)
+            );
+        })
+    );
 
-//     return items;
-// };
+    return items;
+};
 
 // export const getFakeInspirationalQuotes = (maxCount: number) => {
 //     return [...Array(maxCount).keys()].map((_) => lorem.generateSentences(random(1, 2)));
