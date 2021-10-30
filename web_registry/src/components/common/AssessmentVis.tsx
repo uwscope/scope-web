@@ -1,6 +1,6 @@
 // import '../node_modules/react-vis/dist/style.css';
 import { FormControlLabel, InputLabel, Switch, withStyles, withTheme } from '@material-ui/core';
-import { addDays, compareAsc, format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { addMonths } from 'date-fns/esm';
 import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
@@ -154,16 +154,13 @@ export const AssessmentVis = withTheme(
         if (!!data && data.length > 0) {
             // TODO: Limit to 14-15 data points per view and allow horizontal scrolling
 
-            const dataPoints = data
-                .slice()
-                .sort((a, b) => compareAsc(a.date, b.date))
-                .map(
-                    (d) =>
-                        ({
-                            x: (useTime ? d.date : clearTime(d.date)).getTime(),
-                            y: getAssessmentScore(d.pointValues),
-                        } as Point)
-                );
+            const dataPoints = data.map(
+                (d) =>
+                    ({
+                        x: (useTime ? d.date : clearTime(d.date)).getTime(),
+                        y: getAssessmentScore(d.pointValues),
+                    } as Point)
+            );
 
             const minXTicks = Math.max(width / 200, 3);
             const minYTicks = state.expanded ? maxValue + 1 : (maxValue * dataKeys.length) / 5;
