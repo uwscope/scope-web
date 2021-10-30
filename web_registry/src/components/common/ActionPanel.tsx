@@ -8,7 +8,7 @@ import {
     Typography,
     withTheme,
 } from '@material-ui/core';
-import React, { FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 const CardTitle = withTheme(
@@ -58,12 +58,12 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
     return (
         <Card id={id}>
             <CardTitle>
-                <div>
+                <Fragment>
                     <TitleType variant="button" noWrap={true}>
                         {title}
                     </TitleType>
                     {inlineTitle && <InlineType>{`(${inlineTitle})`}</InlineType>}
-                </div>
+                </Fragment>
                 <CardActions>
                     {!!actionButtons
                         ? actionButtons.map((a) => (

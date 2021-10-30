@@ -21,7 +21,7 @@ export const getFakeLifeareaValues = (): ILifeAreaValue[] => {
 export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: string): ILifeAreaValueActivity[] => {
     return [
         {
-            id: 'inventory-activity',
+            id: `activity for ${lifeareaId}-${valueId} 1`,
             name: 'some inventory activity',
             valueId: valueId,
             lifeareaId,
@@ -31,7 +31,7 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             dateEdited: new Date(),
         } as ILifeAreaValueActivity,
         {
-            id: 'inventory-activity2',
+            id: `activity for ${lifeareaId}-${valueId} 2`,
             name: 'some inventory activity 2',
             valueId: valueId,
             lifeareaId,

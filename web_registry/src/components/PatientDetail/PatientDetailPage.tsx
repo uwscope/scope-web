@@ -147,16 +147,12 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             content: <BehavioralInformation />,
         },
         {
-            hash: 'checklist',
-            label: 'Checklist',
+            hash: getString('patient_detail_subsection_checklist_hash'),
+            label: getString('patient_detail_subsection_checklist_title'),
         },
         {
             hash: getString('patient_detail_subsection_values_inventory_hash'),
             label: getString('patient_detail_subsection_values_inventory_title'),
-        },
-        {
-            hash: 'activities',
-            label: 'Activities',
         },
     ] as IContent[];
     contentMenu.push.apply(contentMenu, baMenu);
