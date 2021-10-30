@@ -26,10 +26,14 @@ const _strings = {
     patient_progress_assessment_dialog_configure_title: 'Configure Assessment',
     patient_progress_assessment_dialog_configure_frequency_label: 'Assessment Frequency',
     patient_progress_assessment_dialog_configure_dayofweek_label: 'Assessment Day of the Week',
+    patient_progress_assessment_dialog_close_button: 'Close',
+    patient_progress_assessment_dialog_save_button: 'Save',
+    patient_progress_assessment_dialog_cancel_button: 'Cancel',
 
+    patient_progress_assessment_dialog_add_administered_date_label: 'Administered date',
+    patient_progress_assessment_dialog_add_submitted_date_label: 'Submitted date',
     patient_progress_assessment_dialog_add_total_score_label: 'Submit total score only',
     patient_progress_assessment_dialog_comment_label: 'Note',
-    patient_progress_assessment_record_comment_default: 'Added by CM',
 
     patient_progress_mood_header_date: 'Date',
     patient_progress_mood_header_mood: 'Mood Rating',

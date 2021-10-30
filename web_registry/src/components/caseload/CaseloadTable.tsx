@@ -205,6 +205,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
                 headerHeight={56}
                 rowHeight={36}
                 onRowClick={onRowClick}
+                pagination={true}
             />
         </TableContainer>
     );

@@ -15,6 +15,7 @@ export interface IQuestion {
 }
 
 export interface IQuestionnaireProps {
+    readonly?: boolean;
     instruction?: string;
     questions: IQuestion[];
     options: IOption[];
@@ -32,6 +33,7 @@ export interface IQuestionnaireProps {
 
 export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => {
     const {
+        readonly = false,
         instruction,
         questions,
         options,
@@ -48,7 +50,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
     } = props;
 
     const handleSelectChange = (q: IQuestion) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!!onSelect) {
+        if (!!onSelect && !readonly) {
             onSelect(q.id, Number(event.target.value));
         }
     };
@@ -58,24 +60,30 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
             <GridDateField
                 xs={4}
                 sm={4}
-                editable={true}
-                label="Administered Date"
+                editable={!readonly}
+                label={
+                    readonly
+                        ? getString('patient_progress_assessment_dialog_add_submitted_date_label')
+                        : getString('patient_progress_assessment_dialog_add_administered_date_label')
+                }
                 value={selectedDate}
                 onChange={(value) => onDateChange && onDateChange(value as Date)}
             />
-            <GridSwitchField
-                xs={4}
-                sm={4}
-                editable={true}
-                label={getString('patient_progress_assessment_dialog_add_total_score_label')}
-                on={totalOnly}
-                onChange={(value) => onToggleTotalOnly && onToggleTotalOnly(value)}
-            />
+            {!readonly && (
+                <GridSwitchField
+                    xs={4}
+                    sm={4}
+                    editable={!readonly}
+                    label={getString('patient_progress_assessment_dialog_add_total_score_label')}
+                    on={totalOnly}
+                    onChange={(value) => onToggleTotalOnly && onToggleTotalOnly(value)}
+                />
+            )}
             {totalOnly && (
                 <GridTextField
                     xs={4}
                     sm={4}
-                    editable={true}
+                    editable={!readonly && totalOnly}
                     label="Total score"
                     value={totalScore}
                     onChange={(value) => onTotalChange && onTotalChange(value as number)}
@@ -117,7 +125,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
             <GridTextField
                 xs={12}
                 sm={12}
-                editable={true}
+                editable={!readonly}
                 label={getString('patient_progress_assessment_dialog_comment_label')}
                 value={comment}
                 onChange={(value) => onCommentChange && onCommentChange(value as string)}

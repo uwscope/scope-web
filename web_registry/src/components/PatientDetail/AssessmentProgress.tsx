@@ -57,6 +57,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const state = useLocalObservable<{
         openEdit: boolean;
         openConfigure: boolean;
+        assessmentDataId: string | undefined;
+        patientSubmitted: boolean;
         frequency: AssessmentFrequency;
         dayOfWeek: DayOfWeek;
         dataId: string | undefined;
@@ -68,6 +70,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     }>(() => ({
         openEdit: false,
         openConfigure: false,
+        assessmentDataId: undefined,
+        patientSubmitted: false,
         frequency: 'Every 2 weeks',
         dayOfWeek: 'Monday',
         dataId: undefined,
@@ -84,6 +88,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const handleAddRecord = action(() => {
+        state.assessmentDataId = undefined;
+        state.patientSubmitted = false;
         state.openEdit = true;
         state.date = new Date();
         state.dataId = undefined;
@@ -106,7 +112,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             assessmentType: assessment.assessmentType,
             date,
             pointValues: data,
-            comment: comment || getString('patient_progress_assessment_record_comment_default'),
+            comment: comment,
             totalScore: total,
         });
         state.openEdit = false;
@@ -213,6 +219,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         const data = assessmentData.find((a) => a.assessmentDataId == id);
 
         if (!!data) {
+            state.assessmentDataId = data.assessmentDataId;
+            state.patientSubmitted = data.patientSubmitted;
             state.openEdit = true;
             state.date = data.date;
             state.dataId = data.assessmentDataId;
@@ -286,9 +294,16 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             </Grid>
 
             <Dialog open={state.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
-                <DialogTitle>{`Add a new ${assessment.assessmentType} record`}</DialogTitle>
+                <DialogTitle>
+                    {state.patientSubmitted
+                        ? `Patient submitted ${assessment.assessmentType} record`
+                        : state.assessmentDataId
+                        ? `Edit ${assessment.assessmentType} record`
+                        : `Add ${assessment.assessmentType} record`}
+                </DialogTitle>
                 <DialogContent>
                     <Questionnaire
+                        readonly={state.patientSubmitted}
                         questions={questions}
                         options={options}
                         selectedValues={selectedValues}
@@ -304,14 +319,22 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         onCommentChange={onCommentChange}
                     />
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={onSaveEditRecord} color="primary" disabled={saveDisabled}>
-                        Save
-                    </Button>
-                </DialogActions>
+                {state.patientSubmitted ? (
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            {getString('patient_progress_assessment_dialog_close_button')}
+                        </Button>
+                    </DialogActions>
+                ) : (
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            {getString('patient_progress_assessment_dialog_cancel_button')}
+                        </Button>
+                        <Button onClick={onSaveEditRecord} color="primary" disabled={saveDisabled}>
+                            {getString('patient_progress_assessment_dialog_save_button')}
+                        </Button>
+                    </DialogActions>
+                )}
             </Dialog>
             <Dialog open={state.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
