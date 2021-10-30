@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useParams } from 'react-router';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
-import BAInformation from 'src/components/PatientDetail/BAInformation';
+import BehavioralInformation from 'src/components/PatientDetail/BehavioralInformation';
 import PatientCard from 'src/components/PatientDetail/PatientCard';
 import PatientCardExtended from 'src/components/PatientDetail/PatientCardExtended';
 import PatientInformation from 'src/components/PatientDetail/PatientInformation';
@@ -141,14 +141,18 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
 
     const baMenu = [
         {
-            hash: 'behavioral',
-            label: 'Behavioral Activation',
+            hash: getString('patient_detail_section_behavior_strategies_hash'),
+            label: getString('patient_detail_section_behavior_strategies_title'),
             top: true,
-            content: <BAInformation />,
+            content: <BehavioralInformation />,
         },
         {
             hash: 'checklist',
             label: 'Checklist',
+        },
+        {
+            hash: getString('patient_detail_subsection_values_inventory_hash'),
+            label: getString('patient_detail_subsection_values_inventory_title'),
         },
         {
             hash: 'activities',

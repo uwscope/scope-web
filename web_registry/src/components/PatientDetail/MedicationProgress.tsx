@@ -101,7 +101,8 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
     return (
         <ActionPanel
             id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={`${assessment.assessmentType} (${recurrence})`}
+            title={assessment.assessmentType}
+            inlineTitle={recurrence}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[
                 {

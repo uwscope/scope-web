@@ -226,7 +226,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     return (
         <ActionPanel
             id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={`${assessment.assessmentType} (${recurrence})`}
+            title={assessment.assessmentType}
+            inlineTitle={recurrence}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={
                 canAdd

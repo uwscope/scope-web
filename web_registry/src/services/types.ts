@@ -132,6 +132,17 @@ export interface IClinicalHistory {
     psychSocialBackground: string;
 }
 
+export interface IValuesInventory {
+    assigned: boolean;
+    assignedDate: Date;
+    values: ILifeAreaValue[];
+}
+
+export interface ISafetyPlan {
+    assigned: boolean;
+    assignedDate: Date;
+}
+
 export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
 export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
 
@@ -142,6 +153,9 @@ export interface IPatient extends IPatientProfile, IClinicalHistory {
 
     // Assessments
     readonly assessments: IAssessment[];
+
+    // Values inventory
+    readonly valuesInventory: IValuesInventory;
 
     // Activities
     readonly activities: IActivity[];
@@ -156,6 +170,8 @@ export interface IPatientList {
 
 export interface IAppConfig {
     assessments: IAssessmentContent[];
+    lifeAreas: ILifeAreaContent[];
+    resources: IResourceContent[];
 }
 
 export interface IAssessmentContent {
@@ -164,6 +180,38 @@ export interface IAssessmentContent {
     readonly instruction: string;
     readonly questions: { question: string; id: string }[];
     readonly options: { text: string; value: number }[];
+}
+
+export interface ILifeAreaContent {
+    readonly id: string;
+    readonly name: string;
+    readonly examples: ILifeAreaValue[];
+}
+
+export interface ILifeAreaValue {
+    id: string;
+    name: string;
+    lifeareaId: string;
+    activities: ILifeAreaValueActivity[];
+}
+
+export interface ILifeAreaValueActivity {
+    id: string;
+    name: string;
+    valueId: string;
+    lifeareaId: string;
+    enjoyment?: number;
+    importance?: number;
+}
+
+export interface IResourceContent {
+    name: string;
+    resources: IResourceItem[];
+}
+
+export interface IResourceItem {
+    name: string;
+    filename: string;
 }
 
 export const isSession = (session: ISession | ICaseReview): session is ISession => {

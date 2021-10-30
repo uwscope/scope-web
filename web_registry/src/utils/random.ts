@@ -20,3 +20,7 @@ export const sample = <T>(array: ReadonlyArray<T>, count: number) => {
 
     return shuffledIdx.filter((_, idx) => idx < count).map((idx) => array[idx]);
 };
+
+export const getRandomBoolean = () => {
+    return getRandomInteger(0, 2) <= 1;
+};
