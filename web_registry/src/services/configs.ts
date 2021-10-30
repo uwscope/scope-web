@@ -457,6 +457,7 @@ const responsibilitiesLifeArea = {
 
 const resources = [
     {
+        id: 'Review of the BA model',
         name: 'Review of behavioral activation model',
         resources: [
             {
@@ -467,22 +468,24 @@ const resources = [
                 name: 'Form B vicious cycle',
                 filename: 'sample.pdf',
             },
+            {
+                name: 'Form C vicious cycle',
+                filename: 'sample.pdf',
+            },
         ],
     },
     {
+        id: 'Mood and activity monitoring',
         name: 'Mood and activity monitoring',
         resources: [
             {
                 name: 'Form A client education',
                 filename: 'sample.pdf',
             },
-            {
-                name: 'Form B vicious cycle',
-                filename: 'sample.pdf',
-            },
         ],
     },
     {
+        id: 'Values and goals assessment',
         name: 'Values and goals assessment',
         resources: [
             {
@@ -493,9 +496,14 @@ const resources = [
                 name: 'Form B vicious cycle',
                 filename: 'sample.pdf',
             },
+            {
+                name: 'Form C vicious cycle',
+                filename: 'sample.pdf',
+            },
         ],
     },
     {
+        id: 'Activity scheduling',
         name: 'Activity scheduling',
         resources: [
             {

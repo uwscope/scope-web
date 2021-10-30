@@ -15,7 +15,7 @@ import {
     PatientSex,
     Referral,
     ReferralStatus,
-    SessionType
+    SessionType,
 } from 'src/services/enums';
 
 export type KeyedMap<T> = { [key: string]: T };
@@ -207,6 +207,7 @@ export interface ILifeAreaValueActivity {
 }
 
 export interface IResourceContent {
+    id: string;
     name: string;
     resources: IResourceItem[];
 }

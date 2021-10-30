@@ -1,4 +1,4 @@
-import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import { format } from 'date-fns';
@@ -54,38 +54,34 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     onClick: assigned ? undefined : () => currentPatient?.assignValuesInventory(),
                 } as IActionButton,
             ]}>
-            <Grid container spacing={2} alignItems="stretch">
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
-                                <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
-                                <TableCell>{getString('patient_values_inventory_activity_enjoyment_header')}</TableCell>
-                                <TableCell>
-                                    {getString('patient_values_inventory_activity_importance_header')}
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
+                            <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
+                            <TableCell>{getString('patient_values_inventory_activity_enjoyment_header')}</TableCell>
+                            <TableCell>{getString('patient_values_inventory_activity_importance_header')}</TableCell>
+                            <TableCell>{getString('patient_values_inventory_activity_lifearea_header')}</TableCell>
+                            <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {activities.map((activity) => (
+                            <TableRow key={activity.id}>
+                                <TableCell component="th" scope="row">
+                                    {format(activity.lastEdited, 'MM/dd/yyyy')}
                                 </TableCell>
-                                <TableCell>{getString('patient_values_inventory_activity_lifearea_header')}</TableCell>
-                                <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
+                                <TableCell>{activity.name}</TableCell>
+                                <TableCell>{activity.enjoyment}</TableCell>
+                                <TableCell>{activity.importance}</TableCell>
+                                <TableCell>{activity.lifearea}</TableCell>
+                                <TableCell>{activity.value}</TableCell>
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {activities.map((activity) => (
-                                <TableRow key={activity.id}>
-                                    <TableCell component="th" scope="row">
-                                        {format(activity.lastEdited, 'MM/dd/yyyy')}
-                                    </TableCell>
-                                    <TableCell>{activity.name}</TableCell>
-                                    <TableCell>{activity.enjoyment}</TableCell>
-                                    <TableCell>{activity.importance}</TableCell>
-                                    <TableCell>{activity.lifearea}</TableCell>
-                                    <TableCell>{activity.value}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Grid>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </ActionPanel>
     );
 });

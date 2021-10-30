@@ -6,6 +6,8 @@ const _strings = {
     patient_detail_section_behavior_strategies_hash: 'behavioral',
     patient_detail_subsection_values_inventory_title: 'Values Inventory',
     patient_detail_subsection_values_inventory_hash: 'values',
+    patient_detail_subsection_checklist_title: 'Behavioral Activation',
+    patient_detail_subsection_checklist_hash: 'checklist',
 
     patient_values_inventory_assign_button: 'Assign',
     patient_values_inventory_assigned_button: 'Assigned',
@@ -53,6 +55,10 @@ const _strings = {
     patient_progress_activity_success_no: 'No, I did not do it',
     patient_progress_activity_success_maybe: 'No, but I did something else',
     patient_progress_activity_empty: 'There are no activity tracking logs submitted for this patient.',
+
+    patient_behavioral_checklist_components_header: 'BA Core Components',
+    patient_behavioral_checklist_resources_header: 'Relevant Forms and Worksheets',
+    patient_behavioral_checklist_not_completed: 'Not completed',
 };
 
 type Strings = typeof _strings;

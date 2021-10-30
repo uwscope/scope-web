@@ -1,6 +1,5 @@
 import { Grid } from '@material-ui/core';
 import React, { FunctionComponent } from 'react';
-import BAActivities from 'src/components/PatientDetail/BAActivities';
 import { BAChecklist } from 'src/components/PatientDetail/BAChecklist';
 import ValuesInventory from 'src/components/PatientDetail/ValuesInventory';
 
@@ -12,9 +11,6 @@ export const BehavioralInformation: FunctionComponent = () => {
             </Grid>
             <Grid item xs={12} sm={12}>
                 <ValuesInventory />
-            </Grid>
-            <Grid item xs={12} sm={12}>
-                <BAActivities />
             </Grid>
         </Grid>
     );
