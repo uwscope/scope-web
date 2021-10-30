@@ -217,6 +217,8 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
     } else {
         return (
             <GridTextField
+                xs={xs}
+                sm={sm}
                 editable={false}
                 label={label}
                 value={!!value ? format(value as Date, 'MM/dd/yyyy') : 'unknown'}

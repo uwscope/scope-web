@@ -83,6 +83,7 @@ export interface IAssessmentDataPoint {
     readonly pointValues: AssessmentData;
     readonly comment: string;
     readonly totalScore: number;
+    readonly patientSubmitted: boolean;
 }
 
 export interface IActivity {

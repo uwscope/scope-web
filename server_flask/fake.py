@@ -67,7 +67,7 @@ oncologyProviders = ["Darth Vader", "Chewbacca", "R2-D2", "Obi-Wan Kenobi"]
 
 
 def getRandomFakePatients():
-    return [getFakePatient() for idx in range(getRandomInteger(3, 10))]
+    return [getFakePatient() for idx in range(getRandomInteger(10, 15))]
 
 
 def getFakePatient():
@@ -189,6 +189,7 @@ def getAssessmentDataPoints(assessmentType):
             - timedelta(hours=getRandomInteger(4, 48) + idx * getRandomInteger(0, 120)),
             "pointValues": getFakeAssessmentDataPoint(assessmentType),
             "comment": shortLorem.paragraph(),
+            "patientSubmitted": getRandomBoolean()
         }
         for idx in range(getRandomInteger(5, 10))
     ]
@@ -201,6 +202,7 @@ def getAssessmentDataPoints(assessmentType):
                 - timedelta(days=getRandomInteger(0, 3) + idx * getRandomInteger(5, 8)),
                 "pointValues": getFakeAssessmentDataPoint(assessmentType),
                 "comment": shortLorem.paragraph(),
+                "patientSubmitted": getRandomBoolean()
             }
             for idx in range(getRandomInteger(5, 10))
         ]

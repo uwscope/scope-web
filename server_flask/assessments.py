@@ -4,28 +4,28 @@ phq9Assessment = {
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
         {"question": "Little interest or pleasure in doing things", "id": "Interest"},
-        {"question": "Feeling down, depressed, or hopeless", "id": "Mood"},
+        {"question": "Feeling down, depressed, or hopeless", "id": "Feeling"},
         {
             "question": "Trouble falling or staying asleep, or sleeping too much",
             "id": "Sleep",
         },
-        {"question": "Feeling tired or having little energy", "id": "Energy"},
+        {"question": "Feeling tired or having little energy", "id": "Tired"},
         {"question": "Poor appetite or overeating", "id": "Apetite"},
         {
             "question": "Feeling bad about yourself or that you are a failure or have let yourself or your family down",
-            "id": "Guilt",
+            "id": "Failure",
         },
         {
             "question": "Trouble concentrating on things, such as reading the newspaper or watching television",
-            "id": "Concentration",
+            "id": "Concentrating",
         },
         {
             "question": "Moving or speaking so slowly that other people could have noticed. Or the opposite being so figety or restless that you have been moving around a lot more than usual",
-            "id": "Motor",
+            "id": "Slowness",
         },
         {
             "question": "Thoughts that you would be better off dead, or of hurting yourself",
-            "id": "Suicidality",
+            "id": "Suicide",
         },
     ],
     "options": [
