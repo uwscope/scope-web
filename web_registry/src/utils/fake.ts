@@ -27,6 +27,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             lifeareaId,
             enjoyment: getRandomInteger(1, 11),
             importance: getRandomInteger(1, 11),
+            dateCreated: new Date(),
+            dateEdited: new Date(),
         } as ILifeAreaValueActivity,
         {
             id: 'inventory-activity2',
@@ -35,6 +37,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             lifeareaId,
             enjoyment: getRandomInteger(1, 11),
             importance: getRandomInteger(1, 11),
+            dateCreated: new Date(),
+            dateEdited: new Date(),
         } as ILifeAreaValueActivity,
     ];
 };

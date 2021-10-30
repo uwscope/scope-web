@@ -10,6 +10,7 @@ const _strings = {
     patient_values_inventory_assign_button: 'Assign',
     patient_values_inventory_assigned_button: 'Assigned',
     patient_values_inventory_assigned_date: 'Assigned on',
+    patient_values_inventory_activity_date_header: 'Last edited',
     patient_values_inventory_activity_name_header: 'Activity',
     patient_values_inventory_activity_value_header: 'Value',
     patient_values_inventory_activity_lifearea_header: 'Life area',
