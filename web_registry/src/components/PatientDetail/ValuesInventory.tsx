@@ -29,6 +29,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     name: a.name,
                     enjoyment: a.enjoyment,
                     importance: a.importance,
+                    lastEdited: a.dateEdited,
                 };
             });
         })
@@ -58,6 +59,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
                                 <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
                                 <TableCell>{getString('patient_values_inventory_activity_enjoyment_header')}</TableCell>
                                 <TableCell>
@@ -71,8 +73,9 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                             {activities.map((activity) => (
                                 <TableRow key={activity.id}>
                                     <TableCell component="th" scope="row">
-                                        {activity.name}
+                                        {format(activity.lastEdited, 'MM/dd/yyyy')}
                                     </TableCell>
+                                    <TableCell>{activity.name}</TableCell>
                                     <TableCell>{activity.enjoyment}</TableCell>
                                     <TableCell>{activity.importance}</TableCell>
                                     <TableCell>{activity.lifearea}</TableCell>
