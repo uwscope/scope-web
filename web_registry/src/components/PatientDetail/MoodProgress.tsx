@@ -58,7 +58,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
     return (
         <ActionPanel
             id={assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={`${assessmentType}`}
+            title={assessmentType}
             loading={currentPatient?.state == 'Pending'}>
             <Grid container spacing={2} alignItems="stretch">
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (

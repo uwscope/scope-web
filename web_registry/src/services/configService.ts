@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { defaultAppConfig } from 'src/services/configs';
 import { IAppConfig } from './types';
 
 export interface IAppService {
@@ -17,8 +18,10 @@ class AppService implements IAppService {
     }
 
     public async getAppConfig(): Promise<IAppConfig> {
+        // TODO: wait for server update:
         const response = await this.axiosInstance.get<IAppConfig>('/config');
-        return response.data;
+        response;
+        return defaultAppConfig;
     }
 }
 

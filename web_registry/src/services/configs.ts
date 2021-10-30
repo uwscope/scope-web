@@ -1,4 +1,4 @@
-import { IAppConfig, IAssessmentContent } from 'src/services/types';
+import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'src/services/types';
 
 const phq9Assessment: IAssessmentContent = {
     id: 'phq-9',
@@ -165,6 +165,359 @@ const medicationAssessment: IAssessmentContent = {
     ],
 };
 
+const relationshipLifeArea = {
+    id: 'relationship',
+    name: 'Relationship/Social Life',
+    examples: [
+        {
+            name: 'Being a loving parent',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being a caring partner',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being an attentive and supportive friend',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+    ],
+} as ILifeAreaContent;
+
+const educationLifeArea = {
+    id: 'education',
+    name: 'Education/Career/Contributing',
+    examples: [
+        {
+            name: 'Being a loving parent',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being a caring partner',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being an attentive and supportive friend',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+    ],
+} as ILifeAreaContent;
+
+const recreationLifeArea = {
+    id: 'recreation',
+    name: 'Recreation/Interests/Creativity',
+    examples: [
+        {
+            name: 'Being a loving parent',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being a caring partner',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being an attentive and supportive friend',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+    ],
+} as ILifeAreaContent;
+
+const mindBodyLifeArea = {
+    id: 'mindbody',
+    name: 'Mind/Body/Spirituality',
+    examples: [
+        {
+            name: 'Being a loving parent',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being a caring partner',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being an attentive and supportive friend',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+    ],
+} as ILifeAreaContent;
+
+const responsibilitiesLifeArea = {
+    id: 'responsibilities',
+    name: 'Responsibilities',
+    examples: [
+        {
+            name: 'Being a loving parent',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being a caring partner',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+        {
+            name: 'Being an attentive and supportive friend',
+            activities: [
+                {
+                    name: 'Tell my child I love them every day',
+                },
+                {
+                    name: 'Make a special breakfast for my child on Saturday',
+                },
+                {
+                    name: 'Take my child to the part on Saturday',
+                },
+                {
+                    name: 'Pick up my child from school promptly each day',
+                },
+            ],
+        },
+    ],
+} as ILifeAreaContent;
+
+const resources = [
+    {
+        name: 'Review of behavioral activation model',
+        resources: [
+            {
+                name: 'Form A client education',
+                filename: 'sample.pdf',
+            },
+            {
+                name: 'Form B vicious cycle',
+                filename: 'sample.pdf',
+            },
+        ],
+    },
+    {
+        name: 'Mood and activity monitoring',
+        resources: [
+            {
+                name: 'Form A client education',
+                filename: 'sample.pdf',
+            },
+            {
+                name: 'Form B vicious cycle',
+                filename: 'sample.pdf',
+            },
+        ],
+    },
+    {
+        name: 'Values and goals assessment',
+        resources: [
+            {
+                name: 'Form A client education',
+                filename: 'sample.pdf',
+            },
+            {
+                name: 'Form B vicious cycle',
+                filename: 'sample.pdf',
+            },
+        ],
+    },
+    {
+        name: 'Activity scheduling',
+        resources: [
+            {
+                name: 'Form A client education',
+                filename: 'sample.pdf',
+            },
+            {
+                name: 'Form B vicious cycle',
+                filename: 'sample.pdf',
+            },
+        ],
+    },
+];
+
 export const defaultAppConfig: IAppConfig = {
     assessments: [phq9Assessment, gad7Assessment, moodAssessment, medicationAssessment],
+    lifeAreas: [
+        relationshipLifeArea,
+        educationLifeArea,
+        recreationLifeArea,
+        mindBodyLifeArea,
+        responsibilitiesLifeArea,
+    ],
+    resources,
 };

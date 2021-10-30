@@ -2,6 +2,20 @@ const _strings = {
     dialog_action_cancel: 'Cancel',
     dialog_action_save: 'Save',
 
+    patient_detail_section_behavior_strategies_title: 'Behavioral Strategies',
+    patient_detail_section_behavior_strategies_hash: 'behavioral',
+    patient_detail_subsection_values_inventory_title: 'Values Inventory',
+    patient_detail_subsection_values_inventory_hash: 'values',
+
+    patient_values_inventory_assign_button: 'Assign',
+    patient_values_inventory_assigned_button: 'Assigned',
+    patient_values_inventory_assigned_date: 'Assigned on',
+    patient_values_inventory_activity_name_header: 'Activity',
+    patient_values_inventory_activity_value_header: 'Value',
+    patient_values_inventory_activity_lifearea_header: 'Life area',
+    patient_values_inventory_activity_enjoyment_header: 'Enjoyment',
+    patient_values_inventory_activity_importance_header: 'Importance',
+
     patient_progress_assessment_header_date: 'Date',
     patient_progress_assessment_header_comment: 'Note',
     patient_progress_assessment_action_add: 'Add Record',

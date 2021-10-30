@@ -21,7 +21,9 @@ import {
     ICaseReview,
     IPatient,
     ISession,
+    IValuesInventory,
 } from 'src/services/types';
+import { getFakeLifeareaValues } from 'src/utils/fake';
 
 export interface IPatientStore extends IPatient {
     readonly name: string;
@@ -36,6 +38,7 @@ export interface IPatientStore extends IPatient {
     updateCaseReview: (caseReview: Partial<ICaseReview>) => void;
     updateAssessment: (assessment: Partial<IAssessment>) => void;
     updateAssessmentRecord: (assessmentData: Partial<IAssessmentDataPoint>) => void;
+    assignValuesInventory: () => void;
 }
 
 export class PatientStore implements IPatientStore {
@@ -73,6 +76,13 @@ export class PatientStore implements IPatientStore {
     // Assessments
     public assessments: IAssessment[] = [];
 
+    // Values inventory
+    public valuesInventory: IValuesInventory = {
+        assigned: false,
+        assignedDate: new Date(),
+        values: [],
+    };
+
     // Activities
     public activities: IActivity[] = [];
 
@@ -84,6 +94,7 @@ export class PatientStore implements IPatientStore {
     private readonly updateCaseReviewQuery: PromiseQuery<ICaseReview>;
     private readonly updateAssessmentQuery: PromiseQuery<IAssessment>;
     private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
+    private readonly updateValuesInventoryQuery: PromiseQuery<IValuesInventory>;
 
     constructor(patient: IPatient) {
         // IPatientProfile
@@ -120,6 +131,13 @@ export class PatientStore implements IPatientStore {
         // Assessments
         this.assessments = patient.assessments || [];
 
+        // Values inventory
+        this.valuesInventory = {
+            assigned: false,
+            assignedDate: new Date(),
+            values: getFakeLifeareaValues(),
+        };
+
         // Activities
         this.activities = patient.activities || [];
 
@@ -131,6 +149,7 @@ export class PatientStore implements IPatientStore {
         this.updateCaseReviewQuery = new PromiseQuery<ICaseReview>(undefined, 'updateCaseReview');
         this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
         this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
+        this.updateValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'updateValuesInventory');
 
         makeAutoObservable(this);
     }
@@ -301,6 +320,24 @@ export class PatientStore implements IPatientStore {
         this.runAfterLoad(effect);
     }
 
+    @action.bound
+    public async assignValuesInventory() {
+        const effect = () => {
+            const { registryService } = useServices();
+            const promise = registryService.updateValuesInventory(this.recordId, { assigned: true });
+
+            this.updateValuesInventoryQuery.fromPromise(promise).then((valuesInventory) => {
+                action(() => {
+                    this.valuesInventory.assigned = valuesInventory.assigned;
+                })();
+            });
+        };
+
+        this.runAfterLoad(effect);
+
+        console.log(this.valuesInventory);
+    }
+
     private setPatientData(patient: IPatient) {
         console.log(patient);
 
@@ -333,6 +370,9 @@ export class PatientStore implements IPatientStore {
 
         // Assessments
         this.assessments = patient.assessments ?? this.assessments;
+
+        // Values inventory
+        this.valuesInventory = patient.valuesInventory ?? this.valuesInventory;
 
         // Activities
         this.activities = patient.activities ?? this.activities;

@@ -8,6 +8,7 @@ import {
     IPatientList,
     IPatientProfile,
     ISession,
+    IValuesInventory,
 } from 'src/services/types';
 import { handleDates } from 'src/utils/time';
 
@@ -23,6 +24,7 @@ export interface IRegistryService {
         recordId: string,
         assessmentData: Partial<IAssessmentDataPoint>
     ): Promise<IAssessmentDataPoint>;
+    updateValuesInventory(recordId: string, valuesInventory: Partial<IValuesInventory>): Promise<IValuesInventory>;
     addPatient(patient: Partial<IPatientProfile>): Promise<IPatient>;
 
     // TODO:
@@ -115,6 +117,24 @@ class RegistryService implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return assessmentData;
+        }
+    }
+
+    public async updateValuesInventory(
+        recordId: string,
+        valuesInventory: Partial<IValuesInventory>
+    ): Promise<IValuesInventory> {
+        // Work around since backend doesn't exist
+        try {
+            const response = await this.axiosInstance.put<IValuesInventory, AxiosResponse<IValuesInventory>>(
+                `/patient/${recordId}/values`,
+                valuesInventory
+            );
+            return response.data;
+        } catch (error) {
+            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+            valuesInventory.assignedDate = new Date();
+            return valuesInventory as IValuesInventory;
         }
     }
 
