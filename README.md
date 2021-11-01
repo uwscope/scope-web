@@ -117,7 +117,7 @@ For Python components, requires Python and the Pipenv package manager.
   python -m pipenv --version
   ```
   
-  Depending how a machine manages specific versions of Python, possibilities for accessing Pipenv include:
+  Depending on how a machine manages specific versions of Python, possibilities for accessing Pipenv include:
     
   - On Windows, install a specific version of Python in a known directory.  
     Then use a full path to that installation:

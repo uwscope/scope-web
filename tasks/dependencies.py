@@ -57,7 +57,7 @@ def _pipfile_sync(*, context, target_dir: Path):
 
     with context.cd(target_dir):
         # We also clean so that we don't accidentally have other packages installed,
-        # which would likely cause failure in production where they are missing.
+        # which would likely cause failure in production where those are missing.
 
         context.run(
             command='pipenv clean',
