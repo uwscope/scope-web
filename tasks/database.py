@@ -1,46 +1,89 @@
-# """
-# Tasks for accessing a database.
-# """
-#
-# from invoke import Collection
-# from invoke import task
-# from pathlib import Path
-#
-# from tasks.terminal import spawn_new_terminal
-#
-# CONFIG_KEY = 'server_prod'
-#
-# ns = Collection('database')
-#
-# #
-# # We just want one task ripped out from minikube_helm_instance
-# #
-# # TODO: Refactor instance tasks so this can be less of a hack
-#
-# # if Path('secrets', 'server', 'prod', 'config.yaml').exists():
-# #     ns_instance = aws_infrastructure.tasks.library.minikube_helm_instance.create_tasks(
-# #         config_key=CONFIG_KEY,
-# #         working_dir='.',
-# #         instance_dir=Path('secrets', 'server', 'prod')
-# #     )
-# #
-# #
-# #     @task
-# #     def forward_prod(context):
-# #         """
-# #         Forward the database from our production server, listening on `localhost:8000`.
-# #
-# #         For development purposes, asynchronously spawns a new terminal.
-# #
-# #         Access the database using SSH port forwarding and the server's `private` ingress entrypoint.
-# #         """
-# #
-# #         if spawn_new_terminal(context=context):
-# #             ns_instance.tasks['ssh-port-forward'](context, port=8000)
-# #
-# #
-# #     # Build task collection
-# #     ns_forward = Collection('forward')
-# #     ns_forward.add_task(forward_prod, 'prod')
-# #
-# #     ns.add_collection(ns_forward)
+"""
+Tasks for working directly with the database cluster.
+"""
+
+from aws_infrastructure.tasks.collection import compose_collection
+import aws_infrastructure.tasks.library.documentdb
+import aws_infrastructure.tasks.ssh
+from invoke import Collection
+from invoke import task
+import urllib.parse
+
+from tasks.terminal import spawn_new_terminal
+
+SSH_CONFIG_PATH = './secrets/server/prod/ssh_config.yaml'
+DOCUMENTDB_CONFIG_PATH = './secrets/server/prod/documentdb_config.yaml'
+
+
+@task
+def database_forward(context):
+    """
+    Forward the database cluster, listening on `localhost:5000`.
+
+    Use a fixed port because Studio 3T will save the connection information.
+    """
+
+    if spawn_new_terminal(context):
+        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(SSH_CONFIG_PATH)
+        documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
+
+        with aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=ssh_config) as ssh_client:
+            with aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
+                ssh_client=ssh_client,
+                remote_host=documentdb_config.endpoint,
+                remote_port=documentdb_config.port,
+                local_port=5000,
+            ) as ssh_port_forward:
+                mongodbcompass_connection_string = 'mongodb://{}:{}@{}:{}/?{}'.format(
+                    urllib.parse.quote_plus(documentdb_config.admin_user),
+                    urllib.parse.quote_plus(documentdb_config.admin_password),
+                    'localhost',
+                    ssh_port_forward.local_port,
+                    '&'.join([
+                        'ssl=true',
+                        'sslMethod=UNVALIDATED',
+                        'serverSelectionTimeoutMS=5000',
+                        'connectTimeoutMS=10000',
+                        'authSource=admin',
+                        'authMechanism=SCRAM-SHA-1',
+                    ]),
+                )
+
+                studio3t_connection_string = 'mongodb://{}:{}@{}:{}/?{}'.format(
+                    urllib.parse.quote_plus(documentdb_config.admin_user),
+                    urllib.parse.quote_plus(documentdb_config.admin_password),
+                    'localhost',
+                    ssh_port_forward.local_port,
+                    '&'.join([
+                        'ssl=true',
+                        'sslInvalidHostNameAllowed=true',
+                        'serverSelectionTimeoutMS=5000',
+                        'connectTimeoutMS=10000',
+                        'authSource=admin',
+                        'authMechanism=SCRAM-SHA-1',
+                        '3t.uriVersion=3',
+                        '3t.connection.name={}'.format(
+                            urllib.parse.quote_plus('UWScope Production Cluster')
+                        ),
+                        '3t.alwaysShowAuthDB=true',
+                        '3t.alwaysShowDBFromUserRole=true',
+                        '3t.sslTlsVersion=TLS',
+                        '3t.proxyType=none',
+                    ]),
+                )
+
+                print('')
+                print('MongoDB Compass Connection String:')
+                print(mongodbcompass_connection_string)
+                print('')
+                print('Studio 3T Connection String:')
+                print(studio3t_connection_string)
+                print('')
+
+                ssh_port_forward.serve_forever()
+
+
+# Build task collection
+ns = Collection('database')
+
+ns.add_task(database_forward, 'forward')

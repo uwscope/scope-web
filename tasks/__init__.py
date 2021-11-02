@@ -10,6 +10,13 @@ import tasks.registry
 # Build our task collection
 ns = Collection()
 
+# Compose from database.py
+compose_collection(
+    ns,
+    tasks.database.ns,
+    name='database'
+)
+
 # Compose from dependencies.py
 compose_collection(
     ns,
@@ -25,9 +32,6 @@ ns_prod = Collection('prod')
 
 # Compose from celery.py
 # compose_collection(ns, tasks.celery.ns, name='celery')
-
-# Compose from database.py
-# compose_collection(ns, tasks.database.ns, name='database')
 
 #
 # A server collection in each of development and production
