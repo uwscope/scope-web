@@ -40,6 +40,7 @@ For example:
 ```
 Available tasks:
 
+  database.forward          Forward the database cluster, listening on `localhost:5000`.
   depend.install.all        Install all dependencies.
   depend.install.celery     Install celery dependencies.
   depend.install.flask      Install flask dependencies.
@@ -232,3 +233,24 @@ Runtime secrets are expected in the `secrets` directory.
 - `secrets/server/prod/ssh_config.yaml`
 
   Secret for SSH access to the AWS environment via bastion server.
+
+## Database Access
+
+Contents of the database cluster can be directly inspected using:
+
+- [MongoDB Compass](https://www.mongodb.com/products/compass)
+
+  Free and open source. To establish a connection:
+
+  - Obtain a connection string from Invoke task `database.forward`.
+  - Paste the connection string in a new connection.
+  - Select 'Fill in connection fields individually'.
+  - Select 'More Options'.
+  - Select SSL value 'Unvalidated'.
+
+- [Studio 3T](https://studio3t.com/)
+
+  Offers a non-commercial license. To establish a connection:
+
+  - Obtain a connection string from Invoke task `database.forward`.
+  - Paste the connection string via "From URI..." in a new connection.
