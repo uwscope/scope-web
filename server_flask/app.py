@@ -91,3 +91,14 @@ def create_app():
         }
 
     return app
+
+
+# Instead of using `flask run`, import the app normally, then run it.
+# Did this because `flask run` was eating an ImportError, not giving a useful error message.
+if __name__ == '__main__':
+    app = create_app()
+
+    app.run(
+        host=os.getenv('FLASK_RUN_HOST'),
+        port=os.getenv('FLASK_RUN_PORT'),
+    )
