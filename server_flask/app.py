@@ -73,23 +73,6 @@ def create_app():
         else:
             return "Method not allowed", 405
 
-    @app.route('/status')
-    @as_json
-    def status():
-        ## TODO - consistent method of initiating a backend request that will impose timeouts, retries, anything else
-
-        r = requests.get(
-            urljoin(
-                current_app.config['URI_DATABASE'],
-                ''
-            ),
-            timeout=30
-        )
-
-        return {
-            'couchdb': r.json(),
-        }
-
     return app
 
 
