@@ -73,21 +73,15 @@ def create_app():
         else:
             return "Method not allowed", 405
 
-    @app.route('/status')
-    @as_json
-    def status():
-        ## TODO - consistent method of initiating a backend request that will impose timeouts, retries, anything else
-
-        r = requests.get(
-            urljoin(
-                current_app.config['URI_DATABASE'],
-                ''
-            ),
-            timeout=30
-        )
-
-        return {
-            'couchdb': r.json(),
-        }
-
     return app
+
+
+# Instead of using `flask run`, import the app normally, then run it.
+# Did this because `flask run` was eating an ImportError, not giving a useful error message.
+if __name__ == '__main__':
+    app = create_app()
+
+    app.run(
+        host=os.getenv('FLASK_RUN_HOST'),
+        port=os.getenv('FLASK_RUN_PORT'),
+    )

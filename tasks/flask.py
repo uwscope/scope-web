@@ -36,11 +36,13 @@ def dev_serve(context):
             ):
                 with context.cd(Path(FLASK_DIR)):
                     context.run(
+                        # Instead of using `flask run`, import the app normally, then run it.
+                        # Did this because `flask run` was eating an ImportError, not giving a useful error message.
                         command=' '.join([
                             'pipenv',
                             'run',
-                            'flask',
-                            'run',
+                            'python',
+                            'app.py',
                         ]),
                         env={
                             'FLASK_ENV': 'development',
