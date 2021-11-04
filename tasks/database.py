@@ -2,6 +2,8 @@
 Tasks for working directly with the database cluster.
 """
 
+import json
+import pprint
 import urllib.parse
 from collections import namedtuple
 from pathlib import Path
@@ -243,40 +245,44 @@ def test_user(context):
                 for doc in db.patients.find({}):
                     print(doc)
 
-                return
-                client.demo.createUser(
-                    {
-                        "user": "anant",
-                        "pwd": "mittal",
-                        "roles": [
-                            {"db": "demo", "role": "dbOwner"},
-                        ],
-                    }
+
+@task
+def get_all_db_users(context):
+    """Get all document db databases and their users."""
+
+    if spawn_new_terminal(context):
+        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(SSH_CONFIG_PATH)
+        documentdb_config = (
+            aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(
+                DOCUMENTDB_CONFIG_PATH
+            )
+        )
+
+        with aws_infrastructure.tasks.ssh.SSHClientContextManager(
+            ssh_config=ssh_config
+        ) as ssh_client:
+            with aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
+                ssh_client=ssh_client,
+                remote_host=documentdb_config.endpoint,
+                remote_port=documentdb_config.port,
+                local_port=5000,
+            ) as ssh_port_forward:
+                # Connect to DocumentDB
+                client = MongoClient(
+                    host=["localhost"],
+                    port=ssh_port_forward.local_port,
+                    connect=True,
+                    username=documentdb_config.admin_user,
+                    password=documentdb_config.admin_password,
+                    tls=True,
+                    tlsInsecure=True,
                 )
-                return
 
-                for db_account in DOCUMENTDB_ACCOUNTS:
-                    if db_account.database == "dev":
-                        print("Create database and its user")
-                        print(db_account)
-                        print(type(db_account.database))
-                        db_name = db_account.database
-                        db = client.dev
-                        coll = db.patients
-                        db.createUser(
-                            {
-                                "user": db_account.user,
-                                "pwd": db_account.password,
-                                "roles": [
-                                    {"db": db_name, "role": "readWrite"},
-                                ],
-                            }
-                        )
+                db = client.admin
+                print("Admin DB Users:")
 
-                # Verification
-                print("List of databases")
-                print(client.list_database_names())
-                # ssh_port_forward.serve_forever()
+                pprint.pprint(db.command("usersInfo", 1)["users"])
+                print("")
 
 
 # Build task collection
@@ -285,3 +291,4 @@ ns = Collection("database")
 ns.add_task(database_forward, "forward")
 ns.add_task(database_initialize, "initialize")
 ns.add_task(test_user, "test_user")
+ns.add_task(get_all_db_users, "get_all_db_users")
