@@ -1,8 +1,21 @@
+import ruamel.yaml
+
+# Path is relative to server_flask
+DOCUMENT_DB_CONFIG_PATH = "../secrets/server/dev/documentdb_config.yaml"
+
+
 class Config:
-    SECRET_KEY = 'development'
+    # TODO James: In production SECRET_KEY needs to be consistent across instances
+    SECRET_KEY: str = "development"
 
-    # Paths should not reference `localhost`, but should instead reference `127.0.0.1`.
-    # We have observed name resolution of `localhost` introducing a 2 second delay in development environments.
+    DB_USER: str
+    DB_PASSWORD: str
+    DATABASE: str
 
-    # Database is forwarded with a prefix `/db/` through SSH to port 8000
-    URI_DATABASE = 'http://127.0.0.1:8000/db/'
+    def __init__(self):
+        with open(DOCUMENT_DB_CONFIG_PATH) as file_document_db_config:
+            document_db_client_config = ruamel.yaml.safe_load(file_document_db_config)
+
+        self.DATABASE = document_db_client_config["database"]
+        self.DB_USER = document_db_client_config["admin_user"]
+        self.DB_PASSWORD = document_db_client_config["admin_password"]
