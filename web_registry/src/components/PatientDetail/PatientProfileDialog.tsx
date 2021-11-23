@@ -87,8 +87,6 @@ const emptyProfile = {
     gender: 'Male',
     pronoun: 'He/Him',
     race: 'White',
-    primaryOncologyProvider: '',
-    primaryCareManager: '',
 } as IPatientProfile;
 
 const state = observable<IPatientProfile>(emptyProfile);
@@ -99,7 +97,7 @@ interface IDialogProps {
 }
 
 interface IEditPatientProfileDialogProps extends IDialogProps {
-    patient: IPatientProfile;
+    profile: IPatientProfile;
     onSavePatient: (patient: IPatientProfile) => void;
 }
 
@@ -144,11 +142,11 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
 });
 
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> = observer((props) => {
-    const { patient, open, onClose, onSavePatient } = props;
+    const { profile, open, onClose, onSavePatient } = props;
 
     React.useEffect(
         action(() => {
-            Object.assign(state, patient);
+            Object.assign(state, profile);
         }),
         []
     );

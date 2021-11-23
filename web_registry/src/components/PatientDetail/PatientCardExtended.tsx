@@ -20,10 +20,18 @@ const state = observable<{ open: boolean }>({
 
 export const PatientCardExtended: FunctionComponent = observer((_) => {
     const patient = usePatient();
+    const { profile } = patient;
 
     const onToggleFlag = action((flag: DiscussionFlag, flagged: boolean) => {
-        patient.discussionFlag[flag] = flagged;
-        patient?.updatePatientData(patient);
+        const flags = profile.discussionFlag || {
+            'Flag as safety risk': false,
+            'Flag for discussion': false,
+        };
+        flags[flag] = flagged;
+
+        profile.discussionFlag = flags;
+
+        patient?.updateProfile(profile);
         state.open = false;
     });
 
@@ -31,8 +39,8 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
     const firstSession = sessionCount > 0 ? format(patient.sessions[0].date, 'MM/dd/yyyy') : '--';
     const lastSession = sessionCount > 0 ? format(patient.sessions[sessionCount - 1].date, 'MM/dd/yyyy') : '--';
 
-    const flaggedForDiscussion = patient?.discussionFlag['Flag for discussion'];
-    const flaggedForSafety = patient?.discussionFlag['Flag as safety risk'];
+    const flaggedForDiscussion = !!profile.discussionFlag?.['Flag for discussion'];
+    const flaggedForSafety = !!profile.discussionFlag?.['Flag as safety risk'];
 
     return (
         <Container>

@@ -1,6 +1,6 @@
 import { Button, Divider, LinearProgress, Typography, withTheme } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { differenceInYears, format } from 'date-fns';
+import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -48,21 +48,18 @@ export interface IPatientCardProps {
 export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props) => {
     const { loading } = props;
     const patient = usePatient();
+    const { profile } = patient;
 
     const handleClose = action(() => {
         state.open = false;
     });
 
     const handleOpen = action(() => {
-        if (!!patient) {
-            Object.assign(state, patient);
-        }
-
         state.open = true;
     });
 
     const onSave = action((newPatient: IPatientProfile) => {
-        patient?.updatePatientData(newPatient);
+        patient?.updateProfile(newPatient);
         state.open = false;
     });
 
@@ -85,24 +82,24 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
             </Header>
 
             {loading ? <Loading /> : <Divider />}
-            <LabeledField label="mrn" value={patient.MRN} />
-            <LabeledField label="clinic code" value={patient.clinicCode} />
+            <LabeledField label="mrn" value={profile.MRN} />
+            <LabeledField label="clinic code" value={profile.clinicCode} />
             <br />
-            <LabeledField label="dob" value={format(patient.birthdate, 'MM/dd/yyyy')} />
-            <LabeledField label="age" value={differenceInYears(Date.now(), patient.birthdate)} />
-            <LabeledField label="sex" value={patient.sex} />
-            <LabeledField label="race" value={patient.race} />
-            <LabeledField label="gender" value={patient.gender} />
-            <LabeledField label="pronouns" value={patient.pronoun} />
+            <LabeledField label="dob" value={!!profile.birthdate ? format(profile.birthdate, 'MM/dd/yyyy') : '--'} />
+            <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
+            <LabeledField label="sex" value={profile.sex} />
+            <LabeledField label="race" value={profile.race} />
+            <LabeledField label="gender" value={profile.gender} />
+            <LabeledField label="pronouns" value={profile.pronoun} />
             <br />
 
-            <LabeledField label="primary oncology provider" value={patient.primaryOncologyProvider} />
-            <LabeledField label="primary social worker" value={patient.primaryCareManager} />
-            <LabeledField label="treatment status" value={patient.depressionTreatmentStatus} />
-            <LabeledField label="follow-up schedule" value={patient.followupSchedule} />
+            <LabeledField label="primary oncology provider" value={profile.primaryOncologyProvider?.name || '--'} />
+            <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
+            <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
+            <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
 
             <EditPatientProfileDialog
-                patient={patient}
+                profile={profile}
                 open={state.open}
                 onClose={handleClose}
                 onSavePatient={onSave}

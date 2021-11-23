@@ -18,7 +18,7 @@ import {
     XYPlot,
     YAxis,
 } from 'react-vis';
-import { IAssessmentDataPoint } from 'src/services/types';
+import { AssessmentData } from 'src/services/types';
 import { getAssessmentScore } from 'src/utils/assessment';
 import { useResize } from 'src/utils/hooks';
 import { clearTime } from 'src/utils/time';
@@ -77,8 +77,13 @@ const getColoredSwitch = (color: string) =>
         track: {},
     })(Switch);
 
+export interface IVisDataPoint {
+    recordedDate: Date;
+    pointValues: AssessmentData;
+}
+
 export interface IAssessmentChartProps {
-    data: Array<IAssessmentDataPoint>;
+    data: Array<IVisDataPoint>;
     maxValue: number;
     useTime?: boolean;
 }
@@ -144,7 +149,7 @@ export const AssessmentVis = withTheme(
             return data.map(
                 (d) =>
                     ({
-                        x: d.date.getTime(),
+                        x: d.recordedDate.getTime(),
                         y: d.pointValues[key],
                         name: key,
                     } as Point)
@@ -157,7 +162,7 @@ export const AssessmentVis = withTheme(
             const dataPoints = data.map(
                 (d) =>
                     ({
-                        x: (useTime ? d.date : clearTime(d.date)).getTime(),
+                        x: (useTime ? d.recordedDate : clearTime(d.recordedDate)).getTime(),
                         y: getAssessmentScore(d.pointValues),
                     } as Point)
             );
@@ -207,7 +212,10 @@ export const AssessmentVis = withTheme(
                             {state.hoveredPoint && data[state.hoveredIndex as number] && (
                                 <Crosshair values={[state.hoveredPoint]}>
                                     <CrosshairContainer>
-                                        <div>Date: {format(data[state.hoveredIndex as number].date, 'MM/dd/yyyy')}</div>
+                                        <div>
+                                            Date:{' '}
+                                            {format(data[state.hoveredIndex as number].recordedDate, 'MM/dd/yyyy')}
+                                        </div>
                                         {dataKeys.map((key) => (
                                             <div key={key}>
                                                 {key}: {data[state.hoveredIndex as number].pointValues[key]}

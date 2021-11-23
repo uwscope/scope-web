@@ -1,14 +1,18 @@
 import {
     ActivitySuccessType,
     AssessmentFrequency,
-    BehavioralActivationChecklistItem,
-    BehavioralStrategyChecklistItem,
-    CancerTreatmentRegimen,
+    BAChecklistFlags,
+    BehavioralStrategyChecklistFlags,
+    CancerTreatmentRegimenFlags,
     ClinicCode,
+    ContactType,
     DayOfWeek,
+    DayOfWeekFlags,
     DepressionTreatmentStatus,
-    DiscussionFlag,
+    DiscussionFlags,
+    DueType,
     FollowupSchedule,
+    OtherSpecify,
     PatientGender,
     PatientPronoun,
     PatientRaceEthnicity,
@@ -20,14 +24,21 @@ import {
 
 export type KeyedMap<T> = { [key: string]: T };
 
-export interface IUser {
-    readonly name: string;
-    readonly authToken: string;
+export interface IUser extends IIdentity {
+    authToken: string;
 }
 
-export type BAChecklistFlags = { [item in BehavioralActivationChecklistItem]: boolean };
-export type BehavioralStrategyChecklistFlags = { [item in BehavioralStrategyChecklistItem]: boolean };
-export type ReferralStatusFlags = { [item in Referral]: ReferralStatus };
+export interface IIdentity {
+    identityId: string;
+    name: string;
+}
+
+export interface IReferralStatus {
+    referralType: Referral | OtherSpecify;
+    referralStatus: ReferralStatus;
+}
+
+export type ISessionOrCaseReview = ISession | ICaseReview;
 
 export interface ISession {
     sessionId: string;
@@ -45,8 +56,7 @@ export interface ISession {
     behavioralActivationChecklist: BAChecklistFlags;
 
     // Referrals
-    referralStatus: ReferralStatusFlags;
-    referralOther: string;
+    referrals: IReferralStatus[];
 
     otherRecommendations: string;
     sessionNote: string;
@@ -55,7 +65,7 @@ export interface ISession {
 export interface ICaseReview {
     reviewId: string;
     date: Date;
-    consultingPsychiatrist: string;
+    consultingPsychiatrist: IIdentity;
 
     medicationChange: string;
     behavioralStrategyChange: string;
@@ -65,136 +75,146 @@ export interface ICaseReview {
     reviewNote: string;
 }
 
-export type ISessionOrCaseReview = ISession | ICaseReview;
-
 export interface IAssessment {
-    readonly assessmentId: string;
-    readonly assessmentType: string;
+    assessmentId: string;
+    assessmentName: string;
     frequency: AssessmentFrequency;
     dayOfWeek: DayOfWeek;
-    readonly data: IAssessmentDataPoint[];
-}
-
-export type AssessmentData = KeyedMap<number | undefined>;
-export interface IAssessmentDataPoint {
-    readonly assessmentDataId: string;
-    readonly assessmentType: string; // Redundant, but otherwise, this info needs to be carried some other way.
-    readonly date: Date;
-    readonly pointValues: AssessmentData;
-    readonly comment: string;
-    readonly totalScore: number;
-    readonly patientSubmitted: boolean;
 }
 
 export interface IActivity {
-    readonly activityId: string;
-    readonly activityName: string;
-    readonly moodData: IAssessmentDataPoint[];
+    activityId: string;
+    name: string;
+    value: string;
+    lifeareaId: string;
+    startDate: Date;
+    timeOfDay: number;
+    hasReminder: boolean;
+    reminderTimeOfDay: number;
+    hasRepetition: boolean;
+    repeatDayFlags: DayOfWeekFlags;
+    isActive: boolean;
+    isDeleted: boolean;
 }
 
 export interface IScheduledActivity {
-    id: string;
+    scheduleId: string;
+
     activityId: string;
     activityName: string;
+    dueType: DueType;
     dueDate: Date;
-    reminderDate: Date;
-    completed: boolean;
+    reminder: Date;
+}
+
+export interface IScheduledAssessment {
+    scheduleId: string;
+
+    assessmentId: string;
+    assessmentName: string;
+    dueDate: Date;
+}
+export type AssessmentData = KeyedMap<number | undefined>;
+
+export interface ILog {
+    logId: string;
     recordedDate: Date;
+    comment: string;
+}
+
+export interface IActivityLog extends ILog {
+    scheduleId: string;
+    activityName: string;
+
+    completed: boolean;
     success: ActivitySuccessType;
     alternative: string;
     pleasure: number;
     accomplishment: number;
-    comment: string;
+}
+
+export interface IAssessmentLog extends ILog {
+    scheduleId: string;
+    assessmentId: string; // NEW
+    assessmentName: string;
+
+    completed: boolean;
+    patientSubmitted: boolean; // NEW
+    submittedBy: IIdentity;
+    pointValues: AssessmentData;
+    totalScore: number;
+}
+
+export interface IMoodLog extends ILog {
+    mood: number;
 }
 
 export interface IPatientProfile {
-    recordId: string;
     name: string;
     MRN: string;
-    clinicCode: ClinicCode;
-    birthdate: Date;
-    sex: PatientSex;
-    gender: PatientGender;
-    pronoun: PatientPronoun;
-    race: PatientRaceEthnicity;
-    primaryOncologyProvider: string;
-    primaryCareManager: string;
-    discussionFlag: DiscussionFlags;
-    followupSchedule: FollowupSchedule;
-    depressionTreatmentStatus: DepressionTreatmentStatus;
+    clinicCode?: ClinicCode;
+    birthdate?: Date;
+    sex?: PatientSex;
+    gender?: PatientGender;
+    pronoun?: PatientPronoun;
+    race?: PatientRaceEthnicity;
+    primaryOncologyProvider?: IIdentity;
+    primaryCareManager?: IIdentity;
+    discussionFlag?: DiscussionFlags;
+    followupSchedule?: FollowupSchedule;
+    depressionTreatmentStatus?: DepressionTreatmentStatus;
 }
 
 export interface IClinicalHistory {
-    primaryCancerDiagnosis: string;
-    dateOfCancerDiagnosis: string;
-    currentTreatmentRegimen: CancerTreatmentRegimenFlags;
-    currentTreatmentRegimenOther: string;
-    currentTreatmentRegimenNotes: string;
-    psychDiagnosis: string;
-    pastPsychHistory: string;
-    pastSubstanceUse: string;
-    psychSocialBackground: string;
+    primaryCancerDiagnosis?: string;
+    dateOfCancerDiagnosis?: string;
+    currentTreatmentRegimen?: CancerTreatmentRegimenFlags;
+    currentTreatmentRegimenOther?: string;
+    currentTreatmentRegimenNotes?: string;
+    psychDiagnosis?: string;
+    pastPsychHistory?: string;
+    pastSubstanceUse?: string;
+    psychSocialBackground?: string;
 }
 
-export interface IValuesInventory {
-    assigned: boolean;
-    assignedDate: Date;
-    values: ILifeAreaValue[];
+export interface IContact {
+    contactType: ContactType;
+    name: string;
+    address?: string;
+    phoneNumber?: string;
+    emergencyNumber?: string;
 }
 
 export interface ISafetyPlan {
     assigned: boolean;
     assignedDate: Date;
+    reasonsForLiving?: string;
+    warningSigns?: string[];
+    copingStrategies?: string[];
+    distractions?: (string | IContact)[];
+    supporters?: IContact[];
+    professionalSupporters?: IContact[];
+    urgentServices?: IContact[];
+    safeEnvironment?: string[];
 }
 
-export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
-export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
-
-export interface IPatient extends IPatientProfile, IClinicalHistory {
-    // Sessions
-    readonly sessions: ISession[];
-    readonly caseReviews: ICaseReview[];
-
-    // Assessments
-    readonly assessments: IAssessment[];
-
-    // Values inventory
-    readonly valuesInventory: IValuesInventory;
-
-    // Activities
-    readonly activities: IActivity[];
-
-    // Activity logs
-    readonly scheduledActivities: IScheduledActivity[];
-}
-
-export interface IPatientList {
-    readonly patients: IPatient[];
-}
-
-export interface IAppConfig {
-    assessments: IAssessmentContent[];
-    lifeAreas: ILifeAreaContent[];
-    resources: IResourceContent[];
-}
-
-export interface IAssessmentContent {
-    readonly id: string;
-    readonly name: string;
-    readonly instruction: string;
-    readonly questions: { question: string; id: string }[];
-    readonly options: { text: string; value: number }[];
+export interface IValuesInventory {
+    assigned: boolean;
+    assignedDate: Date;
+    values?: ILifeAreaValue[];
 }
 
 export interface ILifeAreaContent {
-    readonly id: string;
-    readonly name: string;
-    readonly examples: ILifeAreaValue[];
+    id: string;
+    name: string;
+    examples: ILifeAreaValue[];
 }
 
 export interface ILifeAreaValue {
     id: string;
     name: string;
+    dateCreated: Date;
+    dateEdited: Date;
     lifeareaId: string;
     activities: ILifeAreaValueActivity[];
 }
@@ -208,6 +228,53 @@ export interface ILifeAreaValueActivity {
     lifeareaId: string;
     enjoyment?: number;
     importance?: number;
+}
+
+export interface IPatient {
+    identity: IIdentity;
+
+    // Patient info
+    profile: IPatientProfile;
+    clinicalHistory: IClinicalHistory;
+
+    // Values inventory and safety plan
+    valuesInventory: IValuesInventory;
+    safetyPlan: ISafetyPlan;
+
+    // Sessions
+    sessions: ISession[];
+    caseReviews: ICaseReview[];
+
+    // Assessments
+    assessments: IAssessment[];
+    scheduledAssessments: IScheduledAssessment[];
+    assessmentLogs: IAssessmentLog[];
+
+    // Activities
+    activities: IActivity[];
+    scheduledActivities: IScheduledActivity[];
+    activityLogs: IActivityLog[];
+
+    // Mood logs
+    moodLogs: IMoodLog[];
+}
+
+export interface IPatientList {
+    patients: IPatient[];
+}
+
+export interface IAppConfig {
+    assessments: IAssessmentContent[];
+    lifeAreas: ILifeAreaContent[];
+    resources: IResourceContent[];
+}
+
+export interface IAssessmentContent {
+    id: string;
+    name: string;
+    instruction: string;
+    questions: { question: string; id: string }[];
+    options: { text: string; value: number }[];
 }
 
 export interface IResourceContent {

@@ -2,7 +2,7 @@ import { action, computed, IObservableArray, makeAutoObservable, observable } fr
 import { AllClinicCode, ClinicCode } from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IPatient, IPatientProfile } from 'src/services/types';
+import { IPatient } from 'src/services/types';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains, unique } from 'src/utils/array';
 
@@ -16,7 +16,7 @@ export interface IPatientsStore {
     readonly state: PromiseState;
 
     getPatients: () => void;
-    addPatient: (patient: IPatientProfile) => void;
+    addPatient: (patient: Partial<IPatient>) => void;
 
     filterCareManager: (careManager: string) => void;
     filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
@@ -45,7 +45,11 @@ export class PatientsStore implements IPatientsStore {
 
     @computed
     public get careManagers() {
-        const cm = unique(this.patients.map((p) => p.primaryCareManager)).sort();
+        const cm = unique(
+            this.patients
+                .filter((p) => !!p.profile && !!p.profile.primaryCareManager && !!p.profile.primaryCareManager.name)
+                .map((p) => p.profile?.primaryCareManager?.name as string)
+        ).sort();
         cm.push(this.AllCareManagers);
         return cm;
     }
@@ -57,7 +61,11 @@ export class PatientsStore implements IPatientsStore {
 
     @computed
     public get clinics() {
-        const cc = unique(this.patients.map((p) => p.clinicCode)).sort();
+        const cc = unique(
+            this.patients
+                .filter((p) => !!p.profile && !!p.profile.clinicCode)
+                .map((p) => p.profile.clinicCode as ClinicCode)
+        ).sort();
         return cc;
     }
 
@@ -75,7 +83,7 @@ export class PatientsStore implements IPatientsStore {
     }
 
     @action.bound
-    public async addPatient(patient: IPatientProfile) {
+    public async addPatient(patient: Partial<IPatient>) {
         const { registryService } = useServices();
         const promise = registryService.addPatient(patient);
         const newPatient = await this.addPatientQuery.fromPromise(promise);
@@ -107,11 +115,13 @@ export class PatientsStore implements IPatientsStore {
     public get filteredPatients() {
         var filteredPatients = this.patients.map((p) => p);
         if (this.filteredCareManager != this.AllCareManagers) {
-            filteredPatients = filteredPatients.filter((p) => p.primaryCareManager == this.filteredCareManager);
+            filteredPatients = filteredPatients.filter(
+                (p) => p.profile?.primaryCareManager?.name == this.filteredCareManager
+            );
         }
 
         if (this.filteredClinic != 'All Clinics') {
-            filteredPatients = filteredPatients.filter((p) => p.clinicCode == this.filteredClinic);
+            filteredPatients = filteredPatients.filter((p) => p.profile?.clinicCode == this.filteredClinic);
         }
 
         return filteredPatients;

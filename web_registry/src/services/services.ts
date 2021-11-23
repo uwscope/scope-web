@@ -1,10 +1,10 @@
-import _ from 'lodash';
+import { trim } from 'lodash';
 import { getAuthServiceInstance, IAuthService } from 'src/services/authService';
 import { getAppServiceInstance, IAppService } from 'src/services/configService';
 import { getRegistryServiceInstance, IRegistryService } from 'src/services/registryService';
 
 const combineUrl = (baseUrl: string, path: string) => {
-    return [baseUrl, path].map((s) => _.trim(s, '/')).join('/');
+    return [baseUrl, path].map((s) => trim(s, '/')).join('/');
 };
 
 const registryService = getRegistryServiceInstance(__API__);

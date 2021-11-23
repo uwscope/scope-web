@@ -24,6 +24,7 @@ class AuthService implements IAuthService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             const user = {
+                identityId: 'luke-skywalker-id',
                 name: 'Luke Skywalker',
                 authToken: 'my token',
             } as IUser;

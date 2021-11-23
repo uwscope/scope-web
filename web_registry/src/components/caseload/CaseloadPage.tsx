@@ -80,8 +80,8 @@ export const CaseloadPage: FunctionComponent = observer(() => {
         state.open = true;
     });
 
-    const onSave = action((newPatient: IPatientProfile) => {
-        rootStore.patientsStore.addPatient(newPatient);
+    const onSave = action((newProfile: IPatientProfile) => {
+        rootStore.patientsStore.addPatient({ profile: newProfile });
         state.open = false;
     });
 

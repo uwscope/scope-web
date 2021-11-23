@@ -67,7 +67,7 @@ export const referralValues = [
     'Spiritual Care',
     'Palliative Care',
 ] as const;
-export type Referral = typeof referralValues[number] | OtherSpecify;
+export type Referral = typeof referralValues[number];
 
 export const referralStatusValues = ['Not Referred', 'Pending', 'Active', 'Completed'] as const;
 export type ReferralStatus = typeof referralStatusValues[number];
@@ -144,5 +144,30 @@ export const daysOfWeekValues = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', '
 
 export type DayOfWeek = typeof daysOfWeekValues[number];
 
+export enum DayOfWeekFlags {
+    None = 0,
+    Sunday = 1 << 0,
+    Monday = 1 << 1,
+    Tuesday = 1 << 2,
+    Wednesday = 1 << 3,
+    Thursday = 1 << 4,
+    Friday = 1 << 5,
+    Saturday = 1 << 6,
+    All = ~(~0 << 7),
+}
+
 export const activitySuccessTypeValues = ['Yes', 'SomethingElse', 'No'];
 export type ActivitySuccessType = typeof activitySuccessTypeValues[number];
+
+export const contactTypeValues = ['Person', 'Service'];
+export type ContactType = typeof contactTypeValues[number];
+
+export type BAChecklistFlags = { [item in BehavioralActivationChecklistItem]: boolean };
+export type BehavioralStrategyChecklistFlags = { [item in BehavioralStrategyChecklistItem]: boolean };
+export type ReferralStatusFlags = { [item in Referral]: ReferralStatus };
+
+export type CancerTreatmentRegimenFlags = { [item in CancerTreatmentRegimen]: boolean };
+export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
+
+export const dueTypeValues = ['Exact', 'ChunkOfDay', 'Day', 'Week'];
+export type DueType = typeof dueTypeValues[number];

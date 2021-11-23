@@ -3,15 +3,12 @@ import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import { IAppConfig, IUser } from 'src/services/types';
-import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 import { IPatientStore } from 'src/stores/PatientStore';
-import { IUserStore, UserStore } from 'src/stores/UserStore';
 
 export interface IRootStore {
     // Stores
-    userStore: IUserStore;
-    authStore: IAuthStore;
+    currentUserIdentity?: IUser;
     patientsStore: IPatientsStore;
 
     // App metadata
@@ -32,8 +29,7 @@ export interface IRootStore {
 
 export class RootStore implements IRootStore {
     // Stores
-    public userStore: IUserStore;
-    public authStore: IAuthStore;
+    public currentUserIdentity?: IUser;
     public patientsStore: IPatientsStore;
 
     // App metadata
@@ -44,8 +40,6 @@ export class RootStore implements IRootStore {
     private readonly configQuery: PromiseQuery<IAppConfig>;
 
     constructor() {
-        this.userStore = new UserStore();
-        this.authStore = new AuthStore();
         this.patientsStore = new PatientsStore();
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
@@ -90,17 +84,14 @@ export class RootStore implements IRootStore {
         const user = await this.loginQuery.fromPromise(promise);
 
         if (!!user) {
-            this.userStore.updateUser(user.name);
-            this.authStore.setAuthToken(user.authToken);
+            this.currentUserIdentity = user;
         }
     }
 
     @action.bound
     public logout() {
         this.loginQuery.state = 'Unknown';
-
-        this.userStore.updateUser('');
-        this.authStore.setAuthToken('');
+        this.currentUserIdentity = undefined;
     }
 
     @action.bound
