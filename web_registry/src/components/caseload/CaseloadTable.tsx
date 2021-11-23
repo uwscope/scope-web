@@ -1,6 +1,6 @@
 import { withTheme } from '@material-ui/core';
 import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@material-ui/x-grid';
-import { addWeeks, differenceInWeeks, format } from 'date-fns';
+import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { Table } from 'src/components/common/Table';
@@ -63,7 +63,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
     const onRowClick = (param: GridRowParams) => {
         if (!!onPatientClick) {
             const mrn = param.getValue(param.id, 'MRN');
-            const found = patients.find((p) => p.MRN == mrn);
+            const found = patients.find((p) => p.profile.MRN == mrn);
 
             if (!!found) {
                 onPatientClick(found.recordId);
@@ -152,17 +152,24 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
     const data = patients.map((p) => {
         const initialSessionDate = p.sessions?.length > 0 ? p.sessions[0].date : null;
         const recentSessionDate = p.sessions?.length > 0 ? p.sessions[p.sessions.length - 1].date : null;
-        const phq9 = p.assessments?.find((a) => a.assessmentType == 'PHQ-9')?.data;
-        const gad7 = p.assessments?.find((a) => a.assessmentType == 'GAD-7')?.data;
+        const phq9 = p.assessmentLogs
+            ?.filter((a) => a.assessmentId == 'phq-9')
+            .slice()
+            .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate));
+        const gad7 = p.assessmentLogs
+            ?.filter((a) => a.assessmentId == 'gad-7')
+            .slice()
+            .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate));
 
         return {
             ...p,
-            id: p.MRN,
+            id: p.profile.MRN,
             initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yyyy') : NA,
             recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yyyy') : NA,
-            nextSessionDue: recentSessionDate
-                ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.followupSchedule)), 'MM/dd/yyyy')
-                : NA,
+            nextSessionDue:
+                recentSessionDate && p.profile.followupSchedule
+                    ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)), 'MM/dd/yyyy')
+                    : NA,
             totalSessions: p.sessions ? p.sessions.length : 0,
             treatmentWeeks:
                 initialSessionDate && recentSessionDate
@@ -179,7 +186,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
                               100
                       )
                     : NA,
-            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].date, 'MM/dd/yyyy') : NA,
+            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
 
             initialGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[0].pointValues) : NA,
             lastGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[gad7.length - 1].pointValues) : NA,
@@ -192,7 +199,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
                               100
                       )
                     : NA,
-            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].date, 'MM/dd/yyyy') : NA,
+            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
         };
     });
 

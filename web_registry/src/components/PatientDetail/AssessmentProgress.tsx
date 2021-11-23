@@ -23,19 +23,19 @@ import Questionnaire from 'src/components/common/Questionnaire';
 import { Table } from 'src/components/common/Table';
 import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { AssessmentData, IAssessment, IAssessmentDataPoint } from 'src/services/types';
-import { usePatient } from 'src/stores/stores';
+import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'src/services/types';
+import { usePatient, useStores } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const ScoreCell = withTheme(
-    styled.div<{ score: number; assessmentType: string }>((props) => ({
+    styled.div<{ score: number; assessmentId: string }>((props) => ({
         width: 'calc(100% + 16px)',
         marginLeft: -8,
         marginRight: -8,
         padding: props.theme.spacing(1),
         backgroundColor:
-            props.theme.customPalette.scoreColors[getAssessmentScoreColorName(props.assessmentType, props.score)],
+            props.theme.customPalette.scoreColors[getAssessmentScoreColorName(props.assessmentId, props.score)],
     }))
 );
 
@@ -45,132 +45,159 @@ export interface IAssessmentProgressProps {
     options: { text: string; value: number }[];
     maxValue: number;
     assessment: IAssessment;
+    assessmentLogs: IAssessmentLog[];
     canAdd?: boolean;
     useTime?: boolean;
 }
 
 export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = observer((props) => {
+    const { currentUserIdentity } = useStores();
     const currentPatient = usePatient();
 
-    const { instruction, questions, options, assessment, maxValue, canAdd, useTime } = props;
+    const { instruction, questions, options, assessment, assessmentLogs, maxValue, canAdd, useTime } = props;
 
-    const state = useLocalObservable<{
-        openEdit: boolean;
+    const configureState = useLocalObservable<{
         openConfigure: boolean;
-        assessmentDataId: string | undefined;
-        patientSubmitted: boolean;
         frequency: AssessmentFrequency;
         dayOfWeek: DayOfWeek;
-        dataId: string | undefined;
-        data: AssessmentData;
-        date: Date;
-        totalOnly: boolean;
-        total: number;
-        comment: string;
     }>(() => ({
-        openEdit: false,
         openConfigure: false,
-        assessmentDataId: undefined,
-        patientSubmitted: false,
         frequency: 'Every 2 weeks',
         dayOfWeek: 'Monday',
-        dataId: undefined,
-        data: {},
-        date: new Date(),
+    }));
+
+    const logState = useLocalObservable<{
+        openEdit: boolean;
+        totalOnly: boolean;
+        scheduleId: string;
+        logId: string;
+        recordedDate: Date;
+        pointValues: AssessmentData;
+        totalScore: number;
+        comment: string;
+        patientSubmitted: boolean;
+    }>(() => ({
+        openEdit: false,
         totalOnly: false,
-        total: 0,
+        scheduleId: '',
+        logId: '',
+        recordedDate: new Date(),
         comment: '',
+        pointValues: {},
+        totalScore: -1,
+        patientSubmitted: false,
     }));
 
     const handleClose = action(() => {
-        state.openEdit = false;
-        state.openConfigure = false;
+        logState.openEdit = false;
+        configureState.openConfigure = false;
     });
 
     const handleAddRecord = action(() => {
-        state.assessmentDataId = undefined;
-        state.patientSubmitted = false;
-        state.openEdit = true;
-        state.date = new Date();
-        state.dataId = undefined;
-        state.data = {};
-        state.total = 0;
-        state.totalOnly = false;
-        state.comment = '';
+        logState.totalOnly = false;
+
+        logState.scheduleId = '';
+        logState.logId = '';
+        logState.comment = '';
+        logState.pointValues = {};
+        logState.totalScore = -1;
     });
 
     const handleConfigure = action(() => {
-        state.openConfigure = true;
-        state.frequency = assessment.frequency || 'None';
-        state.dayOfWeek = assessment.dayOfWeek || 'Monday';
+        configureState.openConfigure = true;
+        configureState.frequency = assessment.frequency || 'None';
+        configureState.dayOfWeek = assessment.dayOfWeek || 'Monday';
     });
 
     const onSaveEditRecord = action(() => {
-        const { data, date, dataId, total, comment } = state;
-        currentPatient.updateAssessmentRecord({
-            assessmentDataId: dataId,
-            assessmentType: assessment.assessmentType,
-            date,
-            pointValues: data,
-            comment: comment,
-            totalScore: total,
-        });
-        state.openEdit = false;
+        const { scheduleId, logId, recordedDate, comment, pointValues, totalScore } = logState;
+
+        if (!!logId) {
+            currentPatient.updateAssessmentLog({
+                logId,
+                recordedDate,
+                comment,
+
+                scheduleId,
+                assessmentId: assessment.assessmentId,
+                assessmentName: assessment.assessmentName,
+                completed: true,
+                patientSubmitted: false,
+                submittedBy: currentUserIdentity as IIdentity,
+                pointValues,
+                totalScore,
+            });
+        } else {
+            currentPatient.addAssessmentLog({
+                logId: '',
+                recordedDate,
+                comment,
+
+                scheduleId: 'on-demand',
+                assessmentId: assessment.assessmentId,
+                assessmentName: assessment.assessmentName,
+                completed: true,
+                patientSubmitted: false,
+                submittedBy: currentUserIdentity as IIdentity,
+                pointValues,
+                totalScore,
+            });
+        }
+        logState.openEdit = false;
     });
 
     const onSaveConfigure = action(() => {
-        const { frequency, dayOfWeek } = state;
+        const { frequency, dayOfWeek } = configureState;
         var newAssessment = { ...assessment } as Partial<IAssessment>;
         newAssessment.frequency = frequency;
         newAssessment.dayOfWeek = dayOfWeek;
         currentPatient.updateAssessment(newAssessment);
-        state.openConfigure = false;
+        configureState.openConfigure = false;
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
-        state.data[qid] = value;
+        logState.pointValues[qid] = value;
     });
 
     const onDateChange = action((date: Date) => {
-        state.date = date;
+        logState.recordedDate = date;
     });
 
     const onTotalChange = action((value: number) => {
-        state.total = value;
+        logState.totalScore = value;
     });
 
     const onToggleTotalOnly = action((value: boolean) => {
-        state.totalOnly = value;
+        logState.totalOnly = value;
     });
 
     const onFrequencyChange = action((freq: AssessmentFrequency) => {
-        state.frequency = freq;
+        configureState.frequency = freq;
     });
 
     const onDayOfWeekChange = action((dow: DayOfWeek) => {
-        state.dayOfWeek = dow;
+        configureState.dayOfWeek = dow;
     });
 
     const onCommentChange = action((comment: string) => {
-        state.comment = comment;
+        logState.comment = comment;
     });
 
-    const selectedValues = questions.map((q) => state.data[q.id]);
-    const saveDisabled = state.totalOnly
-        ? state.total == undefined
+    const selectedValues = questions.map((q) => logState.pointValues[q.id]);
+    const saveDisabled = logState.totalOnly
+        ? logState.totalScore == undefined
         : selectedValues.findIndex((v) => v == undefined) >= 0;
-
-    const assessmentData = (assessment.data as IAssessmentDataPoint[])?.slice();
 
     const questionIds = questions.map((q) => q.id);
 
-    const tableData = assessmentData
-        ?.sort((a, b) => compareDesc(a.date, b.date))
+    const tableData = assessmentLogs
+        .slice()
+        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate))
         .map((a) => {
             return {
-                date: format(a.date, 'MM/dd/yyyy'),
+                date: format(a.recordedDate, 'MM/dd/yyyy'),
                 total: getAssessmentScore(a.pointValues) || a.totalScore,
-                id: a.assessmentDataId,
+                id: a.logId,
                 ...a.pointValues,
                 comment: a.comment,
             };
@@ -179,7 +206,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const recurrence = `${assessment.frequency} on ${assessment.dayOfWeek}s` || 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
-        <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentType}>
+        <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentId}>
             {props.value}
         </ScoreCell>
     );
@@ -214,27 +241,27 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         },
     ];
 
+    ////////// CONTINUE FROM HERE /////////////
     const onRowClick = action((param: GridRowParams) => {
         const id = param.getValue(param.id, 'id') as string;
-        const data = assessmentData.find((a) => a.assessmentDataId == id);
+        const data = assessmentLogs.find((a) => a.logId == id);
 
         if (!!data) {
-            state.assessmentDataId = data.assessmentDataId;
-            state.patientSubmitted = data.patientSubmitted;
-            state.openEdit = true;
-            state.date = data.date;
-            state.dataId = data.assessmentDataId;
-            Object.assign(state.data, data.pointValues);
-            state.total = data.totalScore;
-            state.totalOnly = !!data.totalScore;
-            state.comment = data.comment;
+            logState.openEdit = true;
+            logState.totalOnly = data.totalScore >= 0;
+            logState.scheduleId = data.scheduleId;
+            logState.logId = data.logId;
+            logState.recordedDate = data.recordedDate;
+            Object.assign(logState.pointValues, data.pointValues);
+            logState.totalScore = data.totalScore;
+            logState.comment = data.comment;
         }
     });
 
     return (
         <ActionPanel
-            id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={assessment.assessmentType}
+            id={assessment.assessmentId}
+            title={assessment.assessmentName}
             inlineTitle={recurrence}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={
@@ -260,7 +287,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                       ]
             }>
             <Grid container spacing={2} alignItems="stretch">
-                {assessment.assessmentType != 'Mood Logging' && !!assessmentData && assessmentData.length > 0 && (
+                {assessment.assessmentName != 'Mood Logging' && assessmentLogs.length > 0 && (
                     <Table
                         rows={tableData}
                         columns={columns.map((c) => ({
@@ -277,49 +304,49 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         isRowSelectable={(_) => false}
                     />
                 )}
-                {!!assessmentData && assessmentData.length > 0 && (
+                {assessmentLogs.length > 0 && (
                     <Grid item xs={12}>
                         <AssessmentVis
-                            data={assessmentData?.sort((a, b) => compareAsc(a.date, b.date))}
+                            data={assessmentLogs.slice().sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))}
                             maxValue={maxValue}
                             useTime={useTime}
                         />
                     </Grid>
                 )}
-                {(!assessmentData || assessmentData.length == 0) && (
+                {assessmentLogs.length == 0 && (
                     <Grid item xs={12}>
-                        <Typography>{`There are no ${assessment.assessmentType} scores submitted for this patient`}</Typography>
+                        <Typography>{`There are no ${assessment.assessmentName} scores submitted for this patient`}</Typography>
                     </Grid>
                 )}
             </Grid>
 
-            <Dialog open={state.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
+            <Dialog open={logState.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
                 <DialogTitle>
-                    {state.patientSubmitted
-                        ? `Patient submitted ${assessment.assessmentType} record`
-                        : state.assessmentDataId
-                        ? `Edit ${assessment.assessmentType} record`
-                        : `Add ${assessment.assessmentType} record`}
+                    {logState.patientSubmitted
+                        ? `Patient submitted ${assessment.assessmentName} record`
+                        : !!logState.logId
+                        ? `Edit ${assessment.assessmentName} record`
+                        : `Add ${assessment.assessmentName} record`}
                 </DialogTitle>
                 <DialogContent>
                     <Questionnaire
-                        readonly={state.patientSubmitted}
+                        readonly={logState.patientSubmitted}
                         questions={questions}
                         options={options}
                         selectedValues={selectedValues}
-                        selectedDate={state.date}
+                        selectedDate={logState.recordedDate}
                         instruction={instruction}
                         onSelect={onQuestionSelect}
                         onDateChange={onDateChange}
                         onTotalChange={onTotalChange}
                         onToggleTotalOnly={onToggleTotalOnly}
-                        totalOnly={state.totalOnly}
-                        totalScore={state.total}
-                        comment={state.comment}
+                        totalOnly={logState.totalOnly}
+                        totalScore={logState.totalScore}
+                        comment={logState.comment}
                         onCommentChange={onCommentChange}
                     />
                 </DialogContent>
-                {state.patientSubmitted ? (
+                {logState.patientSubmitted ? (
                     <DialogActions>
                         <Button onClick={handleClose} color="primary">
                             {getString('patient_progress_assessment_dialog_close_button')}
@@ -336,14 +363,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     </DialogActions>
                 )}
             </Dialog>
-            <Dialog open={state.openConfigure} onClose={handleClose}>
+            <Dialog open={configureState.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}
                             label={getString('patient_progress_assessment_dialog_configure_frequency_label')}
-                            value={state.frequency}
+                            value={configureState.frequency}
                             options={assessmentFrequencyValues}
                             xs={12}
                             sm={12}
@@ -352,7 +379,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         <GridDropdownField
                             editable={true}
                             label={getString('patient_progress_assessment_dialog_configure_dayofweek_label')}
-                            value={state.dayOfWeek}
+                            value={configureState.dayOfWeek}
                             options={daysOfWeekValues}
                             xs={12}
                             sm={12}

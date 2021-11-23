@@ -1,9 +1,8 @@
-import { addDays, addHours } from 'date-fns';
+import { addDays } from 'date-fns';
 import { flatten, random } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
-import { activitySuccessTypeValues } from 'src/services/enums';
 import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'src/services/types';
-import { getRandomBoolean, getRandomInteger, getRandomItem } from 'src/utils/random';
+import { getRandomInteger } from 'src/utils/random';
 
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -110,18 +109,19 @@ export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number
             return [...Array(itemCount).keys()].map(
                 () =>
                     ({
-                        id: (date.getTime() + random(10000)).toString(),
+                        scheduleId: (date.getTime() + random(10000)).toString(),
                         activityId: (date.getTime() + random(10000)).toString(),
                         activityName: lorem.generateWords(random(2, 5)),
+                        dueType: 'Day',
                         dueDate: date,
-                        reminderDate: date,
-                        completed: getRandomBoolean(),
-                        recordedDate: addHours(date, getRandomInteger(3, 72)),
-                        success: getRandomItem(activitySuccessTypeValues),
-                        alternative: lorem.generateWords(random(2, 5)),
-                        pleasure: getRandomInteger(1, 11),
-                        accomplishment: getRandomInteger(1, 11),
-                        comment: lorem.generateWords(random(2, 10)),
+                        reminder: date,
+                        // completed: getRandomBoolean(),
+                        // recordedDate: addHours(date, getRandomInteger(3, 72)),
+                        // success: getRandomItem(activitySuccessTypeValues),
+                        // alternative: lorem.generateWords(random(2, 5)),
+                        // pleasure: getRandomInteger(1, 11),
+                        // accomplishment: getRandomInteger(1, 11),
+                        // comment: lorem.generateWords(random(2, 10)),
                     } as IScheduledActivity)
             );
         })

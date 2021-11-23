@@ -9,9 +9,9 @@ import CaseloadTable from 'src/components/caseload/CaseloadTable';
 import { Table } from 'src/components/common/Table';
 import { CaseReviewEntryType, SessionType } from 'src/services/enums';
 import {
-    IAssessment,
-    IAssessmentDataPoint,
+    IAssessmentLog,
     ICaseReview,
+    IReferralStatus,
     ISession,
     ISessionOrCaseReview,
     isSession,
@@ -93,13 +93,13 @@ interface ISessionTableData {
 
 export interface ISessionReviewTableProps {
     sessionOrReviews: ReadonlyArray<ISessionOrCaseReview>;
-    assessments: ReadonlyArray<IAssessment>;
+    assessmentLogs: ReadonlyArray<IAssessmentLog>;
     onSessionClick?: (sessionId: string) => void;
     onReviewClick?: (reviewId: string) => void;
 }
 
 export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = observer((props) => {
-    const { sessionOrReviews, assessments, onSessionClick, onReviewClick } = props;
+    const { sessionOrReviews, assessmentLogs, onSessionClick, onReviewClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
         const id = param.getValue(param.id, 'id') as string;
@@ -196,17 +196,17 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         },
     ];
 
-    const phq9 = assessments
-        ?.find((a) => a.assessmentType == 'PHQ-9')
-        ?.data?.slice()
-        .sort((a, b) => compareDesc(a.date, b.date));
-    const gad7 = assessments
-        ?.find((a) => a.assessmentType == 'GAD-7')
-        ?.data?.slice()
-        .sort((a, b) => compareDesc(a.date, b.date));
+    const phq9 = assessmentLogs
+        ?.filter((a) => a.assessmentId == 'phq-9')
+        ?.slice()
+        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+    const gad7 = assessmentLogs
+        ?.filter((a) => a.assessmentId == 'gad-7')
+        ?.slice()
+        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
 
-    const getLastAvailableAssessment = (assessmentData: IAssessmentDataPoint[] | undefined, date: Date) => {
-        var dataPoint = assessmentData?.find((p) => compareAsc(p.date, date) >= 0);
+    const getLastAvailableAssessment = (assessmentLogs: IAssessmentLog[] | undefined, date: Date) => {
+        var dataPoint = assessmentLogs?.find((p) => compareAsc(p.recordedDate, date) >= 0);
 
         if (!!dataPoint) {
             return getAssessmentScore(dataPoint.pointValues);
@@ -226,6 +226,10 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         return concatValues;
     };
 
+    const generateReferralText = (referrals: IReferralStatus[]) => {
+        return referrals.map((ref) => ref.referralType).join('\n');
+    };
+
     const getSessionData = (session: ISession): ISessionTableData => ({
         id: session.sessionId,
         date: `${format(session.date, 'MM/dd')}\n${format(session.date, 'yyyy')}`,
@@ -236,7 +240,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         gad7: getLastAvailableAssessment(gad7, session.date),
         medications: session.medicationChange,
         behavioralStrategies: generateFlagText(session.behavioralStrategyChecklist, session.behavioralStrategyOther),
-        referrals: generateFlagText(session.referralStatus, session.referralOther),
+        referrals: generateReferralText(session.referrals),
         otherRecommendations: session.otherRecommendations,
         note: session.sessionNote,
     });

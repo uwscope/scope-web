@@ -11,17 +11,18 @@ import { GridDropdownField } from 'src/components/common/GridField';
 import { Table } from 'src/components/common/Table';
 import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { IAssessment } from 'src/services/types';
+import { IAssessment, IAssessmentLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export interface IMedicationProgressProps {
     assessment: IAssessment;
+    assessmentLogs: IAssessmentLog[];
 }
 
 export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = observer((props) => {
     const currentPatient = usePatient();
 
-    const { assessment } = props;
+    const { assessment, assessmentLogs } = props;
 
     const state = useLocalObservable<{
         openConfigure: boolean;
@@ -60,16 +61,16 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         state.dayOfWeek = dow;
     });
 
-    const sortedLogs = assessment.data?.slice().sort((a, b) => compareDesc(a.date, b.date));
+    const sortedLogs = assessmentLogs?.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
 
     const tableData = sortedLogs?.map((a) => {
         return {
-            date: format(a.date, 'MM/dd/yyyy'),
+            date: format(a.recordedDate, 'MM/dd/yyyy'),
             adherence:
                 a.pointValues['Adherence'] == 1
                     ? getString('patient_progress_medication_adherence_yes')
                     : getString('patient_progress_medication_adherence_no'),
-            id: a.assessmentDataId,
+            id: a.logId,
             comment: a.comment,
         };
     });
@@ -100,8 +101,8 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     return (
         <ActionPanel
-            id={assessment.assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={assessment.assessmentType}
+            id={assessment.assessmentId}
+            title={assessment.assessmentName}
             inlineTitle={recurrence}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[

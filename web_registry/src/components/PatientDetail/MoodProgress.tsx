@@ -7,28 +7,27 @@ import ActionPanel from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
-import { IAssessmentDataPoint } from 'src/services/types';
+import { IAssessment, IMoodLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
-import { getAssessmentScore } from 'src/utils/assessment';
 
 export interface IMoodProgressProps {
-    assessmentType: string;
+    assessment: IAssessment;
     maxValue: number;
-    moodLogs: IAssessmentDataPoint[];
+    moodLogs: IMoodLog[];
 }
 
 export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
     const currentPatient = usePatient();
 
-    const { moodLogs, assessmentType, maxValue } = props;
+    const { moodLogs, assessment, maxValue } = props;
 
-    const sortedMoodLogs = moodLogs?.slice().sort((a, b) => compareDesc(a.date, b.date));
+    const sortedMoodLogs = moodLogs?.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
 
     const tableData = sortedMoodLogs?.map((a) => {
         return {
-            date: format(a.date, 'MM/dd/yyyy'),
-            rating: getAssessmentScore(a.pointValues),
-            id: a.assessmentDataId,
+            date: format(a.recordedDate, 'MM/dd/yyyy'),
+            rating: a.mood,
+            id: a.logId,
             comment: a.comment,
         };
     });
@@ -57,8 +56,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
 
     return (
         <ActionPanel
-            id={assessmentType.replace('-', '').replace(' ', '_').toLocaleLowerCase()}
-            title={assessmentType}
+            id={assessment.assessmentId}
+            title={assessment.assessmentName}
             loading={currentPatient?.state == 'Pending'}>
             <Grid container spacing={2} alignItems="stretch">
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
@@ -79,7 +78,14 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                 )}
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
                     <Grid item xs={12}>
-                        <AssessmentVis data={sortedMoodLogs} maxValue={maxValue} useTime={true} />
+                        <AssessmentVis
+                            data={sortedMoodLogs.map((log) => ({
+                                recordedDate: log.recordedDate,
+                                pointValues: { Mood: log.mood },
+                            }))}
+                            maxValue={maxValue}
+                            useTime={true}
+                        />
                     </Grid>
                 )}
                 {(!sortedMoodLogs || sortedMoodLogs.length == 0) && (

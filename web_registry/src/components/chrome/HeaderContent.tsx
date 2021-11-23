@@ -72,7 +72,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
                         <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
                     </Menu>
                     <Button color="inherit" onClick={(e) => handleClickName(e)}>
-                        {rootStore.userStore.name}
+                        {rootStore.currentUserIdentity?.name}
                     </Button>
                 </div>
             );

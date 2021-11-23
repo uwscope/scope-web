@@ -20,7 +20,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     const lifeareaMap = Object.assign({}, ...lifeAreas.map((la) => ({ [la.id]: la.name }))) as KeyedMap<string>;
 
     const activities = values
-        .map((v) => {
+        ?.map((v) => {
             return v.activities.map((a) => {
                 return {
                     id: a.id,

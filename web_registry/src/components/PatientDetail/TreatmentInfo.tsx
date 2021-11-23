@@ -1,21 +1,24 @@
 import { Grid } from '@material-ui/core';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
-import { BehavioralStrategyChecklistItem, Referral } from 'src/services/enums';
-import { BehavioralStrategyChecklistFlags } from 'src/services/types';
+import { BehavioralStrategyChecklistFlags, BehavioralStrategyChecklistItem } from 'src/services/enums';
 import { usePatient } from 'src/stores/stores';
 import { getLatestScore } from 'src/utils/assessment';
 
 export const TreatmentInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
-    const latestPhQ = currentPatient?.assessments.find((a) => a.assessmentType == 'PHQ-9');
-    const latestPhqScore = !!latestPhQ ? getLatestScore(latestPhQ) : -1;
-    const latestGAD = currentPatient?.assessments.find((a) => a.assessmentType == 'GAD-7');
-    const latestGadScore = !!latestGAD ? getLatestScore(latestGAD) : -1;
+    const sortedAssessmentLogs = currentPatient?.assessmentLogs
+        .slice()
+        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+
+    const latestPhqLog = sortedAssessmentLogs.filter((a) => a.assessmentId == 'phq-9')[0];
+    const latestPhqScore = getLatestScore(currentPatient?.assessmentLogs, 'phq-9');
+    const latestGadLog = sortedAssessmentLogs.filter((a) => a.assessmentId == 'gad-7')[0];
+    const latestGadScore = getLatestScore(currentPatient?.assessmentLogs, 'gad-7');
 
     const latestSessionDate = currentPatient.latestSession?.date;
     const currentMedications = currentPatient.latestSession?.currentMedications;
@@ -46,17 +49,9 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
 
     const behavioralStrategiesUsed = behavioralStrategiesUsedList.join('\n');
 
-    const latestReferralsFlags = currentPatient.latestSession?.referralStatus;
-    const referralsList: string[] = [];
-    if (!!latestReferralsFlags) {
-        Object.keys(latestReferralsFlags).forEach((k) => {
-            if (latestReferralsFlags[k as Referral] != 'Not Referred') {
-                referralsList.push(`${k} - ${latestReferralsFlags[k as Referral]}`);
-            }
-        });
-    }
-
-    const referrals = referralsList.join('\n');
+    const referrals = currentPatient.latestSession?.referrals
+        .map((ref) => `${ref.referralType} - ${ref.referralStatus}`)
+        .join('\n');
 
     return (
         <ActionPanel id="treatment" title="Ongoing Treatment Information">
@@ -66,9 +61,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     label="Latest PHQ-9 Score"
                     value={latestPhqScore > 0 ? latestPhqScore : 'No data'}
                     helperText={
-                        !!latestPhQ && latestPhQ.data.length > 0
-                            ? `Updated: ${format(latestPhQ.data[0].date, 'MM/dd/yyyy')}`
-                            : undefined
+                        !!latestPhqLog ? `Updated: ${format(latestPhqLog.recordedDate, 'MM/dd/yyyy')}` : undefined
                     }
                 />
                 <GridTextField
@@ -76,9 +69,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     label="Latest GAD-7 Score"
                     value={latestGadScore > 0 ? latestGadScore : 'No data'}
                     helperText={
-                        !!latestGAD && latestGAD.data.length > 0
-                            ? `Updated: ${format(latestGAD.data[0].date, 'MM/dd/yyyy')}`
-                            : undefined
+                        !!latestGadLog ? `Updated: ${format(latestGadLog.recordedDate, 'MM/dd/yyyy')}` : undefined
                     }
                 />
                 <GridTextField

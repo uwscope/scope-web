@@ -16,24 +16,27 @@ export const ProgressInformation: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
     const validAssessments = assessments.reduce(
-        (prev, curr) => ({ ...prev, [curr.name]: curr }),
+        (prev, curr) => ({ ...prev, [curr.id]: curr }),
         {}
     ) as KeyedMap<IAssessmentContent>;
-    const validAssessmentNames = Object.keys(validAssessments);
+    const validAssessmentIds = Object.keys(validAssessments);
 
-    const getProgress = (assessmentName: string) => {
-        const assessmentContent = validAssessments[assessmentName];
+    const getProgress = (assessmentId: string) => {
+        const assessmentContent = validAssessments[assessmentId];
         const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
-        const assessmentData = currentPatient?.assessments.find((a) => a.assessmentType == assessmentName);
+        const assessment = currentPatient?.assessments.find((a) => a.assessmentId == assessmentId);
 
-        if (!!assessmentData) {
-            switch (assessmentName) {
-                case 'PHQ-9':
-                case 'GAD-7':
+        const assessmentLogs = currentPatient?.assessmentLogs.filter((l) => l.assessmentId == assessmentId);
+
+        if (!!assessment) {
+            switch (assessmentId) {
+                case 'phq-9':
+                case 'gad-7':
                     return (
-                        <Grid item xs={12} sm={12} key={assessmentName}>
+                        <Grid item xs={12} sm={12} key={assessmentId}>
                             <AssessmentProgress
-                                assessment={assessmentData}
+                                assessment={assessment}
+                                assessmentLogs={assessmentLogs}
                                 instruction={assessmentContent.instruction}
                                 questions={assessmentContent.questions}
                                 options={assessmentContent.options}
@@ -42,20 +45,20 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                             />
                         </Grid>
                     );
-                case 'Mood Logging':
+                case 'medication':
                     return (
-                        <Grid item xs={12} sm={12} key={assessmentName}>
-                            <MoodProgress
-                                assessmentType={assessmentName}
-                                maxValue={assessmentMax}
-                                moodLogs={assessmentData?.data || []}
-                            />
+                        <Grid item xs={12} sm={12} key={assessmentId}>
+                            <MedicationProgress assessment={assessment} assessmentLogs={assessmentLogs} />
                         </Grid>
                     );
-                case 'Medication Tracking':
+                case 'mood':
                     return (
-                        <Grid item xs={12} sm={12} key={assessmentName}>
-                            <MedicationProgress assessment={assessmentData} />
+                        <Grid item xs={12} sm={12} key={assessmentId}>
+                            <MoodProgress
+                                assessment={assessment}
+                                maxValue={assessmentMax}
+                                moodLogs={currentPatient?.moodLogs || []}
+                            />
                         </Grid>
                     );
             }
@@ -64,7 +67,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
 
     return (
         <Grid container spacing={3} alignItems="stretch" direction="row">
-            {validAssessmentNames.map(getProgress)}
+            {validAssessmentIds.map(getProgress)}
             <Grid item xs={12} sm={12}>
                 <ActivityProgress />
             </Grid>

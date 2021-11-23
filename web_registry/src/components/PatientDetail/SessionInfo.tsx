@@ -10,18 +10,18 @@ import {
     GridDropdownField,
     GridMultiOptionsField,
     GridMultiSelectField,
-    GridTextField
+    GridTextField,
 } from 'src/components/common/GridField';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
 import {
     behavioralActivationChecklistValues,
     behavioralStrategyChecklistValues,
     EntryType,
+    ReferralStatusFlags,
     referralStatusValues,
-    referralValues,
-    sessionTypeValues
+    sessionTypeValues,
 } from 'src/services/enums';
-import { ICaseReview, ISession, ISessionOrCaseReview } from 'src/services/types';
+import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 const defaultSession: ISession = {
@@ -51,16 +51,9 @@ const defaultSession: ISession = {
         'Managing avoidance behaviors': false,
         'Problem-solving': false,
     },
-    referralStatus: {
-        Psychiatry: 'Not Referred',
-        Psychology: 'Not Referred',
-        'Patient Navigation': 'Not Referred',
-        'Integrative Medicine': 'Not Referred',
-        'Spiritual Care': 'Not Referred',
-        'Palliative Care': 'Not Referred',
-        Other: 'Not Referred',
-    },
-    referralOther: '',
+
+    referrals: [],
+
     otherRecommendations: '',
     sessionNote: '',
 };
@@ -68,13 +61,20 @@ const defaultSession: ISession = {
 const defaultReview: ICaseReview = {
     reviewId: 'new',
     date: new Date(),
-    consultingPsychiatrist: '',
+    consultingPsychiatrist: { identityId: '', name: '' },
     medicationChange: '',
     behavioralStrategyChange: '',
     referralsChange: '',
     otherRecommendations: '',
     reviewNote: '',
 };
+
+// { referralType: 'Psychiatry', referralStatus: 'Not Referred'},
+// { referralType: 'Psychology', referralStatus: 'Not Referred'},
+// { referralType: 'Patient Navigation', referralStatus: 'Not Referred'},
+// { referralType: 'Integrative Medicine', referralStatus: 'Not Referred'},
+// { referralType: 'Spiritual Care', referralStatus: 'Not Referred'},
+// { referralType: 'Palliative Care', referralStatus: 'Not Referred'},
 
 const state = observable<{
     open: boolean;
@@ -83,6 +83,8 @@ const state = observable<{
     entryType: EntryType;
     session: ISession;
     review: ICaseReview;
+    referralStatusFlags: ReferralStatusFlags;
+    otherReferrals: IReferralStatus[];
 }>({
     open: false,
     isNew: false,
@@ -90,6 +92,15 @@ const state = observable<{
     session: defaultSession,
     review: defaultReview,
     entryType: 'Session',
+    referralStatusFlags: {
+        Psychiatry: 'Not Referred',
+        Psychology: 'Not Referred',
+        'Patient Navigation': 'Not Referred',
+        'Integrative Medicine': 'Not Referred',
+        'Spiritual Care': 'Not Referred',
+        'Palliative Care': 'Not Referred',
+    },
+    otherReferrals: [],
 });
 
 const SessionEdit: FunctionComponent = observer(() => {
@@ -162,9 +173,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 label="Referrals"
-                flags={state.session.referralStatus}
-                other={state.session.referralOther}
-                flagOrder={[...referralValues, 'Other']}
+                flags={state.referralStatusFlags}
                 options={referralStatusValues}
                 notOption="Not Referred"
                 onChange={(flags) => onValueChange('referralStatus', flags)}
@@ -211,7 +220,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
             <GridTextField
                 editable={true}
                 label="Consulting Psychiatrist"
-                value={state.review.consultingPsychiatrist}
+                value={state.review.consultingPsychiatrist.name}
                 onChange={(text) => onValueChange('consultingPsychiatrist', text)}
             />
             <GridTextField
@@ -289,14 +298,29 @@ export const SessionInfo: FunctionComponent = observer(() => {
         // Copy over current medications and referral status from the latest session
         if (!!currentPatient.latestSession) {
             state.session.currentMedications = currentPatient.latestSession.currentMedications;
-            state.session.referralOther = currentPatient.latestSession.referralOther;
-            state.session.referralStatus['Psychiatry'] = currentPatient.latestSession.referralStatus['Psychiatry'];
-            state.session.referralStatus['Psychology'] = currentPatient.latestSession.referralStatus['Psychology'];
-            state.session.referralStatus['Patient Navigation'] = currentPatient.latestSession.referralStatus['Patient Navigation'];
-            state.session.referralStatus['Integrative Medicine'] = currentPatient.latestSession.referralStatus['Integrative Medicine'];
-            state.session.referralStatus['Spiritual Care'] = currentPatient.latestSession.referralStatus['Spiritual Care'];
-            state.session.referralStatus['Palliative Care'] = currentPatient.latestSession.referralStatus['Palliative Care'];
-            state.session.referralStatus['Other'] = currentPatient.latestSession.referralStatus['Other'];
+            state.session.referrals = currentPatient.latestSession.referrals;
+
+            state.referralStatusFlags = {
+                Psychiatry: 'Not Referred',
+                Psychology: 'Not Referred',
+                'Patient Navigation': 'Not Referred',
+                'Integrative Medicine': 'Not Referred',
+                'Spiritual Care': 'Not Referred',
+                'Palliative Care': 'Not Referred',
+            };
+
+            var sessionReferralFlags = {} as any;
+            const otherReferrals: IReferralStatus[] = [];
+            state.session.referrals.forEach((ref) => {
+                if (ref.referralType != 'Other') {
+                    sessionReferralFlags[ref.referralType] = ref.referralStatus;
+                } else {
+                    otherReferrals.push(ref);
+                }
+            });
+
+            Object.assign(state.referralStatusFlags, sessionReferralFlags);
+            state.otherReferrals = otherReferrals;
         }
     });
 
@@ -350,7 +374,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
             ]}>
             <SessionReviewTable
                 sessionOrReviews={sortedSessionOrReviews}
-                assessments={currentPatient.assessments}
+                assessmentLogs={currentPatient.assessmentLogs}
                 onReviewClick={handleEditReview}
                 onSessionClick={handleEditSession}
             />

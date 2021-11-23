@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@material-ui/core';
 import { GridColDef } from '@material-ui/x-grid';
-import { format, isBefore } from 'date-fns';
+import { compareAsc, format, isBefore } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -8,15 +8,27 @@ import ActionPanel from 'src/components/common/ActionPanel';
 import { Table } from 'src/components/common/Table';
 import { ActivitySuccessType } from 'src/services/enums';
 import { getString } from 'src/services/strings';
+import { IActivityLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export const ActivityProgress: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
 
+    const logMap = new Map<string, IActivityLog>();
+
+    currentPatient.activityLogs
+        ?.slice()
+        .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))
+        .forEach((log) => logMap.set(log.scheduleId, log));
+
     const logs = currentPatient.scheduledActivities
         ?.slice()
         .filter((a) => isBefore(a.dueDate, new Date()))
-        .sort((a, b) => compareDesc(a.dueDate, b.dueDate));
+        .sort((a, b) => compareDesc(a.dueDate, b.dueDate))
+        .map((scheduledActivity) => ({
+            ...scheduledActivity,
+            ...logMap.get(scheduledActivity.scheduleId),
+        }));
 
     const getCompleted = (success: ActivitySuccessType) => {
         switch (success) {
@@ -31,11 +43,11 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const tableData = logs?.map((log) => {
         return {
-            id: log.id,
+            id: log.scheduleId,
             name: log.activityName,
             dueDate: format(log.dueDate, 'MM/dd/yyyy'),
             recordedDate: log.completed && log.recordedDate ? format(log.recordedDate, 'MM/dd/yyyy') : '--',
-            completed: log.completed ? getCompleted(log.success) : '--',
+            completed: log.completed && log.success ? getCompleted(log.success) : '--',
             pleasure: log.completed ? log.pleasure : '--',
             accomplishment: log.completed ? log.accomplishment : '--',
             comment: log.completed ? log.comment : '--',

@@ -1,73 +1,75 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, when } from 'mobx';
-import {
-    ClinicCode,
-    DepressionTreatmentStatus,
-    FollowupSchedule,
-    PatientGender,
-    PatientPronoun,
-    PatientRaceEthnicity,
-    PatientSex,
-} from 'src/services/enums';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import {
-    CancerTreatmentRegimenFlags,
-    DiscussionFlags,
     IActivity,
+    IActivityLog,
     IAssessment,
-    IAssessmentDataPoint,
+    IAssessmentLog,
     ICaseReview,
+    IClinicalHistory,
+    IIdentity,
+    IMoodLog,
     IPatient,
+    IPatientProfile,
+    ISafetyPlan,
     IScheduledActivity,
+    IScheduledAssessment,
     ISession,
     IValuesInventory,
 } from 'src/services/types';
-import { getFakeLifeareaValues, getFakeScheduledActivities } from 'src/utils/fake';
+import { getFakeLifeareaValues } from 'src/utils/fake';
 
 export interface IPatientStore extends IPatient {
+    readonly recordId: string;
     readonly name: string;
     readonly age: number;
     readonly state: PromiseState;
 
     readonly latestSession: ISession | undefined;
 
-    getPatientData: () => void;
-    updatePatientData: (patient: Partial<IPatient>) => void;
-    updateSession: (session: Partial<ISession>) => void;
-    updateCaseReview: (caseReview: Partial<ICaseReview>) => void;
-    updateAssessment: (assessment: Partial<IAssessment>) => void;
-    updateAssessmentRecord: (assessmentData: Partial<IAssessmentDataPoint>) => void;
-    assignValuesInventory: () => void;
+    getPatientData(): void;
+
+    updateProfile(profile: Partial<IPatientProfile>): void;
+    updateClinicalHistory(history: Partial<IClinicalHistory>): void;
+
+    assignValuesInventory(): void;
+    assignSafetyPlan(): void;
+
+    addSession(session: Partial<ISession>): void;
+    updateSession(session: Partial<ISession>): void;
+
+    addCaseReview(caseReview: Partial<ICaseReview>): void;
+    updateCaseReview(caseReview: Partial<ICaseReview>): void;
+
+    updateAssessment(assessment: Partial<IAssessment>): void;
+
+    addAssessmentLog(assessmentLog: IAssessmentLog): void;
+    updateAssessmentLog(assessmentLog: IAssessmentLog): void;
 }
 
 export class PatientStore implements IPatientStore {
-    // IPatientProfile
-    public recordId: string;
-    public name: string;
-    public MRN: string;
-    public clinicCode: ClinicCode;
-    public depressionTreatmentStatus: DepressionTreatmentStatus;
-    public birthdate: Date;
-    public sex: PatientSex;
-    public gender: PatientGender;
-    public pronoun: PatientPronoun;
-    public race: PatientRaceEthnicity;
-    public primaryOncologyProvider: string;
-    public primaryCareManager: string;
-    public discussionFlag: DiscussionFlags;
-    public followupSchedule: FollowupSchedule;
+    public identity: IIdentity;
 
-    // Clinical History and Diagnosis
-    public primaryCancerDiagnosis: string;
-    public dateOfCancerDiagnosis: string;
-    public currentTreatmentRegimen: CancerTreatmentRegimenFlags;
-    public currentTreatmentRegimenOther: string;
-    public currentTreatmentRegimenNotes: string;
-    public psychDiagnosis: string;
-    public pastPsychHistory: string;
-    public pastSubstanceUse: string;
-    public psychSocialBackground: string;
+    // Patient info
+    public profile: IPatientProfile = {
+        name: '',
+        MRN: '',
+    };
+
+    public clinicalHistory: IClinicalHistory = {};
+
+    // Values inventory and safety plan
+    public valuesInventory: IValuesInventory = {
+        assigned: false,
+        assignedDate: new Date(),
+    };
+
+    public safetyPlan: ISafetyPlan = {
+        assigned: false,
+        assignedDate: new Date(),
+    };
 
     // Sessions
     public sessions: ISession[] = [];
@@ -75,87 +77,70 @@ export class PatientStore implements IPatientStore {
 
     // Assessments
     public assessments: IAssessment[] = [];
-
-    // Values inventory
-    public valuesInventory: IValuesInventory = {
-        assigned: false,
-        assignedDate: new Date(),
-        values: [],
-    };
+    public scheduledAssessments: IScheduledAssessment[] = [];
+    public assessmentLogs: IAssessmentLog[] = [];
 
     // Activities
     public activities: IActivity[] = [];
-
-    // Activity Logs
     public scheduledActivities: IScheduledActivity[] = [];
+    public activityLogs: IActivityLog[] = [];
+
+    // Mood logs
+    public moodLogs: IMoodLog[] = [];
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
-    private readonly updateSessionQuery: PromiseQuery<ISession>;
-    private readonly updateCaseReviewQuery: PromiseQuery<ICaseReview>;
-    private readonly updateAssessmentQuery: PromiseQuery<IAssessment>;
-    private readonly updateAssessmentRecordQuery: PromiseQuery<IAssessmentDataPoint>;
-    private readonly updateValuesInventoryQuery: PromiseQuery<IValuesInventory>;
 
     constructor(patient: IPatient) {
-        // IPatientProfile
-        this.recordId = patient.recordId;
-        this.name = patient.name;
-        this.MRN = patient.MRN;
-        this.clinicCode = patient.clinicCode;
-        this.depressionTreatmentStatus = patient.depressionTreatmentStatus;
-        this.birthdate = patient.birthdate;
-        this.sex = patient.sex;
-        this.gender = patient.gender;
-        this.pronoun = patient.pronoun;
-        this.race = patient.race;
-        this.primaryOncologyProvider = patient.primaryOncologyProvider;
-        this.primaryCareManager = patient.primaryCareManager;
-        this.discussionFlag = patient.discussionFlag;
-        this.followupSchedule = patient.followupSchedule;
+        console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
+        console.assert(!!patient.identity.name, 'Attempted to create a patient object without a name');
+        console.assert(!!patient.identity.identityId, 'Attempted to create a patient object without an id');
 
-        // Clinical History
-        this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis;
-        this.dateOfCancerDiagnosis = patient.dateOfCancerDiagnosis;
-        this.pastPsychHistory = patient.pastPsychHistory;
-        this.pastSubstanceUse = patient.pastSubstanceUse;
-        this.currentTreatmentRegimen = patient.currentTreatmentRegimen;
-        this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther;
-        this.currentTreatmentRegimenNotes = patient.currentTreatmentRegimenNotes;
-        this.psychDiagnosis = patient.psychDiagnosis;
-        this.psychSocialBackground = patient.psychSocialBackground;
+        this.identity = patient.identity;
 
-        // Sessions
-        this.sessions = patient.sessions || [];
-        this.caseReviews = patient.caseReviews || [];
+        // Patient info
+        this.profile = patient.profile || this.profile;
+        this.clinicalHistory = patient.clinicalHistory || this.clinicalHistory;
 
-        // Assessments
-        this.assessments = patient.assessments || [];
-
-        // Values inventory
-        this.valuesInventory = {
+        // Values inventory and safety plan
+        this.valuesInventory = patient.valuesInventory || {
             assigned: false,
             assignedDate: new Date(),
             values: getFakeLifeareaValues(),
         };
 
+        this.safetyPlan = patient.safetyPlan || this.safetyPlan;
+
+        // Sessions
+        this.sessions = patient.sessions || this.sessions;
+        this.caseReviews = patient.caseReviews || this.caseReviews;
+
+        // Assessments
+        this.assessments = patient.assessments || this.assessments;
+        this.scheduledAssessments = patient.scheduledAssessments || this.scheduledAssessments;
+        this.assessmentLogs = patient.assessmentLogs || this.assessmentLogs;
+
         // Activities
-        this.activities = patient.activities || [];
+        this.activities = patient.activities || this.activities;
+        this.scheduledActivities = patient.scheduledActivities || this.scheduledActivities;
+        this.activityLogs = patient.activityLogs || this.activityLogs;
 
-        // Activity Logs
-        this.scheduledActivities = patient.scheduledActivities || getFakeScheduledActivities(20, 2);
+        this.moodLogs = patient.moodLogs || this.moodLogs;
 
-        this.loadPatientDataQuery = new PromiseQuery(patient, 'loadPatientData');
-        this.updateSessionQuery = new PromiseQuery<ISession>(undefined, 'updateSession');
-        this.updateCaseReviewQuery = new PromiseQuery<ICaseReview>(undefined, 'updateCaseReview');
-        this.updateAssessmentQuery = new PromiseQuery<IAssessment>(undefined, 'updateAssessment');
-        this.updateAssessmentRecordQuery = new PromiseQuery<IAssessmentDataPoint>(undefined, 'updateAssessmentRecord');
-        this.updateValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'updateValuesInventory');
+        this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData');
 
         makeAutoObservable(this);
     }
 
+    @computed get recordId() {
+        return this.identity.identityId;
+    }
+
+    @computed get name() {
+        return this.profile.name || this.identity.name;
+    }
+
     @computed get age() {
-        return differenceInYears(new Date(), this.birthdate);
+        return !!this.profile.birthdate ? differenceInYears(new Date(), this.profile.birthdate) : -1;
     }
 
     @computed get state() {
@@ -181,204 +166,172 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async updatePatientData(patient: Partial<IPatient>) {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updatePatientData(this.recordId, patient);
-            this.loadPatientDataQuery.fromPromise(promise).then((patientData) => {
-                action(() => {
-                    this.setPatientData(patientData);
-                })();
-            });
-        };
+    public async updateProfile(patientProfile: Partial<IPatientProfile>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientProfile(this.recordId, patientProfile);
 
-        this.runAfterLoad(effect);
+        this.runPromiseAfterLoad(promise);
     }
 
     @action.bound
-    public async updateSession(session: Partial<ISession>) {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updatePatientSession(this.recordId, session);
-            this.updateSessionQuery.fromPromise(promise).then((session) => {
-                action(() => {
-                    if (!!session.sessionId) {
-                        const existing = this.sessions.find((s) => s.sessionId == session.sessionId);
+    public async updateClinicalHistory(clinicalHistory: Partial<IClinicalHistory>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientClinicalHistory(this.recordId, clinicalHistory);
 
-                        if (!!existing) {
-                            Object.assign(existing, session);
-                            return;
-                        }
-                    }
-
-                    // TODO: server should return appropriate id
-                    const addedSession = {
-                        ...session,
-                        sessionId: session.sessionId || `session-${this.sessions.length}`,
-                    };
-
-                    this.sessions.push(addedSession);
-                })();
-            });
-        };
-
-        this.runAfterLoad(effect);
-    }
-
-    @action.bound
-    public async updateCaseReview(caseReview: Partial<ICaseReview>) {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updatePatientCaseReview(this.recordId, caseReview);
-            this.updateCaseReviewQuery.fromPromise(promise).then((caseReview) => {
-                action(() => {
-                    if (!!caseReview.reviewNote) {
-                        const existing = this.caseReviews.find((s) => s.reviewId == caseReview.reviewId);
-
-                        if (!!existing) {
-                            Object.assign(existing, caseReview);
-                            return;
-                        }
-                    }
-
-                    // TODO: server should return appropriate id
-                    const addedCaseReview = {
-                        ...caseReview,
-                        reviewId: caseReview.reviewId || `review-${this.caseReviews.length}`,
-                    };
-
-                    this.caseReviews.push(addedCaseReview);
-                })();
-            });
-        };
-
-        this.runAfterLoad(effect);
-    }
-
-    @action.bound
-    public async updateAssessment(assessment: Partial<IAssessment>) {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updatePatientAssessment(this.recordId, assessment);
-            this.updateAssessmentQuery.fromPromise(promise).then((assessment) => {
-                action(() => {
-                    if (!!assessment.assessmentId) {
-                        const existing = this.assessments.find((a) => a.assessmentId == assessment.assessmentId);
-
-                        if (!!existing) {
-                            Object.assign(existing, assessment);
-                            return;
-                        }
-                    }
-
-                    // TODO: server should return appropriate id
-                    const addedAssessment = {
-                        ...assessment,
-                        assessmentId: assessment.assessmentId || assessment.assessmentType,
-                    };
-
-                    this.assessments.push(addedAssessment);
-                })();
-            });
-        };
-
-        this.runAfterLoad(effect);
-    }
-
-    @action.bound
-    public updateAssessmentRecord(assessmentData: Partial<IAssessmentDataPoint>) {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updatePatientAssessmentRecord(this.recordId, assessmentData);
-            this.updateAssessmentRecordQuery.fromPromise(promise).then((data) => {
-                action(() => {
-                    const assessment = this.assessments.find((a) => a.assessmentType == data.assessmentType);
-
-                    if (!!assessment) {
-                        if (!!data.assessmentDataId) {
-                            const existing = assessment.data.find((d) => d.assessmentDataId == data.assessmentDataId);
-
-                            if (!!existing) {
-                                Object.assign(existing, data);
-                                return;
-                            }
-                        }
-
-                        // TODO: server should return appropriate id
-                        const addedAssessmentData = {
-                            ...data,
-                            assessmentDataId:
-                                data.assessmentDataId || `${data.assessmentType}-${assessment?.data.length}`,
-                        };
-
-                        assessment.data.push(addedAssessmentData);
-                    }
-                })();
-            });
-        };
-
-        this.runAfterLoad(effect);
+        this.runPromiseAfterLoad(promise);
     }
 
     @action.bound
     public async assignValuesInventory() {
-        const effect = () => {
-            const { registryService } = useServices();
-            const promise = registryService.updateValuesInventory(this.recordId, { assigned: true });
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientValuesInventory(this.recordId, {
+            assigned: true,
+            assignedDate: new Date(),
+        });
 
-            this.updateValuesInventoryQuery.fromPromise(promise).then((valuesInventory) => {
-                action(() => {
-                    this.valuesInventory.assigned = valuesInventory.assigned;
-                })();
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async assignSafetyPlan() {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientSafetyPlan(this.recordId, {
+            assigned: true,
+            assignedDate: new Date(),
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async addSession(session: Partial<ISession>) {
+        const { registryService } = useServices();
+        const promise = registryService.addPatientSession(this.recordId, session).then((session) => {
+            // TODO: server should return appropriate id
+            const addedSession = {
+                ...session,
+                sessionId: `session-${this.sessions.length}`,
+            };
+
+            this.sessions.push(addedSession);
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async updateSession(session: Partial<ISession>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientSession(this.recordId, session).then((session) => {
+            const existing = this.sessions.find((s) => s.sessionId == session.sessionId);
+            console.assert(!!existing, 'Session not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, session);
+                return this;
+            }
+
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async addCaseReview(caseReview: Partial<ICaseReview>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientCaseReview(this.recordId, caseReview).then((caseReview) => {
+            // TODO: server should return appropriate id
+            const addedReview = {
+                ...caseReview,
+                reviewId: `caseReview-${this.caseReviews.length}`,
+            };
+
+            this.caseReviews.push(addedReview);
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async updateCaseReview(caseReview: Partial<ICaseReview>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientCaseReview(this.recordId, caseReview).then((caseReview) => {
+            const existing = this.caseReviews.find((c) => c.reviewId == caseReview.reviewId);
+            console.assert(!!existing, 'Case review not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, caseReview);
+                return this;
+            }
+
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async updateAssessment(assessment: Partial<IAssessment>) {
+        const { registryService } = useServices();
+        const promise = registryService.updatePatientAssessment(this.recordId, assessment).then((assessment) => {
+            const existing = this.assessments.find((a) => a.assessmentId == assessment.assessmentId);
+            console.assert(!!existing, 'Assessment not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, assessment);
+                return this;
+            }
+
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public addAssessmentLog(assessmentLog: IAssessmentLog) {
+        const { registryService } = useServices();
+        const promise = registryService.addPatientAssessmentLog(this.recordId, assessmentLog).then((assessmentLog) => {
+            // TODO: server should return appropriate id
+            const addedAssessmentLog = {
+                ...assessmentLog,
+                logId: `assessmentlog-${this.assessmentLogs.length}`,
+            };
+
+            this.assessmentLogs.push(addedAssessmentLog);
+            return this;
+        });
+
+        this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public updateAssessmentLog(assessmentLog: IAssessmentLog) {
+        const { registryService } = useServices();
+        const promise = registryService
+            .updatePatientAssessmentLog(this.recordId, assessmentLog)
+            .then((assessmentLog) => {
+                const existing = this.assessmentLogs.find((a) => a.logId == assessmentLog.logId);
+                console.assert(!!existing, 'Assessment log not found when expected');
+
+                if (!!existing) {
+                    Object.assign(existing, assessmentLog);
+                    return this;
+                }
+
+                return this;
             });
-        };
 
-        this.runAfterLoad(effect);
-
-        console.log(this.valuesInventory);
+        this.runPromiseAfterLoad(promise);
     }
 
     private setPatientData(patient: IPatient) {
         console.log(patient);
 
         Object.assign(this, patient);
-
-        // Medical information
-        this.recordId = patient.recordId ?? this.recordId;
-        this.MRN = patient.MRN ?? this.MRN;
-        this.name = patient.name;
-        this.birthdate = patient.birthdate ?? this.birthdate;
-        this.sex = patient.sex ?? this.sex;
-        this.clinicCode = patient.clinicCode ?? this.clinicCode;
-
-        // Clinical History
-        this.primaryCancerDiagnosis = patient.primaryCancerDiagnosis ?? this.primaryCancerDiagnosis;
-        this.pastPsychHistory = patient.pastPsychHistory ?? this.pastPsychHistory;
-        this.pastSubstanceUse = patient.pastSubstanceUse ?? this.pastSubstanceUse;
-
-        // Treatment information
-        this.primaryCareManager = patient.primaryCareManager ?? this.primaryCareManager;
-        this.currentTreatmentRegimen = patient.currentTreatmentRegimen ?? this.currentTreatmentRegimen;
-        this.currentTreatmentRegimenOther = patient.currentTreatmentRegimenOther ?? this.currentTreatmentRegimenOther;
-        this.depressionTreatmentStatus = patient.depressionTreatmentStatus ?? this.depressionTreatmentStatus;
-        this.psychDiagnosis = patient.psychDiagnosis ?? this.psychDiagnosis;
-        this.discussionFlag = patient.discussionFlag ?? this.discussionFlag;
-        this.followupSchedule = patient.followupSchedule ?? this.followupSchedule;
-
-        // Sessions
-        this.sessions = patient.sessions ?? this.sessions;
-
-        // Assessments
-        this.assessments = patient.assessments ?? this.assessments;
-
-        // Values inventory
-        this.valuesInventory = patient.valuesInventory ?? this.valuesInventory;
-
-        // Activities
-        this.activities = patient.activities ?? this.activities;
-
-        // Activity logs
-        this.scheduledActivities = patient.scheduledActivities ?? this.scheduledActivities;
     }
 
     private runAfterLoad(fn: () => void) {
@@ -389,5 +342,17 @@ export class PatientStore implements IPatientStore {
         } else {
             fn();
         }
+    }
+
+    private runPromiseAfterLoad(promise: Promise<IPatient>) {
+        const effect = () => {
+            this.loadPatientDataQuery.fromPromise(promise).then((patientData) => {
+                action(() => {
+                    this.setPatientData(patientData);
+                })();
+            });
+        };
+
+        this.runAfterLoad(effect);
     }
 }

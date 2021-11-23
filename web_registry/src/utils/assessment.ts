@@ -1,6 +1,6 @@
 import { compareDesc } from 'date-fns';
-import { AssessmentData, IAssessment, IAssessmentContent } from 'src/services/types';
-import { sum } from 'src/utils/array';
+import { sum } from 'lodash';
+import { AssessmentData, IAssessment, IAssessmentContent, IAssessmentLog } from 'src/services/types';
 
 const getOrder = (assessment: string) => {
     switch (assessment) {
@@ -14,7 +14,7 @@ const getOrder = (assessment: string) => {
 };
 
 export const sortAssessment = (a: IAssessment, b: IAssessment) => {
-    return getOrder(a.assessmentType) - getOrder(b.assessmentType);
+    return getOrder(a.assessmentId) - getOrder(b.assessmentId);
 };
 
 export const sortAssessmentContent = (a: IAssessmentContent, b: IAssessmentContent) => {
@@ -25,9 +25,10 @@ export const getAssessmentScore = (pointValues: AssessmentData) => {
     return sum(Object.keys(pointValues).map((k) => pointValues[k] || 0));
 };
 
-export const getLatestScore = (assessment: IAssessment) => {
-    if (assessment?.data && assessment.data.length > 0) {
-        const sortedAssessments = assessment.data.slice().sort((a, b) => compareDesc(a.date, b.date));
+export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentName: string) => {
+    const filteredAssessmentLogs = assessmentLogs.filter((a) => a.assessmentName == assessmentName);
+    if (filteredAssessmentLogs.length > 0) {
+        const sortedAssessments = assessmentLogs.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
         const latest = sortedAssessments[0];
 
         if (!!latest.totalScore) {
@@ -40,19 +41,8 @@ export const getLatestScore = (assessment: IAssessment) => {
     return -1;
 };
 
-export const getLatestScores = (assessments: IAssessment[]) => {
-    return assessments
-        .filter((a) => a.data.length > 0)
-        .map((a) => {
-            return `${a.assessmentType}=${getAssessmentScore(
-                a.data.slice().sort((a, b) => compareDesc(a.date, b.date))[0].pointValues
-            )}`;
-        })
-        .join('; ');
-};
-
-export const getAssessmentScoreColorName = (assessmentType: string, totalScore: number) => {
-    if (assessmentType == 'PHQ-9' || assessmentType == 'GAD-7') {
+export const getAssessmentScoreColorName = (assessmentId: string, totalScore: number) => {
+    if (assessmentId == 'PHQ-9' || assessmentId == 'GAD-7') {
         if (totalScore > 15) {
             return 'bad';
         } else if (totalScore > 10) {
@@ -62,7 +52,7 @@ export const getAssessmentScoreColorName = (assessmentType: string, totalScore: 
         }
     }
 
-    if (assessmentType == 'Mood Logging') {
+    if (assessmentId == 'Mood Logging') {
         if (totalScore < 2) {
             return 'bad';
         } else if (totalScore < 4) {

@@ -139,6 +139,7 @@ const state = observable<{ open: boolean } & IClinicalHistory>({
 
 export const ClinicalHistory: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
+    const { clinicalHistory } = currentPatient;
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -150,9 +151,9 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
 
     const handleOpen = action(() => {
         if (!!currentPatient) {
-            state.primaryCancerDiagnosis = currentPatient.primaryCancerDiagnosis;
-            state.pastPsychHistory = currentPatient.pastPsychHistory;
-            state.pastSubstanceUse = currentPatient.pastSubstanceUse;
+            state.primaryCancerDiagnosis = clinicalHistory.primaryCancerDiagnosis;
+            state.pastPsychHistory = clinicalHistory.pastPsychHistory;
+            state.pastSubstanceUse = clinicalHistory.pastSubstanceUse;
         }
 
         state.open = true;
@@ -160,7 +161,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
 
     const onSave = action(() => {
         const { open, ...patientData } = { ...state };
-        currentPatient?.updatePatientData(patientData);
+        currentPatient?.updateClinicalHistory(patientData);
         state.open = false;
     });
 
@@ -172,9 +173,9 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <ClinicalHistoryContent
                 editable={false}
-                primaryCancerDiagnosis={currentPatient?.primaryCancerDiagnosis}
-                pastPsychHistory={currentPatient?.pastPsychHistory}
-                pastSubstanceUse={currentPatient?.pastSubstanceUse}
+                primaryCancerDiagnosis={clinicalHistory.primaryCancerDiagnosis}
+                pastPsychHistory={clinicalHistory.pastPsychHistory}
+                pastSubstanceUse={clinicalHistory.pastSubstanceUse}
                 onValueChange={onValueChange}
             />
 
