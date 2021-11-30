@@ -10,7 +10,7 @@ import {
     ISafetyPlan,
     ISession,
     IValuesInventory,
-} from 'src/services/types';
+} from 'shared/types';
 import { handleDates } from 'src/utils/time';
 
 // TODO: https://github.com/axios/axios#interceptors

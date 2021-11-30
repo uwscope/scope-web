@@ -1,8 +1,8 @@
 import { action, computed, makeAutoObservable } from 'mobx';
+import { IAppConfig, IUser } from 'shared/types';
 import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
-import { IAppConfig, IUser } from 'src/services/types';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 import { IPatientStore } from 'src/stores/PatientStore';
 

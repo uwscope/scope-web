@@ -22,7 +22,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import { format } from 'date-fns';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
-import { KeyedMap } from 'src/services/types';
+import { KeyedMap } from 'shared/types';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 
 const EditableFormControl = withTheme(

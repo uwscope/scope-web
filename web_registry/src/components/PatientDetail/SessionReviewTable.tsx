@@ -5,9 +5,7 @@ import compareDesc from 'date-fns/compareDesc';
 import compareAsc from 'date-fns/esm/fp/compareAsc/index.js';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import CaseloadTable from 'src/components/caseload/CaseloadTable';
-import { Table } from 'src/components/common/Table';
-import { CaseReviewEntryType, SessionType } from 'src/services/enums';
+import { CaseReviewEntryType, SessionType } from 'shared/enums';
 import {
     IAssessmentLog,
     ICaseReview,
@@ -16,7 +14,9 @@ import {
     ISessionOrCaseReview,
     isSession,
     KeyedMap,
-} from 'src/services/types';
+} from 'shared/types';
+import CaseloadTable from 'src/components/caseload/CaseloadTable';
+import { Table } from 'src/components/common/Table';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled from 'styled-components';
 

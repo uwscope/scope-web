@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { flatten, random } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
-import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'src/services/types';
+import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'shared/types';
 import { getRandomInteger } from 'src/utils/random';
 
 const lorem = new LoremIpsum({

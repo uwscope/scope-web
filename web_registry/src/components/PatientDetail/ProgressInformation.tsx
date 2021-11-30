@@ -1,11 +1,11 @@
 import { Grid } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { IAssessmentContent, KeyedMap } from 'shared/types';
 import ActivityProgress from 'src/components/PatientDetail/ActivityProgress';
 import AssessmentProgress from 'src/components/PatientDetail/AssessmentProgress';
 import MedicationProgress from 'src/components/PatientDetail/MedicationProgress';
 import MoodProgress from 'src/components/PatientDetail/MoodProgress';
-import { IAssessmentContent, KeyedMap } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
 
 export const ProgressInformation: FunctionComponent = observer(() => {

@@ -2,7 +2,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from 
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
 import {
     clinicCodeValues,
     depressionTreatmentStatusValues,
@@ -11,8 +10,9 @@ import {
     patientPronounValues,
     patientRaceEthnicityValues,
     patientSexValues,
-} from 'src/services/enums';
-import { IPatientProfile } from 'src/services/types';
+} from 'shared/enums';
+import { IPatientProfile } from 'shared/types';
+import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
 
 interface IEditPatientProfileContentProps extends Partial<IPatientProfile> {
     onValueChange: (key: string, value: any) => void;

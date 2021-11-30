@@ -13,10 +13,10 @@ import {
 import { compareAsc, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
+import { BehavioralActivationChecklistItem, behavioralActivationChecklistValues } from 'shared/enums';
+import { IResourceItem, ISession, KeyedMap } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
-import { BehavioralActivationChecklistItem, behavioralActivationChecklistValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { IResourceItem, ISession, KeyedMap } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
 
 export const BAChecklist: FunctionComponent = observer(() => {

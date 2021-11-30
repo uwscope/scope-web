@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { IPatientProfile } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
-import { IPatientProfile } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 import styled from 'styled-components';
 

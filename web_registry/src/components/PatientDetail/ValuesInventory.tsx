@@ -4,9 +4,9 @@ import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
+import { KeyedMap } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { getString } from 'src/services/strings';
-import { KeyedMap } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
