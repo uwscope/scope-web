@@ -163,6 +163,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
         return {
             ...p,
+            ...p.profile,
             id: p.profile.MRN,
             initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yyyy') : NA,
             recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yyyy') : NA,

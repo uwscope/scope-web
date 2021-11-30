@@ -6,7 +6,7 @@ import {
     DialogTitle,
     Grid,
     Typography,
-    withTheme,
+    withTheme
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -287,7 +287,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                       ]
             }>
             <Grid container spacing={2} alignItems="stretch">
-                {assessment.assessmentName != 'Mood Logging' && assessmentLogs.length > 0 && (
+                {assessment.assessmentId != 'mood' && assessmentLogs.length > 0 && (
                     <Table
                         rows={tableData}
                         columns={columns.map((c) => ({

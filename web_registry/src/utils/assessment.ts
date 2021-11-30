@@ -25,10 +25,12 @@ export const getAssessmentScore = (pointValues: AssessmentData) => {
     return sum(Object.keys(pointValues).map((k) => pointValues[k] || 0));
 };
 
-export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentName: string) => {
-    const filteredAssessmentLogs = assessmentLogs.filter((a) => a.assessmentName == assessmentName);
+export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: string) => {
+    const filteredAssessmentLogs = assessmentLogs.filter((a) => a.assessmentId == assessmentId);
     if (filteredAssessmentLogs.length > 0) {
-        const sortedAssessments = assessmentLogs.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+        const sortedAssessments = filteredAssessmentLogs
+            .slice()
+            .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
         const latest = sortedAssessments[0];
 
         if (!!latest.totalScore) {
