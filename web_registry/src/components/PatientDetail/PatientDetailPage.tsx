@@ -126,7 +126,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             .map(
                 (a) =>
                     ({
-                        hash: a.name.replace('-', '').replace(' ', '_').toLocaleLowerCase(),
+                        hash: a.id,
                         label: a.name,
                     } as IContent)
             )

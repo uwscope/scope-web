@@ -151,9 +151,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
 
     const handleOpen = action(() => {
         if (!!currentPatient) {
-            state.primaryCancerDiagnosis = clinicalHistory.primaryCancerDiagnosis;
-            state.pastPsychHistory = clinicalHistory.pastPsychHistory;
-            state.pastSubstanceUse = clinicalHistory.pastSubstanceUse;
+            Object.assign(state, clinicalHistory);
         }
 
         state.open = true;
@@ -171,13 +169,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
             title="Clinical History and Diagnosis"
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
-            <ClinicalHistoryContent
-                editable={false}
-                primaryCancerDiagnosis={clinicalHistory.primaryCancerDiagnosis}
-                pastPsychHistory={clinicalHistory.pastPsychHistory}
-                pastSubstanceUse={clinicalHistory.pastSubstanceUse}
-                onValueChange={onValueChange}
-            />
+            <ClinicalHistoryContent editable={false} {...clinicalHistory} onValueChange={onValueChange} />
 
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Clinical History</DialogTitle>
