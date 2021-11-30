@@ -1,0 +1,6 @@
+# Javascript Environment
+/node_modules/
+
+# Build files
+/build/
+/dist/

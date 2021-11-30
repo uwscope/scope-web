@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "es6",
+
+        "baseUrl": ".",
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react",
+        "lib": ["ES2020.Promise", "DOM"], // Necessary for accessing window, document, promise for service worker
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "outDir": "./build/",
+        "paths": {
+            "src/*": ["src/*"]
+        },
+        "sourceMap": true,
+        "strict": true
+    },
+
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+}
