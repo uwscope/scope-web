@@ -6,12 +6,12 @@ import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'shared/enums';
+import { IAssessment, IAssessmentLog } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField } from 'src/components/common/GridField';
 import { Table } from 'src/components/common/Table';
-import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { IAssessment, IAssessmentLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export interface IMedicationProgressProps {

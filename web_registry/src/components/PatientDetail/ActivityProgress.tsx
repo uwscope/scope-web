@@ -4,11 +4,11 @@ import { compareAsc, format, isBefore } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { ActivitySuccessType } from 'shared/enums';
+import { IActivityLog } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { Table } from 'src/components/common/Table';
-import { ActivitySuccessType } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { IActivityLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export const ActivityProgress: FunctionComponent = observer(() => {

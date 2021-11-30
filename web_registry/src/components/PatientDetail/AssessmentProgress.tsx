@@ -6,7 +6,7 @@ import {
     DialogTitle,
     Grid,
     Typography,
-    withTheme
+    withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -16,14 +16,14 @@ import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'shared/enums';
+import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { Table } from 'src/components/common/Table';
-import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled from 'styled-components';

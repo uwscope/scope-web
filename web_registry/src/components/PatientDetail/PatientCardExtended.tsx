@@ -3,8 +3,8 @@ import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { DiscussionFlag } from 'shared/enums';
 import LabeledField, { FlaggedField } from 'src/components/common/LabeledField';
-import { DiscussionFlag } from 'src/services/enums';
 import { usePatient } from 'src/stores/stores';
 import styled from 'styled-components';
 

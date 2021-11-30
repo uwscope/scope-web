@@ -3,11 +3,11 @@ import { GridColDef } from '@material-ui/x-grid';
 import { format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import React, { FunctionComponent } from 'react';
+import { IAssessment, IMoodLog } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
-import { IAssessment, IMoodLog } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 export interface IMoodProgressProps {

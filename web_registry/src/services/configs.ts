@@ -1,4 +1,4 @@
-import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'src/services/types';
+import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 
 const phq9Assessment: IAssessmentContent = {
     id: 'phq-9',

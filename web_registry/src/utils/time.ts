@@ -1,5 +1,5 @@
 import { parseISO, setHours, setMilliseconds, setMinutes, setSeconds } from 'date-fns';
-import { FollowupSchedule } from 'src/services/enums';
+import { FollowupSchedule } from 'shared/enums';
 
 export const clearTime = (date: Date) => {
     return setMilliseconds(setSeconds(setMinutes(setHours(date, 0), 0), 0), 0);

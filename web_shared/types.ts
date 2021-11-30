@@ -20,7 +20,7 @@ import {
     Referral,
     ReferralStatus,
     SessionType,
-} from 'src/services/enums';
+} from './enums';
 
 export type KeyedMap<T> = { [key: string]: T };
 

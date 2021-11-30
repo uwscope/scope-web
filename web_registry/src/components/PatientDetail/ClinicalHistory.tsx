@@ -3,9 +3,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { IClinicalHistory } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
-import { IClinicalHistory } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {

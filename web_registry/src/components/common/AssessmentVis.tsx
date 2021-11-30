@@ -1,4 +1,3 @@
-// import '../node_modules/react-vis/dist/style.css';
 import { FormControlLabel, InputLabel, Switch, withStyles, withTheme } from '@material-ui/core';
 import { addDays, format } from 'date-fns';
 import { addMonths } from 'date-fns/esm';
@@ -18,7 +17,7 @@ import {
     XYPlot,
     YAxis,
 } from 'react-vis';
-import { AssessmentData } from 'src/services/types';
+import { AssessmentData } from 'shared/types';
 import { getAssessmentScore } from 'src/utils/assessment';
 import { useResize } from 'src/utils/hooks';
 import { clearTime } from 'src/utils/time';

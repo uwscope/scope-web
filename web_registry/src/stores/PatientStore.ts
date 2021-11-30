@@ -1,7 +1,5 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, when } from 'mobx';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
-import { useServices } from 'src/services/services';
 import {
     IActivity,
     IActivityLog,
@@ -18,7 +16,9 @@ import {
     IScheduledAssessment,
     ISession,
     IValuesInventory,
-} from 'src/services/types';
+} from 'shared/types';
+import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { useServices } from 'src/services/services';
 import { getFakeLifeareaValues } from 'src/utils/fake';
 
 export interface IPatientStore extends IPatient {
