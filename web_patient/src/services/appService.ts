@@ -20,7 +20,10 @@ class AppService implements IAppService {
 
     public async getAppConfig(): Promise<IAppConfig> {
         const response = await this.axiosInstance.get<IAppConfig>('/config');
-        return response.data;
+
+        // TODO: fail on purpose since service is not implemented
+        response;
+        throw new Error('Failure on purpose');
     }
 
     public async getInspirationalQuote(): Promise<string> {
