@@ -16,12 +16,13 @@
         "noUnusedParameters": true,
         "outDir": "./build/",
         "paths": {
-            "src/*": ["src/*"]
+            "src/*": ["src/*"],
+            "shared/*": ["../web_shared/*"]
         },
         "sourceMap": true,
         "strict": true
     },
 
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "../web_shared/**/*"],
     "exclude": ["node_modules"]
 }

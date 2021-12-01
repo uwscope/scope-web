@@ -12,10 +12,10 @@ import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useHistory, useParams } from 'react-router';
+import { ILifeAreaValueActivity } from 'shared/types';
 import ListDetailPage, { IListItem } from 'src/components/ValuesInventory/ListDetailPage';
 import { getActivityDetailText } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
-import { ILifeAreaValueActivity } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 
 const DropDown = styled(FormControl)({

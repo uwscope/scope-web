@@ -8,19 +8,19 @@ import {
     isSameWeek,
     startOfWeek,
 } from 'date-fns';
-import { IScheduledTaskItem, KeyedMap } from 'src/services/types';
+import { IScheduledItem, KeyedMap } from 'shared/types';
 
 // Default week starts on Monday
 
 export const defaultDateFormat = 'MM/dd/yyyy';
 
-export const isScheduledForDay = (item: IScheduledTaskItem, date: Date) => {
+export const isScheduledForDay = (item: IScheduledItem, date: Date) => {
     if (item.dueType == 'Week') {
-        return isSameWeek(item.due, date, {
+        return isSameWeek(item.dueDate, date, {
             weekStartsOn: 1,
         });
     } else {
-        return isSameDay(item.due, date);
+        return isSameDay(item.dueDate, date);
     }
 };
 
@@ -52,9 +52,9 @@ export const formatDayRelative = (date: Date, referenceDate: Date) => {
     }
 };
 
-export const getTaskItemDueTimeString = (item: IScheduledTaskItem, referenceDate: Date) => {
+export const getTaskItemDueTimeString = (item: IScheduledItem, referenceDate: Date) => {
     if (item.dueType == 'Week') {
-        const weekDiff = differenceInCalendarWeeks(item.due, referenceDate, {
+        const weekDiff = differenceInCalendarWeeks(item.dueDate, referenceDate, {
             weekStartsOn: 1,
         });
         if (weekDiff == 0) {
@@ -69,38 +69,38 @@ export const getTaskItemDueTimeString = (item: IScheduledTaskItem, referenceDate
             return `due in ${weekDiff} weeks`;
         }
     } else if (item.dueType == 'Day') {
-        return `due ${formatDayRelative(item.due, referenceDate)}`;
+        return `due ${formatDayRelative(item.dueDate, referenceDate)}`;
     } else if (item.dueType == 'ChunkOfDay') {
-        const timeOfDay = getHours(item.due) % 24;
+        const timeOfDay = getHours(item.dueDate) % 24;
 
         if (timeOfDay < 6) {
-            return `due ${formatDayRelative(item.due, referenceDate)} before morning`;
+            return `due ${formatDayRelative(item.dueDate, referenceDate)} before morning`;
         } else if (timeOfDay < 12) {
-            return `due ${formatDayRelative(item.due, referenceDate)} in the morning`;
+            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the morning`;
         } else if (timeOfDay < 18) {
-            return `due ${formatDayRelative(item.due, referenceDate)} in the afternoon`;
+            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the afternoon`;
         } else {
-            return `due ${formatDayRelative(item.due, referenceDate)} in the evening`;
+            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the evening`;
         }
     } else {
-        return `due ${formatDayRelative(item.due, referenceDate)} at ${format(item.due, 'h:mm aaa')}`;
+        return `due ${formatDayRelative(item.dueDate, referenceDate)} at ${format(item.dueDate, 'h:mm aaa')}`;
     }
 };
 
-export const groupTaskItemsByDay = (items: IScheduledTaskItem[]) => {
-    const groups: KeyedMap<IScheduledTaskItem[]> = {};
+export const groupTaskItemsByDay = (items: IScheduledItem[]) => {
+    const groups: KeyedMap<IScheduledItem[]> = {};
 
     items.forEach((item) => {
         if (item.dueType == 'Week') {
             // If the item is due during the week, add it to every day of the week
-            const start = startOfWeek(item.due, { weekStartsOn: 1 });
+            const start = startOfWeek(item.dueDate, { weekStartsOn: 1 });
             for (var i = 0; i < 7; i++) {
                 const day = format(addDays(start, i), defaultDateFormat);
                 groups[day] = groups[day] || [];
                 groups[day].push(item);
             }
         } else {
-            const day = format(item.due, defaultDateFormat);
+            const day = format(item.dueDate, defaultDateFormat);
             groups[day] = groups[day] || [];
             groups[day].push(item);
         }

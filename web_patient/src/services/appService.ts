@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
+import { IAppConfig } from 'shared/types';
 import { getQuote } from 'src/services/quotes';
-import { IAppConfig } from './types';
 
 export interface IAppService {
     getAppConfig(): Promise<IAppConfig>;

@@ -2,13 +2,14 @@ import { FormControl, FormControlLabel, Radio, RadioGroup, Slider, TextField, wi
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { ActivitySuccessType, activitySuccessTypeValues } from 'shared/enums';
+import { IActivityLog } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { logError } from 'src/services/logger';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
-import { ActivitySuccessType, activitySuccessTypeValues, IActivityLog } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -154,8 +155,8 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         return null;
     }
 
-    if (task.sourceId != activityId) {
-        logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.sourceId}`);
+    if (task.activityId != activityId) {
+        logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.activityId}`);
         return null;
     }
 
@@ -163,17 +164,18 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         hasData: false,
     }));
 
-    const dataState = useLocalObservable<Partial<IActivityLog>>(() => ({
+    const dataState = useLocalObservable<IActivityLog>(() => ({
+        scheduleId: task.scheduleId,
         alternative: '',
         comment: '',
-        activityId,
         pleasure: 5,
         accomplishment: 5,
         activityName: activity.name,
+        recordedDate: new Date(),
     }));
 
     const handleSubmit = action(async () => {
-        return (await patientStore.saveActivityLog(dataState)) && (await patientStore.completeTaskItem(task));
+        return await patientStore.completeScheduledActivity(task, dataState);
     });
 
     const handleValueChange = action((key: string, value: any) => {

@@ -17,10 +17,10 @@ import {
     XYPlot,
     YAxis,
 } from 'react-vis';
+import { clearTime } from 'shared/time';
 import { AssessmentData } from 'shared/types';
 import { getAssessmentScore } from 'src/utils/assessment';
 import { useResize } from 'src/utils/hooks';
-import { clearTime } from 'src/utils/time';
 import styled, { ThemedStyledProps } from 'styled-components';
 
 const Container = withTheme(

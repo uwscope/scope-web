@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { IUser } from './types';
+import { IUser } from 'shared/types';
 
 export interface IAuthService {
     login(): Promise<IUser>;

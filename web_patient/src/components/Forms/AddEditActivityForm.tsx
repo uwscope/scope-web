@@ -23,12 +23,13 @@ import { DatePicker, MuiPickersUtilsProvider, TimePicker } from '@material-ui/pi
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
+import { DayOfWeekFlags, daysOfWeekFlagValues } from 'shared/enums';
+import { IActivity, ILifeAreaValueActivity, KeyedMap } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
-import { DayOfWeekFlags, daysOfWeekValues, IActivity, ILifeAreaValueActivity, KeyedMap } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -85,7 +86,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivity>(() => ({
-        id: activityId || '',
+        activityId: activityId || '',
         name: activity?.name || '',
         value: activity?.value || '',
         lifeareaId: activity?.lifeareaId || '',
@@ -96,6 +97,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         hasRepetition: activity?.hasRepetition || false,
         repeatDayFlags: activity?.repeatDayFlags || DayOfWeekFlags.None,
         isActive: activity?.isActive || true,
+        isDeleted: activity?.isDeleted || true,
     }));
 
     const groupedActivities: KeyedMap<ILifeAreaValueActivity[]> = {};
@@ -411,7 +413,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     )}
                     content={
                         <FormGroup row>
-                            {daysOfWeekValues.map((day) => {
+                            {daysOfWeekFlagValues.map((day) => {
                                 return (
                                     <FormControlLabel
                                         key={day}
@@ -452,7 +454,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     return (
         <FormDialog
-            title={!!dataState.id ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')}
+            title={
+                !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
+            }
             isOpen={true}
             canClose={!viewState.hasData}
             pages={pages}

@@ -1,4 +1,4 @@
-import { AssessmentData } from 'src/services/types';
+import { AssessmentData } from 'shared/types';
 import { sum } from 'src/utils/array';
 
 export const getAssessmentScore = (pointValues: AssessmentData) => {

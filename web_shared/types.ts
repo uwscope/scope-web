@@ -78,6 +78,8 @@ export interface ICaseReview {
 export interface IAssessment {
     assessmentId: string;
     assessmentName: string;
+    assigned: boolean;
+    assignedDate: Date;
     frequency: AssessmentFrequency;
     dayOfWeek: DayOfWeek;
 }
@@ -97,40 +99,43 @@ export interface IActivity {
     isDeleted: boolean;
 }
 
-export interface IScheduledActivity {
+export interface IScheduledItem {
     scheduleId: string;
-
-    activityId: string;
-    activityName: string;
-    dueType: DueType;
     dueDate: Date;
-    reminder: Date;
+    dueType: DueType;
 }
 
-export interface IScheduledAssessment {
-    scheduleId: string;
+export interface IScheduledActivity extends IScheduledItem {
+    activityId: string;
+    activityName: string;
+    reminder: Date;
 
+    completed: boolean;
+}
+
+export interface IScheduledAssessment extends IScheduledItem {
     assessmentId: string;
     assessmentName: string;
-    dueDate: Date;
+
+    completed: boolean;
 }
 export type AssessmentData = KeyedMap<number | undefined>;
 
 export interface ILog {
-    logId: string;
+    logId?: string; // Should these be optional until committed?
     recordedDate: Date;
-    comment: string;
+    comment?: string;
 }
 
 export interface IActivityLog extends ILog {
     scheduleId: string;
     activityName: string;
 
-    completed: boolean;
-    success: ActivitySuccessType;
-    alternative: string;
-    pleasure: number;
-    accomplishment: number;
+    completed?: boolean;
+    success?: ActivitySuccessType;
+    alternative?: string;
+    pleasure?: number;
+    accomplishment?: number;
 }
 
 export interface IAssessmentLog extends ILog {
@@ -139,10 +144,10 @@ export interface IAssessmentLog extends ILog {
     assessmentName: string;
 
     completed: boolean;
-    patientSubmitted: boolean; // NEW
-    submittedBy: IIdentity;
+    patientSubmitted?: boolean; // NEW
+    submittedBy?: IIdentity;
     pointValues: AssessmentData;
-    totalScore: number;
+    totalScore?: number;
 }
 
 export interface IMoodLog extends ILog {
@@ -279,6 +284,44 @@ export interface IAssessmentContent {
 
 export interface IResourceContent {
     id: string;
+    name: string;
+    resources: IResourceItem[];
+}
+
+export interface IResourceItem {
+    name: string;
+    filename: string;
+}
+
+export interface IPatientConfig {
+    assignedValuesInventory: boolean;
+    assignedSafetyPlan: boolean;
+    assignedAssessmentIds: string[];
+}
+
+export interface IAppConfig {
+    assessments: IAssessmentContent[];
+    lifeAreas: ILifeAreaContent[];
+    resources: IResourceContent[];
+}
+
+export interface IAssessmentContent {
+    id: string;
+    name: string;
+    instruction: string;
+    questions: { question: string; id: string }[];
+    options: { text: string; value: number }[];
+    interpretationName: string;
+    interpretationTable: { score: string; max: number; interpretation: string }[];
+}
+
+export interface ILifeAreaContent {
+    id: string;
+    name: string;
+    examples: ILifeAreaValue[];
+}
+
+export interface IResourceContent {
     name: string;
     resources: IResourceItem[];
 }

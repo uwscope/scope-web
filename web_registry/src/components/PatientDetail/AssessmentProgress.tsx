@@ -241,20 +241,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         },
     ];
 
-    ////////// CONTINUE FROM HERE /////////////
     const onRowClick = action((param: GridRowParams) => {
         const id = param.getValue(param.id, 'id') as string;
         const data = assessmentLogs.find((a) => a.logId == id);
 
         if (!!data) {
             logState.openEdit = true;
-            logState.totalOnly = data.totalScore >= 0;
+            logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
             logState.scheduleId = data.scheduleId;
-            logState.logId = data.logId;
+            logState.logId = data.logId || '';
             logState.recordedDate = data.recordedDate;
             Object.assign(logState.pointValues, data.pointValues);
-            logState.totalScore = data.totalScore;
-            logState.comment = data.comment;
+            logState.totalScore = data.totalScore || -1;
+            logState.comment = data.comment || '';
         }
     });
 

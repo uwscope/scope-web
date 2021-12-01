@@ -14,12 +14,12 @@ import {
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { IAssessmentLog } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection, { HelperText } from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
-import { IAssessmentDataPoint } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
@@ -87,14 +87,23 @@ const AssessmentText = withTheme(
 
 export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(() => {
     const assessmentId = getRouteParameter(Parameters.assessmentId);
+    const scheduleId = getRouteParameter(Parameters.taskId);
 
-    if (!assessmentId) {
+    if (!assessmentId || !scheduleId) {
+        console.error(`Scheduled id or assessment id not found in query paramters: ${assessmentId} ${scheduleId}`);
         return null;
     }
 
     const rootStore = useStores();
     const { patientStore } = rootStore;
-    const assessmentContent = rootStore.getAssessmentContent(assessmentId);
+    const scheduledAssessment = patientStore.getScheduledAssessmentById(scheduleId);
+
+    if (!scheduledAssessment) {
+        console.error(`Scheduled assessment not found by schedule id: ${scheduleId}`);
+        return null;
+    }
+
+    const assessmentContent = rootStore.getAssessmentContent(scheduledAssessment?.assessmentId);
 
     if (!assessmentContent) {
         return null;
@@ -104,10 +113,16 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
         hasData: false,
     }));
 
-    const dataState = useLocalObservable<IAssessmentDataPoint>(() => ({
+    const dataState = useLocalObservable<IAssessmentLog>(() => ({
+        scheduleId: scheduledAssessment.scheduleId,
         assessmentId: assessmentContent.id,
-        date: new Date(),
+        assessmentName: assessmentContent.name,
+
+        completed: false,
+
+        recordedDate: new Date(),
         pointValues: {},
+
         comment: '',
     }));
 
@@ -121,7 +136,7 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     });
 
     const handleSubmit = action(async () => {
-        return await patientStore.saveAssessment(dataState);
+        return await patientStore.saveAssessmentLog(dataState);
     });
 
     const getAssessmentPages = () => {

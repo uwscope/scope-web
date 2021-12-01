@@ -1,4 +1,4 @@
-import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'src/services/types';
+import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 
 const phq9Assessment: IAssessmentContent = {
     id: 'phq-9',
@@ -439,6 +439,7 @@ const responsibilitiesLifeArea = {
 
 const resources = [
     {
+        id: 'ba-model',
         name: 'Review of behavioral activation model',
         resources: [
             {
@@ -452,6 +453,7 @@ const resources = [
         ],
     },
     {
+        id: 'ba-monitor',
         name: 'Mood and activity monitoring',
         resources: [
             {
@@ -465,6 +467,7 @@ const resources = [
         ],
     },
     {
+        id: 'ba-values',
         name: 'Values and goals assessment',
         resources: [
             {
@@ -478,6 +481,7 @@ const resources = [
         ],
     },
     {
+        id: 'ba-schedule',
         name: 'Activity scheduling',
         resources: [
             {
