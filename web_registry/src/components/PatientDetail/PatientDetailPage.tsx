@@ -98,13 +98,13 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     const sessionInfoMenu = [
         {
             hash: 'session-info',
-            label: 'Session Information',
+            label: 'Session & Review Information',
             top: true,
             content: <SessionInformation />,
         },
         {
             hash: 'sessions',
-            label: 'Sessions',
+            label: 'Sessions & Reviews',
         },
     ] as IContent[];
     contentMenu.push.apply(contentMenu, sessionInfoMenu);
