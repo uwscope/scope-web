@@ -121,7 +121,7 @@ class BehavioralActivationChecklist(Enum):
     ActivityScheduling = "Activity scheduling"
     MoodActivityMonitoring = "Mood and activity monitoring"
     Relaxation = "Relaxation"
-    ContingencyManagement = "Contingency management"
+    PositiveReinforcement = "Positive reinforcement"
     ManagingAvoidance = "Managing avoidance behaviors"
     ProblemSolving = "Problem-solving"
 
