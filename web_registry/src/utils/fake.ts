@@ -151,7 +151,7 @@ export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number
 //             Feeling: random(0, 3),
 //             Sleep: random(0, 3),
 //             Tired: random(0, 3),
-//             Apetite: random(0, 3),
+//             Appetite: random(0, 3),
 //             Failure: random(0, 3),
 //             Concentrating: random(0, 3),
 //             Slowness: random(0, 3),
