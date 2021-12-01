@@ -36,6 +36,7 @@ export interface IPatientStore extends IPatient {
 
     assignValuesInventory(): void;
     assignSafetyPlan(): void;
+    assignAssessment(assessmentId: string): void;
 
     addSession(session: Partial<ISession>): void;
     updateSession(session: Partial<ISession>): void;
@@ -201,6 +202,34 @@ export class PatientStore implements IPatientStore {
         });
 
         this.runPromiseAfterLoad(promise);
+    }
+
+    @action.bound
+    public async assignAssessment(assessmentId: string) {
+        const found = this.assessments.find((a) => a.assessmentId == assessmentId);
+
+        console.assert(!!found, 'Assessment not found');
+
+        if (!!found) {
+            found.assigned = true;
+            found.assignedDate = new Date();
+
+            const { registryService } = useServices();
+
+            const promise = registryService.updatePatientAssessment(this.recordId, found).then((newAssessment) => {
+                const existing = this.assessments.find((c) => c.assessmentId == newAssessment.assessmentId);
+                console.assert(!!existing, 'Assessment not found when expected');
+
+                if (!!existing) {
+                    Object.assign(existing, newAssessment);
+                    return this;
+                }
+
+                return this;
+            });
+
+            this.runPromiseAfterLoad(promise);
+        }
     }
 
     @action.bound
