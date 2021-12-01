@@ -1,4 +1,4 @@
-import { getRandomItem } from 'src/services/random';
+import { sample } from 'lodash';
 
 const _quotes = [
     'I am the architect of my life; I build its foundation and choose its contents.',
@@ -71,5 +71,5 @@ const _quotes = [
 ];
 
 export const getQuote = () => {
-    return getRandomItem(_quotes);
+    return sample(_quotes) as string;
 };

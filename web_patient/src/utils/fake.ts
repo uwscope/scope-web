@@ -1,5 +1,5 @@
-import { addDays } from 'date-fns';
-import { flatten, random } from 'lodash';
+import { addDays, format } from 'date-fns';
+import { flatten, random, sample } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
 import { DayOfWeekFlags, dueTypeValues } from 'shared/enums';
 import {
@@ -12,7 +12,6 @@ import {
     IScheduledActivity,
     IScheduledAssessment,
 } from 'shared/types';
-import { getRandomBoolean, getRandomItem } from 'src/services/random';
 
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -111,17 +110,18 @@ export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number
             const date = addDays(today, idx - daysBefore);
             const itemCount = random(0, 3);
 
-            return [...Array(itemCount).keys()].map(
-                () =>
-                    ({
-                        scheduleId: (date.getTime() + random(10000)).toString(),
-                        activityId: 'some-activity',
-                        activityName: 'some-activity',
-                        dueType: getRandomItem(dueTypeValues),
-                        dueDate: date,
-                        reminder: date,
-                    } as IScheduledActivity)
-            );
+            return [...Array(itemCount).keys()].map(() => {
+                const dueType = sample(dueTypeValues);
+                const scheduleId = (date.getTime() + random(10000)).toString();
+                return {
+                    scheduleId,
+                    activityId: 'some-activity',
+                    activityName: `some-activity due on ${format(date, 'MM/dd/yyyy')} ${dueType} ${scheduleId}`,
+                    dueType,
+                    dueDate: date,
+                    reminder: date,
+                } as IScheduledActivity;
+            });
         })
     );
 
@@ -156,8 +156,8 @@ export const getFakeInspirationalQuotes = (maxCount: number) => {
 
 export const getFakePatientConfig = () => {
     return {
-        assignedValuesInventory: getRandomBoolean(),
-        assignedSafetyPlan: getRandomBoolean(),
+        assignedValuesInventory: random(1) == 1,
+        assignedSafetyPlan: random(1) == 1,
         assignedAssessmentIds: ['phq-9', 'gad-7'],
     } as IPatientConfig;
 };

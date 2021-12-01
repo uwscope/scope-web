@@ -47,12 +47,6 @@ export const HomePage: FunctionComponent = observer(() => {
         );
     });
 
-    // const assessments =
-    // scheduledAssessments &&
-    //     (scheduledAssessments
-    //         .map((scheduledAssessment) => rootStore.getAssessmentContent(scheduledAssessment.assessmentId))
-    //         .filter((c) => !!c) as IAssessmentContent[]);
-
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
@@ -89,7 +83,7 @@ export const HomePage: FunctionComponent = observer(() => {
                     {scheduledAssessments &&
                         scheduledAssessments.length > 0 &&
                         scheduledAssessments.map((assessment) => (
-                            <Fragment>
+                            <Fragment key={assessment.scheduleId}>
                                 <ListItem
                                     button
                                     component={Link}
