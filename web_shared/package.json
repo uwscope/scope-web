@@ -1,0 +1,10 @@
+{
+    "name": "scope-web-shared",
+    "@comment dependencies": [],
+    "dependencies": {
+        "date-fns": "^2.17.0"
+    },
+    "@comment devDependencies": [],
+    "devDependencies": {},
+    "scripts": {}
+}

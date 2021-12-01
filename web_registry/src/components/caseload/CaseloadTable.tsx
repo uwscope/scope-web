@@ -3,10 +3,10 @@ import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } fro
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
-import { getFollowupWeeks } from 'src/utils/time';
 import styled from 'styled-components';
 
 const TableContainer = styled.div({

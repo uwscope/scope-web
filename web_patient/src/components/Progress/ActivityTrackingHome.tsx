@@ -4,10 +4,11 @@ import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useHistory } from 'react-router';
+import { ActivitySuccessType } from 'shared/enums';
+import { IActivityLog } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
-import { ActivitySuccessType, IActivityLog } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -27,7 +28,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         history.goBack();
     });
 
-    const getSuccessString = (success: ActivitySuccessType) => {
+    const getSuccessString = (success?: ActivitySuccessType) => {
         switch (success) {
             case 'Yes':
                 return getString('Activity_tracking_success_yes');
@@ -35,6 +36,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                 return getString('Activity_tracking_success_no');
             case 'No':
                 return getString('Activity_tracking_success_alt');
+            default:
+                return getString('Activity_tracking_success_none');
         }
     };
 
@@ -62,7 +65,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                             {patientStore.activityLogs.map((log, idx) => (
                                 <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                     <TableCell component="th" scope="row">
-                                        {`${format(log.date, 'MM/dd')}`}
+                                        {`${format(log.recordedDate, 'MM/dd')}`}
                                     </TableCell>
                                     <TableCell>{log.activityName}</TableCell>
                                     <TableCell>{getSuccessString(log.success)}</TableCell>
@@ -81,7 +84,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                             {getString('Activity_tracking_column_date')}
                                         </TableCell>
                                         <TableCell>{`${
-                                            viewState.selectedLog?.date && format(viewState.selectedLog.date, 'MM/dd')
+                                            viewState.selectedLog?.recordedDate &&
+                                            format(viewState.selectedLog.recordedDate, 'MM/dd')
                                         }`}</TableCell>
                                     </TableRow>
                                     <TableRow>

@@ -21,13 +21,14 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
+import { DayOfWeekFlags } from 'shared/enums';
+import { IActivity, IScheduledActivity, KeyedMap } from 'shared/types';
 import Calendar from 'src/components/CarePlan/Calendar';
 import { MainPage } from 'src/components/common/MainPage';
 import ScheduledListItem from 'src/components/common/ScheduledListItem';
 import Section from 'src/components/common/Section';
 import { getFormLink, getFormPath, Parameters, ParameterValues } from 'src/services/routes';
 import { getString } from 'src/services/strings';
-import { DayOfWeekFlags, IActivity, IScheduledTaskItem, KeyedMap } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -61,7 +62,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         selectedActivity: undefined,
     }));
 
-    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.due, viewState.selectedDate));
+    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDate, viewState.selectedDate));
     const groupedActivities: KeyedMap<IActivity[]> = {};
     activities.forEach((activity) => {
         const lifearea = activity.lifeareaId || getString('Careplan_activities_uncategorized');
@@ -80,11 +81,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.showActivities = event.target.checked;
     });
 
-    const handleTaskClick = action((item: IScheduledTaskItem) => () => {
+    const handleTaskClick = action((item: IScheduledActivity) => () => {
         history.push(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.sourceId,
-                [Parameters.taskId]: item.id,
+                [Parameters.activityId]: item.activityId,
+                [Parameters.taskId]: item.scheduleId,
             })
         );
     });
@@ -207,13 +208,13 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                             <Section title={lifearea} key={lifearea}>
                                 <CompactList aria-labelledby="nested-list-subheader">
                                     {activities.map((activity, idx) => (
-                                        <Fragment key={activity.id}>
+                                        <Fragment key={activity.activityId}>
                                             <ListItem
                                                 alignItems="flex-start"
                                                 button
                                                 component={Link}
                                                 to={getFormLink(ParameterValues.form.editActivity, {
-                                                    [Parameters.activityId]: activity.id,
+                                                    [Parameters.activityId]: activity.activityId,
                                                 })}>
                                                 <ListItemText
                                                     style={{ opacity: activity.isActive ? 1 : 0.5 }}
@@ -270,7 +271,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                         {selectedTaskItems.length > 0 ? (
                             <CompactList subheader={<li />}>
                                 {selectedTaskItems.map((item, idx) => (
-                                    <Fragment key={item.id}>
+                                    <Fragment key={item.scheduleId}>
                                         <ScheduledListItem item={item} onClick={handleTaskClick(item)} />
                                         {idx < selectedTaskItems.length - 1 && <Divider variant="middle" />}
                                     </Fragment>

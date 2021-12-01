@@ -1,17 +1,18 @@
 import { addDays } from 'date-fns';
 import { flatten, random } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
-import { getRandomBoolean, getRandomItem } from 'src/services/random';
+import { DayOfWeekFlags, dueTypeValues } from 'shared/enums';
 import {
-    DayOfWeekFlags,
-    dueTypeValues,
     IActivity,
-    IAssessmentDataPoint,
+    IAssessmentLog,
     ILifeAreaValue,
     ILifeAreaValueActivity,
     IPatientConfig,
-    IScheduledTaskItem,
-} from 'src/services/types';
+    ISafetyPlan,
+    IScheduledActivity,
+    IScheduledAssessment,
+} from 'shared/types';
+import { getRandomBoolean, getRandomItem } from 'src/services/random';
 
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -35,6 +36,13 @@ export const getFakeLifeareaValues = (): ILifeAreaValue[] => {
     ];
 };
 
+export const getFakeSafetyPlan = (): ISafetyPlan => {
+    return {
+        assigned: true,
+        assignedDate: addDays(new Date(), -random(1, 14)),
+    } as ISafetyPlan;
+};
+
 export const getFakeLifeareaValueActivities = (lifeareaId: string): ILifeAreaValueActivity[] => {
     return [
         {
@@ -51,45 +59,51 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string): ILifeAreaVal
 export const getFakeActivities = (): IActivity[] => {
     return [
         {
-            id: 'some-activity',
+            activityId: 'some-activity',
             name: 'Some activity education no reminder repeat M/W',
             value: 'Some value',
             lifeareaId: 'education',
             startDate: new Date(),
             timeOfDay: 9,
             hasReminder: false,
+            reminderTimeOfDay: 9,
             hasRepetition: true,
             repeatDayFlags: DayOfWeekFlags.Monday | DayOfWeekFlags.Wednesday,
             isActive: true,
+            isDeleted: false,
         } as IActivity,
         {
-            id: 'some-activity2',
+            activityId: 'some-activity2',
             name: 'Some activity relationship has reminder no repeat',
             value: 'Some value',
             lifeareaId: 'relationship',
             startDate: new Date(),
             timeOfDay: 12,
             hasReminder: true,
+            reminderTimeOfDay: 12,
             hasRepetition: false,
             repeatDayFlags: DayOfWeekFlags.None,
             isActive: true,
+            isDeleted: false,
         } as IActivity,
         {
-            id: 'some-activity3',
+            activityId: 'some-activity3',
             name: 'Some activity relationship repeat F inactive',
             value: 'Some value',
             lifeareaId: 'relationship',
             startDate: new Date(),
             timeOfDay: 12,
             hasReminder: false,
+            reminderTimeOfDay: 12,
             hasRepetition: true,
             repeatDayFlags: DayOfWeekFlags.Friday,
             isActive: false,
+            isDeleted: false,
         } as IActivity,
     ];
 };
 
-export const getFakeScheduledItems = (daysBefore: number, daysAfter: number): IScheduledTaskItem[] => {
+export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number): IScheduledActivity[] => {
     const today = new Date();
 
     const items = flatten(
@@ -100,20 +114,40 @@ export const getFakeScheduledItems = (daysBefore: number, daysAfter: number): IS
             return [...Array(itemCount).keys()].map(
                 () =>
                     ({
-                        sourceId: 'some-activity',
-                        id: (date.getTime() + random(10000)).toString(),
+                        scheduleId: (date.getTime() + random(10000)).toString(),
+                        activityId: 'some-activity',
+                        activityName: 'some-activity',
                         dueType: getRandomItem(dueTypeValues),
-                        due: date,
-                        name: lorem.generateWords(random(2, 5)),
-                        taskType: 'Activity',
+                        dueDate: date,
                         reminder: date,
-                        completed: random(0, 5) < 1,
-                    } as IScheduledTaskItem)
+                    } as IScheduledActivity)
             );
         })
     );
 
     return items;
+};
+
+export const getFakeScheduledAssessments = (): IScheduledAssessment[] => {
+    const today = new Date();
+
+    return [
+        {
+            scheduleId: (today.getTime() + random(10000)).toString(),
+            assessmentId: 'phq-9',
+            assessmentName: 'PHQ-9',
+            dueDate: addDays(today, -random(0, 1)),
+            dueType: 'Day',
+        } as IScheduledAssessment,
+
+        {
+            scheduleId: (today.getTime() + random(10000)).toString(),
+            assessmentId: 'gad-7',
+            assessmentName: 'GAD-7',
+            dueDate: addDays(today, -random(0, 1)),
+            dueType: 'Day',
+        } as IScheduledAssessment,
+    ];
 };
 
 export const getFakeInspirationalQuotes = (maxCount: number) => {
@@ -122,17 +156,26 @@ export const getFakeInspirationalQuotes = (maxCount: number) => {
 
 export const getFakePatientConfig = () => {
     return {
-        needsInventory: getRandomBoolean(),
-        needsSafetyPlan: getRandomBoolean(),
-        requiredAssessments: ['phq-9', 'gad-7'],
+        assignedValuesInventory: getRandomBoolean(),
+        assignedSafetyPlan: getRandomBoolean(),
+        assignedAssessmentIds: ['phq-9', 'gad-7'],
     } as IPatientConfig;
 };
 
 export const getFakeAssessmentLog = () => {
     return {
-        assessmentDataId: random(10000).toString(),
+        logId: random(10000).toString(),
+        recordedDate: new Date(),
+        comment: 'This is fake generated comment',
+        scheduleId: random(10000).toString(),
         assessmentId: 'phq-9',
-        date: new Date(),
+        assessmentName: 'PHQ-9',
+        completed: true,
+        patientSubmitted: true,
+        submittedBy: {
+            identityId: 'patient-id',
+            name: 'Some patient',
+        },
         pointValues: {
             Interest: random(0, 3),
             Feeling: random(0, 3),
@@ -144,6 +187,5 @@ export const getFakeAssessmentLog = () => {
             Slowness: random(0, 3),
             Suicide: random(0, 3),
         },
-        comment: 'This is fake generated comment',
-    } as IAssessmentDataPoint;
+    } as IAssessmentLog;
 };

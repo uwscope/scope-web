@@ -156,6 +156,16 @@ export enum DayOfWeekFlags {
     All = ~(~0 << 7),
 }
 
+export const daysOfWeekFlagValues = [
+    DayOfWeekFlags.Monday,
+    DayOfWeekFlags.Tuesday,
+    DayOfWeekFlags.Wednesday,
+    DayOfWeekFlags.Thursday,
+    DayOfWeekFlags.Friday,
+    DayOfWeekFlags.Saturday,
+    DayOfWeekFlags.Sunday,
+] as const;
+
 export const activitySuccessTypeValues = ['Yes', 'SomethingElse', 'No'];
 export type ActivitySuccessType = typeof activitySuccessTypeValues[number];
 

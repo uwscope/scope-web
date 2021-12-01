@@ -12,13 +12,13 @@ import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { IScheduledActivity } from 'shared/types';
 import { MainPage } from 'src/components/common/MainPage';
 import ScheduledListItem from 'src/components/common/ScheduledListItem';
 import Section from 'src/components/common/Section';
 import { getImage } from 'src/services/images';
 import { getFormLink, getFormPath, Parameters, ParameterValues, Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
-import { IAssessmentContent, IScheduledTaskItem } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { getGreeting } from 'src/utils/schedule';
 import styled from 'styled-components';
@@ -36,22 +36,22 @@ const CompactList = withTheme(
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const history = useHistory();
-    const { todayItems, config } = rootStore.patientStore;
+    const { todayItems, config, scheduledAssessments } = rootStore.patientStore;
 
-    const onTaskClick = action((item: IScheduledTaskItem) => () => {
+    const onTaskClick = action((item: IScheduledActivity) => () => {
         history.push(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.sourceId,
-                [Parameters.taskId]: item.id,
+                [Parameters.activityId]: item.activityId,
+                [Parameters.taskId]: item.scheduleId,
             })
         );
     });
 
-    const assessments =
-        config.requiredAssessments &&
-        (config.requiredAssessments
-            .map((assessmentId) => rootStore.getAssessmentContent(assessmentId))
-            .filter((c) => !!c) as IAssessmentContent[]);
+    // const assessments =
+    // scheduledAssessments &&
+    //     (scheduledAssessments
+    //         .map((scheduledAssessment) => rootStore.getAssessmentContent(scheduledAssessment.assessmentId))
+    //         .filter((c) => !!c) as IAssessmentContent[]);
 
     return (
         <MainPage title={getGreeting(new Date())}>
@@ -62,7 +62,7 @@ export const HomePage: FunctionComponent = observer(() => {
             ) : null}
             <Section title={getString('Home_things_title')}>
                 <CompactList>
-                    {!!config.needsInventory && (
+                    {!!config.assignedValuesInventory && (
                         <ListItem button component={Link} to={Routes.valuesInventory}>
                             <ListItemAvatar>
                                 <Avatar
@@ -73,8 +73,8 @@ export const HomePage: FunctionComponent = observer(() => {
                             <ListItemText primary={getString('Home_values_button_text')} />
                         </ListItem>
                     )}
-                    {config.needsInventory && config.needsSafetyPlan && <Divider variant="middle" />}
-                    {!!config.needsSafetyPlan && (
+                    {config.assignedValuesInventory && config.assignedSafetyPlan && <Divider variant="middle" />}
+                    {!!config.assignedSafetyPlan && (
                         <ListItem button>
                             <ListItemAvatar>
                                 <Avatar
@@ -85,22 +85,23 @@ export const HomePage: FunctionComponent = observer(() => {
                             <ListItemText primary={getString('Home_safety_button_text')} />
                         </ListItem>
                     )}
-                    {(config.needsInventory || config.needsSafetyPlan) && <Divider variant="middle" />}
-                    {assessments &&
-                        assessments.length > 0 &&
-                        assessments.map((assessment) => (
+                    {(config.assignedValuesInventory || config.assignedSafetyPlan) && <Divider variant="middle" />}
+                    {scheduledAssessments &&
+                        scheduledAssessments.length > 0 &&
+                        scheduledAssessments.map((assessment) => (
                             <Fragment>
                                 <ListItem
                                     button
                                     component={Link}
                                     to={getFormPath(ParameterValues.form.assessmentLog, {
-                                        [Parameters.assessmentId]: assessment.id,
+                                        [Parameters.taskId]: assessment.scheduleId,
+                                        [Parameters.assessmentId]: assessment.assessmentId,
                                     })}>
                                     <ListItemAvatar>
                                         <Avatar
                                             alt={getString('Home_assessment_button_text').replace(
                                                 '${assessment}',
-                                                assessment.name
+                                                assessment.assessmentName
                                             )}
                                             src={getImage('Home_safety_button_image')}
                                         />
@@ -108,7 +109,7 @@ export const HomePage: FunctionComponent = observer(() => {
                                     <ListItemText
                                         primary={getString('Home_assessment_button_text').replace(
                                             '${assessment}',
-                                            assessment.name
+                                            assessment.assessmentName
                                         )}
                                     />
                                 </ListItem>
@@ -128,7 +129,7 @@ export const HomePage: FunctionComponent = observer(() => {
                     {!!todayItems && todayItems.length > 0 ? (
                         todayItems.map((item, idx) => (
                             <Fragment>
-                                <ScheduledListItem key={item.id} item={item} onClick={onTaskClick(item)} />
+                                <ScheduledListItem key={item.scheduleId} item={item} onClick={onTaskClick(item)} />
                                 {idx < todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
                         ))

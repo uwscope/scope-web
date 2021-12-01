@@ -2,11 +2,11 @@ import { Slider, TextField, withTheme } from '@material-ui/core';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { IMoodLog } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getString } from 'src/services/strings';
-import { IMoodLog } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -22,6 +22,8 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
     const { patientStore } = useStores();
 
     const dataState = useLocalObservable<IMoodLog>(() => ({
+        recordedDate: new Date(),
+        logId: '',
         mood: 5,
         comment: undefined,
     }));
@@ -96,7 +98,7 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
     };
 
     const handleSubmit = action(() => {
-        return patientStore.saveMoodLog({ mood: dataState.mood, comment: dataState.comment });
+        return patientStore.saveMoodLog({ ...dataState });
     });
 
     return (

@@ -4,10 +4,10 @@ import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useHistory } from 'react-router';
+import { IAssessmentLog } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
-import { IAssessmentDataPoint } from 'src/services/types';
 import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
@@ -24,13 +24,13 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
     const rootStore = useStores();
     const { patientStore } = rootStore;
 
-    const viewState = useLocalObservable<{ selectedLog?: IAssessmentDataPoint }>(() => ({}));
+    const viewState = useLocalObservable<{ selectedLog?: IAssessmentLog }>(() => ({}));
 
     const handleGoBack = action(() => {
         history.goBack();
     });
 
-    const handleLogClick = action((log: IAssessmentDataPoint) => {
+    const handleLogClick = action((log: IAssessmentLog) => {
         viewState.selectedLog = log;
     });
 
@@ -65,7 +65,7 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                             {logs.map((log, idx) => (
                                 <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                     <TableCell component="th" scope="row">
-                                        {`${format(log.date, 'MM/dd')}`}
+                                        {`${format(log.recordedDate, 'MM/dd')}`}
                                     </TableCell>
                                     <TableCell>{getAssessmentScore(log.pointValues)}</TableCell>
                                     <TableCell>{log.comment}</TableCell>
@@ -85,7 +85,8 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                                             {getString('Assessment_progress_column_date')}
                                         </TableCell>
                                         <TableCell>{`${
-                                            viewState.selectedLog?.date && format(viewState.selectedLog.date, 'MM/dd')
+                                            viewState.selectedLog?.recordedDate &&
+                                            format(viewState.selectedLog.recordedDate, 'MM/dd')
                                         }`}</TableCell>
                                     </TableRow>
                                     <TableRow>
