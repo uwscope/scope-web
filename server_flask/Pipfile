@@ -12,7 +12,12 @@ numpy = "*"
 requests = "*"
 waitress = "*"
 
+[packages.scope]
+editable = true
+path = "../scope_shared"
+
 [dev-packages]
+pytest = "*"
 
 [requires]
 python_version = "3.9"
