@@ -7,8 +7,10 @@ import scope.config
 
 
 pytest_plugins = [
+    "scope.testing.fixtures_config",
     "scope.testing.fixtures_testing",
 ]
+
 
 def _flask_session_unauthenticated(
     *,

@@ -5,6 +5,7 @@ import scope.testing.config
 
 @pytest.fixture(
     name="config_flask",
+    # TODO: this won't allow modules to choose configurations
     params=scope.testing.config.FLASK_CONFIGS.values(),
     ids=scope.testing.config.FLASK_CONFIGS.keys(),
 )
