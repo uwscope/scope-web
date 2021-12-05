@@ -3,13 +3,16 @@ import pytest
 import scope.config
 import scope.testing.config
 
+
 @pytest.fixture(
     name="config_flask",
     # TODO: this won't allow modules to choose configurations
     params=scope.testing.config.FLASK_CONFIGS.values(),
     ids=scope.testing.config.FLASK_CONFIGS.keys(),
 )
-def fixture_config_flask(request: pytest.FixtureRequest) -> scope.config.FlaskConfig:
+def fixture_config_flask(
+    request: pytest.FixtureRequest,
+) -> scope.config.FlaskConfig:
     """
     Obtain Flask configuration.
     """
@@ -19,7 +22,9 @@ def fixture_config_flask(request: pytest.FixtureRequest) -> scope.config.FlaskCo
 @pytest.fixture(
     name="config_flask_client",
 )
-def fixture_config_flask_client(config_flask: scope.config.FlaskConfig) -> scope.config.FlaskClientConfig:
+def fixture_config_flask_client(
+    config_flask: scope.config.FlaskConfig,
+) -> scope.config.FlaskClientConfig:
     """
     Obtain Flask client configuration.
     """
