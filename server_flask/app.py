@@ -78,7 +78,7 @@ def create_app():
     @app.route("/")
     @as_json
     def status():
-        return {"status": "ok"}
+        return {"flask_status": "ok"}
 
     return app
 

@@ -1,9 +1,14 @@
 import pytest
 import requests
 from typing import Callable
+from urllib.parse import urljoin
 
 import scope.config
 
+
+pytest_plugins = [
+    "scope.testing.fixtures_testing",
+]
 
 def _flask_session_unauthenticated(
     *,
@@ -15,20 +20,27 @@ def _flask_session_unauthenticated(
 
     session = requests.session()
 
-    response = session.get(url=config_flask_client.baseurl)
-    if response.status_code == 200:
-        return session
-    else:
-        assert False
+    response = session.get(
+        url=urljoin(
+            config_flask_client.baseurl,
+            "",
+        ),
+    )
+    assert response.ok
+
+    return session
 
 
 @pytest.fixture(name="flask_session_unauthenticated_factory")
 def fixture_flask_session_unauthenticated_factory(
     request: pytest.FixtureRequest,
     config_flask_client: scope.config.FlaskClientConfig,
+    testing_fixtures: bool,
 ) -> Callable[[], requests.Session]:
     """
     Fixture for flask_session_unauthenticated_factory.
+
+    Provides a factory for obtaining Flask sessions that are not authenticated.
     """
 
     def factory() -> requests.Session:
@@ -37,33 +49,16 @@ def fixture_flask_session_unauthenticated_factory(
                 config_flask_client=config_flask_client,
             )
         except Exception:
-            pytest.xfail("Failed in flask_session_unauthenticated_factory.")
-
-    return factory
-
-
-@pytest.fixture(name="test_flask_session_unauthenticated_factory")
-def fixture_test_flask_session_unauthenticated_factory(
-    request: pytest.FixtureRequest,
-    config_flask_client: scope.config.FlaskClientConfig,
-) -> Callable[[], requests.Session]:
-    """
-    Fixture for testing flask_session_unauthenticated_factory.
-    """
-
-    def factory() -> requests.Session:
-        try:
-            return _flask_session_unauthenticated(
-                config_flask_client=config_flask_client,
-            )
-        except Exception:
-            pytest.fail(
-                "\n".join([
-                    "Failed in flask_session_unauthenticated_factory.",
-                    "Unable to obtain Flask session.",
-                    "Flask expected at {}".format(config_flask_client.baseurl),
-                ]),
-                pytrace=False
-            )
+            if testing_fixtures:
+                pytest.fail(
+                    "\n".join([
+                        "Failed in flask_session_unauthenticated_factory.",
+                        "Unable to obtain Flask session.",
+                        "Flask expected at {}".format(config_flask_client.baseurl),
+                    ]),
+                    pytrace=False
+                )
+            else:
+                pytest.xfail("Failed in flask_session_unauthenticated_factory.")
 
     return factory
