@@ -73,6 +73,13 @@ def create_app():
         else:
             return "Method not allowed", 405
 
+    # Basic status endpoint.
+    # TODO - move this into a blueprint
+    @app.route("/")
+    @as_json
+    def status():
+        return {"status": "ok"}
+
     return app
 
 
