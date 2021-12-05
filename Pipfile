@@ -9,7 +9,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pipenv = "*"
+
+[packages.scope]
+editable = true
+path = "./scope_shared"
 
 [packages.aws-infrastructure]
 git = "https://github.com/fogies/aws-infrastructure.git"
@@ -24,6 +27,8 @@ editable = true
 ################################################################################
 
 [dev-packages]
+black = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.9"
