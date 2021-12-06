@@ -117,7 +117,7 @@ export const phq9ItemValues = [
     'Feeling',
     'Sleep',
     'Tired',
-    'Apetite',
+    'Appetite',
     'Failure',
     'Concentrating',
     'Slowness',

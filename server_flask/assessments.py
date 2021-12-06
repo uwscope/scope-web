@@ -10,7 +10,7 @@ phq9Assessment = {
             "id": "Sleep",
         },
         {"question": "Feeling tired or having little energy", "id": "Tired"},
-        {"question": "Poor appetite or overeating", "id": "Apetite"},
+        {"question": "Poor appetite or overeating", "id": "Appetite"},
         {
             "question": "Feeling bad about yourself or that you are a failure or have let yourself or your family down",
             "id": "Failure",
