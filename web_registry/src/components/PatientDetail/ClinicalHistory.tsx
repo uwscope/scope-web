@@ -84,7 +84,7 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 minLine={4}
                 maxLine={4}
                 label="Past Psychiatric History"
-                placeholder="Include prior diagnosis, treatment, hospitalization, and suicide attempts"
+                helperText="e.g., prior diagnosis, treatment, hospitalization, and suicide attempts"
                 value={pastPsychHistory}
                 onChange={(text) => onValueChange('pastPsychHistory', text)}
             />
@@ -95,6 +95,7 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 minLine={4}
                 maxLine={4}
                 label="Substance Use History"
+                helperText="e.g., prior or current substance use"
                 value={pastSubstanceUse}
                 onChange={(text) => onValueChange('pastSubstanceUse', text)}
             />
@@ -106,6 +107,7 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 maxLine={4}
                 label="Psychosocial Background"
                 value={psychSocialBackground}
+                helperText="e.g., living situation, marital status, children, employment, trauma history"
                 onChange={(text) => onValueChange('psychSocialBackground', text)}
             />
         </Grid>

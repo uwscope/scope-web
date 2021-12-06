@@ -147,6 +147,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Current medications"
+                helperText="Psychotropic and other relevant medications (e.g., steroids, hormone therapies, opioids, etc.)"
                 value={state.session.currentMedications}
                 onChange={(text) => onValueChange('currentMedications', text)}
             />
