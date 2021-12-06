@@ -1,6 +1,6 @@
 import { compareDesc } from 'date-fns';
 import { sum } from 'lodash';
-import { AssessmentData, IAssessment, IAssessmentContent, IAssessmentLog } from 'src/services/types';
+import { AssessmentData, IAssessment, IAssessmentContent, IAssessmentLog } from 'shared/types';
 
 const getOrder = (assessment: string) => {
     switch (assessment) {

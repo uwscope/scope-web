@@ -1,6 +1,6 @@
 import React, { ComponentType, createContext, FC, ReactElement, ReactNode, useContext } from 'react';
 import { IPatientStore } from 'src/stores/PatientStore';
-import { IRootStore, RootStore } from './RootStore';
+import { IRootStore, RootStore } from 'src/stores/RootStore';
 
 export const StoreContext = createContext<IRootStore>(new RootStore());
 

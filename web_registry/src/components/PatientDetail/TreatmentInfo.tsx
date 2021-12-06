@@ -2,9 +2,9 @@ import { Grid } from '@material-ui/core';
 import { compareDesc, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { BehavioralStrategyChecklistFlags, BehavioralStrategyChecklistItem } from 'shared/enums';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
-import { BehavioralStrategyChecklistFlags, BehavioralStrategyChecklistItem } from 'src/services/enums';
 import { usePatient } from 'src/stores/stores';
 import { getLatestScore } from 'src/utils/assessment';
 

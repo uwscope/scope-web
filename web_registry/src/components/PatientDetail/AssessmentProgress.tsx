@@ -6,7 +6,7 @@ import {
     DialogTitle,
     Grid,
     Typography,
-    withTheme
+    withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -16,14 +16,14 @@ import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'shared/enums';
+import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
 import { Table } from 'src/components/common/Table';
-import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'src/services/enums';
 import { getString } from 'src/services/strings';
-import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'src/services/types';
 import { usePatient, useStores } from 'src/stores/stores';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled from 'styled-components';
@@ -241,20 +241,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         },
     ];
 
-    ////////// CONTINUE FROM HERE /////////////
     const onRowClick = action((param: GridRowParams) => {
         const id = param.getValue(param.id, 'id') as string;
         const data = assessmentLogs.find((a) => a.logId == id);
 
         if (!!data) {
             logState.openEdit = true;
-            logState.totalOnly = data.totalScore >= 0;
+            logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
             logState.scheduleId = data.scheduleId;
-            logState.logId = data.logId;
+            logState.logId = data.logId || '';
             logState.recordedDate = data.recordedDate;
             Object.assign(logState.pointValues, data.pointValues);
-            logState.totalScore = data.totalScore;
-            logState.comment = data.comment;
+            logState.totalScore = data.totalScore || -1;
+            logState.comment = data.comment || '';
         }
     });
 

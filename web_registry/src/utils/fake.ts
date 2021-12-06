@@ -1,8 +1,7 @@
 import { addDays } from 'date-fns';
 import { flatten, random } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
-import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'src/services/types';
-import { getRandomInteger } from 'src/utils/random';
+import { ILifeAreaValue, ILifeAreaValueActivity, IScheduledActivity } from 'shared/types';
 
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -39,8 +38,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             name: 'some inventory activity',
             valueId: valueId,
             lifeareaId,
-            enjoyment: getRandomInteger(1, 11),
-            importance: getRandomInteger(1, 11),
+            enjoyment: random(1, 10),
+            importance: random(1, 10),
             dateCreated: new Date(),
             dateEdited: new Date(),
         } as ILifeAreaValueActivity,
@@ -49,8 +48,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             name: 'some inventory activity 2',
             valueId: valueId,
             lifeareaId,
-            enjoyment: getRandomInteger(1, 11),
-            importance: getRandomInteger(1, 11),
+            enjoyment: random(1, 10),
+            importance: random(1, 10),
             dateCreated: new Date(),
             dateEdited: new Date(),
         } as ILifeAreaValueActivity,

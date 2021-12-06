@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { handleDates } from 'shared/time';
 import {
     IAssessment,
     IAssessmentLog,
@@ -10,8 +11,7 @@ import {
     ISafetyPlan,
     ISession,
     IValuesInventory,
-} from 'src/services/types';
-import { handleDates } from 'src/utils/time';
+} from 'shared/types';
 
 // TODO: https://github.com/axios/axios#interceptors
 export interface IRegistryService {

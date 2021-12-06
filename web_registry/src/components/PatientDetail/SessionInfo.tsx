@@ -4,6 +4,15 @@ import { compareAsc, compareDesc } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import {
+    behavioralActivationChecklistValues,
+    behavioralStrategyChecklistValues,
+    EntryType,
+    ReferralStatusFlags,
+    referralStatusValues,
+    sessionTypeValues,
+} from 'shared/enums';
+import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import {
     GridDateField,
@@ -13,15 +22,6 @@ import {
     GridTextField,
 } from 'src/components/common/GridField';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
-import {
-    behavioralActivationChecklistValues,
-    behavioralStrategyChecklistValues,
-    EntryType,
-    ReferralStatusFlags,
-    referralStatusValues,
-    sessionTypeValues,
-} from 'src/services/enums';
-import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview } from 'src/services/types';
 import { usePatient } from 'src/stores/stores';
 
 const defaultSession: ISession = {

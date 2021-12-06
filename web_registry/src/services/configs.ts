@@ -1,4 +1,4 @@
-import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'src/services/types';
+import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 
 const phq9Assessment: IAssessmentContent = {
     id: 'phq-9',
@@ -49,6 +49,34 @@ const phq9Assessment: IAssessmentContent = {
             value: 3,
         },
     ],
+    interpretationName: 'Depression severity',
+    interpretationTable: [
+        {
+            score: '0-4',
+            max: 4,
+            interpretation: 'None/minimal',
+        },
+        {
+            score: '5-9',
+            max: 9,
+            interpretation: 'Mild',
+        },
+        {
+            score: '10-14',
+            max: 14,
+            interpretation: 'Moderate',
+        },
+        {
+            score: '15-19',
+            max: 19,
+            interpretation: 'Moderately severe',
+        },
+        {
+            score: '20-27',
+            max: 27,
+            interpretation: 'Severe',
+        },
+    ],
 };
 
 const gad7Assessment: IAssessmentContent = {
@@ -92,6 +120,29 @@ const gad7Assessment: IAssessmentContent = {
         {
             text: 'Nearly every day',
             value: 3,
+        },
+    ],
+    interpretationName: 'Anxiety severity',
+    interpretationTable: [
+        {
+            score: '0-5',
+            max: 5,
+            interpretation: 'None',
+        },
+        {
+            score: '6-10',
+            max: 10,
+            interpretation: 'Mild',
+        },
+        {
+            score: '11-15',
+            max: 15,
+            interpretation: 'Moderate',
+        },
+        {
+            score: '16-21',
+            max: 21,
+            interpretation: 'Severe',
         },
     ],
 };
@@ -143,6 +194,8 @@ const moodAssessment: IAssessmentContent = {
             value: 10,
         },
     ],
+    interpretationName: 'Mood rating',
+    interpretationTable: [],
 };
 
 const medicationAssessment: IAssessmentContent = {
@@ -163,6 +216,8 @@ const medicationAssessment: IAssessmentContent = {
             value: 0,
         },
     ],
+    interpretationName: 'Medication tracking',
+    interpretationTable: [],
 };
 
 const relationshipLifeArea = {
