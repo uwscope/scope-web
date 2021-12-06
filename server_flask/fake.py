@@ -246,11 +246,11 @@ def getFakeScheduledAssessment(assessment):
     dowValues = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     for idx in range(len(dowValues)):
-        if assessment["dayOfWeek"] == idx:
+        if assessment["dayOfWeek"] == dowValues[idx]:
             dow = idx
             break
 
-    pastDate = datetime(datetime.today().year, date.today().month, date.today().day - (7 - dow - date.today().weekday()))
+    dueDate = datetime.today() + timedelta(days=7 - date.today().weekday() + dow)
 
     # 10 assessments in the past and 10 in the future
     scheduled = []
@@ -259,7 +259,7 @@ def getFakeScheduledAssessment(assessment):
             "scheduleId": "Scheduled %d" % idx,
             "assessmentId": assessment["assessmentId"],
             "assessmentName": assessment["assessmentName"],
-            "dueDate": pastDate + timedelta(days=freq * idx)
+            "dueDate": dueDate + timedelta(days=freq * idx)
         })
 
     return scheduled
