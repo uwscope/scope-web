@@ -93,7 +93,7 @@ export const behavioralActivationChecklistValues = [
     'Activity scheduling',
     'Mood and activity monitoring',
     'Relaxation',
-    'Contingency management',
+    'Positive reinforcement',
     'Managing avoidance behaviors',
     'Problem-solving',
 ] as const;

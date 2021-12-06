@@ -47,7 +47,7 @@ const defaultSession: ISession = {
         'Activity scheduling': false,
         'Mood and activity monitoring': false,
         Relaxation: false,
-        'Contingency management': false,
+        'Positive reinforcement': false,
         'Managing avoidance behaviors': false,
         'Problem-solving': false,
     },
