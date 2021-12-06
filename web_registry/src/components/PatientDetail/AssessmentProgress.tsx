@@ -9,6 +9,8 @@ import {
     withTheme,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
 import { compareAsc, format } from 'date-fns';
@@ -203,7 +205,12 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             };
         });
 
-    const recurrence = `${assessment.frequency} on ${assessment.dayOfWeek}s` || 'Not assigned';
+    const recurrence = assessment.assigned
+        ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
+              assessment.assignedDate,
+              'MM/dd/yyyy'
+          )}`
+        : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
         <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentId}>
@@ -263,28 +270,39 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             title={assessment.assessmentName}
             inlineTitle={recurrence}
             loading={currentPatient?.state == 'Pending'}
-            actionButtons={
-                canAdd
-                    ? [
-                          {
-                              icon: <AddIcon />,
-                              text: getString('patient_progress_assessment_action_add'),
-                              onClick: handleAddRecord,
-                          } as IActionButton,
-                          {
-                              icon: <SettingsIcon />,
-                              text: getString('patient_progress_assessment_action_configure'),
-                              onClick: handleConfigure,
-                          } as IActionButton,
-                      ]
-                    : [
-                          {
-                              icon: <SettingsIcon />,
-                              text: getString('patient_progress_assessment_action_configure'),
-                              onClick: handleConfigure,
-                          } as IActionButton,
-                      ]
-            }>
+            actionButtons={[
+                {
+                    icon: assessment.assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
+                    text: assessment.assigned
+                        ? getString('patient_progress_assessment_assigned_button')
+                        : getString('patient_progress_assessment_assign_button'),
+                    onClick: assessment.assigned
+                        ? undefined
+                        : () => currentPatient?.assignAssessment(assessment.assessmentId),
+                } as IActionButton,
+            ]
+                .concat(
+                    assessment.assigned
+                        ? [
+                              {
+                                  icon: <SettingsIcon />,
+                                  text: getString('patient_progress_assessment_action_configure'),
+                                  onClick: handleConfigure,
+                              } as IActionButton,
+                          ]
+                        : []
+                )
+                .concat(
+                    canAdd
+                        ? [
+                              {
+                                  icon: <AddIcon />,
+                                  text: getString('patient_progress_assessment_action_add'),
+                                  onClick: handleAddRecord,
+                              } as IActionButton,
+                          ]
+                        : []
+                )}>
             <Grid container spacing={2} alignItems="stretch">
                 {assessment.assessmentId != 'mood' && assessmentLogs.length > 0 && (
                     <Table

@@ -20,6 +20,9 @@ const _strings = {
     patient_values_inventory_activity_importance_header: 'Importance',
     patient_values_inventory_empty: 'There are no activities defined in the values inventory.',
 
+    patient_progress_assessment_assign_button: 'Assign',
+    patient_progress_assessment_assigned_button: 'Assigned',
+    patient_progress_assessment_assigned_date: 'Assigned on',
     patient_progress_assessment_header_date: 'Date',
     patient_progress_assessment_header_comment: 'Note',
     patient_progress_assessment_action_add: 'Add Record',

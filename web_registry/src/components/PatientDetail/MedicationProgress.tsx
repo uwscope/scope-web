@@ -1,4 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@material-ui/core';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { GridColDef } from '@material-ui/x-grid';
 import { format } from 'date-fns';
@@ -97,7 +99,12 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         },
     ];
 
-    const recurrence = `${assessment.frequency} on ${assessment.dayOfWeek}s` || 'Not assigned';
+    const recurrence = assessment.assigned
+        ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
+              assessment.assignedDate,
+              'MM/dd/yyyy'
+          )}`
+        : 'Not assigned';
 
     return (
         <ActionPanel
@@ -107,11 +114,25 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[
                 {
-                    icon: <SettingsIcon />,
-                    text: getString('patient_progress_assessment_action_configure'),
-                    onClick: handleConfigure,
+                    icon: assessment.assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
+                    text: assessment.assigned
+                        ? getString('patient_progress_assessment_assigned_button')
+                        : getString('patient_progress_assessment_assign_button'),
+                    onClick: assessment.assigned
+                        ? undefined
+                        : () => currentPatient?.assignAssessment(assessment.assessmentId),
                 } as IActionButton,
-            ]}>
+            ].concat(
+                assessment.assigned
+                    ? [
+                          {
+                              icon: <SettingsIcon />,
+                              text: getString('patient_progress_assessment_action_configure'),
+                              onClick: handleConfigure,
+                          } as IActionButton,
+                      ]
+                    : []
+            )}>
             <Grid container spacing={2} alignItems="stretch">
                 {!!sortedLogs && sortedLogs.length > 0 && (
                     <Table
