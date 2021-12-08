@@ -62,13 +62,8 @@ Available tasks:
 
 Runtime secrets are expected in the `secrets` directory.
 
-- `secrets/server/prod/documentdb_config.yaml`
-
-  Secret for DocumentDB credentials and endpoint.
-
-- `secrets/server/prod/ssh_config.yaml`
-
-  Secret for SSH access to the AWS environment via bastion server.
+- `secrets/configuration/documentdb.yaml`
+- `secrets/configuration/ssh.yaml`
 
 ### Database Access
 
