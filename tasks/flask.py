@@ -12,8 +12,8 @@ from pathlib import Path
 from tasks.terminal import spawn_new_terminal
 
 FLASK_DIR = './server_flask'
-SSH_CONFIG_PATH = './secrets/server/prod/ssh_config.yaml'
-DOCUMENTDB_CONFIG_PATH = './secrets/server/prod/documentdb_config.yaml'
+SSH_CONFIG_PATH = './secrets/configuration/ssh.yaml'
+DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
 
 
 @task
