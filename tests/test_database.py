@@ -8,13 +8,13 @@ import scope.testing.config
 
 SSH_CONFIGS = {
     "host": aws_infrastructure.tasks.ssh.SSHConfig.load(
-        ssh_config_path='./secrets/configuration/ssh.yaml',
+        ssh_config_path="./secrets/configuration/ssh.yaml",
     ),
 }
 
 DOCUMENTDB_CONFIGS = {
     "experimental": scope.config.DocumentDBConfig.load(
-        config_path='./secrets/configuration/documentdb.yaml',
+        config_path="./secrets/configuration/documentdb.yaml",
     ),
 }
 
@@ -73,18 +73,20 @@ def test_documentdb_reachable(
     Test that we can reach the DocumentDB cluster hosting the database.
     """
 
-    with aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=config_ssh_client) as ssh_client:
+    with aws_infrastructure.tasks.ssh.SSHClientContextManager(
+        ssh_config=config_ssh_client
+    ) as ssh_client:
         with aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
-                ssh_client=ssh_client,
-                remote_host=config_documentdb.endpoint,
-                remote_port=config_documentdb.port,
+            ssh_client=ssh_client,
+            remote_host=config_documentdb.endpoint,
+            remote_port=config_documentdb.port,
         ) as ssh_port_forward:
             # Obtain a client authenticated as DocumentDB admin
             client_admin = MongoClient(
                 # Synchronously initiate the connection
                 connect=True,
                 # Connect via SSH port forward
-                host='127.0.0.1',
+                host="127.0.0.1",
                 port=ssh_port_forward.local_port,
                 # Because of the port forward, must not attempt to access the replica set
                 directConnection=True,
@@ -97,8 +99,8 @@ def test_documentdb_reachable(
             )
 
             # Ping the admin database, this does not require authentication
-            response = client_admin.admin.command('ping')
-            assert 'ok' in response
+            response = client_admin.admin.command("ping")
+            assert "ok" in response
 
             # Obtain list of collections in the admin database, this requires authentication
             response = client_admin.admin.list_collection_names()
