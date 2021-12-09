@@ -5,11 +5,3 @@
 
 # Python caches
 **/__pycache__/
-
-# Secrets, defined using /** so we can also define exceptions
-/secrets/**
-
-# Exception to create /secrets/server/prod
-!/secrets/server
-!/secrets/server/prod
-!/secrets/server/prod/.gitignore

@@ -1,15 +1,16 @@
 import json
 import os
-import requests
 import sys
 from urllib.parse import urljoin
 
-from flask import Flask, request, current_app
+from flask import Flask, current_app, request
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
 from assessments import get_supported_assessments
+from blueprints.patient import patient_blueprint
+from database import Database
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
@@ -17,12 +18,14 @@ from utils import parseInt
 def create_app():
     app = Flask(__name__)
 
-    flask_environment = os.getenv('FLASK_ENV')
-    if flask_environment == 'production':
+    flask_environment = os.getenv("FLASK_ENV")
+    if flask_environment == "production":
         from config.prod import Config
+
         app.config.from_object(Config())
-    elif flask_environment == 'development':
+    elif flask_environment == "development":
         from config.dev import Config
+
         app.config.from_object(Config())
     else:
         raise ValueError
@@ -32,6 +35,9 @@ def create_app():
     # Simple CORS wrapper of the application allows any and all requests.
     CORS(app)
     FlaskJSON(app)
+
+    with app.app_context():
+        Database.initialize()
 
     # Temporary store for patients
     patients = getRandomFakePatients()
@@ -47,10 +53,10 @@ def create_app():
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
 
-    @app.route("/patients")
-    @as_json
-    def get_patients():
-        return {"patients": patients}
+    # @app.route("/patients")
+    # @as_json
+    # def get_patients():
+    #    return {"patients": patients}
 
     @app.route("/patient/<recordId>", methods=["GET"])
     @as_json
@@ -80,15 +86,17 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
+    app.register_blueprint(patient_blueprint, url_prefix="/patients")
+
     return app
 
 
 # Instead of using `flask run`, import the app normally, then run it.
 # Did this because `flask run` was eating an ImportError, not giving a useful error message.
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
 
     app.run(
-        host=os.getenv('FLASK_RUN_HOST'),
-        port=os.getenv('FLASK_RUN_PORT'),
+        host=os.getenv("FLASK_RUN_HOST"),
+        port=os.getenv("FLASK_RUN_PORT"),
     )

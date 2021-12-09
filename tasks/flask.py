@@ -12,8 +12,8 @@ from invoke import Collection, task
 from tasks.terminal import spawn_new_terminal
 
 FLASK_DIR = "./server_flask"
-SSH_CONFIG_PATH = "./secrets/server/prod/ssh_config.yaml"
-DOCUMENTDB_CONFIG_PATH = "./secrets/server/prod/documentdb_config.yaml"
+SSH_CONFIG_PATH = "./secrets/configuration/ssh.yaml"
+DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 
 
 @task
@@ -80,7 +80,9 @@ def prod_serve(context):
                     '--call "app:create_app"',
                 ]
             ),
-            env={"FLASK_ENV": "production"},
+            env={
+                "FLASK_ENV": "production",
+            },
         )
 
 
