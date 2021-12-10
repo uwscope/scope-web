@@ -1,6 +1,9 @@
 from functools import wraps
 
 import jsonschema
+
+# from models.patient import Patient
+from database import find, find_by_id, get_db, insert
 from flask import (
     Blueprint,
     abort,
@@ -13,8 +16,10 @@ from flask import (
     url_for,
 )
 from flask_json import as_json
-from models.patient import Patient
 from scope.schema import patient_schema
+from werkzeug.local import LocalProxy
+
+db = LocalProxy(get_db)
 
 patient_blueprint = Blueprint("patient_blueprint", __name__)
 
@@ -42,30 +47,27 @@ def validate_schema(schema_object):
     return decorator
 
 
-# NOTE: "collection_name=<>" can be hard coded in the model file. Keeping it here for now.
-patient = Patient(collection_name="patient_collection")
-
-
 @patient_blueprint.route("/", methods=["GET"])
 @as_json
 def get_patients():
-    response = patient.find({})
-    return response, 200
+    query = {}
+    collection = "patient_collection"
+    return {"patients": find(query, db, collection)}, 200
 
 
 @patient_blueprint.route("/<string:patient_id>", methods=["GET"])
 @as_json
 def get_patient(patient_id):
-    response = patient.find_by_id(patient_id)
-    return response, 200
+    collection = "patient_collection"
+    return find_by_id(patient_id, db, collection), 200
 
 
 @patient_blueprint.route("/", methods=["POST"])
 @validate_schema(patient_schema)
 @as_json
 def create_patient():
-    response = patient.create(request.json)
-    return response, 200
+    collection = "patient_collection"
+    return {"inserted_id ": insert(request.json, db, collection)}, 200
 
 
 @patient_blueprint.route("/<string:patient_id>/", methods=["PUT"])
