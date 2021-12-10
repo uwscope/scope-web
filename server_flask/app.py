@@ -1,16 +1,13 @@
-import json
 import os
-import sys
 from urllib.parse import urljoin
 
-from flask import Flask, current_app, request
+from flask import Flask, request
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
 from assessments import get_supported_assessments
 from blueprints.patient import patient_blueprint
-from database import Database
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
@@ -35,9 +32,6 @@ def create_app():
     # Simple CORS wrapper of the application allows any and all requests.
     CORS(app)
     FlaskJSON(app)
-
-    with app.app_context():
-        Database.initialize()
 
     # Temporary store for patients
     patients = getRandomFakePatients()
