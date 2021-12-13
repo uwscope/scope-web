@@ -2,12 +2,12 @@
 Tasks for the Flask server.
 """
 
-from aws_infrastructure.tasks.collection import compose_collection
+from pathlib import Path
+
 import aws_infrastructure.tasks.library.documentdb
 import aws_infrastructure.tasks.ssh
-from invoke import Collection
-from invoke import task
-from pathlib import Path
+from aws_infrastructure.tasks.collection import compose_collection
+from invoke import Collection, task
 
 from tasks.terminal import spawn_new_terminal
 
@@ -39,7 +39,7 @@ def dev_serve(context):
                 ssh_client=ssh_client,
                 remote_host=documentdb_config.endpoint,
                 remote_port=documentdb_config.port,
-            ):
+            ) as ssh_port_forward:
                 with context.cd(Path(FLASK_DIR)):
                     context.run(
                         # Instead of using `flask run`, import the app normally, then run it.
@@ -56,6 +56,7 @@ def dev_serve(context):
                             "FLASK_ENV": "development",
                             "FLASK_RUN_HOST": "localhost",
                             "FLASK_RUN_PORT": "4000",
+                            "LOCAL_DOCUMENTDB_PORT": str(ssh_port_forward.local_port),
                         },
                     )
 

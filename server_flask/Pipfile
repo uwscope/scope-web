@@ -7,10 +7,12 @@ name = "pypi"
 flask = "*"
 flask-cors = "*"
 flask-json = "*"
+jsonschema = "*"
 lorem = "*"
 numpy = "*"
 requests = "*"
 waitress = "*"
+pymongo = "*"
 
 [packages.scope]
 editable = true
