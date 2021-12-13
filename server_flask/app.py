@@ -47,10 +47,10 @@ def create_app():
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
 
-    # @app.route("/patients")
-    # @as_json
-    # def get_patients():
-    #    return {"patients": patients}
+    @app.route("/patients")
+    @as_json
+    def get_patients():
+        return {"patients": patients}
 
     @app.route("/patient/<recordId>", methods=["GET"])
     @as_json
@@ -80,7 +80,7 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
-    app.register_blueprint(patient_blueprint, url_prefix="/patients")
+    app.register_blueprint(patient_blueprint, url_prefix="/patients_blueprint")
 
     return app
 
