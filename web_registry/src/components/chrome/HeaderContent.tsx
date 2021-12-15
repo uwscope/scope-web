@@ -51,39 +51,13 @@ export const HeaderContent: FunctionComponent = observer(() => {
     });
 
     const handleLogout = action(() => {
-        rootStore.logout();
+        rootStore.authStore.logout();
         state.anchorEl = null;
     });
 
     const handleClose = action(() => {
         state.anchorEl = null;
     });
-
-    const loginButton = () => {
-        if (rootStore.loginState == 'Fulfilled') {
-            return (
-                <div>
-                    <Menu
-                        id="lock-menu"
-                        anchorEl={state.anchorEl}
-                        keepMounted
-                        open={Boolean(state.anchorEl)}
-                        onClose={() => handleClose()}>
-                        <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
-                    </Menu>
-                    <Button color="inherit" onClick={(e) => handleClickName(e)}>
-                        {rootStore.currentUserIdentity?.name}
-                    </Button>
-                </div>
-            );
-        } else {
-            return (
-                <Button color="inherit" onClick={() => rootStore.login()}>
-                    Log in
-                </Button>
-            );
-        }
-    };
 
     return (
         <Grid container direction="row" justify="flex-start" alignItems="center" spacing={2}>
@@ -107,7 +81,19 @@ export const HeaderContent: FunctionComponent = observer(() => {
                     onSelect={onPatientSelect}
                 />
             </Grid>
-            {loginButton()}
+            <div>
+                <Menu
+                    id="lock-menu"
+                    anchorEl={state.anchorEl}
+                    keepMounted
+                    open={Boolean(state.anchorEl)}
+                    onClose={() => handleClose()}>
+                    <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
+                </Menu>
+                <Button color="inherit" onClick={(e) => handleClickName(e)}>
+                    {rootStore.currentUserIdentity?.name}
+                </Button>
+            </div>
         </Grid>
     );
 });
