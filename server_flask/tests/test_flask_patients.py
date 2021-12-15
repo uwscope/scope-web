@@ -6,14 +6,14 @@ import scope.config
 
 
 def test_flask_get_all_patients(
-    config_flask_client: scope.config.FlaskClientConfig,
+    flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     session = flask_session_unauthenticated_factory()
 
     response = session.get(
         url=urljoin(
-            config_flask_client.baseurl,
+            flask_client_config.baseurl,
             "patients",
         ),
     )
@@ -28,14 +28,14 @@ def test_flask_get_all_patients(
 
 
 def test_flask_get_patient(
-    config_flask_client: scope.config.FlaskClientConfig,
+    flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     session = flask_session_unauthenticated_factory()
 
     response = session.get(
         url=urljoin(
-            config_flask_client.baseurl,
+            flask_client_config.baseurl,
             "patients/{}".format("61b181ab15d6b17541f102e7"),
         ),
     )
