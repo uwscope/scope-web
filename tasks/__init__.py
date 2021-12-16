@@ -16,8 +16,7 @@ aws_infrastructure.tasks.library.color.enable_color()
 ns = Collection()
 
 # Compose from database.py
-# TODO: Move onto new secrets and structure
-# compose_collection(ns, tasks.database.ns, name="database")
+compose_collection(ns, tasks.database.ns, name="database")
 
 # Compose from dependencies.py
 compose_collection(ns, tasks.dependencies.ns, name="depend")

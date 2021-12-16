@@ -15,15 +15,15 @@ def get_db():
     db = getattr(g, "_database", None)
     if db is None:
         db = g._database = MongoClient(
-            host="127.0.0.1",
-            port=int(os.getenv("LOCAL_DOCUMENTDB_PORT")),
             connect=True,
-            directConnection=True,
-            username=current_app.config["DB_USER"],
-            password=current_app.config["DB_PASSWORD"],
+            host=current_app.config["DOCUMENTDB_HOST"],
+            port=current_app.config["DOCUMENTDB_PORT"],
+            directConnection=current_app.config["DOCUMENTDB_DIRECTCONNECTION"],
             tls=True,
-            tlsInsecure=True,
-        )[current_app.config["DATABASE"]]
+            tlsInsecure=current_app.config["DOCUMENTDB_TLSINSECURE"],
+            username=current_app.config["DATABASE_USER"],
+            password=current_app.config["DATABASE_PASSWORD"],
+        )[current_app.config["DATABASE_NAME"]]
     return db
 
 

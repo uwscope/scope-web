@@ -11,8 +11,8 @@ import urllib.parse
 
 from tasks.terminal import spawn_new_terminal
 
-SSH_CONFIG_PATH = './secrets/server/prod/ssh_config.yaml'
-DOCUMENTDB_CONFIG_PATH = './secrets/server/prod/documentdb_config.yaml'
+SSH_CONFIG_PATH = './secrets/configuration/ssh.yaml'
+DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
 
 
 @task
@@ -41,7 +41,7 @@ def database_forward(context):
                     ssh_port_forward.local_port,
                     '&'.join([
                         'ssl=true',
-                        'sslMethod=UNVALIDATED',
+                        'directConnection=true',
                         'serverSelectionTimeoutMS=5000',
                         'connectTimeoutMS=10000',
                         'authSource=admin',

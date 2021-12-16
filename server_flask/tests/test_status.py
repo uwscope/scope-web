@@ -6,14 +6,14 @@ import scope.config
 
 
 def test_status(
-    config_flask_client: scope.config.FlaskClientConfig,
+    flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     session = flask_session_unauthenticated_factory()
 
     response = session.get(
         url=urljoin(
-            config_flask_client.baseurl,
+            flask_client_config.baseurl,
             "",
         ),
     )
