@@ -56,7 +56,7 @@ def dev_serve(context):
                             "FLASK_ENV": "development",
                             "FLASK_RUN_HOST": "localhost",
                             "FLASK_RUN_PORT": "4000",
-                            "LOCAL_DOCUMENTDB_PORT": str(ssh_port_forward.local_port),
+                            "DOCUMENTDB_LOCAL_PORT": str(ssh_port_forward.local_port),
                         },
                     )
 

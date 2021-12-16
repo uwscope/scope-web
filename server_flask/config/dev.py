@@ -1,21 +1,24 @@
-import ruamel.yaml
+import os
+
+import scope.config
+from config.base import Config
 
 # Path is relative to server_flask
-DOCUMENT_DB_CONFIG_PATH = "../secrets/configuration/documentdb.yaml"
+DEV_LOCAL_FLASK_CONFIG_PATH = "../secrets/configuration/dev_local_flask.yaml"
 
 
-class Config:
-    # TODO James: In production SECRET_KEY needs to be consistent across instances
-    SECRET_KEY: str = "development"
-
-    DB_USER: str
-    DB_PASSWORD: str
-    DATABASE: str
-
+class DevelopmentConfig(Config):
     def __init__(self):
-        with open(DOCUMENT_DB_CONFIG_PATH) as file_document_db_config:
-            document_db_client_config = ruamel.yaml.safe_load(file_document_db_config)
+        flask_config = scope.config.FlaskConfig.load(DEV_LOCAL_FLASK_CONFIG_PATH)
 
-        self.DATABASE = document_db_client_config["database"]
-        self.DB_USER = document_db_client_config["admin_user"]
-        self.DB_PASSWORD = document_db_client_config["admin_password"]
+        Config.__init__(
+            self=self,
+            secret_key=flask_config.secret_key,
+            documentdb_host=flask_config.documentdb_host,
+            documentdb_port=int(os.getenv("DOCUMENTDB_LOCAL_PORT")),
+            documentdb_directconnection=flask_config.documentdb_directconnection,
+            documentdb_tlsinsecure=flask_config.documentdb_tlsinsecure,
+            database_name=flask_config.database_name,
+            database_user=flask_config.database_user,
+            database_password=flask_config.database_password,
+        )

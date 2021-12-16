@@ -14,7 +14,7 @@ def test_flask_get_all_patients(
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients",
+            "patients_blueprint",
         ),
     )
     assert response.ok
@@ -36,7 +36,7 @@ def test_flask_get_patient(
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients/{}".format("61b181ab15d6b17541f102e7"),
+            "patients_blueprint/{}".format("61b181ab15d6b17541f102e7"),
         ),
     )
     assert response.ok
