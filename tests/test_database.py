@@ -8,7 +8,7 @@ import scope.testing.testing_config
 
 SSH_CONFIGS = {
     "host": aws_infrastructure.tasks.ssh.SSHConfig.load(
-        ssh_config_path="./secrets/configuration/ssh.yaml",
+        ssh_config_path="./secrets/configuration/instance_ssh.yaml",
     ),
 }
 

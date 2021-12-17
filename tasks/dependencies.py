@@ -20,6 +20,14 @@ PROJECTS = {
             './web_registry',
         ]
     ),
+    'python': ProjectTuple(
+        pipfile_dirs=[
+            '.',
+            './server_celery',
+            './server_flask',
+        ],
+        yarn_dirs=None,
+    ),
     'root': ProjectTuple(
         pipfile_dirs=['.'],
         yarn_dirs=None
