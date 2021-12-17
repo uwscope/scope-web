@@ -13,6 +13,7 @@ setuptools.setup(
     # long_description="",
     python_requires=">=3",
     install_requires=[
+        "requests",
         "ruamel.yaml",
     ],
 )

@@ -11,7 +11,7 @@ import urllib.parse
 
 from tasks.terminal import spawn_new_terminal
 
-SSH_CONFIG_PATH = './secrets/configuration/ssh.yaml'
+INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
 
 
@@ -24,7 +24,7 @@ def database_forward(context):
     """
 
     if spawn_new_terminal(context):
-        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(SSH_CONFIG_PATH)
+        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
         documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
 
         with aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=ssh_config) as ssh_client:

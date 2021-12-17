@@ -58,7 +58,7 @@ def fixture_flask_session_unauthenticated_factory(
                         [
                             "Failed in flask_session_unauthenticated_factory.",
                             "Unable to obtain Flask session.",
-                            "Flask expected at {}".format(flask_client_config.baseurl),
+                            "Flask expected at {}.".format(flask_client_config.baseurl),
                         ]
                     ),
                     pytrace=False,

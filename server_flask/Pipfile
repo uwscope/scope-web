@@ -18,6 +18,11 @@ pymongo = "*"
 editable = true
 path = "../scope_shared"
 
+[packages.aws_infrastructure]
+git = "https://github.com/fogies/aws-infrastructure.git"
+subdirectory = "aws_infrastructure"
+editable = true
+
 [dev-packages]
 pytest = "*"
 

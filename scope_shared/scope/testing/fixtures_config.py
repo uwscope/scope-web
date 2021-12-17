@@ -2,7 +2,7 @@ import pytest
 import _pytest.python
 
 import scope.config
-import scope.testing.config
+import scope.testing.testing_config
 
 
 def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
@@ -13,10 +13,10 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
     Otherwise, apply a default of ALL_CONFIGS.
     """
     if "_testing_config_generator" in metafunc.fixturenames:
-        if 'TESTING_CONFIGS' in metafunc.module.__dict__:
+        if "TESTING_CONFIGS" in metafunc.module.__dict__:
             testing_configs = metafunc.module.TESTING_CONFIGS
         else:
-            testing_configs = scope.testing.config.ALL_CONFIGS
+            raise ImportError(name="TESTING_CONFIGS not found in test module.")
 
         metafunc.parametrize(
             argnames="_testing_config_generator",
@@ -29,8 +29,8 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
     name="testing_config",
 )
 def fixture_testing_config(
-    _testing_config_generator: scope.testing.config.TestingConfig
-) -> scope.testing.config.TestingConfig:
+    _testing_config_generator: scope.testing.TestingConfig,
+) -> scope.testing.TestingConfig:
     """
     Primary fixture to parameterize testing for each TestingConfig.
 
@@ -43,7 +43,7 @@ def fixture_testing_config(
     name="flask_config",
 )
 def fixture_flask_config(
-    testing_config: scope.testing.config.TestingConfig,
+    testing_config: scope.testing.TestingConfig,
 ) -> scope.config.FlaskConfig:
     """
     Obtain Flask configuration.
