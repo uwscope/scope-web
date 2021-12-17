@@ -6,12 +6,6 @@ from urllib.parse import urljoin
 import scope.config
 
 
-pytest_plugins = [
-    "scope.testing.fixtures_config",
-    "scope.testing.fixtures_testing",
-]
-
-
 def _flask_session_unauthenticated(
     *,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -46,6 +40,7 @@ def fixture_flask_session_unauthenticated_factory(
 
     def factory() -> requests.Session:
         # Allow catching any exception due to goal of fixture xfail
+        #
         # noinspection PyBroadException
         try:
             return _flask_session_unauthenticated(
@@ -65,5 +60,7 @@ def fixture_flask_session_unauthenticated_factory(
                 )
             else:
                 pytest.xfail("Failed in flask_session_unauthenticated_factory.")
+
+    # No cleanup for this factory, ok to return instead of yield
 
     return factory
