@@ -4,6 +4,7 @@ from typing import Callable
 from urllib.parse import urljoin
 
 import scope.config
+import scope.testing
 
 
 def _flask_session_unauthenticated(
@@ -30,7 +31,6 @@ def _flask_session_unauthenticated(
 @pytest.fixture(name="flask_session_unauthenticated_factory")
 def fixture_flask_session_unauthenticated_factory(
     flask_client_config: scope.config.FlaskClientConfig,
-    testing_fixtures: bool,
 ) -> Callable[[], requests.Session]:
     """
     Fixture for flask_session_unauthenticated_factory.
@@ -47,7 +47,7 @@ def fixture_flask_session_unauthenticated_factory(
                 flask_client_config=flask_client_config,
             )
         except Exception:
-            if testing_fixtures:
+            if scope.testing.testing_check_fixtures():
                 pytest.fail(
                     "\n".join(
                         [

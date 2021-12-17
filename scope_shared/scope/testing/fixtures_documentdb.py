@@ -11,7 +11,6 @@ import scope.config
 def fixture_documentdb_port_forward(
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
     documentdb_config: scope.config.DocumentDBConfig,
-    testing_fixtures: bool,
 ) -> aws_infrastructure.tasks.ssh.SSHPortForward:
     """
     Fixture for opening a local port that forwards to the DocumentDB cluster.
