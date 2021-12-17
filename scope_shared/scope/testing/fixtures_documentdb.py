@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 import scope.config
 
 
-@pytest.fixture(name="documentdb_port_forward")
+@pytest.fixture(name="documentdb_port_forward", scope="session")
 def fixture_documentdb_port_forward(
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
     documentdb_config: scope.config.DocumentDBConfig,

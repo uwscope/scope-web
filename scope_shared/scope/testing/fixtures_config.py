@@ -23,12 +23,11 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
             argnames="_testing_config_generator",
             argvalues=testing_configs.values(),
             ids=testing_configs.keys(),
+            scope="session",
         )
 
 
-@pytest.fixture(
-    name="testing_config",
-)
+@pytest.fixture(name="testing_config", scope="session")
 def fixture_testing_config(
     _testing_config_generator: scope.testing.TestingConfig,
 ) -> scope.testing.TestingConfig:
@@ -40,9 +39,7 @@ def fixture_testing_config(
     return _testing_config_generator
 
 
-@pytest.fixture(
-    name="instance_ssh_config",
-)
+@pytest.fixture(name="instance_ssh_config", scope="session")
 def fixture_instance_ssh_config(
     testing_config: scope.testing.TestingConfig,
 ) -> aws_infrastructure.tasks.ssh.SSHConfig:
@@ -52,9 +49,7 @@ def fixture_instance_ssh_config(
     return testing_config.instance_ssh_config
 
 
-@pytest.fixture(
-    name="documentdb_config",
-)
+@pytest.fixture(name="documentdb_config", scope="session")
 def fixture_documentdb_config(
     testing_config: scope.testing.TestingConfig,
 ) -> scope.config.DocumentDBConfig:
@@ -64,9 +59,7 @@ def fixture_documentdb_config(
     return testing_config.documentdb_config
 
 
-@pytest.fixture(
-    name="documentdb_client_config",
-)
+@pytest.fixture(name="documentdb_client_config", scope="session")
 def fixture_documentdb_client_config(
     documentdb_config: scope.config.DocumentDBConfig,
 ) -> scope.config.DocumentDBClientConfig:
@@ -76,13 +69,11 @@ def fixture_documentdb_client_config(
     return scope.config.DocumentDBClientConfig(
         endpoint=documentdb_config.endpoint,
         hosts=documentdb_config.hosts,
-        port=documentdb_config.port
+        port=documentdb_config.port,
     )
 
 
-@pytest.fixture(
-    name="flask_config",
-)
+@pytest.fixture(name="flask_config", scope="session")
 def fixture_flask_config(
     testing_config: scope.testing.TestingConfig,
 ) -> scope.config.FlaskConfig:
@@ -92,9 +83,7 @@ def fixture_flask_config(
     return testing_config.flask_config
 
 
-@pytest.fixture(
-    name="flask_client_config",
-)
+@pytest.fixture(name="flask_client_config", scope="session")
 def fixture_flask_client_config(
     flask_config: scope.config.FlaskConfig,
 ) -> scope.config.FlaskClientConfig:
