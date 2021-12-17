@@ -20,7 +20,7 @@ PROJECTS = {
             './web_registry',
         ]
     ),
-    'tasks': ProjectTuple(
+    'root': ProjectTuple(
         pipfile_dirs=['.'],
         yarn_dirs=None
     ),

@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import pytest
 
 import scope.config
-import scope.testing.config
+import scope.testing.testing_config
 
 
 SSH_CONFIGS = {
