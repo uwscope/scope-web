@@ -65,7 +65,7 @@ Runtime secrets are expected in the `secrets` directory.
 - `secrets/configuration/dev_database.yaml`
 - `secrets/configuration/dev_local_flask.yaml`
 - `secrets/configuration/documentdb.yaml`
-- `secrets/configuration/ssh.yaml`
+- `secrets/configuration/instance_ssh.yaml`
 
 ### Database Access
 
