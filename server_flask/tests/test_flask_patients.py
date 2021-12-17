@@ -3,6 +3,9 @@ from urllib.parse import urljoin
 
 import requests
 import scope.config
+import tests.testing_config
+
+TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
 def test_flask_get_all_patients(

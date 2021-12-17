@@ -7,8 +7,6 @@ Fixtures should then fail instead of xfail, allowing inspection of the failure.
 Current fixture tests are imported from "scope.testing.test_fixtures".
 """
 
-import pytest
-
 from scope.testing.test_fixtures import *
 import tests.testing_config
 
