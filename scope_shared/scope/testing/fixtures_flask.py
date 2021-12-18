@@ -30,6 +30,7 @@ def _flask_session_unauthenticated(
 
 @pytest.fixture(name="flask_session_unauthenticated_factory")
 def fixture_flask_session_unauthenticated_factory(
+    request: pytest.FixtureRequest,
     flask_client_config: scope.config.FlaskClientConfig,
 ) -> Callable[[], requests.Session]:
     """
@@ -47,20 +48,17 @@ def fixture_flask_session_unauthenticated_factory(
                 flask_client_config=flask_client_config,
             )
         except Exception:
-            if scope.testing.testing_check_fixtures():
+            if scope.testing.testing_check_fixtures(request=request):
                 pytest.fail(
                     "\n".join(
                         [
                             "Failed in flask_session_unauthenticated_factory.",
                             "Unable to obtain Flask session.",
-                            "Flask expected at {}.".format(flask_client_config.baseurl),
                         ]
                     ),
                     pytrace=False,
                 )
             else:
                 pytest.xfail("Failed in flask_session_unauthenticated_factory.")
-
-    # No cleanup for this factory, ok to return instead of yield
 
     return factory
