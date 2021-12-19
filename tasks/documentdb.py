@@ -16,11 +16,11 @@ DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
 
 
 @task
-def database_forward(context):
+def documentdb_forward(context):
     """
-    Forward the database cluster, listening on `localhost:5000`.
+    Forward the DocumentDB cluster, listening on `localhost:5000`.
 
-    Use a fixed port because Studio 3T will save the connection information.
+    Use a fixed port so clients can save the connection information.
     """
 
     if spawn_new_terminal(context):
@@ -84,6 +84,6 @@ def database_forward(context):
 
 
 # Build task collection
-ns = Collection('database')
+ns = Collection('documentdb')
 
-ns.add_task(database_forward, 'forward')
+ns.add_task(documentdb_forward, 'forward')

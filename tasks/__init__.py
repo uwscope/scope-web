@@ -3,7 +3,7 @@ from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection
 
 import tasks.celery
-import tasks.database
+import tasks.documentdb
 import tasks.dependencies
 import tasks.flask
 import tasks.registry
@@ -16,7 +16,7 @@ aws_infrastructure.tasks.library.color.enable_color()
 ns = Collection()
 
 # Compose from database.py
-compose_collection(ns, tasks.database.ns, name="database")
+compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 
 # Compose from dependencies.py
 compose_collection(ns, tasks.dependencies.ns, name="depend")
