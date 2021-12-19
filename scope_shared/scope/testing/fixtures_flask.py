@@ -48,17 +48,15 @@ def fixture_flask_session_unauthenticated_factory(
                 flask_client_config=flask_client_config,
             )
         except Exception:
-            if scope.testing.testing_check_fixtures(request=request):
-                pytest.fail(
-                    "\n".join(
-                        [
-                            "Failed in flask_session_unauthenticated_factory.",
-                            "Unable to obtain Flask session.",
-                        ]
-                    ),
-                    pytrace=False,
-                )
-            else:
-                pytest.xfail("Failed in flask_session_unauthenticated_factory.")
+            scope.testing.testing_check_fixtures(
+                explicit_check_fixtures=None,
+                fixture_request=request,
+                message="\n".join(
+                    [
+                        "Failed in flask_session_unauthenticated_factory.",
+                        "Unable to obtain Flask session.",
+                    ]
+                ),
+            )
 
     return factory

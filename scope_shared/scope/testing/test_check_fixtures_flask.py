@@ -13,4 +13,4 @@ def test_flask_session_unauthenticated_factory(
     """
 
     session = flask_session_unauthenticated_factory()
-    assert session
+    assert session is not None
