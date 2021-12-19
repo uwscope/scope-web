@@ -73,6 +73,16 @@ def fixture_documentdb_client_config(
     )
 
 
+@pytest.fixture(name="database_config", scope="session")
+def fixture_database_config(
+    testing_config: scope.testing.TestingConfig,
+) -> scope.config.DatabaseConfig:
+    """
+    Obtain database configuration.
+    """
+    return testing_config.database_config
+
+
 @pytest.fixture(name="flask_config", scope="session")
 def fixture_flask_config(
     testing_config: scope.testing.TestingConfig,
