@@ -1,0 +1,1 @@
+PATIENTS_COLLECTION_NAME = "patients"

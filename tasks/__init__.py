@@ -3,6 +3,7 @@ from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection
 
 import tasks.celery
+import tasks.database
 import tasks.documentdb
 import tasks.dependencies
 import tasks.flask
@@ -29,6 +30,9 @@ compose_collection(ns, tasks.tests.ns, name="test")
 #
 ns_dev = Collection("dev")
 ns_prod = Collection("prod")
+
+# Compose from database.py
+compose_collection(ns_dev, tasks.database.ns.collections["dev"], name="database")
 
 #
 # A server collection in each of development and production
