@@ -11,42 +11,77 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 def test_flask_get_all_patients(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
+    data_fake_patient_factory: Callable[[], dict],
 ):
+    """
+    Test that we can get a list of patients.
+    """
+
+    # Obtain a session
     session = flask_session_unauthenticated_factory()
 
+    # Generate a fake patient
+    fake_patient = data_fake_patient_factory()
+
+    # Insert the fake patient
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "patients_blueprint/"
+        ),
+        json=fake_patient,
+    )
+    assert response.ok
+
+    # Retrieve all patients
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients_blueprint",
+            "patients_blueprint/",
         ),
     )
     assert response.ok
 
-    # TODO: Use fixtures to get sample patient account.
-    assert {
-        "_id": "61b181ab15d6b17541f102e7",
-        "created_at": "2021-12-09T04:10:19.719000",
-        "name": "Test",
-    } in response.json()["patients"]
+    # "patients" is a list
+    response_patients = response.json()["patients"]
+
+    # Ensure list includes our fake patient
+    assert fake_patient in response_patients
 
 
 def test_flask_get_patient(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
+    data_fake_patient_factory: Callable[[], dict],
 ):
+    """
+    Test that we can get a patient via object ID.
+    """
+
+    # Obtain a session
     session = flask_session_unauthenticated_factory()
 
+    # Generate a fake patient
+    fake_patient = data_fake_patient_factory()
+
+    # Insert the fake patient
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "patients_blueprint/"
+        ),
+        json=fake_patient,
+    )
+    assert response.ok
+
+    # Retrieve the same patient using the _id
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients_blueprint/{}".format("61b181ab15d6b17541f102e7"),
+            "patients_blueprint/{}".format(fake_patient["_id"]),
         ),
     )
     assert response.ok
-    # TODO: Use fixtures to get sample patient account.
-    assert response.json() == {
-        "_id": "61b181ab15d6b17541f102e7",
-        "created_at": "2021-12-09T04:10:19.719000",
-        "name": "Test",
-        "status": 200,
-    }
+
+    # Ensure body of response is our fake patient
+    assert response.json() == fake_patient

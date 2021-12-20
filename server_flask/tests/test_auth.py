@@ -23,7 +23,6 @@ def test_auth(
     assert response.ok
 
     assert response.json() == {
-        "status": 200,
         "name": "Luke Skywalker",
         "authToken": "my token",
     }
