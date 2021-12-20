@@ -56,6 +56,9 @@ def _documentdb_client_admin(
 
 @task
 def dev_initialize(context):
+    """
+    Initialize the database.
+    """
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
     documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
     database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
@@ -76,6 +79,10 @@ def dev_initialize(context):
 
 @task
 def dev_reset(context):
+    """
+    Reset and initialize the database.
+    """
+
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
     documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
     database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
