@@ -4,12 +4,7 @@ from typing import Callable
 from urllib.parse import urljoin
 
 import scope.config
-
-
-pytest_plugins = [
-    "scope.testing.fixtures_config",
-    "scope.testing.fixtures_testing",
-]
+import scope.testing
 
 
 def _flask_session_unauthenticated(
@@ -35,8 +30,8 @@ def _flask_session_unauthenticated(
 
 @pytest.fixture(name="flask_session_unauthenticated_factory")
 def fixture_flask_session_unauthenticated_factory(
+    request: pytest.FixtureRequest,
     flask_client_config: scope.config.FlaskClientConfig,
-    testing_fixtures: bool,
 ) -> Callable[[], requests.Session]:
     """
     Fixture for flask_session_unauthenticated_factory.
@@ -46,24 +41,22 @@ def fixture_flask_session_unauthenticated_factory(
 
     def factory() -> requests.Session:
         # Allow catching any exception due to goal of fixture xfail
+        #
         # noinspection PyBroadException
         try:
             return _flask_session_unauthenticated(
                 flask_client_config=flask_client_config,
             )
         except Exception:
-            if testing_fixtures:
-                pytest.fail(
-                    "\n".join(
-                        [
-                            "Failed in flask_session_unauthenticated_factory.",
-                            "Unable to obtain Flask session.",
-                            "Flask expected at {}.".format(flask_client_config.baseurl),
-                        ]
-                    ),
-                    pytrace=False,
-                )
-            else:
-                pytest.xfail("Failed in flask_session_unauthenticated_factory.")
+            scope.testing.testing_check_fixtures(
+                explicit_check_fixtures=None,
+                fixture_request=request,
+                message="\n".join(
+                    [
+                        "Failed in flask_session_unauthenticated_factory.",
+                        "Unable to obtain Flask session.",
+                    ]
+                ),
+            )
 
     return factory

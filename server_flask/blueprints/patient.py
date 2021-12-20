@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 
 import jsonschema
@@ -18,6 +19,9 @@ from flask import (
 from flask_json import as_json
 from scope.schema import patient_schema
 from werkzeug.local import LocalProxy
+
+
+import scope.database.patients
 
 db = LocalProxy(get_db)
 
@@ -50,15 +54,21 @@ def validate_schema(schema_object):
 @patient_blueprint.route("/", methods=["GET"])
 @as_json
 def get_patients():
-    query = {}
-    collection = "patient_collection"
-    return {"patients": find(query, db, collection)}, 200
+    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
+    query = {
+        "type": "patient",
+    }
+
+    return {
+        "patients": find(query, db, collection),
+    }, 200
 
 
 @patient_blueprint.route("/<string:patient_id>", methods=["GET"])
 @as_json
 def get_patient(patient_id):
-    collection = "patient_collection"
+    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
+
     return find_by_id(patient_id, db, collection), 200
 
 
@@ -66,8 +76,11 @@ def get_patient(patient_id):
 @validate_schema(patient_schema)
 @as_json
 def create_patient():
-    collection = "patient_collection"
-    return {"inserted_id ": insert(request.json, db, collection)}, 200
+    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
+
+    return {
+        "inserted_id ": insert(request.json, db, collection)
+    }, 200
 
 
 @patient_blueprint.route("/<string:patient_id>/", methods=["PUT"])

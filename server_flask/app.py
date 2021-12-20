@@ -32,6 +32,7 @@ def create_app():
     # Simple CORS wrapper of the application allows any and all requests.
     CORS(app)
     FlaskJSON(app)
+    app.config["JSON_ADD_STATUS"] = False
 
     # Temporary store for patients
     patients = getRandomFakePatients()
