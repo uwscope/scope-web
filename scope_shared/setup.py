@@ -12,8 +12,5 @@ setuptools.setup(
     # description="",
     # long_description="",
     python_requires=">=3",
-    install_requires=[
-        "requests",
-        "ruamel.yaml",
-    ],
+    install_requires=["requests", "ruamel.yaml", "jschon"],
 )

@@ -1,0 +1,26 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/icontact",
+	"title": "IContact",
+	"description": "IContact Type",
+	"type": "object",
+	"properties": {
+		"contactType": {
+			"$ref": "/schemas/enums#/properties/contactType"
+		},
+		"name": {
+			"type": "string"
+		},
+		"address": {
+			"type": "string"
+		},
+		"phoneNumber": {
+			"type": "string"
+		},
+		"emergencyNumber": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["contactType", "name"]
+}

@@ -1,3 +1,4 @@
+import json
 from functools import wraps
 
 import jsonschema
@@ -16,7 +17,8 @@ from flask import (
     url_for,
 )
 from flask_json import as_json
-from scope.schema import patient_schema
+from jschon import JSON
+from scope.schema_jschon import patient_schema
 from werkzeug.local import LocalProxy
 
 db = LocalProxy(get_db)
@@ -28,16 +30,14 @@ def validate_schema(schema_object):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            try:
-                jsonschema.validate(request.json, schema_object)
-            except (jsonschema.SchemaError, jsonschema.ValidationError) as error:
-                # NOTE: jsonify returns a flask.Response() object with content-type header 'application/json'. Is this the best way to return the response?
+            # For .evaluate to work, its argument needs to be of type '<class 'jschon.json.JSON'>'
+            result = schema_object.evaluate(JSON.loads(json.dumps(request.json)))
+            if result.output("flag")["valid"] == False:
                 abort(
                     400,
                     jsonify(
                         message="Invalid contents.",
-                        schema=error.schema,
-                        error=error.message,
+                        error=result.output("basic"),
                     ),
                 )
             return f(*args, **kwargs)

@@ -13,10 +13,8 @@ numpy = "*"
 requests = "*"
 waitress = "*"
 pymongo = "*"
-
-[packages.scope]
-editable = true
-path = "../scope_shared"
+flask-awscognito = "*"
+scope = {editable = true, path = "../scope_shared"}
 
 [packages.aws_infrastructure]
 git = "https://github.com/fogies/aws-infrastructure.git"

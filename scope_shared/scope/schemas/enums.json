@@ -1,0 +1,124 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/enums",
+	"title": "Enums",
+	"description": "Enum types",
+	"type": "object",
+	"properties": {
+		"clinicCode": {
+			"type": "string",
+			"description": "ClinicCode Type",
+			"enum": [
+				"Breast",
+				"Endocrine",
+				"GI",
+				"GI – Pancreatic",
+				"GU",
+				"GYN",
+				"HEME",
+				"HEME – Sickle Cell",
+				"HNL",
+				"Immunotherapy",
+				"Melanoma/Renal",
+				"Neuro",
+				"NW Hospital",
+				"Sarcoma",
+				"Transplant – Auto",
+				"Transplant – Allo",
+				"Transplant – CAR-T",
+				"Transplant – LTFU",
+				"Transplant – TTC",
+				"Other"
+			]
+		},
+		"sex": {
+			"type": "string",
+			"description": "PatientSex Type",
+			"enum": ["Male", "Female"]
+		},
+		"gender": {
+			"type": "string",
+			"description": "PatientGender Type",
+			"enum": ["Male", "Female"]
+		},
+		"pronoun": {
+			"type": "string",
+			"description": "PatientPronoun Type",
+			"enum": ["He/Him", "She/Her", "They/Them"]
+		},
+		"race": {
+			"type": "string",
+			"description": "PatientRaceEthnicity Type",
+			"enum": ["White", "Black"]
+		},
+		"discussionFlags": {
+			"type": "object",
+			"description": "DiscussionFlags Type",
+			"$comment": "TODO: Figure out if there is a better way to design discussionFlag.",
+			"properties": {
+				"Flag as safety risk": {
+					"type": "boolean"
+				},
+				"Flag for discussion": {
+					"type": "boolean"
+				}
+			},
+			"required": ["Flag as safety risk", "Flag for discussion"]
+		},
+		"followupSchedule": {
+			"type": "string",
+			"description": "FollowupSchedule Type",
+			"enum": ["1-week follow-up", "2-week follow-up", "4-week follow-up"]
+		},
+		"depressionTreatmentStatus": {
+			"type": "string",
+			"description": "DepressionTreatmentStatus Type",
+			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending"]
+		},
+		"cancerTreatmentRegimenFlags": {
+			"type": "object",
+			"description": "CancerTreatmentRegimenFlags Type",
+			"properties": {
+				"Surgery": {
+					"type": "boolean"
+				},
+				"Chemotherapy": {
+					"type": "boolean"
+				},
+				"Radiation": {
+					"type": "boolean"
+				},
+				"Stem Cell Transplant": {
+					"type": "boolean"
+				},
+				"Immunotherapy": {
+					"type": "boolean"
+				},
+				"CAR-T": {
+					"type": "boolean"
+				},
+				"Endocrine": {
+					"type": "boolean"
+				},
+				"Surveillance": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"Surgery",
+				"Chemotherapy",
+				"Radiation",
+				"Stem Cell Transplant",
+				"Immunotherapy",
+				"CAR-T",
+				"Endocrine",
+				"Surveillance"
+			]
+		},
+		"contactType": {
+			"type": "string",
+			"description": "ContactType Type",
+			"enum": ["Person", "Service"]
+		}
+	}
+}
