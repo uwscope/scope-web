@@ -22,10 +22,14 @@ def initialize(*, database: pymongo.database.Database):
 def initialize_patients_collection(*, database: pymongo.database.Database):
     """
     Initialize a patients collection.
+
+    Initialization should be idempotent.
     """
 
     # Get or create a patients collection
-    patients_collection = database.get_collection(scope.database.patients.PATIENTS_COLLECTION_NAME)
+    patients_collection = database.get_collection(
+        scope.database.patients.PATIENTS_COLLECTION_NAME
+    )
 
     # Ensure a sentinel document
     result = patients_collection.find_one(
