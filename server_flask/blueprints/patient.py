@@ -4,7 +4,6 @@ from functools import wraps
 import jsonschema
 
 # from models.patient import Patient
-from database import get_db
 from flask import (
     Blueprint,
     abort,
@@ -23,8 +22,6 @@ from werkzeug.local import LocalProxy
 
 import scope.database
 import scope.database.patients
-
-db = LocalProxy(get_db)
 
 patient_blueprint = Blueprint("patient_blueprint", __name__)
 
@@ -61,7 +58,7 @@ def get_patients():
     }
 
     return {
-        "patients": scope.database.find(query, db, collection),
+        "patients": scope.database.find(query, current_app.db, collection),
     }, 200
 
 
@@ -70,7 +67,7 @@ def get_patients():
 def get_patient(patient_id):
     collection = scope.database.patients.PATIENTS_COLLECTION_NAME
 
-    return scope.database.find_by_id(patient_id, db, collection), 200
+    return scope.database.find_by_id(patient_id, current_app.db, collection), 200
 
 
 @patient_blueprint.route("/", methods=["POST"])
@@ -80,7 +77,7 @@ def create_patient():
     collection = scope.database.patients.PATIENTS_COLLECTION_NAME
 
     return {
-        "inserted_id ": scope.database.insert(request.json, db, collection)
+        "inserted_id ": scope.database.insert(request.json, current_app.db, collection)
     }, 200
 
 
