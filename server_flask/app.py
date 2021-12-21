@@ -15,6 +15,7 @@ from utils import parseInt
 def create_app():
     app = Flask(__name__)
 
+    # Apply our configuration
     flask_environment = os.getenv("FLASK_ENV")
     if flask_environment == "production":
         from config.prod import ProductionConfig
@@ -30,9 +31,10 @@ def create_app():
     # Although ingress could provide CORS in production,
     # our development configuration also generates CORS requests.
     # Simple CORS wrapper of the application allows any and all requests.
-    CORS(app)
-    FlaskJSON(app)
-    app.config["JSON_ADD_STATUS"] = False
+    CORS().init_app(app=app)
+
+    # Improved support for JSON in endpoints.
+    FlaskJSON().init_app(app=app)
 
     # Temporary store for patients
     patients = getRandomFakePatients()
