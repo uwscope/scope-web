@@ -26,6 +26,4 @@ class Database:
             password=app.config["DATABASE_PASSWORD"],
         )
 
-        database = client.get_database(app.config["DATABASE_NAME"])
-
-        app.db = database
+        app.database = client.get_database(app.config["DATABASE_NAME"])

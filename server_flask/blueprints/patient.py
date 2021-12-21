@@ -3,23 +3,17 @@ from functools import wraps
 
 import jsonschema
 
-# from models.patient import Patient
 from flask import (
     Blueprint,
     abort,
-    current_app,
     jsonify,
-    make_response,
-    redirect,
-    render_template,
     request,
-    url_for,
 )
 from flask_json import as_json
 from scope.schema import patient_schema
-from werkzeug.local import LocalProxy
 
 
+from request_context import request_context
 import scope.database
 import scope.database.patients
 
@@ -52,32 +46,35 @@ def validate_schema(schema_object):
 @patient_blueprint.route("/", methods=["GET"])
 @as_json
 def get_patients():
+    context = request_context()
     collection = scope.database.patients.PATIENTS_COLLECTION_NAME
     query = {
         "type": "patient",
     }
 
     return {
-        "patients": scope.database.find(query, current_app.db, collection),
+        "patients": scope.database.find(query, context.database, collection),
     }, 200
 
 
 @patient_blueprint.route("/<string:patient_id>", methods=["GET"])
 @as_json
 def get_patient(patient_id):
+    context = request_context()
     collection = scope.database.patients.PATIENTS_COLLECTION_NAME
 
-    return scope.database.find_by_id(patient_id, current_app.db, collection), 200
+    return scope.database.find_by_id(patient_id, context.database, collection), 200
 
 
 @patient_blueprint.route("/", methods=["POST"])
 @validate_schema(patient_schema)
 @as_json
 def create_patient():
+    context = request_context()
     collection = scope.database.patients.PATIENTS_COLLECTION_NAME
 
     return {
-        "inserted_id ": scope.database.insert(request.json, current_app.db, collection)
+        "inserted_id ": scope.database.insert(request.json, context.database, collection)
     }, 200
 
 
