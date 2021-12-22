@@ -1,0 +1,54 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/patient-profile",
+	"title": "IPatientProfile",
+	"description": "IPatientProfile Type",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"MRN": {
+			"type": "string"
+		},
+		"clinicCode": {
+			"$ref": "/schemas/enums#/properties/clinicCode"
+		},
+		"birthdate": {
+			"type": "string"
+		},
+		"sex": {
+			"$ref": "/schemas/enums#/properties/sex"
+		},
+		"gender": {
+			"$ref": "/schemas/enums#/properties/gender"
+		},
+		"pronoun": {
+			"$ref": "/schemas/enums#/properties/pronoun"
+		},
+		"race": {
+			"$ref": "/schemas/enums#/properties/race"
+		},
+		"primaryOncologyProvider": {
+			"type": "object",
+			"description": "IIdentity schema",
+			"$ref": "/schemas/identity"
+		},
+		"primaryCareManager": {
+			"type": "object",
+			"description": "IIdentity schema",
+			"$ref": "/schemas/identity"
+		},
+		"discussionFlag": {
+			"$ref": "/schemas/enums#/properties/discussionFlags"
+		},
+		"followupSchedule": {
+			"$ref": "/schemas/enums#/properties/followupSchedule"
+		},
+		"depressionTreatmentStatus": {
+			"$ref": "/schemas/enums#/properties/depressionTreatmentStatus"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["name", "MRN"]
+}

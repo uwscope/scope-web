@@ -1,0 +1,23 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/values-inventory",
+	"title": "IValuesInventory",
+	"description": "IValuesInventory Type",
+	"type": "object",
+	"properties": {
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDate": {
+			"type": "string"
+		},
+		"values": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/life-area-value"
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["assigned", "assignedDate"]
+}

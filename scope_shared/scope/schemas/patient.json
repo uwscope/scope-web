@@ -1,0 +1,50 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/patient",
+	"title": "IPatient",
+	"description": "Holds all the patient data",
+	"type": "object",
+	"properties": {
+		"identity": {
+			"type": "object",
+			"description": "IIdentity schema",
+			"$ref": "/schemas/identity"
+		},
+		"profile": {
+			"type": "object",
+			"description": "IPatientProfile schema",
+			"$ref": "/schemas/patient-profile"
+		},
+		"clinicalHistory": {
+			"type": "object",
+			"description": "IClinicalHistory schema",
+			"$ref": "/schemas/clinical-history"
+		},
+		"valuesInventory": {
+			"type": "object",
+			"description": "IValuesInventory schema",
+			"$ref": "/schemas/values-inventory"
+		},
+		"safetyPlan": {
+			"type": "object",
+			"description": "ISafetyPlan schema",
+			"$ref": "/schemas/safety-plan"
+		},
+		"sessions": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/session"
+			}
+		},
+		"caseReviews": { "type": "array" },
+		"assessments": { "type": "array" },
+		"scheduledAssessments": { "type": "array" },
+		"assessmentLogs": { "type": "array" },
+		"activities": { "type": "array" },
+		"scheduledActivities": { "type": "array" },
+		"activityLogs": { "type": "array" },
+		"moodLogs": { "type": "array" }
+	},
+	"additionalProperties": false,
+	"required": ["identity", "profile", "clinicalHistory", "valuesInventory", "safetyPlan", "sessions"]
+}

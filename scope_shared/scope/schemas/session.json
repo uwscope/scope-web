@@ -1,0 +1,63 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://example.com/schemas/session",
+	"title": "ISession",
+	"description": "ISession Type",
+	"type": "object",
+	"properties": {
+		"sessionId": {
+			"type": "string"
+		},
+		"date": {
+			"type": "string"
+		},
+		"sessionType": {
+			"$ref": "/schemas/enums#/properties/sessionType"
+		},
+		"billableMinutes": {
+			"type": "number"
+		},
+		"medicationChange": {
+			"type": "string"
+		},
+		"currentMedications": {
+			"type": "string"
+		},
+		"behavioralStrategyChecklist": {
+			"$ref": "/schemas/enums#/properties/behavioralStrategyChecklistFlags"
+		},
+		"behavioralStrategyOther": {
+			"type": "string"
+		},
+		"behavioralActivationChecklist": {
+			"$ref": "/schemas/enums#/properties/bAChecklistFlags"
+		},
+		"referrals": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/referral-status"
+			}
+		},
+		"otherRecommendations": {
+			"type": "string"
+		},
+		"sessionNote": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"sessionId",
+		"date",
+		"sessionType",
+		"billableMinutes",
+		"medicationChange",
+		"currentMedications",
+		"behavioralStrategyChecklist",
+		"behavioralStrategyOther",
+		"behavioralActivationChecklist",
+		"referral",
+		"otherRecommendations",
+		"sessionNote"
+	]
+}
