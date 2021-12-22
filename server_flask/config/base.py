@@ -67,3 +67,12 @@ class Config:
         self.DATABASE_NAME = database_name
         self.DATABASE_USER = database_user
         self.DATABASE_PASSWORD = database_password
+
+    #
+    # Additional fixed configuration
+    #
+
+    JSON_ADD_STATUS: bool = False
+    """
+    Expected by FlaskJSON. Disables inclusion of "status" field in response body.
+    """

@@ -55,6 +55,20 @@ class FlaskClientConfig:
     Excludes internal fields that a client should not access.
     """
 
-    # TODO: Implement This
-
     baseurl: str
+
+    @staticmethod
+    def load(config_path: Union[Path, str]):
+        config_path = Path(config_path)
+
+        with open(config_path) as config_file:
+            yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+            config_dict = yaml.load(config_file)
+
+        return FlaskClientConfig.parse(config_dict)
+
+    @staticmethod
+    def parse(config_dict: dict):
+        return FlaskClientConfig(
+            baseurl=config_dict["baseurl"],
+        )

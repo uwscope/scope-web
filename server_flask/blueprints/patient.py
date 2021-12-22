@@ -1,27 +1,21 @@
-import json
+import http
 from functools import wraps
 
 import jsonschema
 
-# from models.patient import Patient
-from database import find, find_by_id, get_db, insert
 from flask import (
     Blueprint,
     abort,
-    current_app,
     jsonify,
-    make_response,
-    redirect,
-    render_template,
     request,
-    url_for,
 )
 from flask_json import as_json
-from jschon import JSON
-from scope.schema_jschon import patient_schema
-from werkzeug.local import LocalProxy
+from scope.schema import patient_schema
 
-db = LocalProxy(get_db)
+
+from request_context import request_context
+import scope.database
+import scope.database.patients
 
 patient_blueprint = Blueprint("patient_blueprint", __name__)
 
@@ -30,14 +24,16 @@ def validate_schema(schema_object):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            # For .evaluate to work, its argument needs to be of type '<class 'jschon.json.JSON'>'
-            result = schema_object.evaluate(JSON.loads(json.dumps(request.json)))
-            if result.output("flag")["valid"] == False:
+            try:
+                jsonschema.validate(request.json, schema_object)
+            except (jsonschema.SchemaError, jsonschema.ValidationError) as error:
+                # NOTE: jsonify returns a flask.Response() object with content-type header 'application/json'. Is this the best way to return the response?
                 abort(
                     400,
                     jsonify(
                         message="Invalid contents.",
-                        error=result.output("basic"),
+                        schema=error.schema,
+                        error=error.message,
                     ),
                 )
             return f(*args, **kwargs)
@@ -50,31 +46,23 @@ def validate_schema(schema_object):
 @patient_blueprint.route("/", methods=["GET"])
 @as_json
 def get_patients():
-    query = {}
-    collection = "patient_collection"
-    return {"patients": find(query, db, collection)}, 200
+    context = request_context()
+
+    patients = scope.database.patients.get_patients(database=context.database)
+
+    return {
+        "patients": patients
+    }, http.HTTPStatus.OK
 
 
 @patient_blueprint.route("/<string:patient_id>", methods=["GET"])
 @as_json
 def get_patient(patient_id):
-    collection = "patient_collection"
-    return find_by_id(patient_id, db, collection), 200
+    context = request_context()
 
+    result = scope.database.patients.get_patient(database=context.database, id=patient_id)
 
-@patient_blueprint.route("/", methods=["POST"])
-@validate_schema(patient_schema)
-@as_json
-def create_patient():
-    collection = "patient_collection"
-    return {"inserted_id ": insert(request.json, db, collection)}, 200
-
-
-@patient_blueprint.route("/<string:patient_id>/", methods=["PUT"])
-def update_patient(patient_id):
-    pass
-
-
-@patient_blueprint.route("/<string:patient_id>/", methods=["DELETE"])
-def delete_patient(patient_id):
-    pass
+    if result:
+        return result, http.HTTPStatus.OK
+    else:
+        abort(http.HTTPStatus.NOT_FOUND)

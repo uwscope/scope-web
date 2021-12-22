@@ -1,4 +1,3 @@
-import pytest
 import requests
 from typing import Callable
 
@@ -14,3 +13,4 @@ def test_flask_session_unauthenticated_factory(
     """
 
     session = flask_session_unauthenticated_factory()
+    assert session is not None
