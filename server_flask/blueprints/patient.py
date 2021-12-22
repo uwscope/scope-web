@@ -1,4 +1,4 @@
-import logging
+import http
 from functools import wraps
 
 import jsonschema
@@ -47,42 +47,22 @@ def validate_schema(schema_object):
 @as_json
 def get_patients():
     context = request_context()
-    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
-    query = {
-        "type": "patient",
-    }
+
+    patients = scope.database.patients.get_patients(database=context.database)
 
     return {
-        "patients": scope.database.find(query, context.database, collection),
-    }, 200
+        "patients": patients
+    }, http.HTTPStatus.OK
 
 
 @patient_blueprint.route("/<string:patient_id>", methods=["GET"])
 @as_json
 def get_patient(patient_id):
     context = request_context()
-    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
 
-    return scope.database.find_by_id(patient_id, context.database, collection), 200
+    result = scope.database.patients.get_patient(database=context.database, id=patient_id)
 
-
-@patient_blueprint.route("/", methods=["POST"])
-@validate_schema(patient_schema)
-@as_json
-def create_patient():
-    context = request_context()
-    collection = scope.database.patients.PATIENTS_COLLECTION_NAME
-
-    return {
-        "inserted_id ": scope.database.insert(request.json, context.database, collection)
-    }, 200
-
-
-@patient_blueprint.route("/<string:patient_id>/", methods=["PUT"])
-def update_patient(patient_id):
-    pass
-
-
-@patient_blueprint.route("/<string:patient_id>/", methods=["DELETE"])
-def delete_patient(patient_id):
-    pass
+    if result:
+        return result, http.HTTPStatus.OK
+    else:
+        abort(http.HTTPStatus.NOT_FOUND)

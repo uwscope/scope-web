@@ -43,12 +43,15 @@ def _documentdb_client_admin(
         port=documentdb_port_forward.local_port,
         # Because of the port forward, must not attempt to access the replica set
         directConnection=True,
-        # Connect as admin
-        username=documentdb_config.admin_user,
-        password=documentdb_config.admin_password,
         # DocumentDB requires SSL, but port forwarding means the certificate will not match
         tls=True,
         tlsInsecure=True,
+        # PyMongo defaults to retryable writes, which are not supported by DocumentDB
+        # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
+        retryWrites=False,
+        # Connect as admin
+        username=documentdb_config.admin_user,
+        password=documentdb_config.admin_password,
     )
 
     return documentdb_client_admin
