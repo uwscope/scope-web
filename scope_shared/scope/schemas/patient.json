@@ -42,14 +42,64 @@
 				"$ref": "/schemas/case-review"
 			}
 		},
-		"assessments": { "type": "array" },
-		"scheduledAssessments": { "type": "array" },
-		"assessmentLogs": { "type": "array" },
-		"activities": { "type": "array" },
-		"scheduledActivities": { "type": "array" },
-		"activityLogs": { "type": "array" },
-		"moodLogs": { "type": "array" }
+		"assessments": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/assessment"
+			}
+		},
+		"scheduledAssessments": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/scheduled-assessment"
+			}
+		},
+		"assessmentLogs": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/assessment-log"
+			}
+		},
+		"activities": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/activity"
+			}
+		},
+		"scheduledActivities": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/scheduled-activity"
+			}
+		},
+		"activityLogs": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/activity-log"
+			}
+		},
+		"moodLogs": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/mood-log"
+			}
+		}
 	},
 	"additionalProperties": false,
-	"required": ["identity", "profile", "clinicalHistory", "valuesInventory", "safetyPlan", "sessions", "caseReviews"]
+	"required": [
+		"identity",
+		"profile",
+		"clinicalHistory",
+		"valuesInventory",
+		"safetyPlan",
+		"sessions",
+		"caseReviews",
+		"assessments",
+		"scheduledAssessments",
+		"assessmentLogs",
+		"activities",
+		"scheduledActivities",
+		"activityLogs",
+		"moodLogs"
+	]
 }

@@ -214,6 +214,26 @@
 			"type": "string",
 			"description": "ReferralStatus Type",
 			"enum": ["Not Referred", "Pending", "Active", "Completed"]
+		},
+		"assessmentFrequency": {
+			"type": "string",
+			"description": "AssessmentFrequency Type",
+			"enum": ["Daily", "Once a week", "Every 2 weeks", "Monthly", "None"]
+		},
+		"dayOfWeek": {
+			"type": "string",
+			"description": "DayOfWeek Type",
+			"enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		},
+		"dueType": {
+			"type": "string",
+			"description": "DueType Type",
+			"enum": ["Exact", "ChunkOfDay", "Day", "Week"]
+		},
+		"activitySuccessType": {
+			"type": "string",
+			"description": "ActivitySuccessType Type",
+			"enum": ["Yes", "SomethingElse", "No"]
 		}
 	}
 }
