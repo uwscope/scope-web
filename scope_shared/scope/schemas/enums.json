@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/enums",
+	"$id": "https://uwscope.org/schemas/enums",
 	"title": "Enums",
 	"description": "Enum types",
 	"type": "object",
@@ -209,6 +209,11 @@
 				"Palliative Care",
 				"Other"
 			]
+		},
+		"referralStatus": {
+			"type": "string",
+			"description": "ReferralStatus Type",
+			"enum": ["Not Referred", "Pending", "Active", "Completed"]
 		}
 	}
 }

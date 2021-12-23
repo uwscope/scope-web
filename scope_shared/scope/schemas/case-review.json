@@ -1,0 +1,46 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/case-review",
+	"title": "ICaseReview",
+	"description": "ICaseReview Type",
+	"type": "object",
+	"properties": {
+		"reviewId": {
+			"type": "string"
+		},
+		"date": {
+			"type": "string"
+		},
+		"consultingPsychiatrist": {
+			"type": "object",
+			"description": "IIdentity schema",
+			"$ref": "/schemas/identity"
+		},
+		"medicationChange": {
+			"type": "string"
+		},
+		"behavioralStrategyChange": {
+			"type": "string"
+		},
+		"referralsChange": {
+			"type": "string"
+		},
+		"otherRecommendations": {
+			"type": "string"
+		},
+		"reviewNote": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"reviewId",
+		"date",
+		"consultingPsychiatrist",
+		"medicationChange",
+		"behavioralStrategyChange",
+		"referralsChange",
+		"otherRecommendations",
+		"reviewNote"
+	]
+}

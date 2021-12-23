@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/contact",
+	"$id": "https://uwscope.org/schemas/contact",
 	"title": "IContact",
 	"description": "IContact Type",
 	"type": "object",

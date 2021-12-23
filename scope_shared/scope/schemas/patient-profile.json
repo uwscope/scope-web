@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/patient-profile",
+	"$id": "https://uwscope.org/schemas/patient-profile",
 	"title": "IPatientProfile",
 	"description": "IPatientProfile Type",
 	"type": "object",

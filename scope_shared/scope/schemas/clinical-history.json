@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/clinical-history",
+	"$id": "https://uwscope.org/schemas/clinical-history",
 	"title": "IClinicalHistory",
 	"description": "IClinicalHistory Type",
 	"type": "object",

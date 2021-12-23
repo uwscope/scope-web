@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/life-area-value",
+	"$id": "https://uwscope.org/schemas/life-area-value",
 	"title": "ILifeAreaValue",
 	"description": "ILifeAreaValue Type",
 	"type": "object",

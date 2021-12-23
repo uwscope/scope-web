@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/safety-plan",
+	"$id": "https://uwscope.org/schemas/safety-plan",
 	"title": "ISafetyPlan",
 	"description": "ISafetyPlan Type",
 	"type": "object",

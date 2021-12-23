@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://example.com/schemas/ilife-area-value-activity",
+	"$id": "https://uwscope.org/schemas/ilife-area-value-activity",
 	"title": "ILifeAreaValueActivity",
 	"description": "ILifeAreaValueActivity Type",
 	"type": "object",
