@@ -156,6 +156,59 @@
 				"Mindfulness Strategies",
 				"Supportive Therapy"
 			]
+		},
+		"bAChecklistFlags": {
+			"type": "object",
+			"description": "BAChecklistFlags Type",
+			"properties": {
+				"Review of the BA model": {
+					"type": "boolean"
+				},
+				"Values and goals assessment": {
+					"type": "boolean"
+				},
+				"Activity scheduling": {
+					"type": "boolean"
+				},
+				"Mood and activity monitoring": {
+					"type": "boolean"
+				},
+				"Relaxation": {
+					"type": "boolean"
+				},
+				"Positive reinforcement": {
+					"type": "boolean"
+				},
+				"Managing avoidance behaviors": {
+					"type": "boolean"
+				},
+				"Problem-solving": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"Review of the BA model",
+				"Values and goals assessment",
+				"Activity scheduling",
+				"Mood and activity monitoring",
+				"Relaxation",
+				"Positive reinforcement",
+				"Managing avoidance behaviors",
+				"Problem-solving"
+			]
+		},
+		"referral": {
+			"type": "string",
+			"description": "Referral Type",
+			"enum": [
+				"Psychiatry",
+				"Psychology",
+				"Patient Navigation",
+				"Integrative Medicine",
+				"Spiritual Care",
+				"Palliative Care",
+				"Other"
+			]
 		}
 	}
 }
