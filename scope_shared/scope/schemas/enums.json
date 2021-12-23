@@ -119,6 +119,43 @@
 			"type": "string",
 			"description": "ContactType Type",
 			"enum": ["Person", "Service"]
+		},
+		"sessionType": {
+			"type": "string",
+			"description": "SessionType Type",
+			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
+		},
+		"behavioralStrategyChecklistFlags": {
+			"type": "object",
+			"description": "BehavioralStrategyChecklistFlags Type",
+			"properties": {
+				"Behavioral Activation": {
+					"type": "boolean"
+				},
+				"Motivational Interviewing": {
+					"type": "boolean"
+				},
+				"Problem Solving Therapy": {
+					"type": "boolean"
+				},
+				"Cognitive Therapy": {
+					"type": "boolean"
+				},
+				"Mindfulness Strategies": {
+					"type": "boolean"
+				},
+				"Supportive Therapy": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"Behavioral Activation",
+				"Motivational Interviewing",
+				"Problem Solving Therapy",
+				"Cognitive Therapy",
+				"Mindfulness Strategies",
+				"Supportive Therapy"
+			]
 		}
 	}
 }
