@@ -11,6 +11,6 @@ catalog = create_catalog("2020-12")
 catalog.add_directory(URI("https://example.com/schemas/"), schema_dir)
 
 
-ipatient_schema = JSONSchema.loadf(schema_dir / "ipatient.json")
+patient_schema = JSONSchema.loadf(schema_dir / "patient.json")
 
 # TODO: Load other schemas below as API endpoints are added.
