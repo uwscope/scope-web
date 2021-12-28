@@ -1,11 +1,14 @@
+from typing import List, Optional
+
 import pymongo.database
 import pymongo.results
-from typing import List, Optional
 
 PATIENTS_COLLECTION_NAME = "patients"
 
 
-def create_patient(*, database: pymongo.database.Database, patient: dict) -> pymongo.results.InsertOneResult:
+def create_patient(
+    *, database: pymongo.database.Database, patient: dict
+) -> pymongo.results.InsertOneResult:
     """
     Create the provided patient.
     """
@@ -19,7 +22,9 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> pym
     return result
 
 
-def delete_patient(*, database: pymongo.database.Database, id: str) -> pymongo.results.DeleteResult:
+def delete_patient(
+    *, database: pymongo.database.Database, id: str
+) -> pymongo.results.DeleteResult:
     """
     Delete "patient" document with provided id.
     """
@@ -68,6 +73,10 @@ def get_patients(*, database: pymongo.database.Database) -> List[dict]:
 
     cursor = collection.find(filter=query)
     patients = list(cursor)
+
+    # To serialize object, convert _id in document to string.
+    for doc in patients:
+        doc.update((k, str(v)) for k, v in doc.items() if k == "_id")
 
     # TODO: Verify schema against each patient in patients
 
