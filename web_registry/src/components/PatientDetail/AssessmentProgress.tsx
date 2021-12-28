@@ -1,18 +1,10 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Typography,
-    withTheme,
-} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-import SettingsIcon from '@material-ui/icons/Settings';
-import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
+import AddIcon from '@mui/icons-material/Add';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import { GridCellParams, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { compareAsc, format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';

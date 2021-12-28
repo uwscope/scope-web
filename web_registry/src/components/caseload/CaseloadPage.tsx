@@ -1,5 +1,6 @@
-import { Button, FormControl, MenuItem, Select, withTheme } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import { Button, FormControl, MenuItem, Select } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import AddIcon from '@mui/icons-material/Add';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

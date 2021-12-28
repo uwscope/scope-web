@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import { SessionInfo } from 'src/components/PatientDetail/SessionInfo';
 

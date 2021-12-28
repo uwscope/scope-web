@@ -1,4 +1,4 @@
-import DateFnsUtils from '@date-io/date-fns';
+import { DatePicker } from '@mui/lab';
 import {
     Checkbox,
     FormControl,
@@ -15,10 +15,10 @@ import {
     Select,
     SelectProps,
     Switch,
+    TextField,
     Typography,
-    withTheme,
-} from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+} from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
@@ -63,14 +63,6 @@ const SelectField = withTheme(
             } as CSSObject)
     )
 );
-
-const DatePickerContainer = styled(KeyboardDatePicker)({
-    width: '100%',
-    margin: 0,
-    'label + .MuiInput-formControl': {
-        marginTop: 20,
-    },
-});
 
 const OtherGrid = styled(Grid)({
     display: 'flex',
@@ -131,7 +123,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
                 <Input
                     multiline={multiline}
                     rows={minLine}
-                    rowsMax={maxLine}
+                    maxRows={maxLine}
                     readOnly={!editable}
                     value={value}
                     onChange={handleChange}
@@ -198,20 +190,12 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
     if (editable) {
         return (
             <Grid item xs={xs || 12} sm={sm || 6}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <DatePickerContainer
-                        disableToolbar
-                        variant="inline"
-                        format="MM/dd/yyyy"
-                        margin="normal"
-                        label={label}
-                        value={value}
-                        onChange={handleChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
-                </MuiPickersUtilsProvider>
+                <DatePicker
+                    label={label}
+                    value={value}
+                    onChange={handleChange}
+                    renderInput={(params) => <TextField {...params} />}
+                />
             </Grid>
         );
     } else {

@@ -1,5 +1,5 @@
-import { withTheme } from '@material-ui/core';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@material-ui/x-grid';
+import withTheme from '@mui/styles/withTheme';
+import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

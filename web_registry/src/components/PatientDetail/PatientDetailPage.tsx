@@ -1,4 +1,5 @@
-import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
+import { Divider, Paper, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

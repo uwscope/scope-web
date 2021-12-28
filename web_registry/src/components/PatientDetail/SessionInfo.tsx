@@ -1,5 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { compareAsc, compareDesc } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';

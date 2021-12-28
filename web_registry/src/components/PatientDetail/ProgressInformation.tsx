@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { IAssessmentContent, KeyedMap } from 'shared/types';

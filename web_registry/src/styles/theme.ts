@@ -1,7 +1,7 @@
-import { indigo } from '@material-ui/core/colors';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { indigo } from '@mui/material/colors';
+import { createTheme } from '@mui/material/styles';
 
-declare module '@material-ui/core/styles/createMuiTheme' {
+declare module '@mui/material/styles' {
     interface Theme {
         customPalette: {
             subtle: React.CSSProperties['color'];
@@ -31,7 +31,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
 }
 
 export default function createAppTheme() {
-    return createMuiTheme({
+    return createTheme({
         customPalette: {
             subtle: '#eeeeee',
             label: '#00000088',
@@ -59,49 +59,61 @@ export default function createAppTheme() {
             headerHeight: 64,
             footerHeight: 80,
         },
-        overrides: {
+        components: {
             MuiFormLabel: {
-                root: {
-                    color: indigo[500],
-                    textTransform: 'uppercase',
-                    fontWeight: 700,
+                styleOverrides: {
+                    root: {
+                        color: indigo[500],
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                    },
                 },
             },
             MuiInput: {
-                input: {
-                    padding: '6px 12px',
-                },
-                inputMultiline: {
-                    padding: '0 12px',
-                },
-                underline: {
-                    background: '#fafafa',
+                styleOverrides: {
+                    input: {
+                        padding: '6px 12px',
+                    },
+                    inputMultiline: {
+                        padding: '0 12px',
+                    },
+                    underline: {
+                        background: '#fafafa',
+                    },
                 },
             },
             MuiFormControl: {
-                root: {
-                    paddingBottom: '24px',
+                styleOverrides: {
+                    root: {
+                        paddingBottom: '24px',
+                    },
                 },
             },
             MuiCheckbox: {
-                root: {},
+                styleOverrides: {
+                    root: {},
+                },
             },
             MuiInputLabel: {
-                shrink: {
-                    transform: 'translate(0)',
-                    fontSize: 14,
-                    paddingBottom: 6,
-                },
-                formControl: {
-                    transform: 'translate(0)',
-                    fontSize: 14,
-                    paddingBottom: 6,
+                styleOverrides: {
+                    shrink: {
+                        transform: 'translate(0)',
+                        fontSize: 14,
+                        paddingBottom: 6,
+                    },
+                    formControl: {
+                        transform: 'translate(0)',
+                        fontSize: 14,
+                        paddingBottom: 6,
+                    },
                 },
             },
             MuiFormControlLabel: {
-                label: {
-                    fontSize: 14,
-                    paddingBottom: 0,
+                styleOverrides: {
+                    label: {
+                        fontSize: 14,
+                        paddingBottom: 0,
+                    },
                 },
             },
         },

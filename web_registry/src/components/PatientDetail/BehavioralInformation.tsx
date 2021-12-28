@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import { BAChecklist } from 'src/components/PatientDetail/BAChecklist';
 import ValuesInventory from 'src/components/PatientDetail/ValuesInventory';

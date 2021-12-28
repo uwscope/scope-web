@@ -1,5 +1,6 @@
-import { Button, Divider, LinearProgress, Typography, withTheme } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import { Button, Divider, LinearProgress, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import EditIcon from '@mui/icons-material/Edit';
 import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';

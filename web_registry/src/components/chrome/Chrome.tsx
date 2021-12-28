@@ -1,6 +1,7 @@
-import { Button, CircularProgress, CssBaseline, Dialog, Typography, withTheme } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
+import { Button, CircularProgress, CssBaseline, Dialog, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import Footer from 'src/components/chrome/Footer';

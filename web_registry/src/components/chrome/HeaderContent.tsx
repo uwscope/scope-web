@@ -1,6 +1,7 @@
-import { Avatar, Breadcrumbs, Grid, Link, Menu, MenuItem, withTheme } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import { Avatar, Breadcrumbs, Grid, Link, Menu, MenuItem } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -86,7 +87,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
     };
 
     return (
-        <Grid container direction="row" justify="flex-start" alignItems="center" spacing={2}>
+        <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
             <Grid item>
                 <Avatar alt="Scope logo" src={Logo} />
             </Grid>

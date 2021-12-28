@@ -1,5 +1,5 @@
-import { TableRow } from '@material-ui/core';
-import { XGrid } from '@material-ui/x-grid';
+import { TableRow } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import styled from 'styled-components';
 
 export const ClickableTableRow = styled(TableRow)({
@@ -8,7 +8,7 @@ export const ClickableTableRow = styled(TableRow)({
     },
 });
 
-export const Table = styled(XGrid)({
+export const Table = styled(DataGrid)({
     '.MuiDataGrid-cell:focus': {
         outline: 'none',
     },

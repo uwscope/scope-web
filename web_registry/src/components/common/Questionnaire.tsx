@@ -1,4 +1,4 @@
-import { Grid, Radio, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { Grid, Radio, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import Disable from 'src/components/common/Disable';
 import { GridDateField, GridSwitchField, GridTextField } from 'src/components/common/GridField';

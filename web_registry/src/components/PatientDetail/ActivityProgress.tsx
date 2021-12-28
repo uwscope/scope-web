@@ -1,5 +1,5 @@
-import { Grid, Typography } from '@material-ui/core';
-import { GridColDef } from '@material-ui/x-grid';
+import { Grid, Typography } from '@mui/material';
+import { GridColDef } from '@mui/x-data-grid';
 import { compareAsc, format, isBefore } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { observer } from 'mobx-react';
