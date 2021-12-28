@@ -12,7 +12,7 @@ from invoke import Collection, task
 from tasks.terminal import spawn_new_terminal
 
 FLASK_DIR = "./server_flask"
-SSH_CONFIG_PATH = "./secrets/configuration/ssh.yaml"
+INSTANCE_SSH_CONFIG_PATH = "./secrets/configuration/instance_ssh.yaml"
 DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 
 
@@ -25,7 +25,7 @@ def dev_serve(context):
     """
 
     if spawn_new_terminal(context):
-        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(SSH_CONFIG_PATH)
+        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
         documentdb_config = (
             aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(
                 DOCUMENTDB_CONFIG_PATH
@@ -56,7 +56,7 @@ def dev_serve(context):
                             "FLASK_ENV": "development",
                             "FLASK_RUN_HOST": "localhost",
                             "FLASK_RUN_PORT": "4000",
-                            "LOCAL_DOCUMENTDB_PORT": str(ssh_port_forward.local_port),
+                            "DOCUMENTDB_LOCAL_PORT": str(ssh_port_forward.local_port),
                         },
                     )
 

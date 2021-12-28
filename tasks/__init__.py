@@ -4,6 +4,7 @@ from invoke import Collection
 
 import tasks.celery
 import tasks.database
+import tasks.documentdb
 import tasks.dependencies
 import tasks.flask
 import tasks.registry
@@ -16,8 +17,7 @@ aws_infrastructure.tasks.library.color.enable_color()
 ns = Collection()
 
 # Compose from database.py
-# TODO: Move onto new secrets and structure
-# compose_collection(ns, tasks.database.ns, name="database")
+compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 
 # Compose from dependencies.py
 compose_collection(ns, tasks.dependencies.ns, name="depend")
@@ -30,6 +30,9 @@ compose_collection(ns, tasks.tests.ns, name="test")
 #
 ns_dev = Collection("dev")
 ns_prod = Collection("prod")
+
+# Compose from database.py
+compose_collection(ns_dev, tasks.database.ns.collections["dev"], name="database")
 
 #
 # A server collection in each of development and production

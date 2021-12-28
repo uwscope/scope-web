@@ -60,11 +60,11 @@ class DocumentDBClientConfig:
             yaml = ruamel.yaml.YAML(typ="safe", pure=True)
             config_dict = yaml.load(config_file)
 
-        return DocumentDBConfig.parse(config_dict)
+        return DocumentDBClientConfig.parse(config_dict)
 
     @staticmethod
     def parse(config_dict: dict):
-        return DocumentDBConfig(
+        return DocumentDBClientConfig(
             endpoint=config_dict["endpoint"],
             hosts=config_dict["hosts"],
             port=config_dict["port"],
