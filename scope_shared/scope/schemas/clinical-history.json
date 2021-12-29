@@ -5,6 +5,10 @@
 	"description": "IClinicalHistory Type",
 	"type": "object",
 	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"type": { "const": "clinicalHistory" },
 		"primaryCancerDiagnosis": {
 			"type": "string"
 		},
@@ -33,5 +37,6 @@
 			"type": "string"
 		}
 	},
-	"additionalProperties": false
+	"additionalProperties": false,
+	"$comment": "None of the fields are required."
 }

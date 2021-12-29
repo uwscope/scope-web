@@ -5,13 +5,14 @@
 	"description": "Identity of the user",
 	"type": "object",
 	"properties": {
-		"identityId": {
+		"_id": {
 			"type": "string"
 		},
+		"type": { "const": "identity" },
 		"name": {
 			"type": "string"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["identityId", "name"]
+	"required": ["_id", "type", "name"]
 }

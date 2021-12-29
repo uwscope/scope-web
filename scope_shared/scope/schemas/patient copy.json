@@ -5,8 +5,6 @@
 	"description": "Holds all the patient data",
 	"type": "object",
 	"properties": {
-		"_id": { "type": "string" },
-		"type": { "const": "patient" },
 		"identity": {
 			"type": "object",
 			"description": "IIdentity schema",
@@ -88,5 +86,20 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_id", "type", "identity", "profile"]
+	"required": [
+		"identity",
+		"profile",
+		"clinicalHistory",
+		"valuesInventory",
+		"safetyPlan",
+		"sessions",
+		"caseReviews",
+		"assessments",
+		"scheduledAssessments",
+		"assessmentLogs",
+		"activities",
+		"scheduledActivities",
+		"activityLogs",
+		"moodLogs"
+	]
 }

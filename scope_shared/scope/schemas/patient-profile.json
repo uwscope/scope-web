@@ -5,6 +5,10 @@
 	"description": "IPatientProfile Type",
 	"type": "object",
 	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"type": { "const": "profile" },
 		"name": {
 			"type": "string"
 		},

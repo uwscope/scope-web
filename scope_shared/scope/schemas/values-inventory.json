@@ -5,6 +5,10 @@
 	"description": "IValuesInventory Type",
 	"type": "object",
 	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"type": { "const": "valuesInventory" },
 		"assigned": {
 			"type": "boolean"
 		},
