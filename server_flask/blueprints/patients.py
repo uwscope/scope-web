@@ -1,38 +1,15 @@
 import http
 from functools import wraps
 
-import jsonschema
 import scope.database
 import scope.database.patients
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
 from scope.schema import patient_schema
+from utils import validate_schema
 
 patients_blueprint = Blueprint("patients_blueprint", __name__)
-
-
-def validate_schema(schema_object):
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            try:
-                jsonschema.validate(request.json, schema_object)
-            except (jsonschema.SchemaError, jsonschema.ValidationError) as error:
-                # NOTE: jsonify returns a flask.Response() object with content-type header 'application/json'. Is this the best way to return the response?
-                abort(
-                    400,
-                    jsonify(
-                        message="Invalid contents.",
-                        schema=error.schema,
-                        error=error.message,
-                    ),
-                )
-            return f(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 @patients_blueprint.route("/", methods=["GET"])
@@ -61,6 +38,20 @@ def get_patient(patient_id):
 
 
 @patients_blueprint.route("/", methods=["POST"])
+@validate_schema(patient_schema)
 @as_json
 def create_patient():
-    pass
+    current_app.logger.info(request.json)
+
+    patient = request.json
+
+    context = request_context()
+
+    # Creates a patient collection of name `patient_{identity["_id"]` and inserts all the subschema documents.
+    patient_collection_name = scope.database.patients.create_patient_collection(
+        database=context.database, patient=patient
+    )
+
+    current_app.logger.info(patient_collection_name)
+
+    return patient_collection_name, http.HTTPStatus.OK
