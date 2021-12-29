@@ -6,6 +6,41 @@ import pymongo.results
 PATIENTS_COLLECTION_NAME = "patients"
 
 
+def create_patient_collection(
+    *, database: pymongo.database.Database, patient: dict
+) -> str:
+    """
+    Initialize a patient collection.
+
+    Initialize the collection with multiple subchema documents and return the collection name.
+    """
+
+    identity = patient["identity"]
+    profile = patient["profile"]
+    clinical_history = patient["clinicalHistory"]
+    values_inventory = patient["valuesInventory"]
+
+    patient_collection_name = "patient_{}".format(identity["_id"])
+
+    # Get or create a patients collection
+    patients_collection = database.get_collection(patient_collection_name)
+
+    # Ensure an identity document exists.
+    result = patients_collection.find_one(
+        filter={
+            "type": "identity",
+        }
+    )
+    if result is None:
+        # NOTE: Talk to James about this.
+        patients_collection.insert_one(document=identity)
+        patients_collection.insert_one(document=profile)
+        patients_collection.insert_one(document=clinical_history)
+        patients_collection.insert_one(document=values_inventory)
+
+    return patient_collection_name
+
+
 def create_patient(
     *, database: pymongo.database.Database, patient: dict
 ) -> pymongo.results.InsertOneResult:
