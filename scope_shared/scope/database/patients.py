@@ -3,14 +3,13 @@ from typing import List, Optional
 
 import pymongo
 import pymongo.database
+import pymongo.errors
 import pymongo.results
 
 PATIENTS_COLLECTION_NAME = "patients"
 
 
-def create_patient_collection(
-    *, database: pymongo.database.Database, patient: dict
-) -> str:
+def create_patient(*, database: pymongo.database.Database, patient: dict) -> str:
     """
     Initialize a patient collection.
 
@@ -42,26 +41,10 @@ def create_patient_collection(
 
     # Create unique index on (`type`, `v`)
     patients_collection.create_index(
-        [("type", pymongo.ASCENDING), ("v", pymongo.DESCENDING)], unique=True
+        [("type", pymongo.ASCENDING), ("_rev", pymongo.DESCENDING)], unique=True
     )
 
-    return patient_collection_name
-
-
-def create_patient(
-    *, database: pymongo.database.Database, patient: dict
-) -> pymongo.results.InsertOneResult:
-    """
-    Create the provided patient.
-    """
-
-    # TODO: Verify schema against patient
-
-    collection = database.get_collection(name=PATIENTS_COLLECTION_NAME)
-
-    result = collection.insert_one(document=patient)
-
-    return result
+    return patient
 
 
 def delete_patient(
@@ -85,48 +68,49 @@ def delete_patient(
     return result
 
 
-def get_patient(*, database: pymongo.database.Database, id: str) -> Optional[dict]:
+def get_patient(
+    *, database: pymongo.database.Database, collection: str
+) -> Optional[dict]:
     """
-    Retrieve "patient" document with provided id.
+    Retrieve "patient" document with provided patient collection.
     """
-    collection = database.get_collection(name=PATIENTS_COLLECTION_NAME)
 
-    query = {
-        "type": "patient",
-        "_id": id,
-    }
+    # NOTE: If patient collection name doesn't exist, return None.
+    # Maybe there is a better way to return a 404.
+    if collection not in database.list_collection_names():
+        return None
 
-    patient = collection.find_one(filter=query)
+    collection = database.get_collection(name=collection)
 
-    # TODO: Verify schema against patient
+    patient = {"type": "patient"}
+
+    queries = [
+        {
+            "type": "identity",
+        },
+        {
+            "type": "profile",
+        },
+        {
+            "type": "clinicalHistory",
+        },
+        {
+            "type": "valuesInventory",
+        },
+    ]
+
+    for query in queries:
+        # Find the document with highest `v`.
+        found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
+        # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
+        if "_id" in found:
+            found["_id"] = str(found["_id"])
+        patient[query["type"]] = found
 
     return patient
 
 
-# NOTE: This method will go away eventually.
 def get_patients(*, database: pymongo.database.Database) -> List[dict]:
-    """
-    Retrieve all "patient" documents.
-    """
-    collection = database.get_collection(name=PATIENTS_COLLECTION_NAME)
-
-    query = {
-        "type": "patient",
-    }
-
-    cursor = collection.find(filter=query)
-    patients = list(cursor)
-
-    # To serialize object, convert _id in document to string.
-    for doc in patients:
-        doc.update((k, str(v)) for k, v in doc.items() if k == "_id")
-
-    # TODO: Verify schema against each patient in patients
-
-    return patients
-
-
-def get_all_patients(*, database: pymongo.database.Database):
     """
     Retrieve all "patient" documents.
     """
@@ -144,7 +128,7 @@ def get_all_patients(*, database: pymongo.database.Database):
 
     for patient_collection in patient_collections:
         patient = {"type": "patient"}
-
+        # NOTE: Validate latency.
         collection = database.get_collection(name=patient_collection)
         queries = [
             {
@@ -163,12 +147,16 @@ def get_all_patients(*, database: pymongo.database.Database):
 
         for query in queries:
             # Find the document with highest `v`.
-            found = collection.find_one(filter=query, sort=[("v", pymongo.DESCENDING)])
+            found = collection.find_one(
+                filter=query, sort=[("_rev", pymongo.DESCENDING)]
+            )
             # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
             if "_id" in found:
                 found["_id"] = str(found["_id"])
             patient[query["type"]] = found
 
         patients.append(patient)
+
+    # TODO: Verify schema against each patient in patients
 
     return patients
