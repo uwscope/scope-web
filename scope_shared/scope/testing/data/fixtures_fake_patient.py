@@ -129,6 +129,7 @@ def data_fake_values_inventory_factory() -> dict:
     fake_values_inventory = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "valuesInventory",
+        "v": 1,
         "assigned": True,
         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
         "values": [
@@ -192,3 +193,14 @@ def fixture_data_fake_patient_factory() -> Callable[[], dict]:
     """
 
     return data_fake_patient_factory
+
+
+@pytest.fixture(name="data_fake_values_inventory_factory")
+def fixture_data_fake_values_inventory_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_values_inventory_factory.
+
+    Provides a factory for obtaining data for a fake values inventory.
+    """
+
+    return data_fake_values_inventory_factory
