@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 
 import pymongo
@@ -102,6 +103,7 @@ def get_patient(*, database: pymongo.database.Database, id: str) -> Optional[dic
     return patient
 
 
+# NOTE: This method will go away eventually.
 def get_patients(*, database: pymongo.database.Database) -> List[dict]:
     """
     Retrieve all "patient" documents.
@@ -120,5 +122,53 @@ def get_patients(*, database: pymongo.database.Database) -> List[dict]:
         doc.update((k, str(v)) for k, v in doc.items() if k == "_id")
 
     # TODO: Verify schema against each patient in patients
+
+    return patients
+
+
+def get_all_patients(*, database: pymongo.database.Database):
+    """
+    Retrieve all "patient" documents.
+    """
+    collections = database.list_collection_names()
+
+    # Patient collection names start with `patient_`
+    regex_match_string = "patient_(.*)"
+    patient_collections = [
+        collection
+        for collection in collections
+        if re.match(regex_match_string, collection)
+    ]
+
+    patients = []
+
+    for patient_collection in patient_collections:
+        patient = {"type": "patient"}
+
+        collection = database.get_collection(name=patient_collection)
+        queries = [
+            {
+                "type": "identity",
+            },
+            {
+                "type": "profile",
+            },
+            {
+                "type": "clinicalHistory",
+            },
+            {
+                "type": "valuesInventory",
+            },
+        ]
+
+        for query in queries:
+            # Find the document with highest `v`.
+            found = collection.find_one(filter=query, sort=[("v", pymongo.DESCENDING)])
+            # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
+            if "_id" in found:
+                found["_id"] = str(found["_id"])
+            patient[query["type"]] = found
+
+        patients.append(patient)
 
     return patients
