@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import pymongo
 import pymongo.database
 import pymongo.results
 
@@ -37,6 +38,11 @@ def create_patient_collection(
         patients_collection.insert_one(document=profile)
         patients_collection.insert_one(document=clinical_history)
         patients_collection.insert_one(document=values_inventory)
+
+    # Create unique index on (`type`, `v`)
+    patients_collection.create_index(
+        [("type", pymongo.ASCENDING), ("v", pymongo.DESCENDING)], unique=True
+    )
 
     return patient_collection_name
 
