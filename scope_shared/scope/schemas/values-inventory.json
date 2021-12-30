@@ -9,7 +9,7 @@
 			"type": "string"
 		},
 		"type": { "const": "valuesInventory" },
-		"v": { "type": "number" },
+		"_rev": { "type": "number" },
 		"assigned": {
 			"type": "boolean"
 		},
@@ -24,5 +24,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_id", "type", "v", "assigned", "assignedDate"]
+	"required": ["_id", "type", "_rev", "assigned", "assignedDate"]
 }

@@ -9,7 +9,7 @@
 			"type": "string"
 		},
 		"type": { "const": "profile" },
-		"v": { "type": "number" },
+		"_rev": { "type": "number" },
 		"name": {
 			"type": "string"
 		},
