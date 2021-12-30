@@ -61,7 +61,7 @@ def data_fake_identity_factory() -> dict:
         # NOTE: patient collection name is `patient_{_id}`
         "_id": str(bson.objectid.ObjectId()),
         "type": "identity",
-        "v": 1,
+        "_rev": 1,
         "name": _fake_name_factory(),
     }
 
@@ -74,7 +74,7 @@ def data_fake_profile_factory() -> dict:
     fake_profile = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "profile",
-        "v": 1,
+        "_rev": 1,
         "name": "First Last",  # TODO: should be same as identity?
         "MRN": "dummy_MRN",
         "clinicCode": "Neuro",  # clinicCode enum
@@ -102,7 +102,7 @@ def data_fake_clinical_history_factory() -> dict:
     fake_clinical_history = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "clinicalHistory",
-        "v": 1,
+        "_rev": 1,
         "primaryCancerDiagnosis": "primaryCancerDiagnosis",
         "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
         "currentTreatmentRegimen": {
@@ -132,7 +132,7 @@ def data_fake_values_inventory_factory() -> dict:
     fake_values_inventory = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "valuesInventory",
-        "v": 1,
+        "_rev": 1,
         "assigned": True,
         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
         "values": [
