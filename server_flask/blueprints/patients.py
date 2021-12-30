@@ -41,7 +41,6 @@ def get_patient(patient_id):
 @validate_schema(patient_schema)
 @as_json
 def create_patient():
-    current_app.logger.info(request.json)
 
     patient = request.json
 
