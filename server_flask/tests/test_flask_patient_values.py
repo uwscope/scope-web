@@ -20,14 +20,14 @@ def test_flask_get_patient_values(
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we can get the values inventory for a patient.
+    Test to get the values inventory for a patient.
     """
 
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection = scope.database.patients.create_patient_collection(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
     )
@@ -35,10 +35,13 @@ def test_flask_get_patient_values(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
+    # GET /patient/values/patient_{identityId}
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "{}/{}".format(API_RELATIVE_PATH, patient_collection),
+            "{}/patient_{}".format(
+                API_RELATIVE_PATH, data_fake_patient["identity"]["_id"]
+            ),
         ),
     )
 
@@ -61,26 +64,31 @@ def test_flask_update_patient_values(
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
 
-    # Generate a fake value inventory
+    # Generate a fake values inventory
     data_fake_values_inventory = data_fake_values_inventory_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection = scope.database.patients.create_patient_collection(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
     )
 
-    # Increment the `v` version of the fake values inventory document
-    data_fake_values_inventory["v"] = data_fake_patient["valuesInventory"]["v"] + 1
+    # Increment the `_rev` version of the fake values inventory document
+    data_fake_values_inventory["_rev"] = (
+        data_fake_patient["valuesInventory"]["_rev"] + 1
+    )
 
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve the same patient using the _id
+    # Updates the same patient's values inventory
+    # PUT /patient/values/patient_{identityId} -
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
-            "{}/{}".format(API_RELATIVE_PATH, patient_collection),
+            "{}/patient_{}".format(
+                API_RELATIVE_PATH, data_fake_patient["identity"]["_id"]
+            ),
         ),
         json=data_fake_values_inventory,
     )
@@ -96,7 +104,7 @@ def test_flask_update_patient_values_duplicate(
     data_fake_values_inventory_factory: Callable[[], dict],
 ):
     """
-    Test that we cannot update the values inventory for a patient with the same `v` version number.
+    Test that we cannot update the values inventory for a patient with the same `_rev` version number.
     """
 
     # Generate a fake patient
@@ -106,7 +114,7 @@ def test_flask_update_patient_values_duplicate(
     data_fake_values_inventory = data_fake_values_inventory_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection = scope.database.patients.create_patient_collection(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
     )
@@ -114,12 +122,73 @@ def test_flask_update_patient_values_duplicate(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve the same patient using the _id
+    # Updates the same patient's values inventory but fails with pymongo duplicate key error.
+    # PUT /patient/values/patient_{identityId}
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
-            "{}/{}".format(API_RELATIVE_PATH, patient_collection),
+            "{}/patient_{}".format(
+                API_RELATIVE_PATH, data_fake_patient["identity"]["_id"]
+            ),
         ),
         json=data_fake_values_inventory,
     )
     assert response.status_code == 422
+
+
+def test_flask_get_patient_values_latest(
+    database_client: pymongo.database.Database,
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+    data_fake_patient_factory: Callable[[], dict],
+    data_fake_values_inventory_factory: Callable[[], dict],
+):
+    """
+    Test that we get the latest values inventory for a patient.
+    """
+
+    # Generate a fake patient
+    data_fake_patient = data_fake_patient_factory()
+
+    # Create the patient collection and insert the documents
+    scope.database.patients.create_patient(
+        database=database_client,
+        patient=data_fake_patient,
+    )
+
+    # Generate a fake value inventory
+    data_fake_values_inventory = data_fake_values_inventory_factory()
+
+    # Increment the `_rev` version of the fake values inventory document
+    data_fake_values_inventory["_rev"] = (
+        data_fake_patient["valuesInventory"]["_rev"] + 1
+    )
+
+    # Obtain a session
+    session = flask_session_unauthenticated_factory()
+
+    # Update the patient with new _rev
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "{}/patient_{}".format(
+                API_RELATIVE_PATH, data_fake_patient["identity"]["_id"]
+            ),
+        ),
+        json=data_fake_values_inventory,
+    )
+
+    # GET the values inventory document
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "{}/patient_{}".format(
+                API_RELATIVE_PATH, data_fake_patient["identity"]["_id"]
+            ),
+        ),
+    )
+
+    assert response.ok
+
+    # Confirm if the response matches the latest `_rev`
+    assert response.json() == data_fake_values_inventory
