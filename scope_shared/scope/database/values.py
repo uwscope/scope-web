@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import pymongo
 import pymongo.database
 import pymongo.errors
 import pymongo.results
@@ -19,7 +20,7 @@ def get_values(
 
     # Find the document with highest `v`.
     values_inventory = collection.find_one(
-        filter=query, sort=[("v", pymongo.DESCENDING)]
+        filter=query, sort=[("_rev", pymongo.DESCENDING)]
     )
 
     # TODO: Verify schema against values-inventory json.
