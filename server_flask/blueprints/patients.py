@@ -17,9 +17,12 @@ patients_blueprint = Blueprint("patients_blueprint", __name__)
 def get_patients():
     context = request_context()
 
-    patients = scope.database.patients.get_patients(database=context.database)
-
+    patients = scope.database.patients.get_all_patients(database=context.database)
     return {"patients": patients}, http.HTTPStatus.OK
+
+    # NOTE: Keeping James' old code for now.
+    # patients = scope.database.patients.get_patients(database=context.database)
+    # return {"patients": patients}, http.HTTPStatus.OK
 
 
 @patients_blueprint.route("/<string:patient_id>", methods=["GET"])
