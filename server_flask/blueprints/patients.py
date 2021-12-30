@@ -17,24 +17,20 @@ patients_blueprint = Blueprint("patients_blueprint", __name__)
 def get_patients():
     context = request_context()
 
-    patients = scope.database.patients.get_all_patients(database=context.database)
+    patients = scope.database.patients.get_patients(database=context.database)
     return {"patients": patients}, http.HTTPStatus.OK
 
-    # NOTE: Keeping James' old code for now.
-    # patients = scope.database.patients.get_patients(database=context.database)
-    # return {"patients": patients}, http.HTTPStatus.OK
 
-
-@patients_blueprint.route("/<string:patient_id>", methods=["GET"])
+@patients_blueprint.route("/<string:patient_collection>", methods=["GET"])
 @as_json
-def get_patient(patient_id):
+def get_patient(patient_collection):
     context = request_context()
 
     result = scope.database.patients.get_patient(
-        database=context.database, id=patient_id
+        database=context.database, collection=patient_collection
     )
 
-    if result:
+    if result is not None:
         return result, http.HTTPStatus.OK
     else:
         abort(http.HTTPStatus.NOT_FOUND)
@@ -50,10 +46,8 @@ def create_patient():
     context = request_context()
 
     # Creates a patient collection of name `patient_{identity["_id"]` and inserts all the subschema documents.
-    patient_collection_name = scope.database.patients.create_patient_collection(
+    created_patient = scope.database.patients.create_patient(
         database=context.database, patient=patient
     )
 
-    current_app.logger.info(patient_collection_name)
-
-    return patient_collection_name, http.HTTPStatus.OK
+    return created_patient, http.HTTPStatus.OK
