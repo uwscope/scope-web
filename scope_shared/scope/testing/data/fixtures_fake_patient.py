@@ -61,6 +61,7 @@ def data_fake_identity_factory() -> dict:
         # NOTE: patient collection name is `patient_{_id}`
         "_id": str(bson.objectid.ObjectId()),
         "type": "identity",
+        "v": 1,
         "name": _fake_name_factory(),
     }
 
@@ -73,6 +74,7 @@ def data_fake_profile_factory() -> dict:
     fake_profile = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "profile",
+        "v": 1,
         "name": "First Last",  # TODO: should be same as identity?
         "MRN": "dummy_MRN",
         "clinicCode": "Neuro",  # clinicCode enum
@@ -100,6 +102,7 @@ def data_fake_clinical_history_factory() -> dict:
     fake_clinical_history = {
         "_id": str(bson.objectid.ObjectId()),
         "type": "clinicalHistory",
+        "v": 1,
         "primaryCancerDiagnosis": "primaryCancerDiagnosis",
         "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
         "currentTreatmentRegimen": {
@@ -170,8 +173,8 @@ def data_fake_patient_factory() -> dict:
     fake_patient = {
         # TODO: A "patient" exists only as a query composed from other documents.
         #       Because a "patient" is never stored to the database, it will not have an "_id".
-        # NOTE: Below `_id` isn't being used anywhere for now.
-        "_id": str(bson.objectid.ObjectId()),
+        # NOTE: Below `_id` isn't being used anywhere for now except in James' version of CRUD patients code.
+        # "_id": str(bson.objectid.ObjectId()),
         "type": "patient",
         "identity": data_fake_identity_factory(),
         "profile": data_fake_profile_factory(),
