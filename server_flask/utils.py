@@ -18,9 +18,9 @@ def validate_schema(schema_object):
         @wraps(f)
         def wrapper(*args, **kwargs):
             # For .evaluate to work, its argument needs to be of type '<class 'jschon.json.JSON'>'
-            current_app.logger.info(schema_object)
+            # current_app.logger.info(schema_object)
             result = schema_object.evaluate(JSON.loads(json.dumps(request.json)))
-            current_app.logger.info(result.output("basic"))
+            # current_app.logger.info(result.output("basic"))
 
             if result.output("flag")["valid"] == False:
                 abort(
