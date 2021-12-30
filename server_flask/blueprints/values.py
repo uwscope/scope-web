@@ -12,7 +12,8 @@ from utils import validate_schema
 values_blueprint = Blueprint("values_blueprint", __name__)
 
 
-# NOTE: Passing the patient collection name for now. Will fix this after auth workflow is finalized. Other option could be the patient identity id because the collection name is `patient_{identity_id}`.
+# NOTE: Passing the patient collection name for now. Will fix this after auth workflow is finalized.
+# Other option could be the patient identity id because the collection name is `patient_{identity_id}`.
 @values_blueprint.route("/<string:patient_collection>", methods=["GET"])
 @as_json
 def get_patient_values(patient_collection):
@@ -28,10 +29,21 @@ def get_patient_values(patient_collection):
         abort(http.HTTPStatus.NOT_FOUND)
 
 
-@values_blueprint.route("/", methods=["PUT"])
+@values_blueprint.route("/<string:patient_collection>", methods=["PUT"])
 @as_json
-def update_patient_values(patient_id):
-    current_app.logger.info(
-        "For the authenticated patient, updates the values inventory and returns an array of life area values data"
+def update_patient_values(patient_collection):
+
+    values_inventory = request.json
+
+    context = request_context()
+
+    result = scope.database.values.create_values(
+        database=context.database,
+        collection=patient_collection,
+        values_inventory=values_inventory,
     )
-    return True, http.HTTPStatus.OK
+
+    if result is not None:
+        return values_inventory, http.HTTPStatus.OK
+    else:
+        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)
