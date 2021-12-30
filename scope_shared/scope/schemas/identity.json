@@ -9,6 +9,7 @@
 			"type": "string"
 		},
 		"type": { "const": "identity" },
+		"v": { "type": "number" },
 		"name": {
 			"type": "string"
 		}

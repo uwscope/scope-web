@@ -9,6 +9,7 @@
 			"type": "string"
 		},
 		"type": { "const": "profile" },
+		"v": { "type": "number" },
 		"name": {
 			"type": "string"
 		},

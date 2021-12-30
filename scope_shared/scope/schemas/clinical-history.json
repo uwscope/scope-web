@@ -9,6 +9,7 @@
 			"type": "string"
 		},
 		"type": { "const": "clinicalHistory" },
+		"v": { "type": "number" },
 		"primaryCancerDiagnosis": {
 			"type": "string"
 		},
