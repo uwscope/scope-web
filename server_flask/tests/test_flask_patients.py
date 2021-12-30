@@ -134,7 +134,7 @@ def test_flask_create_patient(
         json=data_fake_patient,
     )
 
-    # NOTE: Creation isn't happening yet. But returning 200 for now.
+    # TODO: Add more checks on `response`
     assert response.status_code == 200
 
     # Ensure body of response is our fake patient
