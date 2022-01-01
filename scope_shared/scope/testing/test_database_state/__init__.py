@@ -5,3 +5,4 @@ Packages can then import this single module for their own check of database stat
 """
 
 from scope.testing.test_database_state.test_patients_collection import *
+from scope.testing.test_database_state.test_unique_credentials import *

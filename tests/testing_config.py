@@ -21,3 +21,11 @@ DEVELOPMENT_CONFIGS = {
 }
 
 ALL_CONFIGS = DEVELOPMENT_CONFIGS
+
+UNIQUE_DOCUMENTDB_CONFIGS = [
+    DEVELOPMENT_CONFIGS["development_local"].documentdb_config,
+]
+
+UNIQUE_DATABASE_CONFIGS = [
+    DEVELOPMENT_CONFIGS["development_local"].database_config,
+]
