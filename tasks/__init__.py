@@ -8,7 +8,7 @@ import tasks.documentdb
 import tasks.dependencies
 import tasks.flask
 import tasks.registry
-import tasks.tests
+import tasks.test
 
 # Enable color
 aws_infrastructure.tasks.library.color.enable_color()
