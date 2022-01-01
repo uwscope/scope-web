@@ -23,7 +23,7 @@ compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 compose_collection(ns, tasks.dependencies.ns, name="depend")
 
 # Compose from test.py
-compose_collection(ns, tasks.tests.ns, name="test")
+compose_collection(ns, tasks.test.ns, name="test")
 
 #
 # Collections for development and production
