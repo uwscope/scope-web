@@ -1,5 +1,6 @@
 import aws_infrastructure.tasks.ssh
 from dataclasses import dataclass
+from typing import Optional
 
 import scope.config
 
@@ -12,4 +13,4 @@ class TestingConfig:
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig
     documentdb_config: scope.config.DocumentDBConfig
     database_config: scope.config.DatabaseConfig
-    flask_config: scope.config.FlaskConfig
+    flask_config: Optional[scope.config.FlaskConfig] = None
