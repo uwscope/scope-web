@@ -10,8 +10,7 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
     """
     Configure fixture_testing_config for each testing context.
 
-    Detect whether a module specifies a value for TESTING_CONFIGS.
-    Otherwise, apply a default of ALL_CONFIGS.
+    Obtained desired testing configurations from module variable TESTING_CONFIGS.
     """
     if "_testing_config_generator" in metafunc.fixturenames:
         if "TESTING_CONFIGS" in metafunc.module.__dict__:

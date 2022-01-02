@@ -7,7 +7,7 @@ Fixtures should then fail and therefore allow inspection of the failure.
 
 import tests.testing_config
 
-TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
+TESTING_CONFIGS = tests.testing_config.DATABASE_TESTING_CONFIGS
 TESTING_CHECK_FIXTURES = True
 
 from scope.testing.test_check_fixtures import *

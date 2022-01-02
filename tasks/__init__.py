@@ -17,6 +17,9 @@ aws_infrastructure.tasks.library.color.enable_color()
 ns = Collection()
 
 # Compose from database.py
+compose_collection(ns, tasks.database.ns, name="database")
+
+# Compose from documentdb.py
 compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 
 # Compose from dependencies.py
@@ -30,9 +33,6 @@ compose_collection(ns, tasks.test.ns, name="test")
 #
 ns_dev = Collection("dev")
 ns_prod = Collection("prod")
-
-# Compose from database.py
-compose_collection(ns_dev, tasks.database.ns.collections["dev"], name="database")
 
 #
 # A server collection in each of development and production
