@@ -6,11 +6,10 @@ because those will be executed in a production environment that does not include
 """
 
 from aws_infrastructure.tasks.collection import compose_collection
+import aws_infrastructure.tasks.terminal
 from invoke import Collection
 from invoke import task
 from pathlib import Path
-
-from tasks.terminal import spawn_new_terminal
 
 REGISTRY_DIR = './web_registry'
 
@@ -25,7 +24,7 @@ def dev_registry_serve(context):
     For development purposes, asynchronously starts in a new terminal.
     """
 
-    if spawn_new_terminal(context):
+    if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
         with context.cd(Path(REGISTRY_DIR)):
             context.run(
                 command=' '.join([

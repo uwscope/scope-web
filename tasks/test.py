@@ -33,7 +33,7 @@ TEST_CONFIGS = {
     ),
 }
 
-ns = Collection("tests")
+ns = Collection("test")
 
 ns_dependencies = aws_infrastructure.tasks.library.tests.create_tasks(
     config_key=CONFIG_KEY,

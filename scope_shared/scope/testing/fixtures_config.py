@@ -10,8 +10,7 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
     """
     Configure fixture_testing_config for each testing context.
 
-    Detect whether a module specifies a value for TESTING_CONFIGS.
-    Otherwise, apply a default of ALL_CONFIGS.
+    Obtained desired testing configurations from module variable TESTING_CONFIGS.
     """
     if "_testing_config_generator" in metafunc.fixturenames:
         if "TESTING_CONFIGS" in metafunc.module.__dict__:
@@ -89,7 +88,13 @@ def fixture_flask_config(
 ) -> scope.config.FlaskConfig:
     """
     Obtain Flask configuration.
+
+    If a testing_config does not include a flask_config, skip any associated tests.
     """
+
+    if testing_config.flask_config is None:
+        pytest.skip("No flask_config in testing_config")
+
     return testing_config.flask_config
 
 

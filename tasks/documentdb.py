@@ -5,11 +5,10 @@ Tasks for working directly with the database cluster.
 from aws_infrastructure.tasks.collection import compose_collection
 import aws_infrastructure.tasks.library.documentdb
 import aws_infrastructure.tasks.ssh
+import aws_infrastructure.tasks.terminal
 from invoke import Collection
 from invoke import task
 import urllib.parse
-
-from tasks.terminal import spawn_new_terminal
 
 INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
@@ -23,7 +22,7 @@ def documentdb_forward(context):
     Use a fixed port so clients can save the connection information.
     """
 
-    if spawn_new_terminal(context):
+    if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
         ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
         documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
 
