@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/values-inventory",
+	"title": "IValuesInventory",
+	"description": "IValuesInventory Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"type": { "const": "valuesInventory" },
+		"_rev": { "type": "number" },
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDate": {
+			"type": "string"
+		},
+		"values": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/life-area-value"
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_id", "type", "_rev", "assigned", "assignedDate"]
+}

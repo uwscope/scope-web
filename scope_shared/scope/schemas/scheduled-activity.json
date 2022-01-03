@@ -1,0 +1,32 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/scheduled-activity",
+	"title": "IScheduledActivity",
+	"description": "IScheduledActivity Type",
+	"type": "object",
+	"properties": {
+		"scheduleId": {
+			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
+		},
+		"dueDate": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		},
+		"dueType": {
+			"$ref": "/schemas/scheduled-item#/properties/dueType"
+		},
+		"activityId": {
+			"type": "string"
+		},
+		"activityName": {
+			"type": "string"
+		},
+		"reminder": {
+			"type": "string"
+		},
+		"completed": {
+			"type": "boolean"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["scheduleId", "dueDate", "dueType", "activityId", "activityName", "reminder", "completed"]
+}

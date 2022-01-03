@@ -1,0 +1,17 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/referral-status",
+	"title": "IReferralStatus",
+	"description": "IReferralStatus interface",
+	"type": "object",
+	"properties": {
+		"referralType": {
+			"$ref": "/schemas/enums#/properties/referral"
+		},
+		"referralStatus": {
+			"$ref": "/schemas/enums#/properties/referralStatus"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["referralType", "referralStatus"]
+}

@@ -1,0 +1,32 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/life-area-value",
+	"title": "ILifeAreaValue",
+	"description": "ILifeAreaValue Type",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": {
+			"type": "string"
+		},
+		"dateCreated": {
+			"type": "string"
+		},
+		"dateEdited": {
+			"type": "string"
+		},
+		"lifeareaId": {
+			"type": "string"
+		},
+		"activities": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/life-area-value-activity"
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["id", "name", "dateCreated", "dateEdited", "lifeareaId", "activities"]
+}

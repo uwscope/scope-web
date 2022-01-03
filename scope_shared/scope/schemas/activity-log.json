@@ -1,0 +1,41 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/activity-log",
+	"title": "IActivityLog",
+	"description": "IActivityLog Type",
+	"type": "object",
+	"properties": {
+		"logId": {
+			"$ref": "/schemas/log#/properties/logId"
+		},
+		"recordedDate": {
+			"$ref": "/schemas/log#/properties/recordedDate"
+		},
+		"comment": {
+			"$ref": "/schemas/log#/properties/comment"
+		},
+		"scheduleId": {
+			"type": "string"
+		},
+		"activityName": {
+			"type": "string"
+		},
+		"completed": {
+			"type": "boolean"
+		},
+		"success": {
+			"$ref": "/schemas/enums#/properties/activitySuccessType"
+		},
+		"alternative": {
+			"type": "string"
+		},
+		"pleasure": {
+			"type": "number"
+		},
+		"accomplishment": {
+			"type": "number"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["recordedDate", "scheduleId", "activityName"]
+}
