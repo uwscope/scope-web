@@ -1,7 +1,7 @@
 import { Button, CircularProgress, CssBaseline, Dialog, Typography } from '@mui/material';
-import withTheme from '@mui/styles/withTheme';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import withTheme from '@mui/styles/withTheme';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import Footer from 'src/components/chrome/Footer';
@@ -66,7 +66,7 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
             </Dialog>
             <CssBaseline />
             <AppBarContainer position="fixed">
-                <Toolbar>{props.headerContent}</Toolbar>
+                <Toolbar variant="dense">{props.headerContent}</Toolbar>
             </AppBarContainer>
             <MainContainer>{props.children}</MainContainer>
             <Footer></Footer>

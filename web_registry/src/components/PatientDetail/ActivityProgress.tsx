@@ -103,7 +103,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             id={getString('patient_progress_activity_hash')}
             title={getString('patient_progress_activity_name')}
             loading={currentPatient?.state == 'Pending'}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {!!logs && logs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -115,9 +115,11 @@ export const ActivityProgress: FunctionComponent = observer(() => {
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={false}
+                        pagination
                     />
                 )}
                 {(!logs || logs.length == 0) && (

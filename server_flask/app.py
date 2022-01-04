@@ -6,12 +6,11 @@ from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
+import database
 from assessments import get_supported_assessments
 from blueprints.patient import patient_blueprint
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
-
-import database
 
 
 def create_app():
@@ -43,7 +42,7 @@ def create_app():
 
     # Temporary store for patients
     patients = getRandomFakePatients()
-    patient_map = {p["recordId"]: p for p in patients}
+    patient_map = {p["identity"]["identityId"]: p for p in patients}
 
     # API TODO:
     # - check method

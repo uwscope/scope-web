@@ -122,7 +122,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
                 <InputLabel shrink>{label}</InputLabel>
                 <Input
                     multiline={multiline}
-                    rows={minLine}
+                    minRows={minLine}
                     maxRows={maxLine}
                     readOnly={!editable}
                     value={value}

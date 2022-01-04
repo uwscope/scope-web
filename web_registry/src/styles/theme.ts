@@ -1,5 +1,75 @@
+import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
 import { indigo } from '@mui/material/colors';
 import { createTheme } from '@mui/material/styles';
+
+export const themeOptions: ThemeOptions = {
+    palette: {
+        type: 'light',
+        primary: {
+            main: '#3f51b5',
+        },
+        secondary: {
+            main: '#f50057',
+        },
+    },
+    typography: {
+        body1: {
+            fontSize: '1rem',
+            lineHeight: 1.15,
+        },
+        fontSize: 12,
+    },
+    spacing: 4,
+    props: {
+        MuiList: {
+            dense: true,
+        },
+        MuiMenuItem: {
+            dense: true,
+        },
+        MuiTable: {
+            size: 'small',
+        },
+        MuiButton: {
+            size: 'small',
+        },
+        MuiButtonGroup: {
+            size: 'small',
+        },
+        MuiCheckbox: {
+            size: 'small',
+        },
+        MuiFab: {
+            size: 'small',
+        },
+        MuiFormControl: {
+            margin: 'dense',
+            size: 'small',
+        },
+        MuiFormHelperText: {
+            margin: 'dense',
+        },
+        MuiIconButton: {
+            size: 'small',
+        },
+        MuiInputBase: {
+            margin: 'dense',
+        },
+        MuiInputLabel: {
+            margin: 'dense',
+        },
+        MuiRadio: {
+            size: 'small',
+        },
+        MuiSwitch: {
+            size: 'small',
+        },
+        MuiTextField: {
+            margin: 'dense',
+            size: 'small',
+        },
+    },
+};
 
 declare module '@mui/material/styles' {
     interface Theme {
@@ -32,6 +102,22 @@ declare module '@mui/material/styles' {
 
 export default function createAppTheme() {
     return createTheme({
+        palette: {
+            primary: {
+                main: '#3f51b5',
+            },
+            secondary: {
+                main: '#f50057',
+            },
+        },
+        typography: {
+            body1: {
+                fontSize: '1rem',
+                lineHeight: 1.15,
+            },
+            fontSize: 12,
+        },
+        spacing: 4,
         customPalette: {
             subtle: '#eeeeee',
             label: '#00000088',
@@ -56,10 +142,69 @@ export default function createAppTheme() {
         },
         customSizes: {
             contentsMenuWidth: 300,
-            headerHeight: 64,
-            footerHeight: 80,
+            headerHeight: 48,
+            footerHeight: 48,
         },
         components: {
+            MuiList: {
+                defaultProps: {
+                    dense: true,
+                },
+            },
+            MuiMenuItem: {
+                defaultProps: {
+                    dense: true,
+                },
+            },
+            MuiTable: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiButton: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiButtonGroup: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiCheckbox: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiFab: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiFormControl: {
+                styleOverrides: {
+                    root: {
+                        paddingBottom: '24px',
+                    },
+                },
+                defaultProps: {
+                    margin: 'dense',
+                    size: 'small',
+                },
+            },
+            MuiFormControlLabel: {
+                styleOverrides: {
+                    label: {
+                        fontSize: 14,
+                        paddingBottom: 0,
+                    },
+                },
+            },
+            MuiFormHelperText: {
+                defaultProps: {
+                    margin: 'dense',
+                },
+            },
             MuiFormLabel: {
                 styleOverrides: {
                     root: {
@@ -67,6 +212,11 @@ export default function createAppTheme() {
                         textTransform: 'uppercase',
                         fontWeight: 700,
                     },
+                },
+            },
+            MuiIconButton: {
+                defaultProps: {
+                    size: 'small',
                 },
             },
             MuiInput: {
@@ -82,19 +232,15 @@ export default function createAppTheme() {
                     },
                 },
             },
-            MuiFormControl: {
-                styleOverrides: {
-                    root: {
-                        paddingBottom: '24px',
-                    },
-                },
-            },
-            MuiCheckbox: {
-                styleOverrides: {
-                    root: {},
+            MuiInputBase: {
+                defaultProps: {
+                    margin: 'dense',
                 },
             },
             MuiInputLabel: {
+                defaultProps: {
+                    margin: 'dense',
+                },
                 styleOverrides: {
                     shrink: {
                         transform: 'translate(0)',
@@ -108,12 +254,20 @@ export default function createAppTheme() {
                     },
                 },
             },
-            MuiFormControlLabel: {
-                styleOverrides: {
-                    label: {
-                        fontSize: 14,
-                        paddingBottom: 0,
-                    },
+            MuiRadio: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiSwitch: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiTextField: {
+                defaultProps: {
+                    margin: 'dense',
+                    size: 'small',
                 },
             },
         },

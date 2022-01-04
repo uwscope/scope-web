@@ -25,7 +25,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
 
     const tableData = sortedMoodLogs?.map((a) => {
         return {
-            date: format(a.recordedDate, 'MM/dd/yyyy'),
+            date: format(a.recordedDate, 'MM/dd/yy'),
+            time: format(a.recordedDate, 'hh:mm aa'),
             rating: a.mood,
             id: a.logId,
             comment: a.comment,
@@ -35,22 +36,33 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
     const columns: GridColDef[] = [
         {
             field: 'date',
-            headerName: getString('patient_progress_mood_header_date'),
-            width: 100,
+            headerName: 'Date',
+            width: 60,
             sortable: true,
             hideSortIcons: false,
+            headerAlign: 'center',
+        },
+        {
+            field: 'time',
+            headerName: 'Time',
+            width: 62,
+            sortable: true,
+            hideSortIcons: false,
+            headerAlign: 'center',
         },
         {
             field: 'rating',
             headerName: getString('patient_progress_mood_header_mood'),
-            width: 80,
+            width: 60,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'comment',
             headerName: getString('patient_progress_mood_header_comment'),
-            width: 200,
+            width: 600,
             align: 'left',
+            headerAlign: 'center',
         },
     ];
 
@@ -59,7 +71,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
             id={assessment.assessmentId}
             title={assessment.assessmentName}
             loading={currentPatient?.state == 'Pending'}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -71,9 +83,11 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={false}
+                        pagination
                     />
                 )}
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (

@@ -189,7 +189,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate))
         .map((a) => {
             return {
-                date: format(a.recordedDate, 'MM/dd/yyyy'),
+                date: format(a.recordedDate, 'MM/dd/yy'),
                 total: getAssessmentScore(a.pointValues) || a.totalScore,
                 id: a.logId,
                 ...a.pointValues,
@@ -205,7 +205,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
-        <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentId}>
+        <ScoreCell score={props.value as number} assessmentId={assessment?.assessmentId}>
             {props.value}
         </ScoreCell>
     );
@@ -213,30 +213,34 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         {
             field: 'date',
             headerName: 'Date',
-            width: 100,
+            width: 60,
             sortable: true,
             hideSortIcons: false,
+            headerAlign: 'center',
         },
         {
             field: 'total',
             headerName: 'Total',
-            width: 80,
+            width: 60,
             renderCell: renderScoreCell,
             align: 'center',
+            headerAlign: 'center',
         },
         ...questionIds.map(
             (q) =>
                 ({
                     field: q,
                     headerName: q,
-                    width: 80,
+                    width: 60,
                     align: 'center',
+                    headerAlign: 'center',
                 } as GridColDef)
         ),
         {
             field: 'comment',
             headerName: 'Comment',
-            width: 120,
+            width: 300,
+            headerAlign: 'center',
         },
     ];
 
@@ -295,7 +299,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                           ]
                         : []
                 )}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {assessment.assessmentId != 'mood' && assessmentLogs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -307,10 +311,12 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         onRowClick={onRowClick}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={false}
+                        pagination
                     />
                 )}
                 {assessmentLogs.length > 0 && (

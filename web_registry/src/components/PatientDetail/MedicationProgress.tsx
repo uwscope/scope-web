@@ -67,7 +67,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const tableData = sortedLogs?.map((a) => {
         return {
-            date: format(a.recordedDate, 'MM/dd/yyyy'),
+            date: format(a.recordedDate, 'MM/dd/yy'),
             adherence:
                 a.pointValues['Adherence'] == 1
                     ? getString('patient_progress_medication_adherence_yes')
@@ -81,21 +81,24 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         {
             field: 'date',
             headerName: getString('patient_progress_medication_header_date'),
-            width: 100,
+            width: 60,
             sortable: true,
             hideSortIcons: false,
+            headerAlign: 'center',
         },
         {
             field: 'adherence',
             headerName: getString('patient_progress_medication_header_adherence'),
-            width: 80,
+            width: 170,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'comment',
             headerName: getString('patient_progress_medication_header_comment'),
-            width: 200,
+            width: 600,
             align: 'left',
+            headerAlign: 'center',
         },
     ];
 
@@ -133,7 +136,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                       ]
                     : []
             )}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {!!sortedLogs && sortedLogs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -145,9 +148,11 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={false}
+                        pagination
                     />
                 )}
                 {(!sortedLogs || sortedLogs.length == 0) && (
