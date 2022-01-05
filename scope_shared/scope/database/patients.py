@@ -1,3 +1,4 @@
+import hashlib
 import re
 from typing import List, Optional
 
@@ -6,7 +7,18 @@ import pymongo.database
 import pymongo.errors
 import pymongo.results
 
+# NOTE: Keep this for `invoke database.dev.reset`
 PATIENTS_COLLECTION_NAME = "patients"
+
+
+def collection_for_patient(*, patient_name: str):
+    """
+    Obtain the name of the collection for a specified patient.
+
+    Collection name will therefore be 'patient_' followed by hex encoding of an MD5 hash of the patient name.
+    """
+
+    return "patient_{}".format(hashlib.md5(patient_name.encode("utf-8")).digest().hex())
 
 
 def create_patient(*, database: pymongo.database.Database, patient: dict) -> str:
@@ -21,7 +33,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     clinical_history = patient["clinicalHistory"]
     values_inventory = patient["valuesInventory"]
 
-    patient_collection_name = "patient_{}".format(identity["_id"])
+    patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
     # Get or create a patients collection
     patients_collection = database.get_collection(patient_collection_name)
@@ -44,28 +56,17 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         [("type", pymongo.ASCENDING), ("_rev", pymongo.DESCENDING)], unique=True
     )
 
-    return patient
+    return patient_collection_name
 
 
 def delete_patient(
-    *, database: pymongo.database.Database, id: str
+    *, database: pymongo.database.Database, patient_collection_name: str
 ) -> pymongo.results.DeleteResult:
     """
-    Delete "patient" document with provided id.
+    Delete "patient" collection with provided patient_collection_name.
     """
 
-    # TODO: Verify schema against patient
-
-    collection = database.get_collection(name=PATIENTS_COLLECTION_NAME)
-
-    query = {
-        "type": "patient",
-        "_id": id,
-    }
-
-    result = collection.delete_one(filter=query)
-
-    return result
+    database.drop_collection(name_or_collection=patient_collection_name)
 
 
 def get_patient(

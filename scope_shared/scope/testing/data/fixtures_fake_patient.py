@@ -59,7 +59,7 @@ def _fake_name_factory() -> str:
 def data_fake_identity_factory() -> dict:
     fake_identity = {
         # NOTE: patient collection name is `patient_{_id}`
-        "_id": str(bson.objectid.ObjectId()),
+        # "_id": str(bson.objectid.ObjectId()),
         "type": "identity",
         "_rev": 1,
         "name": _fake_name_factory(),
@@ -72,7 +72,7 @@ def data_fake_identity_factory() -> dict:
 
 def data_fake_profile_factory() -> dict:
     fake_profile = {
-        "_id": str(bson.objectid.ObjectId()),
+        # "_id": str(bson.objectid.ObjectId()),
         "type": "profile",
         "_rev": 1,
         "name": "First Last",  # TODO: should be same as identity?
@@ -100,7 +100,7 @@ def data_fake_profile_factory() -> dict:
 
 def data_fake_clinical_history_factory() -> dict:
     fake_clinical_history = {
-        "_id": str(bson.objectid.ObjectId()),
+        # "_id": str(bson.objectid.ObjectId()),
         "type": "clinicalHistory",
         "_rev": 1,
         "primaryCancerDiagnosis": "primaryCancerDiagnosis",
@@ -130,7 +130,7 @@ def data_fake_clinical_history_factory() -> dict:
 
 def data_fake_values_inventory_factory() -> dict:
     fake_values_inventory = {
-        "_id": str(bson.objectid.ObjectId()),
+        # "_id": str(bson.objectid.ObjectId()),
         "type": "valuesInventory",
         "_rev": 1,
         "assigned": True,

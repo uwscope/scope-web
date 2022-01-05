@@ -10,27 +10,101 @@ def create_registry():
     def get_patients():
 
         if request.method == "GET":
+            # NOTE: Done.
             print("Gets the list of all patients and returns an array of patients")
 
         elif request.method == "POST":
+            # NOTE: In-progress. More subschemas need to be added.
             print("Creates a new patient record and returns the patient")
 
         else:
             return "Method not allowed", 405
 
-
-    @registry.route("/patient/<recordId>", methods=["GET", "PUT"])
+    @registry.route("/patients/<recordId>", methods=["GET"])
     @as_json
     def get_patient_data(recordId):
         if request.method == "GET":
+            # NOTE: Done. Takes patient_collection_name instead of `recordId`. URL is /patients/<patient_collection_name>
             print("Gets the full patient data by id and returns the patient")
 
         elif request.method == "PUT":
-            print("Updates the patient data by id and returns the patient")
+            # NOTE: Done.
+            return "Method not allowed", 405
 
         else:
             return "Method not allowed", 405
 
+    @registry.route(
+        "/patients/<recordId>/values", methods=["GET", "PUT"]
+    )  # GET for subschemas is not needed for current client function but putting it there for completeness
+    @as_json
+    def get_patient_values(recordId):  # Uses values-inventory.json subschema
+        if request.method == "GET":
+            print(
+                "Gets the patient values inventory data by patient id and returns the patient values inventory data"
+            )
+
+        elif request.method == "PUT":
+            print(
+                "Updates the patient values inventory data by patient id and returns the patient values inventory data"
+            )
+
+        else:
+            return "Method not allowed", 405
+
+    @registry.route(
+        "/patient/<recordId>/safety", methods=["GET", "PUT"]
+    )  # GET for subschemas is not needed for current client function but putting it there for completeness
+    @as_json
+    def get_patient_values(recordId):  # Uses safety-plan.json subschema
+        if request.method == "GET":
+            print(
+                "Gets the patient safety plan data by patient id and returns the patient safety plan data"
+            )
+
+        elif request.method == "PUT":
+            print(
+                "Updates the patient safety plan data by patient id and returns the patient safety plan data"
+            )
+
+        else:
+            return "Method not allowed", 405
+
+    @registry.route(
+        "/patient/<recordId>/clinicalhistory", methods=["GET", "PUT"]
+    )  # GET for subschemas is not needed for current client function but putting it there for completeness
+    @as_json
+    def get_patient_values(recordId):  # Uses clinical-history.json subschema
+        if request.method == "GET":
+            print(
+                "Gets the patient clinical history data by patient id and returns the patient clinical history data"
+            )
+
+        elif request.method == "PUT":
+            print(
+                "Updates the patient clinical history data by patient id and returns the patient clinical history data"
+            )
+
+        else:
+            return "Method not allowed", 405
+
+    @registry.route(
+        "/patient/<recordId>/profile", methods=["GET", "PUT"]
+    )  # GET for subschemas is not needed for current client function but putting it there for completeness
+    @as_json
+    def get_patient_profile(recordId):  # Uses patient-profile.json subschema
+        if request.method == "GET":
+            print(
+                "Gets the patient profile data by id and returns the patient profile data"
+            )
+
+        elif request.method == "PUT":
+            print(
+                "Updates the patient profile data by id and returns the patient profile data"
+            )
+
+        else:
+            return "Method not allowed", 405
 
     @registry.route("/patient/<recordId>/sessions", methods=["GET", "POST"])
     @as_json
@@ -44,7 +118,6 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-
     @registry.route("/patient/<recordId>/session/<sessionId>", methods=["GET", "PUT"])
     @as_json
     def get_patient_session(recordId, sessionId):
@@ -57,19 +130,21 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-
     @registry.route("/patient/<recordId>/casereviews", methods=["GET", "POST"])
     @as_json
     def get_patient_casereviews(recordId):
         if request.method == "GET":
-            print("Gets the list of all case reviews and returns an array of case reviews")
+            print(
+                "Gets the list of all case reviews and returns an array of case reviews"
+            )
 
         elif request.method == "POST":
-            print("Creates a new case review in the patient record and returns the case review")
+            print(
+                "Creates a new case review in the patient record and returns the case review"
+            )
 
         else:
             return "Method not allowed", 405
-
 
     @registry.route("/patient/<recordId>/casereview/<reviewId>", methods=["GET", "PUT"])
     @as_json
@@ -83,8 +158,9 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-
-    @registry.route("/patient/<recordId>/assessment/<assessmentId>", methods=["GET", "PUT"])
+    @registry.route(
+        "/patient/<recordId>/assessment/<assessmentId>", methods=["GET", "PUT"]
+    )
     @as_json
     def get_patient_assessments(recordId, assessmentId):
         if request.method == "GET":
@@ -100,10 +176,14 @@ def create_registry():
     @as_json
     def get_patient_assessmentlogs(recordId):
         if request.method == "GET":
-            print("Gets the list of assessment logs for patient and returns an array of assessment logs")
+            print(
+                "Gets the list of assessment logs for patient and returns an array of assessment logs"
+            )
 
         elif request.method == "POST":
-            print("Creates a new assessment log in the patient record and returns the assessment log")
+            print(
+                "Creates a new assessment log in the patient record and returns the assessment log"
+            )
 
         else:
             return "Method not allowed", 405
@@ -112,14 +192,14 @@ def create_registry():
     @as_json
     def get_patient_assessmentlog(recordId, logId):
         if request.method == "GET":
-            print("Gets the assessment log by id for patient and returns the assessment log")
+            print(
+                "Gets the assessment log by id for patient and returns the assessment log"
+            )
 
         elif request.method == "PUT":
             print("Updates the assessment log by id and returns the assessment log")
 
         else:
             return "Method not allowed", 405
-
-
 
     return registry

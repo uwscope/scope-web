@@ -9,10 +9,12 @@ from request_context import request_context
 from scope.schema import patient_schema
 from utils import validate_schema
 
-patients_blueprint = Blueprint("patients_blueprint", __name__)
+registry_patients_blueprint = Blueprint(
+    "registry_patients_blueprint", __name__, url_prefix="/patients"
+)
 
 
-@patients_blueprint.route("/", methods=["GET"])
+@registry_patients_blueprint.route("/", methods=["GET"])
 @as_json
 def get_patients():
     context = request_context()
@@ -21,7 +23,7 @@ def get_patients():
     return {"patients": patients}, http.HTTPStatus.OK
 
 
-@patients_blueprint.route("/<string:patient_collection>", methods=["GET"])
+@registry_patients_blueprint.route("/<string:patient_collection>", methods=["GET"])
 @as_json
 def get_patient(patient_collection):
     context = request_context()
@@ -36,7 +38,7 @@ def get_patient(patient_collection):
         abort(http.HTTPStatus.NOT_FOUND)
 
 
-@patients_blueprint.route("/", methods=["POST"])
+@registry_patients_blueprint.route("/", methods=["POST"])
 @validate_schema(patient_schema)
 @as_json
 def create_patient():

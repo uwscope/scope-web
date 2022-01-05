@@ -8,8 +8,9 @@ from markupsafe import escape
 
 import database
 from assessments import get_supported_assessments
-from blueprints.patients import patients_blueprint
-from blueprints.values import values_blueprint
+from blueprints.patient.values import patient_values_blueprint
+from blueprints.registry.patients import registry_patients_blueprint
+from blueprints.registry.values import registry_values_blueprint
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
@@ -88,11 +89,15 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
-    app.register_blueprint(patients_blueprint, url_prefix="/patients")
+    # Register all the `registry` blueprints, i.e. blueprints for web_registry
+    app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
+    app.register_blueprint(
+        registry_values_blueprint
+    )  # url_prefix="/patients/<patient_collection>/values"
 
-    # Register all the `patient` blueprints.
+    # Register all the `patient` blueprints, i.e. blueprints for web_patient
     patient = Blueprint("patient", __name__, url_prefix="/patient")
-    patient.register_blueprint(values_blueprint, url_prefix="/values/")
+    patient.register_blueprint(patient_values_blueprint, url_prefix="/values/")
     app.register_blueprint(patient)
 
     return app
