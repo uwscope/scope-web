@@ -129,9 +129,7 @@ export default function createAppTheme() {
             },
             MuiFormControl: {
                 styleOverrides: {
-                    root: {
-                        paddingBottom: '24px',
-                    },
+                    root: {},
                 },
                 defaultProps: {
                     margin: 'dense',

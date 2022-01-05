@@ -17,8 +17,9 @@ const TitleSelectContainer = withTheme(
     styled.div({
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'baseline',
+        alignItems: 'center',
         flexWrap: 'wrap',
+        height: 48,
     })
 );
 
@@ -32,8 +33,8 @@ const SelectForm = withTheme(
 const SelectInput = withTheme(
     styled(Select)((props) => ({
         ...props.theme.typography.h5,
-        '> .MuiSelect-select': {
-            paddingTop: 0,
+        '>.MuiSelect-select': {
+            minHeight: 'auto',
         },
     }))
 );
