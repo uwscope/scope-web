@@ -45,6 +45,7 @@ def fixture_documentdb_port_forward(
 
 
 def _fixture_documentdb_client_admin(
+    *,
     explicit_check_fixtures: bool,
     documentdb_config: scope.config.DocumentDBConfig,
     documentdb_port_forward: aws_infrastructure.tasks.ssh.SSHPortForward,
@@ -60,6 +61,7 @@ def _fixture_documentdb_client_admin(
         #
         # Create the client
         #
+        # TODO Refactor all MongoClient creation into scope.database
         documentdb_client_admin = pymongo.MongoClient(
             # Synchronously initiate the connection
             connect=True,

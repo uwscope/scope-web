@@ -4,6 +4,7 @@ import aws_infrastructure.tasks.ssh
 import contextlib
 from invoke import Collection, task
 import pymongo
+import pymongo.database
 
 import scope.config
 import scope.database.initialize
@@ -21,7 +22,7 @@ def _documentdb_client_admin(
     documentdb_config: scope.config.DocumentDBConfig,
 ) -> pymongo.MongoClient:
     """
-    Utility function for obtaining a DocumentDB client.
+    Utility function for obtaining a DocumentDB client, authenticated as the cluster administrator.
     """
 
     ssh_client = context_manager.enter_context(
@@ -36,6 +37,7 @@ def _documentdb_client_admin(
         )
     )
 
+    # TODO Refactor all MongoClient creation into scope.database
     documentdb_client_admin = pymongo.MongoClient(
         # Synchronously initiate the connection
         connect=True,
@@ -58,6 +60,52 @@ def _documentdb_client_admin(
     return documentdb_client_admin
 
 
+def _documentdb_client_database(
+    *,
+    context_manager: contextlib.ExitStack,
+    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
+    documentdb_config: scope.config.DocumentDBConfig,
+    database_config: scope.config.DatabaseConfig,
+) -> pymongo.database.Database:
+    """
+    Utility function for obtaining a DocumentDB client, authenticated as the user associated with a specific database.
+    """
+
+    ssh_client = context_manager.enter_context(
+        aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=instance_ssh_config)
+    )
+
+    documentdb_port_forward = context_manager.enter_context(
+        aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
+            ssh_client=ssh_client,
+            remote_host=documentdb_config.endpoint,
+            remote_port=documentdb_config.port,
+        )
+    )
+
+    # TODO Refactor all MongoClient creation into scope.database
+    documentdb_client_admin = pymongo.MongoClient(
+        # Synchronously initiate the connection
+        connect=True,
+        # Connect via SSH port forward
+        host="127.0.0.1",
+        port=documentdb_port_forward.local_port,
+        # Because of the port forward, must not attempt to access the replica set
+        directConnection=True,
+        # DocumentDB requires SSL, but port forwarding means the certificate will not match
+        tls=True,
+        tlsInsecure=True,
+        # PyMongo defaults to retryable writes, which are not supported by DocumentDB
+        # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
+        retryWrites=False,
+        # Connect as admin
+        username=database_config.user,
+        password=database_config.password,
+    )
+
+    return documentdb_client_admin.get_database(database_config.name)
+
+
 def _database_initialize(
     *,
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
@@ -77,6 +125,39 @@ def _database_initialize(
 
         database = documentdb_client_admin.get_database(
             name=database_config.name,
+        )
+
+        # Ensure the expected database user
+        # All DocumentDB users are created in the "admin" database
+        result = database.command(
+            "usersInfo",
+            {
+                "user": database_config.user,
+                "db": "admin",
+            },
+        )
+        if not result["users"]:
+            create_or_update_command = "createUser"
+        else:
+            create_or_update_command = "updateUser"
+
+        database.command(
+            create_or_update_command,
+            database_config.user,
+            pwd=database_config.password,
+            roles=[
+                {
+                    "role": "readWrite",
+                    "db": database_config.name,
+                },
+            ],
+        )
+
+        database = _documentdb_client_database(
+            context_manager=context_manager,
+            instance_ssh_config=instance_ssh_config,
+            documentdb_config=documentdb_config,
+            database_config=database_config,
         )
 
         scope.database.initialize.initialize(database=database)

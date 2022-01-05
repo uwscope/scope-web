@@ -1,3 +1,4 @@
+import aws_infrastructure.tasks.ssh
 import pymongo
 import pymongo.database
 
@@ -6,19 +7,19 @@ import scope.testing.fixtures_database
 
 
 def test_database_client(
+    documentdb_config: scope.config.DocumentDBConfig,
+    documentdb_port_forward: aws_infrastructure.tasks.ssh.SSHPortForward,
     database_config: scope.config.DatabaseConfig,
-    documentdb_client_admin: pymongo.MongoClient,
 ):
     """
     Test for database_client.
-
-    TODO: Use a fixture authenticated as the database user, rather than as admin.
     """
 
     database_client = scope.testing.fixtures_database._fixture_database_client(
         explicit_check_fixtures=True,
+        documentdb_config=documentdb_config,
+        documentdb_port_forward=documentdb_port_forward,
         database_config=database_config,
-        documentdb_client=documentdb_client_admin,
     )
 
     assert database_client is not None
