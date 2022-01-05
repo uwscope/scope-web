@@ -238,6 +238,11 @@ export default function createAppTheme() {
                 defaultProps: {
                     size: 'small',
                 },
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
+                },
             },
             MuiTextField: {
                 defaultProps: {

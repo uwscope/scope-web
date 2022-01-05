@@ -88,6 +88,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const handleAddRecord = action(() => {
+        logState.openEdit = true;
         logState.totalOnly = false;
 
         logState.scheduleId = '';

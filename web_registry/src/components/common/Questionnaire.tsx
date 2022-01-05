@@ -56,7 +56,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
     };
 
     return (
-        <Grid container spacing={2} alignItems="center" xs={12}>
+        <Grid container spacing={2} alignItems="center">
             <GridDateField
                 xs={4}
                 sm={4}

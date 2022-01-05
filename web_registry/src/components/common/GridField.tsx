@@ -461,6 +461,7 @@ export const GridSwitchField: FunctionComponent<IGridSwitchFieldProps> = (props)
     return (
         <Grid item xs={xs || 12} sm={sm || 6}>
             <FormControlLabel
+                sx={{ marginLeft: 0 }}
                 control={<Switch checked={on} onChange={handleChange} name={label} disabled={!editable} />}
                 label={label}
             />
