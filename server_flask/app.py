@@ -89,12 +89,13 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
+    # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
     app.register_blueprint(
         registry_values_blueprint
     )  # url_prefix="/patients/<patient_collection>/values"
 
-    # Register all the `patient` blueprints.
+    # Register all the `patient` blueprints, i.e. blueprints for web_patient
     patient = Blueprint("patient", __name__, url_prefix="/patient")
     patient.register_blueprint(patient_values_blueprint, url_prefix="/values/")
     app.register_blueprint(patient)
