@@ -1,6 +1,6 @@
+import AddIcon from '@mui/icons-material/Add';
 import { Button, FormControl, MenuItem, Select } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import AddIcon from '@mui/icons-material/Add';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -8,10 +8,9 @@ import { useHistory } from 'react-router-dom';
 import { AllClinicCode, ClinicCode } from 'shared/enums';
 import { IPatientProfile } from 'shared/types';
 import CaseloadTable from 'src/components/caseload/CaseloadTable';
-import { Page, PageHeaderContainer, PageHeaderSubtitle, PageHeaderTitle } from 'src/components/common/Page';
+import { Page, PageHeaderContainer, PageHeaderTitle } from 'src/components/common/Page';
 import { AddPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
 import { useStores } from 'src/stores/stores';
-import { getTodayString } from 'src/utils/formatter';
 import styled from 'styled-components';
 
 const TitleSelectContainer = withTheme(
@@ -138,7 +137,6 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                         </Button>
                     </ActionButtonContainer>
                 </TitleSelectContainer>
-                <PageHeaderSubtitle>{`${getTodayString()}`}</PageHeaderSubtitle>
             </PageHeaderContainer>
             <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
             <AddPatientProfileDialog open={state.open} onClose={handleClose} onAddPatient={onSave} />

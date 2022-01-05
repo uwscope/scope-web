@@ -213,9 +213,10 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         {
             field: 'date',
             headerName: 'Date',
-            width: 60,
+            width: 65,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
             headerAlign: 'center',
         },
         {
@@ -240,6 +241,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             field: 'comment',
             headerName: 'Comment',
             width: 300,
+            flex: 1,
             headerAlign: 'center',
         },
     ];

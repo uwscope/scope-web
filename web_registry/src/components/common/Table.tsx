@@ -35,6 +35,7 @@ export const Table = withTheme(
             maxHeight: 24,
             minHeight: 24,
             backgroundColor: 'rgba(0,0,0,0.05)',
+            overflow: 'hidden',
         },
     }))
 );

@@ -24,6 +24,7 @@ const ColumnHeader = styled.div({
     whiteSpace: 'initial',
     fontWeight: 500,
     lineHeight: '1rem',
+    textAlign: 'center',
 });
 
 const PHQCell = withTheme(
@@ -113,16 +114,17 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'date',
             headerName: 'Date',
-            width: 60,
+            width: 65,
             renderHeader,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
             headerAlign: 'center',
         },
         {
             field: 'type',
             headerName: 'Type',
-            width: 65,
+            width: 70,
             renderHeader,
             align: 'center',
             headerAlign: 'center',
@@ -191,7 +193,8 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'note',
             headerName: 'Note',
-            width: 300,
+            minWidth: 150,
+            flex: 1,
             renderHeader,
             renderCell: renderMultilineCell,
             headerAlign: 'center',
@@ -282,7 +285,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
                     disableColumnMenu: true,
                     ...c,
                 }))}
-                headerHeight={28}
+                headerHeight={36}
                 onRowClick={onRowClick}
                 autoHeight={true}
                 isRowSelectable={false}

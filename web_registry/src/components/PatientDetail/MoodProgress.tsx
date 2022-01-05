@@ -37,17 +37,19 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
         {
             field: 'date',
             headerName: 'Date',
-            width: 60,
+            width: 65,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
             headerAlign: 'center',
         },
         {
             field: 'time',
             headerName: 'Time',
-            width: 62,
+            width: 65,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
             headerAlign: 'center',
         },
         {
@@ -60,7 +62,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
         {
             field: 'comment',
             headerName: getString('patient_progress_mood_header_comment'),
-            width: 600,
+            width: 300,
+            flex: 1,
             align: 'left',
             headerAlign: 'center',
         },

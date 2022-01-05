@@ -1,79 +1,5 @@
-import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
 import { indigo } from '@mui/material/colors';
 import { createTheme } from '@mui/material/styles';
-
-export const themeOptions: ThemeOptions = {
-    palette: {
-        type: 'light',
-        primary: {
-            main: '#3f51b5',
-        },
-        secondary: {
-            main: '#f50057',
-        },
-    },
-    typography: {
-        body1: {
-            fontSize: '1rem',
-            lineHeight: 1.15,
-        },
-        body2: {
-            fontSize: '1rem',
-            lineHeight: 1.05,
-        },
-        fontSize: 12,
-    },
-    spacing: 4,
-    props: {
-        MuiList: {
-            dense: true,
-        },
-        MuiMenuItem: {
-            dense: true,
-        },
-        MuiTable: {
-            size: 'small',
-        },
-        MuiButton: {
-            size: 'small',
-        },
-        MuiButtonGroup: {
-            size: 'small',
-        },
-        MuiCheckbox: {
-            size: 'small',
-        },
-        MuiFab: {
-            size: 'small',
-        },
-        MuiFormControl: {
-            margin: 'dense',
-            size: 'small',
-        },
-        MuiFormHelperText: {
-            margin: 'dense',
-        },
-        MuiIconButton: {
-            size: 'small',
-        },
-        MuiInputBase: {
-            margin: 'dense',
-        },
-        MuiInputLabel: {
-            margin: 'dense',
-        },
-        MuiRadio: {
-            size: 'small',
-        },
-        MuiSwitch: {
-            size: 'small',
-        },
-        MuiTextField: {
-            margin: 'dense',
-            size: 'small',
-        },
-    },
-};
 
 declare module '@mui/material/styles' {
     interface Theme {
@@ -116,8 +42,24 @@ export default function createAppTheme() {
         },
         typography: {
             body1: {
+                fontSize: '0.8rem',
+                lineHeight: 1.1,
+            },
+            body2: {
+                fontSize: '0.8rem',
+                lineHeight: 1,
+            },
+            h6: {
+                fontSize: '0.9rem',
+                lineHeight: 1.1,
+            },
+            h5: {
                 fontSize: '1rem',
-                lineHeight: 1.15,
+                lineHeight: 1.1,
+            },
+            h4: {
+                fontSize: '1.2rem',
+                lineHeight: 1.1,
             },
             fontSize: 12,
         },
