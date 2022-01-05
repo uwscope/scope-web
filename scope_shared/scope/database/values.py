@@ -23,6 +23,8 @@ def get_values(
         filter=query, sort=[("_rev", pymongo.DESCENDING)]
     )
 
+    if "_id" in values_inventory:
+        values_inventory["_id"] = str(values_inventory["_id"])
     # TODO: Verify schema against values-inventory json.
 
     return values_inventory
