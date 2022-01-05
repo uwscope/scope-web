@@ -186,6 +186,9 @@ export default function createAppTheme() {
                     margin: 'dense',
                 },
                 styleOverrides: {
+                    root: {
+                        textTransform: 'none',
+                    },
                     shrink: {
                         transform: 'translate(0)',
                         fontSize: 14,

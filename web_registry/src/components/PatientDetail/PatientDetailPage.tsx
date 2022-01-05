@@ -49,15 +49,18 @@ const ContentContainer = withTheme(
 
 const Section = withTheme(
     styled.div((props) => ({
-        marginBottom: props.theme.spacing(5),
-        minHeight: 600,
+        marginBottom: props.theme.spacing(12),
     }))
 );
 
-const SectionTitle = styled(Typography)({
-    minHeight: 48,
-    textTransform: 'uppercase',
-});
+const SectionTitle = withTheme(
+    styled(Typography)((props) => ({
+        marginTop: props.theme.spacing(2),
+        marginBottom: props.theme.spacing(4),
+        textTransform: 'uppercase',
+        fontWeight: 600,
+    }))
+);
 
 type IContent = IContentItem & { content?: React.ReactNode };
 
@@ -186,7 +189,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                             .filter((c) => c.top)
                             .map((c) => (
                                 <Section id={c.hash} key={c.hash}>
-                                    <SectionTitle variant="h6">{c.label}</SectionTitle>
+                                    <SectionTitle variant="h4">{c.label}</SectionTitle>
                                     {c.content ? c.content : null}
                                 </Section>
                             ))}

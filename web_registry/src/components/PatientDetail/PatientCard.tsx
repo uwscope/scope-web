@@ -18,7 +18,6 @@ const Container = withTheme(
 );
 
 const Name = styled(Typography)({
-    fontWeight: 600,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     margin: 0,

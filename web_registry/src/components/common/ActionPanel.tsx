@@ -1,31 +1,16 @@
-import {
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    Divider,
-    LinearProgress,
-    Typography,
-} from '@mui/material';
+import { Button, Card, CardActions, CardContent, Divider, Grid, LinearProgress, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 const CardTitle = withTheme(
     styled.div((props) => ({
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: props.theme.spacing(1, 1, 1, 2),
-        height: 64,
+        height: 42,
+        padding: props.theme.spacing(2),
     }))
 );
 
-const TitleType = styled(Typography)({
-    fontSize: '1rem',
-    fontWeight: 600,
-});
+const TitleType = styled(Typography)({});
 
 const InlineType = withTheme(
     styled.span((props) => ({
@@ -58,31 +43,37 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
     return (
         <Card id={id}>
             <CardTitle>
-                <div>
-                    <TitleType variant="button" noWrap={true}>
-                        {title}
-                    </TitleType>
-                    {inlineTitle && <InlineType>{`(${inlineTitle})`}</InlineType>}
-                </div>
-                <CardActions>
-                    {!!actionButtons
-                        ? actionButtons.map((a) => (
-                              <Button
-                                  variant="outlined"
-                                  size="small"
-                                  color="primary"
-                                  startIcon={a.icon}
-                                  disabled={loading || !a.onClick}
-                                  onClick={a.onClick}
-                                  key={a.text}>
-                                  {a.text}
-                              </Button>
-                          ))
-                        : null}
-                </CardActions>
+                <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="center">
+                    <Grid item p={0}>
+                        <TitleType variant="h6" noWrap={true}>
+                            {title}
+                        </TitleType>
+                    </Grid>
+                    <Grid item flexGrow={1}>
+                        {inlineTitle && <InlineType>{`(${inlineTitle})`}</InlineType>}
+                    </Grid>
+                    <Grid item>
+                        <CardActions sx={{ padding: 0, minHeight: 28 }}>
+                            {!!actionButtons
+                                ? actionButtons.map((a) => (
+                                      <Button
+                                          variant="outlined"
+                                          size="small"
+                                          color="primary"
+                                          startIcon={a.icon}
+                                          disabled={loading || !a.onClick}
+                                          onClick={a.onClick}
+                                          key={a.text}>
+                                          {a.text}
+                                      </Button>
+                                  ))
+                                : null}
+                        </CardActions>
+                    </Grid>
+                </Grid>
             </CardTitle>
             {loading ? <Loading /> : <Divider variant="middle" />}
-            <CardContent>{children}</CardContent>
+            <CardContent sx={{ padding: 3 }}>{children}</CardContent>
         </Card>
     );
 };
