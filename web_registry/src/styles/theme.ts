@@ -121,6 +121,32 @@ export default function createAppTheme() {
                 defaultProps: {
                     size: 'small',
                 },
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
+                },
+            },
+            MuiDialogContent: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
+            },
+            MuiDialogTitle: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
+            },
+            MuiDialogActions: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
             },
             MuiFab: {
                 defaultProps: {
@@ -139,7 +165,6 @@ export default function createAppTheme() {
             MuiFormControlLabel: {
                 styleOverrides: {
                     label: {
-                        fontSize: 14,
                         paddingBottom: 0,
                     },
                 },
@@ -191,12 +216,10 @@ export default function createAppTheme() {
                     },
                     shrink: {
                         transform: 'translate(0)',
-                        fontSize: 14,
                         paddingBottom: 6,
                     },
                     formControl: {
                         transform: 'translate(0)',
-                        fontSize: 14,
                         paddingBottom: 6,
                     },
                 },
@@ -204,6 +227,11 @@ export default function createAppTheme() {
             MuiRadio: {
                 defaultProps: {
                     size: 'small',
+                },
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
                 },
             },
             MuiSwitch: {

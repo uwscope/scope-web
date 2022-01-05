@@ -194,7 +194,14 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
                     label={label}
                     value={value}
                     onChange={handleChange}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => (
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            {...params}
+                            InputLabelProps={{ shrink: true, sx: { position: 'relative' } }}
+                        />
+                    )}
                 />
             </Grid>
         );
@@ -256,6 +263,7 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                                     return (
                                         <Grid item xs={6} key={key}>
                                             <FormControlLabel
+                                                sx={{ marginLeft: 0 }}
                                                 control={
                                                     <Checkbox
                                                         checked={flags[key]}
@@ -271,6 +279,7 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                             {showOther ? (
                                 <OtherGrid item xs={12} key={'Other'}>
                                     <FormControlLabel
+                                        sx={{ marginLeft: 0 }}
                                         control={
                                             <Checkbox
                                                 checked={flags['Other']}

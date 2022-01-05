@@ -126,7 +126,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Add Patient</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <EditPatientProfileContent {...state} onValueChange={onValueChange} />
             </DialogContent>
             <DialogActions>
@@ -162,7 +162,7 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Edit Patient Information</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <EditPatientProfileContent {...state} onValueChange={onValueChange} />
             </DialogContent>
             <DialogActions>

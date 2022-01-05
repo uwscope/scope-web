@@ -345,7 +345,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         ? `Edit ${assessment.assessmentName} record`
                         : `Add ${assessment.assessmentName} record`}
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Questionnaire
                         readonly={logState.patientSubmitted}
                         questions={questions}
@@ -382,7 +382,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             </Dialog>
             <Dialog open={configureState.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}

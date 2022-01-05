@@ -165,7 +165,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             </Grid>
             <Dialog open={state.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}
