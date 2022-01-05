@@ -14,3 +14,5 @@ catalog.add_directory(URI("https://uwscope.org/schemas/"), schema_dir)
 patient_schema = JSONSchema.loadf(schema_dir / "patient.json")
 
 # TODO: Load other schemas below as API endpoints are added.
+values_inventory_schema = JSONSchema.loadf(schema_dir / "values-inventory.json")
+identity_schema = JSONSchema.loadf(schema_dir / "identity.json")
