@@ -1,0 +1,129 @@
+{
+	"identity": {
+		"identityId": "identityId",
+		"name": "patient name?"
+	},
+	"profile": {
+		"name": "patientName",
+		"MRN": "mrn",
+		"clinicCode": "Transplant – Auto",
+		"birthdate": "birthdate",
+		"sex": "Male",
+		"primaryOncologyProvider": {
+			"identityId": "identityId",
+			"name": "primaryOncologyProvider"
+		},
+		"primaryCareManager": {
+			"identityId": "identityId",
+			"name": "primaryCareManager"
+		},
+		"discussionFlag": {
+			"Flag as safety risk": true,
+			"Flag for discussion": false
+		},
+		"followupSchedule": "1-week follow-up",
+		"depressionTreatmentStatus": "CoCM"
+	},
+	"clinicalHistory": {
+		"primaryCancerDiagnosis": "test",
+		"currentTreatmentRegimen": {
+			"Surgery": true,
+			"Chemotherapy": true,
+			"Radiation": true,
+			"Stem Cell Transplant": true,
+			"Immunotherapy": true,
+			"CAR-T": true,
+			"Endocrine": true,
+			"Surveillance": true
+		}
+	},
+	"valuesInventory": {
+		"assigned": true,
+		"assignedDate": "some date",
+		"values": [
+			{
+				"id": "id",
+				"name": "name",
+				"dateCreated": "",
+				"dateEdited": "",
+				"lifeareaId": "",
+				"activities": [
+					{
+						"id": "id",
+						"name": "name",
+						"valueId": "",
+						"dateCreated": "",
+						"dateEdited": "",
+						"lifeareaId": ""
+					}
+				]
+			}
+		]
+	},
+	"safetyPlan": {
+		"assigned": true,
+		"assignedDate": "some date",
+		"reasonsForLiving": "reasons",
+		"warningSigns": ["warningSign1", "warningSign2"],
+		"copingStrategies": ["copingStrategies1", "copingStrategies2"],
+		"distractions": ["distractions1", "distractions2"],
+		"supporters": [
+			{
+				"contactType": "Person",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			},
+			{
+				"contactType": "Service",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			}
+		],
+		"professionalSupporters": [
+			{
+				"contactType": "Person",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			},
+			{
+				"contactType": "Service",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			}
+		],
+		"urgentServices": [
+			{
+				"contactType": "Person",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			},
+			{
+				"contactType": "Service",
+				"name": "name",
+				"address": "addresss",
+				"phoneNumber": "phoneNumber",
+				"emergencyNumber": "emergencyNumber"
+			}
+		],
+		"safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
+	},
+	"sessions": [],
+	"caseReviews": [],
+	"assessments": [],
+	"scheduledAssessments": [],
+	"assessmentLogs": [],
+	"activities": [],
+	"scheduledActivities": [],
+	"activityLogs": [],
+	"moodLogs": []
+}
