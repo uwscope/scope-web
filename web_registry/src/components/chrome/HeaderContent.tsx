@@ -1,26 +1,12 @@
-import { Avatar, Breadcrumbs, Grid, Link, Menu, MenuItem } from '@mui/material';
-import withTheme from '@mui/styles/withTheme';
+import { Avatar, Grid, Menu, MenuItem } from '@mui/material';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
-import React, { FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { useHistory, useRouteMatch } from 'react-router';
 import Logo from 'src/assets/scope-logo.png';
-import PatientSearch from 'src/components/chrome/PatientSearch';
 import { useStores } from 'src/stores/stores';
-import styled from 'styled-components';
-
-const Title = styled(Grid)({
-    flexGrow: 1,
-});
-
-const BreadcrumbPath = withTheme(
-    styled(Breadcrumbs)((props) => ({
-        flexGrow: 1,
-        color: props.theme.palette.primary.contrastText,
-    }))
-);
 
 const state = observable<{ anchorEl: HTMLElement | null }>({
     anchorEl: null,
@@ -43,10 +29,6 @@ export const HeaderContent: FunctionComponent = observer(() => {
         }
     }
 
-    const onPatientSelect = (name: string) => {
-        console.log('TODO: selected', name);
-    };
-
     const handleClickName = action((event: React.MouseEvent<HTMLElement>) => {
         state.anchorEl = event.currentTarget;
     });
@@ -63,7 +45,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
     const loginButton = () => {
         if (rootStore.loginState == 'Fulfilled') {
             return (
-                <div>
+                <Fragment>
                     <Menu
                         id="lock-menu"
                         anchorEl={state.anchorEl}
@@ -73,9 +55,9 @@ export const HeaderContent: FunctionComponent = observer(() => {
                         <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
                     </Menu>
                     <Button color="inherit" onClick={(e) => handleClickName(e)}>
-                        {rootStore.currentUserIdentity?.name}
+                        {rootStore.userName}
                     </Button>
-                </div>
+                </Fragment>
             );
         } else {
             return (
@@ -91,24 +73,15 @@ export const HeaderContent: FunctionComponent = observer(() => {
             <Grid item>
                 <Avatar alt="Scope logo" src={Logo} />
             </Grid>
-            <Title item>
-                <Typography variant="h6">{rootStore.appTitle}</Typography>
-            </Title>
-            {!!patientName ? (
-                <BreadcrumbPath>
-                    <Link href="#" color="inherit" onClick={() => history.goBack()}>
-                        <Typography>Registry</Typography>
-                    </Link>
-                    <Typography>{patientName}</Typography>
-                </BreadcrumbPath>
-            ) : null}
             <Grid item>
-                <PatientSearch
-                    options={rootStore.patientsStore.patients.map((p) => p.name)}
-                    onSelect={onPatientSelect}
-                />
+                <Button color="inherit" onClick={!!patientName ? () => history.goBack() : undefined}>
+                    <Typography variant="h6">{rootStore.appTitle}</Typography>
+                </Button>
             </Grid>
-            {loginButton()}
+            <Grid item flexGrow={1}>
+                {!!patientName ? <Typography>{`/  ${patientName}`}</Typography> : null}
+            </Grid>
+            <Grid item>{loginButton()}</Grid>
         </Grid>
     );
 });
