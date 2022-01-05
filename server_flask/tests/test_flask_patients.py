@@ -1,10 +1,11 @@
-import pymongo.database
-import requests
 from typing import Callable
 from urllib.parse import urljoin
 
+import pymongo.database
+import requests
 import scope.config
 import scope.database.patients
+
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -36,10 +37,12 @@ def test_flask_get_all_patients(
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients_blueprint/",
+            "patients/",
         ),
     )
     assert response.ok
+    # print(response.json())
+    # print(data_fake_patient)
 
     # "patients" is a list
     response_patients = response.json()["patients"]
@@ -70,11 +73,11 @@ def test_flask_get_patient(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve the same patient using the _id
+    # Retrieve the same patient by sending its collection name
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients_blueprint/{}".format(data_fake_patient["_id"]),
+            "patients/patient_{}".format(data_fake_patient["identity"]["_id"]),
         ),
     )
     assert response.ok
@@ -103,7 +106,37 @@ def test_flask_get_patient_nonexistent(
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients_blueprint/{}".format(data_fake_patient["_id"]),
+            "patients/patient_{}".format(data_fake_patient["identity"]["_id"]),
         ),
     )
     assert response.status_code == 404  # Not Found
+
+
+def test_flask_create_patient(
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+    data_fake_patient_factory: Callable[[], dict],
+):
+    """
+    Test that we can create a patient.
+    """
+
+    # Generate a fake patient
+    data_fake_patient = data_fake_patient_factory()
+
+    # Obtain a session
+    session = flask_session_unauthenticated_factory()
+
+    # Retrieve the same patient using the _id
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "patients/",
+        ),
+        json=data_fake_patient,
+    )
+
+    assert response.status_code == 200
+
+    # Ensure body of response is our fake patient
+    assert response.json() == data_fake_patient

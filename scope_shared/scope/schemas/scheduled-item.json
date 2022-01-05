@@ -1,0 +1,20 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/scheduled-item",
+	"title": "IScheduledItem",
+	"description": "IScheduledItem Type",
+	"type": "object",
+	"properties": {
+		"scheduleId": {
+			"type": "string"
+		},
+		"dueDate": {
+			"type": "string"
+		},
+		"dueType": {
+			"$ref": "/schemas/enums#/properties/dueType"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["scheduleId", "dueDate", "dueType"]
+}

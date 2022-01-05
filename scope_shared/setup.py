@@ -16,5 +16,6 @@ setuptools.setup(
         "pymongo",
         "requests",
         "ruamel.yaml",
+        "jschon",
     ],
 )

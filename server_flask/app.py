@@ -1,14 +1,15 @@
 import os
 from urllib.parse import urljoin
 
-from flask import Flask, request
+from flask import Blueprint, Flask, request
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
 import database
 from assessments import get_supported_assessments
-from blueprints.patient import patient_blueprint
+from blueprints.patients import patients_blueprint
+from blueprints.values import values_blueprint
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
@@ -54,12 +55,12 @@ def create_app():
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
 
-    @app.route("/patients")
+    @app.route("/patients_deprecated")
     @as_json
     def get_patients():
         return {"patients": patients}
 
-    @app.route("/patient/<recordId>", methods=["GET"])
+    @app.route("/patient_deprecated/<recordId>", methods=["GET"])
     @as_json
     def get_patient_data(recordId):
         if request.method == "GET":
@@ -87,7 +88,12 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
-    app.register_blueprint(patient_blueprint, url_prefix="/patients_blueprint")
+    app.register_blueprint(patients_blueprint, url_prefix="/patients")
+
+    # Register all the `patient` blueprints.
+    patient = Blueprint("patient", __name__, url_prefix="/patient")
+    patient.register_blueprint(values_blueprint, url_prefix="/values/")
+    app.register_blueprint(patient)
 
     return app
 

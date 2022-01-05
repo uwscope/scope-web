@@ -6,10 +6,9 @@ from pathlib import Path
 
 import aws_infrastructure.tasks.library.documentdb
 import aws_infrastructure.tasks.ssh
+import aws_infrastructure.tasks.terminal
 from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection, task
-
-from tasks.terminal import spawn_new_terminal
 
 FLASK_DIR = "./server_flask"
 INSTANCE_SSH_CONFIG_PATH = "./secrets/configuration/instance_ssh.yaml"
@@ -24,7 +23,7 @@ def dev_serve(context):
     For development purposes, asynchronously starts in a new terminal.
     """
 
-    if spawn_new_terminal(context):
+    if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
         ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
         documentdb_config = (
             aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(

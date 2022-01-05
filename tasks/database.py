@@ -10,6 +10,7 @@ import scope.database.initialize
 
 INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
+DEMO_DATABASE_CONFIG_PATH = "./secrets/configuration/demo_database.yaml"
 DEV_DATABASE_CONFIG_PATH = "./secrets/configuration/dev_database.yaml"
 
 
@@ -57,14 +58,15 @@ def _documentdb_client_admin(
     return documentdb_client_admin
 
 
-@task
-def dev_initialize(context):
+def _database_initialize(
+    *,
+    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
+    documentdb_config: scope.config.DocumentDBConfig,
+    database_config: scope.config.DatabaseConfig,
+):
     """
-    Initialize the database.
+    Initialize a database.
     """
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
 
     with contextlib.ExitStack() as context_manager:
         documentdb_client_admin = _documentdb_client_admin(
@@ -80,15 +82,15 @@ def dev_initialize(context):
         scope.database.initialize.initialize(database=database)
 
 
-@task
-def dev_reset(context):
+def _database_reset(
+    *,
+    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
+    documentdb_config: scope.config.DocumentDBConfig,
+    database_config: scope.config.DatabaseConfig,
+):
     """
-    Reset and initialize the database.
+    Reset a database.
     """
-
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
 
     with contextlib.ExitStack() as context_manager:
         documentdb_client_admin = _documentdb_client_admin(
@@ -100,18 +102,92 @@ def dev_reset(context):
         documentdb_client_admin.drop_database(
             name_or_database=database_config.name
         )
-        database = documentdb_client_admin.get_database(
-            name=database_config.name
+
+        _database_initialize(
+            instance_ssh_config=instance_ssh_config,
+            documentdb_config=documentdb_config,
+            database_config=database_config,
         )
 
-        scope.database.initialize.initialize(database=database)
+
+@task
+def demo_initialize(context):
+    """
+    Initialize the demo database.
+    """
+
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
+    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
+    database_config = scope.config.DatabaseConfig.load(DEMO_DATABASE_CONFIG_PATH)
+
+    _database_initialize(
+        instance_ssh_config=instance_ssh_config,
+        documentdb_config=documentdb_config,
+        database_config=database_config,
+    )
+
+
+@task
+def demo_reset(context):
+    """
+    Reset and initialize the demo database.
+    """
+
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
+    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
+    database_config = scope.config.DatabaseConfig.load(DEMO_DATABASE_CONFIG_PATH)
+
+    _database_reset(
+        instance_ssh_config=instance_ssh_config,
+        documentdb_config=documentdb_config,
+        database_config=database_config,
+    )
+
+
+@task
+def dev_initialize(context):
+    """
+    Initialize the development database.
+    """
+
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
+    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
+    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
+
+    _database_initialize(
+        instance_ssh_config=instance_ssh_config,
+        documentdb_config=documentdb_config,
+        database_config=database_config,
+    )
+
+
+@task
+def dev_reset(context):
+    """
+    Reset and initialize the development database.
+    """
+
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
+    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
+    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
+
+    _database_reset(
+        instance_ssh_config=instance_ssh_config,
+        documentdb_config=documentdb_config,
+        database_config=database_config,
+    )
 
 
 # Build task collection
 ns = Collection("database")
 
+ns_demo = Collection("demo")
+ns_demo.add_task(demo_initialize, "initialize")
+ns_demo.add_task(demo_reset, "reset")
+
 ns_dev = Collection("dev")
 ns_dev.add_task(dev_initialize, "initialize")
 ns_dev.add_task(dev_reset, "reset")
 
+compose_collection(ns, ns_demo, name="demo")
 compose_collection(ns, ns_dev, name="dev")

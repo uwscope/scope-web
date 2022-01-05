@@ -1,0 +1,19 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/identity",
+	"title": "IIdentity",
+	"description": "Identity of the user",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"type": { "const": "identity" },
+		"_rev": { "type": "number" },
+		"name": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_id", "type", "name"]
+}

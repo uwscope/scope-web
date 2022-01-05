@@ -1,0 +1,29 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/assessment",
+	"title": "IAssessment",
+	"description": "IAssessment Type",
+	"type": "object",
+	"properties": {
+		"assessmentId": {
+			"type": "string"
+		},
+		"assessmentName": {
+			"type": "string"
+		},
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDate": {
+			"type": "string"
+		},
+		"frequency": {
+			"$ref": "/schemas/enums#/properties/assessmentFrequency"
+		},
+		"dayOfWeek": {
+			"$ref": "/schemas/enums#/properties/dayOfWeek"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["assessmentId", "assessmentName", "assigned", "assignedDate", "frequency", "dayOfWeek"]
+}

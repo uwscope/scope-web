@@ -1,0 +1,42 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/assessment-log",
+	"title": "IAssessmentLog",
+	"description": "IAssessmentLog Type",
+	"type": "object",
+	"properties": {
+		"logId": {
+			"$ref": "/schemas/log#/properties/logId"
+		},
+		"recordedDate": {
+			"$ref": "/schemas/log#/properties/recordedDate"
+		},
+		"comment": {
+			"$ref": "/schemas/log#/properties/comment"
+		},
+		"scheduleId": {
+			"type": "string"
+		},
+		"assessmentId": {
+			"type": "string"
+		},
+		"assessmentName": {
+			"type": "string"
+		},
+		"completed": {
+			"type": "boolean"
+		},
+		"patientSubmitted": {
+			"type": "boolean"
+		},
+		"submittedBy": {
+			"$ref": "/schemas/identity"
+		},
+		"pointValues": { "$ref": "" },
+		"totalScore": {
+			"type": "number"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["recordedDate", "scheduleId", "assessmentId", "assessmentName", "completed", "pointValues"]
+}

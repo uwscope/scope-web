@@ -1,7 +1,7 @@
-import requests
 from typing import Callable
 from urllib.parse import urljoin
 
+import requests
 import scope.config
 import tests.testing_config
 
