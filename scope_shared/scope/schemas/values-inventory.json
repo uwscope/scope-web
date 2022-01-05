@@ -24,5 +24,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_id", "type", "_rev", "assigned", "assignedDate"]
+	"required": ["type", "_rev", "assigned", "assignedDate"]
 }
