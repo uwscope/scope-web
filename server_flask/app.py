@@ -43,7 +43,7 @@ def create_app():
 
     # Temporary store for patients
     patients = getRandomFakePatients()
-    patient_map = {p["recordId"]: p for p in patients}
+    patient_map = {p["identity"]["identityId"]: p for p in patients}
 
     # API TODO:
     # - check method

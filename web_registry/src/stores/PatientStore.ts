@@ -161,8 +161,8 @@ export class PatientStore implements IPatientStore {
         if (this.state != 'Pending') {
             const { registryService } = useServices();
             const promise = registryService.getPatientData(this.recordId);
-            const patientData = await this.loadPatientDataQuery.fromPromise(promise);
-            this.setPatientData(patientData);
+
+            this.runPromiseAfterLoad(promise);
         }
     }
 

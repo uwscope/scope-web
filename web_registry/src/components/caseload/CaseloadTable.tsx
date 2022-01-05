@@ -1,5 +1,5 @@
-import { withTheme } from '@material-ui/core';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@material-ui/x-grid';
+import withTheme from '@mui/styles/withTheme';
+import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -17,6 +17,7 @@ const ColumnHeader = styled.div({
     whiteSpace: 'initial',
     fontWeight: 500,
     lineHeight: '1rem',
+    textAlign: 'center',
 });
 
 const PHQCell = withTheme(
@@ -73,80 +74,120 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
-        { field: 'MRN', headerName: 'MRN', width: 150, renderHeader },
+        { field: 'MRN', headerName: 'MRN', minWidth: 50, align: 'center', headerAlign: 'center' },
         {
             field: 'depressionTreatmentStatus',
-            headerName: 'Treatment Status',
-            width: 120,
-            renderHeader,
+            headerName: 'Tx Status',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
         },
-        { field: 'name', headerName: 'Name', width: 150, renderHeader },
-        { field: 'clinicCode', headerName: 'Clinic Code', width: 150, renderHeader },
+        { field: 'name', headerName: 'Name', minWidth: 120, align: 'center', headerAlign: 'center' },
+        {
+            field: 'clinicCode',
+            headerName: 'Clinic Code',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
+        },
         {
             field: 'initialSession',
             headerName: 'Initial Session',
-            width: 160,
-            renderHeader,
+            minWidth: 80,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
         },
         {
             field: 'recentSession',
             headerName: 'Last Session',
-            width: 160,
-            renderHeader,
+            minWidth: 80,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
         },
-        { field: 'nextSessionDue', headerName: 'Follow-up Due', width: 160, renderHeader },
-        { field: 'totalSessions', headerName: 'Total Sessions', width: 120, renderHeader, align: 'center' },
-        { field: 'treatmentWeeks', headerName: 'Weeks in Treatment', width: 120, renderHeader, align: 'center' },
+        {
+            field: 'nextSessionDue',
+            headerName: 'Follow-up Due',
+            minWidth: 80,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
+        },
+        {
+            field: 'totalSessions',
+            headerName: 'Total Sess',
+            width: 50,
+            renderHeader,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
+        },
+        {
+            field: 'treatmentWeeks',
+            headerName: 'Wks in Tx',
+            width: 50,
+            renderHeader,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
+        },
         {
             field: 'initialPHQ',
             headerName: 'Initial PHQ-9',
-            width: 120,
+            width: 50,
             renderHeader,
             renderCell: renderPHQCell,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'lastPHQ',
             headerName: 'Last PHQ-9',
-            width: 120,
+            width: 50,
             renderHeader,
             renderCell: renderPHQCell,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'changePHQ',
-            headerName: '% Change in PHQ-9',
-            width: 150,
+            headerName: 'Change',
+            width: 60,
             renderHeader,
             renderCell: renderChangeCell,
             align: 'center',
+            headerAlign: 'center',
         },
-        { field: 'lastPHQDate', headerName: 'Last PHQ-9 Date', width: 150, renderHeader },
+        { field: 'lastPHQDate', headerName: 'Last PHQ-9 Date', minWidth: 120, align: 'center', headerAlign: 'center' },
         {
             field: 'initialGAD',
             headerName: 'Initial GAD-7',
-            width: 120,
+            width: 50,
             renderHeader,
             renderCell: renderGADCell,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'lastGAD',
             headerName: 'Last GAD-7',
-            width: 120,
+            width: 50,
             renderHeader,
             renderCell: renderGADCell,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'changeGAD',
-            headerName: '% Change in GAD-7',
-            width: 150,
+            headerName: 'Change',
+            width: 60,
             renderHeader,
             renderCell: renderChangeCell,
             align: 'center',
+            headerAlign: 'center',
         },
-        { field: 'lastGADDate', headerName: 'Last GAD-7 Date', width: 150, renderHeader },
+        { field: 'lastGADDate', headerName: 'Last GAD-7 Date', minWidth: 120, align: 'center', headerAlign: 'center' },
     ];
 
     const data = patients.map((p) => {
@@ -165,11 +206,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
             ...p,
             ...p.profile,
             id: p.profile.MRN,
-            initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yyyy') : NA,
-            recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yyyy') : NA,
+            initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yy') : NA,
+            recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yy') : NA,
             nextSessionDue:
                 recentSessionDate && p.profile.followupSchedule
-                    ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)), 'MM/dd/yyyy')
+                    ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)), 'MM/dd/yy')
                     : NA,
             totalSessions: p.sessions ? p.sessions.length : 0,
             treatmentWeeks:
@@ -209,11 +250,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
             <Table
                 rows={data}
                 columns={columns}
-                autoPageSize
-                headerHeight={56}
+                headerHeight={36}
                 rowHeight={36}
                 onRowClick={onRowClick}
-                pagination={true}
+                autoHeight={true}
+                isRowSelectable={false}
+                pagination
+                disableColumnMenu
             />
         </TableContainer>
     );

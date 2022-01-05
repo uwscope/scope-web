@@ -1,5 +1,5 @@
-import { Box, Typography } from '@material-ui/core';
-import { withTheme } from '@material-ui/core/styles';
+import { Box, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 

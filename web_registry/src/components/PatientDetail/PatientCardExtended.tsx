@@ -1,4 +1,4 @@
-import { withTheme } from '@material-ui/core';
+import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';

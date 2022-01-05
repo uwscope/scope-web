@@ -40,12 +40,12 @@ const _strings = {
     patient_progress_assessment_dialog_comment_label: 'Note',
 
     patient_progress_mood_header_date: 'Date',
-    patient_progress_mood_header_mood: 'Mood Rating',
+    patient_progress_mood_header_mood: 'Mood',
     patient_progress_mood_header_comment: 'Note',
     patient_progress_mood_empty: 'There are no mood ratings submitted for this patient.',
 
     patient_progress_medication_header_date: 'Date',
-    patient_progress_medication_header_adherence: 'Took all medication for last 7 days',
+    patient_progress_medication_header_adherence: 'Took all meds for last 7 days',
     patient_progress_medication_header_comment: 'Question or Comment for Care Team',
     patient_progress_medication_empty: 'There are no medication tracking logs submitted for this patient.',
     patient_progress_medication_adherence_yes: 'Yes',

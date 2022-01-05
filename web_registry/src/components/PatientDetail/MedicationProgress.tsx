@@ -1,8 +1,8 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@material-ui/core';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-import SettingsIcon from '@material-ui/icons/Settings';
-import { GridColDef } from '@material-ui/x-grid';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@mui/material';
+import { GridColDef } from '@mui/x-data-grid';
 import { format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
@@ -67,7 +67,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const tableData = sortedLogs?.map((a) => {
         return {
-            date: format(a.recordedDate, 'MM/dd/yyyy'),
+            date: format(a.recordedDate, 'MM/dd/yy'),
             adherence:
                 a.pointValues['Adherence'] == 1
                     ? getString('patient_progress_medication_adherence_yes')
@@ -81,21 +81,26 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         {
             field: 'date',
             headerName: getString('patient_progress_medication_header_date'),
-            width: 100,
+            width: 65,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'adherence',
             headerName: getString('patient_progress_medication_header_adherence'),
-            width: 80,
+            minWidth: 180,
             align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'comment',
             headerName: getString('patient_progress_medication_header_comment'),
-            width: 200,
+            width: 300,
+            flex: 1,
             align: 'left',
+            headerAlign: 'center',
         },
     ];
 
@@ -133,7 +138,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                       ]
                     : []
             )}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {!!sortedLogs && sortedLogs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -145,9 +150,11 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={false}
+                        pagination
                     />
                 )}
                 {(!sortedLogs || sortedLogs.length == 0) && (
@@ -158,7 +165,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             </Grid>
             <Dialog open={state.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}

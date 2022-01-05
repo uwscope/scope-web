@@ -1,6 +1,7 @@
-import { fade, InputBase, withTheme } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import { Autocomplete } from '@material-ui/lab';
+import { alpha, InputBase } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import SearchIcon from '@mui/icons-material/Search';
+import { Autocomplete } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -8,9 +9,9 @@ const SearchContainer = withTheme(
     styled.div((props) => ({
         position: 'relative',
         borderRadius: props.theme.shape.borderRadius,
-        backgroundColor: fade(props.theme.palette.common.white, 0.15),
+        backgroundColor: alpha(props.theme.palette.common.white, 0.15),
         '&:hover': {
-            backgroundColor: fade(props.theme.palette.common.white, 0.25),
+            backgroundColor: alpha(props.theme.palette.common.white, 0.25),
         },
         marginRight: props.theme.spacing(2),
         marginLeft: 0,

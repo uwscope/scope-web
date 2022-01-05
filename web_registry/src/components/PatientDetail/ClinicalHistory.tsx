@@ -1,5 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -175,7 +175,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
 
             <Dialog open={state.open} onClose={handleClose}>
                 <DialogTitle>Edit Clinical History</DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <ClinicalHistoryContent editable={true} {...state} onValueChange={onValueChange} />
                 </DialogContent>
                 <DialogActions>

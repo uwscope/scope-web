@@ -1,5 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
-import { IAppConfig, IUser } from 'shared/types';
+import { IAppConfig, IIdentity, IUser } from 'shared/types';
 import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -8,7 +8,8 @@ import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface IRootStore {
     // Stores
-    currentUserIdentity?: IUser;
+    currentUserIdentity?: IIdentity;
+    userName?: string;
     patientsStore: IPatientsStore;
 
     // App metadata
@@ -29,7 +30,6 @@ export interface IRootStore {
 
 export class RootStore implements IRootStore {
     // Stores
-    public currentUserIdentity?: IUser;
     public patientsStore: IPatientsStore;
 
     // App metadata
@@ -70,6 +70,24 @@ export class RootStore implements IRootStore {
         return this.configQuery.value || defaultAppConfig;
     }
 
+    @computed
+    public get currentUserIdentity() {
+        if (this.loginQuery.state == 'Fulfilled') {
+            return this.loginQuery.value;
+        } else {
+            return undefined;
+        }
+    }
+
+    @computed
+    public get userName() {
+        if (this.loginQuery.state == 'Fulfilled') {
+            return this.loginQuery.value?.name;
+        } else {
+            return 'Invalid';
+        }
+    }
+
     @action.bound
     public async load() {
         await this.login();
@@ -81,17 +99,12 @@ export class RootStore implements IRootStore {
     public async login() {
         const { authService } = useServices();
         const promise = authService.login();
-        const user = await this.loginQuery.fromPromise(promise);
-
-        if (!!user) {
-            this.currentUserIdentity = user;
-        }
+        await this.loginQuery.fromPromise(promise);
     }
 
     @action.bound
     public logout() {
         this.loginQuery.state = 'Unknown';
-        this.currentUserIdentity = undefined;
     }
 
     @action.bound

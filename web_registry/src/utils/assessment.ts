@@ -3,10 +3,10 @@ import { sum } from 'lodash';
 import { AssessmentData, IAssessment, IAssessmentContent, IAssessmentLog } from 'shared/types';
 
 const getOrder = (assessment: string) => {
-    switch (assessment) {
-        case 'PHQ-9':
+    switch (assessment.toLowerCase()) {
+        case 'phq-9':
             return 1;
-        case 'GAD-7':
+        case 'gad-7':
             return 2;
         default:
             return 3;
@@ -44,7 +44,8 @@ export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: s
 };
 
 export const getAssessmentScoreColorName = (assessmentId: string, totalScore: number) => {
-    if (assessmentId == 'PHQ-9' || assessmentId == 'GAD-7') {
+    const lowAssessmentId = assessmentId.toLowerCase();
+    if (lowAssessmentId == 'phq-9' || lowAssessmentId == 'gad-7') {
         if (totalScore > 15) {
             return 'bad';
         } else if (totalScore > 10) {
@@ -54,7 +55,7 @@ export const getAssessmentScoreColorName = (assessmentId: string, totalScore: nu
         }
     }
 
-    if (assessmentId == 'Mood Logging') {
+    if (lowAssessmentId == 'mood') {
         if (totalScore < 2) {
             return 'bad';
         } else if (totalScore < 4) {

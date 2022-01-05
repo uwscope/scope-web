@@ -102,7 +102,6 @@ def getFakePatient():
     } for idx in range(0, getRandomInteger(1, 40)) ]
 
     return {
-        "recordId": recordId, # Backcompat only
         "identity": {
             "identityId": recordId,
             "name": name

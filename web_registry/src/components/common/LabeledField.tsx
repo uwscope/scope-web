@@ -1,6 +1,8 @@
-import { IconButton, styled, Typography, withTheme } from '@material-ui/core';
-import FlagIcon from '@material-ui/icons/Flag';
+import FlagIcon from '@mui/icons-material/Flag';
+import { IconButton, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
+import styled from 'styled-components';
 
 const Label = withTheme(
     styled(Typography)((props) => ({

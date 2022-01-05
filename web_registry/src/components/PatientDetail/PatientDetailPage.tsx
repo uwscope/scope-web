@@ -1,4 +1,5 @@
-import { Divider, Paper, Typography, withTheme } from '@material-ui/core';
+import { Divider, Grid, Paper, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -48,15 +49,18 @@ const ContentContainer = withTheme(
 
 const Section = withTheme(
     styled.div((props) => ({
-        marginBottom: props.theme.spacing(5),
-        minHeight: 600,
+        marginBottom: props.theme.spacing(12),
     }))
 );
 
-const SectionTitle = styled(Typography)({
-    minHeight: 48,
-    textTransform: 'uppercase',
-});
+const SectionTitle = withTheme(
+    styled(Typography)((props) => ({
+        marginTop: props.theme.spacing(2),
+        marginBottom: props.theme.spacing(4),
+        textTransform: 'uppercase',
+        fontWeight: 600,
+    }))
+);
 
 type IContent = IContentItem & { content?: React.ReactNode };
 
@@ -162,18 +166,30 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             <PatientStoreProvider patient={currentPatient}>
                 <DetailPageContainer>
                     <LeftPaneContainer elevation={3} square>
-                        <PatientCard loading={currentPatient.state == 'Pending'} />
-                        <Divider variant="middle" />
-                        <PatientCardExtended />
-                        <Divider variant="middle" />
-                        <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
+                        <Grid container spacing={1} direction="column" justifyContent="flex-start" alignItems="stretch">
+                            <Grid item>
+                                <PatientCard loading={currentPatient.state == 'Pending'} />
+                            </Grid>
+                            <Grid item>
+                                <Divider variant="middle" />
+                            </Grid>
+                            <Grid item>
+                                <PatientCardExtended />
+                            </Grid>
+                            <Grid item>
+                                <Divider variant="middle" />
+                            </Grid>
+                            <Grid item>
+                                <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
+                            </Grid>
+                        </Grid>
                     </LeftPaneContainer>
                     <ContentContainer id="scroll-content">
                         {contentMenu
                             .filter((c) => c.top)
                             .map((c) => (
                                 <Section id={c.hash} key={c.hash}>
-                                    <SectionTitle variant="h6">{c.label}</SectionTitle>
+                                    <SectionTitle variant="h4">{c.label}</SectionTitle>
                                     {c.content ? c.content : null}
                                 </Section>
                             ))}

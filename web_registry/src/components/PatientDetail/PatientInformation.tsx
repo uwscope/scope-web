@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import ClinicalHistory from 'src/components/PatientDetail/ClinicalHistory';
 import { TreatmentInfo } from 'src/components/PatientDetail/TreatmentInfo';

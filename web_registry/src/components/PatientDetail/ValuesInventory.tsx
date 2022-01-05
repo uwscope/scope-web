@@ -1,6 +1,6 @@
-import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
