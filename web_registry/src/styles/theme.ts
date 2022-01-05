@@ -17,6 +17,10 @@ export const themeOptions: ThemeOptions = {
             fontSize: '1rem',
             lineHeight: 1.15,
         },
+        body2: {
+            fontSize: '1rem',
+            lineHeight: 1.05,
+        },
         fontSize: 12,
     },
     spacing: 4,

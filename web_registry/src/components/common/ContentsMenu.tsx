@@ -19,6 +19,7 @@ const ContentListItem = withTheme(
         paddingLeft: props.$top ? props.theme.spacing(2) : props.theme.spacing(4),
         '>.MuiListItemText-root': {
             textTransform: props.$top ? 'uppercase' : null,
+            margin: 0,
         } as CSSObject,
     }))
 );
