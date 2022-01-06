@@ -32,6 +32,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     profile = patient["profile"]
     clinical_history = patient["clinicalHistory"]
     values_inventory = patient["valuesInventory"]
+    safety_plan = patient["safetyPlan"]
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
@@ -50,6 +51,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         patients_collection.insert_one(document=profile)
         patients_collection.insert_one(document=clinical_history)
         patients_collection.insert_one(document=values_inventory)
+        patients_collection.insert_one(document=safety_plan)
 
     # Create unique index on (`type`, `v`)
     patients_collection.create_index(
@@ -98,6 +100,9 @@ def get_patient(
         {
             "type": "valuesInventory",
         },
+        {
+            "type": "safetyPlan",
+        },
     ]
 
     for query in queries:
@@ -143,6 +148,9 @@ def get_patients(*, database: pymongo.database.Database) -> List[dict]:
             },
             {
                 "type": "valuesInventory",
+            },
+            {
+                "type": "safetyPlan",
             },
         ]
 
