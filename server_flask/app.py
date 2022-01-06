@@ -13,6 +13,7 @@ from assessments import get_supported_assessments
 from blueprints.patient.values_inventory import patient_values_inventory_blueprint
 
 # Import registry blueprints.
+from blueprints.registry.clinical_history import registry_clinical_history_blueprint
 from blueprints.registry.patients import registry_patients_blueprint
 from blueprints.registry.safety_plan import registry_safety_plan_blueprint
 from blueprints.registry.values_inventory import registry_values_inventory_blueprint
@@ -101,7 +102,10 @@ def create_app():
     )  # url_prefix="/patients/<patient_collection>/values"
     app.register_blueprint(
         registry_safety_plan_blueprint
-    )  # url_prefix="/patients/<patient_collection>/safetyclear"
+    )  # url_prefix="/patients/<patient_collection>/safety"
+    app.register_blueprint(
+        registry_clinical_history_blueprint
+    )  # url_prefix="/patients/<patient_collection>/clinicalhistory"
 
     # Register all the `patient` blueprints, i.e. blueprints for web_patient
     patient = Blueprint("patient", __name__, url_prefix="/patient")

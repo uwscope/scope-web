@@ -16,4 +16,5 @@ patient_schema = JSONSchema.loadf(schema_dir / "patient.json")
 # TODO: Load other schemas below as API endpoints are added.
 identity_schema = JSONSchema.loadf(schema_dir / "identity.json")
 values_inventory_schema = JSONSchema.loadf(schema_dir / "values-inventory.json")
+clinical_history_schema = JSONSchema.loadf(schema_dir / "clinical-history.json")
 safety_plan_schema = JSONSchema.loadf(schema_dir / "safety-plan.json")

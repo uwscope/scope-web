@@ -220,6 +220,17 @@ def fixture_data_fake_patient_factory() -> Callable[[], dict]:
     return data_fake_patient_factory
 
 
+@pytest.fixture(name="data_fake_clinical_history_factory")
+def fixture_data_fake_clinical_history_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_clinical_history_factory.
+
+    Provides a factory for obtaining data for a fake clinical history.
+    """
+
+    return data_fake_clinical_history_factory
+
+
 @pytest.fixture(name="data_fake_values_inventory_factory")
 def fixture_data_fake_values_inventory_factory() -> Callable[[], dict]:
     """
