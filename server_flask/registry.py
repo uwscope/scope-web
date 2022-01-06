@@ -78,16 +78,19 @@ def create_registry():
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_values(recordId):  # Uses clinical-history.json subschema
+        # NOTE: Done.
         if request.method == "GET":
             print(
                 "Gets the patient clinical history data by patient id and returns the patient clinical history data"
             )
 
+        # NOTE: Done.
         elif request.method == "PUT":
             print(
                 "Updates the patient clinical history data by patient id and returns the patient clinical history data"
             )
 
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
