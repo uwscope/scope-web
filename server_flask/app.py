@@ -8,9 +8,14 @@ from markupsafe import escape
 
 import database
 from assessments import get_supported_assessments
-from blueprints.patient.values_inventory import patient_values_blueprint
+
+# Import patient blueprints.
+from blueprints.patient.values_inventory import patient_values_inventory_blueprint
+
+# Import registry blueprints.
 from blueprints.registry.patients import registry_patients_blueprint
-from blueprints.registry.values_inventory import registry_values_blueprint
+from blueprints.registry.safety_plan import registry_safety_plan_blueprint
+from blueprints.registry.values_inventory import registry_values_inventory_blueprint
 from fake import getFakePatient, getRandomFakePatients
 from utils import parseInt
 
@@ -92,12 +97,17 @@ def create_app():
     # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
     app.register_blueprint(
-        registry_values_blueprint
+        registry_values_inventory_blueprint
     )  # url_prefix="/patients/<patient_collection>/values"
+    app.register_blueprint(
+        registry_safety_plan_blueprint
+    )  # url_prefix="/patients/<patient_collection>/safetyclear"
 
     # Register all the `patient` blueprints, i.e. blueprints for web_patient
     patient = Blueprint("patient", __name__, url_prefix="/patient")
-    patient.register_blueprint(patient_values_blueprint, url_prefix="/values/")
+    patient.register_blueprint(
+        patient_values_inventory_blueprint, url_prefix="/values/"
+    )
     app.register_blueprint(patient)
 
     return app
