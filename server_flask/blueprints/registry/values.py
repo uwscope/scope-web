@@ -6,7 +6,7 @@ import scope.database.values
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
-from scope.schema import patient_schema
+from scope.schema import values_inventory_schema
 from utils import validate_schema
 
 registry_values_blueprint = Blueprint(
@@ -32,6 +32,7 @@ def get_patient_values(patient_collection):
 
 
 @registry_values_blueprint.route("/<string:patient_collection>/values", methods=["PUT"])
+@validate_schema(values_inventory_schema)
 @as_json
 def update_patient_values(patient_collection):
 
