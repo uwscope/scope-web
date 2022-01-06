@@ -7,12 +7,12 @@ import pymongo.results
 
 
 def get_safety_plan(
-    *, database: pymongo.database.Database, collection: str
+    *, database: pymongo.database.Database, collection_name: str
 ) -> Optional[dict]:
     """
     Retrieve "safetyPlan" document.
     """
-    collection = database.get_collection(name=collection)
+    collection = database.get_collection(name=collection_name)
 
     query = {
         "type": "safetyPlan",
@@ -29,13 +29,13 @@ def get_safety_plan(
 
 
 def create_safety_plan(
-    *, database: pymongo.database.Database, collection: str, safety_plan: dict
+    *, database: pymongo.database.Database, collection_name: str, safety_plan: dict
 ) -> pymongo.results.InsertOneResult:
     """
     Create the "valuesInventory" document.
     """
 
-    collection = database.get_collection(name=collection)
+    collection = database.get_collection(name=collection_name)
 
     try:
         result = collection.insert_one(document=safety_plan)

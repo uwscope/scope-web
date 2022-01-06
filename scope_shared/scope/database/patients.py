@@ -72,7 +72,7 @@ def delete_patient(
 
 
 def get_patient(
-    *, database: pymongo.database.Database, collection: str
+    *, database: pymongo.database.Database, collection_name: str
 ) -> Optional[dict]:
     """
     Retrieve "patient" document with provided patient collection.
@@ -80,10 +80,10 @@ def get_patient(
 
     # NOTE: If patient collection name doesn't exist, return None.
     # Maybe there is a better way to return a 404.
-    if collection not in database.list_collection_names():
+    if collection_name not in database.list_collection_names():
         return None
 
-    collection = database.get_collection(name=collection)
+    collection = database.get_collection(name=collection_name)
 
     patient = {"type": "patient"}
 

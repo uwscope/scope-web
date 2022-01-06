@@ -23,7 +23,7 @@ def get_patient_safety_plan(patient_collection):
     context = request_context()
 
     result = scope.database.safety_plan.get_safety_plan(
-        database=context.database, collection=patient_collection
+        database=context.database, collection_name=patient_collection
     )
 
     if result:
@@ -51,7 +51,7 @@ def update_patient_safety_plan(patient_collection):
 
     result = scope.database.safety_plan.create_safety_plan(
         database=context.database,
-        collection=patient_collection,
+        collection_name=patient_collection,
         safety_plan=safety_plan,
     )
 

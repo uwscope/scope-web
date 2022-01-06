@@ -23,7 +23,7 @@ def get_patient_values(patient_collection):
     context = request_context()
 
     result = scope.database.values_inventory.get_values_inventory(
-        database=context.database, collection=patient_collection
+        database=context.database, collection_name=patient_collection
     )
 
     if result:
@@ -53,7 +53,7 @@ def update_patient_values(patient_collection):
 
     result = scope.database.values_inventory.create_values_inventory(
         database=context.database,
-        collection=patient_collection,
+        collection_name=patient_collection,
         values_inventory=values_inventory,
     )
 
