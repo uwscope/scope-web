@@ -15,8 +15,7 @@ API_RELATIVE_PATH = "patients/"
 # TODO: This could be renamed better.
 API_QUERY_PATH = "safety"
 
-
-@pytest.mark.skip(reason="no way of currently testing this")
+# @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_patient_safety_plan(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -24,7 +23,7 @@ def test_flask_get_patient_safety_plan(
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test to get the values inventory for a patient.
+    Test to get the safety plan for a patient.
     """
 
     # Generate a fake patient
@@ -56,7 +55,7 @@ def test_flask_get_patient_safety_plan(
 
     assert response.ok
 
-    assert response.json() == data_fake_patient["valuesInventory"]
+    assert response.json() == data_fake_patient["safetyPlan"]
 
     scope.database.patients.delete_patient(
         database=database_client,
@@ -64,23 +63,23 @@ def test_flask_get_patient_safety_plan(
     )
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+# @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_update_patient_safety_plan(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
-    data_fake_values_inventory_factory: Callable[[], dict],
+    data_fake_safety_plan_factory: Callable[[], dict],
 ):
     """
-    Test that we can update the values inventory for a patient.
+    Test that we can update the safety plan for a patient.
     """
 
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
 
-    # Generate a fake values inventory
-    data_fake_values_inventory = data_fake_values_inventory_factory()
+    # Generate a fake safety plan
+    data_fake_values_inventory = data_fake_safety_plan_factory()
 
     # Create the patient collection and insert the documents
     patient_collection_name = scope.database.patients.create_patient(
@@ -110,7 +109,7 @@ def test_flask_update_patient_safety_plan(
     )
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+# @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_update_patient_safety_plan_duplicate(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -118,7 +117,7 @@ def test_flask_update_patient_safety_plan_duplicate(
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we cannot update the values inventory for a patient with the same `_rev` version number.
+    Test that we cannot update the safety plan for a patient with the same `_rev` version number.
     """
 
     # Generate a fake patient
@@ -134,7 +133,7 @@ def test_flask_update_patient_safety_plan_duplicate(
     session = flask_session_unauthenticated_factory()
 
     # Remove `_id` and decrement `_rev` from values inventory document.
-    data_fake_values_inventory = data_fake_patient["valuesInventory"]
+    data_fake_values_inventory = data_fake_patient["safetyPlan"]
     data_fake_values_inventory["_rev"] -= 1
     data_fake_values_inventory.pop("_id")
 
@@ -157,16 +156,16 @@ def test_flask_update_patient_safety_plan_duplicate(
     )
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+# @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_patient_safety_plan_latest(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
-    data_fake_values_inventory_factory: Callable[[], dict],
+    data_fake_safety_plan_factory: Callable[[], dict],
 ):
     """
-    Test that we get the latest values inventory for a patient.
+    Test that we get the latest safety plan for a patient.
     """
 
     # Generate a fake patient
@@ -178,8 +177,8 @@ def test_flask_get_patient_safety_plan_latest(
         patient=data_fake_patient,
     )
 
-    # Generate a fake value inventory
-    data_fake_values_inventory = data_fake_values_inventory_factory()
+    # Generate a fake safety plan
+    data_fake_safety_plan = data_fake_safety_plan_factory()
 
     # Obtain a session
     session = flask_session_unauthenticated_factory()
@@ -192,7 +191,7 @@ def test_flask_get_patient_safety_plan_latest(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_values_inventory,
+        json=data_fake_safety_plan,
     )
 
     # GET the values inventory document
@@ -210,9 +209,9 @@ def test_flask_get_patient_safety_plan_latest(
     response_values_inventory = response.json()
 
     # Confirm if the response matches the latest `_rev`
-    data_fake_values_inventory["_rev"] += 1
+    data_fake_safety_plan["_rev"] += 1
     response_values_inventory.pop("_id")
-    assert response_values_inventory == data_fake_values_inventory
+    assert response_values_inventory == data_fake_safety_plan
 
     scope.database.patients.delete_patient(
         database=database_client,
