@@ -6,7 +6,7 @@ import pymongo.errors
 import pymongo.results
 
 
-def get_values(
+def get_values_inventory(
     *, database: pymongo.database.Database, collection: str
 ) -> Optional[dict]:
     """
@@ -30,7 +30,7 @@ def get_values(
     return values_inventory
 
 
-def create_values(
+def create_values_inventory(
     *, database: pymongo.database.Database, collection: str, values_inventory: dict
 ) -> pymongo.results.InsertOneResult:
     """
