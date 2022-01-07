@@ -13,17 +13,17 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 API_RELATIVE_PATH = "patients/"
 
 # TODO: This could be renamed better.
-API_QUERY_PATH = "safety"
+API_QUERY_PATH = "profile"
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_get_patient_safety_plan(
+def test_flask_get_patient_profile(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test to get the safety plan for a patient.
+    Test to get the clinical history for a patient.
     """
 
     # Generate a fake patient
@@ -38,6 +38,7 @@ def test_flask_get_patient_safety_plan(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
+    # GET /patient/values/patient_{identityId}
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -54,7 +55,7 @@ def test_flask_get_patient_safety_plan(
 
     assert response.ok
 
-    assert response.json() == data_fake_patient["safetyPlan"]
+    assert response.json() == data_fake_patient["patientProfile"]
 
     scope.database.patients.delete_patient(
         database=database_client,
@@ -63,22 +64,22 @@ def test_flask_get_patient_safety_plan(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_update_patient_safety_plan(
+def test_flask_update_patient_profile(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
-    data_fake_safety_plan_factory: Callable[[], dict],
+    data_fake_patient_profile_factory: Callable[[], dict],
 ):
     """
-    Test that we can update the safety plan for a patient.
+    Test that we can update the clinical history for a patient.
     """
 
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
 
-    # Generate a fake safety plan
-    data_fake_safety_plan = data_fake_safety_plan_factory()
+    # Generate a fake patien profile
+    data_fake_patient_profile = data_fake_patient_profile_factory()
 
     # Create the patient collection and insert the documents
     patient_collection_name = scope.database.patients.create_patient(
@@ -96,7 +97,7 @@ def test_flask_update_patient_safety_plan(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_safety_plan,
+        json=data_fake_patient_profile,
     )
     assert response.ok
 
@@ -107,14 +108,14 @@ def test_flask_update_patient_safety_plan(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_update_patient_safety_plan_duplicate(
+def test_flask_update_patient_profile_duplicate(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we cannot update the safety plan for a patient with the same `_rev` version number.
+    Test that we cannot update the profile for a patient with the same `_rev` version number.
     """
 
     # Generate a fake patient
@@ -129,10 +130,10 @@ def test_flask_update_patient_safety_plan_duplicate(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Remove `_id` and decrement `_rev` from safety plan document.
-    data_fake_safety_plan = data_fake_patient["safetyPlan"]
-    data_fake_safety_plan["_rev"] -= 1
-    data_fake_safety_plan.pop("_id")
+    # Remove `_id` and decrement `_rev` from clinical history document.
+    data_fake_patient_profile = data_fake_patient["patientProfile"]
+    data_fake_patient_profile["_rev"] -= 1
+    data_fake_patient_profile.pop("_id")
 
     response = session.put(
         url=urljoin(
@@ -141,7 +142,7 @@ def test_flask_update_patient_safety_plan_duplicate(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_safety_plan,
+        json=data_fake_patient_profile,
     )
     assert response.status_code == 422
 
@@ -152,15 +153,15 @@ def test_flask_update_patient_safety_plan_duplicate(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_get_patient_safety_plan_latest(
+def test_flask_get_patient_profile_latest(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
-    data_fake_safety_plan_factory: Callable[[], dict],
+    data_fake_patient_profile_factory: Callable[[], dict],
 ):
     """
-    Test that we get the latest safety plan for a patient.
+    Test that we get the latest profile for a patient.
     """
 
     # Generate a fake patient
@@ -172,8 +173,8 @@ def test_flask_get_patient_safety_plan_latest(
         patient=data_fake_patient,
     )
 
-    # Generate a fake safety plan
-    data_fake_safety_plan = data_fake_safety_plan_factory()
+    # Generate a fake patient profile
+    data_fake_patient_profile = data_fake_patient_profile_factory()
 
     # Obtain a session
     session = flask_session_unauthenticated_factory()
@@ -186,10 +187,10 @@ def test_flask_get_patient_safety_plan_latest(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_safety_plan,
+        json=data_fake_patient_profile,
     )
 
-    # GET the safety plan document
+    # GET the values inventory document
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -204,9 +205,9 @@ def test_flask_get_patient_safety_plan_latest(
     response_json = response.json()
 
     # Confirm if the response matches the latest `_rev`
-    data_fake_safety_plan["_rev"] += 1
+    data_fake_patient_profile["_rev"] += 1
     response_json.pop("_id")
-    assert response_json == data_fake_safety_plan
+    assert response_json == data_fake_patient_profile
 
     scope.database.patients.delete_patient(
         database=database_client,

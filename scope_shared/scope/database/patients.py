@@ -29,7 +29,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     """
 
     identity = patient["identity"]
-    profile = patient["profile"]
+    patient_profile = patient["patientProfile"]
     clinical_history = patient["clinicalHistory"]
     values_inventory = patient["valuesInventory"]
     safety_plan = patient["safetyPlan"]
@@ -48,7 +48,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     if result is None:
         # NOTE: Talk to James about this.
         patients_collection.insert_one(document=identity)
-        patients_collection.insert_one(document=profile)
+        patients_collection.insert_one(document=patient_profile)
         patients_collection.insert_one(document=clinical_history)
         patients_collection.insert_one(document=values_inventory)
         patients_collection.insert_one(document=safety_plan)
@@ -92,7 +92,7 @@ def get_patient(
             "type": "identity",
         },
         {
-            "type": "profile",
+            "type": "patientProfile",
         },
         {
             "type": "clinicalHistory",
@@ -141,7 +141,7 @@ def get_patients(*, database: pymongo.database.Database) -> List[dict]:
                 "type": "identity",
             },
             {
-                "type": "profile",
+                "type": "patientProfile",
             },
             {
                 "type": "clinicalHistory",

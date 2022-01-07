@@ -38,7 +38,6 @@ def test_flask_get_patient_values(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # GET /patient/values/patient_{identityId}
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -90,8 +89,6 @@ def test_flask_update_patient_values(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Updates the same patient's values inventory
-    # PUT /patient/values/patient_{identityId} -
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -137,8 +134,6 @@ def test_flask_update_patient_values_duplicate(
     data_fake_values_inventory["_rev"] -= 1
     data_fake_values_inventory.pop("_id")
 
-    # Updates the same patient's values inventory but fails with pymongo duplicate key error.
-    # PUT /patient/values/patient_{identityId}
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -206,12 +201,12 @@ def test_flask_get_patient_values_latest(
 
     assert response.ok
 
-    response_values_inventory = response.json()
+    response_json = response.json()
 
     # Confirm if the response matches the latest `_rev`
     data_fake_values_inventory["_rev"] += 1
-    response_values_inventory.pop("_id")
-    assert response_values_inventory == data_fake_values_inventory
+    response_json.pop("_id")
+    assert response_json == data_fake_values_inventory
 
     scope.database.patients.delete_patient(
         database=database_client,

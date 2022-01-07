@@ -69,10 +69,10 @@ def data_fake_identity_factory() -> dict:
     return fake_identity
 
 
-def data_fake_profile_factory() -> dict:
+def data_fake_patient_profile_factory() -> dict:
     fake_profile = {
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "profile",
+        "type": "patientProfile",
         "_rev": 1,
         "name": "First Last",  # TODO: should be same as identity?
         "MRN": "dummy_MRN",
@@ -198,7 +198,7 @@ def data_fake_patient_factory() -> dict:
         # "_id": str(bson.objectid.ObjectId()),
         "type": "patient",
         "identity": data_fake_identity_factory(),
-        "profile": data_fake_profile_factory(),
+        "patientProfile": data_fake_patient_profile_factory(),
         "clinicalHistory": data_fake_clinical_history_factory(),  # NOTE: In typescipt, all the keys in clinicalHistory are optional. Chat with James about this.
         "valuesInventory": data_fake_values_inventory_factory(),
         "safetyPlan": data_fake_safety_plan_factory(),
@@ -218,6 +218,17 @@ def fixture_data_fake_patient_factory() -> Callable[[], dict]:
     """
 
     return data_fake_patient_factory
+
+
+@pytest.fixture(name="data_fake_patient_profile_factory")
+def fixture_data_fake_profile_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_patient_profile_factory.
+
+    Provides a factory for obtaining data for a fake profile.
+    """
+
+    return data_fake_patient_profile_factory
 
 
 @pytest.fixture(name="data_fake_clinical_history_factory")

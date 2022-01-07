@@ -6,41 +6,41 @@ import pymongo.errors
 import pymongo.results
 
 
-def get_clinical_history(
+def get_patient_profile(
     *, database: pymongo.database.Database, collection_name: str
 ) -> Optional[dict]:
     """
-    Retrieve "clinicalHistory" document.
+    Retrieve "patientProfile" document.
     """
     collection = database.get_collection(name=collection_name)
 
     query = {
-        "type": "clinicalHistory",
+        "type": "patientProfile",
     }
 
     # Find the document with highest `v`.
-    clinical_history = collection.find_one(
+    patient_profile = collection.find_one(
         filter=query, sort=[("_rev", pymongo.DESCENDING)]
     )
 
-    if "_id" in clinical_history:
-        clinical_history["_id"] = str(clinical_history["_id"])
-    # TODO: Verify schema against clinical-history json.
+    if "_id" in patient_profile:
+        patient_profile["_id"] = str(patient_profile["_id"])
+    # TODO: Verify schema against patient-profile json.
 
-    return clinical_history
+    return patient_profile
 
 
-def create_clinical_history(
-    *, database: pymongo.database.Database, collection_name: str, clinical_history: dict
+def create_patient_profile(
+    *, database: pymongo.database.Database, collection_name: str, patient_profile: dict
 ) -> pymongo.results.InsertOneResult:
     """
-    Create the "valuesInventory" document.
+    Create the "patientProfile" document.
     """
 
     collection = database.get_collection(name=collection_name)
 
     try:
-        result = collection.insert_one(document=clinical_history)
+        result = collection.insert_one(document=patient_profile)
         return result
     except pymongo.errors.DuplicateKeyError:
         return None

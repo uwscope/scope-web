@@ -8,7 +8,7 @@
 		"_id": {
 			"type": "string"
 		},
-		"type": { "const": "profile" },
+		"type": { "const": "patientProfile" },
 		"_rev": { "type": "number" },
 		"name": {
 			"type": "string"

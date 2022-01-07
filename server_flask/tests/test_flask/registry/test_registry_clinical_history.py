@@ -12,7 +12,6 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 API_RELATIVE_PATH = "patients/"
 
-# TODO: This could be renamed better.
 API_QUERY_PATH = "clinicalhistory"
 
 # @pytest.mark.skip(reason="no way of currently testing this")
@@ -79,7 +78,7 @@ def test_flask_update_patient_clinical_history(
     data_fake_patient = data_fake_patient_factory()
 
     # Generate a fake clinical history
-    data_fake_values_inventory = data_fake_clinical_history_factory()
+    data_fake_clinical_history = data_fake_clinical_history_factory()
 
     # Create the patient collection and insert the documents
     patient_collection_name = scope.database.patients.create_patient(
@@ -90,8 +89,6 @@ def test_flask_update_patient_clinical_history(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Updates the same patient's values inventory
-    # PUT /patient/values/patient_{identityId} -
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -99,7 +96,7 @@ def test_flask_update_patient_clinical_history(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_values_inventory,
+        json=data_fake_clinical_history,
     )
     assert response.ok
 
@@ -117,7 +114,7 @@ def test_flask_update_patient_clinical_history_duplicate(
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we cannot update the clinical historyn for a patient with the same `_rev` version number.
+    Test that we cannot update the clinical history for a patient with the same `_rev` version number.
     """
 
     # Generate a fake patient
@@ -133,12 +130,10 @@ def test_flask_update_patient_clinical_history_duplicate(
     session = flask_session_unauthenticated_factory()
 
     # Remove `_id` and decrement `_rev` from clinical history document.
-    data_fake_values_inventory = data_fake_patient["clinicalHistory"]
-    data_fake_values_inventory["_rev"] -= 1
-    data_fake_values_inventory.pop("_id")
+    data_fake_clinical_history = data_fake_patient["clinicalHistory"]
+    data_fake_clinical_history["_rev"] -= 1
+    data_fake_clinical_history.pop("_id")
 
-    # Updates the same patient's clinical history but fails with pymongo duplicate key error.
-    # PUT /patient/values/patient_{identityId}
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -146,7 +141,7 @@ def test_flask_update_patient_clinical_history_duplicate(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_values_inventory,
+        json=data_fake_clinical_history,
     )
     assert response.status_code == 422
 
@@ -206,12 +201,12 @@ def test_flask_get_patient_clinical_history_latest(
 
     assert response.ok
 
-    response_values_inventory = response.json()
+    response_json = response.json()
 
     # Confirm if the response matches the latest `_rev`
     data_fake_clinical_history["_rev"] += 1
-    response_values_inventory.pop("_id")
-    assert response_values_inventory == data_fake_clinical_history
+    response_json.pop("_id")
+    assert response_json == data_fake_clinical_history
 
     scope.database.patients.delete_patient(
         database=database_client,
