@@ -1,16 +1,15 @@
 import aws_infrastructure.tasks.ssh
-import pymongo
 import pymongo.database
 import pytest
 
 import scope.config
+import scope.database.client
 import scope.testing
 
 
 def _fixture_database_client(
     *,
     explicit_check_fixtures: bool,
-    documentdb_config: scope.config.DocumentDBConfig,
     documentdb_port_forward: aws_infrastructure.tasks.ssh.SSHPortForward,
     database_config: scope.config.DatabaseConfig,
 ) -> pymongo.database.Database:
@@ -25,35 +24,26 @@ def _fixture_database_client(
         #
         # Create the client
         #
-        # TODO Refactor all MongoClient creation into scope.database
-        documentdb_client = pymongo.MongoClient(
-            # Synchronously initiate the connection
-            connect=True,
-            # Connect via SSH port forward
+        database_client = scope.database.client.documentdb_client_database(
+            # Connect via existing SSH port forward
             host="127.0.0.1",
             port=documentdb_port_forward.local_port,
             # Because of the port forward, must not attempt to access the replica set
-            directConnection=True,
+            direct_connection=True,
             # DocumentDB requires SSL, but port forwarding means the certificate will not match
-            tls=True,
-            tlsInsecure=True,
-            # PyMongo defaults to retryable writes, which are not supported by DocumentDB
-            # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
-            retryWrites=False,
+            tls_insecure=True,
             # Connect as database user
-            username=database_config.user,
+            user=database_config.user,
             password=database_config.password,
+            # Desired database
+            database_name=database_config.name
         )
 
         #
         # Probe the client
         #
 
-        # Ensure the database exists
-        assert database_config.name in documentdb_client.list_database_names()
-
         # Obtain list of collections in the database, this requires authentication
-        database_client = documentdb_client.get_database(database_config.name)
         response = database_client.list_collection_names()
         assert isinstance(response, list)
 
@@ -81,8 +71,6 @@ def fixture_database_client(
     Fixture for obtaining a client for the database.
 
     Uses a single fixture for the entire session.
-
-    TODO: Use a fixture authenticated as the database user, rather than as admin.
     """
 
     return _fixture_database_client(
