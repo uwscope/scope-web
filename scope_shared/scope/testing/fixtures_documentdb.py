@@ -3,6 +3,7 @@ import pymongo
 import pytest
 
 import scope.config
+import scope.database.client
 import scope.testing
 
 
@@ -61,33 +62,22 @@ def _fixture_documentdb_client_admin(
         #
         # Create the client
         #
-        # TODO Refactor all MongoClient creation into scope.database
-        documentdb_client_admin = pymongo.MongoClient(
-            # Synchronously initiate the connection
-            connect=True,
-            # Connect via SSH port forward
+        documentdb_client_admin = scope.database.client.documentdb_client_admin(
+            # Connect via existing SSH port forward
             host="127.0.0.1",
             port=documentdb_port_forward.local_port,
             # Because of the port forward, must not attempt to access the replica set
-            directConnection=True,
+            direct_connection=True,
             # DocumentDB requires SSL, but port forwarding means the certificate will not match
-            tls=True,
-            tlsInsecure=True,
-            # PyMongo defaults to retryable writes, which are not supported by DocumentDB
-            # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
-            retryWrites=False,
+            tls_insecure=True,
             # Connect as admin
-            username=documentdb_config.admin_user,
-            password=documentdb_config.admin_password,
+            admin_user=documentdb_config.admin_user,
+            admin_password=documentdb_config.admin_password,
         )
 
         #
         # Probe the client
         #
-
-        # Ping the admin database, this does not require authentication
-        response = documentdb_client_admin.admin.command("ping")
-        assert "ok" in response
 
         # Obtain list of collections in the admin database, this requires authentication
         response = documentdb_client_admin.admin.list_collection_names()
