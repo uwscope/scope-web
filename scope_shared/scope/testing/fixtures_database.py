@@ -10,6 +10,7 @@ import scope.testing
 def _fixture_database_client(
     *,
     explicit_check_fixtures: bool,
+    documentdb_config: scope.config.DocumentDBConfig,
     documentdb_port_forward: aws_infrastructure.tasks.ssh.SSHPortForward,
     database_config: scope.config.DatabaseConfig,
 ) -> pymongo.database.Database:
