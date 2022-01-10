@@ -29,7 +29,7 @@ def get_patient(patient_collection):
     context = request_context()
 
     result = scope.database.patients.get_patient(
-        database=context.database, collection=patient_collection
+        database=context.database, collection_name=patient_collection
     )
 
     if result is not None:

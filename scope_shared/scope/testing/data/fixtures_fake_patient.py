@@ -58,7 +58,6 @@ def _fake_name_factory() -> str:
 
 def data_fake_identity_factory() -> dict:
     fake_identity = {
-        # NOTE: patient collection name is `patient_{_id}`
         # "_id": str(bson.objectid.ObjectId()),
         "type": "identity",
         "_rev": 1,
@@ -70,10 +69,10 @@ def data_fake_identity_factory() -> dict:
     return fake_identity
 
 
-def data_fake_profile_factory() -> dict:
+def data_fake_patient_profile_factory() -> dict:
     fake_profile = {
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "profile",
+        "type": "patientProfile",
         "_rev": 1,
         "name": "First Last",  # TODO: should be same as identity?
         "MRN": "dummy_MRN",
@@ -169,17 +168,40 @@ def data_fake_values_inventory_factory() -> dict:
     return fake_values_inventory
 
 
+def data_fake_safety_plan_factory() -> dict:
+    fake_safety_plan = {
+        "type": "safetyPlan",
+        "_rev": 1,
+        "assigned": True,
+        "assignedDate": "some date",
+        "reasonsForLiving": "To stare at Mt. Rainier.",
+        "supporters": [
+            {
+                "contactType": "Person",
+                "name": "Name",
+                "address": "Address",
+                "phoneNumber": "Number",
+            }
+        ],
+    }
+
+    # TODO: Verify the schema
+
+    return fake_safety_plan
+
+
 def data_fake_patient_factory() -> dict:
     fake_patient = {
-        # TODO: A "patient" exists only as a query composed from other documents.
-        #       Because a "patient" is never stored to the database, it will not have an "_id".
-        # NOTE: Below `_id` isn't being used anywhere for now except in James' version of CRUD patients code.
+        # NOTE: A "patient" exists only as a query composed from other documents.
+        # Because a "patient" is never stored to the database, it will not have an "_id".
+        # Below `_id` isn't being used anywhere for now except in James' version of CRUD patients code.
         # "_id": str(bson.objectid.ObjectId()),
         "type": "patient",
         "identity": data_fake_identity_factory(),
-        "profile": data_fake_profile_factory(),
+        "patientProfile": data_fake_patient_profile_factory(),
         "clinicalHistory": data_fake_clinical_history_factory(),  # NOTE: In typescipt, all the keys in clinicalHistory are optional. Chat with James about this.
         "valuesInventory": data_fake_values_inventory_factory(),
+        "safetyPlan": data_fake_safety_plan_factory(),
     }
 
     # TODO: Verify the schema
@@ -198,6 +220,28 @@ def fixture_data_fake_patient_factory() -> Callable[[], dict]:
     return data_fake_patient_factory
 
 
+@pytest.fixture(name="data_fake_patient_profile_factory")
+def fixture_data_fake_profile_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_patient_profile_factory.
+
+    Provides a factory for obtaining data for a fake profile.
+    """
+
+    return data_fake_patient_profile_factory
+
+
+@pytest.fixture(name="data_fake_clinical_history_factory")
+def fixture_data_fake_clinical_history_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_clinical_history_factory.
+
+    Provides a factory for obtaining data for a fake clinical history.
+    """
+
+    return data_fake_clinical_history_factory
+
+
 @pytest.fixture(name="data_fake_values_inventory_factory")
 def fixture_data_fake_values_inventory_factory() -> Callable[[], dict]:
     """
@@ -207,3 +251,14 @@ def fixture_data_fake_values_inventory_factory() -> Callable[[], dict]:
     """
 
     return data_fake_values_inventory_factory
+
+
+@pytest.fixture(name="data_fake_safety_plan_factory")
+def fixture_data_fake_safety_plan_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_values_inventory_factory.
+
+    Provides a factory for obtaining data for a fake values inventory.
+    """
+
+    return data_fake_safety_plan_factory

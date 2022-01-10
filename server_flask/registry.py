@@ -18,6 +18,7 @@ def create_registry():
             print("Creates a new patient record and returns the patient")
 
         else:
+            # NOTE: In-progress. More subschemas need to be added.
             return "Method not allowed", 405
 
     @registry.route("/patients/<recordId>", methods=["GET"])
@@ -30,7 +31,6 @@ def create_registry():
         elif request.method == "PUT":
             # NOTE: Done.
             return "Method not allowed", 405
-
         else:
             return "Method not allowed", 405
 
@@ -40,33 +40,36 @@ def create_registry():
     @as_json
     def get_patient_values(recordId):  # Uses values-inventory.json subschema
         if request.method == "GET":
+            # NOTE: Done.
             print(
                 "Gets the patient values inventory data by patient id and returns the patient values inventory data"
             )
 
         elif request.method == "PUT":
+            # NOTE: Done.
             print(
                 "Updates the patient values inventory data by patient id and returns the patient values inventory data"
             )
-
         else:
+            # NOTE: Done.
             return "Method not allowed", 405
 
     @registry.route(
-        "/patient/<recordId>/safety", methods=["GET", "PUT"]
+        "/patients/<recordId>/safety", methods=["GET", "PUT"]
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_values(recordId):  # Uses safety-plan.json subschema
+        # NOTE: Done.
         if request.method == "GET":
             print(
                 "Gets the patient safety plan data by patient id and returns the patient safety plan data"
             )
-
+        # NOTE: Done.
         elif request.method == "PUT":
             print(
                 "Updates the patient safety plan data by patient id and returns the patient safety plan data"
             )
-
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
@@ -75,16 +78,19 @@ def create_registry():
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_values(recordId):  # Uses clinical-history.json subschema
+        # NOTE: Done.
         if request.method == "GET":
             print(
                 "Gets the patient clinical history data by patient id and returns the patient clinical history data"
             )
 
+        # NOTE: Done
         elif request.method == "PUT":
             print(
                 "Updates the patient clinical history data by patient id and returns the patient clinical history data"
             )
 
+        # NOTE: Done
         else:
             return "Method not allowed", 405
 
@@ -93,16 +99,17 @@ def create_registry():
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_profile(recordId):  # Uses patient-profile.json subschema
+        # NOTE: DONE.
         if request.method == "GET":
             print(
                 "Gets the patient profile data by id and returns the patient profile data"
             )
-
+        # NOTE: Done.
         elif request.method == "PUT":
             print(
                 "Updates the patient profile data by id and returns the patient profile data"
             )
-
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
