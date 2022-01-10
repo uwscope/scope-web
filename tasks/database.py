@@ -1,13 +1,7 @@
 from aws_infrastructure.tasks.collection import compose_collection
-import aws_infrastructure.tasks.library.documentdb
-import aws_infrastructure.tasks.ssh
-import contextlib
-from invoke import Collection, task
-import pymongo
-import pymongo.database
+from invoke import Collection
 
-import scope.config
-import scope.database.initialize
+import scope.tasks.database
 
 INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
@@ -15,260 +9,32 @@ DEMO_DATABASE_CONFIG_PATH = "./secrets/configuration/demo_database.yaml"
 DEV_DATABASE_CONFIG_PATH = "./secrets/configuration/dev_database.yaml"
 
 
-def _documentdb_client_admin(
-    *,
-    context_manager: contextlib.ExitStack,
-    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
-    documentdb_config: scope.config.DocumentDBConfig,
-) -> pymongo.MongoClient:
-    """
-    Utility function for obtaining a DocumentDB client, authenticated as the cluster administrator.
-    """
-
-    ssh_client = context_manager.enter_context(
-        aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=instance_ssh_config)
-    )
-
-    documentdb_port_forward = context_manager.enter_context(
-        aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
-            ssh_client=ssh_client,
-            remote_host=documentdb_config.endpoint,
-            remote_port=documentdb_config.port,
-        )
-    )
-
-    # TODO Refactor all MongoClient creation into scope.database
-    documentdb_client_admin = pymongo.MongoClient(
-        # Synchronously initiate the connection
-        connect=True,
-        # Connect via SSH port forward
-        host="127.0.0.1",
-        port=documentdb_port_forward.local_port,
-        # Because of the port forward, must not attempt to access the replica set
-        directConnection=True,
-        # DocumentDB requires SSL, but port forwarding means the certificate will not match
-        tls=True,
-        tlsInsecure=True,
-        # PyMongo defaults to retryable writes, which are not supported by DocumentDB
-        # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
-        retryWrites=False,
-        # Connect as admin
-        username=documentdb_config.admin_user,
-        password=documentdb_config.admin_password,
-    )
-
-    return documentdb_client_admin
-
-
-def _documentdb_client_database(
-    *,
-    context_manager: contextlib.ExitStack,
-    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
-    documentdb_config: scope.config.DocumentDBConfig,
-    database_config: scope.config.DatabaseConfig,
-) -> pymongo.database.Database:
-    """
-    Utility function for obtaining a DocumentDB client, authenticated as the user associated with a specific database.
-    """
-
-    ssh_client = context_manager.enter_context(
-        aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=instance_ssh_config)
-    )
-
-    documentdb_port_forward = context_manager.enter_context(
-        aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
-            ssh_client=ssh_client,
-            remote_host=documentdb_config.endpoint,
-            remote_port=documentdb_config.port,
-        )
-    )
-
-    # TODO Refactor all MongoClient creation into scope.database
-    documentdb_client_admin = pymongo.MongoClient(
-        # Synchronously initiate the connection
-        connect=True,
-        # Connect via SSH port forward
-        host="127.0.0.1",
-        port=documentdb_port_forward.local_port,
-        # Because of the port forward, must not attempt to access the replica set
-        directConnection=True,
-        # DocumentDB requires SSL, but port forwarding means the certificate will not match
-        tls=True,
-        tlsInsecure=True,
-        # PyMongo defaults to retryable writes, which are not supported by DocumentDB
-        # https://docs.aws.amazon.com/documentdb/latest/developerguide/functional-differences.html#functional-differences.retryable-writes
-        retryWrites=False,
-        # Connect as admin
-        username=database_config.user,
-        password=database_config.password,
-    )
-
-    return documentdb_client_admin.get_database(database_config.name)
-
-
-def _database_initialize(
-    *,
-    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
-    documentdb_config: scope.config.DocumentDBConfig,
-    database_config: scope.config.DatabaseConfig,
-):
-    """
-    Initialize a database.
-    """
-
-    with contextlib.ExitStack() as context_manager:
-        documentdb_client_admin = _documentdb_client_admin(
-            context_manager=context_manager,
-            instance_ssh_config=instance_ssh_config,
-            documentdb_config=documentdb_config,
-        )
-
-        database = documentdb_client_admin.get_database(
-            name=database_config.name,
-        )
-
-        # Ensure the expected database user
-        # All DocumentDB users are created in the "admin" database
-        result = database.command(
-            "usersInfo",
-            {
-                "user": database_config.user,
-                "db": "admin",
-            },
-        )
-        if not result["users"]:
-            create_or_update_command = "createUser"
-        else:
-            create_or_update_command = "updateUser"
-
-        database.command(
-            create_or_update_command,
-            database_config.user,
-            pwd=database_config.password,
-            roles=[
-                {
-                    "role": "readWrite",
-                    "db": database_config.name,
-                },
-            ],
-        )
-
-        database = _documentdb_client_database(
-            context_manager=context_manager,
-            instance_ssh_config=instance_ssh_config,
-            documentdb_config=documentdb_config,
-            database_config=database_config,
-        )
-
-        scope.database.initialize.initialize(database=database)
-
-
-def _database_reset(
-    *,
-    instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
-    documentdb_config: scope.config.DocumentDBConfig,
-    database_config: scope.config.DatabaseConfig,
-):
-    """
-    Reset a database.
-    """
-
-    with contextlib.ExitStack() as context_manager:
-        documentdb_client_admin = _documentdb_client_admin(
-            context_manager=context_manager,
-            instance_ssh_config=instance_ssh_config,
-            documentdb_config=documentdb_config,
-        )
-
-        documentdb_client_admin.drop_database(
-            name_or_database=database_config.name
-        )
-
-        _database_initialize(
-            instance_ssh_config=instance_ssh_config,
-            documentdb_config=documentdb_config,
-            database_config=database_config,
-        )
-
-
-@task
-def demo_initialize(context):
-    """
-    Initialize the demo database.
-    """
-
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEMO_DATABASE_CONFIG_PATH)
-
-    _database_initialize(
-        instance_ssh_config=instance_ssh_config,
-        documentdb_config=documentdb_config,
-        database_config=database_config,
-    )
-
-
-@task
-def demo_reset(context):
-    """
-    Reset and initialize the demo database.
-    """
-
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEMO_DATABASE_CONFIG_PATH)
-
-    _database_reset(
-        instance_ssh_config=instance_ssh_config,
-        documentdb_config=documentdb_config,
-        database_config=database_config,
-    )
-
-
-@task
-def dev_initialize(context):
-    """
-    Initialize the development database.
-    """
-
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
-
-    _database_initialize(
-        instance_ssh_config=instance_ssh_config,
-        documentdb_config=documentdb_config,
-        database_config=database_config,
-    )
-
-
-@task
-def dev_reset(context):
-    """
-    Reset and initialize the development database.
-    """
-
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
-    documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-    database_config = scope.config.DatabaseConfig.load(DEV_DATABASE_CONFIG_PATH)
-
-    _database_reset(
-        instance_ssh_config=instance_ssh_config,
-        documentdb_config=documentdb_config,
-        database_config=database_config,
-    )
-
-
 # Build task collection
 ns = Collection("database")
 
 ns_demo = Collection("demo")
-ns_demo.add_task(demo_initialize, "initialize")
-ns_demo.add_task(demo_reset, "reset")
+ns_demo.add_task(scope.tasks.database.task_initialize(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEMO_DATABASE_CONFIG_PATH,
+), "initialize")
+ns_demo.add_task(scope.tasks.database.task_reset(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEMO_DATABASE_CONFIG_PATH,
+), "reset")
 
 ns_dev = Collection("dev")
-ns_dev.add_task(dev_initialize, "initialize")
-ns_dev.add_task(dev_reset, "reset")
+ns_dev.add_task(scope.tasks.database.task_initialize(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEV_DATABASE_CONFIG_PATH,
+), "initialize")
+ns_dev.add_task(scope.tasks.database.task_reset(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEV_DATABASE_CONFIG_PATH,
+), "reset")
 
 compose_collection(ns, ns_demo, name="demo")
 compose_collection(ns, ns_dev, name="dev")
