@@ -117,7 +117,7 @@
 		],
 		"safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
 	},
-	"sessions": [],
+	"sessions": {},
 	"caseReviews": [],
 	"assessments": [],
 	"scheduledAssessments": [],
