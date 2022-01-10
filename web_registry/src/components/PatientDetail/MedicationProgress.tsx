@@ -153,7 +153,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                         headerHeight={28}
                         rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={false}
+                        isRowSelectable={() => false}
                         pagination
                     />
                 )}
