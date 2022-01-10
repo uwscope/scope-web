@@ -6,13 +6,13 @@ import pymongo.errors
 import pymongo.results
 
 
-def get_values(
-    *, database: pymongo.database.Database, collection: str
+def get_values_inventory(
+    *, database: pymongo.database.Database, collection_name: str
 ) -> Optional[dict]:
     """
     Retrieve "valuesInventory" document.
     """
-    collection = database.get_collection(name=collection)
+    collection = database.get_collection(name=collection_name)
 
     query = {
         "type": "valuesInventory",
@@ -30,14 +30,14 @@ def get_values(
     return values_inventory
 
 
-def create_values(
-    *, database: pymongo.database.Database, collection: str, values_inventory: dict
+def create_values_inventory(
+    *, database: pymongo.database.Database, collection_name: str, values_inventory: dict
 ) -> pymongo.results.InsertOneResult:
     """
     Create the "valuesInventory" document.
     """
 
-    collection = database.get_collection(name=collection)
+    collection = database.get_collection(name=collection_name)
 
     try:
         result = collection.insert_one(document=values_inventory)

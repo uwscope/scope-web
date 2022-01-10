@@ -2,25 +2,28 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.values
+import scope.database.values_inventory
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
-from scope.schema import patient_schema
+from scope.schema import values_inventory_schema
 from utils import validate_schema
 
-patient_values_blueprint = Blueprint("patient_values_blueprint", __name__)
+registry_values_inventory_blueprint = Blueprint(
+    "registry_values_inventory_blueprint", __name__, url_prefix="/patients"
+)
 
 
 # NOTE: Passing the patient collection name for now. Will fix this after auth workflow is finalized.
-# Other option could be the patient identity id because the collection name is `patient_{identity_id}`.
-@patient_values_blueprint.route("/<string:patient_collection>", methods=["GET"])
+@registry_values_inventory_blueprint.route(
+    "/<string:patient_collection>/values", methods=["GET"]
+)
 @as_json
 def get_patient_values(patient_collection):
     context = request_context()
 
-    result = scope.database.values.get_values(
-        database=context.database, collection=patient_collection
+    result = scope.database.values_inventory.get_values_inventory(
+        database=context.database, collection_name=patient_collection
     )
 
     if result:
@@ -29,11 +32,12 @@ def get_patient_values(patient_collection):
         abort(http.HTTPStatus.NOT_FOUND)
 
 
-@patient_values_blueprint.route("/<string:patient_collection>", methods=["PUT"])
+@registry_values_inventory_blueprint.route(
+    "/<string:patient_collection>/values", methods=["PUT"]
+)
+@validate_schema(values_inventory_schema)
 @as_json
 def update_patient_values(patient_collection):
-
-    # TODO: Check that `_id` doesn't exist in values_inventory
 
     values_inventory = request.json
 
@@ -45,9 +49,9 @@ def update_patient_values(patient_collection):
 
     context = request_context()
 
-    result = scope.database.values.create_values(
+    result = scope.database.values_inventory.create_values_inventory(
         database=context.database,
-        collection=patient_collection,
+        collection_name=patient_collection,
         values_inventory=values_inventory,
     )
 
