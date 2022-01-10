@@ -33,10 +33,7 @@
 			"$ref": "/schemas/safety-plan"
 		},
 		"sessions": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/session"
-			}
+			"$ref": "/schemas/sessions"
 		},
 		"caseReviews": {
 			"type": "array",
