@@ -288,7 +288,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
                 headerHeight={36}
                 onRowClick={onRowClick}
                 autoHeight={true}
-                isRowSelectable={false}
+                isRowSelectable={() => false}
                 pagination
             />
         </Grid>

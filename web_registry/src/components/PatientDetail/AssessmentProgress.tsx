@@ -318,7 +318,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         rowHeight={24}
                         onRowClick={onRowClick}
                         autoHeight={true}
-                        isRowSelectable={false}
+                        isRowSelectable={() => false}
                         pagination
                     />
                 )}
