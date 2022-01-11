@@ -81,12 +81,15 @@ const emptyProfile = {
     name: '',
     MRN: '',
     clinicCode: 'Other',
-    depressionTreatmentStatus: 'Other',
     birthdate: new Date(),
+    race: 'White',
     sex: 'Male',
     gender: 'Male',
     pronoun: 'He/Him',
-    race: 'White',
+    primaryOncologyProvider: undefined,
+    primaryCareManager: undefined,
+    depressionTreatmentStatus: undefined,
+    followupSchedule: undefined,
 } as IPatientProfile;
 
 const state = observable<IPatientProfile>(emptyProfile);
@@ -112,7 +115,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
         action(() => {
             Object.assign(state, emptyProfile);
         }),
-        []
+        [props.open]
     );
 
     const onValueChange = action((key: string, value: any) => {

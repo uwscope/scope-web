@@ -3,7 +3,6 @@ import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
@@ -87,7 +86,7 @@ export interface ICaseloadTableProps {
     onPatientClick?: (recordId: string) => void;
 }
 
-export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
+export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
     const { patients, onPatientClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
@@ -297,6 +296,6 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
             />
         </TableContainer>
     );
-});
+};
 
 export default CaseloadTable;
