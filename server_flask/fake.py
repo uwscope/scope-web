@@ -9,9 +9,9 @@ from enums import (AssessmentFrequency, AssessmentType,
                    BehavioralActivationChecklist, BehavioralStrategyChecklist,
                    CancerTreatmentRegimen, ClinicCode, DayOfWeek,
                    DepressionTreatmentStatus, DiscussionFlag, FollowupSchedule,
-                   PatientGender, PatientPronoun, PatientRaceEthnicity,
-                   PatientSex, Referral, ReferralStatus, SessionType,
-                   TreatmentChange, TreatmentPlan)
+                   PatientEthnicity, PatientGender, PatientPronoun,
+                   PatientRace, PatientSex, Referral, ReferralStatus,
+                   SessionType, TreatmentChange, TreatmentPlan)
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
 shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))
@@ -119,7 +119,8 @@ def getFakePatient():
             "sex": getRandomItem(PatientSex).value,
             "gender": getRandomItem(PatientGender).value,
             "pronoun": getRandomItem(PatientPronoun).value,
-            "race": getRandomItem(PatientRaceEthnicity).value,
+            "race": getRandomFlags(PatientRace),
+            "ethnicity": getRandomItem(PatientEthnicity).value,
             "primaryOncologyProvider": {
                 "identityId": str(uuid.uuid1()),
                 "name": getRandomItem(oncologyProviders)

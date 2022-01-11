@@ -1,16 +1,31 @@
 export type OtherSpecify = 'Other';
 
-export const patientSexValues = ['Male', 'Female'] as const;
+export const patientSexValues = ['Male', 'Female', 'Intersex'] as const;
 export type PatientSex = typeof patientSexValues[number];
 
-export const patientGenderValues = ['Male', 'Female'] as const;
+export const patientGenderValues = ['Male', 'Female', 'Transgender', 'Non-binary/Non-conforming', 'Other'] as const;
 export type PatientGender = typeof patientGenderValues[number];
 
 export const patientPronounValues = ['He/Him', 'She/Her', 'They/Them'] as const;
 export type PatientPronoun = typeof patientPronounValues[number];
 
-export const patientRaceEthnicityValues = ['White', 'Black'] as const;
-export type PatientRaceEthnicity = typeof patientRaceEthnicityValues[number];
+export const patientRaceValues = [
+    'American Indian or Alaska Native',
+    'Asian or Asian American',
+    'Black or African American',
+    'Native Hawaiian or Other Pacific Islander',
+    'White',
+    'Unknown',
+] as const;
+export type PatientRace = typeof patientRaceValues[number];
+export type PatientRaceFlags = { [item in PatientRace]: boolean };
+
+export const patientEthnicityValues = [
+    'Hispanic or Latino/Latina/Latinx',
+    'Not Hispanic or Latino/Latina/Latinx',
+    'Unknown',
+] as const;
+export type PatientEthnicity = typeof patientEthnicityValues[number];
 
 export const clinicCodeValues = [
     'Breast',

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { IPatientProfile } from 'shared/types';
+import { IPatientProfile, KeyedMap } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
 import { usePatient } from 'src/stores/stores';
@@ -64,6 +64,14 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
         state.open = false;
     });
 
+    const generateRaceText = (flags: KeyedMap<boolean | string>) => {
+        var concatValues = Object.keys(flags)
+            .filter((k) => flags[k])
+            .join(', ');
+
+        return concatValues;
+    };
+
     return (
         <Container>
             <Grid container spacing={2} direction="column" justifyContent="flex-start" alignItems="stretch">
@@ -97,7 +105,11 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                     />
                     <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
                     <LabeledField label="sex" value={profile.sex} />
-                    <LabeledField label="race" value={profile.race} />
+                    <LabeledField
+                        label="race"
+                        value={profile.race != undefined ? generateRaceText(profile.race) : 'unknown'}
+                    />
+                    <LabeledField label="ethnicity" value={profile.ethnicity} />
                     <LabeledField label="gender" value={profile.gender} />
                     <LabeledField label="pronouns" value={profile.pronoun} />
                 </Grid>
