@@ -1,7 +1,8 @@
+import FlagIcon from '@mui/icons-material/Flag';
+import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
@@ -41,6 +42,18 @@ const ChangeCell = withTheme(
     }))
 );
 
+const RedFlag = withTheme(
+    styled(FlagIcon)<{ on: boolean }>((props) => ({
+        color: props.theme.customPalette.scoreColors[props.on ? 'bad' : 'disabled'],
+    }))
+);
+
+const YellowFlag = withTheme(
+    styled(FlagIcon)<{ on: boolean }>((props) => ({
+        color: props.theme.customPalette.scoreColors[props.on ? 'warning' : 'disabled'],
+    }))
+);
+
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
 const renderPHQCell = (props: GridCellParams) => <PHQCell score={props.value as number}>{props.value}</PHQCell>;
@@ -51,6 +64,21 @@ const renderChangeCell = (props: GridCellParams) => (
     <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
 );
 
+const renderFlagCell = (props: GridCellParams) => {
+    const flaggedForDiscussion = !!props.value?.['Flag for discussion'];
+    const flaggedForSafety = !!props.value?.['Flag as safety risk'];
+    return (
+        <div>
+            <Tooltip title="Flagged for safety">
+                <RedFlag on={flaggedForSafety} fontSize="small" />
+            </Tooltip>
+            <Tooltip title="Flagged for discussion">
+                <YellowFlag on={flaggedForDiscussion} fontSize="small" />
+            </Tooltip>
+        </div>
+    );
+};
+
 const NA = '--';
 
 export interface ICaseloadTableProps {
@@ -58,7 +86,7 @@ export interface ICaseloadTableProps {
     onPatientClick?: (recordId: string) => void;
 }
 
-export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
+export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
     const { patients, onPatientClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
@@ -74,6 +102,14 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
 
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
+        {
+            field: 'discussionFlag',
+            headerName: 'Flags',
+            width: 25,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: renderFlagCell,
+        },
         { field: 'MRN', headerName: 'MRN', minWidth: 50, align: 'center', headerAlign: 'center' },
         {
             field: 'depressionTreatmentStatus',
@@ -254,12 +290,12 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((p
                 rowHeight={36}
                 onRowClick={onRowClick}
                 autoHeight={true}
-                isRowSelectable={false}
+                isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
             />
         </TableContainer>
     );
-});
+};
 
 export default CaseloadTable;

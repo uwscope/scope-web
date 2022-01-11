@@ -126,7 +126,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
         action(() => {
             Object.assign(state, emptyProfile);
         }),
-        []
+        [props.open]
     );
 
     const onValueChange = action((key: string, value: any) => {

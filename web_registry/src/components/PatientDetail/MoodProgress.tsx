@@ -89,7 +89,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                         headerHeight={28}
                         rowHeight={24}
                         autoHeight={true}
-                        isRowSelectable={false}
+                        isRowSelectable={() => false}
                         pagination
                     />
                 )}
