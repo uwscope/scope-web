@@ -13,9 +13,10 @@ import {
     DueType,
     FollowupSchedule,
     OtherSpecify,
+    PatientEthnicity,
     PatientGender,
     PatientPronoun,
-    PatientRaceEthnicity,
+    PatientRaceFlags,
     PatientSex,
     Referral,
     ReferralStatus,
@@ -162,7 +163,8 @@ export interface IPatientProfile {
     sex?: PatientSex;
     gender?: PatientGender;
     pronoun?: PatientPronoun;
-    race?: PatientRaceEthnicity;
+    race?: PatientRaceFlags;
+    ethnicity?: PatientEthnicity;
     primaryOncologyProvider?: IIdentity;
     primaryCareManager?: IIdentity;
     discussionFlag?: DiscussionFlags;
