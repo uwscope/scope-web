@@ -10,8 +10,8 @@ module.exports = {
     appIndex: resolveProject('src/index.tsx'),
     appIndexTemplate: resolveProject('public/index.html'),
     tsconfig: resolveProject('tsconfig.json'),
-    webpackConfigDev: resolveProject('config/webpack.dev.js'),
-    webpackConfigProd: resolveProject('config/webpack.prod.js'),
+    webpackConfigDev: resolveProject('webpack/webpack.dev.js'),
+    webpackConfigProd: resolveProject('webpack/webpack.prod.js'),
 
     appServerProd: '/api/',
     appServerLocalDev: 'http://localhost:4000/',
