@@ -44,9 +44,16 @@ module.exports = {
         ],
     },
 
+    externals: {
+        clientConfig: 'clientConfig',
+    },
+
     plugins: [
         new HtmlWebpackPlugin({
             template: paths.appIndexTemplate,
+        }),
+        new CopyWebpackPlugin({
+            patterns: [{ from: 'config', to: 'config' }],
         }),
         new CopyWebpackPlugin({
             patterns: [{ from: 'src/assets/resources', to: 'resources' }],

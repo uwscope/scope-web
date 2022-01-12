@@ -4,8 +4,8 @@ import withTheme from '@mui/styles/withTheme';
 import { addDays, format } from 'date-fns';
 import { addMonths } from 'date-fns/esm';
 import throttle from 'lodash.throttle';
-import { action, observable } from 'mobx';
-import { observer } from 'mobx-react';
+import { action } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
 import React from 'react';
 import {
     Crosshair,
@@ -103,26 +103,26 @@ interface IAssessmentChartState {
     visibility: LegendItem[];
 }
 
-const state = observable<IAssessmentChartState>({
-    hoveredPoint: undefined,
-    hoveredIndex: undefined,
-    expanded: false,
-    visibility: [],
-});
-
-const onNearestX = throttle(
-    action((point: Point, { index }: RVNearestXData<Point>) => {
-        state.hoveredPoint = point;
-        state.hoveredIndex = index;
-    }),
-    500
-);
-
 export const AssessmentVis = withTheme(
     observer((props: ThemedStyledProps<IAssessmentChartProps, any>) => {
         const ref = React.useRef(null);
         const { width } = useResize(ref);
         const { data, maxValue, useTime } = props;
+
+        const state = useLocalObservable<IAssessmentChartState>(() => ({
+            hoveredPoint: undefined,
+            hoveredIndex: undefined,
+            expanded: false,
+            visibility: [],
+        }));
+
+        const onNearestX = throttle(
+            action((point: Point, { index }: RVNearestXData<Point>) => {
+                state.hoveredPoint = point;
+                state.hoveredIndex = index;
+            }),
+            500
+        );
 
         const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
 

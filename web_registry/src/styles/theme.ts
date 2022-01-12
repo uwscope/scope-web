@@ -84,6 +84,7 @@ export default function createAppTheme() {
                 warning: '#ffbf00',
                 good: '#20ab41',
                 unknown: '#fafafa',
+                disabled: '#eeeeee',
             },
         },
         customSizes: {

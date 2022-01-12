@@ -1,6 +1,6 @@
 const rimraf = require('rimraf');
 const webpack = require('webpack');
-const paths = require('../config/paths');
+const paths = require('../webpack/paths');
 const webpackConfig = require(paths.webpackConfigProd);
 
 console.log(`Building production in ${paths.appBuildProd}.`);

@@ -5,7 +5,7 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../webpack/paths');
 const webpackConfig = require(paths.webpackConfigDev);
 
 console.log(`Starting debug build with hot reloading.`);

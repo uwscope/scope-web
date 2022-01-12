@@ -18,10 +18,5 @@ module.exports = merge(common, {
     },
 
     plugins: [
-        // Local execution of the app server
-        new webpack.DefinePlugin({
-            // Quotes around strings for compile-time text substitution
-            __API__: "'" + paths.appServerProd + "'",
-        }),
     ],
 });

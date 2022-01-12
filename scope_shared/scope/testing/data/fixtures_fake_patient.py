@@ -121,7 +121,7 @@ def data_fake_patient_profile_factory() -> dict:
         "sex": "Male",  # sex enum
         "gender": "Male",  # gender enum
         "pronoun": "He/Him",  # pronoun enum
-        "race": "Black",  # race enum
+        "race": "Black or African American",  # race enum
         "primaryOncologyProvider": data_fake_identity_factory(),
         "primaryCareManager": data_fake_identity_factory(),
         "discussionFlag": {

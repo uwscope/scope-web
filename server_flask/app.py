@@ -63,12 +63,12 @@ def create_app():
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
 
-    @app.route("/patients_deprecated")
+    @app.route("/patients")
     @as_json
     def get_patients():
         return {"patients": patients}
 
-    @app.route("/patient_deprecated/<recordId>", methods=["GET"])
+    @app.route("/patient/<recordId>", methods=["GET"])
     @as_json
     def get_patient_data(recordId):
         if request.method == "GET":
@@ -96,27 +96,27 @@ def create_app():
     def status():
         return {"flask_status": "ok"}
 
-    # Register all the `registry` blueprints, i.e. blueprints for web_registry
-    app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
-    app.register_blueprint(
-        registry_patient_profile_blueprint
-    )  # url_prefix="/patients/<patient_collection>/profile"
-    app.register_blueprint(
-        registry_clinical_history_blueprint
-    )  # url_prefix="/patients/<patient_collection>/clinicalhistory"
-    app.register_blueprint(
-        registry_values_inventory_blueprint
-    )  # url_prefix="/patients/<patient_collection>/values"
-    app.register_blueprint(
-        registry_safety_plan_blueprint
-    )  # url_prefix="/patients/<patient_collection>/safety"
-
-    # Register all the `patient` blueprints, i.e. blueprints for web_patient
-    patient = Blueprint("patient", __name__, url_prefix="/patient")
-    patient.register_blueprint(
-        patient_values_inventory_blueprint, url_prefix="/values/"
-    )
-    app.register_blueprint(patient)
+    # # Register all the `registry` blueprints, i.e. blueprints for web_registry
+    # app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
+    # app.register_blueprint(
+    #     registry_patient_profile_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/profile"
+    # app.register_blueprint(
+    #     registry_clinical_history_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/clinicalhistory"
+    # app.register_blueprint(
+    #     registry_values_inventory_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/values"
+    # app.register_blueprint(
+    #     registry_safety_plan_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/safety"
+    #
+    # # Register all the `patient` blueprints, i.e. blueprints for web_patient
+    # patient = Blueprint("patient", __name__, url_prefix="/patient")
+    # patient.register_blueprint(
+    #     patient_values_inventory_blueprint, url_prefix="/values/"
+    # )
+    # app.register_blueprint(patient)
 
     return app
 
