@@ -1,9 +1,49 @@
 import random
+from datetime import date, datetime, timedelta
 from typing import Callable
 
 import bson.json_util
 import bson.objectid
+import numpy as np
 import pytest
+from lorem.text import TextLorem
+
+from .enums import *
+
+lorem = TextLorem(srange=(4, 16), prange=(4, 8))
+shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))
+
+
+def get_random_integer(min_inclusive, max_exclusive):
+    return int(np.random.randint(low=min_inclusive, high=max_exclusive))
+
+
+def get_random_item(enum):
+    return np.random.choice(enum, 1)[0]
+
+
+def get_random_boolean():
+    return np.random.randint(0, 2) == 0
+
+
+def sample(enum, count):
+    return np.random.choice(enum, count, replace=False)
+
+
+def get_random_flags(enum):
+    flags = dict()
+    for key in enum:
+        flags[key.value] = get_random_boolean()
+
+    return flags
+
+
+def get_random_states(enum, options):
+    flags = dict()
+    for key in enum:
+        flags[key.value] = get_random_item(options).value
+
+    return flags
 
 
 def _fake_name_factory() -> str:
@@ -190,6 +230,52 @@ def data_fake_safety_plan_factory() -> dict:
     return fake_safety_plan
 
 
+def data_fake_sessions_factory() -> dict:
+    session_count = get_random_integer(1, 10)
+    random_referrals = get_random_states(Referral, ReferralStatus)
+    referrals = []
+    for referral in random_referrals:
+        if random_referrals[referral] != "Not Referred":
+            referrals.append(
+                {"referralType": referral, "referralStatus": random_referrals[referral]}
+            )
+
+    fake_sessions = [
+        {
+            "sessionId": "Initial assessment" if idx == 0 else "session-%d" % idx,
+            "type": "session",
+            "_rev": 1,
+            "date": str(
+                datetime.now()
+                - timedelta(
+                    days=get_random_integer(-2, 2)
+                    + (session_count - idx) * get_random_integer(13, 18)
+                )
+            ),
+            "sessionType": get_random_item(SessionType).value,
+            "billableMinutes": int(get_random_item([30, 45, 60, 80])),
+            "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
+            "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
+            "behavioralStrategyChecklist": get_random_flags(
+                BehavioralStrategyChecklist
+            ),
+            "behavioralStrategyOther": shortLorem.sentence()
+            if get_random_boolean()
+            else "",
+            "behavioralActivationChecklist": get_random_flags(
+                BehavioralActivationChecklist
+            ),
+            "referrals": referrals,
+            "otherRecommendations": shortLorem.sentence(),
+            "sessionNote": lorem.paragraph(),
+        }
+        for idx in range(session_count)
+    ]
+    # TODO: Verify the schema
+
+    return fake_sessions
+
+
 def data_fake_patient_factory() -> dict:
     fake_patient = {
         # NOTE: A "patient" exists only as a query composed from other documents.
@@ -202,6 +288,7 @@ def data_fake_patient_factory() -> dict:
         "clinicalHistory": data_fake_clinical_history_factory(),  # NOTE: In typescipt, all the keys in clinicalHistory are optional. Chat with James about this.
         "valuesInventory": data_fake_values_inventory_factory(),
         "safetyPlan": data_fake_safety_plan_factory(),
+        "sessions": data_fake_sessions_factory(),
     }
 
     # TODO: Verify the schema
@@ -262,3 +349,14 @@ def fixture_data_fake_safety_plan_factory() -> Callable[[], dict]:
     """
 
     return data_fake_safety_plan_factory
+
+
+@pytest.fixture(name="data_fake_sessions_factory")
+def fixture_data_fake_sessions_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_values_inventory_factory.
+
+    Provides a factory for obtaining data for a fake values inventory.
+    """
+
+    return data_fake_sessions_factory
