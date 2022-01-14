@@ -1,5 +1,5 @@
 {
-	"type": "valuesInventory",
+	"_type": "valuesInventory",
 	"_rev": 1,
 	"assigned": true,
 	"assignedDate": "some date",

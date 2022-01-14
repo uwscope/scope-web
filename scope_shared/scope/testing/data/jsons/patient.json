@@ -1,22 +1,18 @@
 {
+	"_type": "patient",
 	"identity": {
-		"identityId": "identityId",
+		"_type": "identity",
+		"_rev": 1,
 		"name": "patient name?"
 	},
-	"profile": {
+	"patientProfile": {
+		"_type": "patientProfile",
+		"_rev": 1,
 		"name": "patientName",
 		"MRN": "mrn",
 		"clinicCode": "Transplant – Auto",
 		"birthdate": "birthdate",
 		"sex": "Male",
-		"primaryOncologyProvider": {
-			"identityId": "identityId",
-			"name": "primaryOncologyProvider"
-		},
-		"primaryCareManager": {
-			"identityId": "identityId",
-			"name": "primaryCareManager"
-		},
 		"discussionFlag": {
 			"Flag as safety risk": true,
 			"Flag for discussion": false
@@ -25,6 +21,8 @@
 		"depressionTreatmentStatus": "CoCM"
 	},
 	"clinicalHistory": {
+		"_type": "clinicalHistory",
+		"_rev": 1,
 		"primaryCancerDiagnosis": "test",
 		"currentTreatmentRegimen": {
 			"Surgery": true,
@@ -38,6 +36,8 @@
 		}
 	},
 	"valuesInventory": {
+		"_type": "valuesInventory",
+		"_rev": 1,
 		"assigned": true,
 		"assignedDate": "some date",
 		"values": [
@@ -61,6 +61,8 @@
 		]
 	},
 	"safetyPlan": {
+		"_type": "safetyPlan",
+		"_rev": 1,
 		"assigned": true,
 		"assignedDate": "some date",
 		"reasonsForLiving": "reasons",
@@ -117,13 +119,5 @@
 		],
 		"safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
 	},
-	"sessions": {},
-	"caseReviews": [],
-	"assessments": [],
-	"scheduledAssessments": [],
-	"assessmentLogs": [],
-	"activities": [],
-	"scheduledActivities": [],
-	"activityLogs": [],
-	"moodLogs": []
+	"sessions": []
 }

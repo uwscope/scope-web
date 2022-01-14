@@ -1,5 +1,5 @@
 {
-	"type": "safetyPlan",
+	"_type": "safetyPlan",
 	"_rev": 1,
 	"assigned": true,
 	"assignedDate": "some date",
