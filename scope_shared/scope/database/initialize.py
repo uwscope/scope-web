@@ -74,9 +74,7 @@ def reset(
             admin_password=documentdb_config.admin_password,
         )
 
-        documentdb_client_admin.drop_database(
-            name_or_database=database_config.name
-        )
+        documentdb_client_admin.drop_database(name_or_database=database_config.name)
 
         initialize(
             instance_ssh_config=instance_ssh_config,
@@ -155,13 +153,13 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     # Ensure a sentinel document
     result = patients_collection.find_one(
         filter={
-            "type": "sentinel",
+            "_type": "sentinel",
         }
     )
     if result is None:
         patients_collection.insert_one(
             {
                 "_id": bson.objectid.ObjectId(),
-                "type": "sentinel",
+                "_type": "sentinel",
             }
         )

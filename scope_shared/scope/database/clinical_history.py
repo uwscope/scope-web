@@ -15,7 +15,7 @@ def get_clinical_history(
     collection = database.get_collection(name=collection_name)
 
     query = {
-        "type": "clinicalHistory",
+        "_type": "clinicalHistory",
     }
 
     # Find the document with highest `v`.
