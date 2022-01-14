@@ -18,5 +18,5 @@ sessions_data = JSON.loadf(sample_data_dir / "sessions.json")
 )
 def test_identity(schema: JSONSchema, document: JSON, expected_valid: bool):
     result = schema.evaluate(document)
-    # print(result.output("basic"))
+    print(result.output("basic"))
     assert result.output("flag")["valid"] == expected_valid
