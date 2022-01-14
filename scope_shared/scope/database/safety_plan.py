@@ -15,7 +15,7 @@ def get_safety_plan(
     collection = database.get_collection(name=collection_name)
 
     query = {
-        "type": "safetyPlan",
+        "_type": "safetyPlan",
     }
 
     # Find the document with highest `v`.
