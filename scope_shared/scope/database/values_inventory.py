@@ -15,7 +15,7 @@ def get_values_inventory(
     collection = database.get_collection(name=collection_name)
 
     query = {
-        "type": "valuesInventory",
+        "_type": "valuesInventory",
     }
 
     # Find the document with highest `v`.
