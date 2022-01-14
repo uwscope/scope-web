@@ -3,51 +3,54 @@
 	"$id": "https://uwscope.org/schemas/session",
 	"title": "ISession",
 	"description": "ISession Type",
-	"type": "object",
+	"_type": "object",
 	"properties": {
-		"sessionId": {
-			"type": "string"
+		"_session_id": {
+			"_type": "string"
 		},
+		"_type": { "const": "session" },
+		"_rev": { "_type": "number" },
 		"date": {
-			"type": "string"
+			"_type": "string"
 		},
 		"sessionType": {
 			"$ref": "/schemas/enums#/properties/sessionType"
 		},
 		"billableMinutes": {
-			"type": "number"
+			"_type": "number"
 		},
 		"medicationChange": {
-			"type": "string"
+			"_type": "string"
 		},
 		"currentMedications": {
-			"type": "string"
+			"_type": "string"
 		},
 		"behavioralStrategyChecklist": {
 			"$ref": "/schemas/enums#/properties/behavioralStrategyChecklistFlags"
 		},
 		"behavioralStrategyOther": {
-			"type": "string"
+			"_type": "string"
 		},
 		"behavioralActivationChecklist": {
 			"$ref": "/schemas/enums#/properties/bAChecklistFlags"
 		},
 		"referrals": {
-			"type": "array",
+			"_type": "array",
 			"items": {
 				"$ref": "/schemas/referral-status"
 			}
 		},
 		"otherRecommendations": {
-			"type": "string"
+			"_type": "string"
 		},
 		"sessionNote": {
-			"type": "string"
+			"_type": "string"
 		}
 	},
 	"additionalProperties": false,
 	"required": [
 		"sessionId",
+		"_rev",
 		"date",
 		"sessionType",
 		"billableMinutes",

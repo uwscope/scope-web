@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"_id": { "type": "string" },
-		"type": { "const": "patient" },
+		"_type": { "const": "patient" },
 		"identity": {
 			"type": "object",
 			"description": "IIdentity schema",

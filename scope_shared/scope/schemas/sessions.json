@@ -2,15 +2,9 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "https://uwscope.org/schemas/sessions",
 	"title": "ISession[]",
-	"type": "object",
-	"properties": {
-		"type": { "const": "sessions" },
-		"sessions": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/session"
-			}
-		}
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/session"
 	},
 	"additionalProperties": false,
 	"required": []
