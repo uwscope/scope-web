@@ -275,7 +275,7 @@ def data_fake_sessions_factory() -> dict:
             "otherRecommendations": shortLorem.sentence(),
             "sessionNote": lorem.paragraph(),
         }
-        for idx in range(3)
+        for idx in range(session_count)
     ]
     # TODO: Verify the schema
 
