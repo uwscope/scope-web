@@ -49,7 +49,7 @@
 	},
 	"additionalProperties": false,
 	"required": [
-		"sessionId",
+		"_session_id",
 		"_rev",
 		"date",
 		"sessionType",

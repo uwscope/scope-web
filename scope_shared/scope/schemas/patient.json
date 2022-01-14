@@ -85,5 +85,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["type", "identity", "patientProfile"]
+	"required": ["_type", "identity", "patientProfile"]
 }
