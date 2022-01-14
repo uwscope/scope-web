@@ -96,7 +96,7 @@
 		"depressionTreatmentStatus": {
 			"type": "string",
 			"description": "DepressionTreatmentStatus Type",
-			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending"]
+			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending", "Other"]
 		},
 		"cancerTreatmentRegimenFlags": {
 			"type": "object",
@@ -226,7 +226,7 @@
 			"enum": [
 				"Psychiatry",
 				"Psychology",
-				"Patient Navigation",
+				"Pt Navigation",
 				"Integrative Medicine",
 				"Spiritual Care",
 				"Palliative Care",
