@@ -99,7 +99,7 @@ def _fake_name_factory() -> str:
 def data_fake_identity_factory() -> dict:
     fake_identity = {
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "identity",
+        "_type": "identity",
         "_rev": 1,
         "name": _fake_name_factory(),
     }
@@ -110,26 +110,32 @@ def data_fake_identity_factory() -> dict:
 
 
 def data_fake_patient_profile_factory() -> dict:
+
+    name = _fake_name_factory()
+    mrn = "%s" % get_random_integer(10000, 1000000)
+
     fake_profile = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "type": "patientProfile",
+        "_type": "patientProfile",
         "_rev": 1,
-        "name": "First Last",  # TODO: should be same as identity?
-        "MRN": "dummy_MRN",
-        "clinicCode": "Neuro",  # clinicCode enum
-        "birthdate": "June 13, 1985",  # TODO: date pattern needs to be fixed in schema
-        "sex": "Male",  # sex enum
-        "gender": "Male",  # gender enum
-        "pronoun": "He/Him",  # pronoun enum
-        "race": "Black or African American",  # race enum
+        "name": name,
+        "MRN": mrn,
+        "clinicCode": get_random_item(ClinicCode).value,
+        "birthdate": str(
+            datetime(
+                get_random_integer(1930, 2000),
+                get_random_integer(1, 13),
+                get_random_integer(1, 28),
+            )
+        ),
+        "sex": get_random_item(PatientSex).value,
+        "gender": get_random_item(PatientGender).value,
+        "pronoun": get_random_item(PatientPronoun).value,
+        "race": get_random_flags(PatientRace),
         "primaryOncologyProvider": data_fake_identity_factory(),
         "primaryCareManager": data_fake_identity_factory(),
-        "discussionFlag": {
-            "Flag as safety risk": True,
-            "Flag for discussion": True,
-        },
-        "followupSchedule": "1-week follow-up",  # followupSchedule enum
-        "depressionTreatmentStatus": "CoCM",  # depressionTreatmentStatus enum
+        "discussionFlag": get_random_flags(DiscussionFlag),
+        "followupSchedule": get_random_item(FollowupSchedule).value,
+        "depressionTreatmentStatus": get_random_item(DepressionTreatmentStatus).value,
     }
 
     # TODO: Verify the schema
@@ -140,7 +146,7 @@ def data_fake_patient_profile_factory() -> dict:
 def data_fake_clinical_history_factory() -> dict:
     fake_clinical_history = {
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "clinicalHistory",
+        "_type": "clinicalHistory",
         "_rev": 1,
         "primaryCancerDiagnosis": "primaryCancerDiagnosis",
         "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
@@ -170,7 +176,7 @@ def data_fake_clinical_history_factory() -> dict:
 def data_fake_values_inventory_factory() -> dict:
     fake_values_inventory = {
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "valuesInventory",
+        "_type": "valuesInventory",
         "_rev": 1,
         "assigned": True,
         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
@@ -210,7 +216,7 @@ def data_fake_values_inventory_factory() -> dict:
 
 def data_fake_safety_plan_factory() -> dict:
     fake_safety_plan = {
-        "type": "safetyPlan",
+        "_type": "safetyPlan",
         "_rev": 1,
         "assigned": True,
         "assignedDate": "some date",
@@ -242,8 +248,8 @@ def data_fake_sessions_factory() -> dict:
 
     fake_sessions = [
         {
-            "sessionId": "Initial assessment" if idx == 0 else "session-%d" % idx,
-            "type": "session",
+            "_session_id": "Initial assessment" if idx == 0 else "session-%d" % idx,
+            "_type": "session",
             "_rev": 1,
             "date": str(
                 datetime.now()
@@ -269,7 +275,7 @@ def data_fake_sessions_factory() -> dict:
             "otherRecommendations": shortLorem.sentence(),
             "sessionNote": lorem.paragraph(),
         }
-        for idx in range(session_count)
+        for idx in range(3)
     ]
     # TODO: Verify the schema
 
@@ -282,7 +288,7 @@ def data_fake_patient_factory() -> dict:
         # Because a "patient" is never stored to the database, it will not have an "_id".
         # Below `_id` isn't being used anywhere for now except in James' version of CRUD patients code.
         # "_id": str(bson.objectid.ObjectId()),
-        "type": "patient",
+        "_type": "patient",
         "identity": data_fake_identity_factory(),
         "patientProfile": data_fake_patient_profile_factory(),
         "clinicalHistory": data_fake_clinical_history_factory(),  # NOTE: In typescipt, all the keys in clinicalHistory are optional. Chat with James about this.
