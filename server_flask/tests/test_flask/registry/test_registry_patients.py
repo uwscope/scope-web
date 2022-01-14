@@ -49,6 +49,9 @@ def test_flask_get_all_patients(
         if "_id" in v:
             v["_id"] = str(v["_id"])
 
+    for fake_session in data_fake_patient["sessions"]:
+        fake_session["_id"] = str(fake_session["_id"])
+
     # "patients" is a list
     response_patients = response.json()["patients"]
 
@@ -92,11 +95,15 @@ def test_flask_get_patient(
         ),
     )
     assert response.ok
+    assert response.status_code == 200
 
     for v in data_fake_patient.values():
         # Convert `bson.objectid.ObjectId` to `str`
         if "_id" in v:
             v["_id"] = str(v["_id"])
+
+    for fake_session in data_fake_patient["sessions"]:
+        fake_session["_id"] = str(fake_session["_id"])
 
     # Ensure body of response is our fake patient
     assert response.json() == data_fake_patient
@@ -171,10 +178,10 @@ def test_flask_create_patient(
     # Ensure body of response is our fake patient collection name
     assert response.json() == patient_collection_name
 
-    scope.database.patients.delete_patient(
-        database=database_client,
-        patient_collection_name=patient_collection_name,
-    )
+    # scope.database.patients.delete_patient(
+    #    database=database_client,
+    #    patient_collection_name=patient_collection_name,
+    # )
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
@@ -204,6 +211,8 @@ def test_flask_update_patient_405(
         # Convert `bson.objectid.ObjectId` to `str`
         if "_id" in v:
             v["_id"] = str(v["_id"])
+    for fake_session in data_fake_patient["sessions"]:
+        fake_session["_id"] = str(fake_session["_id"])
 
     # Update the same patient by sending its collection name
     response = session.put(
