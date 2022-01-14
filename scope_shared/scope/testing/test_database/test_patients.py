@@ -1,12 +1,16 @@
-import pymongo.database
-import pymongo.errors
 from typing import Callable
 
+import pymongo.database
+import pymongo.errors
 import pytest
-
 import scope.database.patients
 
+# NOTE: This file can be deleted at some point. Keeping it here for reference.
 
+
+@pytest.mark.skip(
+    reason="fixture for fake patient data and scope.database.patients have changed"
+)
 def test_patients_create_get_delete(
     database_client: pymongo.database.Database,
     data_fake_patient_factory: Callable[[], dict],
@@ -53,8 +57,7 @@ def test_patients_create_get_delete(
 
     # Delete the fake patient
     result = scope.database.patients.delete_patient(
-        database=database_client,
-        id=data_fake_patient["_id"]
+        database=database_client, id=data_fake_patient["_id"]
     )
     assert result.deleted_count == 1
 
@@ -72,6 +75,9 @@ def test_patients_create_get_delete(
     assert data_fake_patient not in patients
 
 
+@pytest.mark.skip(
+    reason="fixture for fake patient data and scope.database.patients have changed"
+)
 def test_patients_create_existing(
     database_client: pymongo.database.Database,
     data_fake_patient_factory: Callable[[], dict],
@@ -97,6 +103,9 @@ def test_patients_create_existing(
         )
 
 
+@pytest.mark.skip(
+    reason="fixture for fake patient data and scope.database.patients have changed"
+)
 def test_patients_delete_nonexistent(
     database_client: pymongo.database.Database,
     data_fake_patient_factory: Callable[[], dict],
@@ -110,7 +119,6 @@ def test_patients_delete_nonexistent(
 
     # Delete the fake patient
     result = scope.database.patients.delete_patient(
-        database=database_client,
-        id=data_fake_patient["_id"]
+        database=database_client, id=data_fake_patient["_id"]
     )
     assert result.deleted_count == 0
