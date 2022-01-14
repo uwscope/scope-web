@@ -2,6 +2,7 @@ import hashlib
 import re
 from typing import List, Optional
 
+import bson
 import pymongo
 import pymongo.database
 import pymongo.errors
@@ -17,46 +18,111 @@ def collection_for_patient(*, patient_name: str):
 
     Collection name will therefore be 'patient_' followed by hex encoding of an MD5 hash of the patient name.
     """
-
+    # NOTE: Needs to be changed. There will be hash collisions for people with same names.
     return "patient_{}".format(hashlib.md5(patient_name.encode("utf-8")).digest().hex())
+
+
+def _build_patient_json(
+    database: pymongo.database.Database, collection_name: str
+) -> dict:
+    collection = database.get_collection(name=collection_name)
+    patient = {"_type": "patient"}
+    queries = [
+        {
+            "_type": "identity",
+        },
+        {
+            "_type": "patientProfile",
+        },
+        {
+            "_type": "clinicalHistory",
+        },
+        {
+            "_type": "valuesInventory",
+        },
+        {
+            "_type": "safetyPlan",
+        },
+    ]
+
+    for query in queries:
+        # Find the document with highest `v`.
+        found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
+        if found is not None:
+            # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
+            if "_id" in found:
+                found["_id"] = str(found["_id"])
+        patient[query["_type"]] = found
+
+    # Find unique session ids and then get document with latest _rev from them.
+    pipeline = [
+        {"$match": {"_type": "session"}},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": "$_session_id",
+                "latest_session_document": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$latest_session_document"}},
+    ]
+
+    found_sessions = list(collection.aggregate(pipeline))
+    if found_sessions is not None:
+        for found_session in found_sessions:
+            if "_id" in found_session:
+                found_session["_id"] = str(found_session["_id"])
+
+    patient["sessions"] = found_sessions
+
+    return patient
 
 
 def create_patient(*, database: pymongo.database.Database, patient: dict) -> str:
     """
     Initialize a patient collection.
 
-    Initialize the collection with multiple subchema documents and return the collection name.
+    Initialize the collection with multiple subschema documents and return the collection name.
     """
 
-    identity = patient["identity"]
-    patient_profile = patient["patientProfile"]
-    clinical_history = patient["clinicalHistory"]
-    values_inventory = patient["valuesInventory"]
-    safety_plan = patient["safetyPlan"]
+    identity = patient.get("identity")
+    patient_profile = patient.get("patientProfile")
+    clinical_history = patient.get("clinicalHistory")
+    values_inventory = patient.get("valuesInventory")
+    safety_plan = patient.get("safetyPlan")
+    sessions = patient.get("sessions")
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
     # Get or create a patients collection
     patients_collection = database.get_collection(patient_collection_name)
 
-    # Ensure an identity document exists.
+    # Create unique index.
+    patients_collection.create_index(
+        [
+            ("_type", pymongo.ASCENDING),
+            ("_rev", pymongo.DESCENDING),
+            ("_session_id", pymongo.DESCENDING),
+            ("_assessment_id", pymongo.DESCENDING),
+        ],
+        unique=True,
+        name="global_patient_index",
+    )
+
+    # Ensure no identity document exists.
     result = patients_collection.find_one(
         filter={
-            "type": "identity",
+            "_type": "identity",
         }
     )
     if result is None:
-        # NOTE: Talk to James about this.
+        # TODO: Talk to James about this. Only insert documents if values exist in 'patient' dict
         patients_collection.insert_one(document=identity)
         patients_collection.insert_one(document=patient_profile)
         patients_collection.insert_one(document=clinical_history)
         patients_collection.insert_one(document=values_inventory)
         patients_collection.insert_one(document=safety_plan)
-
-    # Create unique index on (`type`, `v`)
-    patients_collection.create_index(
-        [("type", pymongo.ASCENDING), ("_rev", pymongo.DESCENDING)], unique=True
-    )
+        patients_collection.insert_many(documents=sessions)
 
     return patient_collection_name
 
@@ -83,35 +149,7 @@ def get_patient(
     if collection_name not in database.list_collection_names():
         return None
 
-    collection = database.get_collection(name=collection_name)
-
-    patient = {"type": "patient"}
-
-    queries = [
-        {
-            "type": "identity",
-        },
-        {
-            "type": "patientProfile",
-        },
-        {
-            "type": "clinicalHistory",
-        },
-        {
-            "type": "valuesInventory",
-        },
-        {
-            "type": "safetyPlan",
-        },
-    ]
-
-    for query in queries:
-        # Find the document with highest `v`.
-        found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
-        # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
-        if "_id" in found:
-            found["_id"] = str(found["_id"])
-        patient[query["type"]] = found
+    patient = _build_patient_json(database, collection_name)
 
     return patient
 
@@ -133,36 +171,8 @@ def get_patients(*, database: pymongo.database.Database) -> List[dict]:
     patients = []
 
     for patient_collection in patient_collections:
-        patient = {"type": "patient"}
-        # NOTE: Validate latency.
-        collection = database.get_collection(name=patient_collection)
-        queries = [
-            {
-                "type": "identity",
-            },
-            {
-                "type": "patientProfile",
-            },
-            {
-                "type": "clinicalHistory",
-            },
-            {
-                "type": "valuesInventory",
-            },
-            {
-                "type": "safetyPlan",
-            },
-        ]
 
-        for query in queries:
-            # Find the document with highest `v`.
-            found = collection.find_one(
-                filter=query, sort=[("_rev", pymongo.DESCENDING)]
-            )
-            # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
-            if "_id" in found:
-                found["_id"] = str(found["_id"])
-            patient[query["type"]] = found
+        patient = _build_patient_json(database, patient_collection)
 
         patients.append(patient)
 
