@@ -36,10 +36,7 @@
 			"$ref": "/schemas/sessions"
 		},
 		"caseReviews": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/case-review"
-			}
+			"$ref": "/schemas/case-reviews"
 		},
 		"assessments": {
 			"type": "array",

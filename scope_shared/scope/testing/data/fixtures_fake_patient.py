@@ -321,6 +321,58 @@ def data_fake_session_factory() -> dict:
     return fake_session
 
 
+def data_fake_case_reviews_factory() -> dict:
+    case_review_count = get_random_integer(1, 10)
+
+    fake_case_reviews = [
+        {
+            "_review_id": "Initial review" if idx == 0 else "review-%d" % idx,
+            "_type": "caseReview",
+            "_rev": 1,
+            "date": str(
+                datetime.now()
+                - timedelta(
+                    days=get_random_integer(-2, 2)
+                    + (case_review_count - idx) * get_random_integer(13, 18)
+                )
+            ),
+            "consultingPsychiatrist": data_fake_identity_factory(),
+            "medicationChange": shortLorem.sentence(),
+            "behavioralStrategyChange": shortLorem.sentence(),
+            "referralsChange": shortLorem.sentence(),
+            "otherRecommendations": shortLorem.sentence(),
+            "reviewNote": lorem.paragraph(),
+        }
+        for idx in range(case_review_count)
+    ]
+    # TODO: Verify the schema
+
+    return fake_case_reviews
+
+
+def data_fake_case_review_factory() -> dict:
+    idx = get_random_integer(1, 10)
+    fake_case_review = {
+        "_review_id": "review-%d" % idx,
+        "_type": "caseReview",
+        "_rev": 1,
+        "date": str(
+            datetime.now()
+            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
+        ),
+        "consultingPsychiatrist": data_fake_identity_factory(),
+        "medicationChange": shortLorem.sentence(),
+        "behavioralStrategyChange": shortLorem.sentence(),
+        "referralsChange": shortLorem.sentence(),
+        "otherRecommendations": shortLorem.sentence(),
+        "reviewNote": lorem.paragraph(),
+    }
+
+    # TODO: Verify the schema
+
+    return fake_case_review
+
+
 def data_fake_patient_factory() -> dict:
     fake_patient = {
         # NOTE: A "patient" exists only as a query composed from other documents.
@@ -334,6 +386,7 @@ def data_fake_patient_factory() -> dict:
         "valuesInventory": data_fake_values_inventory_factory(),
         "safetyPlan": data_fake_safety_plan_factory(),
         "sessions": data_fake_sessions_factory(),
+        "caseReviews": data_fake_case_reviews_factory(),
     }
 
     # TODO: Verify the schema
@@ -416,3 +469,25 @@ def fixture_data_fake_session_factory() -> Callable[[], dict]:
     """
 
     return data_fake_session_factory
+
+
+@pytest.fixture(name="data_fake_case_reviews_factory")
+def fixture_data_fake_case_reviews_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_case_reviews_factory.
+
+    Provides a factory for obtaining data for a list of case reviews.
+    """
+
+    return data_fake_case_reviews_factory
+
+
+@pytest.fixture(name="data_fake_case_review_factory")
+def fixture_data_fake_case_review_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_case_review_factory.
+
+    Provides a factory for obtaining data for a case review.
+    """
+
+    return data_fake_case_review_factory

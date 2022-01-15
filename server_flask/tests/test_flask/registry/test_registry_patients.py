@@ -49,8 +49,11 @@ def test_flask_get_all_patients(
         if "_id" in v:
             v["_id"] = str(v["_id"])
 
-    for fake_session in data_fake_patient["sessions"]:
-        fake_session["_id"] = str(fake_session["_id"])
+    for v in data_fake_patient["sessions"]:
+        v["_id"] = str(v["_id"])
+
+    for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
 
     # "patients" is a list
     response_patients = response.json()["patients"]
@@ -102,8 +105,11 @@ def test_flask_get_patient(
         if "_id" in v:
             v["_id"] = str(v["_id"])
 
-    for fake_session in data_fake_patient["sessions"]:
-        fake_session["_id"] = str(fake_session["_id"])
+    for v in data_fake_patient["sessions"]:
+        v["_id"] = str(v["_id"])
+
+    for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
 
     # Ensure body of response is our fake patient
     assert response.json() == data_fake_patient
@@ -116,20 +122,12 @@ def test_flask_get_patient(
 
 # @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_patient_nonexistent(
-    database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
-    data_fake_patient_factory: Callable[[], dict],
 ):
     """
     Test that we get a 404 if we try to get a non-existant patient.
     """
-
-    # Generate a fake patient
-    data_fake_patient = data_fake_patient_factory()
-    patient_collection_name = scope.database.patients.collection_for_patient(
-        patient_name=data_fake_patient["identity"]["name"]
-    )
 
     # Obtain a session
     session = flask_session_unauthenticated_factory()
@@ -138,7 +136,7 @@ def test_flask_get_patient_nonexistent(
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
-            "patients/{}".format(patient_collection_name),
+            "patients/{}".format("patient_nonexistant"),
         ),
     )
     assert response.status_code == 404  # Not Found
@@ -211,8 +209,10 @@ def test_flask_update_patient_405(
         # Convert `bson.objectid.ObjectId` to `str`
         if "_id" in v:
             v["_id"] = str(v["_id"])
-    for fake_session in data_fake_patient["sessions"]:
-        fake_session["_id"] = str(fake_session["_id"])
+    for v in data_fake_patient["sessions"]:
+        v["_id"] = str(v["_id"])
+    for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
 
     # Update the same patient by sending its collection name
     response = session.put(

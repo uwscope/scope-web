@@ -1,4 +1,5 @@
 import hashlib
+import pstats
 import re
 from typing import List, Optional
 
@@ -22,6 +23,78 @@ def collection_for_patient(*, patient_name: str):
     return "patient_{}".format(hashlib.md5(patient_name.encode("utf-8")).digest().hex())
 
 
+def _build_patient_array_documents(
+    collection: pymongo.database.Collection, type: str, document_id_key
+):
+    """
+    Helper function to stitch together array documents of "_type" such as "session".
+    """
+    # Filter on type. Then, group documents by document_id_key and get document with latest _rev.
+    pipeline = [
+        {"$match": {"_type": type}},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": "${}".format(document_id_key),
+                "latest_rev_document": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$latest_rev_document"}},
+    ]
+
+    found_documents = list(collection.aggregate(pipeline))
+    if found_documents is not None:
+        for fd in found_documents:
+            if "_id" in fd:
+                fd["_id"] = str(fd["_id"])
+
+    return found_documents
+
+
+def _build_patient_json(
+    database: pymongo.database.Database, collection_name: str
+) -> dict:
+    collection = database.get_collection(name=collection_name)
+    patient = {"_type": "patient"}
+    queries = [
+        {
+            "_type": "identity",
+        },
+        {
+            "_type": "patientProfile",
+        },
+        {
+            "_type": "clinicalHistory",
+        },
+        {
+            "_type": "valuesInventory",
+        },
+        {
+            "_type": "safetyPlan",
+        },
+    ]
+
+    for query in queries:
+        # Find the document with highest `v`.
+        found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
+        if found is not None:
+            # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
+            if "_id" in found:
+                found["_id"] = str(found["_id"])
+        patient[query["_type"]] = found
+
+    patient["sessions"] = _build_patient_array_documents(
+        collection=collection, type="session", document_id_key="_session_id"
+    )
+
+    patient["caseReviews"] = _build_patient_array_documents(
+        collection=collection, type="caseReview", document_id_key="_review_id"
+    )
+
+    return patient
+
+
+"""
 def _build_patient_json(
     database: pymongo.database.Database, collection_name: str
 ) -> dict:
@@ -76,6 +149,7 @@ def _build_patient_json(
     patient["sessions"] = found_sessions
 
     return patient
+"""
 
 
 def create_patient(*, database: pymongo.database.Database, patient: dict) -> str:
@@ -91,6 +165,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     values_inventory = patient.get("valuesInventory")
     safety_plan = patient.get("safetyPlan")
     sessions = patient.get("sessions")
+    case_reviews = patient.get("caseReviews")
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
@@ -103,7 +178,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
             ("_type", pymongo.ASCENDING),
             ("_rev", pymongo.DESCENDING),
             ("_session_id", pymongo.DESCENDING),
-            ("_assessment_id", pymongo.DESCENDING),
+            ("_review_id", pymongo.DESCENDING),
         ],
         unique=True,
         name="global_patient_index",
@@ -123,6 +198,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         patients_collection.insert_one(document=values_inventory)
         patients_collection.insert_one(document=safety_plan)
         patients_collection.insert_many(documents=sessions)
+        patients_collection.insert_many(documents=case_reviews)
 
     return patient_collection_name
 
