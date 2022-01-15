@@ -75,7 +75,7 @@ def _build_patient_json(
     ]
 
     for query in queries:
-        # Find the document with highest `v`.
+        # Find the document with highest `_rev`.
         found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
         if found is not None:
             # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
@@ -92,64 +92,6 @@ def _build_patient_json(
     )
 
     return patient
-
-
-"""
-def _build_patient_json(
-    database: pymongo.database.Database, collection_name: str
-) -> dict:
-    collection = database.get_collection(name=collection_name)
-    patient = {"_type": "patient"}
-    queries = [
-        {
-            "_type": "identity",
-        },
-        {
-            "_type": "patientProfile",
-        },
-        {
-            "_type": "clinicalHistory",
-        },
-        {
-            "_type": "valuesInventory",
-        },
-        {
-            "_type": "safetyPlan",
-        },
-    ]
-
-    for query in queries:
-        # Find the document with highest `v`.
-        found = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
-        if found is not None:
-            # To serialize object and to avoid `TypeError: Object of type ObjectId is not JSON serializable` error, convert _id in document to string.
-            if "_id" in found:
-                found["_id"] = str(found["_id"])
-        patient[query["_type"]] = found
-
-    # Find unique session ids and then get document with latest _rev from them.
-    pipeline = [
-        {"$match": {"_type": "session"}},
-        {"$sort": {"_rev": pymongo.DESCENDING}},
-        {
-            "$group": {
-                "_id": "$_session_id",
-                "latest_session_document": {"$first": "$$ROOT"},
-            }
-        },
-        {"$replaceRoot": {"newRoot": "$latest_session_document"}},
-    ]
-
-    found_sessions = list(collection.aggregate(pipeline))
-    if found_sessions is not None:
-        for found_session in found_sessions:
-            if "_id" in found_session:
-                found_session["_id"] = str(found_session["_id"])
-
-    patient["sessions"] = found_sessions
-
-    return patient
-"""
 
 
 def create_patient(*, database: pymongo.database.Database, patient: dict) -> str:
