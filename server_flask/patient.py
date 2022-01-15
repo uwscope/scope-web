@@ -8,20 +8,19 @@ def create_patient_service():
     @patient_service.route("/patient/values", methods=["GET", "PUT"])
     @as_json
     def get_patient_values():
+        # NOTE: Done
         if request.method == "GET":
-            # NOTE: Done
             print(
                 "For the authenticated patient, gets the values inventory and returns an array of life area values data"
             )
-
+        # NOTE: Done
         elif request.method == "PUT":
-            # NOTE: Done
             print(
                 "For the authenticated patient, updates the values inventory and returns an array of life area values data"
             )
 
         # Should we pull CRUD APIs for values inventory?
-
+        # NOTE: Done
         else:
             return "Method not allowed", 405
 

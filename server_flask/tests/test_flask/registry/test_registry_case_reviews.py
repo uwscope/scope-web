@@ -13,17 +13,17 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 API_RELATIVE_PATH = "patients/"
 
 # TODO: This could be renamed better.
-API_QUERY_PATH = "sessions"
+API_QUERY_PATH = "casereviews"
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_get_sessions(
+def test_flask_get_case_reviews(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we can get a list of sessions.
+    Test that we can get a list of case_reviews.
     """
 
     # Generate a fake patient
@@ -38,7 +38,7 @@ def test_flask_get_sessions(
     # Obtain a session
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve all sessions
+    # Retrieve all case reviews
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -54,11 +54,10 @@ def test_flask_get_sessions(
         # Convert `bson.objectid.ObjectId` to `str`
         if "_id" in v:
             v["_id"] = str(v["_id"])
+    for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
 
-    for fake_session in data_fake_patient["sessions"]:
-        fake_session["_id"] = str(fake_session["_id"])
-
-    assert data_fake_patient["sessions"] == response.json()
+    assert data_fake_patient["caseReviews"] == response.json()
 
     scope.database.patients.delete_patient(
         database=database_client,
@@ -66,7 +65,8 @@ def test_flask_get_sessions(
     )
 
 
-def test_flask_get_sessions_404(
+# @pytest.mark.skip(reason="no way of currently testing this")
+def test_flask_get_case_reviews_404(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
@@ -90,22 +90,23 @@ def test_flask_get_sessions_404(
     assert response.status_code == 404
 
 
-def test_flask_create_session(
+# @pytest.mark.skip(reason="no way of currently testing this")
+def test_flask_create_case_review(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
-    data_fake_session_factory: Callable[[], dict],
+    data_fake_case_review_factory: Callable[[], dict],
 ):
     """
-    Test that we can create a session.
+    Test that we can create a case review.
     """
 
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
-    data_fake_session = data_fake_session_factory()
-    data_fake_session["_session_id"] = "session-%d" % (
-        len(data_fake_patient["sessions"]) + 1
+    data_fake_case_review = data_fake_case_review_factory()
+    data_fake_case_review["_review_id"] = "review-%d" % (
+        len(data_fake_patient["caseReviews"]) + 1
     )
 
     # Insert the fake patient
@@ -124,17 +125,18 @@ def test_flask_create_session(
                 API_RELATIVE_PATH, patient_collection_name, API_QUERY_PATH
             ),
         ),
-        json=data_fake_session,
+        json=data_fake_case_review,
     )
     assert response.ok
 
     response_json = response.json()
     response_json.pop("_id", None)
 
-    assert response_json == data_fake_session
+    assert response_json == data_fake_case_review
 
 
-def test_flask_get_sessions_405(
+# @pytest.mark.skip(reason="no way of currently testing this")
+def test_flask_get_case_reviews_405(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
@@ -159,14 +161,14 @@ def test_flask_get_sessions_405(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_get_session(
+def test_flask_get_case_review(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we can get a session using session_id.
+    Test that we can get a case review using review_id.
     """
 
     # Generate a fake patient
@@ -178,11 +180,10 @@ def test_flask_get_session(
         patient=data_fake_patient,
     )
 
-    session_document = random.choice(data_fake_patient["sessions"])
+    case_review_document = random.choice(data_fake_patient["caseReviews"])
 
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve the session using session_id
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -190,15 +191,15 @@ def test_flask_get_session(
                 API_RELATIVE_PATH,
                 patient_collection_name,
                 API_QUERY_PATH,
-                session_document["_session_id"],
+                case_review_document["_review_id"],
             ),
         ),
     )
     assert response.status_code == 200
     response_json = response.json()
-    session_document["_id"] = str(session_document["_id"])
+    case_review_document["_id"] = str(case_review_document["_id"])
 
-    assert response_json == session_document
+    assert response_json == case_review_document
 
     scope.database.patients.delete_patient(
         database=database_client,
@@ -207,14 +208,14 @@ def test_flask_get_session(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_update_session(
+def test_flask_update_case_review(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
     data_fake_patient_factory: Callable[[], dict],
 ):
     """
-    Test that we can update a session using session_id.
+    Test that we can update a case review using review_id.
     """
 
     # Generate a fake patient
@@ -226,12 +227,12 @@ def test_flask_update_session(
         patient=data_fake_patient,
     )
 
-    session_document = random.choice(data_fake_patient["sessions"])
-    session_document.pop("_id", None)
+    case_review_document = random.choice(data_fake_patient["caseReviews"])
+    case_review_document.pop("_id", None)
 
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve the session using session_id
+    # Retrieve the case review using review_id
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -239,63 +240,19 @@ def test_flask_update_session(
                 API_RELATIVE_PATH,
                 patient_collection_name,
                 API_QUERY_PATH,
-                session_document["_session_id"],
+                case_review_document["_review_id"],
             ),
         ),
-        json=session_document,
+        json=case_review_document,
     )
     assert response.status_code == 200
 
-    session_document["_rev"] += 1
+    case_review_document["_rev"] += 1
     response_json = response.json()
     response_json.pop("_id", None)
 
-    assert response_json == session_document
+    assert response_json == case_review_document
 
-    scope.database.patients.delete_patient(
-        database=database_client,
-        patient_collection_name=patient_collection_name,
-    )
-
-
-def test_flask_update_session(
-    database_client: pymongo.database.Database,
-    flask_client_config: scope.config.FlaskClientConfig,
-    flask_session_unauthenticated_factory: Callable[[], requests.Session],
-    data_fake_patient_factory: Callable[[], dict],
-):
-    """
-    Test that we get a 422 if _id exists in json.
-    """
-
-    # Generate a fake patient
-    data_fake_patient = data_fake_patient_factory()
-
-    # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
-        database=database_client,
-        patient=data_fake_patient,
-    )
-
-    session_document = random.choice(data_fake_patient["sessions"])
-    session_document["_id"] = str(session_document["_id"])
-
-    session = flask_session_unauthenticated_factory()
-
-    # Retrieve the session using session_id
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            "{}/{}/{}/{}".format(
-                API_RELATIVE_PATH,
-                patient_collection_name,
-                API_QUERY_PATH,
-                session_document["_session_id"],
-            ),
-        ),
-        json=session_document,
-    )
-    assert response.status_code == 422
     scope.database.patients.delete_patient(
         database=database_client,
         patient_collection_name=patient_collection_name,
