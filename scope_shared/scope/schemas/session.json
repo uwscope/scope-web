@@ -47,7 +47,7 @@
 			"_type": "string"
 		}
 	},
-	"additionalProperties": false,
+	"additionalProperties": true,
 	"required": [
 		"_session_id",
 		"_rev",
