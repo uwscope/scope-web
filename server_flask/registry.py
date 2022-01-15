@@ -138,31 +138,35 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/casereviews", methods=["GET", "POST"])
+    @registry.route("/patients/<recordId>/casereviews", methods=["GET", "POST"])
     @as_json
     def get_patient_casereviews(recordId):
+        # NOTE: Done.
         if request.method == "GET":
             print(
                 "Gets the list of all case reviews and returns an array of case reviews"
             )
-
+        # NOTE: Done.
         elif request.method == "POST":
             print(
                 "Creates a new case review in the patient record and returns the case review"
             )
-
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/casereview/<reviewId>", methods=["GET", "PUT"])
+    @registry.route(
+        "/patients/<recordId>/casereviews/<reviewId>", methods=["GET", "PUT"]
+    )
     @as_json
     def get_patient_casereview(recordId, reviewId):
+        # NOTE: Done.
         if request.method == "GET":
             print("Gets the full case review data by id and returns the case review")
-
+        # NOTE: Done.
         elif request.method == "PUT":
             print("Updates the case review data by id and returns the case review")
-
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
