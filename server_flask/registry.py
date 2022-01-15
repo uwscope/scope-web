@@ -8,28 +8,25 @@ def create_registry():
     @registry.route("/patients", methods=["GET", "POST"])
     @as_json
     def get_patients():
-
+        # NOTE: In-progress. More subschemas need to be added.
         if request.method == "GET":
-            # NOTE: Done.
             print("Gets the list of all patients and returns an array of patients")
 
+        # NOTE: In-progress. More subschemas need to be added.
         elif request.method == "POST":
-            # NOTE: In-progress. More subschemas need to be added.
             print("Creates a new patient record and returns the patient")
 
         else:
-            # NOTE: In-progress. More subschemas need to be added.
             return "Method not allowed", 405
 
     @registry.route("/patients/<recordId>", methods=["GET"])
     @as_json
     def get_patient_data(recordId):
+        # NOTE: Done. Takes patient_collection_name instead of `recordId`. URL is /patients/<patient_collection_name>
         if request.method == "GET":
-            # NOTE: Done. Takes patient_collection_name instead of `recordId`. URL is /patients/<patient_collection_name>
             print("Gets the full patient data by id and returns the patient")
-
+        # NOTE: Done.
         elif request.method == "PUT":
-            # NOTE: Done.
             return "Method not allowed", 405
         else:
             return "Method not allowed", 405
@@ -39,19 +36,18 @@ def create_registry():
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_values(recordId):  # Uses values-inventory.json subschema
+        # NOTE: Done.
         if request.method == "GET":
-            # NOTE: Done.
             print(
                 "Gets the patient values inventory data by patient id and returns the patient values inventory data"
             )
-
+        # NOTE: Done.
         elif request.method == "PUT":
-            # NOTE: Done.
             print(
                 "Updates the patient values inventory data by patient id and returns the patient values inventory data"
             )
+        # NOTE: Done.
         else:
-            # NOTE: Done.
             return "Method not allowed", 405
 
     @registry.route(
@@ -74,7 +70,7 @@ def create_registry():
             return "Method not allowed", 405
 
     @registry.route(
-        "/patient/<recordId>/clinicalhistory", methods=["GET", "PUT"]
+        "/patients/<recordId>/clinicalhistory", methods=["GET", "PUT"]
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_values(recordId):  # Uses clinical-history.json subschema
@@ -95,7 +91,7 @@ def create_registry():
             return "Method not allowed", 405
 
     @registry.route(
-        "/patient/<recordId>/profile", methods=["GET", "PUT"]
+        "/patients/<recordId>/profile", methods=["GET", "PUT"]
     )  # GET for subschemas is not needed for current client function but putting it there for completeness
     @as_json
     def get_patient_profile(recordId):  # Uses patient-profile.json subschema
@@ -113,27 +109,32 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/sessions", methods=["GET", "POST"])
+    @registry.route("/patients/<recordId>/sessions", methods=["GET", "POST"])
     @as_json
     def get_patient_sessions(recordId):
+        # NOTE: Done.
         if request.method == "GET":
             print("Gets the list of all sessions and returns an array of sessions")
 
+        # NOTE: Done.
         elif request.method == "POST":
             print("Creates a new session in the patient record and returns the session")
 
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/session/<sessionId>", methods=["GET", "PUT"])
+    @registry.route("/patients/<recordId>/sessions/<sessionId>", methods=["GET", "PUT"])
     @as_json
     def get_patient_session(recordId, sessionId):
+        # NOTE: Done.
         if request.method == "GET":
             print("Gets the full session data by id and returns the session")
 
+        # NOTE: Done. Question - do we need to send sessionId here?
         elif request.method == "PUT":
             print("Updates the session data by id and returns the session")
-
+        # NOTE: Done.
         else:
             return "Method not allowed", 405
 

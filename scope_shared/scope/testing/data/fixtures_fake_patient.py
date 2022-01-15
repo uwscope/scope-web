@@ -282,6 +282,45 @@ def data_fake_sessions_factory() -> dict:
     return fake_sessions
 
 
+def data_fake_session_factory() -> dict:
+    idx = get_random_integer(1, 10)
+    random_referrals = get_random_states(Referral, ReferralStatus)
+    referrals = []
+    for referral in random_referrals:
+        if random_referrals[referral] != "Not Referred":
+            referrals.append(
+                {"referralType": referral, "referralStatus": random_referrals[referral]}
+            )
+
+    fake_session = {
+        "_session_id": "session-%d" % idx,
+        "_type": "session",
+        "_rev": 1,
+        "date": str(
+            datetime.now()
+            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
+        ),
+        "sessionType": get_random_item(SessionType).value,
+        "billableMinutes": int(get_random_item([30, 45, 60, 80])),
+        "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
+        "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
+        "behavioralStrategyChecklist": get_random_flags(BehavioralStrategyChecklist),
+        "behavioralStrategyOther": shortLorem.sentence()
+        if get_random_boolean()
+        else "",
+        "behavioralActivationChecklist": get_random_flags(
+            BehavioralActivationChecklist
+        ),
+        "referrals": referrals,
+        "otherRecommendations": shortLorem.sentence(),
+        "sessionNote": lorem.paragraph(),
+    }
+
+    # TODO: Verify the schema
+
+    return fake_session
+
+
 def data_fake_patient_factory() -> dict:
     fake_patient = {
         # NOTE: A "patient" exists only as a query composed from other documents.
@@ -349,9 +388,9 @@ def fixture_data_fake_values_inventory_factory() -> Callable[[], dict]:
 @pytest.fixture(name="data_fake_safety_plan_factory")
 def fixture_data_fake_safety_plan_factory() -> Callable[[], dict]:
     """
-    Fixture for data_fake_values_inventory_factory.
+    Fixture for data_fake_safety_plan_factory.
 
-    Provides a factory for obtaining data for a fake values inventory.
+    Provides a factory for obtaining data for a fake safety plan.
     """
 
     return data_fake_safety_plan_factory
@@ -360,9 +399,20 @@ def fixture_data_fake_safety_plan_factory() -> Callable[[], dict]:
 @pytest.fixture(name="data_fake_sessions_factory")
 def fixture_data_fake_sessions_factory() -> Callable[[], dict]:
     """
-    Fixture for data_fake_values_inventory_factory.
+    Fixture for data_fake_sessions_factory.
 
-    Provides a factory for obtaining data for a fake values inventory.
+    Provides a factory for obtaining data for a list of sessions.
     """
 
     return data_fake_sessions_factory
+
+
+@pytest.fixture(name="data_fake_session_factory")
+def fixture_data_fake_session_factory() -> Callable[[], dict]:
+    """
+    Fixture for data_fake_session_factory.
+
+    Provides a factory for obtaining data for a session.
+    """
+
+    return data_fake_session_factory
