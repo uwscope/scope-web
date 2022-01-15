@@ -51,7 +51,7 @@ def get_session(
 
     query = {"_type": "session", "_session_id": session_id}
 
-    # Find the document with highest `v`.
+    # Find the document with highest `_rev`.
     session = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
 
     if "_id" in session:
