@@ -51,10 +51,7 @@
 			}
 		},
 		"assessmentLogs": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/assessment-log"
-			}
+			"$ref": "/schemas/assessment-logs"
 		},
 		"activities": {
 			"type": "array",
