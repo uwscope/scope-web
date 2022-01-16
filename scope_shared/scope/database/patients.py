@@ -17,9 +17,9 @@ def collection_for_patient(*, patient_name: str):
     """
     Obtain the name of the collection for a specified patient.
 
-    Collection name will therefore be 'patient_' followed by hex encoding of an MD5 hash of the patient name.
+    NOTE: Check with James.
     """
-    # NOTE: Needs to be changed. There will be hash collisions for people with same names.
+    # return "patient_{}".format(str(bson.objectid.ObjectId()))
     return "patient_{}".format(hashlib.md5(patient_name.encode("utf-8")).digest().hex())
 
 
@@ -142,7 +142,17 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         patients_collection.insert_many(documents=sessions)
         patients_collection.insert_many(documents=case_reviews)
 
-    return patient_collection_name
+        for v in patient.values():
+            # Convert `bson.objectid.ObjectId` to `str`
+            if "_id" in v:
+                v["_id"] = str(v["_id"])
+        for v in patient["sessions"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["caseReviews"]:
+            v["_id"] = str(v["_id"])
+
+        return patient
+    return None
 
 
 def delete_patient(
