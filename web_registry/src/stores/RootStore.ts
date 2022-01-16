@@ -1,6 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
 import { IAppConfig, IIdentity, IUser } from 'shared/types';
-import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
@@ -14,7 +13,7 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
-    appConfig: IAppConfig;
+    appConfig: IAppConfig | undefined;
 
     // UI states
     appState: PromiseState;
@@ -37,13 +36,15 @@ export class RootStore implements IRootStore {
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
-    private readonly configQuery: PromiseQuery<IAppConfig>;
+    private readonly configQuery: PromiseQuery<IAppConfig | undefined>;
 
     constructor() {
         this.patientsStore = new PatientsStore();
 
+        // TODO: require configQuery to succeed before anything else
+
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
+        this.configQuery = new PromiseQuery(undefined, 'configQuery');
 
         makeAutoObservable(this);
     }
@@ -67,7 +68,7 @@ export class RootStore implements IRootStore {
 
     @computed
     public get appConfig() {
-        return this.configQuery.value || defaultAppConfig;
+        return this.configQuery.value;
     }
 
     @computed
