@@ -1,0 +1,23 @@
+{
+  "id": "medication",
+  "name": "Medication Tracking",
+  "instruction": "The following questions pertain to any medications you are taking for stress, mood, anxiety, sleep, or other psychological symptoms.",
+  "questions": [
+    {
+      "question": "In the past 7 days, did you take all your prescribed medications as scheduled?",
+      "id": "adherence"
+    }
+  ],
+  "options": [
+    {
+      "text": "Yes, I took my medications as scheduled",
+      "value": 1
+    },
+    {
+      "text": "No, I did not take all my medications as scheduled",
+      "value": 0
+    }
+  ],
+    "interpretationName": "Medication tracking",
+    "interpretationTable": []
+}
