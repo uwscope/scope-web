@@ -9,7 +9,8 @@ APP_CONFIG_LIFE_AREAS_PATH = "./app_config/life_areas"
 APP_CONFIG_RESOURCES_PATH = "./app_config/resources"
 
 app_config_blueprint = flask.Blueprint(
-    "app_config_blueprint", __name__, url_prefix="/app"
+    "app_config_blueprint",
+    __name__,
 )
 
 
