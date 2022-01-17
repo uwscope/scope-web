@@ -184,7 +184,7 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/assessmentlogs", methods=["GET", "POST"])
+    @registry.route("/patients/<recordId>/assessmentlogs", methods=["GET", "POST"])
     @as_json
     def get_patient_assessmentlogs(recordId):
         if request.method == "GET":
@@ -200,7 +200,9 @@ def create_registry():
         else:
             return "Method not allowed", 405
 
-    @registry.route("/patient/<recordId>/assessmentlog/<logId>", methods=["GET", "PUT"])
+    @registry.route(
+        "/patients/<recordId>/assessmentlogs/<logId>", methods=["GET", "PUT"]
+    )
     @as_json
     def get_patient_assessmentlog(recordId, logId):
         if request.method == "GET":
