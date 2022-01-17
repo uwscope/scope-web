@@ -30,9 +30,12 @@ def test_flask_get_sessions(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -55,8 +58,9 @@ def test_flask_get_sessions(
         if "_id" in v:
             v["_id"] = str(v["_id"])
 
-    for fake_session in data_fake_patient["sessions"]:
-        fake_session["_id"] = str(fake_session["_id"])
+    for v in data_fake_patient["sessions"]:
+        if "_id" in v:
+            v["_id"] = str(v["_id"])
 
     assert data_fake_patient["sessions"] == response.json()
 
@@ -109,9 +113,12 @@ def test_flask_create_session(
     )
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -173,9 +180,12 @@ def test_flask_get_session(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     session_document = random.choice(data_fake_patient["sessions"])
@@ -221,9 +231,12 @@ def test_flask_update_session(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     session_document = random.choice(data_fake_patient["sessions"])
@@ -252,50 +265,6 @@ def test_flask_update_session(
 
     assert response_json == session_document
 
-    scope.database.patients.delete_patient(
-        database=database_client,
-        patient_collection_name=patient_collection_name,
-    )
-
-
-def test_flask_update_session(
-    database_client: pymongo.database.Database,
-    flask_client_config: scope.config.FlaskClientConfig,
-    flask_session_unauthenticated_factory: Callable[[], requests.Session],
-    data_fake_patient_factory: Callable[[], dict],
-):
-    """
-    Test that we get a 422 if _id exists in json.
-    """
-
-    # Generate a fake patient
-    data_fake_patient = data_fake_patient_factory()
-
-    # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
-        database=database_client,
-        patient=data_fake_patient,
-    )
-
-    session_document = random.choice(data_fake_patient["sessions"])
-    session_document["_id"] = str(session_document["_id"])
-
-    session = flask_session_unauthenticated_factory()
-
-    # Retrieve the session using session_id
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            "{}/{}/{}/{}".format(
-                API_RELATIVE_PATH,
-                patient_collection_name,
-                API_QUERY_PATH,
-                session_document["_session_id"],
-            ),
-        ),
-        json=session_document,
-    )
-    assert response.status_code == 422
     scope.database.patients.delete_patient(
         database=database_client,
         patient_collection_name=patient_collection_name,

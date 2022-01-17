@@ -30,9 +30,12 @@ def test_flask_get_case_reviews(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -110,9 +113,13 @@ def test_flask_create_case_review(
     )
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -175,9 +182,13 @@ def test_flask_get_case_review(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     case_review_document = random.choice(data_fake_patient["caseReviews"])
@@ -222,9 +233,13 @@ def test_flask_update_case_review(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     case_review_document = random.choice(data_fake_patient["caseReviews"])

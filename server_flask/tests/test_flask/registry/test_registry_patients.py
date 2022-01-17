@@ -26,9 +26,12 @@ def test_flask_get_all_patients(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -55,8 +58,19 @@ def test_flask_get_all_patients(
     for v in data_fake_patient["caseReviews"]:
         v["_id"] = str(v["_id"])
 
+    for v in data_fake_patient["assessmentLogs"]:
+        v["_id"] = str(v["_id"])
+
     # "patients" is a list
     response_patients = response.json()["patients"]
+
+    # For assert to work on two list of dicts, the order needs to be same.
+    data_fake_patient["assessmentLogs"] = sorted(
+        data_fake_patient["assessmentLogs"], key=lambda i: i["_id"]
+    )
+
+    for rp in response_patients:
+        rp["assessmentLogs"] = sorted(rp["assessmentLogs"], key=lambda i: i["_id"])
 
     # Ensure list includes our fake patient
     assert data_fake_patient in response_patients
@@ -82,9 +96,12 @@ def test_flask_get_patient(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -98,7 +115,7 @@ def test_flask_get_patient(
         ),
     )
     assert response.ok
-    assert response.status_code == 200
+    response_json = response.json()
 
     for v in data_fake_patient.values():
         # Convert `bson.objectid.ObjectId` to `str`
@@ -111,8 +128,23 @@ def test_flask_get_patient(
     for v in data_fake_patient["caseReviews"]:
         v["_id"] = str(v["_id"])
 
+    for v in data_fake_patient["assessmentLogs"]:
+        v["_id"] = str(v["_id"])
+
     # Ensure body of response is our fake patient
-    assert response.json() == data_fake_patient
+    assert response_json["_type"] == data_fake_patient["_type"]
+    assert response_json["identity"] == data_fake_patient["identity"]
+    assert response_json["patientProfile"] == data_fake_patient["patientProfile"]
+    assert response_json["clinicalHistory"] == data_fake_patient["clinicalHistory"]
+    assert response_json["valuesInventory"] == data_fake_patient["valuesInventory"]
+    assert response_json["safetyPlan"] == data_fake_patient["safetyPlan"]
+    assert response_json["sessions"] == data_fake_patient["sessions"]
+    assert response_json["caseReviews"] == data_fake_patient["caseReviews"]
+
+    # NOTE: assert response_json["assessmentLogs"] == data_fake_patient["assessmentLogs"] fails because the order of dicts in the two lists is different.
+    assert sorted(response_json["assessmentLogs"], key=lambda i: i["_id"]) == sorted(
+        data_fake_patient["assessmentLogs"], key=lambda i: i["_id"]
+    )
 
     scope.database.patients.delete_patient(
         database=database_client,
@@ -121,7 +153,7 @@ def test_flask_get_patient(
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
-def test_flask_get_patient_nonexistent(
+def test_flask_get_nonexistent_patient(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -155,6 +187,7 @@ def test_flask_create_patient(
 
     # Generate a fake patient
     data_fake_patient = data_fake_patient_factory()
+
     patient_collection_name = scope.database.patients.collection_for_patient(
         patient_name=data_fake_patient["identity"]["name"]
     )
@@ -172,14 +205,45 @@ def test_flask_create_patient(
     )
 
     assert response.status_code == 200
+    response_json = response.json()
 
-    # Ensure body of response is our fake patient collection name
-    assert response.json() == patient_collection_name
+    # Convert `bson.objectid.ObjectId` to `str`
+    for v in response_json.values():
+        if isinstance(v, dict):
+            v.pop("_id", None)
+    for v in response_json["sessions"]:
+        if isinstance(v, dict):
+            v.pop("_id", None)
+    for v in response_json["caseReviews"]:
+        if isinstance(v, dict):
+            v.pop("_id", None)
+    for v in response_json["assessmentLogs"]:
+        if isinstance(v, dict):
+            v.pop("_id", None)
 
-    # scope.database.patients.delete_patient(
-    #    database=database_client,
-    #    patient_collection_name=patient_collection_name,
-    # )
+    # Ensure body of response is our fake patient
+    assert response_json["_type"] == data_fake_patient["_type"]
+    assert response_json["identity"] == data_fake_patient["identity"]
+    assert response_json["patientProfile"] == data_fake_patient["patientProfile"]
+    assert response_json["clinicalHistory"] == data_fake_patient["clinicalHistory"]
+    assert response_json["valuesInventory"] == data_fake_patient["valuesInventory"]
+    assert response_json["safetyPlan"] == data_fake_patient["safetyPlan"]
+    assert response_json["sessions"] == data_fake_patient["sessions"]
+    assert response_json["caseReviews"] == data_fake_patient["caseReviews"]
+
+    # NOTE: assert response_json["assessmentLogs"] == data_fake_patient["assessmentLogs"] fails because the order of dicts in the two lists is different.
+    assert sorted(
+        response_json["assessmentLogs"],
+        key=lambda i: (i["_log_id"], i["assessmentName"]),
+    ) == sorted(
+        data_fake_patient["assessmentLogs"],
+        key=lambda i: (i["_log_id"], i["assessmentName"]),
+    )
+
+    scope.database.patients.delete_patient(
+        database=database_client,
+        patient_collection_name=patient_collection_name,
+    )
 
 
 # @pytest.mark.skip(reason="no way of currently testing this")
@@ -197,9 +261,12 @@ def test_flask_update_patient_405(
     data_fake_patient = data_fake_patient_factory()
 
     # Insert the fake patient
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -212,6 +279,9 @@ def test_flask_update_patient_405(
     for v in data_fake_patient["sessions"]:
         v["_id"] = str(v["_id"])
     for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
+
+    for v in data_fake_patient["assessmentLogs"]:
         v["_id"] = str(v["_id"])
 
     # Update the same patient by sending its collection name
