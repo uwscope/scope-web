@@ -27,7 +27,7 @@ def _build_patient_array_documents(
     collection: pymongo.database.Collection, type: str, document_id_key
 ):
     """
-    Helper function to stitch together array documents of "_type" such as "session".
+    Helper function to stitch together array documents of "_type" such as "session", "caseReview".
     """
     # Filter on type. Then, group documents by document_id_key and get document with latest _rev.
     pipeline = [
@@ -36,6 +36,38 @@ def _build_patient_array_documents(
         {
             "$group": {
                 "_id": "${}".format(document_id_key),
+                "latest_rev_document": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$latest_rev_document"}},
+    ]
+
+    found_documents = list(collection.aggregate(pipeline))
+    if found_documents is not None:
+        for fd in found_documents:
+            if "_id" in fd:
+                fd["_id"] = str(fd["_id"])
+
+    return found_documents
+
+
+def _build_patient_assessment_log_documents(
+    collection: pymongo.database.Collection, type: str, document_id_key
+):
+    """
+    Helper function to stitch together array documents of "_type" equal to "assessmentLog".
+    """
+    # Filter on type. Then, group documents by document_id_key and get document with latest _rev.
+    pipeline = [
+        {"$match": {"_type": type}},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                # _id:{username:$username, age:$ge}
+                "_id": {
+                    "{}".format(document_id_key): "${}".format(document_id_key),
+                    "assessmentName": "$assessmentName",
+                },
                 "latest_rev_document": {"$first": "$$ROOT"},
             }
         },
@@ -91,6 +123,10 @@ def _build_patient_json(
         collection=collection, type="caseReview", document_id_key="_review_id"
     )
 
+    patient["assessmentLogs"] = _build_patient_assessment_log_documents(
+        collection=collection, type="assessmentLog", document_id_key="_log_id"
+    )
+
     return patient
 
 
@@ -108,6 +144,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     safety_plan = patient.get("safetyPlan")
     sessions = patient.get("sessions")
     case_reviews = patient.get("caseReviews")
+    assessment_logs = patient.get("assessmentLogs")
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
@@ -119,8 +156,13 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         [
             ("_type", pymongo.ASCENDING),
             ("_rev", pymongo.DESCENDING),
-            ("_session_id", pymongo.DESCENDING),
-            ("_review_id", pymongo.DESCENDING),
+            ("_session_id", pymongo.DESCENDING),  # session
+            ("_review_id", pymongo.DESCENDING),  # caseReview
+            ("_log_id", pymongo.DESCENDING),  # assessmentLog,
+            (
+                "assessmentName",
+                pymongo.DESCENDING,
+            ),  # assessmentLog, # NOTE: Check with jina.
         ],
         unique=True,
         name="global_patient_index",
@@ -141,14 +183,17 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         patients_collection.insert_one(document=safety_plan)
         patients_collection.insert_many(documents=sessions)
         patients_collection.insert_many(documents=case_reviews)
+        patients_collection.insert_many(documents=assessment_logs)
 
+        # Convert `bson.objectid.ObjectId` to `str`
         for v in patient.values():
-            # Convert `bson.objectid.ObjectId` to `str`
             if "_id" in v:
                 v["_id"] = str(v["_id"])
         for v in patient["sessions"]:
             v["_id"] = str(v["_id"])
         for v in patient["caseReviews"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["assessmentLogs"]:
             v["_id"] = str(v["_id"])
 
         return patient
