@@ -4,10 +4,13 @@
 	"title": "IAssessmentLog",
 	"description": "IAssessmentLog Type",
 	"type": "object",
+	"$comment": "property pointValues not clear : { \"$ref\": \"\"}",
 	"properties": {
-		"logId": {
+		"_log_id": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
+		"_rev": { "_type": "number" },
+		"_type": { "const": "assessmentLog" },
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
 		},
@@ -32,11 +35,10 @@
 		"submittedBy": {
 			"$ref": "/schemas/identity"
 		},
-		"pointValues": { "$ref": "" },
 		"totalScore": {
 			"type": "number"
 		}
 	},
-	"additionalProperties": false,
-	"required": ["recordedDate", "scheduleId", "assessmentId", "assessmentName", "completed", "pointValues"]
+	"additionalProperties": true,
+	"required": ["recordedDate", "scheduleId", "assessmentId", "assessmentName", "completed"]
 }
