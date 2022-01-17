@@ -13,7 +13,7 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
-    appConfig: IAppConfig | undefined;
+    appConfig: IAppConfig;
 
     // UI states
     appState: PromiseState;
@@ -36,7 +36,7 @@ export class RootStore implements IRootStore {
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
-    private readonly configQuery: PromiseQuery<IAppConfig | undefined>;
+    private readonly configQuery: PromiseQuery<IAppConfig>;
 
     constructor() {
         this.patientsStore = new PatientsStore();
@@ -44,7 +44,13 @@ export class RootStore implements IRootStore {
         // TODO: require configQuery to succeed before anything else
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-        this.configQuery = new PromiseQuery(undefined, 'configQuery');
+
+        const defaultAppConfig: IAppConfig = {
+            assessments: [],
+            lifeAreas: [],
+            resources: []
+        }
+        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
 
         makeAutoObservable(this);
     }
@@ -68,7 +74,8 @@ export class RootStore implements IRootStore {
 
     @computed
     public get appConfig() {
-        return this.configQuery.value;
+        // We provided a default, know this is not undefined
+        return this.configQuery.value as IAppConfig;
     }
 
     @computed
