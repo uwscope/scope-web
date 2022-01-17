@@ -27,9 +27,13 @@ def test_flask_get_patient_values(
     data_fake_patient = data_fake_patient_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -77,9 +81,12 @@ def test_flask_update_patient_values(
     data_fake_values_inventory = data_fake_values_inventory_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -118,9 +125,13 @@ def test_flask_update_patient_values_duplicate(
     data_fake_patient = data_fake_patient_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Obtain a session
@@ -164,9 +175,13 @@ def test_flask_get_patient_values_latest(
     data_fake_patient = data_fake_patient_factory()
 
     # Create the patient collection and insert the documents
-    patient_collection_name = scope.database.patients.create_patient(
+    scope.database.patients.create_patient(
         database=database_client,
         patient=data_fake_patient,
+    )
+
+    patient_collection_name = scope.database.patients.collection_for_patient(
+        patient_name=data_fake_patient["identity"]["name"]
     )
 
     # Generate a fake value inventory
