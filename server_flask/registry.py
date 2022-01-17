@@ -187,11 +187,12 @@ def create_registry():
     @registry.route("/patients/<recordId>/assessmentlogs", methods=["GET", "POST"])
     @as_json
     def get_patient_assessmentlogs(recordId):
+        # NOTE: In-progress. Conversation pending with Jina.
         if request.method == "GET":
             print(
                 "Gets the list of assessment logs for patient and returns an array of assessment logs"
             )
-
+        # NOTE: In-progress. Conversation pending with Jina.
         elif request.method == "POST":
             print(
                 "Creates a new assessment log in the patient record and returns the assessment log"
@@ -205,14 +206,15 @@ def create_registry():
     )
     @as_json
     def get_patient_assessmentlog(recordId, logId):
+        # NOTE: In-progress. Conversation pending with Jina.
         if request.method == "GET":
             print(
                 "Gets the assessment log by id for patient and returns the assessment log"
             )
-
+        # NOTE: In-progress. Conversation pending with Jina.
         elif request.method == "PUT":
             print("Updates the assessment log by id and returns the assessment log")
-
+        # NOTE: In-progress. Conversation pending with Jina.
         else:
             return "Method not allowed", 405
 
