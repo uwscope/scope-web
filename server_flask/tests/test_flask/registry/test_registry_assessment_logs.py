@@ -15,7 +15,8 @@ API_RELATIVE_PATH = "patients/"
 # TODO: This could be renamed better.
 API_QUERY_PATH = "assessmentlogs"
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_assessment_logs(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -68,7 +69,7 @@ def test_flask_get_assessment_logs(
     )
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_assessment_logs_404(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -93,7 +94,7 @@ def test_flask_get_assessment_logs_404(
     assert response.status_code == 404
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_create_assessment_log(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -142,7 +143,7 @@ def test_flask_create_assessment_log(
     assert response_json == data_fake_case_review
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_assessment_logs_405(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -167,7 +168,7 @@ def test_flask_get_assessment_logs_405(
     assert response.status_code == 405
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_assessment_log(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -218,7 +219,7 @@ def test_flask_get_assessment_log(
     )
 
 
-# @pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_update_assessment_log(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
