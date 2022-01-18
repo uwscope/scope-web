@@ -11,3 +11,7 @@ declare function clearTimeout(timeoutId: number): void;
 declare var CLIENT_CONFIG: {
     flaskBaseUrl: string
 }
+
+// Expected server configuration
+// Currently "any" instead of "IAppConfig" because TypeScript barfed
+declare var SERVER_CONFIG: any;

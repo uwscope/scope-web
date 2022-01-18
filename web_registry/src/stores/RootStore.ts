@@ -45,12 +45,8 @@ export class RootStore implements IRootStore {
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
 
-        const defaultAppConfig: IAppConfig = {
-            assessments: [],
-            lifeAreas: [],
-            resources: []
-        }
-        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
+        // If the type of SERVER_CONFIG could be declared in types/custom.d.ts, would not need this "as"
+        this.configQuery = new PromiseQuery(SERVER_CONFIG as IAppConfig, 'configQuery');
 
         makeAutoObservable(this);
     }
