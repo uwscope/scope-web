@@ -27,16 +27,17 @@ def create_patient_service():
     @patient_service.route("/patient/safety", methods=["GET", "PUT"])
     @as_json
     def get_patient_safety_plan():
+        # NOTE: Done
         if request.method == "GET":
             print(
                 "For the authenticated patient, gets the safety plan and returns the safety plan data"
             )
-
+        # NOTE: Done
         elif request.method == "PUT":
             print(
                 "For the authenticated patient, updates the safety plan and returns the safety plan data"
             )
-
+        # NOTE: Done
         else:
             return "Method not allowed", 405
 
