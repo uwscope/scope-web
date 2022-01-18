@@ -58,7 +58,9 @@ def update_patient_values(patient_collection):
     )
 
     if result is not None:
-        return str(result.inserted_id), http.HTTPStatus.OK
+        values_inventory.update({"_id": str(result.inserted_id)})
+        return values_inventory, http.HTTPStatus.OK
+        # return str(result.inserted_id), http.HTTPStatus.OK
     else:
         # NOTE: Send back the latest version of the document. Hold off on that.
         abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
