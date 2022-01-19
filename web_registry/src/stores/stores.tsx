@@ -1,8 +1,8 @@
 import React, { ComponentType, createContext, FC, ReactElement, ReactNode, useContext } from 'react';
 import { IPatientStore } from 'src/stores/PatientStore';
-import { IRootStore, RootStore } from 'src/stores/RootStore';
+import { IRootStore } from 'src/stores/RootStore';
 
-export const StoreContext = createContext<IRootStore>(new RootStore());
+export const StoreContext = createContext<IRootStore | undefined>(undefined);
 
 export type StoreComponent = FC<{
     store: IRootStore;
@@ -13,7 +13,7 @@ export const StoreProvider: StoreComponent = ({ children, store }): ReactElement
     return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
 
-export const useStores = () => useContext(StoreContext);
+export const useStores = () => useContext(StoreContext) as IRootStore;
 
 export type TWithStoreHOC = <P extends unknown>(Component: ComponentType<P>) => (props: P) => JSX.Element;
 

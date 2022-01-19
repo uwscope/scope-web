@@ -1,0 +1,10 @@
+{
+  "id": "moodandactivitymonitoring",
+  "name": "Mood and activity monitoring",
+  "resources": [
+    {
+      "name": "Form A client education",
+      "filename": "sample.pdf"
+    }
+  ]
+}

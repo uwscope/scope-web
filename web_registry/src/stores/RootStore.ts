@@ -1,6 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
 import { IAppConfig, IIdentity, IUser } from 'shared/types';
-import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
@@ -34,16 +33,17 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE Registry';
+    public appConfig: IAppConfig;
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
-    private readonly configQuery: PromiseQuery<IAppConfig>;
 
-    constructor() {
+    constructor(serverConfig: IAppConfig) {
+        // As more is added to serverConfig, it will become a type and this will be split up
+        this.appConfig = serverConfig;
         this.patientsStore = new PatientsStore();
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
 
         makeAutoObservable(this);
     }
@@ -63,11 +63,6 @@ export class RootStore implements IRootStore {
     @computed
     public get loginState() {
         return this.loginQuery.state;
-    }
-
-    @computed
-    public get appConfig() {
-        return this.configQuery.value || defaultAppConfig;
     }
 
     @computed
@@ -91,7 +86,6 @@ export class RootStore implements IRootStore {
     @action.bound
     public async load() {
         await this.login();
-        await this.loadAppConfig();
         await this.patientsStore.getPatients();
     }
 
@@ -105,13 +99,6 @@ export class RootStore implements IRootStore {
     @action.bound
     public logout() {
         this.loginQuery.state = 'Unknown';
-    }
-
-    @action.bound
-    public async loadAppConfig() {
-        const { appService } = useServices();
-        const promise = appService.getAppConfig();
-        await this.configQuery.fromPromise(promise);
     }
 
     public getPatientByRecordId(recordId: string | undefined) {

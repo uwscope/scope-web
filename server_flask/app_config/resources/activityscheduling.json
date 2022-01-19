@@ -1,0 +1,14 @@
+{
+  "id": "activityscheduling",
+  "name": "Activity scheduling",
+  "resources": [
+    {
+      "name": "Form A client education",
+      "filename": "sample.pdf"
+    },
+    {
+      "name": "Form B vicious cycle",
+      "filename": "sample.pdf"
+    }
+  ]
+}

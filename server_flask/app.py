@@ -6,8 +6,8 @@ from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
+import blueprints.app.config
 import database
-from assessments import get_supported_assessments
 from blueprints.patient.safety_plan import patient_safety_plan_blueprint
 
 # Import patient & registry blueprints.
@@ -98,21 +98,17 @@ def create_app():
         else:
             return "Method not allowed", 405
 
-    @app.route("/app/config", methods=["GET"])
-    @as_json
-    def get_assessments():
-        if request.method == "GET":
-            return {"assessments": get_supported_assessments()}
-
-        else:
-            return "Method not allowed", 405
-
     # Basic status endpoint.
     # TODO - move this into a blueprint
     @app.route("/")
     @as_json
     def status():
         return {"flask_status": "ok"}
+
+    # App blueprints
+    app.register_blueprint(
+        blueprints.app.config.app_config_blueprint, url_prefix="/app"
+    )
 
     # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
