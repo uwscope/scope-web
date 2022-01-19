@@ -1,10 +1,10 @@
+import json
 import uuid
 from datetime import date, datetime, timedelta
 
 import numpy as np
 from lorem.text import TextLorem
 
-from assessments import gad7Assessment, moodAssessment, phq9Assessment
 from enums import (AssessmentFrequency, AssessmentType,
                    BehavioralActivationChecklist, BehavioralStrategyChecklist,
                    CancerTreatmentRegimen, ClinicCode, DayOfWeek,
@@ -12,6 +12,15 @@ from enums import (AssessmentFrequency, AssessmentType,
                    PatientEthnicity, PatientGender, PatientPronoun,
                    PatientRace, PatientSex, Referral, ReferralStatus,
                    SessionType, TreatmentChange, TreatmentPlan)
+
+
+with open("./app_config/assessments/gad7.json") as config_file:
+    gad7Assessment = json.load(config_file)
+with open("./app_config/assessments/mood.json") as config_file:
+    moodAssessment = json.load(config_file)
+with open("./app_config/assessments/phq9.json") as config_file:
+    phq9Assessment = json.load(config_file)
+
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
 shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))

@@ -1,0 +1,76 @@
+{
+  "id": "gad-7",
+  "name": "GAD-7",
+  "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
+  "questions": [
+    {
+      "question": "Feeling nervous, anxious, or on edge",
+      "id": "Anxious"
+    },
+    {
+      "question": "Not being able to stop or control worrying",
+      "id": "Constant worrying"
+    },
+    {
+      "question": "Worrying too much about different things",
+      "id": "Worrying too much"
+    },
+    {
+      "question": "Trouble relaxing",
+      "id": "Trouble relaxing"
+    },
+    {
+      "question": "Being so restless that it is hard to sit still",
+      "id": "Restless"
+    },
+    {
+      "question": "Becoming easily annoyed or irritated",
+      "id": "Irritable"
+    },
+    {
+      "question": "Feeling afraid as if something awful might happen",
+      "id": "Afraid"
+    }
+  ],
+  "options": [
+    {
+      "text": "Not at all",
+      "value": 0
+    },
+    {
+      "text": "Several days",
+      "value": 1
+    },
+    {
+      "text": "More than half the days",
+      "value": 2
+    },
+    {
+      "text": "Nearly every day",
+      "value": 3
+    }
+  ],
+  "interpretationName": "Anxiety severity",
+  "interpretationTable": [
+    {
+      "score": "0-5",
+      "max": 5,
+      "interpretation": "None"
+    },
+    {
+      "score": "6-10",
+      "max": 10,
+      "interpretation": "Mild"
+    },
+    {
+      "score": "11-15",
+      "max": 15,
+      "interpretation": "Moderate"
+    },
+    {
+      "score": "16-21",
+      "max": 21,
+      "interpretation": "Severe"
+    }
+  ]
+}

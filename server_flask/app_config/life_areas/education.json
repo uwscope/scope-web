@@ -1,0 +1,57 @@
+{
+  "id": "education",
+  "name": "Education/Career/Contributing",
+  "examples": [
+    {
+      "name": "Being a loving parent",
+      "activities": [
+        {
+          "name": "Tell my child I love them every day"
+        },
+        {
+          "name": "Make a special breakfast for my child on Saturday"
+        },
+        {
+          "name": "Take my child to the part on Saturday"
+        },
+        {
+          "name": "Pick up my child from school promptly each day"
+        }
+      ]
+    },
+    {
+      "name": "Being a caring partner",
+      "activities": [
+        {
+          "name": "Tell my child I love them every day"
+        },
+        {
+          "name": "Make a special breakfast for my child on Saturday"
+        },
+        {
+          "name": "Take my child to the part on Saturday"
+        },
+        {
+          "name": "Pick up my child from school promptly each day"
+        }
+      ]
+    },
+    {
+      "name": "Being an attentive and supportive friend",
+      "activities": [
+        {
+          "name": "Tell my child I love them every day"
+        },
+        {
+          "name": "Make a special breakfast for my child on Saturday"
+        },
+        {
+          "name": "Take my child to the part on Saturday"
+        },
+        {
+          "name": "Pick up my child from school promptly each day"
+        }
+      ]
+    }
+  ]
+}

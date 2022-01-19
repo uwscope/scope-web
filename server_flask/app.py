@@ -7,7 +7,8 @@ from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
 import database
-from assessments import get_supported_assessments
+
+import blueprints.app.config
 
 # Import patient blueprints.
 from blueprints.patient.values_inventory import patient_values_inventory_blueprint
@@ -80,21 +81,15 @@ def create_app():
         else:
             return "Method not allowed", 405
 
-    @app.route("/app/config", methods=["GET"])
-    @as_json
-    def get_assessments():
-        if request.method == "GET":
-            return {"assessments": get_supported_assessments()}
-
-        else:
-            return "Method not allowed", 405
-
     # Basic status endpoint.
     # TODO - move this into a blueprint
     @app.route("/")
     @as_json
     def status():
         return {"flask_status": "ok"}
+
+    # App blueprints
+    app.register_blueprint(blueprints.app.config.app_config_blueprint, url_prefix="/app")
 
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
     # app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
