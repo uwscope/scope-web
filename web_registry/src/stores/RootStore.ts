@@ -33,20 +33,17 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE Registry';
+    public appConfig: IAppConfig;
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
-    private readonly configQuery: PromiseQuery<IAppConfig>;
 
-    constructor() {
+    constructor(serverConfig: IAppConfig) {
+        // As more is added to serverConfig, it will become a type and this will be split up
+        this.appConfig = serverConfig;
         this.patientsStore = new PatientsStore();
 
-        // TODO: require configQuery to succeed before anything else
-
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-
-        // If the type of SERVER_CONFIG could be declared in types/custom.d.ts, would not need this "as"
-        this.configQuery = new PromiseQuery(SERVER_CONFIG as IAppConfig, 'configQuery');
 
         makeAutoObservable(this);
     }
@@ -66,12 +63,6 @@ export class RootStore implements IRootStore {
     @computed
     public get loginState() {
         return this.loginQuery.state;
-    }
-
-    @computed
-    public get appConfig() {
-        // We provided a default, know this is not undefined
-        return this.configQuery.value as IAppConfig;
     }
 
     @computed
@@ -95,7 +86,6 @@ export class RootStore implements IRootStore {
     @action.bound
     public async load() {
         await this.login();
-        await this.loadAppConfig();
         await this.patientsStore.getPatients();
     }
 
@@ -109,13 +99,6 @@ export class RootStore implements IRootStore {
     @action.bound
     public logout() {
         this.loginQuery.state = 'Unknown';
-    }
-
-    @action.bound
-    public async loadAppConfig() {
-        const { appService } = useServices();
-        const promise = appService.getAppConfig();
-        await this.configQuery.fromPromise(promise);
     }
 
     public getPatientByRecordId(recordId: string | undefined) {
