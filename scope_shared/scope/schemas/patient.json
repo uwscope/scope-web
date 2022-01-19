@@ -39,10 +39,7 @@
 			"$ref": "/schemas/case-reviews"
 		},
 		"assessments": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/assessment"
-			}
+			"$ref": "/schemas/assessments"
 		},
 		"scheduledAssessments": {
 			"type": "array",
@@ -54,10 +51,7 @@
 			"$ref": "/schemas/assessment-logs"
 		},
 		"activities": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/activity"
-			}
+			"$ref": "/schemas/activities"
 		},
 		"scheduledActivities": {
 			"type": "array",

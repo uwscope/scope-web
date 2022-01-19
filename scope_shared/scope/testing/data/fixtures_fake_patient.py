@@ -50,11 +50,13 @@ def get_random_states(enum, options):
 def get_fake_assessments():
     return [
         {
-            "assessmentId": "mood"
+            "_assessment_id": "mood"
             if a.value == "Mood Logging"
             else "medication"
             if a.value == "Medication Tracking"
             else a.value.lower(),
+            "_type": "assessment",
+            "_rev": 1,
             "assessmentName": a.value,
             "frequency": get_random_item(AssessmentFrequency).value,
             "dayOfWeek": get_random_item(DayOfWeek).value,
@@ -65,7 +67,7 @@ def get_fake_assessments():
 
 def get_fake_scheduled_assessment(assessment):
 
-    if assessment["assessmentId"] == "mood":
+    if assessment["_assessment_id"] == "mood":
         return []
 
     freq = 0
@@ -102,7 +104,7 @@ def get_fake_scheduled_assessment(assessment):
         scheduled.append(
             {
                 "scheduleId": "Scheduled {}".format(idx),
-                "assessmentId": assessment["assessmentId"],
+                "assessmentId": assessment["_assessment_id"],
                 "assessmentName": assessment["assessmentName"],
                 "dueDate": dueDate + timedelta(days=freq * idx),
             }
@@ -533,6 +535,10 @@ def data_fake_case_review_factory() -> dict:
     return fake_case_review
 
 
+def data_fake_assessments_factory() -> List[dict]:
+    return get_fake_assessments()
+
+
 def data_fake_patient_factory() -> dict:
     fake_patient = {
         # NOTE: A "patient" exists only as a query composed from other documents.
@@ -547,6 +553,7 @@ def data_fake_patient_factory() -> dict:
         "safetyPlan": data_fake_safety_plan_factory(),
         "sessions": data_fake_sessions_factory(),
         "caseReviews": data_fake_case_reviews_factory(),
+        "assessments": data_fake_assessments_factory(),
         "assessmentLogs": data_fake_assessment_logs_factory(),
     }
 

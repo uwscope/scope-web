@@ -58,6 +58,9 @@ def test_flask_get_all_patients(
     for v in data_fake_patient["caseReviews"]:
         v["_id"] = str(v["_id"])
 
+    for v in data_fake_patient["assessments"]:
+        v["_id"] = str(v["_id"])
+
     for v in data_fake_patient["assessmentLogs"]:
         v["_id"] = str(v["_id"])
 
@@ -65,11 +68,17 @@ def test_flask_get_all_patients(
     response_patients = response.json()["patients"]
 
     # For assert to work on two list of dicts, the order needs to be same.
+    data_fake_patient["assessments"] = sorted(
+        data_fake_patient["assessments"], key=lambda i: i["_id"]
+    )
+
+    # For assert to work on two list of dicts, the order needs to be same.
     data_fake_patient["assessmentLogs"] = sorted(
         data_fake_patient["assessmentLogs"], key=lambda i: i["_id"]
     )
 
     for rp in response_patients:
+        rp["assessments"] = sorted(rp["assessments"], key=lambda i: i["_id"])
         rp["assessmentLogs"] = sorted(rp["assessmentLogs"], key=lambda i: i["_id"])
 
     # Ensure list includes our fake patient
@@ -128,6 +137,9 @@ def test_flask_get_patient(
     for v in data_fake_patient["caseReviews"]:
         v["_id"] = str(v["_id"])
 
+    for v in data_fake_patient["assessments"]:
+        v["_id"] = str(v["_id"])
+
     for v in data_fake_patient["assessmentLogs"]:
         v["_id"] = str(v["_id"])
 
@@ -144,6 +156,10 @@ def test_flask_get_patient(
     # NOTE: assert response_json["assessmentLogs"] == data_fake_patient["assessmentLogs"] fails because the order of dicts in the two lists is different.
     assert sorted(response_json["assessmentLogs"], key=lambda i: i["_id"]) == sorted(
         data_fake_patient["assessmentLogs"], key=lambda i: i["_id"]
+    )
+
+    assert sorted(response_json["assessments"], key=lambda i: i["_id"]) == sorted(
+        data_fake_patient["assessments"], key=lambda i: i["_id"]
     )
 
     scope.database.patients.delete_patient(
@@ -217,6 +233,9 @@ def test_flask_create_patient(
     for v in response_json["caseReviews"]:
         if isinstance(v, dict):
             v.pop("_id", None)
+    for v in response_json["assessments"]:
+        if isinstance(v, dict):
+            v.pop("_id", None)
     for v in response_json["assessmentLogs"]:
         if isinstance(v, dict):
             v.pop("_id", None)
@@ -230,6 +249,7 @@ def test_flask_create_patient(
     assert response_json["safetyPlan"] == data_fake_patient["safetyPlan"]
     assert response_json["sessions"] == data_fake_patient["sessions"]
     assert response_json["caseReviews"] == data_fake_patient["caseReviews"]
+    assert response_json["assessments"] == data_fake_patient["assessments"]
 
     # NOTE: assert response_json["assessmentLogs"] == data_fake_patient["assessmentLogs"] fails because the order of dicts in the two lists is different.
     assert sorted(
@@ -279,6 +299,8 @@ def test_flask_update_patient_405(
     for v in data_fake_patient["sessions"]:
         v["_id"] = str(v["_id"])
     for v in data_fake_patient["caseReviews"]:
+        v["_id"] = str(v["_id"])
+    for v in data_fake_patient["assessments"]:
         v["_id"] = str(v["_id"])
 
     for v in data_fake_patient["assessmentLogs"]:

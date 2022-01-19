@@ -123,6 +123,10 @@ def _build_patient_json(
         collection=collection, type="caseReview", document_id_key="_review_id"
     )
 
+    patient["assessments"] = _build_patient_array_documents(
+        collection=collection, type="assessment", document_id_key="_assessment_id"
+    )
+
     patient["assessmentLogs"] = _build_patient_assessment_log_documents(
         collection=collection, type="assessmentLog", document_id_key="_log_id"
     )
@@ -144,6 +148,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     safety_plan = patient.get("safetyPlan")
     sessions = patient.get("sessions")
     case_reviews = patient.get("caseReviews")
+    assessments = patient.get("assessments")
     assessment_logs = patient.get("assessmentLogs")
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
@@ -158,6 +163,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
             ("_rev", pymongo.DESCENDING),
             ("_session_id", pymongo.DESCENDING),  # session
             ("_review_id", pymongo.DESCENDING),  # caseReview
+            ("_assessment_id", pymongo.DESCENDING),  # assessment
             ("_log_id", pymongo.DESCENDING),  # assessmentLog,
             (
                 "assessmentName",
@@ -183,6 +189,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         patients_collection.insert_one(document=safety_plan)
         patients_collection.insert_many(documents=sessions)
         patients_collection.insert_many(documents=case_reviews)
+        patients_collection.insert_many(documents=assessments)
         patients_collection.insert_many(documents=assessment_logs)
 
         # Convert `bson.objectid.ObjectId` to `str`
@@ -192,6 +199,8 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         for v in patient["sessions"]:
             v["_id"] = str(v["_id"])
         for v in patient["caseReviews"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["assessments"]:
             v["_id"] = str(v["_id"])
         for v in patient["assessmentLogs"]:
             v["_id"] = str(v["_id"])
