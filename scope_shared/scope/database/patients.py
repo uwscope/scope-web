@@ -191,15 +191,15 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
         [
             ("_type", pymongo.ASCENDING),
             ("_rev", pymongo.DESCENDING),
-            ("_session_id", pymongo.DESCENDING),  # session
-            ("_review_id", pymongo.DESCENDING),  # caseReview
-            ("_assessment_id", pymongo.DESCENDING),  # assessment
+            ("_session_id", pymongo.ASCENDING),  # session
+            ("_review_id", pymongo.ASCENDING),  # caseReview
+            ("_assessment_id", pymongo.ASCENDING),  # assessment
             (
                 "_schedule_id",
-                pymongo.DESCENDING,
+                pymongo.ASCENDING,
             ),  # scheduledAssessment and scheduledActivity
-            ("_log_id", pymongo.DESCENDING),  # assessmentLog and activityLog
-            ("_activity_id", pymongo.DESCENDING),  # activity,
+            ("_log_id", pymongo.ASCENDING),  # assessmentLog and activityLog
+            ("_activity_id", pymongo.ASCENDING),  # activity,
         ],
         unique=True,
         name="global_patient_index",
@@ -213,50 +213,85 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     )
     if result is None:
         # TODO: Talk to James about this. Only insert documents if values exist in 'patient' dict
-        patients_collection.insert_one(document=identity)
+        if identity is not None:
+            identity_result = patients_collection.insert_one(document=identity)
+            patient["identity"].update({"_id": str(identity_result.inserted_id)})
         # Patient info
-        patients_collection.insert_one(document=patient_profile)
-        patients_collection.insert_one(document=clinical_history)
+        if patient_profile is not None:
+            patient_profile_result = patients_collection.insert_one(
+                document=patient_profile
+            )
+            patient["patientProfile"].update(
+                {"_id": str(patient_profile_result.inserted_id)}
+            )
+        if clinical_history is not None:
+            clinical_history_restult = patients_collection.insert_one(
+                document=clinical_history
+            )
+            patient["clinicalHistory"].update(
+                {"_id": str(clinical_history_restult.inserted_id)}
+            )
         # Values inventory and safety plan
-        patients_collection.insert_one(document=values_inventory)
-        patients_collection.insert_one(document=safety_plan)
+        if values_inventory is not None:
+            values_inventory_result = patients_collection.insert_one(
+                document=values_inventory
+            )
+            patient["valuesInventory"].update(
+                {"_id": str(values_inventory_result.inserted_id)}
+            )
+        if safety_plan is not None:
+            safety_plan_result = patients_collection.insert_one(document=safety_plan)
+            patient["safetyPlan"].update({"_id": str(safety_plan_result.inserted_id)})
         # Sessions
-        patients_collection.insert_many(documents=sessions)
-        patients_collection.insert_many(documents=case_reviews)
+        if sessions is not None:
+            sessions_result = patients_collection.insert_many(documents=sessions)
+            for idx, s in enumerate(patient["sessions"]):
+                s.update({"_id": str(sessions_result.inserted_ids[idx])})
+        if case_reviews is not None:
+            case_reviews_result = patients_collection.insert_many(
+                documents=case_reviews
+            )
+            for idx, cr in enumerate(patient["caseReviews"]):
+                cr.update({"_id": str(case_reviews_result.inserted_ids[idx])})
         # Assessments
-        patients_collection.insert_many(documents=assessments)
-        patients_collection.insert_many(documents=scheduled_assessments)
-        patients_collection.insert_many(documents=assessment_logs)
+        if assessments is not None:
+            assessments_result = patients_collection.insert_many(documents=assessments)
+            for idx, a in enumerate(patient["assessments"]):
+                a.update({"_id": str(assessments_result.inserted_ids[idx])})
+        if scheduled_assessments is not None:
+            scheduled_assessments_result = patients_collection.insert_many(
+                documents=scheduled_assessments
+            )
+            for idx, sa in enumerate(patient["scheduledAssessments"]):
+                sa.update({"_id": str(scheduled_assessments_result.inserted_ids[idx])})
+        if assessment_logs is not None:
+            assessment_logs_result = patients_collection.insert_many(
+                documents=assessment_logs
+            )
+            for idx, al in enumerate(patient["assessmentLogs"]):
+                al.update({"_id": str(assessment_logs_result.inserted_ids[idx])})
         # Activities
-        patients_collection.insert_many(documents=activities)
-        patients_collection.insert_many(documents=scheduled_activities)
-        patients_collection.insert_many(documents=activity_logs)
+        if activities is not None:
+            activities_result = patients_collection.insert_many(documents=activities)
+            for idx, a in enumerate(patient["activities"]):
+                a.update({"_id": str(activities_result.inserted_ids[idx])})
+        if scheduled_activities is not None:
+            scheduled_activities_result = patients_collection.insert_many(
+                documents=scheduled_activities
+            )
+            for idx, sa in enumerate(patient["scheduledActivities"]):
+                sa.update({"_id": str(scheduled_activities_result.inserted_ids[idx])})
+        if activity_logs is not None:
+            activity_logs_result = patients_collection.insert_many(
+                documents=activity_logs
+            )
+            for idx, al in enumerate(patient["activityLogs"]):
+                al.update({"_id": str(activity_logs_result.inserted_ids[idx])})
         # Mood logs
-        patients_collection.insert_many(documents=mood_logs)
-
-        # NOTE: See if the following can be made more pythonic, maybe a lambda function.
-        # Convert `bson.objectid.ObjectId` to `str`
-        for v in patient.values():
-            if "_id" in v:
-                v["_id"] = str(v["_id"])
-        for v in patient["sessions"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["caseReviews"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["assessments"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["scheduledAssessments"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["assessmentLogs"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["activities"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["scheduledActivities"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["activityLogs"]:
-            v["_id"] = str(v["_id"])
-        for v in patient["moodLogs"]:
-            v["_id"] = str(v["_id"])
+        if mood_logs is not None:
+            mood_logs_result = patients_collection.insert_many(documents=mood_logs)
+            for idx, ml in enumerate(patient["moodLogs"]):
+                ml.update({"_id": str(mood_logs_result.inserted_ids[idx])})
 
         return patient
     return None
