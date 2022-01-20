@@ -40,5 +40,14 @@
 		}
 	},
 	"additionalProperties": true,
-	"required": ["recordedDate", "scheduleId", "assessmentId", "assessmentName", "completed"]
+	"required": [
+		"_log_id",
+		"_type",
+		"_rev",
+		"recordedDate",
+		"scheduleId",
+		"assessmentId",
+		"assessmentName",
+		"completed"
+	]
 }

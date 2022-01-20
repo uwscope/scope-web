@@ -5,9 +5,11 @@
 	"description": "IScheduledActivity Type",
 	"type": "object",
 	"properties": {
-		"scheduleId": {
+		"_schedule_id": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
+		"_type": { "const": "scheduledActivity" },
+		"_rev": { "type": "number" },
 		"dueDate": {
 			"$ref": "/schemas/scheduled-item#/properties/dueDate"
 		},
@@ -28,5 +30,15 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["scheduleId", "dueDate", "dueType", "activityId", "activityName", "reminder", "completed"]
+	"required": [
+		"_schedule_id",
+		"_type",
+		"_rev",
+		"dueDate",
+		"dueType",
+		"activityId",
+		"activityName",
+		"reminder",
+		"completed"
+	]
 }

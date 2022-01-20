@@ -5,9 +5,11 @@
 	"description": "IScheduledAssessment Type",
 	"type": "object",
 	"properties": {
-		"scheduleId": {
+		"_schedule_id": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
+		"_type": { "const": "scheduledAssessment" },
+		"_rev": { "type": "number" },
 		"dueDate": {
 			"$ref": "/schemas/scheduled-item#/properties/dueDate"
 		},
@@ -25,5 +27,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["scheduleId", "dueDate", "dueType", "assessmentId", "assessmentName", "completed"]
+	"required": ["_schedule_id", "_type", "_rev", "dueDate", "assessmentId", "assessmentName"]
 }

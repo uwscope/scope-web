@@ -5,7 +5,6 @@
 	"description": "Holds all the patient data",
 	"type": "object",
 	"properties": {
-		"_id": { "type": "string" },
 		"_type": { "const": "patient" },
 		"identity": {
 			"type": "object",
@@ -42,10 +41,7 @@
 			"$ref": "/schemas/assessments"
 		},
 		"scheduledAssessments": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/scheduled-assessment"
-			}
+			"$ref": "/schemas/scheduled-assessments"
 		},
 		"assessmentLogs": {
 			"$ref": "/schemas/assessment-logs"
@@ -54,22 +50,13 @@
 			"$ref": "/schemas/activities"
 		},
 		"scheduledActivities": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/scheduled-activity"
-			}
+			"$ref": "/schemas/scheduled-activities"
 		},
 		"activityLogs": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/activity-log"
-			}
+			"$ref": "/schemas/activity-logs"
 		},
 		"moodLogs": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/mood-log"
-			}
+			"$ref": "/schemas/mood-logs"
 		}
 	},
 	"additionalProperties": false,
