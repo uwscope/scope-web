@@ -461,9 +461,10 @@ def get_fake_scheduled_assessment(assessment):
 
     dueDate = datetime.today() + timedelta(days=7 - date.today().weekday() + dow)
 
-    # 10 assessments in the past and 10 in the future
+    # 10 assessments in the past and 10 in the future.
+    # NOTE: Anant changed these to 5 in the past and 5 in the future.
     scheduled = []
-    for idx in list(range(-10, 10)):
+    for idx in list(range(-5, 5)):
         scheduled.append(
             {
                 # "scheduleId": "Scheduled %d" % idx, # NOTE: Wasn't unique, appended _assessment_id to make it unique.
@@ -566,11 +567,7 @@ def data_fake_scheduled_assessments_factory() -> List[dict]:
 
 def data_fake_assessment_logs_factory() -> List[dict]:
 
-    assessments = get_fake_assessments()
-    scheduled_assessments_list = [get_fake_scheduled_assessment(a) for a in assessments]
-    scheduled_assessments = [
-        a for scheduled_list in scheduled_assessments_list for a in scheduled_list
-    ]
+    scheduled_assessments = data_fake_scheduled_assessments_factory()
 
     assessment_logs = [
         {
@@ -591,7 +588,9 @@ def data_fake_assessment_logs_factory() -> List[dict]:
             # "totalScore": None,
             "totalScore": get_random_integer(0, 100),
         }
-        for a in scheduled_assessments
+        for a in random.sample(
+            scheduled_assessments, 5
+        )  # Sample 5 scheduled assessments.
         # if a["dueDate"] < datetime.today()
     ]
 
@@ -616,7 +615,7 @@ def data_fake_activities_factory() -> List[dict]:
 
     fake_activities = [
         {
-            "_activity_id": "%s" % idx,
+            "_activity_id": "Activity-%s" % idx,
             "_type": "activity",
             "_rev": 1,
             "name": shortLorem.sentence(),
@@ -749,7 +748,7 @@ def data_fake_patient_factory() -> dict:
         # Assessments
         "assessments": data_fake_assessments_factory(),
         "scheduledAssessments": data_fake_scheduled_assessments_factory(),
-        "assessmentLogs": data_fake_assessment_logs_factory(),
+        "assessmentLogs": data_fake_assessment_logs_factory(),  # NOTE: Taking too much time in insert_many operation.
         # Activities
         "activities": data_fake_activities_factory(),
         "scheduledActivities": data_fake_scheduled_activities_factory(),
