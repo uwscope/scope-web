@@ -118,7 +118,6 @@ def _build_patient_json(
     patient["sessions"] = _build_patient_array_documents(
         collection=collection, type="session", document_id_key="_session_id"
     )
-
     patient["caseReviews"] = _build_patient_array_documents(
         collection=collection, type="caseReview", document_id_key="_review_id"
     )
@@ -126,9 +125,29 @@ def _build_patient_json(
     patient["assessments"] = _build_patient_array_documents(
         collection=collection, type="assessment", document_id_key="_assessment_id"
     )
-
-    patient["assessmentLogs"] = _build_patient_assessment_log_documents(
+    patient["scheduledAssessments"] = _build_patient_array_documents(
+        collection=collection,
+        type="scheduledAssessment",
+        document_id_key="_schedule_id",
+    )
+    patient["assessmentLogs"] = _build_patient_array_documents(
         collection=collection, type="assessmentLog", document_id_key="_log_id"
+    )
+
+    patient["activities"] = _build_patient_array_documents(
+        collection=collection, type="activity", document_id_key="_activity_id"
+    )
+    patient["scheduledActivities"] = _build_patient_array_documents(
+        collection=collection,
+        type="scheduledActivity",
+        document_id_key="_schedule_id",
+    )
+    patient["activityLogs"] = _build_patient_array_documents(
+        collection=collection, type="activityLog", document_id_key="_log_id"
+    )
+
+    patient["moodLogs"] = _build_patient_array_documents(
+        collection=collection, type="moodLog", document_id_key="_log_id"
     )
 
     return patient
@@ -142,14 +161,25 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     """
 
     identity = patient.get("identity")
+    # Patient info
     patient_profile = patient.get("patientProfile")
     clinical_history = patient.get("clinicalHistory")
+    # Values inventory and safety plan
     values_inventory = patient.get("valuesInventory")
     safety_plan = patient.get("safetyPlan")
+    # Sessions
     sessions = patient.get("sessions")
     case_reviews = patient.get("caseReviews")
+    # Assessments
     assessments = patient.get("assessments")
+    scheduled_assessments = patient.get("scheduledAssessments")
     assessment_logs = patient.get("assessmentLogs")
+    # Activities
+    activities = patient.get("activities")
+    scheduled_activities = patient.get("scheduledActivities")
+    activity_logs = patient.get("activityLogs")
+    # Mood logs
+    mood_logs = patient.get("moodLogs")
 
     patient_collection_name = collection_for_patient(patient_name=identity["name"])
 
@@ -164,11 +194,12 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
             ("_session_id", pymongo.DESCENDING),  # session
             ("_review_id", pymongo.DESCENDING),  # caseReview
             ("_assessment_id", pymongo.DESCENDING),  # assessment
-            ("_log_id", pymongo.DESCENDING),  # assessmentLog,
             (
-                "assessmentName",
+                "_schedule_id",
                 pymongo.DESCENDING,
-            ),  # assessmentLog, # NOTE: Check with jina.
+            ),  # scheduledAssessment and scheduledActivity
+            ("_log_id", pymongo.DESCENDING),  # assessmentLog and activityLog
+            ("_activity_id", pymongo.DESCENDING),  # activity,
         ],
         unique=True,
         name="global_patient_index",
@@ -183,15 +214,27 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     if result is None:
         # TODO: Talk to James about this. Only insert documents if values exist in 'patient' dict
         patients_collection.insert_one(document=identity)
+        # Patient info
         patients_collection.insert_one(document=patient_profile)
         patients_collection.insert_one(document=clinical_history)
+        # Values inventory and safety plan
         patients_collection.insert_one(document=values_inventory)
         patients_collection.insert_one(document=safety_plan)
+        # Sessions
         patients_collection.insert_many(documents=sessions)
         patients_collection.insert_many(documents=case_reviews)
+        # Assessments
         patients_collection.insert_many(documents=assessments)
+        patients_collection.insert_many(documents=scheduled_assessments)
         patients_collection.insert_many(documents=assessment_logs)
+        # Activities
+        patients_collection.insert_many(documents=activities)
+        patients_collection.insert_many(documents=scheduled_activities)
+        patients_collection.insert_many(documents=activity_logs)
+        # Mood logs
+        patients_collection.insert_many(documents=mood_logs)
 
+        # NOTE: See if the following can be made more pythonic, maybe a lambda function.
         # Convert `bson.objectid.ObjectId` to `str`
         for v in patient.values():
             if "_id" in v:
@@ -202,7 +245,17 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
             v["_id"] = str(v["_id"])
         for v in patient["assessments"]:
             v["_id"] = str(v["_id"])
+        for v in patient["scheduledAssessments"]:
+            v["_id"] = str(v["_id"])
         for v in patient["assessmentLogs"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["activities"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["scheduledActivities"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["activityLogs"]:
+            v["_id"] = str(v["_id"])
+        for v in patient["moodLogs"]:
             v["_id"] = str(v["_id"])
 
         return patient
