@@ -16,6 +16,6 @@ def test_documentdb_client_admin(
         explicit_check_fixtures=True,
         documentdb_config=documentdb_config,
         documentdb_port_forward=documentdb_port_forward,
-    )
+    )  # fmt:skip
 
     assert documentdb_client_admin is not None
