@@ -55,22 +55,6 @@ def create_app():
     patients = getRandomFakePatients()
     patient_map = {p["identity"]["identityId"]: p for p in patients}
 
-    print([el["logId"] for el in patients[0]["assessmentLogs"]])
-    assert len([el["logId"] for el in patients[0]["assessmentLogs"]]) != len(
-        set([el["logId"] for el in patients[0]["assessmentLogs"]])
-    )
-
-    assert len(
-        [(el["logId"], el["assessmentName"]) for el in patients[0]["assessmentLogs"]]
-    ) == len(
-        set(
-            [
-                (el["logId"], el["assessmentName"])
-                for el in patients[0]["assessmentLogs"]
-            ]
-        )
-    )
-
     # API TODO:
     # - check method
     # - check parameters
@@ -110,36 +94,36 @@ def create_app():
         blueprints.app.config.app_config_blueprint, url_prefix="/app"
     )
 
-    # Register all the `registry` blueprints, i.e. blueprints for web_registry
-    app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
-    app.register_blueprint(
-        registry_patient_profile_blueprint
-    )  # url_prefix="/patients/<patient_collection>/profile"
-    app.register_blueprint(
-        registry_clinical_history_blueprint
-    )  # url_prefix="/patients/<patient_collection>/clinicalhistory"
-    app.register_blueprint(
-        registry_values_inventory_blueprint
-    )  # url_prefix="/patients/<patient_collection>/values"
-    app.register_blueprint(
-        registry_safety_plan_blueprint
-    )  # url_prefix="/patients/<patient_collection>/safety"
-    app.register_blueprint(
-        registry_sessions_blueprint
-    )  # url_prefix="/patients/<patient_collection>/sessions"
-    app.register_blueprint(
-        registry_case_reviews_blueprint
-    )  # url_prefix="/patients/<patient_collection>/casereviews"
-    app.register_blueprint(
-        registry_assessment_logs_blueprint
-    )  # url_prefix="/patients/<patient_collection>/assessmentlogs"
+    # # Register all the `registry` blueprints, i.e. blueprints for web_registry
+    # app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
+    # app.register_blueprint(
+    #     registry_patient_profile_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/profile"
+    # app.register_blueprint(
+    #     registry_clinical_history_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/clinicalhistory"
+    # app.register_blueprint(
+    #     registry_values_inventory_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/values"
+    # app.register_blueprint(
+    #     registry_safety_plan_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/safety"
+    # app.register_blueprint(
+    #     registry_sessions_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/sessions"
+    # app.register_blueprint(
+    #     registry_case_reviews_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/casereviews"
+    # app.register_blueprint(
+    #     registry_assessment_logs_blueprint
+    # )  # url_prefix="/patients/<patient_collection>/assessmentlogs"
 
-    # Register all the `patient` blueprints, i.e. blueprints for web_patient
-    patient = Blueprint("patient", __name__, url_prefix="/patient")
-    patient.register_blueprint(patient_values_inventory_blueprint, url_prefix="/values")
-    patient.register_blueprint(patient_safety_plan_blueprint, url_prefix="/safety")
+    # # Register all the `patient` blueprints, i.e. blueprints for web_patient
+    # patient = Blueprint("patient", __name__, url_prefix="/patient")
+    # patient.register_blueprint(patient_values_inventory_blueprint, url_prefix="/values")
+    # patient.register_blueprint(patient_safety_plan_blueprint, url_prefix="/safety")
 
-    app.register_blueprint(patient)
+    # app.register_blueprint(patient)
 
     return app
 
