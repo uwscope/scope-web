@@ -6,7 +6,27 @@ import bson.json_util
 import bson.objectid
 import numpy as np
 import pytest
+from jschon import JSON
 from lorem.text import TextLorem
+from scope.schema import (
+    activities_schema,
+    activity_logs_schema,
+    assessment_logs_schema,
+    assessments_schema,
+    case_review_schema,
+    case_reviews_schema,
+    clinical_history_schema,
+    identity_schema,
+    mood_logs_schema,
+    patient_profile_schema,
+    patient_schema,
+    safety_plan_schema,
+    scheduled_activities_schema,
+    scheduled_assessments_schema,
+    session_schema,
+    sessions_schema,
+    values_inventory_schema,
+)
 
 from .assessments import *
 from .enums import *
@@ -47,9 +67,352 @@ def get_random_states(enum, options):
     return flags
 
 
+def _fake_name_factory() -> str:
+    first_names = [
+        "Paisley",
+        "Vince",
+        "Prudence",
+        "Floyd",
+        "Marty",
+        "Yvonne",
+        "Russ",
+        "Herb",
+        "Hannah",
+        "Melanie",
+        "Dwayne",
+        "Clifford",
+        "Garth",
+        "Rachel",
+        "Phoebe",
+        "Doug",
+        "Mortimer",
+        "Heath",
+        "Iris",
+        "Tony",
+    ]
+
+    last_names = [
+        "Lowe",
+        "Dawson",
+        "Porter",
+        "Tomlinson",
+        "Windrow",
+        "Cook",
+        "Wolfe",
+        "Chapman",
+        "Malone",
+        "Green",
+        "Fairbank",
+        "Wood",
+        "Miller",
+        "Clayton",
+        "Russell",
+        "Atkinson",
+        "Whitehead",
+        "Greene",
+        "Cannon",
+        "Pope",
+    ]
+
+    return "{} {}".format(random.choice(first_names), random.choice(last_names))
+
+
+def data_fake_identity_factory() -> dict:
+    fake_identity = {
+        # "_id": str(bson.objectid.ObjectId()),
+        "_type": "identity",
+        "_rev": 1,
+        "name": _fake_name_factory(),
+    }
+
+    # Verify the schema
+    result = identity_schema.evaluate(JSON(fake_identity))
+    assert result.output("basic")["valid"] == True
+    return fake_identity
+
+
+def data_fake_patient_profile_factory() -> dict:
+
+    name = _fake_name_factory()
+    mrn = "%s" % get_random_integer(10000, 1000000)
+
+    fake_profile = {
+        "_type": "patientProfile",
+        "_rev": 1,
+        "name": name,
+        "MRN": mrn,
+        "clinicCode": get_random_item(ClinicCode).value,
+        "birthdate": str(
+            datetime(
+                get_random_integer(1930, 2000),
+                get_random_integer(1, 13),
+                get_random_integer(1, 28),
+            )
+        ),
+        "sex": get_random_item(PatientSex).value,
+        "gender": get_random_item(PatientGender).value,
+        "pronoun": get_random_item(PatientPronoun).value,
+        "race": get_random_flags(PatientRace),
+        "primaryOncologyProvider": data_fake_identity_factory(),
+        "primaryCareManager": data_fake_identity_factory(),
+        "discussionFlag": get_random_flags(DiscussionFlag),
+        "followupSchedule": get_random_item(FollowupSchedule).value,
+        "depressionTreatmentStatus": get_random_item(DepressionTreatmentStatus).value,
+    }
+
+    # Verify the schema
+    result = patient_profile_schema.evaluate(JSON(fake_profile))
+    assert result.output("basic")["valid"] == True
+
+    return fake_profile
+
+
+def data_fake_clinical_history_factory() -> dict:
+    fake_clinical_history = {
+        # "_id": str(bson.objectid.ObjectId()),
+        "_type": "clinicalHistory",
+        "_rev": 1,
+        "primaryCancerDiagnosis": "primaryCancerDiagnosis",
+        "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
+        "currentTreatmentRegimen": {
+            "Surgery": True,
+            "Chemotherapy": True,
+            "Radiation": True,
+            "Stem Cell Transplant": True,
+            "Immunotherapy": True,
+            "CAR-T": True,
+            "Endocrine": True,
+            "Surveillance": True,
+        },
+        "currentTreatmentRegimenOther": "currentTreatmentRegimenOther",
+        "currentTreatmentRegimenNotes": "currentTreatmentRegimenNotes",
+        "psychDiagnosis": "psychDiagnosis",
+        "pastPsychHistory": "pastPsychHistory",
+        "pastSubstanceUse": "pastSubstanceUse",
+        "psychSocialBackground": "psychSocialBackground",
+    }
+
+    # Verify the schema
+    result = clinical_history_schema.evaluate(JSON(fake_clinical_history))
+    assert result.output("basic")["valid"] == True
+    return fake_clinical_history
+
+
+def data_fake_values_inventory_factory() -> dict:
+    fake_values_inventory = {
+        # "_id": str(bson.objectid.ObjectId()),
+        "_type": "valuesInventory",
+        "_rev": 1,
+        "assigned": True,
+        "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
+        "values": [
+            {
+                "id": "id",
+                "name": "name",
+                "dateCreated": "",
+                "dateEdited": "",
+                "lifeareaId": "",
+                "activities": [
+                    {
+                        "id": "id",
+                        "name": "name",
+                        "valueId": "",
+                        "dateCreated": "",
+                        "dateEdited": "",
+                        "lifeareaId": "",
+                    },
+                    {
+                        "id": "id",
+                        "name": "name",
+                        "valueId": "",
+                        "dateCreated": "",
+                        "dateEdited": "",
+                        "lifeareaId": "",
+                    },
+                ],
+            }
+        ],
+    }
+
+    # Verify the schema
+    result = values_inventory_schema.evaluate(JSON(fake_values_inventory))
+    assert result.output("flag")["valid"] == True
+
+    return fake_values_inventory
+
+
+def data_fake_safety_plan_factory() -> dict:
+    fake_safety_plan = {
+        "_type": "safetyPlan",
+        "_rev": 1,
+        "assigned": True,
+        "assignedDate": "some date",
+        "reasonsForLiving": "To stare at Mt. Rainier.",
+        "supporters": [
+            {
+                "contactType": "Person",
+                "name": "Name",
+                "address": "Address",
+                "phoneNumber": "Number",
+            }
+        ],
+    }
+
+    # Verify the schema
+    result = safety_plan_schema.evaluate(JSON(fake_safety_plan))
+    assert result.output("basic")["valid"] == True
+    return fake_safety_plan
+
+
+def data_fake_sessions_factory() -> List[dict]:
+    session_count = get_random_integer(1, 5)
+    random_referrals = get_random_states(Referral, ReferralStatus)
+    referrals = []
+    for referral in random_referrals:
+        if random_referrals[referral] != "Not Referred":
+            referrals.append(
+                {"referralType": referral, "referralStatus": random_referrals[referral]}
+            )
+
+    fake_sessions = [
+        {
+            "_session_id": "Initial assessment" if idx == 0 else "session-%d" % idx,
+            "_type": "session",
+            "_rev": 1,
+            "date": str(
+                datetime.now()
+                - timedelta(
+                    days=get_random_integer(-2, 2)
+                    + (session_count - idx) * get_random_integer(13, 18)
+                )
+            ),
+            "sessionType": get_random_item(SessionType).value,
+            "billableMinutes": int(get_random_item([30, 45, 60, 80])),
+            "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
+            "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
+            "behavioralStrategyChecklist": get_random_flags(
+                BehavioralStrategyChecklist
+            ),
+            "behavioralStrategyOther": shortLorem.sentence()
+            if get_random_boolean()
+            else "",
+            "behavioralActivationChecklist": get_random_flags(
+                BehavioralActivationChecklist
+            ),
+            "referrals": referrals,
+            "otherRecommendations": shortLorem.sentence(),
+            "sessionNote": lorem.paragraph(),
+        }
+        for idx in range(session_count)
+    ]
+
+    # Verify the schema
+    result = sessions_schema.evaluate(JSON(fake_sessions))
+    assert result.output("basic")["valid"] == True
+
+    return fake_sessions
+
+
+def data_fake_session_factory() -> dict:
+    idx = get_random_integer(1, 10)
+    random_referrals = get_random_states(Referral, ReferralStatus)
+    referrals = []
+    for referral in random_referrals:
+        if random_referrals[referral] != "Not Referred":
+            referrals.append(
+                {"referralType": referral, "referralStatus": random_referrals[referral]}
+            )
+
+    fake_session = {
+        "_session_id": "session-%d" % idx,
+        "_type": "session",
+        "_rev": 1,
+        "date": str(
+            datetime.now()
+            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
+        ),
+        "sessionType": get_random_item(SessionType).value,
+        "billableMinutes": int(get_random_item([30, 45, 60, 80])),
+        "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
+        "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
+        "behavioralStrategyChecklist": get_random_flags(BehavioralStrategyChecklist),
+        "behavioralStrategyOther": shortLorem.sentence()
+        if get_random_boolean()
+        else "",
+        "behavioralActivationChecklist": get_random_flags(
+            BehavioralActivationChecklist
+        ),
+        "referrals": referrals,
+        "otherRecommendations": shortLorem.sentence(),
+        "sessionNote": lorem.paragraph(),
+    }
+
+    # Verify the schema
+    result = session_schema.evaluate(JSON(fake_session))
+    assert result.output("basic")["valid"] == True
+    return fake_session
+
+
+def data_fake_case_reviews_factory() -> List[dict]:
+    case_review_count = get_random_integer(1, 5)
+
+    fake_case_reviews = [
+        {
+            "_review_id": "Initial review" if idx == 0 else "review-%d" % idx,
+            "_type": "caseReview",
+            "_rev": 1,
+            "date": str(
+                datetime.now()
+                - timedelta(
+                    days=get_random_integer(-2, 2)
+                    + (case_review_count - idx) * get_random_integer(13, 18)
+                )
+            ),
+            "consultingPsychiatrist": data_fake_identity_factory(),
+            "medicationChange": shortLorem.sentence(),
+            "behavioralStrategyChange": shortLorem.sentence(),
+            "referralsChange": shortLorem.sentence(),
+            "otherRecommendations": shortLorem.sentence(),
+            "reviewNote": lorem.paragraph(),
+        }
+        for idx in range(case_review_count)
+    ]
+    # Verify the schema
+    result = case_reviews_schema.evaluate(JSON(fake_case_reviews))
+    assert result.output("basic")["valid"] == True
+
+    return fake_case_reviews
+
+
+def data_fake_case_review_factory() -> dict:
+    idx = get_random_integer(1, 10)
+    fake_case_review = {
+        "_review_id": "review-%d" % idx,
+        "_type": "caseReview",
+        "_rev": 1,
+        "date": str(
+            datetime.now()
+            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
+        ),
+        "consultingPsychiatrist": data_fake_identity_factory(),
+        "medicationChange": shortLorem.sentence(),
+        "behavioralStrategyChange": shortLorem.sentence(),
+        "referralsChange": shortLorem.sentence(),
+        "otherRecommendations": shortLorem.sentence(),
+        "reviewNote": lorem.paragraph(),
+    }
+
+    # Verify the schema
+    result = case_review_schema.evaluate(JSON(fake_case_review))
+    assert result.output("basic")["valid"] == True
+
+    return fake_case_review
+
+
 def get_fake_assessments():
     return [
         {
+            # "assessmentId": "mood"
             "_assessment_id": "mood"
             if a.value == "Mood Logging"
             else "medication"
@@ -103,10 +466,15 @@ def get_fake_scheduled_assessment(assessment):
     for idx in list(range(-10, 10)):
         scheduled.append(
             {
-                "scheduleId": "Scheduled {}".format(idx),
+                # "scheduleId": "Scheduled %d" % idx, # NOTE: Wasn't unique, appended _assessment_id to make it unique.
+                "_schedule_id": "Scheduled-Assessment-{}-{}".format(
+                    idx, assessment["_assessment_id"]
+                ),
+                "_type": "scheduledAssessment",
+                "_rev": 1,
                 "assessmentId": assessment["_assessment_id"],
                 "assessmentName": assessment["assessmentName"],
-                "dueDate": dueDate + timedelta(days=freq * idx),
+                "dueDate": str(dueDate + timedelta(days=freq * idx)),
             }
         )
 
@@ -173,6 +541,29 @@ def get_fake_assessment_data_points(assessment_type):
         return data
 
 
+def data_fake_assessments_factory() -> List[dict]:
+    fake_assessments = get_fake_assessments()
+
+    # Verify the schema
+    result = assessments_schema.evaluate(JSON(fake_assessments))
+    assert result.output("basic")["valid"] == True
+
+    return fake_assessments
+
+
+def data_fake_scheduled_assessments_factory() -> List[dict]:
+    assessments = get_fake_assessments()
+    scheduled_assessments_list = [get_fake_scheduled_assessment(a) for a in assessments]
+    scheduled_assessments = [
+        a for scheduled_list in scheduled_assessments_list for a in scheduled_list
+    ]
+
+    # Verify the schema
+    result = scheduled_assessments_schema.evaluate(JSON(scheduled_assessments))
+    assert result.output("basic")["valid"] == True
+    return scheduled_assessments
+
+
 def data_fake_assessment_logs_factory() -> List[dict]:
 
     assessments = get_fake_assessments()
@@ -183,14 +574,13 @@ def data_fake_assessment_logs_factory() -> List[dict]:
 
     assessment_logs = [
         {
-            "_log_id": a["scheduleId"] + "_logged",
+            # "logId": a["scheduleId"] + "_logged",
+            "_log_id": a["_schedule_id"] + "-logged",
             "_type": "assessmentLog",
             "_rev": 1,
-            "recordedDate": str(
-                a["dueDate"] + timedelta(days=get_random_integer(-1, 2))
-            ),
+            "recordedDate": a["dueDate"],
             "comment": shortLorem.paragraph(),
-            "scheduleId": a["scheduleId"],
+            "scheduleId": a["_schedule_id"],
             "assessmentId": a["assessmentId"],
             "assessmentName": a["assessmentName"],
             "completed": get_random_boolean(),
@@ -202,341 +592,141 @@ def data_fake_assessment_logs_factory() -> List[dict]:
             "totalScore": get_random_integer(0, 100),
         }
         for a in scheduled_assessments
-        if a["dueDate"] < datetime.today()
+        # if a["dueDate"] < datetime.today()
     ]
+
+    # Verify the schema
+    result = assessment_logs_schema.evaluate(JSON(assessment_logs))
+    assert result.output("basic")["valid"] == True
 
     return assessment_logs
 
 
-def _fake_name_factory() -> str:
-    first_names = [
-        "Paisley",
-        "Vince",
-        "Prudence",
-        "Floyd",
-        "Marty",
-        "Yvonne",
-        "Russ",
-        "Herb",
-        "Hannah",
-        "Melanie",
-        "Dwayne",
-        "Clifford",
-        "Garth",
-        "Rachel",
-        "Phoebe",
-        "Doug",
-        "Mortimer",
-        "Heath",
-        "Iris",
-        "Tony",
-    ]
+def data_fake_activities_factory() -> List[dict]:
+    # Code is replica of getFakeActivities() method.
+    # NOTE: This isn't following IActivity interface properties.
+    # return [
+    #     {
+    #         "activityId": "%s" % idx,
+    #         "activityName": shortLorem.sentence(),
+    #         "moodData": get_fake_assessment_data_points("Mood Logging"),
+    #     }
+    #     for idx in range(get_random_integer(1, 3))
+    # ]
 
-    last_names = [
-        "Lowe",
-        "Dawson",
-        "Porter",
-        "Tomlinson",
-        "Windrow",
-        "Cook",
-        "Wolfe",
-        "Chapman",
-        "Malone",
-        "Green",
-        "Fairbank",
-        "Wood",
-        "Miller",
-        "Clayton",
-        "Russell",
-        "Atkinson",
-        "Whitehead",
-        "Greene",
-        "Cannon",
-        "Pope",
-    ]
-
-    return "{} {}".format(random.choice(first_names), random.choice(last_names))
-
-
-def data_fake_identity_factory() -> dict:
-    fake_identity = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "identity",
-        "_rev": 1,
-        "name": _fake_name_factory(),
-    }
-
-    # TODO: Verify the schema
-
-    return fake_identity
-
-
-def data_fake_patient_profile_factory() -> dict:
-
-    name = _fake_name_factory()
-    mrn = "%s" % get_random_integer(10000, 1000000)
-
-    fake_profile = {
-        "_type": "patientProfile",
-        "_rev": 1,
-        "name": name,
-        "MRN": mrn,
-        "clinicCode": get_random_item(ClinicCode).value,
-        "birthdate": str(
-            datetime(
-                get_random_integer(1930, 2000),
-                get_random_integer(1, 13),
-                get_random_integer(1, 28),
-            )
-        ),
-        "sex": get_random_item(PatientSex).value,
-        "gender": get_random_item(PatientGender).value,
-        "pronoun": get_random_item(PatientPronoun).value,
-        "race": get_random_flags(PatientRace),
-        "primaryOncologyProvider": data_fake_identity_factory(),
-        "primaryCareManager": data_fake_identity_factory(),
-        "discussionFlag": get_random_flags(DiscussionFlag),
-        "followupSchedule": get_random_item(FollowupSchedule).value,
-        "depressionTreatmentStatus": get_random_item(DepressionTreatmentStatus).value,
-    }
-
-    # TODO: Verify the schema
-
-    return fake_profile
-
-
-def data_fake_clinical_history_factory() -> dict:
-    fake_clinical_history = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "clinicalHistory",
-        "_rev": 1,
-        "primaryCancerDiagnosis": "primaryCancerDiagnosis",
-        "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
-        "currentTreatmentRegimen": {
-            "Surgery": True,
-            "Chemotherapy": True,
-            "Radiation": True,
-            "Stem Cell Transplant": True,
-            "Immunotherapy": True,
-            "CAR-T": True,
-            "Endocrine": True,
-            "Surveillance": True,
-        },
-        "currentTreatmentRegimenOther": "currentTreatmentRegimenOther",
-        "currentTreatmentRegimenNotes": "currentTreatmentRegimenNotes",
-        "psychDiagnosis": "psychDiagnosis",
-        "pastPsychHistory": "pastPsychHistory",
-        "pastSubstanceUse": "pastSubstanceUse",
-        "psychSocialBackground": "psychSocialBackground",
-    }
-
-    # TODO: Verify the schema
-
-    return fake_clinical_history
-
-
-def data_fake_values_inventory_factory() -> dict:
-    fake_values_inventory = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "valuesInventory",
-        "_rev": 1,
-        "assigned": True,
-        "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
-        "values": [
-            {
-                "id": "id",
-                "name": "name",
-                "dateCreated": "",
-                "dateEdited": "",
-                "lifeareaId": "",
-                "activities": [
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                ],
-            }
-        ],
-    }
-
-    # TODO: Verify the schema
-
-    return fake_values_inventory
-
-
-def data_fake_safety_plan_factory() -> dict:
-    fake_safety_plan = {
-        "_type": "safetyPlan",
-        "_rev": 1,
-        "assigned": True,
-        "assignedDate": "some date",
-        "reasonsForLiving": "To stare at Mt. Rainier.",
-        "supporters": [
-            {
-                "contactType": "Person",
-                "name": "Name",
-                "address": "Address",
-                "phoneNumber": "Number",
-            }
-        ],
-    }
-
-    # TODO: Verify the schema
-
-    return fake_safety_plan
-
-
-def data_fake_sessions_factory() -> List[dict]:
-    session_count = get_random_integer(1, 10)
-    random_referrals = get_random_states(Referral, ReferralStatus)
-    referrals = []
-    for referral in random_referrals:
-        if random_referrals[referral] != "Not Referred":
-            referrals.append(
-                {"referralType": referral, "referralStatus": random_referrals[referral]}
-            )
-
-    fake_sessions = [
+    fake_activities = [
         {
-            "_session_id": "Initial assessment" if idx == 0 else "session-%d" % idx,
-            "_type": "session",
+            "_activity_id": "%s" % idx,
+            "_type": "activity",
             "_rev": 1,
-            "date": str(
-                datetime.now()
-                - timedelta(
-                    days=get_random_integer(-2, 2)
-                    + (session_count - idx) * get_random_integer(13, 18)
+            "name": shortLorem.sentence(),
+            "value": shortLorem.sentence(),
+            "lifeareaId": shortLorem.sentence(),
+            "startDate": str(
+                datetime(
+                    get_random_integer(1930, 2000),
+                    get_random_integer(1, 13),
+                    get_random_integer(1, 28),
                 )
             ),
-            "sessionType": get_random_item(SessionType).value,
-            "billableMinutes": int(get_random_item([30, 45, 60, 80])),
-            "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
-            "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
-            "behavioralStrategyChecklist": get_random_flags(
-                BehavioralStrategyChecklist
-            ),
-            "behavioralStrategyOther": shortLorem.sentence()
-            if get_random_boolean()
-            else "",
-            "behavioralActivationChecklist": get_random_flags(
-                BehavioralActivationChecklist
-            ),
-            "referrals": referrals,
-            "otherRecommendations": shortLorem.sentence(),
-            "sessionNote": lorem.paragraph(),
+            "timeOfDay": get_random_integer(1, 25),
+            "hasReminder": get_random_boolean(),
+            "reminderTimeOfDay": get_random_integer(1, 25),
+            "hasRepetition": get_random_boolean(),
+            "repeatDayFlags": "",  # NOTE: Check this property with Jina.
+            "isActive": get_random_boolean(),
+            "isDeleted": get_random_boolean(),
         }
-        for idx in range(session_count)
+        for idx in range(get_random_integer(1, 3))
     ]
-    # TODO: Verify the schema
 
-    return fake_sessions
+    # Verify the schema
+    result = activities_schema.evaluate(JSON(fake_activities))
+    assert result.output("basic")["valid"] == True
 
-
-def data_fake_session_factory() -> dict:
-    idx = get_random_integer(1, 10)
-    random_referrals = get_random_states(Referral, ReferralStatus)
-    referrals = []
-    for referral in random_referrals:
-        if random_referrals[referral] != "Not Referred":
-            referrals.append(
-                {"referralType": referral, "referralStatus": random_referrals[referral]}
-            )
-
-    fake_session = {
-        "_session_id": "session-%d" % idx,
-        "_type": "session",
-        "_rev": 1,
-        "date": str(
-            datetime.now()
-            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
-        ),
-        "sessionType": get_random_item(SessionType).value,
-        "billableMinutes": int(get_random_item([30, 45, 60, 80])),
-        "medicationChange": shortLorem.sentence() if get_random_boolean() else "",
-        "currentMedications": shortLorem.sentence() if get_random_boolean() else "",
-        "behavioralStrategyChecklist": get_random_flags(BehavioralStrategyChecklist),
-        "behavioralStrategyOther": shortLorem.sentence()
-        if get_random_boolean()
-        else "",
-        "behavioralActivationChecklist": get_random_flags(
-            BehavioralActivationChecklist
-        ),
-        "referrals": referrals,
-        "otherRecommendations": shortLorem.sentence(),
-        "sessionNote": lorem.paragraph(),
-    }
-
-    # TODO: Verify the schema
-
-    return fake_session
+    return fake_activities
 
 
-def data_fake_case_reviews_factory() -> List[dict]:
-    case_review_count = get_random_integer(1, 10)
-
-    fake_case_reviews = [
+def data_fake_scheduled_activities_factory() -> List[dict]:
+    activities = data_fake_activities_factory()
+    fake_scheduled_activities = [
         {
-            "_review_id": "Initial review" if idx == 0 else "review-%d" % idx,
-            "_type": "caseReview",
+            "_schedule_id": "Scheduled-Activity-{}".format(activity["_activity_id"]),
+            "_type": "scheduledActivity",
             "_rev": 1,
-            "date": str(
-                datetime.now()
-                - timedelta(
-                    days=get_random_integer(-2, 2)
-                    + (case_review_count - idx) * get_random_integer(13, 18)
+            "dueDate": str(
+                datetime(
+                    get_random_integer(1930, 2000),
+                    get_random_integer(1, 13),
+                    get_random_integer(1, 28),
                 )
             ),
-            "consultingPsychiatrist": data_fake_identity_factory(),
-            "medicationChange": shortLorem.sentence(),
-            "behavioralStrategyChange": shortLorem.sentence(),
-            "referralsChange": shortLorem.sentence(),
-            "otherRecommendations": shortLorem.sentence(),
-            "reviewNote": lorem.paragraph(),
+            "dueType": get_random_item(DueType).value,
+            "activityId": activity["_activity_id"],
+            "activityName": activity["name"],
+            "reminder": str(
+                datetime(
+                    get_random_integer(1930, 2000),
+                    get_random_integer(1, 13),
+                    get_random_integer(1, 28),
+                )
+            ),
+            "completed": get_random_boolean(),
         }
-        for idx in range(case_review_count)
+        for activity in activities
     ]
-    # TODO: Verify the schema
 
-    return fake_case_reviews
+    # Verify the schema
+    result = scheduled_activities_schema.evaluate(JSON(fake_scheduled_activities))
+    assert result.output("basic")["valid"] == True
 
-
-def data_fake_case_review_factory() -> dict:
-    idx = get_random_integer(1, 10)
-    fake_case_review = {
-        "_review_id": "review-%d" % idx,
-        "_type": "caseReview",
-        "_rev": 1,
-        "date": str(
-            datetime.now()
-            - timedelta(days=get_random_integer(-2, 2) + get_random_integer(13, 18))
-        ),
-        "consultingPsychiatrist": data_fake_identity_factory(),
-        "medicationChange": shortLorem.sentence(),
-        "behavioralStrategyChange": shortLorem.sentence(),
-        "referralsChange": shortLorem.sentence(),
-        "otherRecommendations": shortLorem.sentence(),
-        "reviewNote": lorem.paragraph(),
-    }
-
-    # TODO: Verify the schema
-
-    return fake_case_review
+    return fake_scheduled_activities
 
 
-def data_fake_assessments_factory() -> List[dict]:
-    return get_fake_assessments()
+def data_fake_activity_logs_factory() -> List[dict]:
+    scheduled_activities = data_fake_scheduled_activities_factory()
+    fake_activity_logs = [
+        {
+            "_log_id": sa["_schedule_id"] + "-logged",
+            "_type": "activityLog",
+            "_rev": 1,
+            "recordedDate": sa["dueDate"],
+            "comment": shortLorem.paragraph(),
+            "scheduleId": sa["_schedule_id"],
+            "activityName": sa["activityName"],
+            "completed": get_random_boolean(),
+        }
+        for sa in scheduled_activities
+    ]
+    # Verify the schema
+    result = activity_logs_schema.evaluate(JSON(fake_activity_logs))
+    assert result.output("basic")["valid"] == True
+
+    return fake_activity_logs
+
+
+def data_fake_mood_logs_factory() -> List[dict]:
+    fake_mood_logs = [
+        {
+            "_log_id": "mood_%d_logged" % idx,
+            "_type": "moodLog",
+            "_rev": 1,
+            "recordedDate": str(
+                datetime.today()
+                + timedelta(
+                    days=-get_random_integer(0, 40), hours=get_random_integer(0, 24)
+                )
+            ),
+            "comment": shortLorem.paragraph(),
+            "mood": get_random_integer(1, 11),
+        }
+        for idx in range(0, get_random_integer(1, 5))
+    ]
+    # Verify the schema
+    result = mood_logs_schema.evaluate(JSON(fake_mood_logs))
+    assert result.output("basic")["valid"] == True
+
+    return fake_mood_logs
 
 
 def data_fake_patient_factory() -> dict:
@@ -547,18 +737,30 @@ def data_fake_patient_factory() -> dict:
         # "_id": str(bson.objectid.ObjectId()),
         "_type": "patient",
         "identity": data_fake_identity_factory(),
+        # Patient info
         "patientProfile": data_fake_patient_profile_factory(),
         "clinicalHistory": data_fake_clinical_history_factory(),  # NOTE: In typescipt, all the keys in clinicalHistory are optional. Chat with James about this.
+        # Values inventory and safety plan
         "valuesInventory": data_fake_values_inventory_factory(),
         "safetyPlan": data_fake_safety_plan_factory(),
+        # Sessions
         "sessions": data_fake_sessions_factory(),
         "caseReviews": data_fake_case_reviews_factory(),
+        # Assessments
         "assessments": data_fake_assessments_factory(),
+        "scheduledAssessments": data_fake_scheduled_assessments_factory(),
         "assessmentLogs": data_fake_assessment_logs_factory(),
+        # Activities
+        "activities": data_fake_activities_factory(),
+        "scheduledActivities": data_fake_scheduled_activities_factory(),
+        "activityLogs": data_fake_activity_logs_factory(),
+        # Mood logs
+        "moodLogs": data_fake_mood_logs_factory(),
     }
 
-    # TODO: Verify the schema
-
+    # Verify the schema
+    result = patient_schema.evaluate(JSON(fake_patient))
+    assert result.output("basic")["valid"] == True
     return fake_patient
 
 
