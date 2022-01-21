@@ -3,8 +3,9 @@ import aws_infrastructure.tasks.ssh
 import scope.config
 import scope.testing.testing_config
 
-DEVELOPMENT_CONFIGS = {
-    "development_local": scope.testing.testing_config.TestingConfig(
+DEVELOPMENT_CONFIGS = [
+    scope.testing.testing_config.TestingConfig(
+        name="development_local",
         instance_ssh_config=aws_infrastructure.tasks.ssh.SSHConfig.load(
             ssh_config_path="../secrets/configuration/instance_ssh.yaml",
         ),
@@ -18,6 +19,6 @@ DEVELOPMENT_CONFIGS = {
             config_path="../secrets/configuration/dev_local_flask.yaml",
         ),
     )
-}
+]
 
 ALL_CONFIGS = DEVELOPMENT_CONFIGS
