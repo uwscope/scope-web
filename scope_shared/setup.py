@@ -17,5 +17,7 @@ setuptools.setup(
         "requests",
         "ruamel.yaml",
         "jschon",
+        "lorem",  # TODO: To remove
+        "numpy",  # TODO: To remove
     ],
 )
