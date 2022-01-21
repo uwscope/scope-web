@@ -172,6 +172,7 @@ class DayOfWeek(Enum):
     Friday = "Friday"
     Saturday = "Saturday"
     Sunday = "Sunday"
+    
 
 class DueType(Enum):
     Exact = "Exact"

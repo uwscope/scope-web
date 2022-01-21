@@ -38,3 +38,4 @@ scheduled_activity_schema = JSONSchema.loadf(schema_dir / "scheduled-activity.js
 activity_logs_schema = JSONSchema.loadf(schema_dir / "activity-logs.json")
 activity_log_schema = JSONSchema.loadf(schema_dir / "activity-log.json")
 mood_logs_schema = JSONSchema.loadf(schema_dir / "mood-logs.json")
+

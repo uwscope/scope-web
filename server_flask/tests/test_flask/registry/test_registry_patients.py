@@ -139,7 +139,7 @@ def test_flask_get_patient(
     )
     assert response.ok
     response_json = response.json()
-
+  
     # Ensure body of response is our fake patient
     assert response_json.get("_type") == data_fake_patient.get("_type")
     assert response_json.get("identity") == data_fake_patient.get("identity")

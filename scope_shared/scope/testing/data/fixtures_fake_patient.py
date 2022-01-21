@@ -67,6 +67,165 @@ def get_random_states(enum, options):
     return flags
 
 
+def get_fake_assessments():
+    return [
+        {
+            "assessmentId": "mood"
+            if a.value == "Mood Logging"
+            else "medication"
+            if a.value == "Medication Tracking"
+            else a.value.lower(),
+            "assessmentName": a.value,
+            "frequency": get_random_item(AssessmentFrequency).value,
+            "dayOfWeek": get_random_item(DayOfWeek).value,
+        }
+        for a in AssessmentType
+    ]
+
+
+def get_fake_scheduled_assessment(assessment):
+
+    if assessment["assessmentId"] == "mood":
+        return []
+
+    freq = 0
+    if assessment["frequency"] == "Daily":
+        freq = 1
+    elif assessment["frequency"] == "Once a week":
+        freq = 7
+    elif assessment["frequency"] == "Every 2 weeks":
+        freq = 14
+    elif assessment["frequency"] == "Monthly":
+        freq = 28
+
+    dow = 0
+    dowValues = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+
+    for idx in range(len(dowValues)):
+        if assessment["dayOfWeek"] == dowValues[idx]:
+            dow = idx
+            break
+
+    dueDate = datetime.today() + timedelta(days=7 - date.today().weekday() + dow)
+
+    # 10 assessments in the past and 10 in the future
+    scheduled = []
+    for idx in list(range(-10, 10)):
+        scheduled.append(
+            {
+                "scheduleId": "Scheduled {}".format(idx),
+                "assessmentId": assessment["assessmentId"],
+                "assessmentName": assessment["assessmentName"],
+                "dueDate": dueDate + timedelta(days=freq * idx),
+            }
+        )
+
+    return scheduled
+
+
+def get_fake_assessment_data_point(assessmentType):
+    points = dict()
+    if assessmentType == "PHQ-9":
+        for q in phq9Assessment.get("questions", []):
+            points[q["id"]] = get_random_integer(0, 4)
+        return points
+    elif assessmentType == "GAD-7":
+        for q in gad7Assessment.get("questions", []):
+            points[q["id"]] = get_random_integer(0, 4)
+        return points
+    elif assessmentType == "Mood Logging":
+        return {"Mood": get_random_integer(1, 11)}
+    elif assessmentType == "Medication Tracking":
+        return {"Adherence": get_random_integer(1, 6)}
+    else:
+        return {}
+
+
+def get_fake_assessment_data_points(assessment_type):
+    if assessment_type == "Mood Logging":
+        return [
+            {
+                "assessmentDataId": "%s-%d" % (assessment_type, idx),
+                "assessmentType": assessment_type,
+                "date": datetime.now()
+                - timedelta(
+                    hours=get_random_integer(4, 48) + idx * get_random_integer(0, 120)
+                ),
+                "pointValues": get_fake_assessment_data_point(assessment_type),
+                "comment": shortLorem.paragraph(),
+                "patientSubmitted": get_random_boolean(),
+            }
+            for idx in range(get_random_integer(5, 10))
+        ]
+    else:
+        data = [
+            {
+                "assessmentDataId": "%s-%d" % (assessment_type, idx),
+                "assessmentType": assessment_type,
+                "date": datetime.now()
+                + timedelta(days=14)
+                - timedelta(
+                    days=get_random_integer(0, 3) + idx * get_random_integer(5, 8)
+                ),
+                "pointValues": get_fake_assessment_data_point(assessment_type),
+                "comment": shortLorem.paragraph(),
+                "patientSubmitted": get_random_boolean(),
+            }
+            for idx in range(get_random_integer(5, 10))
+        ]
+
+        for d in data:
+            if d["date"] > datetime.now():
+                d["pointValues"] = None
+                d["comment"] = None
+                d["patientSubmitted"] = None
+
+        return data
+
+
+def data_fake_assessment_logs_factory() -> List[dict]:
+
+    assessments = get_fake_assessments()
+    scheduled_assessments_list = [get_fake_scheduled_assessment(a) for a in assessments]
+    scheduled_assessments = [
+        a for scheduled_list in scheduled_assessments_list for a in scheduled_list
+    ]
+
+    assessment_logs = [
+        {
+            "_log_id": a["scheduleId"] + "_logged",
+            "_type": "assessmentLog",
+            "_rev": 1,
+            "recordedDate": str(
+                a["dueDate"] + timedelta(days=get_random_integer(-1, 2))
+            ),
+            "comment": shortLorem.paragraph(),
+            "scheduleId": a["scheduleId"],
+            "assessmentId": a["assessmentId"],
+            "assessmentName": a["assessmentName"],
+            "completed": get_random_boolean(),
+            "patientSubmitted": get_random_boolean(),
+            "submittedBy": data_fake_identity_factory(),
+            # "submittedBy": "Auto generated",
+            "pointValues": get_fake_assessment_data_point(a["assessmentName"]),
+            # "totalScore": None,
+            "totalScore": get_random_integer(0, 100),
+        }
+        for a in scheduled_assessments
+        if a["dueDate"] < datetime.today()
+    ]
+
+    return assessment_logs
+
+
 def _fake_name_factory() -> str:
     first_names = [
         "Paisley",
@@ -350,6 +509,7 @@ def data_fake_session_factory() -> dict:
     # Verify the schema
     result = session_schema.evaluate(JSON(fake_session))
     assert result.output("basic")["valid"] == True
+
     return fake_session
 
 
@@ -377,6 +537,7 @@ def data_fake_case_reviews_factory() -> List[dict]:
         }
         for idx in range(case_review_count)
     ]
+
     # Verify the schema
     result = case_reviews_schema.evaluate(JSON(fake_case_reviews))
     assert result.output("basic")["valid"] == True

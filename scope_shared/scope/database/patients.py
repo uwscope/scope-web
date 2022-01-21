@@ -13,6 +13,7 @@ import pymongo.results
 PATIENTS_COLLECTION_NAME = "patients"
 
 
+# TODO: relying on uniqueness of patient name seems highly problematic
 def collection_for_patient(*, patient_name: str):
     """
     Obtain the name of the collection for a specified patient.
@@ -118,6 +119,7 @@ def _build_patient_json(
     patient["sessions"] = _build_patient_array_documents(
         collection=collection, type="session", document_id_key="_session_id"
     )
+    
     patient["caseReviews"] = _build_patient_array_documents(
         collection=collection, type="caseReview", document_id_key="_review_id"
     )
@@ -161,6 +163,7 @@ def create_patient(*, database: pymongo.database.Database, patient: dict) -> str
     """
 
     identity = patient.get("identity")
+
     # Patient info
     patient_profile = patient.get("patientProfile")
     clinical_history = patient.get("clinicalHistory")
