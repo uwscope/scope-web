@@ -3,7 +3,7 @@ import pymongo.database
 import pytest
 
 import scope.config
-import scope.database.client
+import scope.documentdb.client
 import scope.testing
 
 
@@ -25,7 +25,7 @@ def _fixture_database_client(
         #
         # Create the client
         #
-        database_client = scope.database.client.documentdb_client_database(
+        database_client = scope.documentdb.client.documentdb_client_database(
             # Connect via existing SSH port forward
             host="127.0.0.1",
             port=documentdb_port_forward.local_port,
