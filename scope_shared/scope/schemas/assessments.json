@@ -1,0 +1,11 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/assessments",
+	"title": "IAssessment[]",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/assessment"
+	},
+	"additionalProperties": false,
+	"required": []
+}

@@ -5,9 +5,11 @@
 	"description": "IActivity Type",
 	"type": "object",
 	"properties": {
-		"activityId": {
+		"_activity_id": {
 			"type": "string"
 		},
+		"_rev": { "_type": "number" },
+		"_type": { "const": "activity" },
 		"name": {
 			"type": "string"
 		},
@@ -33,7 +35,7 @@
 			"type": "boolean"
 		},
 		"repeatDayFlags": {
-			"$ref": ""
+			"type": "string"
 		},
 		"isActive": {
 			"type": "boolean"
@@ -44,7 +46,9 @@
 	},
 	"additionalProperties": false,
 	"required": [
-		"activityId",
+		"_activity_id",
+		"_type",
+		"_rev",
 		"name",
 		"value",
 		"lifeareaId",

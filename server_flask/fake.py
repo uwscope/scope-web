@@ -28,7 +28,6 @@ from enums import (
     TreatmentPlan,
 )
 
-
 with open("./app_config/assessments/gad7.json") as config_file:
     gad7Assessment = json.load(config_file)
 with open("./app_config/assessments/mood.json") as config_file:

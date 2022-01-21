@@ -5,9 +5,11 @@
 	"description": "IActivityLog Type",
 	"type": "object",
 	"properties": {
-		"logId": {
+		"_log_id": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
+		"_rev": { "_type": "number" },
+		"_type": { "const": "activityLog" },
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
 		},
@@ -37,5 +39,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["recordedDate", "scheduleId", "activityName"]
+	"required": ["_log_id", "_type", "_rev", "recordedDate", "scheduleId", "activityName"]
 }
