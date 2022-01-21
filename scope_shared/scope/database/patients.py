@@ -13,6 +13,7 @@ import pymongo.results
 PATIENTS_COLLECTION_NAME = "patients"
 
 
+# TODO: relying on uniqueness of patient name seems highly problematic
 def collection_for_patient(*, patient_name: str):
     """
     Obtain the name of the collection for a specified patient.
