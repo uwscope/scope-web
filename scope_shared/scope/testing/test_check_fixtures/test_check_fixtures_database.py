@@ -1,6 +1,4 @@
 import aws_infrastructure.tasks.ssh
-import pymongo
-import pymongo.database
 
 import scope.config
 import scope.testing.fixtures_database

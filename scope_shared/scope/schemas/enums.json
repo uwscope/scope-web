@@ -34,12 +34,12 @@
 		"sex": {
 			"type": "string",
 			"description": "PatientSex Type",
-			"enum": ["Male", "Female"]
+			"enum": ["Male", "Female", "Intersex"]
 		},
 		"gender": {
 			"type": "string",
 			"description": "PatientGender Type",
-			"enum": ["Male", "Female"]
+			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
 		},
 		"pronoun": {
 			"type": "string",
@@ -47,9 +47,32 @@
 			"enum": ["He/Him", "She/Her", "They/Them"]
 		},
 		"race": {
-			"type": "string",
-			"description": "PatientRaceEthnicity Type",
-			"enum": ["White", "Black"]
+			"type": "object",
+			"description": "PatientRaceFlags Type",
+			"properties": {
+				"American Indian or Alaska Native": {
+					"type": "boolean"
+				},
+				"Asian or Asian American": {
+					"type": "boolean"
+				},
+				"Black or African American": { "type": "boolean" },
+				"Native Hawaiian or Other Pacific Islander": {
+					"type": "boolean"
+				},
+				"White": {
+					"type": "boolean"
+				},
+				"Unknown": { "type": "boolean" }
+			},
+			"required": [
+				"American Indian or Alaska Native",
+				"Asian or Asian American",
+				"Black or African American",
+				"Native Hawaiian or Other Pacific Islander",
+				"White",
+				"Unknown"
+			]
 		},
 		"discussionFlags": {
 			"type": "object",
@@ -73,7 +96,7 @@
 		"depressionTreatmentStatus": {
 			"type": "string",
 			"description": "DepressionTreatmentStatus Type",
-			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending"]
+			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending", "Other"]
 		},
 		"cancerTreatmentRegimenFlags": {
 			"type": "object",
@@ -203,7 +226,7 @@
 			"enum": [
 				"Psychiatry",
 				"Psychology",
-				"Patient Navigation",
+				"Pt Navigation",
 				"Integrative Medicine",
 				"Spiritual Care",
 				"Palliative Care",

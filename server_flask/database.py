@@ -1,6 +1,6 @@
 import flask
 
-import scope.database.client
+import scope.documentdb.client
 
 
 class Database:
@@ -15,7 +15,7 @@ class Database:
     """
     @staticmethod
     def init_app(*, app: flask.Flask,):
-        database = scope.database.client.documentdb_client_database(
+        database = scope.documentdb.client.documentdb_client_database(
             # Connect to the provided host
             host=app.config["DOCUMENTDB_HOST"],
             port=app.config["DOCUMENTDB_PORT"],

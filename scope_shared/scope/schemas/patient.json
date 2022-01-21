@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"_id": { "type": "string" },
-		"type": { "const": "patient" },
+		"_type": { "const": "patient" },
 		"identity": {
 			"type": "object",
 			"description": "IIdentity schema",
@@ -33,16 +33,10 @@
 			"$ref": "/schemas/safety-plan"
 		},
 		"sessions": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/session"
-			}
+			"$ref": "/schemas/sessions"
 		},
 		"caseReviews": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/case-review"
-			}
+			"$ref": "/schemas/case-reviews"
 		},
 		"assessments": {
 			"type": "array",
@@ -57,10 +51,7 @@
 			}
 		},
 		"assessmentLogs": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/assessment-log"
-			}
+			"$ref": "/schemas/assessment-logs"
 		},
 		"activities": {
 			"type": "array",
@@ -88,5 +79,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["type", "identity", "patientProfile"]
+	"required": ["_type", "identity", "patientProfile"]
 }

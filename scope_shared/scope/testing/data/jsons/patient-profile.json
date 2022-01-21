@@ -1,5 +1,5 @@
 {
-	"type": "patientProfile",
+	"_type": "patientProfile",
 	"_rev": 1,
 	"name": "Paul Atreides",
 	"MRN": "MRN"

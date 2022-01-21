@@ -8,12 +8,12 @@
 		"_id": {
 			"type": "string"
 		},
-		"type": { "const": "identity" },
+		"_type": { "const": "identity" },
 		"_rev": { "type": "number" },
 		"name": {
 			"type": "string"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["type", "name"]
+	"required": ["_type", "name"]
 }

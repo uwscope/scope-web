@@ -8,7 +8,7 @@
 		"_id": {
 			"type": "string"
 		},
-		"type": { "const": "safetyPlan" },
+		"_type": { "const": "safetyPlan" },
 		"_rev": { "type": "number" },
 		"assigned": {
 			"type": "boolean"
@@ -56,5 +56,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["type", "_rev", "assigned", "assignedDate"]
+	"required": ["_type", "_rev", "assigned", "assignedDate"]
 }

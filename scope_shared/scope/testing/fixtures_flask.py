@@ -36,7 +36,7 @@ def fixture_flask_session_unauthenticated_factory(
     """
     Fixture for flask_session_unauthenticated_factory.
 
-    Provides a factory for obtaining Flask sessions that are not authenticated.
+    Provides a factory for obtaining a Flask session that is not authenticated.
     """
 
     def factory() -> requests.Session:

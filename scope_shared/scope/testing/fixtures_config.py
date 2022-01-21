@@ -20,8 +20,8 @@ def pytest_generate_tests(metafunc: _pytest.python.Metafunc):
 
         metafunc.parametrize(
             argnames="_testing_config_generator",
-            argvalues=testing_configs.values(),
-            ids=testing_configs.keys(),
+            argvalues=testing_configs,
+            ids=[config.name for config in testing_configs],
             scope="session",
         )
 
@@ -93,7 +93,7 @@ def fixture_flask_config(
     """
 
     if testing_config.flask_config is None:
-        pytest.skip("No flask_config in testing_config")
+        pytest.skip("No flask_config in testing_config \"{}\"".format(testing_config.name))
 
     return testing_config.flask_config
 

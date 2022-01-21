@@ -4,7 +4,7 @@ import contextlib
 import pymongo.database
 
 import scope.config
-import scope.database.client
+import scope.documentdb.client
 import scope.database.patients
 
 
@@ -22,7 +22,7 @@ def initialize(
 
     with contextlib.ExitStack() as context_manager:
         # Connect as cluster admin for database initialization
-        documentdb_client_admin = scope.database.client.documentdb_client_admin(
+        documentdb_client_admin = scope.documentdb.client.documentdb_client_admin(
             context_manager=context_manager,
             instance_ssh_config=instance_ssh_config,
             host=documentdb_config.endpoint,
@@ -39,7 +39,7 @@ def initialize(
         )
 
         # Connect as database user for continued initialization
-        database = scope.database.client.documentdb_client_database(
+        database = scope.documentdb.client.documentdb_client_database(
             context_manager=context_manager,
             instance_ssh_config=instance_ssh_config,
             host=documentdb_config.endpoint,
@@ -65,7 +65,7 @@ def reset(
     """
 
     with contextlib.ExitStack() as context_manager:
-        documentdb_client_admin = scope.database.client.documentdb_client_admin(
+        documentdb_client_admin = scope.documentdb.client.documentdb_client_admin(
             context_manager=context_manager,
             instance_ssh_config=instance_ssh_config,
             host=documentdb_config.endpoint,
@@ -74,9 +74,7 @@ def reset(
             admin_password=documentdb_config.admin_password,
         )
 
-        documentdb_client_admin.drop_database(
-            name_or_database=database_config.name
-        )
+        documentdb_client_admin.drop_database(name_or_database=database_config.name)
 
         initialize(
             instance_ssh_config=instance_ssh_config,
@@ -155,13 +153,13 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     # Ensure a sentinel document
     result = patients_collection.find_one(
         filter={
-            "type": "sentinel",
+            "_type": "sentinel",
         }
     )
     if result is None:
         patients_collection.insert_one(
             {
                 "_id": bson.objectid.ObjectId(),
-                "type": "sentinel",
+                "_type": "sentinel",
             }
         )

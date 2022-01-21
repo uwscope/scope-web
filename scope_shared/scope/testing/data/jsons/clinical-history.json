@@ -1,5 +1,5 @@
 {
-	"type": "clinicalHistory",
+	"_type": "clinicalHistory",
 	"_rev": 1,
 	"primaryCancerDiagnosis": "primaryCancerDiagnosis",
 	"dateOfCancerDiagnosis": "dateOfCancerDiagnosis",
