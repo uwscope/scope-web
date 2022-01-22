@@ -330,6 +330,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                             data={assessmentLogs.slice().sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))}
                             maxValue={maxValue}
                             useTime={useTime}
+                            scaleOrder={questions.map((q) => q.id)}
                         />
                     </Grid>
                 )}

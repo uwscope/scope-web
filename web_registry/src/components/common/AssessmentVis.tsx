@@ -105,6 +105,7 @@ export interface IAssessmentChartProps {
     data: Array<IVisDataPoint>;
     maxValue: number;
     useTime?: boolean;
+    scaleOrder?: string[];
 }
 
 type Point = LineMarkSeriesPoint;
@@ -125,7 +126,7 @@ export const AssessmentVis = withTheme(
     observer((props: ThemedStyledProps<IAssessmentChartProps, any>) => {
         const ref = React.useRef(null);
         const { width } = useResize(ref);
-        const { data, maxValue, useTime } = props;
+        const { data, maxValue, useTime, scaleOrder } = props;
 
         const state = useLocalObservable<IAssessmentChartState>(() => ({
             hoveredPoint: undefined,
@@ -142,7 +143,7 @@ export const AssessmentVis = withTheme(
             500
         );
 
-        const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
+        const dataKeys = scaleOrder || (!!data && data.length > 0 ? Object.keys(data[0].pointValues) : []);
 
         const toggleExpand = action(() => {
             state.expanded = !state.expanded;
