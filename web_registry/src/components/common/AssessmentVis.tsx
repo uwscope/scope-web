@@ -1,4 +1,7 @@
-import { FormControlLabel, InputLabel, Switch } from '@mui/material';
+import ReadMoreIcon from '@mui/icons-material/ReadMore';
+import { AccordionDetails, FormControlLabel, Switch, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import withStyles from '@mui/styles/withStyles';
 import withTheme from '@mui/styles/withTheme';
 import { addDays, format } from 'date-fns';
@@ -28,7 +31,7 @@ import styled, { ThemedStyledProps } from 'styled-components';
 const Container = withTheme(
     styled.div({
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
     })
 );
 
@@ -38,22 +41,37 @@ const ChartContainer = withTheme(
     })
 );
 
-const LegendContainer = withTheme(
-    styled.div((props) => ({
-        width: 150,
-        margin: props.theme.spacing(1, 2),
-        fontSize: '0.95em',
-    }))
-);
+const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    '&:not(:last-child)': {
+        borderBottom: 0,
+    },
+    '&:before': {
+        display: 'none',
+    },
+}));
 
-const LegendTitle = styled(InputLabel)({
-    fontSize: '1em',
-    textTransform: 'uppercase',
-});
+const AccordionSummary = styled((props) => (
+    <MuiAccordionSummary expandIcon={<ReadMoreIcon sx={{ fontSize: '0.9rem' }} />} {...props} />
+))(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : 'rgba(0, 0, 0, .03)',
+    minHeight: 'auto',
+    flexDirection: 'row-reverse',
+    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+        transform: 'rotate(90deg)',
+    },
+    '& .MuiAccordionSummary-content': {
+        marginLeft: theme.spacing(1),
+    },
+}));
 
 const LegendArea = withTheme(
     styled.div((props) => ({
         margin: props.theme.spacing(1, 2),
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        flexWrap: 'wrap',
     }))
 );
 
@@ -228,33 +246,33 @@ export const AssessmentVis = withTheme(
                         </XYPlot>
                     </ChartContainer>
                     {dataKeys.length > 1 && (
-                        <LegendContainer>
-                            <FormControlLabel
-                                control={<Switch color="primary" checked={state.expanded} onChange={toggleExpand} />}
-                                label="Expand"
-                            />
-                            {state.expanded && (
-                                <LegendArea>
-                                    <LegendTitle>Legend</LegendTitle>
-                                    {state.visibility.map(({ title, color, visible }) => {
-                                        const ColoredSwitch = getColoredSwitch(color);
-                                        return (
-                                            <FormControlLabel
-                                                key={title}
-                                                control={
-                                                    <ColoredSwitch
-                                                        size="small"
-                                                        checked={visible}
-                                                        onChange={() => toggleVisibility(title)}
-                                                    />
-                                                }
-                                                label={title}
-                                            />
-                                        );
-                                    })}
-                                </LegendArea>
-                            )}
-                        </LegendContainer>
+                        <Accordion expanded={state.expanded} onChange={toggleExpand}>
+                            <AccordionSummary expandIcon={<ReadMoreIcon />}>
+                                <Typography>{`${state.expanded ? 'Hide' : 'View'} individual scales`}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {state.expanded && (
+                                    <LegendArea>
+                                        {state.visibility.map(({ title, color, visible }) => {
+                                            const ColoredSwitch = getColoredSwitch(color);
+                                            return (
+                                                <FormControlLabel
+                                                    key={title}
+                                                    control={
+                                                        <ColoredSwitch
+                                                            size="small"
+                                                            checked={visible}
+                                                            onChange={() => toggleVisibility(title)}
+                                                        />
+                                                    }
+                                                    label={title}
+                                                />
+                                            );
+                                        })}
+                                    </LegendArea>
+                                )}
+                            </AccordionDetails>
+                        </Accordion>
                     )}
                 </Container>
             );
