@@ -1,10 +1,4 @@
-import {
-    Button,
-    CircularProgress,
-    CssBaseline,
-    Dialog,
-    Typography,
-} from '@mui/material';
+import { CssBaseline } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import withTheme from '@mui/styles/withTheme';

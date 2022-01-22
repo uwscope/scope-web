@@ -46,9 +46,8 @@ export const HeaderContent: FunctionComponent = observer(() => {
         <Grid
             container
             direction="row"
-            justifyContent="flex-start"
+            justifyContent="space-between"
             alignItems="center"
-            spacing={2}
         >
             <Grid item>
                 <Avatar alt="Scope logo" src={Logo} />
@@ -77,7 +76,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
                     <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
                 </Menu>
                 <Button color="inherit" onClick={(e) => handleClickName(e)}>
-                    {rootStore.currentUserIdentity?.name}
+                    {rootStore.authStore.currentUserIdentity?.name}
                 </Button>
             </div>
         </Grid>

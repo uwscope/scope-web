@@ -1,15 +1,11 @@
-import { action, computed, makeAutoObservable } from 'mobx';
-import { IAppConfig, IIdentity, IUser } from 'shared/types';
-import { PromiseQuery } from 'src/services/promiseQuery';
-import { useServices } from 'src/services/services';
+import { action, makeAutoObservable } from 'mobx';
+import { IAppConfig } from 'shared/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface IRootStore {
     // Stores
-    currentUserIdentity?: IIdentity;
-    userName?: string;
     patientsStore: IPatientsStore;
     authStore: IAuthStore;
 
@@ -36,40 +32,13 @@ export class RootStore implements IRootStore {
     public appTitle = 'SCOPE Registry';
     public appConfig: IAppConfig;
 
-    // Promise queries
-    private readonly loginQuery: PromiseQuery<IUser | undefined>;
-
     constructor(serverConfig: IAppConfig) {
         // As more is added to serverConfig, it will become a type and this will be split up
         this.appConfig = serverConfig;
         this.patientsStore = new PatientsStore();
         this.authStore = new AuthStore();
 
-        this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-
         makeAutoObservable(this);
-    }
-    @computed
-    public get loginState() {
-        return this.loginQuery.state;
-    }
-
-    @computed
-    public get currentUserIdentity() {
-        if (this.loginQuery.state == 'Fulfilled') {
-            return this.loginQuery.value;
-        } else {
-            return undefined;
-        }
-    }
-
-    @computed
-    public get userName() {
-        if (this.loginQuery.state == 'Fulfilled') {
-            return this.loginQuery.value?.name;
-        } else {
-            return 'Invalid';
-        }
     }
 
     @action.bound

@@ -38,7 +38,7 @@ module.exports = {
             },
             // Image resources
             {
-                test: /\.png/,
+                test: /\.(jpe?g|png|gif|svg)$/i,
                 type: 'asset/resource',
             },
         ],
