@@ -20,7 +20,7 @@ def test_compound_index_singletons(
     collection.create_index(
         [
             ("_type", pymongo.ASCENDING),
-            ("_rev", pymongo.ASCENDING),
+            ("_rev", pymongo.DESCENDING),
         ],
         unique=True,
         name="index",
@@ -70,7 +70,7 @@ def test_compound_index_singletons_and_sets(
         [
             ("_type", pymongo.ASCENDING),
             ("_set_id", pymongo.ASCENDING),
-            ("_rev", pymongo.ASCENDING),
+            ("_rev", pymongo.DESCENDING),
         ],
         unique=True,
         name="index",
@@ -130,7 +130,7 @@ def test_sparse_compound_index_failure(
     collection.create_index(
         [
             ("_type", pymongo.ASCENDING),
-            ("_rev", pymongo.ASCENDING),
+            ("_rev", pymongo.DESCENDING),
         ],
         unique=True,
         name="index_1",
@@ -142,7 +142,7 @@ def test_sparse_compound_index_failure(
     collection.create_index(
         [
             ("_type_id", pymongo.ASCENDING),
-            ("_rev", pymongo.ASCENDING),
+            ("_rev", pymongo.DESCENDING),
         ],
         sparse=True,
         unique=True,

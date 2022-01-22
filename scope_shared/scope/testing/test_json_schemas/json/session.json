@@ -1,6 +1,6 @@
 {
-	"sessionId": "1",
 	"_type": "session",
+	"_session_id": "1",
 	"_rev": 1,
 	"date": "date",
 	"sessionType": "Telehealth",
