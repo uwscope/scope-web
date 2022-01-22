@@ -1,18 +1,10 @@
+import pymongo.collection
 import pymongo.database
 import pymongo.errors
-import pytest
 from typing import Callable
 
 
-def test_singleton_query(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
-):
-    """
-    Query a singleton.
-    """
-
-    collection = temp_collection_client_factory()
-
+def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
     # Index structure based on test_index.py
     collection.create_index(
         [
@@ -40,6 +32,17 @@ def test_singleton_query(
         ]
     )
     assert len(result.inserted_ids) == 10
+
+
+def test_singleton_query(
+    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Query a singleton.
+    """
+
+    collection = temp_collection_client_factory()
+    _configure_collection(collection=collection)
 
     # Query pipeline
     query_document_type = "singleton"
@@ -74,34 +77,7 @@ def test_set_query(
     """
 
     collection = temp_collection_client_factory()
-
-    # Index structure based on test_index.py
-    collection.create_index(
-        [
-            ("_type", pymongo.ASCENDING),
-            ("_set_id", pymongo.ASCENDING),
-            ("_rev", pymongo.DESCENDING),
-        ],
-        unique=True,
-        name="index",
-    )
-
-    # Populate some documents
-    result = collection.insert_many(
-        [
-            {"_type": "singleton", "_rev": "1"},
-            {"_type": "singleton", "_rev": "2"},
-            {"_type": "other singleton", "_rev": "1"},
-            {"_type": "other singleton", "_rev": "2"},
-            {"_type": "set", "_set_id": "1", "_rev": "1"},
-            {"_type": "set", "_set_id": "1", "_rev": "2"},
-            {"_type": "set", "_set_id": "2", "_rev": "1"},
-            {"_type": "set", "_set_id": "2", "_rev": "2"},
-            {"_type": "other set", "_set_id": "1", "_rev": "1"},
-            {"_type": "other set", "_set_id": "1", "_rev": "2"},
-        ]
-    )
-    assert len(result.inserted_ids) == 10
+    _configure_collection(collection=collection)
 
     # Query pipeline for all elements of a set
     query_document_type = "set"
