@@ -7,6 +7,7 @@ import AssessmentProgress from 'src/components/PatientDetail/AssessmentProgress'
 import MedicationProgress from 'src/components/PatientDetail/MedicationProgress';
 import MoodProgress from 'src/components/PatientDetail/MoodProgress';
 import { usePatient, useStores } from 'src/stores/stores';
+import { sortAssessmentIds } from 'src/utils/assessment';
 
 export const ProgressInformation: FunctionComponent = observer(() => {
     const {
@@ -23,10 +24,16 @@ export const ProgressInformation: FunctionComponent = observer(() => {
 
     const getProgress = (assessmentId: string) => {
         const assessmentContent = validAssessments[assessmentId];
-        const assessmentMax = Math.max(...assessmentContent.options.map((o) => o.value));
-        const assessment = currentPatient?.assessments.find((a) => a.assessmentId == assessmentId);
+        const assessmentMax = Math.max(
+            ...assessmentContent.options.map((o) => o.value)
+        );
+        const assessment = currentPatient?.assessments.find(
+            (a) => a.assessmentId == assessmentId
+        );
 
-        const assessmentLogs = currentPatient?.assessmentLogs.filter((l) => l.assessmentId == assessmentId);
+        const assessmentLogs = currentPatient?.assessmentLogs.filter(
+            (l) => l.assessmentId == assessmentId
+        );
 
         if (!!assessment) {
             switch (assessmentId) {
@@ -48,7 +55,10 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                 case 'medication':
                     return (
                         <Grid item xs={12} sm={12} key={assessmentId}>
-                            <MedicationProgress assessment={assessment} assessmentLogs={assessmentLogs} />
+                            <MedicationProgress
+                                assessment={assessment}
+                                assessmentLogs={assessmentLogs}
+                            />
                         </Grid>
                     );
                 case 'mood':
@@ -67,7 +77,10 @@ export const ProgressInformation: FunctionComponent = observer(() => {
 
     return (
         <Grid container spacing={3} alignItems="stretch" direction="row">
-            {validAssessmentIds.map(getProgress)}
+            {validAssessmentIds
+                .slice()
+                .sort(sortAssessmentIds)
+                .map(getProgress)}
             <Grid item xs={12} sm={12}>
                 <ActivityProgress />
             </Grid>

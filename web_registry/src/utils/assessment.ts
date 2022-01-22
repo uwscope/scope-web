@@ -17,6 +17,10 @@ export const sortAssessment = (a: IAssessment, b: IAssessment) => {
     return getOrder(a.assessmentId) - getOrder(b.assessmentId);
 };
 
+export const sortAssessmentIds = (a: string, b: string) => {
+    return getOrder(a) - getOrder(b);
+};
+
 export const sortAssessmentContent = (a: IAssessmentContent, b: IAssessmentContent) => {
     return getOrder(a.name) - getOrder(b.name);
 };
