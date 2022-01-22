@@ -1,7 +1,7 @@
-import { indigo } from '@material-ui/core/colors';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { indigo } from '@mui/material/colors';
+import { createTheme } from '@mui/material/styles';
 
-declare module '@material-ui/core/styles/createMuiTheme' {
+declare module '@mui/material/styles' {
     interface Theme {
         customPalette: {
             subtle: React.CSSProperties['color'];
@@ -31,7 +31,39 @@ declare module '@material-ui/core/styles/createMuiTheme' {
 }
 
 export default function createAppTheme() {
-    return createMuiTheme({
+    return createTheme({
+        palette: {
+            primary: {
+                main: '#3f51b5',
+            },
+            secondary: {
+                main: '#f50057',
+            },
+        },
+        typography: {
+            body1: {
+                fontSize: '0.8rem',
+                lineHeight: 1.1,
+            },
+            body2: {
+                fontSize: '0.8rem',
+                lineHeight: 1,
+            },
+            h6: {
+                fontSize: '0.9rem',
+                lineHeight: 1.1,
+            },
+            h5: {
+                fontSize: '1rem',
+                lineHeight: 1.1,
+            },
+            h4: {
+                fontSize: '1.2rem',
+                lineHeight: 1.1,
+            },
+            fontSize: 12,
+        },
+        spacing: 4,
         customPalette: {
             subtle: '#eeeeee',
             label: '#00000088',
@@ -52,56 +84,171 @@ export default function createAppTheme() {
                 warning: '#ffbf00',
                 good: '#20ab41',
                 unknown: '#fafafa',
+                disabled: '#eeeeee',
             },
         },
         customSizes: {
             contentsMenuWidth: 300,
-            headerHeight: 64,
-            footerHeight: 80,
+            headerHeight: 48,
+            footerHeight: 48,
         },
-        overrides: {
-            MuiFormLabel: {
-                root: {
-                    color: indigo[500],
-                    textTransform: 'uppercase',
-                    fontWeight: 700,
+        components: {
+            MuiList: {
+                defaultProps: {
+                    dense: true,
                 },
             },
-            MuiInput: {
-                input: {
-                    padding: '6px 12px',
-                },
-                inputMultiline: {
-                    padding: '0 12px',
-                },
-                underline: {
-                    background: '#fafafa',
+            MuiMenuItem: {
+                defaultProps: {
+                    dense: true,
                 },
             },
-            MuiFormControl: {
-                root: {
-                    paddingBottom: '24px',
+            MuiTable: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiButton: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiButtonGroup: {
+                defaultProps: {
+                    size: 'small',
                 },
             },
             MuiCheckbox: {
-                root: {},
-            },
-            MuiInputLabel: {
-                shrink: {
-                    transform: 'translate(0)',
-                    fontSize: 14,
-                    paddingBottom: 6,
+                defaultProps: {
+                    size: 'small',
                 },
-                formControl: {
-                    transform: 'translate(0)',
-                    fontSize: 14,
-                    paddingBottom: 6,
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
+                },
+            },
+            MuiDialogContent: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
+            },
+            MuiDialogTitle: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
+            },
+            MuiDialogActions: {
+                styleOverrides: {
+                    root: {
+                        padding: 12,
+                    },
+                },
+            },
+            MuiFab: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiFormControl: {
+                styleOverrides: {
+                    root: {},
+                },
+                defaultProps: {
+                    margin: 'dense',
+                    size: 'small',
                 },
             },
             MuiFormControlLabel: {
-                label: {
-                    fontSize: 14,
-                    paddingBottom: 0,
+                styleOverrides: {
+                    label: {
+                        paddingBottom: 0,
+                    },
+                },
+            },
+            MuiFormHelperText: {
+                defaultProps: {
+                    margin: 'dense',
+                },
+            },
+            MuiFormLabel: {
+                styleOverrides: {
+                    root: {
+                        color: indigo[500],
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                    },
+                },
+            },
+            MuiIconButton: {
+                defaultProps: {
+                    size: 'small',
+                },
+            },
+            MuiInput: {
+                styleOverrides: {
+                    input: {
+                        padding: '6px 12px',
+                    },
+                    inputMultiline: {
+                        padding: '0 12px',
+                    },
+                    underline: {
+                        background: '#fafafa',
+                    },
+                },
+            },
+            MuiInputBase: {
+                defaultProps: {
+                    margin: 'dense',
+                },
+            },
+            MuiInputLabel: {
+                defaultProps: {
+                    margin: 'dense',
+                },
+                styleOverrides: {
+                    root: {
+                        textTransform: 'none',
+                    },
+                    shrink: {
+                        transform: 'translate(0)',
+                        paddingBottom: 6,
+                    },
+                    formControl: {
+                        transform: 'translate(0)',
+                        paddingBottom: 6,
+                    },
+                },
+            },
+            MuiRadio: {
+                defaultProps: {
+                    size: 'small',
+                },
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
+                },
+            },
+            MuiSwitch: {
+                defaultProps: {
+                    size: 'small',
+                },
+                styleOverrides: {
+                    root: {
+                        padding: 4,
+                    },
+                },
+            },
+            MuiTextField: {
+                defaultProps: {
+                    margin: 'dense',
+                    size: 'small',
                 },
             },
         },

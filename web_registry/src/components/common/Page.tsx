@@ -1,4 +1,5 @@
-import { CircularProgress, Typography, withTheme } from '@material-ui/core';
+import { CircularProgress, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -13,12 +14,8 @@ export const Page = withTheme(
     }))
 );
 
-const PageTitle = styled(Typography)({
-    minHeight: 48,
-});
-
 export const PageHeaderTitle: FunctionComponent = (props) => {
-    return <PageTitle variant="h5">{props.children}</PageTitle>;
+    return <Typography variant="h5">{props.children}</Typography>;
 };
 
 export const PageHeaderSubtitle: FunctionComponent = (props) => {

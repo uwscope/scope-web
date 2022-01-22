@@ -1,0 +1,25 @@
+{
+	"_type": "valuesInventory",
+	"_rev": 1,
+	"assigned": true,
+	"assignedDate": "some date",
+	"values": [
+		{
+			"id": "id",
+			"name": "name",
+			"dateCreated": "",
+			"dateEdited": "",
+			"lifeareaId": "",
+			"activities": [
+				{
+					"id": "id",
+					"name": "name",
+					"valueId": "",
+					"dateCreated": "",
+					"dateEdited": "",
+					"lifeareaId": ""
+				}
+			]
+		}
+	]
+}

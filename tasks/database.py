@@ -1,89 +1,40 @@
-"""
-Tasks for working directly with the database cluster.
-"""
-
 from aws_infrastructure.tasks.collection import compose_collection
-import aws_infrastructure.tasks.library.documentdb
-import aws_infrastructure.tasks.ssh
 from invoke import Collection
-from invoke import task
-import urllib.parse
 
-from tasks.terminal import spawn_new_terminal
+import scope.tasks.database
 
-SSH_CONFIG_PATH = './secrets/server/prod/ssh_config.yaml'
-DOCUMENTDB_CONFIG_PATH = './secrets/server/prod/documentdb_config.yaml'
-
-
-@task
-def database_forward(context):
-    """
-    Forward the database cluster, listening on `localhost:5000`.
-
-    Use a fixed port because Studio 3T will save the connection information.
-    """
-
-    if spawn_new_terminal(context):
-        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(SSH_CONFIG_PATH)
-        documentdb_config = aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(DOCUMENTDB_CONFIG_PATH)
-
-        with aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=ssh_config) as ssh_client:
-            with aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(
-                ssh_client=ssh_client,
-                remote_host=documentdb_config.endpoint,
-                remote_port=documentdb_config.port,
-                local_port=5000,
-            ) as ssh_port_forward:
-                mongodbcompass_connection_string = 'mongodb://{}:{}@{}:{}/?{}'.format(
-                    urllib.parse.quote_plus(documentdb_config.admin_user),
-                    urllib.parse.quote_plus(documentdb_config.admin_password),
-                    'localhost',
-                    ssh_port_forward.local_port,
-                    '&'.join([
-                        'ssl=true',
-                        'sslMethod=UNVALIDATED',
-                        'serverSelectionTimeoutMS=5000',
-                        'connectTimeoutMS=10000',
-                        'authSource=admin',
-                        'authMechanism=SCRAM-SHA-1',
-                    ]),
-                )
-
-                studio3t_connection_string = 'mongodb://{}:{}@{}:{}/?{}'.format(
-                    urllib.parse.quote_plus(documentdb_config.admin_user),
-                    urllib.parse.quote_plus(documentdb_config.admin_password),
-                    'localhost',
-                    ssh_port_forward.local_port,
-                    '&'.join([
-                        'ssl=true',
-                        'sslInvalidHostNameAllowed=true',
-                        'serverSelectionTimeoutMS=5000',
-                        'connectTimeoutMS=10000',
-                        'authSource=admin',
-                        'authMechanism=SCRAM-SHA-1',
-                        '3t.uriVersion=3',
-                        '3t.connection.name={}'.format(
-                            urllib.parse.quote_plus('UWScope Production Cluster')
-                        ),
-                        '3t.alwaysShowAuthDB=true',
-                        '3t.alwaysShowDBFromUserRole=true',
-                        '3t.sslTlsVersion=TLS',
-                        '3t.proxyType=none',
-                    ]),
-                )
-
-                print('')
-                print('MongoDB Compass Connection String:')
-                print(mongodbcompass_connection_string)
-                print('')
-                print('Studio 3T Connection String:')
-                print(studio3t_connection_string)
-                print('')
-
-                ssh_port_forward.serve_forever()
+INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
+DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
+DEMO_DATABASE_CONFIG_PATH = "./secrets/configuration/demo_database.yaml"
+DEV_DATABASE_CONFIG_PATH = "./secrets/configuration/dev_database.yaml"
 
 
 # Build task collection
-ns = Collection('database')
+ns = Collection("database")
 
-ns.add_task(database_forward, 'forward')
+ns_demo = Collection("demo")
+ns_demo.add_task(scope.tasks.database.task_initialize(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEMO_DATABASE_CONFIG_PATH,
+), "initialize")
+ns_demo.add_task(scope.tasks.database.task_reset(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEMO_DATABASE_CONFIG_PATH,
+), "reset")
+
+ns_dev = Collection("dev")
+ns_dev.add_task(scope.tasks.database.task_initialize(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEV_DATABASE_CONFIG_PATH,
+), "initialize")
+ns_dev.add_task(scope.tasks.database.task_reset(
+    instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+    documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
+    database_config_path=DEV_DATABASE_CONFIG_PATH,
+), "reset")
+
+compose_collection(ns, ns_demo, name="demo")
+compose_collection(ns, ns_dev, name="dev")

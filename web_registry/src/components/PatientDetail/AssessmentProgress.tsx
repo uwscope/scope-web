@@ -1,18 +1,10 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Typography,
-    withTheme,
-} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-import SettingsIcon from '@material-ui/icons/Settings';
-import { GridCellParams, GridColDef, GridRowParams } from '@material-ui/x-grid';
+import AddIcon from '@mui/icons-material/Add';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import { GridCellParams, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { compareAsc, format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { action } from 'mobx';
@@ -96,6 +88,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const handleAddRecord = action(() => {
+        logState.openEdit = true;
         logState.totalOnly = false;
 
         logState.scheduleId = '';
@@ -197,7 +190,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate))
         .map((a) => {
             return {
-                date: format(a.recordedDate, 'MM/dd/yyyy'),
+                date: format(a.recordedDate, 'MM/dd/yy'),
                 total: getAssessmentScore(a.pointValues) || a.totalScore,
                 id: a.logId,
                 ...a.pointValues,
@@ -213,7 +206,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
-        <ScoreCell score={props.value as number} assessmentType={assessment?.assessmentId}>
+        <ScoreCell score={props.value as number} assessmentId={assessment?.assessmentId}>
             {props.value}
         </ScoreCell>
     );
@@ -221,30 +214,36 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         {
             field: 'date',
             headerName: 'Date',
-            width: 100,
+            width: 65,
             sortable: true,
             hideSortIcons: false,
+            align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'total',
             headerName: 'Total',
-            width: 80,
+            width: 60,
             renderCell: renderScoreCell,
             align: 'center',
+            headerAlign: 'center',
         },
         ...questionIds.map(
             (q) =>
                 ({
                     field: q,
                     headerName: q,
-                    width: 80,
+                    width: 60,
                     align: 'center',
+                    headerAlign: 'center',
                 } as GridColDef)
         ),
         {
             field: 'comment',
             headerName: 'Comment',
-            width: 120,
+            width: 300,
+            flex: 1,
+            headerAlign: 'center',
         },
     ];
 
@@ -303,7 +302,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                           ]
                         : []
                 )}>
-            <Grid container spacing={2} alignItems="stretch">
+            <Grid container alignItems="stretch">
                 {assessment.assessmentId != 'mood' && assessmentLogs.length > 0 && (
                     <Table
                         rows={tableData}
@@ -315,10 +314,12 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        autoPageSize
+                        headerHeight={28}
+                        rowHeight={24}
                         onRowClick={onRowClick}
                         autoHeight={true}
-                        isRowSelectable={(_) => false}
+                        isRowSelectable={() => false}
+                        pagination
                     />
                 )}
                 {assessmentLogs.length > 0 && (
@@ -345,7 +346,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         ? `Edit ${assessment.assessmentName} record`
                         : `Add ${assessment.assessmentName} record`}
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Questionnaire
                         readonly={logState.patientSubmitted}
                         questions={questions}
@@ -382,7 +383,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             </Dialog>
             <Dialog open={configureState.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
-                <DialogContent>
+                <DialogContent dividers>
                     <Grid container spacing={2} alignItems="stretch">
                         <GridDropdownField
                             editable={true}

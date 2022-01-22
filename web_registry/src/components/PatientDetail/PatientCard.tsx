@@ -1,10 +1,11 @@
-import { Button, Divider, LinearProgress, Typography, withTheme } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
+import { Button, Divider, Grid, LinearProgress, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { IPatientProfile } from 'shared/types';
+import { IPatientProfile, KeyedMap } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
 import { usePatient } from 'src/stores/stores';
@@ -17,9 +18,9 @@ const Container = withTheme(
 );
 
 const Name = styled(Typography)({
-    fontWeight: 600,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    margin: 0,
 });
 
 const EditButton = withTheme(
@@ -32,7 +33,7 @@ const Header = styled.div({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
 });
 
 const Loading = withTheme(styled(LinearProgress)({ height: 1 }));
@@ -63,47 +64,72 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
         state.open = false;
     });
 
+    const generateRaceText = (flags: KeyedMap<boolean | string>) => {
+        var concatValues = Object.keys(flags)
+            .filter((k) => flags[k])
+            .join(', ');
+
+        return concatValues;
+    };
+
     return (
         <Container>
-            <Header>
-                <Name variant="h5" gutterBottom>
-                    {patient.name}
-                </Name>
-                <EditButton
-                    variant="outlined"
-                    size="small"
-                    color="primary"
-                    startIcon={<EditIcon />}
-                    disabled={loading}
-                    onClick={handleOpen}
-                    key="Edit">
-                    Edit
-                </EditButton>
-            </Header>
+            <Grid container spacing={2} direction="column" justifyContent="flex-start" alignItems="stretch">
+                <Grid item>
+                    <Header>
+                        <Name variant="h5" gutterBottom>
+                            {patient.name}
+                        </Name>
+                        <EditButton
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            startIcon={<EditIcon />}
+                            disabled={loading}
+                            onClick={handleOpen}
+                            key="Edit">
+                            Edit
+                        </EditButton>
+                    </Header>
+                </Grid>
 
-            {loading ? <Loading /> : <Divider />}
-            <LabeledField label="mrn" value={profile.MRN} />
-            <LabeledField label="clinic code" value={profile.clinicCode} />
-            <br />
-            <LabeledField label="dob" value={!!profile.birthdate ? format(profile.birthdate, 'MM/dd/yyyy') : '--'} />
-            <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
-            <LabeledField label="sex" value={profile.sex} />
-            <LabeledField label="race" value={profile.race} />
-            <LabeledField label="gender" value={profile.gender} />
-            <LabeledField label="pronouns" value={profile.pronoun} />
-            <br />
+                <Grid item>{loading ? <Loading /> : <Divider />}</Grid>
+                <Grid item>
+                    <LabeledField label="mrn" value={profile.MRN} />
+                    <LabeledField label="clinic code" value={profile.clinicCode} />
+                </Grid>
+                <Grid item>
+                    <LabeledField
+                        label="dob"
+                        value={!!profile.birthdate ? format(profile.birthdate, 'MM/dd/yyyy') : '--'}
+                    />
+                    <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
+                    <LabeledField label="sex" value={profile.sex} />
+                    <LabeledField
+                        label="race"
+                        value={profile.race != undefined ? generateRaceText(profile.race) : 'unknown'}
+                    />
+                    <LabeledField label="ethnicity" value={profile.ethnicity} />
+                    <LabeledField label="gender" value={profile.gender} />
+                    <LabeledField label="pronouns" value={profile.pronoun} />
+                </Grid>
 
-            <LabeledField label="primary oncology provider" value={profile.primaryOncologyProvider?.name || '--'} />
-            <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
-            <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
-            <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
-
-            <EditPatientProfileDialog
-                profile={profile}
-                open={state.open}
-                onClose={handleClose}
-                onSavePatient={onSave}
-            />
+                <Grid item>
+                    <LabeledField
+                        label="primary oncology provider"
+                        value={profile.primaryOncologyProvider?.name || '--'}
+                    />
+                    <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
+                    <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
+                    <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
+                </Grid>
+                <EditPatientProfileDialog
+                    profile={profile}
+                    open={state.open}
+                    onClose={handleClose}
+                    onSavePatient={onSave}
+                />
+            </Grid>
         </Container>
     );
 });

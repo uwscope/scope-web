@@ -1,0 +1,64 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/activity",
+	"title": "IActivity",
+	"description": "IActivity Type",
+	"type": "object",
+	"properties": {
+		"_activity_id": {
+			"type": "string"
+		},
+		"_rev": { "_type": "number" },
+		"_type": { "const": "activity" },
+		"name": {
+			"type": "string"
+		},
+		"value": {
+			"type": "string"
+		},
+		"lifeareaId": {
+			"type": "string"
+		},
+		"startDate": {
+			"type": "string"
+		},
+		"timeOfDay": {
+			"type": "number"
+		},
+		"hasReminder": {
+			"type": "boolean"
+		},
+		"reminderTimeOfDay": {
+			"type": "number"
+		},
+		"hasRepetition": {
+			"type": "boolean"
+		},
+		"repeatDayFlags": {
+			"type": "string"
+		},
+		"isActive": {
+			"type": "boolean"
+		},
+		"isDeleted": {
+			"type": "boolean"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"_activity_id",
+		"_type",
+		"_rev",
+		"name",
+		"value",
+		"lifeareaId",
+		"startDate",
+		"timeOfDay",
+		"hasReminder",
+		"reminderTimeOfDay",
+		"hasRepetition",
+		"repeatDayFlags",
+		"isActive",
+		"isDeleted"
+	]
+}

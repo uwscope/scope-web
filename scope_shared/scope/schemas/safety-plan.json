@@ -1,0 +1,60 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/safety-plan",
+	"title": "ISafetyPlan",
+	"description": "ISafetyPlan Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": { "const": "safetyPlan" },
+		"_rev": { "type": "number" },
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDate": {
+			"type": "string"
+		},
+		"reasonsForLiving": {
+			"type": "string"
+		},
+		"warningSigns": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"copingStrategies": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"distractions": {
+			"type": "array",
+			"$comment": "Test the typescript code. Either (string | IContact)[], or a mix of both.",
+			"items": { "type": "string" }
+		},
+		"supporters": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/contact"
+			}
+		},
+		"professionalSupporters": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/contact"
+			}
+		},
+		"urgentServices": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/contact"
+			}
+		},
+		"safeEnvironment": {
+			"type": "array",
+			"items": { "type": "string" }
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "_rev", "assigned", "assignedDate"]
+}

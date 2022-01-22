@@ -1,7 +1,7 @@
 const express = require('express');
 
 const path = require('path');
-const paths = require('../config/paths');
+const paths = require('../webpack/paths');
 
 console.log(`Serving from production build in ${paths.appBuildProd}.`);
 

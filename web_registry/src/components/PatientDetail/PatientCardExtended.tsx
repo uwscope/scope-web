@@ -1,4 +1,4 @@
-import { withTheme } from '@material-ui/core';
+import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -55,14 +55,16 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
 
             <LabeledField label="Flags" value="" />
             <FlaggedField
-                label="Discussion"
-                flagged={flaggedForDiscussion}
-                onClick={() => onToggleFlag('Flag for discussion', !flaggedForDiscussion)}
-            />
-            <FlaggedField
                 label="Safety risk"
                 flagged={flaggedForSafety}
+                color={'bad'}
                 onClick={() => onToggleFlag('Flag as safety risk', !flaggedForSafety)}
+            />
+            <FlaggedField
+                label="Discussion"
+                flagged={flaggedForDiscussion}
+                color={'warning'}
+                onClick={() => onToggleFlag('Flag for discussion', !flaggedForDiscussion)}
             />
         </Container>
     );

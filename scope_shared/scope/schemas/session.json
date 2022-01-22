@@ -1,0 +1,66 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/session",
+	"title": "ISession",
+	"description": "ISession Type",
+	"_type": "object",
+	"properties": {
+		"_session_id": {
+			"_type": "string"
+		},
+		"_type": { "const": "session" },
+		"_rev": { "_type": "number" },
+		"date": {
+			"_type": "string"
+		},
+		"sessionType": {
+			"$ref": "/schemas/enums#/properties/sessionType"
+		},
+		"billableMinutes": {
+			"_type": "number"
+		},
+		"medicationChange": {
+			"_type": "string"
+		},
+		"currentMedications": {
+			"_type": "string"
+		},
+		"behavioralStrategyChecklist": {
+			"$ref": "/schemas/enums#/properties/behavioralStrategyChecklistFlags"
+		},
+		"behavioralStrategyOther": {
+			"_type": "string"
+		},
+		"behavioralActivationChecklist": {
+			"$ref": "/schemas/enums#/properties/bAChecklistFlags"
+		},
+		"referrals": {
+			"_type": "array",
+			"items": {
+				"$ref": "/schemas/referral-status"
+			}
+		},
+		"otherRecommendations": {
+			"_type": "string"
+		},
+		"sessionNote": {
+			"_type": "string"
+		}
+	},
+	"additionalProperties": true,
+	"required": [
+		"_session_id",
+		"_rev",
+		"date",
+		"sessionType",
+		"billableMinutes",
+		"medicationChange",
+		"currentMedications",
+		"behavioralStrategyChecklist",
+		"behavioralStrategyOther",
+		"behavioralActivationChecklist",
+		"referrals",
+		"otherRecommendations",
+		"sessionNote"
+	]
+}

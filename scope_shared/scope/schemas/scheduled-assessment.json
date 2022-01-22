@@ -1,0 +1,31 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/scheduled-assessment",
+	"title": "IScheduledAssessment",
+	"description": "IScheduledAssessment Type",
+	"type": "object",
+	"properties": {
+		"_schedule_id": {
+			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
+		},
+		"_type": { "const": "scheduledAssessment" },
+		"_rev": { "type": "number" },
+		"dueDate": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		},
+		"dueType": {
+			"$ref": "/schemas/scheduled-item#/properties/dueType"
+		},
+		"assessmentId": {
+			"type": "string"
+		},
+		"assessmentName": {
+			"type": "string"
+		},
+		"completed": {
+			"type": "boolean"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_schedule_id", "_type", "_rev", "dueDate", "assessmentId", "assessmentName"]
+}

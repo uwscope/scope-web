@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -6,13 +6,14 @@ import {
     clinicCodeValues,
     depressionTreatmentStatusValues,
     followupScheduleValues,
+    patientEthnicityValues,
     patientGenderValues,
     patientPronounValues,
-    patientRaceEthnicityValues,
+    patientRaceValues,
     patientSexValues,
 } from 'shared/enums';
 import { IPatientProfile } from 'shared/types';
-import { GridDateField, GridDropdownField, GridTextField } from 'src/components/common/GridField';
+import { GridDateField, GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 
 interface IEditPatientProfileContentProps extends Partial<IPatientProfile> {
     onValueChange: (key: string, value: any) => void;
@@ -27,6 +28,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         followupSchedule,
         birthdate,
         race,
+        ethnicity,
         sex,
         gender,
         pronoun,
@@ -60,7 +62,15 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
                 value={birthdate}
                 onChange={(text) => onValueChange('birthdate', text)}
             />
-            {getDropdownField('Race/Ethnicity', race, patientRaceEthnicityValues, 'race')}
+            <GridMultiSelectField
+                sm={12}
+                editable
+                label="Race"
+                flags={race}
+                flagOrder={[...patientRaceValues]}
+                onChange={(flags) => onValueChange('race', flags)}
+            />
+            {getDropdownField('Ethnicity', ethnicity, patientEthnicityValues, 'race')}
             {getDropdownField('Sex', sex, patientSexValues, 'sex')}
             {getDropdownField('Gender', gender, patientGenderValues, 'gender')}
             {getDropdownField('Pronouns', pronoun, patientPronounValues, 'pronoun')}
@@ -80,13 +90,17 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
 const emptyProfile = {
     name: '',
     MRN: '',
-    clinicCode: 'Other',
-    depressionTreatmentStatus: 'Other',
-    birthdate: new Date(),
-    sex: 'Male',
-    gender: 'Male',
-    pronoun: 'He/Him',
-    race: 'White',
+    clinicCode: undefined,
+    birthdate: undefined,
+    race: {},
+    ethnicity: undefined,
+    sex: undefined,
+    gender: undefined,
+    pronoun: undefined,
+    primaryOncologyProvider: undefined,
+    primaryCareManager: undefined,
+    depressionTreatmentStatus: undefined,
+    followupSchedule: undefined,
 } as IPatientProfile;
 
 const state = observable<IPatientProfile>(emptyProfile);
@@ -112,7 +126,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
         action(() => {
             Object.assign(state, emptyProfile);
         }),
-        []
+        [props.open]
     );
 
     const onValueChange = action((key: string, value: any) => {
@@ -126,7 +140,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Add Patient</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <EditPatientProfileContent {...state} onValueChange={onValueChange} />
             </DialogContent>
             <DialogActions>
@@ -162,7 +176,7 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Edit Patient Information</DialogTitle>
-            <DialogContent>
+            <DialogContent dividers>
                 <EditPatientProfileContent {...state} onValueChange={onValueChange} />
             </DialogContent>
             <DialogActions>

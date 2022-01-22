@@ -13,6 +13,11 @@ setuptools.setup(
     # long_description="",
     python_requires=">=3",
     install_requires=[
+        "pymongo",
+        "requests",
         "ruamel.yaml",
+        "jschon",
+        "lorem",  # TODO: To remove
+        "numpy",  # TODO: To remove
     ],
 )

@@ -1,4 +1,4 @@
-import DateFnsUtils from '@date-io/date-fns';
+import { DatePicker } from '@mui/lab';
 import {
     Checkbox,
     FormControl,
@@ -15,10 +15,10 @@ import {
     Select,
     SelectProps,
     Switch,
+    TextField,
     Typography,
-    withTheme,
-} from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+} from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
@@ -63,14 +63,6 @@ const SelectField = withTheme(
             } as CSSObject)
     )
 );
-
-const DatePickerContainer = styled(KeyboardDatePicker)({
-    width: '100%',
-    margin: 0,
-    'label + .MuiInput-formControl': {
-        marginTop: 20,
-    },
-});
 
 const OtherGrid = styled(Grid)({
     display: 'flex',
@@ -130,8 +122,8 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => 
                 <InputLabel shrink>{label}</InputLabel>
                 <Input
                     multiline={multiline}
-                    rows={minLine}
-                    rowsMax={maxLine}
+                    minRows={minLine}
+                    maxRows={maxLine}
                     readOnly={!editable}
                     value={value}
                     onChange={handleChange}
@@ -198,20 +190,19 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
     if (editable) {
         return (
             <Grid item xs={xs || 12} sm={sm || 6}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <DatePickerContainer
-                        disableToolbar
-                        variant="inline"
-                        format="MM/dd/yyyy"
-                        margin="normal"
-                        label={label}
-                        value={value}
-                        onChange={handleChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
-                </MuiPickersUtilsProvider>
+                <DatePicker
+                    label={label}
+                    value={value}
+                    onChange={handleChange}
+                    renderInput={(params) => (
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            {...params}
+                            InputLabelProps={{ shrink: true, sx: { position: 'relative' } }}
+                        />
+                    )}
+                />
             </Grid>
         );
     } else {
@@ -272,6 +263,7 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                                     return (
                                         <Grid item xs={6} key={key}>
                                             <FormControlLabel
+                                                sx={{ marginLeft: 0 }}
                                                 control={
                                                     <Checkbox
                                                         checked={flags[key]}
@@ -287,6 +279,7 @@ export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps>
                             {showOther ? (
                                 <OtherGrid item xs={12} key={'Other'}>
                                     <FormControlLabel
+                                        sx={{ marginLeft: 0 }}
                                         control={
                                             <Checkbox
                                                 checked={flags['Other']}
@@ -468,6 +461,7 @@ export const GridSwitchField: FunctionComponent<IGridSwitchFieldProps> = (props)
     return (
         <Grid item xs={xs || 12} sm={sm || 6}>
             <FormControlLabel
+                sx={{ marginLeft: 0 }}
                 control={<Switch checked={on} onChange={handleChange} name={label} disabled={!editable} />}
                 label={label}
             />

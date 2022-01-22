@@ -1,5 +1,6 @@
-import { withTheme } from '@material-ui/core';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@material-ui/x-grid';
+import { Grid } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import compareAsc from 'date-fns/esm/fp/compareAsc/index.js';
@@ -15,29 +16,22 @@ import {
     isSession,
     KeyedMap,
 } from 'shared/types';
-import CaseloadTable from 'src/components/caseload/CaseloadTable';
 import { Table } from 'src/components/common/Table';
 import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
 import styled from 'styled-components';
-
-const TableContainer = styled.div({
-    flexGrow: 1,
-});
 
 const ColumnHeader = styled.div({
     whiteSpace: 'initial',
     fontWeight: 500,
     lineHeight: '1rem',
+    textAlign: 'center',
 });
 
 const PHQCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: 'calc(100% + 16px)',
-        lineHeight: '1rem',
-        height: '100%',
         marginLeft: -8,
         marginRight: -8,
-        padding: props.theme.spacing(1),
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('PHQ-9', props.score)],
     }))
 );
@@ -45,11 +39,8 @@ const PHQCell = withTheme(
 const GADCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: 'calc(100% + 16px)',
-        lineHeight: '1rem',
-        height: '100%',
         marginLeft: -8,
         marginRight: -8,
-        padding: props.theme.spacing(1),
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('GAD-7', props.score)],
     }))
 );
@@ -118,46 +109,54 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
             headerName: 'Id',
             renderHeader,
             hide: true,
+            headerAlign: 'center',
         },
         {
             field: 'date',
             headerName: 'Date',
-            width: 70,
+            width: 65,
             renderHeader,
             sortable: true,
             hideSortIcons: false,
-            renderCell: renderMultilineCell,
+            align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'type',
             headerName: 'Type',
             width: 70,
             renderHeader,
-            renderCell: renderMultilineCell,
+            align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'billableMinutes',
             headerName: 'Bill Min',
-            width: 50,
+            width: 25,
             renderHeader,
-            renderCell: renderMultilineCell,
             align: 'center',
+            type: 'number',
+            headerAlign: 'center',
         },
         {
             field: 'phq9',
             headerName: 'PHQ',
-            width: 60,
+            width: 25,
             renderHeader,
             renderCell: renderPHQCell,
             align: 'center',
+            type: 'number',
+            headerAlign: 'center',
         },
         {
             field: 'gad7',
             headerName: 'GAD',
-            width: 60,
+            width: 25,
             renderHeader,
             renderCell: renderGADCell,
             align: 'center',
+            type: 'number',
+            headerAlign: 'center',
         },
         {
             field: 'medications',
@@ -165,6 +164,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
             width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
+            headerAlign: 'center',
         },
         {
             field: 'behavioralStrategies',
@@ -172,6 +172,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
             width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
+            headerAlign: 'center',
         },
         {
             field: 'referrals',
@@ -179,20 +180,24 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
             width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
+            headerAlign: 'center',
         },
         {
             field: 'otherRecommendations',
-            headerName: 'Other Recommendations / Action Items',
+            headerName: 'Other Rec / Action Items',
             width: 150,
             renderHeader,
             renderCell: renderMultilineCell,
+            headerAlign: 'center',
         },
         {
             field: 'note',
             headerName: 'Note',
-            width: 300,
+            minWidth: 150,
+            flex: 1,
             renderHeader,
             renderCell: renderMultilineCell,
+            headerAlign: 'center',
         },
     ];
 
@@ -232,7 +237,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
 
     const getSessionData = (session: ISession): ISessionTableData => ({
         id: session.sessionId,
-        date: `${format(session.date, 'MM/dd')}\n${format(session.date, 'yyyy')}`,
+        date: `${format(session.date, 'MM/dd/yy')}`,
         type: session.sessionType,
         billableMinutes: session.billableMinutes,
         flag: 'TBD',
@@ -269,7 +274,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
     });
 
     return (
-        <TableContainer>
+        <Grid container alignItems="stretch">
             <Table
                 rows={data}
                 columns={columns.map((c) => ({
@@ -280,15 +285,14 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
                     disableColumnMenu: true,
                     ...c,
                 }))}
-                autoPageSize
-                headerHeight={56}
-                rowHeight={140}
+                headerHeight={36}
                 onRowClick={onRowClick}
                 autoHeight={true}
-                isRowSelectable={(_) => false}
+                isRowSelectable={() => false}
+                pagination
             />
-        </TableContainer>
+        </Grid>
     );
 });
 
-export default CaseloadTable;
+export default SessionReviewTable;

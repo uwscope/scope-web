@@ -1,6 +1,8 @@
-import { IconButton, styled, Typography, withTheme } from '@material-ui/core';
-import FlagIcon from '@material-ui/icons/Flag';
+import FlagIcon from '@mui/icons-material/Flag';
+import { IconButton, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
+import styled from 'styled-components';
 
 const Label = withTheme(
     styled(Typography)((props) => ({
@@ -26,6 +28,12 @@ const NoPaddingIconButton = styled(IconButton)({
     padding: 0,
 });
 
+const ColoredFlag = withTheme(
+    styled(FlagIcon)<{ on: boolean; _color: string }>((props) => ({
+        color: props.theme.customPalette.scoreColors[props.on ? props._color : 'disabled'],
+    }))
+);
+
 export interface ILabeledFieldProps {
     label: string;
     value: string | number | undefined;
@@ -45,17 +53,18 @@ export const LabeledField: FunctionComponent<ILabeledFieldProps> = (props) => {
 export interface IFlaggedFieldProps {
     label: string;
     flagged: boolean;
+    color: string;
     onClick: () => void;
 }
 
 export const FlaggedField: FunctionComponent<IFlaggedFieldProps> = (props) => {
-    const { label, flagged, onClick } = props;
+    const { label, flagged, color, onClick } = props;
     return (
         <div>
             <Value>{label}</Value>
             {`: `}
             <NoPaddingIconButton aria-label="flag" size="small" onClick={onClick}>
-                <FlagIcon color={flagged ? 'error' : 'disabled'} fontSize="small" />
+                <ColoredFlag on={flagged} _color={color} fontSize="small" />
             </NoPaddingIconButton>
         </div>
     );

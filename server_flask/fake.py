@@ -1,17 +1,40 @@
+import json
 import uuid
 from datetime import date, datetime, timedelta
 
 import numpy as np
 from lorem.text import TextLorem
 
-from assessments import gad7Assessment, moodAssessment, phq9Assessment
-from enums import (AssessmentFrequency, AssessmentType,
-                   BehavioralActivationChecklist, BehavioralStrategyChecklist,
-                   CancerTreatmentRegimen, ClinicCode, DayOfWeek,
-                   DepressionTreatmentStatus, DiscussionFlag, FollowupSchedule,
-                   PatientGender, PatientPronoun, PatientRaceEthnicity,
-                   PatientSex, Referral, ReferralStatus, SessionType,
-                   TreatmentChange, TreatmentPlan)
+from enums import (
+    AssessmentFrequency,
+    AssessmentType,
+    BehavioralActivationChecklist,
+    BehavioralStrategyChecklist,
+    CancerTreatmentRegimen,
+    ClinicCode,
+    DayOfWeek,
+    DepressionTreatmentStatus,
+    DiscussionFlag,
+    FollowupSchedule,
+    PatientEthnicity,
+    PatientGender,
+    PatientPronoun,
+    PatientRace,
+    PatientSex,
+    Referral,
+    ReferralStatus,
+    SessionType,
+    TreatmentChange,
+    TreatmentPlan,
+)
+
+with open("./app_config/assessments/gad7.json") as config_file:
+    gad7Assessment = json.load(config_file)
+with open("./app_config/assessments/mood.json") as config_file:
+    moodAssessment = json.load(config_file)
+with open("./app_config/assessments/phq9.json") as config_file:
+    phq9Assessment = json.load(config_file)
+
 
 lorem = TextLorem(srange=(4, 16), prange=(4, 8))
 shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))
@@ -70,7 +93,6 @@ def getRandomFakePatients():
     return [getFakePatient() for idx in range(getRandomInteger(10, 15))]
 
 
-
 def getFakePatient():
     recordId = str(uuid.uuid1())
     name = "%s %s" % (getRandomItem(firstNames), getRandomItem(lastNames))
@@ -79,35 +101,40 @@ def getFakePatient():
     assessments = getFakeAssessments()
 
     scheduledAssessmentsList = [getFakeScheduledAssessment(a) for a in assessments]
-    scheduledAssessments = [a for scheduledList in scheduledAssessmentsList for a in scheduledList]
-    loggedAssessments = [{
-        "logId": a["scheduleId"] + "_logged",
-        "recordedDate": a["dueDate"] + timedelta(days=getRandomInteger(-1, 2)),
-        "comment": shortLorem.paragraph(),
-        "scheduleId": a["scheduleId"],
-        "assessmentId": a["assessmentId"],
-        "assessmentName": a["assessmentName"],
-        "completed": getRandomBoolean(),
-        "patientSubmitted": getRandomBoolean(),
-        "submittedBy": "Auto generated",
-        "pointValues": getFakeAssessmentDataPoint(a["assessmentName"]),
-        "totalScore": None,
-    } for a in scheduledAssessments if a["dueDate"] < datetime.today()]
+    scheduledAssessments = [
+        a for scheduledList in scheduledAssessmentsList for a in scheduledList
+    ]
+    loggedAssessments = [
+        {
+            "logId": a["scheduleId"] + "_logged",
+            "recordedDate": a["dueDate"] + timedelta(days=getRandomInteger(-1, 2)),
+            "comment": shortLorem.paragraph(),
+            "scheduleId": a["scheduleId"],
+            "assessmentId": a["assessmentId"],
+            "assessmentName": a["assessmentName"],
+            "completed": getRandomBoolean(),
+            "patientSubmitted": getRandomBoolean(),
+            "submittedBy": "Auto generated",
+            "pointValues": getFakeAssessmentDataPoint(a["assessmentName"]),
+            "totalScore": None,
+        }
+        for a in scheduledAssessments
+        if a["dueDate"] < datetime.today()
+    ]
 
-    loggedMood = [{
-        "logId": "mood_%d_logged" % idx,
-        "recordedDate": datetime.today() + timedelta(days=-getRandomInteger(0, 40), hours=getRandomInteger(0, 24)),
-        "comment": shortLorem.paragraph(),
-        "mood": getRandomInteger(1, 11)
-    } for idx in range(0, getRandomInteger(1, 40)) ]
+    loggedMood = [
+        {
+            "logId": "mood_%d_logged" % idx,
+            "recordedDate": datetime.today()
+            + timedelta(days=-getRandomInteger(0, 40), hours=getRandomInteger(0, 24)),
+            "comment": shortLorem.paragraph(),
+            "mood": getRandomInteger(1, 11),
+        }
+        for idx in range(0, getRandomInteger(1, 40))
+    ]
 
     return {
-        "recordId": recordId, # Backcompat only
-        "identity": {
-            "identityId": recordId,
-            "name": name
-        },
-
+        "identity": {"identityId": recordId, "name": name},
         "profile": {
             "name": name,
             "MRN": mrn,
@@ -120,14 +147,15 @@ def getFakePatient():
             "sex": getRandomItem(PatientSex).value,
             "gender": getRandomItem(PatientGender).value,
             "pronoun": getRandomItem(PatientPronoun).value,
-            "race": getRandomItem(PatientRaceEthnicity).value,
+            "race": getRandomFlags(PatientRace),
+            "ethnicity": getRandomItem(PatientEthnicity).value,
             "primaryOncologyProvider": {
                 "identityId": str(uuid.uuid1()),
-                "name": getRandomItem(oncologyProviders)
+                "name": getRandomItem(oncologyProviders),
             },
             "primaryCareManager": {
                 "identityId": str(uuid.uuid1()),
-                "name": getRandomItem(careManagers)
+                "name": getRandomItem(careManagers),
             },
             "discussionFlag": getRandomFlags(DiscussionFlag),
             "followupSchedule": getRandomItem(FollowupSchedule).value,
@@ -148,20 +176,16 @@ def getFakePatient():
             "pastSubstanceUse": shortLorem.paragraph(),
             "psychSocialBackground": shortLorem.paragraph(),
         },
-
         # Sessions
         "sessions": getFakeSessions(),
-
         # Assessments
         "assessments": getFakeAssessments(),
-        "scheduledAssessments":scheduledAssessments,
+        "scheduledAssessments": scheduledAssessments,
         "assessmentLogs": loggedAssessments,
-
         # Activities
         "activities": getFakeActivities(),
-
         # Mood logs
-        "moodLogs": loggedMood
+        "moodLogs": loggedMood,
     }
 
 
@@ -200,7 +224,11 @@ def getRandomStates(enum, options):
 def getFakeAssessments():
     return [
         {
-            "assessmentId": "mood" if a.value == "Mood Logging" else "medication" if a.value == "Medication Tracking" else a.value.lower(),
+            "assessmentId": "mood"
+            if a.value == "Mood Logging"
+            else "medication"
+            if a.value == "Medication Tracking"
+            else a.value.lower(),
             "assessmentName": a.value,
             "frequency": getRandomItem(AssessmentFrequency).value,
             "dayOfWeek": getRandomItem(DayOfWeek).value,
@@ -243,7 +271,15 @@ def getFakeScheduledAssessment(assessment):
         freq = 28
 
     dow = 0
-    dowValues = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    dowValues = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
 
     for idx in range(len(dowValues)):
         if assessment["dayOfWeek"] == dowValues[idx]:
@@ -255,12 +291,14 @@ def getFakeScheduledAssessment(assessment):
     # 10 assessments in the past and 10 in the future
     scheduled = []
     for idx in range(-10, 10):
-        scheduled.append({
-            "scheduleId": "Scheduled %d" % idx,
-            "assessmentId": assessment["assessmentId"],
-            "assessmentName": assessment["assessmentName"],
-            "dueDate": dueDate + timedelta(days=freq * idx)
-        })
+        scheduled.append(
+            {
+                "scheduleId": "Scheduled %d" % idx,
+                "assessmentId": assessment["assessmentId"],
+                "assessmentName": assessment["assessmentName"],
+                "dueDate": dueDate + timedelta(days=freq * idx),
+            }
+        )
 
     return scheduled
 
@@ -268,27 +306,30 @@ def getFakeScheduledAssessment(assessment):
 def getFakeAssessmentDataPoints(assessmentType):
     if assessmentType == "Mood Logging":
         return [
-        {
-            "assessmentDataId": "%s-%d" % (assessmentType, idx),
-            "assessmentType": assessmentType,
-            "date": datetime.now()
-            - timedelta(hours=getRandomInteger(4, 48) + idx * getRandomInteger(0, 120)),
-            "pointValues": getFakeAssessmentDataPoint(assessmentType),
-            "comment": shortLorem.paragraph(),
-            "patientSubmitted": getRandomBoolean()
-        }
-        for idx in range(getRandomInteger(5, 10))
-    ]
+            {
+                "assessmentDataId": "%s-%d" % (assessmentType, idx),
+                "assessmentType": assessmentType,
+                "date": datetime.now()
+                - timedelta(
+                    hours=getRandomInteger(4, 48) + idx * getRandomInteger(0, 120)
+                ),
+                "pointValues": getFakeAssessmentDataPoint(assessmentType),
+                "comment": shortLorem.paragraph(),
+                "patientSubmitted": getRandomBoolean(),
+            }
+            for idx in range(getRandomInteger(5, 10))
+        ]
     else:
         data = [
             {
                 "assessmentDataId": "%s-%d" % (assessmentType, idx),
                 "assessmentType": assessmentType,
-                "date": datetime.now() + timedelta(days=14)
+                "date": datetime.now()
+                + timedelta(days=14)
                 - timedelta(days=getRandomInteger(0, 3) + idx * getRandomInteger(5, 8)),
                 "pointValues": getFakeAssessmentDataPoint(assessmentType),
                 "comment": shortLorem.paragraph(),
-                "patientSubmitted": getRandomBoolean()
+                "patientSubmitted": getRandomBoolean(),
             }
             for idx in range(getRandomInteger(5, 10))
         ]
@@ -309,10 +350,9 @@ def getFakeSessions():
     referrals = []
     for referral in randomReferrals:
         if randomReferrals[referral] != "Not Referred":
-            referrals.append({
-                "referralType": referral,
-                "referralStatus": randomReferrals[referral]
-            })
+            referrals.append(
+                {"referralType": referral, "referralStatus": randomReferrals[referral]}
+            )
 
     return [
         {

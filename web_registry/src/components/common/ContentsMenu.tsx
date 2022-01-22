@@ -1,4 +1,5 @@
-import { List, ListItem, ListItemProps, ListItemText, Typography, useTheme, withTheme } from '@material-ui/core';
+import { List, ListItem, ListItemProps, ListItemText, Typography, useTheme } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import throttle from 'lodash.throttle';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -36,10 +37,10 @@ export interface IContentsMenuProps {
 const noop = () => {};
 
 const useThrottledOnScroll = (callback: any, delay: number, contentId: string) => {
-    const throttledCallback = React.useMemo(() => (callback ? throttle(callback, delay) : noop), [
-        callback,
-        delay,
-    ]) as any;
+    const throttledCallback = React.useMemo(
+        () => (callback ? throttle(callback, delay) : noop),
+        [callback, delay]
+    ) as any;
 
     React.useEffect(() => {
         if (throttledCallback === noop) {
@@ -143,7 +144,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer((pro
 
                 if (!!element) {
                     mainBody.scrollBy({
-                        top: element.getBoundingClientRect().top - theme.customSizes.headerHeight - theme.spacing(3),
+                        top: element.getBoundingClientRect().top - theme.customSizes.headerHeight - 24,
                         behavior: 'smooth',
                     });
                 }

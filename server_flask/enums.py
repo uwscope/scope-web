@@ -27,16 +27,28 @@ class ClinicCode(Enum):
 class PatientSex(Enum):
     Male = "Male"
     Female = "Female"
+    Intersex = "Intersex"
 
 
 class PatientGender(Enum):
     Male = "Male"
     Female = "Female"
+    Transgender = "Transgender"
+    NonBinary = "Non-binary/Non-conforming"
+    Other = "Other"
 
-
-class PatientRaceEthnicity(Enum):
+class PatientRace(Enum):
+    Native = "American Indian or Alaska Native"
+    Asian = "Asian or Asian American"
+    Black = "Black or African American"
+    Pacific = "Native Hawaiian or Other Pacific Islander"
     White = "White"
-    Black = "Black"
+    Unknown = "Unknown"
+
+class PatientEthnicity(Enum):
+    Hispanic = "Hispanic or Latino/Latina/Latinx"
+    NotHispanic = "Not Hispanic or Latino/Latina/Latinx"
+    Unknown = "Unknown"
 
 
 class PatientPronoun(Enum):

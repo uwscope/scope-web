@@ -1,0 +1,18 @@
+{
+  "id": "valuesandgoalsassessment",
+  "name": "Values and goals assessment",
+  "resources": [
+    {
+      "name": "Form A client education",
+      "filename": "sample.pdf"
+    },
+    {
+      "name": "Form B vicious cycle",
+      "filename": "sample.pdf"
+    },
+    {
+      "name": "Form C vicious cycle",
+      "filename": "sample.pdf"
+    }
+  ]
+}

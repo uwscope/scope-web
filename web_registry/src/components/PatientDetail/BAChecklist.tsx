@@ -9,7 +9,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-} from '@material-ui/core';
+} from '@mui/material';
 import { compareAsc, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
