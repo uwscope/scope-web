@@ -270,7 +270,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async addCaseReview(caseReview: Partial<ICaseReview>) {
         const { registryService } = useServices();
-        const promise = registryService.updatePatientCaseReview(this.recordId, caseReview).then((caseReview) => {
+        const promise = registryService.addPatientCaseReview(this.recordId, caseReview).then((caseReview) => {
             // TODO: server should return appropriate id
             const addedReview = {
                 ...caseReview,
