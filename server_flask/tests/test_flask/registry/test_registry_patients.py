@@ -11,6 +11,9 @@ import tests.testing_config
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
+# TODO: James to Review
+pytest.skip("Not reviewed", allow_module_level=True)
+
 # @pytest.mark.skip(reason="Taking too much time")
 def test_flask_get_all_patients(
     database_client: pymongo.database.Database,

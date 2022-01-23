@@ -12,6 +12,9 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 API_RELATIVE_PATH = "patient/values/"
 
+# TODO: James to Review
+pytest.skip("Not reviewed", allow_module_level=True)
+
 
 def test_flask_get_patient_values(
     database_client: pymongo.database.Database,
