@@ -1,10 +1,10 @@
 import aws_infrastructure.tasks.ssh
-import bson.objectid
 import contextlib
 import pymongo.database
 
 import scope.config
 import scope.documentdb.client
+import scope.database.collection_utils
 import scope.database.patients
 
 
@@ -145,12 +145,12 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     Initialization should be idempotent.
     """
 
-    # Get or create a patients collection
+    # Ensure a patients collection
     patients_collection = database.get_collection(
-        scope.database.patients.PATIENTS_COLLECTION_NAME
+        scope.database.patients.PATIENTS_COLLECTION
     )
 
-    # Ensure a sentinel document
+    # Ensure a sentinel document in that collection
     result = patients_collection.find_one(
         filter={
             "_type": "sentinel",
@@ -159,7 +159,9 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     if result is None:
         patients_collection.insert_one(
             {
-                "_id": bson.objectid.ObjectId(),
                 "_type": "sentinel",
             }
         )
+
+    # Ensure the expected index
+    scope.database.collection_utils.ensure_index(collection=patients_collection)

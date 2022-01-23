@@ -25,6 +25,29 @@ def _normalize_document(
         document["_id"] = str(doc_id)
 
 
+def delete_set_element(
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    set_id: str,
+    destructive: bool,
+) -> bool:
+    # TODO: define semantics of this method, in place now so we're forced to use it
+
+    if not destructive:
+        raise NotImplementedError()
+
+    # There is likely a race condition here, but our semantics for destructive deletion are weak.
+    result = collection.delete_many(
+        {
+            "_type": document_type,
+            "_set_id": set_id,
+        }
+    )
+
+    return result.deleted_count > 0
+
+
 def ensure_index(
     *,
     collection: pymongo.collection.Collection,
@@ -48,10 +71,14 @@ def ensure_index(
     # Determine if an existing index needs replaced
     if PRIMARY_COLLECTION_INDEX_NAME in index_information:
         existing_index = index_information[PRIMARY_COLLECTION_INDEX_NAME]
+
         replace_index = False
-        replace_index = replace_index or existing_index.keys() != {"key", "ns", "unique", "valid"},
-        replace_index = replace_index or existing_index["key"] != PRIMARY_COLLECTION_INDEX,
-        replace_index = replace_index or existing_index["unique"] is not True,
+        if not replace_index:
+            replace_index = existing_index.keys() != {"key", "ns", "unique", "valid"}
+        if not replace_index:
+            replace_index = existing_index["key"] != PRIMARY_COLLECTION_INDEX
+        if not replace_index:
+            replace_index = existing_index["unique"] is not True
 
         if replace_index:
             del index_information[PRIMARY_COLLECTION_INDEX_NAME]
@@ -69,7 +96,7 @@ def ensure_index(
 def get_set(
     *,
     collection: pymongo.collection.Collection,
-    doc_type: str,
+    document_type: str,
 ) -> Optional[List[dict]]:
     """
     Retrieve all elements of set with "_type" of doc_type.
@@ -78,7 +105,7 @@ def get_set(
     """
 
     # Parameters in query pipeline
-    query_document_type = doc_type
+    query_document_type = document_type
 
     # Query pipeline
     pipeline = [
@@ -109,10 +136,10 @@ def get_set(
 
 
 def get_set_element(
-        *,
-        collection: pymongo.collection.Collection,
-        doc_type: str,
-        set_id: str,
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    set_id: str,
 ) -> Optional[dict]:
     """
     Retrieve all elements of set with "_type" of doc_type.
@@ -121,15 +148,17 @@ def get_set_element(
     """
 
     # Parameters in query pipeline
-    query_document_type = doc_type
+    query_document_type = document_type
     query_set_id = set_id
 
     # Query pipeline
     pipeline = [
-        {"$match": {
-            "_type": query_document_type,
-            "_set_id": query_set_id,
-        }},
+        {
+            "$match": {
+                "_type": query_document_type,
+                "_set_id": query_set_id,
+            }
+        },
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -157,7 +186,7 @@ def get_set_element(
 def get_singleton(
     *,
     collection: pymongo.collection.Collection,
-    doc_type: str,
+    document_type: str,
 ) -> Optional[dict]:
     """
     Retrieve current document for singleton with "_type" of doc_type.
@@ -166,7 +195,7 @@ def get_singleton(
     """
 
     # Parameters in query pipeline
-    query_document_type = doc_type
+    query_document_type = document_type
 
     # Query pipeline
     pipeline = [
@@ -193,3 +222,17 @@ def get_singleton(
     _normalize_document(document=result)
 
     return result
+
+
+def insert(
+    *,
+    collection: pymongo.collection.Collection,
+    document: dict,
+) -> dict:
+    # TODO: define semantics of this method, in place now so we're forced to use it
+
+    result = collection.insert_one(document)
+
+    _normalize_document(document=document)
+
+    return document

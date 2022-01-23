@@ -45,7 +45,7 @@ def test_get_set(
 
     result = scope.database.collection_utils.get_set(
         collection=collection,
-        doc_type="set",
+        document_type="set",
     )
 
     # Remove the "_id" field that was created upon insertion
@@ -69,7 +69,7 @@ def test_get_set_not_found(
 
     result = scope.database.collection_utils.get_set(
         collection=collection,
-        doc_type="nothing",
+        document_type="nothing",
     )
 
     assert result is None
@@ -86,7 +86,7 @@ def test_get_set_element(
 
     result = scope.database.collection_utils.get_set_element(
         collection=collection,
-        doc_type="set",
+        document_type="set",
         set_id="1",
     )
 
@@ -107,7 +107,7 @@ def test_get_set_element_not_found(
 
     result = scope.database.collection_utils.get_set_element(
         collection=collection,
-        doc_type="set",
+        document_type="set",
         set_id="nothing",
     )
 

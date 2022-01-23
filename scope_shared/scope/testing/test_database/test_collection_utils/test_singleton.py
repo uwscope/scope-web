@@ -45,7 +45,7 @@ def test_get_singleton(
 
     result = scope.database.collection_utils.get_singleton(
         collection=collection,
-        doc_type="singleton",
+        document_type="singleton",
     )
 
     # Remove the "_id" field that was created upon insertion
@@ -65,7 +65,7 @@ def test_get_singleton_not_found(
 
     result = scope.database.collection_utils.get_singleton(
         collection=collection,
-        doc_type="nothing",
+        document_type="nothing",
     )
 
     assert result is None
