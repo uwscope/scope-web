@@ -50,9 +50,9 @@ export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: s
 export const getAssessmentScoreColorName = (assessmentId: string, totalScore: number) => {
     const lowAssessmentId = assessmentId.toLowerCase();
     if (lowAssessmentId == 'phq-9' || lowAssessmentId == 'gad-7') {
-        if (totalScore > 15) {
+        if (totalScore >= 15) {
             return 'bad';
-        } else if (totalScore > 10) {
+        } else if (totalScore >= 10) {
             return 'warning';
         } else if (totalScore >= 0) {
             return 'good';
