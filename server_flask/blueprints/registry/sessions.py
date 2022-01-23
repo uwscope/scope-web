@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.sessions
+import scope.database.patient.sessions
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -21,7 +21,7 @@ registry_sessions_blueprint = Blueprint(
 def get_sessions(patient_collection):
     context = request_context()
 
-    result = scope.database.sessions.get_sessions(
+    result = scope.database.patient.sessions.get_sessions(
         database=context.database, collection_name=patient_collection
     )
 
@@ -48,7 +48,7 @@ def create_session(patient_collection):
 
     context = request_context()
 
-    result = scope.database.sessions.create_session(
+    result = scope.database.patient.sessions.create_session(
         database=context.database,
         collection_name=patient_collection,
         session=session,
@@ -69,7 +69,7 @@ def create_session(patient_collection):
 def get_session(patient_collection, session_id):
     context = request_context()
 
-    result = scope.database.sessions.get_session(
+    result = scope.database.patient.sessions.get_session(
         database=context.database,
         collection_name=patient_collection,
         session_id=session_id,
@@ -101,7 +101,7 @@ def update_session(patient_collection, session_id):
 
     context = request_context()
 
-    result = scope.database.sessions.update_session(
+    result = scope.database.patient.sessions.update_session(
         database=context.database,
         collection_name=patient_collection,
         session=session,

@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.assessment_logs
+import scope.database.patient.assessment_logs
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -21,7 +21,7 @@ registry_assessment_logs_blueprint = Blueprint(
 def get_assessment_logs(patient_collection):
     context = request_context()
 
-    result = scope.database.assessment_logs.get_assessment_logs(
+    result = scope.database.patient.assessment_logs.get_assessment_logs(
         database=context.database, collection_name=patient_collection
     )
 
@@ -48,7 +48,7 @@ def create_assessment_log(patient_collection):
 
     context = request_context()
 
-    result = scope.database.assessment_logs.create_assessment_log(
+    result = scope.database.patient.assessment_logs.create_assessment_log(
         database=context.database,
         collection_name=patient_collection,
         assessment_log=assessment_log,
@@ -69,7 +69,7 @@ def create_assessment_log(patient_collection):
 def get_assessment_log(patient_collection, log_id):
     context = request_context()
 
-    result = scope.database.assessment_logs.get_assessment_log(
+    result = scope.database.patient.assessment_logs.get_assessment_log(
         database=context.database,
         collection_name=patient_collection,
         log_id=log_id,
@@ -101,7 +101,7 @@ def update_assessment_log(patient_collection, log_id):
 
     context = request_context()
 
-    result = scope.database.assessment_logs.update_assessment_log(
+    result = scope.database.patient.assessment_logs.update_assessment_log(
         database=context.database,
         collection_name=patient_collection,
         assessment_log=assessment_log,

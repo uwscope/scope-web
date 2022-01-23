@@ -15,6 +15,8 @@ API_RELATIVE_PATH = "patients/"
 # TODO: This could be renamed better.
 API_QUERY_PATH = "assessmentlogs"
 
+# TODO: James to Review
+pytest.skip("Not reviewed", allow_module_level=True)
 
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_flask_get_assessment_logs(

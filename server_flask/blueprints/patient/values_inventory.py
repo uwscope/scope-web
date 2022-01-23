@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.values_inventory
+import scope.database.patient.values_inventory
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -22,7 +22,7 @@ patient_values_inventory_blueprint = Blueprint(
 def get_patient_values(patient_collection):
     context = request_context()
 
-    result = scope.database.values_inventory.get_values_inventory(
+    result = scope.database.patient.values_inventory.get_values_inventory(
         database=context.database, collection_name=patient_collection
     )
 
@@ -51,7 +51,7 @@ def update_patient_values(patient_collection):
 
     context = request_context()
 
-    result = scope.database.values_inventory.create_values_inventory(
+    result = scope.database.patient.values_inventory.create_values_inventory(
         database=context.database,
         collection_name=patient_collection,
         values_inventory=values_inventory,
