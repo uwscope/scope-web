@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.clinical_history
+import scope.database.patient.clinical_history
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -22,7 +22,7 @@ registry_clinical_history_blueprint = Blueprint(
 def get_patient_clinical_history(patient_collection):
     context = request_context()
 
-    result = scope.database.clinical_history.get_clinical_history(
+    result = scope.database.patient.clinical_history.get_clinical_history(
         database=context.database, collection_name=patient_collection
     )
 
@@ -49,7 +49,7 @@ def update_patient_clinical_history(patient_collection):
 
     context = request_context()
 
-    result = scope.database.clinical_history.create_clinical_history(
+    result = scope.database.patient.clinical_history.create_clinical_history(
         database=context.database,
         collection_name=patient_collection,
         clinical_history=clinical_history,

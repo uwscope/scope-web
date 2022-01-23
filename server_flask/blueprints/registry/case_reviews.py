@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.case_reviews
+import scope.database.patient.case_reviews
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -21,7 +21,7 @@ registry_case_reviews_blueprint = Blueprint(
 def get_case_reviews(patient_collection):
     context = request_context()
 
-    result = scope.database.case_reviews.get_case_reviews(
+    result = scope.database.patient.case_reviews.get_case_reviews(
         database=context.database, collection_name=patient_collection
     )
 
@@ -48,7 +48,7 @@ def create_case_review(patient_collection):
 
     context = request_context()
 
-    result = scope.database.case_reviews.create_case_review(
+    result = scope.database.patient.case_reviews.create_case_review(
         database=context.database,
         collection_name=patient_collection,
         case_review=case_review,
@@ -69,7 +69,7 @@ def create_case_review(patient_collection):
 def get_case_review(patient_collection, review_id):
     context = request_context()
 
-    result = scope.database.case_reviews.get_case_review(
+    result = scope.database.patient.case_reviews.get_case_review(
         database=context.database,
         collection_name=patient_collection,
         review_id=review_id,
@@ -101,7 +101,7 @@ def update_case_review(patient_collection, review_id):
 
     context = request_context()
 
-    result = scope.database.case_reviews.update_case_review(
+    result = scope.database.patient.case_reviews.update_case_review(
         database=context.database,
         collection_name=patient_collection,
         case_review=case_review,

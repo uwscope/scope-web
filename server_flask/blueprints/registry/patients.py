@@ -2,7 +2,7 @@ import http
 from functools import wraps
 
 import scope.database
-import scope.database.patients
+import scope.database.patient.patients
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
@@ -19,7 +19,7 @@ registry_patients_blueprint = Blueprint(
 def get_patients():
     context = request_context()
 
-    patients = scope.database.patients.get_patients(database=context.database)
+    patients = scope.database.patient.patients.get_patients(database=context.database)
     return {"patients": patients}, http.HTTPStatus.OK
 
 
@@ -28,7 +28,7 @@ def get_patients():
 def get_patient(patient_collection):
     context = request_context()
 
-    result = scope.database.patients.get_patient(
+    result = scope.database.patient.patients.get_patient(
         database=context.database, collection_name=patient_collection
     )
 
@@ -47,7 +47,7 @@ def create_patient():
 
     context = request_context()
 
-    created_patient = scope.database.patients.create_patient(
+    created_patient = scope.database.patient.patients.create_patient(
         database=context.database, patient=patient
     )
     if created_patient is not None:
