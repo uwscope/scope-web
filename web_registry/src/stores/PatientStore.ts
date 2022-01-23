@@ -358,8 +358,6 @@ export class PatientStore implements IPatientStore {
     }
 
     private setPatientData(patient: IPatient) {
-        console.log(patient);
-
         Object.assign(this, patient);
     }
 

@@ -3,7 +3,7 @@ import { AccordionDetails, alpha, FormControlLabel, Switch, Typography } from '@
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import withTheme from '@mui/styles/withTheme';
-import { addWeeks, compareAsc, differenceInWeeks, format, nextSunday, previousSunday } from 'date-fns';
+import { addHours, addWeeks, compareAsc, differenceInWeeks, format, nextSunday, previousSunday } from 'date-fns';
 import throttle from 'lodash.throttle';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -102,7 +102,7 @@ export interface IVisDataPoint {
 }
 
 export interface IAssessmentChartProps {
-    data: Array<IVisDataPoint>;
+    data: Array<IVisDataPoint>; // Data points should be sorted in date ascending
     maxValue: number;
     useTime?: boolean;
     scaleOrder?: string[];
@@ -147,6 +147,8 @@ export const AssessmentVis = withTheme(
 
         const toggleExpand = action(() => {
             state.expanded = !state.expanded;
+            state.hoveredPoint = undefined;
+            state.hoveredIndex = undefined;
 
             if (state.expanded && state.visibility.length != dataKeys.length) {
                 state.visibility = dataKeys.map((key, idx) => ({
@@ -184,10 +186,66 @@ export const AssessmentVis = withTheme(
                 (d) => compareAsc(minDate, d.recordedDate) < 0 && compareAsc(maxDate, d.recordedDate) > 0
             );
 
-            const dataPoints = filteredData.map(
+            const dailyPoints = filteredData.map(
                 (d) =>
                     ({
-                        x: (useTime ? d.recordedDate : clearTime(d.recordedDate)).getTime(),
+                        x: addHours(clearTime(d.recordedDate), useTime ? 12 : 0).getTime(),
+                        y: getAssessmentScore(d.pointValues),
+                        _x: d.recordedDate.getTime(),
+                    } as Point)
+            );
+
+            const reduced = dailyPoints.reduce((m, d) => {
+                const key = d.x.toString();
+                const value = d.y as number;
+
+                const found = m.get(key);
+                if (!found) {
+                    m.set(key, {
+                        points: value,
+                        count: 1,
+                        source: [
+                            {
+                                x: d._x,
+                                y: d.y,
+                            },
+                        ],
+                    });
+                } else {
+                    m.set(key, {
+                        count: found.count + 1,
+                        points: found.points + value,
+                        source: [
+                            ...found.source,
+                            {
+                                x: d._x,
+                                y: d.y,
+                            },
+                        ],
+                    });
+                }
+
+                return m;
+            }, new Map<string, { count: number; points: number; source: Point[] }>());
+
+            const dataPoints = Array.from(reduced.keys())
+                .map((k) => {
+                    const item = reduced.get(k);
+
+                    if (!!item) {
+                        return {
+                            x: Number(k),
+                            y: item.points / item.count,
+                            source: item.source,
+                        };
+                    }
+                })
+                .filter((k) => k != undefined) as Point[];
+
+            const timedDataPoints = filteredData.map(
+                (d) =>
+                    ({
+                        x: d.recordedDate.getTime(),
                         y: getAssessmentScore(d.pointValues),
                     } as Point)
             );
@@ -211,7 +269,6 @@ export const AssessmentVis = withTheme(
             const xWeeks = differenceInWeeks(maxDate, minDate);
             const minXTicks = Math.min(Math.floor(width / 60), xWeeks);
             const xTickAngle = minXTicks < xWeeks ? -45 : 0;
-            console.log('ticks', width, xWeeks, minXTicks);
 
             return (
                 <Container>
@@ -234,6 +291,13 @@ export const AssessmentVis = withTheme(
                                 tickFormat={(tick: number) => format(tick, 'MMM d')}
                             />
                             <YAxis title="Score" tickTotal={minYTicks} />
+                            {useTime && (
+                                <MarkSeries
+                                    data={timedDataPoints}
+                                    color={alpha(props.theme.palette.primary.dark, 0.2)}
+                                    strokeWidth={0}
+                                />
+                            )}
                             {state.expanded ? (
                                 state.visibility
                                     .filter(({ visible }) => visible)
@@ -263,7 +327,7 @@ export const AssessmentVis = withTheme(
                                     color={props.theme.palette.primary.dark}
                                 />
                             )}
-                            {state.hoveredPoint && data[state.hoveredIndex as number] && (
+                            {state.hoveredPoint && !state.expanded && (
                                 <Crosshair
                                     values={[state.hoveredPoint]}
                                     style={{
@@ -272,15 +336,22 @@ export const AssessmentVis = withTheme(
                                         },
                                     }}>
                                     <CrosshairContainer>
-                                        <div>
-                                            Date:{' '}
-                                            {format(data[state.hoveredIndex as number].recordedDate, 'MM/dd/yyyy')}
-                                        </div>
-                                        {dataKeys.map((key) => (
-                                            <div key={key}>
-                                                {key}: {data[state.hoveredIndex as number].pointValues[key]}
-                                            </div>
-                                        ))}
+                                        <div>Date: {format(state.hoveredPoint.x as number, 'MM/dd/yyyy')}</div>
+                                        {!useTime &&
+                                            dataKeys.map((key) => (
+                                                <div key={key}>
+                                                    {`${useTime ? 'Average ' : ''}${key}`}:{' '}
+                                                    {data[state.hoveredIndex as number].pointValues[key]}
+                                                </div>
+                                            ))}
+                                        {useTime &&
+                                            ((state.hoveredPoint as any).source as { x: number; y: number }[]).map(
+                                                (p) => (
+                                                    <div key={p.x.toString()}>
+                                                        {`${format(p.x as number, 'hh:mm aaa')}: ${p.y}`}
+                                                    </div>
+                                                )
+                                            )}
                                     </CrosshairContainer>
                                 </Crosshair>
                             )}
