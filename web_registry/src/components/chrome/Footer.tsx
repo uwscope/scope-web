@@ -20,9 +20,11 @@ const FooterContainer = withTheme(
 
 export const Footer: FunctionComponent = () => {
     return (
-        <FooterContainer>
-            <Disclaimer>Prototype by UW</Disclaimer>
-        </FooterContainer>
+        <footer style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+            <FooterContainer>
+                <Disclaimer>Prototype by UW</Disclaimer>
+            </FooterContainer>
+        </footer>
     );
 };
 
