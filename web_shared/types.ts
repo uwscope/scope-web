@@ -196,6 +196,7 @@ export interface IContact {
 export interface ISafetyPlan {
     assigned: boolean;
     assignedDate: Date;
+    lastUpdatedDate?: Date;
     reasonsForLiving?: string;
     warningSigns?: string[];
     copingStrategies?: string[];
@@ -209,6 +210,7 @@ export interface ISafetyPlan {
 export interface IValuesInventory {
     assigned: boolean;
     assignedDate: Date;
+    lastUpdatedDate?: Date;
     values?: ILifeAreaValue[];
 }
 

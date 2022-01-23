@@ -1,6 +1,6 @@
-import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
@@ -15,7 +15,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     } = useStores();
     const currentPatient = usePatient();
     const { valuesInventory } = currentPatient;
-    const { assigned, assignedDate, values } = valuesInventory;
+    const { assigned, assignedDate, lastUpdatedDate, values } = valuesInventory;
 
     const lifeareaMap = Object.assign({}, ...lifeAreas.map((la) => ({ [la.id]: la.name }))) as KeyedMap<string>;
 
@@ -35,15 +35,24 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         })
         .reduce((a, b) => a.concat(b), []);
 
+    var dateStrings: string[] = [];
+    if (assigned && !!assignedDate) {
+        dateStrings.push(
+            `${getString('patient_values_inventory_assigned_date')} ${format(assignedDate, 'MM/dd/yyyy')}`
+        );
+    }
+
+    if (!!lastUpdatedDate) {
+        dateStrings.push(
+            `${getString('patient_values_inventory_activity_date_header')} ${format(lastUpdatedDate, 'MM/dd/yyyy')}`
+        );
+    }
+
     return (
         <ActionPanel
             id={getString('patient_detail_subsection_values_inventory_hash')}
             title={getString('patient_detail_subsection_values_inventory_title')}
-            inlineTitle={
-                assigned
-                    ? `${getString('patient_values_inventory_assigned_date')} ${format(assignedDate, 'MM/dd/yyyy')}`
-                    : ''
-            }
+            inlineTitle={dateStrings.join(', ')}
             loading={currentPatient?.state == 'Pending'}
             actionButtons={[
                 {
@@ -51,16 +60,16 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     text: assigned
                         ? getString('patient_values_inventory_assigned_button')
                         : getString('patient_values_inventory_assign_button'),
-                    onClick: assigned ? undefined : () => currentPatient?.assignValuesInventory(),
+                    onClick: () => currentPatient?.assignValuesInventory(),
                 } as IActionButton,
             ]}>
             <Grid container spacing={2} alignItems="stretch">
-                <TableContainer>
-                    {!activities || activities.length == 0 ? (
-                        <Grid item xs={12}>
-                            <Typography>{getString('patient_values_inventory_empty')}</Typography>
-                        </Grid>
-                    ) : (
+                {!activities || activities.length == 0 ? (
+                    <Grid item xs={12}>
+                        <Typography>{getString('patient_values_inventory_empty')}</Typography>
+                    </Grid>
+                ) : (
+                    <TableContainer>
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -93,8 +102,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 ))}
                             </TableBody>
                         </Table>
-                    )}
-                </TableContainer>
+                    </TableContainer>
+                )}
             </Grid>
         </ActionPanel>
     );
