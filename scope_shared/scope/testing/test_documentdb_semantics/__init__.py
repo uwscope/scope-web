@@ -1,7 +1,5 @@
 """
-Import all tests that should be executed to check database assumptions about database semantics.
-
-Packages can then import this single module.
+Module testing assumptions and understanding of AWS DocumentDB behavior and semantics.
 """
 
 from scope.testing.test_documentdb_semantics.test_index import *
