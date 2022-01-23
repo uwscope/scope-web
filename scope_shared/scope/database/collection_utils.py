@@ -1,4 +1,5 @@
 import pymongo.collection
+from typing import List
 from typing import Optional
 
 
@@ -13,13 +14,15 @@ PRIMARY_COLLECTION_INDEX_NAME = "_primary"
 def _normalize_document(
     *,
     document: dict,
-) -> dict:
+) -> None:
+    """
+    Currently implemented to modify document in place.
+    """
+
     # Ensure retrieved _id can easily serialize
     doc_id = document.get("_id", None)
     if (doc_id is not None) and (not isinstance(doc_id, str)):
         document["_id"] = str(doc_id)
-
-    return document
 
 
 def ensure_index(
@@ -63,6 +66,94 @@ def ensure_index(
         )
 
 
+def get_set(
+    *,
+    collection: pymongo.collection.Collection,
+    doc_type: str,
+) -> Optional[List[dict]]:
+    """
+    Retrieve all elements of set with "_type" of doc_type.
+
+    If none exist, return None.
+    """
+
+    # Parameters in query pipeline
+    query_document_type = doc_type
+
+    # Query pipeline
+    pipeline = [
+        {"$match": {"_type": query_document_type}},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": "$_set_id",
+                "result": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$result"}},
+    ]
+
+    # Execute pipeline, obtain list of results
+    with collection.aggregate(pipeline) as pipeline_result:
+        # Confirm a result was found
+        if not pipeline_result.alive:
+            return None
+
+        result = list(pipeline_result)
+
+    # Normalize the results
+    for result_current in result:
+        _normalize_document(document=result_current)
+
+    return result
+
+
+def get_set_element(
+        *,
+        collection: pymongo.collection.Collection,
+        doc_type: str,
+        set_id: str,
+) -> Optional[dict]:
+    """
+    Retrieve all elements of set with "_type" of doc_type.
+
+    If none exist, return None.
+    """
+
+    # Parameters in query pipeline
+    query_document_type = doc_type
+    query_set_id = set_id
+
+    # Query pipeline
+    pipeline = [
+        {"$match": {
+            "_type": query_document_type,
+            "_set_id": query_set_id,
+        }},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": None,
+                "result": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$result"}},
+    ]
+
+    # Execute pipeline, obtain single result
+    with collection.aggregate(pipeline) as pipeline_result:
+        # Confirm a result was found
+        if not pipeline_result.alive:
+            return None
+
+        result = pipeline_result.next()
+
+    # Normalize the result
+    _normalize_document(document=result)
+
+    return result
+
+
 def get_singleton(
     *,
     collection: pymongo.collection.Collection,
@@ -99,6 +190,6 @@ def get_singleton(
         result = pipeline_result.next()
 
     # Normalize the result
-    result = _normalize_document(document=result)
+    _normalize_document(document=result)
 
     return result
