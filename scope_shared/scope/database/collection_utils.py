@@ -2,12 +2,12 @@ import pymongo.collection
 from typing import Optional
 
 
-PATIENT_COLLECTION_INDEX = [
+PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
     ("_set_id", pymongo.ASCENDING),
     ("_rev", pymongo.DESCENDING),
 ]
-PATIENT_COLLECTION_INDEX_NAME = "_primary"
+PRIMARY_COLLECTION_INDEX_NAME = "_primary"
 
 
 def _normalize_document(
@@ -36,30 +36,30 @@ def ensure_index(
     # Remove any indices that are not expected
     indices_unexpected = set(index_information.keys()) - {
         "_id_",
-        PATIENT_COLLECTION_INDEX_NAME,
+        PRIMARY_COLLECTION_INDEX_NAME,
     }
     for index_unexpected in indices_unexpected:
         del index_information[index_unexpected]
         collection.drop_index(index_unexpected)
 
     # Determine if an existing index needs replaced
-    if PATIENT_COLLECTION_INDEX_NAME in index_information:
-        existing_index = index_information[PATIENT_COLLECTION_INDEX_NAME]
+    if PRIMARY_COLLECTION_INDEX_NAME in index_information:
+        existing_index = index_information[PRIMARY_COLLECTION_INDEX_NAME]
         replace_index = False
         replace_index = replace_index or existing_index.keys() != {"key", "ns", "unique", "valid"},
-        replace_index = replace_index or existing_index["key"] != PATIENT_COLLECTION_INDEX,
+        replace_index = replace_index or existing_index["key"] != PRIMARY_COLLECTION_INDEX,
         replace_index = replace_index or existing_index["unique"] is not True,
 
         if replace_index:
-            del index_information[PATIENT_COLLECTION_INDEX_NAME]
-            collection.drop_index(PATIENT_COLLECTION_INDEX_NAME)
+            del index_information[PRIMARY_COLLECTION_INDEX_NAME]
+            collection.drop_index(PRIMARY_COLLECTION_INDEX_NAME)
 
     # Create the index
-    if PATIENT_COLLECTION_INDEX_NAME not in index_information:
+    if PRIMARY_COLLECTION_INDEX_NAME not in index_information:
         collection.create_index(
-            PATIENT_COLLECTION_INDEX,
+            PRIMARY_COLLECTION_INDEX,
             unique=True,
-            name=PATIENT_COLLECTION_INDEX_NAME,
+            name=PRIMARY_COLLECTION_INDEX_NAME,
         )
 
 

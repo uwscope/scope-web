@@ -1,7 +1,7 @@
 import pymongo.collection
 from typing import Callable
 
-import scope.database.patient_collection_utils
+import scope.database.collection_utils
 
 
 def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
@@ -43,7 +43,7 @@ def test_get_singleton(
     collection = temp_collection_client_factory()
     _configure_collection(collection=collection)
 
-    result = scope.database.patient_collection_utils.get_singleton(
+    result = scope.database.collection_utils.get_singleton(
         collection=collection,
         doc_type="singleton",
     )
@@ -63,7 +63,7 @@ def test_get_singleton_not_found(
     collection = temp_collection_client_factory()
     _configure_collection(collection=collection)
 
-    result = scope.database.patient_collection_utils.get_singleton(
+    result = scope.database.collection_utils.get_singleton(
         collection=collection,
         doc_type="nothing",
     )
