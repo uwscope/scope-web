@@ -64,6 +64,7 @@ const _strings = {
     patient_progress_activity_header_due_date: 'Due date',
     patient_progress_activity_header_submitted_date: 'Submitted date',
     patient_progress_activity_header_success: 'Completed',
+    patient_progress_activity_header_alternative: 'Alternative',
     patient_progress_activity_header_pleasure: 'Pleasure',
     patient_progress_activity_header_accomplishment: 'Accomplishment',
     patient_progress_activity_header_comment: 'Note',

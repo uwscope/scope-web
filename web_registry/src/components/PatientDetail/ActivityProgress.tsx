@@ -48,6 +48,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             dueDate: format(log.dueDate, 'MM/dd/yyyy'),
             recordedDate: log.completed && log.recordedDate ? format(log.recordedDate, 'MM/dd/yyyy') : '--',
             completed: log.completed && log.success ? getCompleted(log.success) : '--',
+            alternative: log.alternative || '--',
             pleasure: log.completed ? log.pleasure : '--',
             accomplishment: log.completed ? log.accomplishment : '--',
             comment: log.completed ? log.comment : '--',
@@ -79,6 +80,13 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             headerName: getString('patient_progress_activity_header_success'),
             width: 200,
             sortable: true,
+            hideSortIcons: false,
+        },
+        {
+            field: 'alternative',
+            headerName: getString('patient_progress_activity_header_alternative'),
+            width: 200,
+            sortable: false,
             hideSortIcons: false,
         },
         {
