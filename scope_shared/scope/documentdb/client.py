@@ -108,10 +108,10 @@ def documentdb_client_database(
     port: int,
     direct_connection: bool,
     tls_insecure: bool,
-    user: str,
-    password: str,
     # Desired database
     database_name: str,
+    user: str,
+    password: str,
 ) -> pymongo.database.Database:
     """
     Obtain a DocumentDB client, authenticated as the user associated with a specific database.

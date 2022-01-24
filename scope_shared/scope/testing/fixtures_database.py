@@ -34,10 +34,9 @@ def _fixture_database_client(
             # DocumentDB requires SSL, but port forwarding means the certificate will not match
             tls_insecure=True,
             # Connect as database user
+            database_name=database_config.name,
             user=database_config.user,
             password=database_config.password,
-            # Desired database
-            database_name=database_config.name
         )
 
         #
