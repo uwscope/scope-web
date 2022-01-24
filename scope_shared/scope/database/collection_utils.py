@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import pymongo.collection
 from typing import List
 from typing import Optional
@@ -99,7 +100,7 @@ def get_set(
     document_type: str,
 ) -> Optional[List[dict]]:
     """
-    Retrieve all elements of set with "_type" of doc_type.
+    Retrieve all elements of set with "_type" of document_type.
 
     If none exist, return None.
     """
@@ -142,7 +143,7 @@ def get_set_element(
     set_id: str,
 ) -> Optional[dict]:
     """
-    Retrieve all elements of set with "_type" of doc_type.
+    Retrieve all elements of set with "_type" document_type.
 
     If none exist, return None.
     """
@@ -189,7 +190,7 @@ def get_singleton(
     document_type: str,
 ) -> Optional[dict]:
     """
-    Retrieve current document for singleton with "_type" of doc_type.
+    Retrieve current document for singleton with "_type" document_type.
 
     If none exists, return None.
     """
@@ -224,15 +225,128 @@ def get_singleton(
     return result
 
 
-def insert(
+# def put_set_element(
+#     *,
+#     collection: pymongo.collection.Collection,
+#     document_type: str,
+#     set_id: str,
+# )
+#
+# def insert(
+#     *,
+#     collection: pymongo.collection.Collection,
+#     document: dict,
+# ) -> dict:
+#     # TODO: define semantics of this method, in place now so we're forced to use it
+#
+#     result = collection.insert_one(document)
+#
+#     _normalize_document(document=document)
+#
+#     return document
+
+
+@dataclass(frozen=True)
+class PutResult:
+    inserted_count: int
+    inserted_id: str
+    document: dict
+
+
+def put_set_element(
     *,
     collection: pymongo.collection.Collection,
-    document: dict,
-) -> dict:
-    # TODO: define semantics of this method, in place now so we're forced to use it
+    document_type: str,
+    set_id: str,
+    document: dict
+) -> PutResult:
+    """
+    Put a set element document.
+    - Document must not already include an "_id".
+    - An existing "_type" must match document_type.
+    - An existing "_set_id" must match set_id.
+    - An existing "_rev" will be incremented.
+    """
 
-    result = collection.insert_one(document)
+    # Document must not include an "_id",
+    # as this indicates it was retrieved from the database.
+    if "_id" in document:
+        raise ValueError("Document must not have existing \"_id\"")
+
+    # If a document includes a "_type", it must match document_type.
+    if "_type" in document:
+        if document["_type"] != document_type:
+            raise ValueError("document[\"_type\"] must match document_type")
+    else:
+        document["_type"] = document_type
+
+    # If a document includes a "_set_id", it must match set_id.
+    if "_set_id" in document:
+        if document["_set_id"] != set_id:
+            raise ValueError("document[\"_set_id\"] must match set_id")
+    else:
+        document["_set_id"] = set_id
+
+    # Increment the "_rev"
+    if "_rev" in document:
+        if not isinstance(document["_rev"], int):
+            raise ValueError("document[\"_rev\"] must be int")
+
+        document["_rev"] += 1
+    else:
+        document["_rev"] = 1
+
+    result = collection.insert_one(document=document)
 
     _normalize_document(document=document)
 
-    return document
+    return PutResult(
+        inserted_count=1,
+        inserted_id=str(result.inserted_id),
+        document=document
+    )
+
+
+def put_singleton(
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    document: dict
+) -> PutResult:
+    """
+    Put a singleton document.
+    - Document must not already include an "_id".
+    - An existing "_type" must match document_type.
+    - An existing "_rev" will be incremented.
+    """
+
+    # Document must not include an "_id",
+    # as this indicates it was retrieved from the database.
+    if "_id" in document:
+        raise ValueError("Document must not have existing \"_id\"")
+
+    # If a document includes a "_type", it must match document_type.
+    if "_type" in document:
+        if document["_type"] != document_type:
+            raise ValueError("document[\"_type\"] must match document_type")
+    else:
+        document["_type"] = document_type
+
+    # Increment the "_rev"
+    if "_rev" in document:
+        if not isinstance(document["_rev"], int):
+            raise ValueError("document[\"_rev\"] must be int")
+
+        document["_rev"] += 1
+    else:
+        document["_rev"] = 1
+
+    result = collection.insert_one(document=document)
+
+    _normalize_document(document=document)
+
+    return PutResult(
+        inserted_count=1,
+        inserted_id=str(result.inserted_id),
+        document=document
+    )
