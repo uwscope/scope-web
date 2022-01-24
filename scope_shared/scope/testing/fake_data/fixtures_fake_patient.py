@@ -357,47 +357,47 @@ def data_fake_clinical_history_factory() -> dict:
     return fake_clinical_history
 
 
-def data_fake_values_inventory_factory() -> dict:
-    fake_values_inventory = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "valuesInventory",
-        "_rev": 1,
-        "assigned": True,
-        "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
-        "values": [
-            {
-                "id": "id",
-                "name": "name",
-                "dateCreated": "",
-                "dateEdited": "",
-                "lifeareaId": "",
-                "activities": [
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                ],
-            }
-        ],
-    }
-
-    # Verify the schema
-    result = values_inventory_schema.evaluate(JSON(fake_values_inventory))
-    assert result.output("flag")["valid"] == True
-
-    return fake_values_inventory
+# def data_fake_values_inventory_factory() -> dict:
+#     fake_values_inventory = {
+#         # "_id": str(bson.objectid.ObjectId()),
+#         "_type": "valuesInventory",
+#         "_rev": 1,
+#         "assigned": True,
+#         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
+#         "values": [
+#             {
+#                 "id": "id",
+#                 "name": "name",
+#                 "dateCreated": "",
+#                 "dateEdited": "",
+#                 "lifeareaId": "",
+#                 "activities": [
+#                     {
+#                         "id": "id",
+#                         "name": "name",
+#                         "valueId": "",
+#                         "dateCreated": "",
+#                         "dateEdited": "",
+#                         "lifeareaId": "",
+#                     },
+#                     {
+#                         "id": "id",
+#                         "name": "name",
+#                         "valueId": "",
+#                         "dateCreated": "",
+#                         "dateEdited": "",
+#                         "lifeareaId": "",
+#                     },
+#                 ],
+#             }
+#         ],
+#     }
+#
+#     # Verify the schema
+#     result = values_inventory_schema.evaluate(JSON(fake_values_inventory))
+#     assert result.output("flag")["valid"] == True
+#
+#     return fake_values_inventory
 
 
 def data_fake_safety_plan_factory() -> dict:

@@ -7,5 +7,5 @@ PYTEST_PLUGINS = [
     "scope.testing.fixtures_database",
     "scope.testing.fixtures_documentdb",
     "scope.testing.fixtures_flask",
-    "scope.testing.data.fixtures_fake_patient",
+    "scope.testing.fake_data.fixtures_fake_patient",
 ]
