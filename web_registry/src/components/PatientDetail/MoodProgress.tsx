@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
-import { format } from 'date-fns';
+import { compareAsc, format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import React, { FunctionComponent } from 'react';
 import { IAssessment, IMoodLog } from 'shared/types';
@@ -96,10 +96,13 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
                     <Grid item xs={12}>
                         <AssessmentVis
-                            data={sortedMoodLogs.map((log) => ({
-                                recordedDate: log.recordedDate,
-                                pointValues: { Mood: log.mood },
-                            }))}
+                            data={moodLogs
+                                .slice()
+                                .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))
+                                .map((log) => ({
+                                    recordedDate: log.recordedDate,
+                                    pointValues: { Mood: log.mood },
+                                }))}
                             maxValue={maxValue}
                             useTime={true}
                         />

@@ -1,8 +1,9 @@
-import { FormControlLabel, InputLabel, Switch } from '@mui/material';
-import withStyles from '@mui/styles/withStyles';
+import ReadMoreIcon from '@mui/icons-material/ReadMore';
+import { AccordionDetails, alpha, FormControlLabel, Switch, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import withTheme from '@mui/styles/withTheme';
-import { addDays, format } from 'date-fns';
-import { addMonths } from 'date-fns/esm';
+import { addHours, addWeeks, compareAsc, differenceInWeeks, format, nextSunday, previousSunday } from 'date-fns';
 import throttle from 'lodash.throttle';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -28,7 +29,7 @@ import styled, { ThemedStyledProps } from 'styled-components';
 const Container = withTheme(
     styled.div({
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
     })
 );
 
@@ -38,22 +39,37 @@ const ChartContainer = withTheme(
     })
 );
 
-const LegendContainer = withTheme(
-    styled.div((props) => ({
-        width: 150,
-        margin: props.theme.spacing(1, 2),
-        fontSize: '0.95em',
-    }))
-);
+const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    '&:not(:last-child)': {
+        borderBottom: 0,
+    },
+    '&:before': {
+        display: 'none',
+    },
+}));
 
-const LegendTitle = styled(InputLabel)({
-    fontSize: '1em',
-    textTransform: 'uppercase',
-});
+const AccordionSummary = styled((props) => (
+    <MuiAccordionSummary expandIcon={<ReadMoreIcon sx={{ fontSize: '0.9rem' }} />} {...props} />
+))(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : 'rgba(0, 0, 0, .03)',
+    minHeight: 'auto',
+    flexDirection: 'row-reverse',
+    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+        transform: 'rotate(90deg)',
+    },
+    '& .MuiAccordionSummary-content': {
+        marginLeft: theme.spacing(1),
+    },
+}));
 
 const LegendArea = withTheme(
     styled.div((props) => ({
         margin: props.theme.spacing(1, 2),
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        flexWrap: 'wrap',
     }))
 );
 
@@ -61,22 +77,24 @@ const CrosshairContainer = withTheme(
     styled.div((props) => ({
         margin: props.theme.spacing(1),
         minWidth: 100,
+        color: props.theme.palette.text.secondary,
     }))
 );
 
 const getColoredSwitch = (color: string) =>
-    withStyles({
-        switchBase: {
-            '&$checked': {
+    withTheme(
+        styled(Switch)((props) => ({
+            '& .MuiSwitch-switchBase.Mui-checked': {
                 color: color,
+                '&:hover': {
+                    backgroundColor: alpha(color, props.theme.palette.action.hoverOpacity),
+                },
             },
-            '&$checked + $track': {
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                 backgroundColor: color,
             },
-        },
-        checked: {},
-        track: {},
-    })(Switch);
+        }))
+    );
 
 export interface IVisDataPoint {
     recordedDate: Date;
@@ -84,9 +102,10 @@ export interface IVisDataPoint {
 }
 
 export interface IAssessmentChartProps {
-    data: Array<IVisDataPoint>;
+    data: Array<IVisDataPoint>; // Data points should be sorted in date ascending
     maxValue: number;
     useTime?: boolean;
+    scaleOrder?: string[];
 }
 
 type Point = LineMarkSeriesPoint;
@@ -107,7 +126,7 @@ export const AssessmentVis = withTheme(
     observer((props: ThemedStyledProps<IAssessmentChartProps, any>) => {
         const ref = React.useRef(null);
         const { width } = useResize(ref);
-        const { data, maxValue, useTime } = props;
+        const { data, maxValue, useTime, scaleOrder } = props;
 
         const state = useLocalObservable<IAssessmentChartState>(() => ({
             hoveredPoint: undefined,
@@ -124,10 +143,12 @@ export const AssessmentVis = withTheme(
             500
         );
 
-        const dataKeys = !!data && data.length > 0 ? Object.keys(data[0].pointValues) : [];
+        const dataKeys = scaleOrder || (!!data && data.length > 0 ? Object.keys(data[0].pointValues) : []);
 
         const toggleExpand = action(() => {
             state.expanded = !state.expanded;
+            state.hoveredPoint = undefined;
+            state.hoveredIndex = undefined;
 
             if (state.expanded && state.visibility.length != dataKeys.length) {
                 state.visibility = dataKeys.map((key, idx) => ({
@@ -146,35 +167,108 @@ export const AssessmentVis = withTheme(
             }
         });
 
-        const getDataForKey = (key: string) => {
-            return data.map(
+        if (!!data && data.length > 0) {
+            const oldestDataDate = data[0].recordedDate;
+
+            // Minimum last 8 weeks and maximum 24 weeks of data, and snap to weeks
+            const maxDate = nextSunday(clearTime(new Date()));
+            var minDate = previousSunday(oldestDataDate);
+
+            if (compareAsc(minDate, addWeeks(maxDate, -24)) < 0) {
+                minDate = addWeeks(maxDate, -24);
+            }
+
+            if (compareAsc(minDate, addWeeks(maxDate, -8)) > 0) {
+                minDate = addWeeks(maxDate, -8);
+            }
+
+            const filteredData = data.filter(
+                (d) => compareAsc(minDate, d.recordedDate) < 0 && compareAsc(maxDate, d.recordedDate) > 0
+            );
+
+            const dailyPoints = filteredData.map(
+                (d) =>
+                    ({
+                        x: addHours(clearTime(d.recordedDate), useTime ? 12 : 0).getTime(),
+                        y: getAssessmentScore(d.pointValues),
+                        _x: d.recordedDate.getTime(),
+                    } as Point)
+            );
+
+            const reduced = dailyPoints.reduce((m, d) => {
+                const key = d.x.toString();
+                const value = d.y as number;
+
+                const found = m.get(key);
+                if (!found) {
+                    m.set(key, {
+                        points: value,
+                        count: 1,
+                        source: [
+                            {
+                                x: d._x,
+                                y: d.y,
+                            },
+                        ],
+                    });
+                } else {
+                    m.set(key, {
+                        count: found.count + 1,
+                        points: found.points + value,
+                        source: [
+                            ...found.source,
+                            {
+                                x: d._x,
+                                y: d.y,
+                            },
+                        ],
+                    });
+                }
+
+                return m;
+            }, new Map<string, { count: number; points: number; source: Point[] }>());
+
+            const dataPoints = Array.from(reduced.keys())
+                .map((k) => {
+                    const item = reduced.get(k);
+
+                    if (!!item) {
+                        return {
+                            x: Number(k),
+                            y: item.points / item.count,
+                            source: item.source,
+                        };
+                    }
+                })
+                .filter((k) => k != undefined) as Point[];
+
+            const timedDataPoints = filteredData.map(
                 (d) =>
                     ({
                         x: d.recordedDate.getTime(),
-                        y: d.pointValues[key],
-                        name: key,
-                    } as Point)
-            );
-        };
-
-        if (!!data && data.length > 0) {
-            // TODO: Limit to 14-15 data points per view and allow horizontal scrolling
-
-            const dataPoints = data.map(
-                (d) =>
-                    ({
-                        x: (useTime ? d.recordedDate : clearTime(d.recordedDate)).getTime(),
                         y: getAssessmentScore(d.pointValues),
                     } as Point)
             );
 
-            const minXTicks = Math.max(width / 200, 3);
+            const getDataForKey = (key: string) => {
+                return filteredData.map(
+                    (d) =>
+                        ({
+                            x: d.recordedDate.getTime(),
+                            y: d.pointValues[key],
+                            name: key,
+                        } as Point)
+                );
+            };
+
             const minYTicks = state.expanded ? maxValue + 1 : (maxValue * dataKeys.length) / 5;
             const yDomain = [0, state.expanded ? maxValue + 1 : maxValue * dataKeys.length + 1];
-            const xDomain = [
-                addMonths(clearTime(new Date()), -2).getTime(),
-                addDays(clearTime(new Date()), 1).getTime(),
-            ];
+
+            // Minimum 2 months, maximum
+            const xDomain = [minDate.getTime(), maxDate.getTime()];
+            const xWeeks = differenceInWeeks(maxDate, minDate);
+            const minXTicks = Math.min(Math.floor(width / 60), xWeeks);
+            const xTickAngle = minXTicks < xWeeks ? -45 : 0;
 
             return (
                 <Container>
@@ -185,11 +279,25 @@ export const AssessmentVis = withTheme(
                             xType="time"
                             xDomain={xDomain}
                             yDomain={yDomain}
+                            margin={{ right: 20, bottom: xTickAngle < 0 ? 50 : 30 }}
                             animation={{ duration: 100 }}>
-                            <VerticalGridLines />
+                            <VerticalGridLines tickTotal={xWeeks} />
                             <HorizontalGridLines />
-                            <XAxis title="Submitted date" on0={true} tickTotal={minXTicks} />
+                            <XAxis
+                                title="Submitted date"
+                                on0={true}
+                                tickTotal={minXTicks}
+                                tickLabelAngle={xTickAngle}
+                                tickFormat={(tick: number) => format(tick, 'MMM d')}
+                            />
                             <YAxis title="Score" tickTotal={minYTicks} />
+                            {useTime && (
+                                <MarkSeries
+                                    data={timedDataPoints}
+                                    color={alpha(props.theme.palette.primary.dark, 0.2)}
+                                    strokeWidth={0}
+                                />
+                            )}
                             {state.expanded ? (
                                 state.visibility
                                     .filter(({ visible }) => visible)
@@ -204,57 +312,80 @@ export const AssessmentVis = withTheme(
                                         />
                                     ))
                             ) : (
-                                <LineMarkSeries data={dataPoints} onNearestX={onNearestX} curve="curveMonotoneX" />
+                                <LineMarkSeries
+                                    data={dataPoints}
+                                    onNearestX={onNearestX}
+                                    curve="curveMonotoneX"
+                                    color={props.theme.palette.primary.light}
+                                />
                             )}
 
                             {!state.expanded && state.hoveredPoint && (
-                                <MarkSeries data={[state.hoveredPoint]} animation={false} />
+                                <MarkSeries
+                                    data={[state.hoveredPoint]}
+                                    animation={false}
+                                    color={props.theme.palette.primary.dark}
+                                />
                             )}
-                            {state.hoveredPoint && data[state.hoveredIndex as number] && (
-                                <Crosshair values={[state.hoveredPoint]}>
+                            {state.hoveredPoint && !state.expanded && (
+                                <Crosshair
+                                    values={[state.hoveredPoint]}
+                                    style={{
+                                        line: {
+                                            background: props.theme.palette.primary.dark,
+                                        },
+                                    }}>
                                     <CrosshairContainer>
-                                        <div>
-                                            Date:{' '}
-                                            {format(data[state.hoveredIndex as number].recordedDate, 'MM/dd/yyyy')}
-                                        </div>
-                                        {dataKeys.map((key) => (
-                                            <div key={key}>
-                                                {key}: {data[state.hoveredIndex as number].pointValues[key]}
-                                            </div>
-                                        ))}
+                                        <div>Date: {format(state.hoveredPoint.x as number, 'MM/dd/yyyy')}</div>
+                                        {!useTime &&
+                                            dataKeys.map((key) => (
+                                                <div key={key}>
+                                                    {`${useTime ? 'Average ' : ''}${key}`}:{' '}
+                                                    {data[state.hoveredIndex as number].pointValues[key]}
+                                                </div>
+                                            ))}
+                                        {useTime &&
+                                            ((state.hoveredPoint as any).source as { x: number; y: number }[]).map(
+                                                (p) => (
+                                                    <div key={p.x.toString()}>
+                                                        {`${format(p.x as number, 'hh:mm aaa')}: ${p.y}`}
+                                                    </div>
+                                                )
+                                            )}
                                     </CrosshairContainer>
                                 </Crosshair>
                             )}
                         </XYPlot>
                     </ChartContainer>
                     {dataKeys.length > 1 && (
-                        <LegendContainer>
-                            <FormControlLabel
-                                control={<Switch color="primary" checked={state.expanded} onChange={toggleExpand} />}
-                                label="Expand"
-                            />
-                            {state.expanded && (
-                                <LegendArea>
-                                    <LegendTitle>Legend</LegendTitle>
-                                    {state.visibility.map(({ title, color, visible }) => {
-                                        const ColoredSwitch = getColoredSwitch(color);
-                                        return (
-                                            <FormControlLabel
-                                                key={title}
-                                                control={
-                                                    <ColoredSwitch
-                                                        size="small"
-                                                        checked={visible}
-                                                        onChange={() => toggleVisibility(title)}
-                                                    />
-                                                }
-                                                label={title}
-                                            />
-                                        );
-                                    })}
-                                </LegendArea>
-                            )}
-                        </LegendContainer>
+                        <Accordion expanded={state.expanded} onChange={toggleExpand}>
+                            <AccordionSummary expandIcon={<ReadMoreIcon />}>
+                                <Typography>{`${state.expanded ? 'Hide' : 'View'} individual scales`}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {state.expanded && (
+                                    <LegendArea>
+                                        {state.visibility.map(({ title, color, visible }) => {
+                                            const ColoredSwitch = getColoredSwitch(color);
+                                            return (
+                                                <FormControlLabel
+                                                    sx={{ paddingRight: 4 }}
+                                                    key={title}
+                                                    control={
+                                                        <ColoredSwitch
+                                                            size="small"
+                                                            checked={visible}
+                                                            onChange={() => toggleVisibility(title)}
+                                                        />
+                                                    }
+                                                    label={title}
+                                                />
+                                            );
+                                        })}
+                                    </LegendArea>
+                                )}
+                            </AccordionDetails>
+                        </Accordion>
                     )}
                 </Container>
             );
