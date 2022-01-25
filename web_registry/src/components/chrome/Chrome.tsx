@@ -17,7 +17,10 @@ const MainContainer = withTheme(
     styled.main((props) => ({
         flexGrow: 1,
         marginTop: props.theme.customSizes.headerHeight,
-        overflow: 'hidden',
+        marginBottom: props.theme.customSizes.footerHeight,
+        overflowY: 'hidden',
+        overflowX: 'scroll',
+        minWidth: 1200,
     }))
 );
 
