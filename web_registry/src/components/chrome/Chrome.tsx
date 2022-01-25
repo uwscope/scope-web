@@ -1,11 +1,10 @@
-import { Button, CircularProgress, CssBaseline, Dialog, Typography } from '@mui/material';
+import { CssBaseline } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import withTheme from '@mui/styles/withTheme';
 import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import Footer from 'src/components/chrome/Footer';
-import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
 const RootContainer = styled.div({
@@ -13,15 +12,6 @@ const RootContainer = styled.div({
     flexDirection: 'column',
     height: 'calc(100vh)',
 });
-
-const LoadingContainer = withTheme(
-    styled.div((props) => ({
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: props.theme.spacing(3),
-    }))
-);
 
 const MainContainer = withTheme(
     styled.main((props) => ({
@@ -46,24 +36,8 @@ export interface IChromeProps {
 }
 
 export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
-    const rootStore = useStores();
-
     return (
         <RootContainer>
-            <Dialog open={rootStore.appState != 'Fulfilled'}>
-                {rootStore.appState == 'Pending' ? (
-                    <LoadingContainer>
-                        <CircularProgress />
-                        <Typography variant="h6">Loading Registry</Typography>
-                    </LoadingContainer>
-                ) : (
-                    <LoadingContainer>
-                        <Button color="inherit" onClick={() => rootStore.login()}>
-                            Log in
-                        </Button>
-                    </LoadingContainer>
-                )}
-            </Dialog>
             <CssBaseline />
             <AppBarContainer position="fixed">
                 <Toolbar variant="dense">{props.headerContent}</Toolbar>

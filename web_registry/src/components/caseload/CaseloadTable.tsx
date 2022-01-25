@@ -1,13 +1,21 @@
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
+import {
+    GridCellParams,
+    GridColDef,
+    GridColumnHeaderParams,
+    GridRowParams,
+} from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
 import React, { FunctionComponent } from 'react';
 import { getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
-import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
+import {
+    getAssessmentScore,
+    getAssessmentScoreColorName,
+} from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const TableContainer = styled.div({
@@ -24,41 +32,59 @@ const ColumnHeader = styled.div({
 const PHQCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: '100%',
-        backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('PHQ-9', props.score)],
+        backgroundColor:
+            props.theme.customPalette.scoreColors[
+                getAssessmentScoreColorName('PHQ-9', props.score)
+            ],
     }))
 );
 
 const GADCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: '100%',
-        backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('GAD-7', props.score)],
+        backgroundColor:
+            props.theme.customPalette.scoreColors[
+                getAssessmentScoreColorName('GAD-7', props.score)
+            ],
     }))
 );
 
 const ChangeCell = withTheme(
     styled.div<{ change: number }>((props) => ({
         width: '100%',
-        backgroundColor: props.change <= -50 && props.theme.customPalette.scoreColors['good'],
+        backgroundColor:
+            props.change <= -50 &&
+            props.theme.customPalette.scoreColors['good'],
     }))
 );
 
 const RedFlag = withTheme(
-    styled(FlagIcon)<{ on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.on ? 'bad' : 'disabled'],
+    styled(FlagIcon)<{ $on: boolean }>((props) => ({
+        color: props.theme.customPalette.scoreColors[
+            props.$on ? 'bad' : 'disabled'
+        ],
     }))
 );
 
 const YellowFlag = withTheme(
-    styled(FlagIcon)<{ on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.on ? 'warning' : 'disabled'],
+    styled(FlagIcon)<{ $on: boolean }>((props) => ({
+        color: props.theme.customPalette.scoreColors[
+            props.$on ? 'warning' : 'disabled'
+        ],
     }))
 );
 
-const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
+const renderHeader = (props: GridColumnHeaderParams) => (
+    <ColumnHeader>{props.colDef.headerName}</ColumnHeader>
+);
 
-const renderPHQCell = (props: GridCellParams) => <PHQCell score={props.value as number}>{props.value}</PHQCell>;
+const renderPHQCell = (props: GridCellParams) => (
+    <PHQCell score={props.value as number}>{props.value}</PHQCell>
+);
 
-const renderGADCell = (props: GridCellParams) => <GADCell score={props.value as number}>{props.value}</GADCell>;
+const renderGADCell = (props: GridCellParams) => (
+    <GADCell score={props.value as number}>{props.value}</GADCell>
+);
 
 const renderChangeCell = (props: GridCellParams) => (
     <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
@@ -70,10 +96,10 @@ const renderFlagCell = (props: GridCellParams) => {
     return (
         <div>
             <Tooltip title="Flagged for safety">
-                <RedFlag on={flaggedForSafety} fontSize="small" />
+                <RedFlag $on={flaggedForSafety} fontSize="small" />
             </Tooltip>
             <Tooltip title="Flagged for discussion">
-                <YellowFlag on={flaggedForDiscussion} fontSize="small" />
+                <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
             </Tooltip>
         </div>
     );
@@ -86,7 +112,9 @@ export interface ICaseloadTableProps {
     onPatientClick?: (recordId: string) => void;
 }
 
-export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
+export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (
+    props
+) => {
     const { patients, onPatientClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
@@ -110,7 +138,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             headerAlign: 'center',
             renderCell: renderFlagCell,
         },
-        { field: 'MRN', headerName: 'MRN', minWidth: 50, align: 'center', headerAlign: 'center' },
+        {
+            field: 'MRN',
+            headerName: 'MRN',
+            minWidth: 50,
+            align: 'center',
+            headerAlign: 'center',
+        },
         {
             field: 'depressionTreatmentStatus',
             headerName: 'Tx Status',
@@ -118,7 +152,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
         },
-        { field: 'name', headerName: 'Name', minWidth: 120, align: 'center', headerAlign: 'center' },
+        {
+            field: 'name',
+            headerName: 'Name',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
+        },
         {
             field: 'clinicCode',
             headerName: 'Clinic Code',
@@ -195,7 +235,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
         },
-        { field: 'lastPHQDate', headerName: 'Last PHQ-9 Date', minWidth: 120, align: 'center', headerAlign: 'center' },
+        {
+            field: 'lastPHQDate',
+            headerName: 'Last PHQ-9 Date',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
+        },
         {
             field: 'initialGAD',
             headerName: 'Initial GAD-7',
@@ -223,12 +269,22 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
         },
-        { field: 'lastGADDate', headerName: 'Last GAD-7 Date', minWidth: 120, align: 'center', headerAlign: 'center' },
+        {
+            field: 'lastGADDate',
+            headerName: 'Last GAD-7 Date',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
+        },
     ];
 
     const data = patients.map((p) => {
-        const initialSessionDate = p.sessions?.length > 0 ? p.sessions[0].date : null;
-        const recentSessionDate = p.sessions?.length > 0 ? p.sessions[p.sessions.length - 1].date : null;
+        const initialSessionDate =
+            p.sessions?.length > 0 ? p.sessions[0].date : null;
+        const recentSessionDate =
+            p.sessions?.length > 0
+                ? p.sessions[p.sessions.length - 1].date
+                : null;
         const phq9 = p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'phq-9')
             .slice()
@@ -242,42 +298,75 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             ...p,
             ...p.profile,
             id: p.profile.MRN,
-            initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yy') : NA,
-            recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yy') : NA,
+            initialSession: initialSessionDate
+                ? format(initialSessionDate, 'MM/dd/yy')
+                : NA,
+            recentSession: recentSessionDate
+                ? format(recentSessionDate, 'MM/dd/yy')
+                : NA,
             nextSessionDue:
                 recentSessionDate && p.profile.followupSchedule
-                    ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)), 'MM/dd/yy')
+                    ? format(
+                          addWeeks(
+                              recentSessionDate,
+                              getFollowupWeeks(p.profile.followupSchedule)
+                          ),
+                          'MM/dd/yy'
+                      )
                     : NA,
             totalSessions: p.sessions ? p.sessions.length : 0,
             treatmentWeeks:
                 initialSessionDate && recentSessionDate
-                    ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
+                    ? differenceInWeeks(recentSessionDate, initialSessionDate) +
+                      1
                     : 0,
-            initialPHQ: phq9 && phq9.length > 0 ? getAssessmentScore(phq9[0].pointValues) : NA,
-            lastPHQ: phq9 && phq9.length > 0 ? getAssessmentScore(phq9[phq9.length - 1].pointValues) : NA,
+            initialPHQ:
+                phq9 && phq9.length > 0
+                    ? getAssessmentScore(phq9[0].pointValues)
+                    : NA,
+            lastPHQ:
+                phq9 && phq9.length > 0
+                    ? getAssessmentScore(phq9[phq9.length - 1].pointValues)
+                    : NA,
             changePHQ:
                 phq9 && phq9.length > 1
                     ? Math.round(
-                          ((getAssessmentScore(phq9[phq9.length - 1].pointValues) -
+                          ((getAssessmentScore(
+                              phq9[phq9.length - 1].pointValues
+                          ) -
                               getAssessmentScore(phq9[0].pointValues)) /
                               getAssessmentScore(phq9[0].pointValues)) *
                               100
                       )
                     : NA,
-            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
+            lastPHQDate:
+                phq9 && phq9?.length > 0
+                    ? format(phq9[phq9.length - 1].recordedDate, 'MM/dd/yyyy')
+                    : NA,
 
-            initialGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[0].pointValues) : NA,
-            lastGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[gad7.length - 1].pointValues) : NA,
+            initialGAD:
+                gad7 && gad7.length > 0
+                    ? getAssessmentScore(gad7[0].pointValues)
+                    : NA,
+            lastGAD:
+                gad7 && gad7.length > 0
+                    ? getAssessmentScore(gad7[gad7.length - 1].pointValues)
+                    : NA,
             changeGAD:
                 gad7 && gad7.length > 1
                     ? Math.round(
-                          ((getAssessmentScore(gad7[gad7.length - 1].pointValues) -
+                          ((getAssessmentScore(
+                              gad7[gad7.length - 1].pointValues
+                          ) -
                               getAssessmentScore(gad7[0].pointValues)) /
                               getAssessmentScore(gad7[0].pointValues)) *
                               100
                       )
                     : NA,
-            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
+            lastGADDate:
+                gad7 && gad7.length > 0
+                    ? format(gad7[gad7.length - 1].recordedDate, 'MM/dd/yyyy')
+                    : NA,
         };
     });
 

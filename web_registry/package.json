@@ -9,6 +9,7 @@
         "@material-ui/lab": "^4.0.0-alpha.57",
         "@material-ui/pickers": "^3.2.10",
         "@material-ui/x-grid": "^4.0.0-alpha.29",
+        "amazon-cognito-identity-js": "^5.2.3",
         "@mui/icons-material": "^5.2.4",
         "@mui/lab": "^5.0.0-alpha.60",
         "@mui/material": "^5.2.6",

@@ -1,15 +1,18 @@
-import { getAuthServiceInstance, IAuthService } from 'src/services/authService';
-import { getRegistryServiceInstance, IRegistryService } from 'src/services/registryService';
+import {
+    getRegistryServiceInstance,
+    IRegistryService,
+} from 'src/services/registryService';
+import { IConfigService, getConfigServiceInstance } from './configService';
 
 const registryService = getRegistryServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
-const authService = getAuthServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
+const configService = getConfigServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
 
 export interface IRootService {
     registryService: IRegistryService;
-    authService: IAuthService;
+    configService: IConfigService;
 }
 
 export const useServices = () => ({
     registryService,
-    authService,
+    configService,
 });
