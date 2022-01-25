@@ -225,27 +225,6 @@ def get_singleton(
     return result
 
 
-# def put_set_element(
-#     *,
-#     collection: pymongo.collection.Collection,
-#     document_type: str,
-#     set_id: str,
-# )
-#
-# def insert(
-#     *,
-#     collection: pymongo.collection.Collection,
-#     document: dict,
-# ) -> dict:
-#     # TODO: define semantics of this method, in place now so we're forced to use it
-#
-#     result = collection.insert_one(document)
-#
-#     _normalize_document(document=document)
-#
-#     return document
-
-
 @dataclass(frozen=True)
 class PutResult:
     inserted_count: int
