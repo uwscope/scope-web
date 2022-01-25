@@ -7,6 +7,7 @@ import {
     FormHelperText,
     Grid,
     GridSize,
+    IconButton,
     Input,
     InputLabel,
     MenuItem,
@@ -21,9 +22,10 @@ import {
 import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action } from 'mobx';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { KeyedMap } from 'shared/types';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
+import CloseIcon from '@mui/icons-material/Close';
 
 const EditableFormControl = withTheme(
     styled(FormControl)(
@@ -383,11 +385,11 @@ export const GridMultiSelectField: FunctionComponent<
 
 export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
     flags: KeyedMap<string> | undefined;
+    otherFlags?: KeyedMap<string> | undefined;
     options: readonly string[];
     notOption: string;
     onChange?: (flags: KeyedMap<string>) => void;
-    other?: string | undefined;
-    onOtherChange?: (other: string) => void;
+    onOtherChange?: (flags: KeyedMap<string>) => void;
     maxLine?: number;
     disabled?: boolean;
     flagOrder?: string[];
@@ -402,7 +404,7 @@ export const GridMultiOptionsField: FunctionComponent<
         flags,
         flagOrder,
         options,
-        other,
+        otherFlags = {},
         notOption,
         onChange,
         onOtherChange,
@@ -412,23 +414,62 @@ export const GridMultiOptionsField: FunctionComponent<
         disabled,
     } = props;
 
-    const handleChange = (flag: string) =>
-        action((event: React.ChangeEvent<HTMLInputElement>) => {
+    const [other, setOther] = useState<string>('');
+
+    const _handleFlagsChange = (
+        flag: string,
+        flags?: KeyedMap<string>,
+        onChange?: (flags: KeyedMap<string>) => void
+    ) =>
+        action((event: React.MouseEvent<HTMLButtonElement>) => {
             if (!!onChange && !!flags) {
+                const newValue = (event.target as HTMLButtonElement).value;
+                const prevValue = flags[flag];
+
                 const newFlags: KeyedMap<string> = {};
                 Object.assign(newFlags, flags);
-                newFlags[flag] = (event.target as HTMLInputElement).value;
+
+                // If the flag was selected when it was previously on, toggle it off to notOption
+                newFlags[flag] = newValue == prevValue ? notOption : newValue;
                 onChange(newFlags);
             }
         });
 
-    const handleOtherChange = action(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (!!onOtherChange) {
-                onOtherChange(event.target.value);
+    const handleFlagsChange = (flag: string) =>
+        _handleFlagsChange(flag, flags, onChange);
+
+    const handleOtherFlagsChange = (flag: string) =>
+        _handleFlagsChange(flag, otherFlags, onOtherChange);
+
+    const handleOtherChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setOther(event.target.value);
+    };
+
+    const handleOtherAdd = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            const trimOther = other.trim();
+            if (!!onOtherChange && !!trimOther && !(trimOther in otherFlags)) {
+                const newFlags: KeyedMap<string> = {};
+                Object.assign(newFlags, otherFlags);
+                newFlags[trimOther] = notOption;
+                setOther('');
+                onOtherChange(newFlags);
             }
         }
-    );
+    };
+
+    const handleOtherDelete = (key: string) => () => {
+        if (key in otherFlags) {
+            if (!!onOtherChange) {
+                const newFlags: KeyedMap<string> = {};
+                Object.assign(newFlags, otherFlags);
+                delete newFlags[key];
+                onOtherChange(newFlags);
+            }
+        }
+    };
+
+    const visibleOptions = options.filter((o) => o != notOption);
 
     if (!!flags) {
         if (editable) {
@@ -452,13 +493,18 @@ export const GridMultiOptionsField: FunctionComponent<
                                         aria-label="gender"
                                         name="gender1"
                                         value={flags[key]}
-                                        onChange={handleChange(key)}
                                     >
-                                        {options.map((option) => (
+                                        {visibleOptions.map((option) => (
                                             <FormControlLabel
                                                 key={option}
                                                 value={option}
-                                                control={<Radio />}
+                                                control={
+                                                    <Radio
+                                                        onClick={handleFlagsChange(
+                                                            key
+                                                        )}
+                                                    />
+                                                }
                                                 label={option}
                                             />
                                         ))}
@@ -466,15 +512,69 @@ export const GridMultiOptionsField: FunctionComponent<
                                 </Grid>
                             </Grid>
                         ))}
-                        <FormControl
-                            fullWidth
-                            disabled={flags['Other'] == notOption}
-                        >
+                        {(otherFlags && Object.keys(otherFlags)).map((key) => (
+                            <Grid container key={key} alignItems="center">
+                                <Grid
+                                    item
+                                    xs={4}
+                                    container
+                                    direction="row"
+                                    justifyContent="flex-start"
+                                    flexWrap="nowrap"
+                                >
+                                    <RadioLabel
+                                        sx={{
+                                            textOverflow: 'ellipsis',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {key}
+                                    </RadioLabel>
+                                    <IconButton
+                                        sx={{ padding: 0, paddingLeft: 2 }}
+                                        size="small"
+                                        aria-label="delete"
+                                        onClick={handleOtherDelete(key)}
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                </Grid>
+
+                                <Grid item xs={8}>
+                                    <RadioGroup
+                                        sx={{ justifyContent: 'space-evenly' }}
+                                        row
+                                        aria-label="gender"
+                                        name="gender1"
+                                        value={otherFlags[key]}
+                                    >
+                                        {visibleOptions.map((option) => (
+                                            <FormControlLabel
+                                                key={option}
+                                                value={option}
+                                                control={
+                                                    <Radio
+                                                        onClick={handleOtherFlagsChange(
+                                                            key
+                                                        )}
+                                                    />
+                                                }
+                                                label={option}
+                                            />
+                                        ))}
+                                    </RadioGroup>
+                                </Grid>
+                            </Grid>
+                        ))}
+                        <FormControl fullWidth>
                             <Input
+                                placeholder="Add other referral"
                                 margin="none"
                                 multiline={false}
                                 value={other}
                                 onChange={handleOtherChange}
+                                onKeyPress={handleOtherAdd}
                                 fullWidth
                             />
                         </FormControl>

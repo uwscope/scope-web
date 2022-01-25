@@ -1,5 +1,12 @@
 import AddIcon from '@mui/icons-material/Add';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+} from '@mui/material';
 import { compareAsc, compareDesc } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -8,11 +15,19 @@ import {
     behavioralActivationChecklistValues,
     behavioralStrategyChecklistValues,
     EntryType,
+    Referral,
+    ReferralStatus,
     ReferralStatusFlags,
     referralStatusValues,
     sessionTypeValues,
 } from 'shared/enums';
-import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview } from 'shared/types';
+import {
+    ICaseReview,
+    IReferralStatus,
+    ISession,
+    ISessionOrCaseReview,
+    KeyedMap,
+} from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import {
     GridDateField,
@@ -24,8 +39,10 @@ import {
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
 import { usePatient } from 'src/stores/stores';
 
+const newId = 'new';
+
 const defaultSession: ISession = {
-    sessionId: 'new',
+    sessionId: newId,
     date: new Date(),
     sessionType: 'In person',
     billableMinutes: 0,
@@ -59,7 +76,7 @@ const defaultSession: ISession = {
 };
 
 const defaultReview: ICaseReview = {
-    reviewId: 'new',
+    reviewId: newId,
     date: new Date(),
     consultingPsychiatrist: { identityId: '', name: '' },
     medicationChange: '',
@@ -69,14 +86,7 @@ const defaultReview: ICaseReview = {
     reviewNote: '',
 };
 
-// { referralType: 'Psychiatry', referralStatus: 'Not Referred'},
-// { referralType: 'Psychology', referralStatus: 'Not Referred'},
-// { referralType: 'Patient Navigation', referralStatus: 'Not Referred'},
-// { referralType: 'Integrative Medicine', referralStatus: 'Not Referred'},
-// { referralType: 'Spiritual Care', referralStatus: 'Not Referred'},
-// { referralType: 'Palliative Care', referralStatus: 'Not Referred'},
-
-const state = observable<{
+interface IState {
     open: boolean;
     isNew: boolean;
     dateAsc: boolean;
@@ -84,8 +94,10 @@ const state = observable<{
     session: ISession;
     review: ICaseReview;
     referralStatusFlags: ReferralStatusFlags;
-    otherReferrals: IReferralStatus[];
-}>({
+    otherReferralFlags: KeyedMap<ReferralStatus>;
+}
+
+const defaultState: IState = {
     open: false,
     isNew: false,
     dateAsc: false,
@@ -100,12 +112,18 @@ const state = observable<{
         'Spiritual Care': 'Not Referred',
         'Palliative Care': 'Not Referred',
     },
-    otherReferrals: [],
-});
+    otherReferralFlags: {},
+};
+
+const state = observable<IState>(defaultState);
 
 const SessionEdit: FunctionComponent = observer(() => {
-    const onValueChange = action((key: string, value: any) => {
+    const onSessionValueChange = action((key: string, value: any) => {
         (state.session as any)[key] = value;
+    });
+
+    const onValueChange = action((key: string, value: any) => {
+        (state as any)[key] = value;
     });
 
     return (
@@ -114,20 +132,22 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 label="Session Date"
                 value={state.session.date}
-                onChange={(text) => onValueChange('date', text)}
+                onChange={(text) => onSessionValueChange('date', text)}
             />
             <GridDropdownField
                 editable={true}
                 label="Session Type"
                 value={state.session.sessionType}
                 options={sessionTypeValues}
-                onChange={(text) => onValueChange('sessionType', text)}
+                onChange={(text) => onSessionValueChange('sessionType', text)}
             />
             <GridTextField
                 editable={true}
                 label="Billable Minutes"
                 value={state.session.billableMinutes}
-                onChange={(text) => onValueChange('billableMinutes', text)}
+                onChange={(text) =>
+                    onSessionValueChange('billableMinutes', text)
+                }
             />
             <GridTextField
                 sm={12}
@@ -138,7 +158,9 @@ const SessionEdit: FunctionComponent = observer(() => {
                 label="Medication changes"
                 value={state.session.medicationChange}
                 placeholder="Leave blank if no change in current medications"
-                onChange={(text) => onValueChange('medicationChange', text)}
+                onChange={(text) =>
+                    onSessionValueChange('medicationChange', text)
+                }
             />
             <GridTextField
                 sm={12}
@@ -149,7 +171,9 @@ const SessionEdit: FunctionComponent = observer(() => {
                 label="Current medications"
                 helperText="Psychotropic and other relevant medications (e.g., steroids, hormone therapies, opioids, etc.)"
                 value={state.session.currentMedications}
-                onChange={(text) => onValueChange('currentMedications', text)}
+                onChange={(text) =>
+                    onSessionValueChange('currentMedications', text)
+                }
             />
             <GridMultiSelectField
                 sm={12}
@@ -158,27 +182,42 @@ const SessionEdit: FunctionComponent = observer(() => {
                 flags={state.session.behavioralStrategyChecklist}
                 flagOrder={[...behavioralStrategyChecklistValues]}
                 other={state.session.behavioralStrategyOther}
-                onChange={(flags) => onValueChange('behavioralStrategyChecklist', flags)}
-                onOtherChange={(text) => onValueChange('behavioralStrategyOther', text)}
+                onChange={(flags) =>
+                    onSessionValueChange('behavioralStrategyChecklist', flags)
+                }
+                onOtherChange={(text) =>
+                    onSessionValueChange('behavioralStrategyOther', text)
+                }
             />
             <GridMultiSelectField
                 sm={12}
                 editable={true}
-                disabled={!state.session.behavioralStrategyChecklist['Behavioral Activation']}
+                disabled={
+                    !state.session.behavioralStrategyChecklist[
+                        'Behavioral Activation'
+                    ]
+                }
                 label="Behavioral Activation Checklist"
                 flags={state.session.behavioralActivationChecklist}
                 flagOrder={[...behavioralActivationChecklistValues]}
-                onChange={(flags) => onValueChange('behavioralActivationChecklist', flags)}
+                onChange={(flags) =>
+                    onSessionValueChange('behavioralActivationChecklist', flags)
+                }
             />
             <GridMultiOptionsField
                 sm={12}
                 editable={true}
                 label="Referrals"
                 flags={state.referralStatusFlags}
+                otherFlags={state.otherReferralFlags}
                 options={referralStatusValues}
                 notOption="Not Referred"
-                onChange={(flags) => onValueChange('referralStatus', flags)}
-                onOtherChange={(text) => onValueChange('referralOther', text)}
+                onChange={(flags) =>
+                    onValueChange('referralStatusFlags', flags)
+                }
+                onOtherChange={(otherFlags) =>
+                    onValueChange('otherReferralFlags', otherFlags)
+                }
             />
             <GridTextField
                 sm={12}
@@ -188,7 +227,9 @@ const SessionEdit: FunctionComponent = observer(() => {
                 maxLine={4}
                 label="Other recommendations / action items"
                 value={state.session.otherRecommendations}
-                onChange={(text) => onValueChange('otherRecommendations', text)}
+                onChange={(text) =>
+                    onSessionValueChange('otherRecommendations', text)
+                }
             />
             <GridTextField
                 sm={12}
@@ -199,7 +240,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 label="Session Note"
                 value={state.session.sessionNote}
                 placeholder="Write session notes here"
-                onChange={(text) => onValueChange('sessionNote', text)}
+                onChange={(text) => onSessionValueChange('sessionNote', text)}
             />
         </Grid>
     );
@@ -222,7 +263,9 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 editable={true}
                 label="Consulting Psychiatrist"
                 value={state.review.consultingPsychiatrist.name}
-                onChange={(text) => onValueChange('consultingPsychiatrist', text)}
+                onChange={(text) =>
+                    onValueChange('consultingPsychiatrist', text)
+                }
             />
             <GridTextField
                 sm={12}
@@ -244,7 +287,9 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 label="Behavioral strategy changes"
                 value={state.review.behavioralStrategyChange}
                 placeholder="Leave blank if no change to behavioral strategies"
-                onChange={(text) => onValueChange('behavioralStrategyChange', text)}
+                onChange={(text) =>
+                    onValueChange('behavioralStrategyChange', text)
+                }
             />
             <GridTextField
                 sm={12}
@@ -289,17 +334,11 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.open = false;
     });
 
-    const handleAddSession = action(() => {
-        Object.assign(state.session, defaultSession);
-        state.open = true;
-        state.isNew = true;
-        state.entryType = 'Session';
-        state.session.sessionId = 'new';
-
+    const _copySessionToState = (session: ISession | undefined) => {
         // Copy over current medications and referral status from the latest session
-        if (!!currentPatient.latestSession) {
-            state.session.currentMedications = currentPatient.latestSession.currentMedications;
-            state.session.referrals = currentPatient.latestSession.referrals;
+        if (!!session) {
+            state.session.currentMedications = session.currentMedications;
+            state.session.referrals = session.referrals;
 
             state.referralStatusFlags = {
                 Psychiatry: 'Not Referred',
@@ -311,18 +350,29 @@ export const SessionInfo: FunctionComponent = observer(() => {
             };
 
             var sessionReferralFlags = {} as any;
-            const otherReferrals: IReferralStatus[] = [];
-            state.session.referrals.forEach((ref) => {
+            var otherReferralFlags = {} as any;
+
+            session.referrals.forEach((ref) => {
                 if (ref.referralType != 'Other') {
                     sessionReferralFlags[ref.referralType] = ref.referralStatus;
                 } else {
-                    otherReferrals.push(ref);
+                    otherReferralFlags[ref.referralOther || ref.referralType] =
+                        ref.referralStatus;
                 }
             });
 
             Object.assign(state.referralStatusFlags, sessionReferralFlags);
-            state.otherReferrals = otherReferrals;
+            state.otherReferralFlags = otherReferralFlags;
         }
+    };
+    const handleAddSession = action(() => {
+        Object.assign(state, defaultState);
+        state.open = true;
+        state.isNew = true;
+        state.entryType = 'Session';
+        state.session.sessionId = newId;
+
+        _copySessionToState(currentPatient.latestSession);
     });
 
     const handleAddReview = action(() => {
@@ -330,19 +380,26 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.open = true;
         state.isNew = true;
         state.entryType = 'Case Review';
-        state.review.reviewId = 'new';
+        state.review.reviewId = newId;
     });
 
     const handleEditSession = action((sessionId: string) => {
-        const session = currentPatient.sessions.find((s) => s.sessionId == sessionId);
+        const session = currentPatient.sessions.find(
+            (s) => s.sessionId == sessionId
+        );
+
         Object.assign(state.session, session);
         state.open = true;
         state.isNew = false;
         state.entryType = 'Session';
+
+        _copySessionToState(session);
     });
 
     const handleEditReview = action((reviewId: string) => {
-        const review = currentPatient.caseReviews.find((s) => s.reviewId == reviewId);
+        const review = currentPatient.caseReviews.find(
+            (s) => s.reviewId == reviewId
+        );
         Object.assign(state.review, review);
         state.open = true;
         state.isNew = false;
@@ -350,19 +407,63 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const onSave = action(() => {
-        const { session, review, entryType } = state;
+        const {
+            session,
+            review,
+            entryType,
+            referralStatusFlags,
+            otherReferralFlags,
+        } = state;
         if (entryType == 'Session') {
-            currentPatient.updateSession(session);
+            // Organize referral flags
+
+            session.referrals = Object.keys(referralStatusFlags)
+                .map(
+                    (flag) =>
+                        ({
+                            referralType: flag,
+                            referralStatus:
+                                referralStatusFlags[flag as Referral],
+                        } as IReferralStatus)
+                )
+                .concat(
+                    Object.keys(otherReferralFlags).map(
+                        (flag) =>
+                            ({
+                                referralType: 'Other',
+                                referralOther: flag,
+                                referralStatus:
+                                    otherReferralFlags[flag as Referral],
+                            } as IReferralStatus)
+                    )
+                )
+                .filter((rs) => rs.referralStatus != 'Not Referred');
+
+            if (session.sessionId == newId) {
+                currentPatient.addSession(session);
+            } else {
+                currentPatient.updateSession(session);
+            }
         } else if (entryType == 'Case Review') {
-            currentPatient.updateCaseReview(review);
+            if (review.reviewId == newId) {
+                currentPatient.addCaseReview(review);
+            } else {
+                currentPatient.updateCaseReview(review);
+            }
         }
         state.open = false;
     });
 
-    const sortedSessionOrReviews = (currentPatient.sessions as ISessionOrCaseReview[])
+    const sortedSessionOrReviews = (
+        currentPatient.sessions as ISessionOrCaseReview[]
+    )
         .concat(currentPatient.caseReviews)
         .slice()
-        .sort((a, b) => (state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date)));
+        .sort((a, b) =>
+            state.dateAsc
+                ? compareAsc(a.date, b.date)
+                : compareDesc(a.date, b.date)
+        );
 
     return (
         <ActionPanel
@@ -370,9 +471,18 @@ export const SessionInfo: FunctionComponent = observer(() => {
             title="Sessions and Reviews"
             loading={currentPatient.state == 'Pending'}
             actionButtons={[
-                { icon: <AddIcon />, text: 'Add Case Review', onClick: handleAddReview } as IActionButton,
-                { icon: <AddIcon />, text: 'Add Session', onClick: handleAddSession } as IActionButton,
-            ]}>
+                {
+                    icon: <AddIcon />,
+                    text: 'Add Case Review',
+                    onClick: handleAddReview,
+                } as IActionButton,
+                {
+                    icon: <AddIcon />,
+                    text: 'Add Session',
+                    onClick: handleAddSession,
+                } as IActionButton,
+            ]}
+        >
             <SessionReviewTable
                 sessionOrReviews={sortedSessionOrReviews}
                 assessmentLogs={currentPatient.assessmentLogs}
@@ -380,9 +490,15 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 onSessionClick={handleEditSession}
             />
             <Dialog open={state.open} onClose={handleClose} maxWidth="md">
-                <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} ${state.entryType} Information`}</DialogTitle>
+                <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} ${
+                    state.entryType
+                } Information`}</DialogTitle>
                 <DialogContent dividers>
-                    {state.entryType == 'Session' ? <SessionEdit /> : <ReviewEdit />}
+                    {state.entryType == 'Session' ? (
+                        <SessionEdit />
+                    ) : (
+                        <ReviewEdit />
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">

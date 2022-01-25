@@ -251,6 +251,13 @@ export default function createAppTheme() {
                     size: 'small',
                 },
             },
+            MuiFormGroup: {
+                styleOverrides: {
+                    row: {
+                        justifyContent: 'space-evenly',
+                    },
+                },
+            },
         },
     });
 }

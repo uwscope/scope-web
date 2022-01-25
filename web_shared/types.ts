@@ -37,6 +37,7 @@ export interface IIdentity {
 export interface IReferralStatus {
     referralType: Referral | OtherSpecify;
     referralStatus: ReferralStatus;
+    referralOther?: string; // If the referralType is Other, then provide the detail in this field
 }
 
 export type ISessionOrCaseReview = ISession | ICaseReview;
