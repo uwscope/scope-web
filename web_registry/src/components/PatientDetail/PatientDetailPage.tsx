@@ -158,6 +158,10 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             hash: getString('patient_detail_subsection_values_inventory_hash'),
             label: getString('patient_detail_subsection_values_inventory_title'),
         },
+        {
+            hash: getString('patient_detail_subsection_safety_plan_hash'),
+            label: getString('patient_detail_subsection_safety_plan_title'),
+        },
     ] as IContent[];
     contentMenu.push.apply(contentMenu, baMenu);
 

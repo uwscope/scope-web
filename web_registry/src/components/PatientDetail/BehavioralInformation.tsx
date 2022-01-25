@@ -1,6 +1,7 @@
 import { Grid } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import { BAChecklist } from 'src/components/PatientDetail/BAChecklist';
+import SafetyPlan from 'src/components/PatientDetail/SafetyPlan';
 import ValuesInventory from 'src/components/PatientDetail/ValuesInventory';
 
 export const BehavioralInformation: FunctionComponent = () => {
@@ -11,6 +12,9 @@ export const BehavioralInformation: FunctionComponent = () => {
             </Grid>
             <Grid item xs={12} sm={12}>
                 <ValuesInventory />
+            </Grid>
+            <Grid item xs={12} sm={12}>
+                <SafetyPlan />
             </Grid>
         </Grid>
     );
