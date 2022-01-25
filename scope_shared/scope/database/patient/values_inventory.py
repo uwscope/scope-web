@@ -1,46 +1,27 @@
-from typing import List, Optional
-
 import pymongo
-import pymongo.database
-import pymongo.errors
 import pymongo.results
+from typing import Optional
+
+import scope.database.collection_utils
 
 
 def get_values_inventory(
-    *, database: pymongo.database.Database, collection_name: str
+    *,
+    collection: pymongo.collection.Collection,
 ) -> Optional[dict]:
-    """
-    Retrieve "valuesInventory" document.
-    """
-    collection = database.get_collection(name=collection_name)
-
-    query = {
-        "_type": "valuesInventory",
-    }
-
-    # Find the document with highest `v`.
-    values_inventory = collection.find_one(
-        filter=query, sort=[("_rev", pymongo.DESCENDING)]
+    return scope.database.collection_utils.get_singleton(
+        collection=collection,
+        document_type="valuesInventory",
     )
 
-    if "_id" in values_inventory:
-        values_inventory["_id"] = str(values_inventory["_id"])
-    # TODO: Verify schema against values-inventory json.
 
-    return values_inventory
-
-
-def create_values_inventory(
-    *, database: pymongo.database.Database, collection_name: str, values_inventory: dict
-) -> pymongo.results.InsertOneResult:
-    """
-    Create the "valuesInventory" document.
-    """
-
-    collection = database.get_collection(name=collection_name)
-
-    try:
-        result = collection.insert_one(document=values_inventory)
-        return result
-    except pymongo.errors.DuplicateKeyError:
-        return None
+def put_values_inventory(
+    *,
+    collection: pymongo.collection.Collection,
+    values_inventory: dict
+) -> scope.database.collection_utils.PutResult:
+    return scope.database.collection_utils.put_singleton(
+        collection=collection,
+        document_type="valuesInventory",
+        document=values_inventory,
+    )

@@ -357,47 +357,47 @@ def data_fake_clinical_history_factory() -> dict:
     return fake_clinical_history
 
 
-def data_fake_values_inventory_factory() -> dict:
-    fake_values_inventory = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "valuesInventory",
-        "_rev": 1,
-        "assigned": True,
-        "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
-        "values": [
-            {
-                "id": "id",
-                "name": "name",
-                "dateCreated": "",
-                "dateEdited": "",
-                "lifeareaId": "",
-                "activities": [
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                    {
-                        "id": "id",
-                        "name": "name",
-                        "valueId": "",
-                        "dateCreated": "",
-                        "dateEdited": "",
-                        "lifeareaId": "",
-                    },
-                ],
-            }
-        ],
-    }
-
-    # Verify the schema
-    result = values_inventory_schema.evaluate(JSON(fake_values_inventory))
-    assert result.output("flag")["valid"] == True
-
-    return fake_values_inventory
+# def data_fake_values_inventory_factory() -> dict:
+#     fake_values_inventory = {
+#         # "_id": str(bson.objectid.ObjectId()),
+#         "_type": "valuesInventory",
+#         "_rev": 1,
+#         "assigned": True,
+#         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
+#         "values": [
+#             {
+#                 "id": "id",
+#                 "name": "name",
+#                 "dateCreated": "",
+#                 "dateEdited": "",
+#                 "lifeareaId": "",
+#                 "activities": [
+#                     {
+#                         "id": "id",
+#                         "name": "name",
+#                         "valueId": "",
+#                         "dateCreated": "",
+#                         "dateEdited": "",
+#                         "lifeareaId": "",
+#                     },
+#                     {
+#                         "id": "id",
+#                         "name": "name",
+#                         "valueId": "",
+#                         "dateCreated": "",
+#                         "dateEdited": "",
+#                         "lifeareaId": "",
+#                     },
+#                 ],
+#             }
+#         ],
+#     }
+#
+#     # Verify the schema
+#     result = values_inventory_schema.evaluate(JSON(fake_values_inventory))
+#     assert result.output("flag")["valid"] == True
+#
+#     return fake_values_inventory
 
 
 def data_fake_safety_plan_factory() -> dict:
@@ -762,49 +762,49 @@ def data_fake_assessment_logs_factory() -> List[dict]:
     return assessment_logs
 
 
-def data_fake_activities_factory() -> List[dict]:
-    # Code is replica of getFakeActivities() method.
-    # NOTE: This isn't following IActivity interface properties.
-    # return [
-    #     {
-    #         "activityId": "%s" % idx,
-    #         "activityName": shortLorem.sentence(),
-    #         "moodData": get_fake_assessment_data_points("Mood Logging"),
-    #     }
-    #     for idx in range(get_random_integer(1, 3))
-    # ]
-
-    fake_activities = [
-        {
-            "_activity_id": "Activity-%s" % idx,
-            "_type": "activity",
-            "_rev": 1,
-            "name": shortLorem.sentence(),
-            "value": shortLorem.sentence(),
-            "lifeareaId": shortLorem.sentence(),
-            "startDate": str(
-                datetime(
-                    get_random_integer(1930, 2000),
-                    get_random_integer(1, 13),
-                    get_random_integer(1, 28),
-                )
-            ),
-            "timeOfDay": get_random_integer(1, 25),
-            "hasReminder": get_random_boolean(),
-            "reminderTimeOfDay": get_random_integer(1, 25),
-            "hasRepetition": get_random_boolean(),
-            "repeatDayFlags": "",  # NOTE: Check this property with Jina.
-            "isActive": get_random_boolean(),
-            "isDeleted": get_random_boolean(),
-        }
-        for idx in range(get_random_integer(1, 3))
-    ]
-
-    # Verify the schema
-    result = activities_schema.evaluate(JSON(fake_activities))
-    assert result.output("basic")["valid"] == True
-
-    return fake_activities
+# def data_fake_activities_factory() -> List[dict]:
+#     # Code is replica of getFakeActivities() method.
+#     # NOTE: This isn't following IActivity interface properties.
+#     # return [
+#     #     {
+#     #         "activityId": "%s" % idx,
+#     #         "activityName": shortLorem.sentence(),
+#     #         "moodData": get_fake_assessment_data_points("Mood Logging"),
+#     #     }
+#     #     for idx in range(get_random_integer(1, 3))
+#     # ]
+#
+#     fake_activities = [
+#         {
+#             "_activity_id": "Activity-%s" % idx,
+#             "_type": "activity",
+#             "_rev": 1,
+#             "name": shortLorem.sentence(),
+#             "value": shortLorem.sentence(),
+#             "lifeareaId": shortLorem.sentence(),
+#             "startDate": str(
+#                 datetime(
+#                     get_random_integer(1930, 2000),
+#                     get_random_integer(1, 13),
+#                     get_random_integer(1, 28),
+#                 )
+#             ),
+#             "timeOfDay": get_random_integer(1, 25),
+#             "hasReminder": get_random_boolean(),
+#             "reminderTimeOfDay": get_random_integer(1, 25),
+#             "hasRepetition": get_random_boolean(),
+#             "repeatDayFlags": "",  # NOTE: Check this property with Jina.
+#             "isActive": get_random_boolean(),
+#             "isDeleted": get_random_boolean(),
+#         }
+#         for idx in range(get_random_integer(1, 3))
+#     ]
+#
+#     # Verify the schema
+#     result = activities_schema.evaluate(JSON(fake_activities))
+#     assert result.output("basic")["valid"] == True
+#
+#     return fake_activities
 
 
 def data_fake_scheduled_activities_factory() -> List[dict]:

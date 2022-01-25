@@ -1,4 +1,6 @@
 import pymongo.collection
+import pymongo.errors
+import pytest
 from typing import Callable
 
 import scope.database.collection_utils
@@ -112,3 +114,164 @@ def test_get_set_element_not_found(
     )
 
     assert result is None
+
+
+@pytest.mark.parametrize(
+    ["document"],
+    [
+        [
+            {
+                "_type": "set",
+                "_set_id": "set_id",
+            }
+        ],
+        [
+            {
+                "_type": "set",
+            }
+        ],
+        [
+            {
+                "_set_id": "set_id",
+            }
+        ],
+        [{}],
+    ],
+    ids=[
+        "with_type_with_set_id",
+        "with_type_no_set_id",
+        "no_type_with_set_id",
+        "no_type_no_set_id",
+    ],
+)
+def test_put_set_element(
+    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    document: dict,
+):
+    """
+    Test insert of a set element.
+    """
+
+    collection = temp_collection_client_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    # Initial insert should generate "_rev" 1
+    result = scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="set_id",
+        document=document,
+    )
+
+    assert result.inserted_count == 1
+    assert result.inserted_id == result.document["_id"]
+
+    del result.document["_id"]
+    assert result.document == {
+        "_type": "set",
+        "_set_id": "set_id",
+        "_rev": 1,
+    }
+
+    # Second insert of same document should generate "_rev" 2
+    result = scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="set_id",
+        document=document,
+    )
+
+    assert result.inserted_count == 1
+    assert result.inserted_id == result.document["_id"]
+
+    del result.document["_id"]
+    assert result.document == {
+        "_type": "set",
+        "_set_id": "set_id",
+        "_rev": 2,
+    }
+
+
+def test_put_set_element_with_id_failure(
+    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Insert of an existing "_id" should fail, as this means document is already in the database.
+    """
+
+    collection = temp_collection_client_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.put_set_element(
+            collection=collection,
+            document_type="set",
+            set_id="set_id",
+            document={"_id": "not allowed"},
+        )
+
+
+def test_put_set_element_duplicate_rev_failure(
+    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Insert of an duplicate "_rev" should fail.
+    """
+
+    collection = temp_collection_client_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="set_id",
+        document={},
+    )
+
+    scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="set_id",
+        document={
+            "_rev": 1,
+        },
+    )
+
+    with pytest.raises(pymongo.errors.DuplicateKeyError):
+        scope.database.collection_utils.put_set_element(
+            collection=collection,
+            document_type="set",
+            set_id="set_id",
+            document={},
+        )
+
+    with pytest.raises(pymongo.errors.DuplicateKeyError):
+        scope.database.collection_utils.put_set_element(
+            collection=collection,
+            document_type="set",
+            set_id="set_id",
+            document={
+                "_rev": 1,
+            },
+        )
+
+
+def test_put_set_element_invalid_rev_failure(
+    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Insert of non-integer "_rev" should fail.
+    """
+
+    collection = temp_collection_client_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.put_set_element(
+            collection=collection,
+            document_type="set",
+            set_id="set_id",
+            document={
+                "_rev": "1",
+            },
+        )

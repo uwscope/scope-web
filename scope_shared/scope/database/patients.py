@@ -47,7 +47,8 @@ def create_patient(
     patients_collection = database.get_collection(PATIENTS_COLLECTION)
 
     # Obtain a unique ID and collection name for the patient.
-    # A set insert with the patient_id ensures the collection name is unique.
+    # A set element with the generated_patient_id ensures the patient_id is unique.
+    # We can therefore also use it as our collection name.
     generated_patient_id = _generate_patient_id()
     generated_patient_collection = _patient_collection_name(
         patient_id=generated_patient_id
@@ -55,23 +56,21 @@ def create_patient(
 
     # Store the patient document
     patient_document = {
-        "_type": PATIENT_DOCUMENT_TYPE,
-        "_set_id": generated_patient_id,
-        "_rev": 1,
         "collection": generated_patient_collection,
     }
-    result = scope.database.collection_utils.insert(
+    result = scope.database.collection_utils.put_set_element(
         collection=patients_collection,
+        document_type=PATIENT_DOCUMENT_TYPE,
+        set_id=generated_patient_id,
         document=patient_document,
     )
 
     # Create the patient collection with a sentinel document
     patient_collection = database.get_collection(generated_patient_collection)
-    result = scope.database.collection_utils.insert(
+    result = scope.database.collection_utils.put_singleton(
         collection=patient_collection,
-        document={
-            "_type": "sentinel",
-        },
+        document_type="sentinel",
+        document={},
     )
 
     return patient_document

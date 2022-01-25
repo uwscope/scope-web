@@ -23,11 +23,10 @@ class Database:
             direct_connection=app.config["DOCUMENTDB_DIRECTCONNECTION"],
             # DocumentDB requires SSL, configure whether certificates are expected to be valid
             tls_insecure=app.config["DOCUMENTDB_TLSINSECURE"],
-            # Configure user and password
+            # Connect as database user
+            database_name=app.config["DATABASE_NAME"],
             user=app.config["DATABASE_USER"],
             password=app.config["DATABASE_PASSWORD"],
-            # Desired database
-            database_name=app.config["DATABASE_NAME"],
         )
 
         # Store the database client on the Flask app
