@@ -11,7 +11,7 @@
 		"name": "patientName",
 		"MRN": "mrn",
 		"clinicCode": "Transplant – Auto",
-		"birthdate": "birthdate",
+		"birthdate": "1991-08-19 00:00:00",
 		"sex": "Male",
 		"discussionFlag": {
 			"Flag as safety risk": true,

@@ -5,9 +5,6 @@
 	"description": "IPatientProfile Type",
 	"type": "object",
 	"properties": {
-		"_id": {
-			"type": "string"
-		},
 		"_type": { "const": "patientProfile" },
 		"_rev": { "type": "number" },
 		"name": {
@@ -20,7 +17,7 @@
 			"$ref": "/schemas/enums#/properties/clinicCode"
 		},
 		"birthdate": {
-			"type": "string"
+			"$ref": "/schemas/regexes#/properties/birthdate"
 		},
 		"sex": {
 			"$ref": "/schemas/enums#/properties/sex"
@@ -55,5 +52,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["name", "MRN"]
+	"required": ["_type", "name", "MRN"]
 }
