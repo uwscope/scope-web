@@ -1,10 +1,10 @@
 import jschon
+import json
 from pathlib import Path
-from pprint import pprint
 import pytest
-import scope.schema
 from typing import Tuple
 
+import scope.schema
 
 SCHEMA_DIR_PATH = Path(Path(__file__).parent, "../../schemas")
 
@@ -18,14 +18,22 @@ def test_schemas_parse(schema_item: Tuple[str, str]):
     schema_name = schema_item[0]
     schema_file_path = schema_item[1]
 
-    # TODO: Anant fix
-    if schema_name == "life_area_value_schema":
-        pytest.xfail("Failing to parse: Need Anant to Fix")
-
     # If a schema failed to parse, parse it now to generate a test failure
     if vars(scope.schema).get(schema_name, None) is None:
-        with open(Path(SCHEMA_DIR_PATH, schema_file_path), encoding="utf-8") as f:
-            schema_json = f.read()
-            pprint(schema_json)
-            print("===========")
-            schema = jschon.JSONSchema.loads(schema_json)
+        schema_path = Path(SCHEMA_DIR_PATH, schema_file_path)
+        with open(schema_path, encoding="utf-8") as f:
+            schema_json = json.loads(f.read())
+
+        try:
+            schema = jschon.JSONSchema(
+                schema_json,
+                catalog=scope.schema.CATALOG,
+            )
+        finally:
+            # Schema construction failed, try again in the next generation
+
+            # Although construction of the schema failed,
+            # jschon will have already placed the schema in the catalog.
+            # Schemas dependent on the failed schema will therefore think it is available.
+            # Remove it from the catalog so that dependent schemas fail quickly.
+            scope.schema.CATALOG.del_schema(jschon.URI(schema_json["$id"]))

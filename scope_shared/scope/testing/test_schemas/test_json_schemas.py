@@ -79,18 +79,10 @@ def test_json_schema(config: ConfigTestJSONSchema):
     if config.schema is None:
         pytest.xfail("Schema failed to parse")
 
-    # TODO: Anant fix, this are caused by life_area_value_schema failing to parse
-    if config.name in ["patient", "safety-plan", "values-inventory"]:
-        pytest.xfail("Failing to parse: Need Anant to Fix")
-
-    with open(Path(JSON_DATA_PATH, config.document_path)) as f:
+    with open(Path(JSON_DATA_PATH, config.document_path), encoding="utf-8") as f:
         json = f.read()
 
-    result = config.schema.evaluate(
-        jschon.JSON.loads(json)
-    ).output("verbose")
-
-    pprint(config.schema)
+    result = config.schema.evaluate(jschon.JSON.loads(json)).output("detailed")
 
     pprint(result)
 
