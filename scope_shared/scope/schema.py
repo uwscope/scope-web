@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import jschon
 
 # Declare each schema in order to support code analysis/completion
@@ -37,7 +38,13 @@ values_inventory_schema: jschon.JSONSchema
 
 # Declare files from which to populate each schema
 SCHEMA_DIR_PATH = Path(Path(__file__).parent, "./schemas")
+
 SCHEMAS = {
+    "enums_schema": "enums.json",
+    "contact_schema": "contact.json",
+    "identity_schema": "identity.json",
+    "log_schema": "log.json",
+    "life_area_value_activity_schema": "life-area-value-activity.json",
     "activity_schema": "activity.json",
     "activities_schema": "activities.json",
     "activity_log_schema": "activity-log.json",
@@ -49,12 +56,7 @@ SCHEMAS = {
     "case_review_schema": "case-review.json",
     "case_reviews_schema": "case-reviews.json",
     "clinical_history_schema": "clinical-history.json",
-    "contact_schema": "contact.json",
-    "enums_schema": "enums.json",
-    "identity_schema": "identity.json",
     "life_area_value_schema": "life-area-value.json",
-    "life_area_value_activity_schema": "life-area-value-activity.json",
-    "log_schema": "log.json",
     "mood_log_schema": "mood-log.json",
     "mood_logs_schema": "mood-logs.json",
     "patient_schema": "patient.json",
@@ -72,7 +74,10 @@ SCHEMAS = {
     "values_inventory_schema": "values-inventory.json",
 }
 
+
 catalog = jschon.create_catalog("2020-12")
+# NOTE: @James, if you don't use below line, you will have to load the schemas in "$ref" dependency order.
+# catalog.add_directory(jschon.URI("https://uwscope.org/schemas/"), SCHEMA_DIR_PATH)
 
 # Schemas need to be loaded in dependency order.
 # The jschon method for doing this internally uses jschon.JSONSchema.loadf,
@@ -88,7 +93,9 @@ while progress:
 
     for schema_current in schemas_remaining:
         try:
-            with open(Path(SCHEMA_DIR_PATH, SCHEMAS[schema_current]), encoding="utf-8") as f:
+            with open(
+                Path(SCHEMA_DIR_PATH, SCHEMAS[schema_current]), encoding="utf-8"
+            ) as f:
                 schema = jschon.JSONSchema.loads(f.read())
 
                 globals()[schema_current] = schema
@@ -98,3 +105,5 @@ while progress:
         except jschon.exceptions.CatalogError as e:
             # A dependency was not available, try again in the next generation
             pass
+
+print(schemas_remaining)
