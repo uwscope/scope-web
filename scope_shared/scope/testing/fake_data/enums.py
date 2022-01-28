@@ -1,3 +1,5 @@
+# TODO: these feel more fundamental than fake_data
+
 from enum import Enum
 
 
