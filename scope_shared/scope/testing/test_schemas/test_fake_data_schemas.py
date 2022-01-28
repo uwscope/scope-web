@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import jschon
+import json
+from pathlib import Path
 from pprint import pprint
 import pytest
 from typing import Callable
@@ -8,6 +10,7 @@ import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_life_areas
 import scope.testing.fake_data.fixtures_fake_values_inventory
+import scope.testing.fake_data.fixtures_fake_patient_profile
 
 
 @dataclass(frozen=True)
@@ -16,6 +19,7 @@ class ConfigTestFakeDataSchema:
     schema: jschon.JSONSchema
     data_factory: Callable[[], dict]
     expected_valid: bool
+
     # Used to indicate test is not resolved
     # because it has an issue in data or schema
     XFAIL_TEST_HAS_TODO: bool = False
@@ -23,27 +27,36 @@ class ConfigTestFakeDataSchema:
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
+        name="patient-profile",
+        schema=scope.schema.patient_profile_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_patient_profile.data_fake_patient_profile_factory,
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        # TODO: what schema applies here?
+        XFAIL_TEST_HAS_TODO=True,
+
         name="activity",
         schema=scope.schema.activity_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
         expected_valid=True,
-        # TODO: what schema applies here?
-        XFAIL_TEST_HAS_TODO=True
     ),
     ConfigTestFakeDataSchema(
+        # TODO: what schema applies here?
+        XFAIL_TEST_HAS_TODO=True,
+
         name="life-areas",
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory,
         expected_valid=True,
-        # TODO: what schema applies here?
-        XFAIL_TEST_HAS_TODO=True
     ),
     ConfigTestFakeDataSchema(
+        XFAIL_TEST_HAS_TODO=True,
+
         name="values-inventory",
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory,
         expected_valid=True,
-        XFAIL_TEST_HAS_TODO=True
     ),
 ]
 
@@ -56,6 +69,9 @@ TEST_CONFIGS = [
 def test_fake_data_schema(config: ConfigTestFakeDataSchema):
     if config.XFAIL_TEST_HAS_TODO:
         pytest.xfail("Test has TODO in data or schema.")
+
+    if config.schema is None:
+        pytest.xfail("Schema failed to parse")
 
     data = config.data_factory()
 

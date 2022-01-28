@@ -5,7 +5,6 @@ APP_CONFIG_LIFE_AREAS_PATH = Path(
     Path(__file__).parent, "../../../../server_flask/app_config/life_areas/"
 )
 
-
 # TODO: still unclear how to handle references
 
 

@@ -290,40 +290,40 @@ def data_fake_identity_factory() -> dict:
     return fake_identity
 
 
-def data_fake_patient_profile_factory() -> dict:
-
-    name = _fake_name_factory()
-    mrn = "%s" % get_random_integer(10000, 1000000)
-
-    fake_profile = {
-        "_type": "patientProfile",
-        "_rev": 1,
-        "name": name,
-        "MRN": mrn,
-        "clinicCode": get_random_item(ClinicCode).value,
-        "birthdate": str(
-            datetime(
-                get_random_integer(1930, 2000),
-                get_random_integer(1, 13),
-                get_random_integer(1, 28),
-            )
-        ),
-        "sex": get_random_item(PatientSex).value,
-        "gender": get_random_item(PatientGender).value,
-        "pronoun": get_random_item(PatientPronoun).value,
-        "race": get_random_flags(PatientRace),
-        "primaryOncologyProvider": data_fake_identity_factory(),
-        "primaryCareManager": data_fake_identity_factory(),
-        "discussionFlag": get_random_flags(DiscussionFlag),
-        "followupSchedule": get_random_item(FollowupSchedule).value,
-        "depressionTreatmentStatus": get_random_item(DepressionTreatmentStatus).value,
-    }
-
-    # Verify the schema
-    result = patient_profile_schema.evaluate(JSON(fake_profile))
-    assert result.output("basic")["valid"] == True
-
-    return fake_profile
+# def data_fake_patient_profile_factory() -> dict:
+#
+#     name = _fake_name_factory()
+#     mrn = "%s" % get_random_integer(10000, 1000000)
+#
+#     fake_profile = {
+#         "_type": "patientProfile",
+#         "_rev": 1,
+#         "name": name,
+#         "MRN": mrn,
+#         "clinicCode": get_random_item(ClinicCode).value,
+#         "birthdate": str(
+#             datetime(
+#                 get_random_integer(1930, 2000),
+#                 get_random_integer(1, 13),
+#                 get_random_integer(1, 28),
+#             )
+#         ),
+#         "sex": get_random_item(PatientSex).value,
+#         "gender": get_random_item(PatientGender).value,
+#         "pronoun": get_random_item(PatientPronoun).value,
+#         "race": get_random_flags(PatientRace),
+#         "primaryOncologyProvider": data_fake_identity_factory(),
+#         "primaryCareManager": data_fake_identity_factory(),
+#         "discussionFlag": get_random_flags(DiscussionFlag),
+#         "followupSchedule": get_random_item(FollowupSchedule).value,
+#         "depressionTreatmentStatus": get_random_item(DepressionTreatmentStatus).value,
+#     }
+#
+#     # Verify the schema
+#     result = patient_profile_schema.evaluate(JSON(fake_profile))
+#     assert result.output("basic")["valid"] == True
+#
+#     return fake_profile
 
 
 def data_fake_clinical_history_factory() -> dict:
