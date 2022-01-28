@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 import jschon
-import json
-from pathlib import Path
 from pprint import pprint
 import pytest
 from typing import Callable
@@ -35,7 +33,6 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         # TODO: what schema applies here?
         XFAIL_TEST_HAS_TODO=True,
-
         name="activity",
         schema=scope.schema.activity_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
@@ -44,7 +41,6 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         # TODO: what schema applies here?
         XFAIL_TEST_HAS_TODO=True,
-
         name="life-areas",
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory,
@@ -52,7 +48,6 @@ TEST_CONFIGS = [
     ),
     ConfigTestFakeDataSchema(
         XFAIL_TEST_HAS_TODO=True,
-
         name="values-inventory",
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory,
@@ -75,9 +70,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
 
     data = config.data_factory()
 
-    result = config.schema.evaluate(
-        jschon.JSON(data)
-    ).output("detailed")
+    result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
     pprint(result)
 
