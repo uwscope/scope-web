@@ -1,46 +1,29 @@
-from typing import List, Optional
-
 import pymongo
-import pymongo.database
-import pymongo.errors
 import pymongo.results
+from typing import Optional
+
+import scope.database.collection_utils
+
+DOCUMENT_TYPE = "patientProfile"
 
 
 def get_patient_profile(
-    *, database: pymongo.database.Database, collection_name: str
+    *,
+    collection: pymongo.collection.Collection,
 ) -> Optional[dict]:
-    """
-    Retrieve "patientProfile" document.
-    """
-    collection = database.get_collection(name=collection_name)
-
-    query = {
-        "_type": "patientProfile",
-    }
-
-    # Find the document with highest `v`.
-    patient_profile = collection.find_one(
-        filter=query, sort=[("_rev", pymongo.DESCENDING)]
+    return scope.database.collection_utils.get_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
     )
 
-    if "_id" in patient_profile:
-        patient_profile["_id"] = str(patient_profile["_id"])
-    # TODO: Verify schema against patient-profile json.
 
-    return patient_profile
-
-
-def create_patient_profile(
-    *, database: pymongo.database.Database, collection_name: str, patient_profile: dict
-) -> pymongo.results.InsertOneResult:
-    """
-    Create the "patientProfile" document.
-    """
-
-    collection = database.get_collection(name=collection_name)
-
-    try:
-        result = collection.insert_one(document=patient_profile)
-        return result
-    except pymongo.errors.DuplicateKeyError:
-        return None
+def put_patient_profile(
+    *,
+    collection: pymongo.collection.Collection,
+    patient_profile: dict
+) -> scope.database.collection_utils.PutResult:
+    return scope.database.collection_utils.put_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        document=patient_profile,
+    )

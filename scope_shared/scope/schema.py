@@ -37,6 +37,18 @@ session_schema: Optional[jschon.JSONSchema] = None
 sessions_schema: Optional[jschon.JSONSchema] = None
 values_inventory_schema: Optional[jschon.JSONSchema] = None
 
+
+def raise_for_invalid(*, schema: jschon.JSONSchema, document) -> None:
+    """
+    Verify a document matches a schema, raise an Error if it does not.
+    """
+
+    result = schema.evaluate(jschon.JSON(document))
+
+    if not result.valid:
+        raise ValueError(result.output("detailed"))
+
+
 # Declare files from which to populate each schema
 SCHEMA_DIR_PATH = Path(Path(__file__).parent, "./schemas")
 SCHEMAS = {

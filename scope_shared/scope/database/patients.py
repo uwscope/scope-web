@@ -64,6 +64,7 @@ def create_patient(
         set_id=generated_patient_id,
         document=patient_document,
     )
+    patient_document = result.document
 
     # Create the patient collection with a sentinel document
     patient_collection = database.get_collection(generated_patient_collection)

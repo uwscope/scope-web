@@ -12,18 +12,36 @@ PRIMARY_COLLECTION_INDEX = [
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
 
 
-def _normalize_document(
+def normalize_document(
     *,
     document: dict,
-) -> None:
+) -> dict:
     """
-    Currently implemented to modify document in place.
+    Obtain a new document in normalized format.
     """
 
-    # Ensure retrieved _id can easily serialize
-    doc_id = document.get("_id", None)
-    if (doc_id is not None) and (not isinstance(doc_id, str)):
-        document["_id"] = str(doc_id)
+    normalized_document = {}
+    keys_remaining = list(document.keys())
+
+    # Dictionaries preserve order, so ensure these are first
+    keys_prefix = ["_id", "_type", "_set_id", "_rev"]
+    for key_current in keys_prefix:
+        if key_current in keys_remaining:
+            value_current = document[key_current]
+
+            if key_current == "_id":
+                # Ensure _id can serialize
+                normalized_document[key_current] = str(value_current)
+            else:
+                normalized_document[key_current] = value_current
+
+            keys_remaining.remove(key_current)
+
+    # And then the remaining keys
+    for key_current in keys_remaining:
+        normalized_document[key_current] = document[key_current]
+
+    return normalized_document
 
 
 def delete_set_element(
@@ -130,8 +148,7 @@ def get_set(
         result = list(pipeline_result)
 
     # Normalize the results
-    for result_current in result:
-        _normalize_document(document=result_current)
+    result = [normalize_document(document=result_current) for result_current in result]
 
     return result
 
@@ -176,12 +193,14 @@ def get_set_element(
         if not pipeline_result.alive:
             return None
 
-        result = pipeline_result.next()
+        document = pipeline_result.next()
 
-    # Normalize the result
-    _normalize_document(document=result)
+    # Normalize the document
+    print(document)
+    document = normalize_document(document=document)
+    print(document)
 
-    return result
+    return document
 
 
 def get_singleton(
@@ -220,7 +239,7 @@ def get_singleton(
         result = pipeline_result.next()
 
     # Normalize the result
-    _normalize_document(document=result)
+    result = normalize_document(document=result)
 
     return result
 
@@ -275,9 +294,10 @@ def put_set_element(
     else:
         document["_rev"] = 1
 
+    # insert_one will modify the document to insert an "_id"
+    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
-
-    _normalize_document(document=document)
+    document = normalize_document(document=document)
 
     return PutResult(
         inserted_count=1,
@@ -320,9 +340,10 @@ def put_singleton(
     else:
         document["_rev"] = 1
 
+    # insert_one will modify the document to insert an "_id"
+    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
-
-    _normalize_document(document=document)
+    document = normalize_document(document=document)
 
     return PutResult(
         inserted_count=1,

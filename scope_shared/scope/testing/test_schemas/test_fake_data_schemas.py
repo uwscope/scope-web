@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import faker
 import jschon
 from pprint import pprint
 import pytest
@@ -23,11 +24,16 @@ class ConfigTestFakeDataSchema:
     XFAIL_TEST_HAS_TODO: bool = False
 
 
+TEST_ITERATIONS = 100
+faker_factory = faker.Faker()
+
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="patient-profile",
         schema=scope.schema.patient_profile_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_patient_profile.data_fake_patient_profile_factory,
+        data_factory=scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
+            faker_factory=faker_factory,
+        ),
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
@@ -55,7 +61,6 @@ TEST_CONFIGS = [
     ),
 ]
 
-
 @pytest.mark.parametrize(
     ["config"],
     [[config] for config in TEST_CONFIGS],
@@ -68,10 +73,11 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
     if config.schema is None:
         pytest.xfail("Schema failed to parse")
 
-    data = config.data_factory()
+    for count in range(TEST_ITERATIONS):
+        data = config.data_factory()
+        result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
-    result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
+        if result["valid"] != config.expected_valid:
+            pprint(result)
 
-    pprint(result)
-
-    assert result["valid"] == config.expected_valid
+            assert result["valid"] == config.expected_valid
