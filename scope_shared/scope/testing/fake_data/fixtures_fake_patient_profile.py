@@ -17,10 +17,10 @@ def fake_patient_profile_factory(
     """
     Obtain a factory that will generate fake patientProfile documents.
     """
-    name = faker_factory.name()
-    mrn = "{}".format(random.randrange(10000, 1000000))
-
     def factory() -> dict:
+        name = faker_factory.name()
+        mrn = "{}".format(random.randrange(10000, 1000000))
+
         fake_patient_profile = {
             "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
 
