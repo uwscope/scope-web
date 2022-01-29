@@ -163,11 +163,12 @@ def test_put_set_element(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "set",
         "_set_id": "set_id",
         "_rev": 1,
@@ -181,11 +182,12 @@ def test_put_set_element(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "set",
         "_set_id": "set_id",
         "_rev": 2,

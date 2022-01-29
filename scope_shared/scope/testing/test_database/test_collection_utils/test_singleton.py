@@ -97,11 +97,12 @@ def test_put_singleton(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "singleton",
         "_rev": 1,
     }
@@ -113,11 +114,12 @@ def test_put_singleton(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "singleton",
         "_rev": 2,
     }
