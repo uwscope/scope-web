@@ -75,18 +75,17 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
         scope.database.patients.PATIENTS_COLLECTION
     )
 
-    # Ensure a sentinel document in that collection
-    result = patients_collection.find_one(
-        filter={
-            "_type": "sentinel",
-        }
-    )
-    if result is None:
-        patients_collection.insert_one(
-            {
-                "_type": "sentinel",
-            }
-        )
-
     # Ensure the expected index
     scope.database.collection_utils.ensure_index(collection=patients_collection)
+
+    # Ensure a sentinel document in that collection
+    result = scope.database.collection_utils.get_singleton(
+        collection=patients_collection,
+        document_type="sentinel",
+    )
+    if result is None:
+        scope.database.collection_utils.put_singleton(
+            collection=patients_collection,
+            document_type="sentinel",
+            document={}
+        )

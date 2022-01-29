@@ -17,6 +17,7 @@ setuptools.setup(
         "requests",
         "ruamel.yaml",
         "jschon",
+        "faker",  # TODO: To remove, used only in development
         "lorem",  # TODO: To remove
         "numpy",  # TODO: To remove
     ],
