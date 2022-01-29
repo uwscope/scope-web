@@ -196,9 +196,7 @@ def get_set_element(
         document = pipeline_result.next()
 
     # Normalize the document
-    print(document)
     document = normalize_document(document=document)
-    print(document)
 
     return document
 
