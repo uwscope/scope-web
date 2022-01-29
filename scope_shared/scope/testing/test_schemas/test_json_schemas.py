@@ -84,6 +84,7 @@ def test_json_schema(config: ConfigTestJSONSchema):
 
     result = config.schema.evaluate(jschon.JSON.loads(json)).output("detailed")
 
-    pprint(result)
+    if result["valid"] != config.expected_valid:
+        pprint(result)
 
-    assert result["valid"] == config.expected_valid
+        assert result["valid"] == config.expected_valid

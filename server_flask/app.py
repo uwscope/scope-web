@@ -7,6 +7,7 @@ from flask_json import FlaskJSON, as_json
 from markupsafe import escape
 
 import blueprints.app.config
+import blueprints.registry.patient_profile
 import database
 from blueprints.patient.safety_plan import patient_safety_plan_blueprint
 
@@ -15,7 +16,6 @@ from blueprints.patient.values_inventory import patient_values_inventory_bluepri
 from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
 from blueprints.registry.case_reviews import registry_case_reviews_blueprint
 from blueprints.registry.clinical_history import registry_clinical_history_blueprint
-from blueprints.registry.patient_profile import registry_patient_profile_blueprint
 from blueprints.registry.patients import registry_patients_blueprint
 from blueprints.registry.safety_plan import registry_safety_plan_blueprint
 from blueprints.registry.sessions import registry_sessions_blueprint
@@ -91,14 +91,14 @@ def create_app():
 
     # App blueprints
     app.register_blueprint(
-        blueprints.app.config.app_config_blueprint, url_prefix="/app"
+        blueprints.app.config.app_config_blueprint, url_prefix="/app",
     )
 
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
     # app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
-    # app.register_blueprint(
-    #     registry_patient_profile_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/profile"
+    app.register_blueprint(
+        blueprints.registry.patient_profile.patient_profile_blueprint, url_prefix="/patient/"
+    )
     # app.register_blueprint(
     #     registry_clinical_history_blueprint
     # )  # url_prefix="/patients/<patient_collection>/clinicalhistory"

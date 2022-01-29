@@ -26,12 +26,12 @@ def _configure_collection_data(*, collection: pymongo.collection.Collection) -> 
 
 
 def test_get_singleton(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a singleton.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
     _configure_collection_data(collection=collection)
 
@@ -47,12 +47,12 @@ def test_get_singleton(
 
 
 def test_get_singleton_not_found(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a singleton that does not exist.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
     _configure_collection_data(collection=collection)
 
@@ -80,14 +80,14 @@ def test_get_singleton_not_found(
     ],
 )
 def test_put_singleton(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
     document: dict,
 ):
     """
     Test insert of a singleton.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     # Initial insert should generate "_rev" 1
@@ -97,11 +97,12 @@ def test_put_singleton(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "singleton",
         "_rev": 1,
     }
@@ -113,24 +114,25 @@ def test_put_singleton(
         document=document,
     )
 
+    document = result.document
     assert result.inserted_count == 1
-    assert result.inserted_id == result.document["_id"]
+    assert result.inserted_id == document["_id"]
 
-    del result.document["_id"]
-    assert result.document == {
+    del document["_id"]
+    assert document == {
         "_type": "singleton",
         "_rev": 2,
     }
 
 
 def test_put_singleton_with_id_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of an existing "_id" should fail, as this means document is already in the database.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     with pytest.raises(ValueError):
@@ -142,13 +144,13 @@ def test_put_singleton_with_id_failure(
 
 
 def test_put_singleton_duplicate_rev_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of an duplicate "_rev" should fail.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     scope.database.collection_utils.put_singleton(
@@ -183,13 +185,13 @@ def test_put_singleton_duplicate_rev_failure(
 
 
 def test_put_singleton_invalid_rev_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of non-integer "_rev" should fail.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     with pytest.raises(ValueError):
