@@ -37,12 +37,12 @@ def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
 
 
 def test_get_set(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a set.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     result = scope.database.collection_utils.get_set(
@@ -61,12 +61,12 @@ def test_get_set(
 
 
 def test_get_set_not_found(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a set that does not exist.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     result = scope.database.collection_utils.get_set(
@@ -78,12 +78,12 @@ def test_get_set_not_found(
 
 
 def test_get_set_element(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a set element.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     result = scope.database.collection_utils.get_set_element(
@@ -99,12 +99,12 @@ def test_get_set_element(
 
 
 def test_get_set_element_not_found(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test retrieval of a set element that does not exist.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     result = scope.database.collection_utils.get_set_element(
@@ -145,14 +145,14 @@ def test_get_set_element_not_found(
     ],
 )
 def test_put_set_element(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
     document: dict,
 ):
     """
     Test insert of a set element.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     # Initial insert should generate "_rev" 1
@@ -193,13 +193,13 @@ def test_put_set_element(
 
 
 def test_put_set_element_with_id_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of an existing "_id" should fail, as this means document is already in the database.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     with pytest.raises(ValueError):
@@ -212,13 +212,13 @@ def test_put_set_element_with_id_failure(
 
 
 def test_put_set_element_duplicate_rev_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of an duplicate "_rev" should fail.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     scope.database.collection_utils.put_set_element(
@@ -257,13 +257,13 @@ def test_put_set_element_duplicate_rev_failure(
 
 
 def test_put_set_element_invalid_rev_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Insert of non-integer "_rev" should fail.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
     with pytest.raises(ValueError):

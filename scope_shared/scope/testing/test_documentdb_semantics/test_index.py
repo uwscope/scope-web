@@ -5,7 +5,7 @@ from typing import Callable
 
 
 def test_compound_index_singletons(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test a basic indexing strategy for singleton documents.
@@ -15,7 +15,7 @@ def test_compound_index_singletons(
     As that logical document is modified, new documents are created with an incremented _rev field.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     collection.create_index(
         [
@@ -44,7 +44,7 @@ def test_compound_index_singletons(
 
 
 def test_compound_index_singletons_and_sets(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test a basic indexing strategy for singleton documents and sets of documents.
@@ -64,7 +64,7 @@ def test_compound_index_singletons_and_sets(
     The index does not prevent this, so it needs otherwise prevented or defined.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     collection.create_index(
         [
@@ -112,7 +112,7 @@ def test_compound_index_singletons_and_sets(
 
 
 def test_sparse_compound_index_failure(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test a failed indexing strategy using different indices for each type and type_id.
@@ -123,7 +123,7 @@ def test_sparse_compound_index_failure(
     but DocumentDB does not apparently support such an ability.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     # An index that might seem appropriate for a type which is a singleton.
     # Assumes storing documents of _type (e.g., a string) with a _rev (e.g., an integer).

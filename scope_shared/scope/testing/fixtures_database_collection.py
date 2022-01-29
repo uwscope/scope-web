@@ -6,15 +6,15 @@ from typing import List
 import uuid
 
 
-@pytest.fixture(name="temp_collection_client_factory")
-def fixture_temp_collection_client_factory(
+@pytest.fixture(name="database_temp_collection_factory")
+def fixture_database_temp_collection_factory(
     database_client: pymongo.database.Database,
 ) -> Callable[[], pymongo.collection.Collection]:
     """
     Fixture for temp_collection_client_factory.
 
     Provides a factory for obtaining a client for a temporary Collection.
-    Removes any temporary collections that are created by obtained clients.
+    Removes any temporary collections that are created by obtained factory.
     """
 
     # List of collections created by the factory

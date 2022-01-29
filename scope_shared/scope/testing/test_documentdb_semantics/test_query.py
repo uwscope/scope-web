@@ -35,13 +35,13 @@ def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
 
 
 def test_singleton_query(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Query a singleton.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     # Query pipeline
@@ -70,13 +70,13 @@ def test_singleton_query(
 
 
 def test_set_query(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Query an element from a set.
     """
 
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
 
     # Query pipeline for all elements of a set

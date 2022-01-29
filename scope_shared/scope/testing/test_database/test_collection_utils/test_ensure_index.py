@@ -27,12 +27,12 @@ def assert_collection_utils_index(*, collection: pymongo.collection.Collection):
 
 
 def test_index_creation(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test the expected index is created.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     scope.database.collection_utils.ensure_index(collection=collection)
 
@@ -40,12 +40,12 @@ def test_index_creation(
 
 
 def test_index_removal(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test an unexpected index will be removed.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     collection.create_index(
         [("_invalid", pymongo.ASCENDING)],
@@ -57,12 +57,12 @@ def test_index_removal(
 
 
 def test_index_replacement(
-    temp_collection_client_factory: Callable[[], pymongo.collection.Collection],
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
     Test an existing index with different properties will be replaced.
     """
-    collection = temp_collection_client_factory()
+    collection = database_temp_collection_factory()
 
     collection.create_index(
         [("_invalid", pymongo.ASCENDING)],
