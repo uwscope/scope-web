@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 import pymongo.collection
 from typing import List
@@ -33,13 +34,13 @@ def normalize_document(
                 # Ensure _id can serialize
                 normalized_document[key_current] = str(value_current)
             else:
-                normalized_document[key_current] = value_current
+                normalized_document[key_current] = copy.deepcopy(value_current)
 
             keys_remaining.remove(key_current)
 
     # And then the remaining keys
     for key_current in keys_remaining:
-        normalized_document[key_current] = document[key_current]
+        normalized_document[key_current] = copy.deepcopy(document[key_current])
 
     return normalized_document
 
@@ -264,6 +265,9 @@ def put_set_element(
     - An existing "_rev" will be incremented.
     """
 
+    # Normalization includes making a copy
+    document = normalize_document(document=document)
+
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
     if "_id" in document:
@@ -293,7 +297,6 @@ def put_set_element(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
-    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
     document = normalize_document(document=document)
 
@@ -317,6 +320,9 @@ def put_singleton(
     - An existing "_rev" will be incremented.
     """
 
+    # Normalization includes making a copy
+    document = normalize_document(document=document)
+
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
     if "_id" in document:
@@ -339,7 +345,6 @@ def put_singleton(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
-    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
     document = normalize_document(document=document)
 
