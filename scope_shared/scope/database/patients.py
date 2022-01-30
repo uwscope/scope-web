@@ -55,6 +55,8 @@ def create_patient(
     )
 
     # Store the patient document
+    # TODO: In theory the later steps could still fail.
+    #       We may eventually want a "ready" state on each patient.
     patient_document = {
         "collection": generated_patient_collection,
     }
@@ -73,6 +75,9 @@ def create_patient(
         document_type="sentinel",
         document={},
     )
+
+    # Create the index on the patient collection
+    scope.database.collection_utils.ensure_index(collection=patient_collection)
 
     return patient_document
 
