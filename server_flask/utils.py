@@ -1,13 +1,10 @@
+import http
 import json
 from functools import wraps
 
 from flask import abort, current_app, jsonify, request
 from flask_json import json_response
 from jschon import JSON
-
-
-def parseInt(text):
-    return int(text) if text.isdecimal() else None
 
 
 # TODO: Confirm location of the function with James.
@@ -24,7 +21,7 @@ def validate_schema(schema_object):
 
             if result.output("flag")["valid"] == False:
                 abort(
-                    400,
+                    http.HTTPStatus.BAD_REQUEST,
                     jsonify(
                         message="Invalid contents.",
                         error=result.output("basic"),

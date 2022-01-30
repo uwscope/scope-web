@@ -21,7 +21,6 @@ from blueprints.registry.safety_plan import registry_safety_plan_blueprint
 from blueprints.registry.sessions import registry_sessions_blueprint
 from blueprints.registry.values_inventory import registry_values_inventory_blueprint
 from fake import getFakePatient, getRandomFakePatients
-from utils import parseInt
 
 
 def create_app():
