@@ -17,7 +17,8 @@ patient_profile_blueprint = Blueprint(
 
 
 @patient_profile_blueprint.route(
-    "/<string:patient_id>/patient_profile", methods=["GET"],
+    "/<string:patient_id>/patient_profile",
+    methods=["GET"],
 )
 @as_json
 def get_patient_profile(patient_id):
@@ -36,9 +37,7 @@ def get_patient_profile(patient_id):
         abort(http.HTTPStatus.NOT_FOUND)
 
     # Obtain patient collection
-    patient_collection = context.database.get_collection(
-        patient_document["collection"]
-    )
+    patient_collection = context.database.get_collection(patient_document["collection"])
 
     # Retrieve the current patient profile
     document_retrieved = scope.database.patient.patient_profile.get_patient_profile(
@@ -53,7 +52,8 @@ def get_patient_profile(patient_id):
 
 
 @patient_profile_blueprint.route(
-    "/<string:patient_id>/patient_profile", methods=["PUT"],
+    "/<string:patient_id>/patient_profile",
+    methods=["PUT"],
 )
 @validate_schema(patient_profile_schema)
 @as_json
@@ -73,9 +73,7 @@ def put_patient_profile(patient_id):
         abort(http.HTTPStatus.NOT_FOUND)
 
     # Obtain patient collection
-    patient_collection = context.database.get_collection(
-        patient_document["collection"]
-    )
+    patient_collection = context.database.get_collection(patient_document["collection"])
 
     # Obtain the document being put
     document = request.json
@@ -89,7 +87,7 @@ def put_patient_profile(patient_id):
     try:
         result = scope.database.patient.patient_profile.put_patient_profile(
             collection=patient_collection,
-            patient_profile=document
+            patient_profile=document,
         )
 
         return result.document

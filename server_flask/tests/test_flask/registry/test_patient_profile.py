@@ -18,8 +18,14 @@ QUERY_PATH = "patient/{patient_id}/patient_profile"
 
 
 def test_get_patient_profile(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
-    data_fake_patient_profile_factory: Callable[[], dict],  # dict is patient profile document
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_patient_profile_factory: Callable[
+        [],
+        dict,
+    ],  # dict is patient profile document
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -34,7 +40,7 @@ def test_get_patient_profile(
     # Store the document
     scope.database.patient.patient_profile.put_patient_profile(
         collection=temp_patient.collection,
-        patient_profile=document
+        patient_profile=document,
     )
 
     # Retrieve the document via Flask
@@ -57,7 +63,10 @@ def test_get_patient_profile(
 
 
 def test_get_patient_profile_invalid(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -88,8 +97,14 @@ def test_get_patient_profile_invalid(
 
 
 def test_put_patient_profile(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
-    data_fake_patient_profile_factory: Callable[[], dict],  # dict is patient profile document
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_patient_profile_factory: Callable[
+        [],
+        dict,
+    ],  # dict is patient profile document
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -136,8 +151,14 @@ def test_put_patient_profile(
 
 
 def test_put_patient_profile_invalid(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
-    data_fake_patient_profile_factory: Callable[[], dict],  # dict is patient profile document
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_patient_profile_factory: Callable[
+        [],
+        dict,
+    ],  # dict is patient profile document
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -155,7 +176,7 @@ def test_put_patient_profile_invalid(
             QUERY_PATH.format(patient_id=temp_patient.patient_id),
         ),
         json={
-            "_invalid": "invalid"
+            "_invalid": "invalid",
         },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
@@ -174,8 +195,14 @@ def test_put_patient_profile_invalid(
 
 
 def test_put_patient_profile_update(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
-    data_fake_patient_profile_factory: Callable[[], dict],  # dict is patient profile document
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_patient_profile_factory: Callable[
+        [],
+        dict,
+    ],  # dict is patient profile document
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
@@ -231,8 +258,14 @@ def test_put_patient_profile_update(
 
 
 def test_put_patient_profile_update_invalid(
-    database_temp_patient_factory: Callable[[], scope.testing.fixtures_database_temp_patient.DatabaseTempPatient],
-    data_fake_patient_profile_factory: Callable[[], dict],  # dict is patient profile document
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_patient_profile_factory: Callable[
+        [],
+        dict,
+    ],  # dict is patient profile document
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
