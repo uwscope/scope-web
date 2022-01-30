@@ -5,8 +5,15 @@
 	"description": "IPatientProfile Type",
 	"type": "object",
 	"properties": {
-		"_type": { "const": "patientProfile" },
-		"_rev": { "type": "number" },
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "patientProfile"
+		},
+		"_rev": {
+			"type": "number"
+		},
 		"name": {
 			"type": "string"
 		},
