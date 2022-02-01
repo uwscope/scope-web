@@ -48,6 +48,9 @@ declare module '@mui/system/createTheme/createBreakpoints' {
 export default function createAppTheme() {
     return createTheme({
         palette: { primary: teal, secondary: amber },
+        typography: {
+            fontSize: 16,
+        },
         customPalette: {
             subtle: '#eeeeee',
             panel: '#ffffffcc',
