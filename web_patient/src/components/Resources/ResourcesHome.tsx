@@ -1,5 +1,5 @@
-import { List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import { List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@mui/material';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

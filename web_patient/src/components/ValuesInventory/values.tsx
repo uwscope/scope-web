@@ -1,9 +1,9 @@
-import EmojiNatureIcon from '@material-ui/icons/EmojiNature';
-import HelpIcon from '@material-ui/icons/Help';
-import ListAltIcon from '@material-ui/icons/ListAlt';
-import SpaIcon from '@material-ui/icons/Spa';
-import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import WorkIcon from '@material-ui/icons/Work';
+import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
+import HelpIcon from '@mui/icons-material/Help';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import SpaIcon from '@mui/icons-material/Spa';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import WorkIcon from '@mui/icons-material/Work';
 import React from 'react';
 import { getString } from 'src/services/strings';
 

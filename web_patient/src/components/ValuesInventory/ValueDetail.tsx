@@ -5,9 +5,10 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    SelectChangeEvent,
     styled,
     TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -75,11 +76,11 @@ export const ValueDetail: FunctionComponent = observer(() => {
         viewState.activityName = event.target.value;
     });
 
-    const handleChangeEnjoyment = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleChangeEnjoyment = action((event: SelectChangeEvent<number>) => {
         viewState.enjoyment = Number(event.target.value);
     });
 
-    const handleChangeImportance = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleChangeImportance = action((event: SelectChangeEvent<number>) => {
         viewState.importance = Number(event.target.value);
     });
 

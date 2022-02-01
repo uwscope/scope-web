@@ -1,6 +1,6 @@
-import { ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
-import CheckIcon from '@material-ui/icons/Check';
-import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import { ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import React, { FunctionComponent } from 'react';
 import { IScheduledActivity } from 'shared/types';
 import { getTaskItemDueTimeString } from 'src/utils/schedule';

@@ -1,13 +1,5 @@
-import {
-    Avatar,
-    Divider,
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
-    Typography,
-    withTheme,
-} from '@material-ui/core';
+import { Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';

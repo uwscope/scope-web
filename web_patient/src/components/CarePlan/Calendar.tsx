@@ -1,8 +1,9 @@
-import { ButtonBase, IconButton, withTheme } from '@material-ui/core';
-import { teal } from '@material-ui/core/colors';
-import { fade } from '@material-ui/core/styles/colorManipulator';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { ButtonBase, IconButton } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import { teal } from '@mui/material/colors';
+import { alpha } from '@mui/material/styles';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { addDays, addMonths, format, getDate, isSameDay, isSameMonth, lastDayOfMonth } from 'date-fns';
 import { eachWeekOfInterval } from 'date-fns/esm';
 import { action } from 'mobx';
@@ -67,8 +68,8 @@ const MonthRowDate = withTheme(
         height: 36,
         border: '1px solid transparent',
         borderRadius: '50%',
-        backgroundColor: props.$selected ? fade(teal[500], 0.3) : 'transparent',
-        color: props.$offRange ? fade(props.theme.palette.text.primary, 0.5) : props.theme.palette.text.primary,
+        backgroundColor: props.$selected ? alpha(teal[500], 0.3) : 'transparent',
+        color: props.$offRange ? alpha(props.theme.palette.text.primary, 0.5) : props.theme.palette.text.primary,
     }))
 );
 
@@ -130,11 +131,11 @@ export const Calendar: FunctionComponent<ICalendarProps> = observer((props) => {
     return (
         <Container>
             <NavContainer>
-                <IconButton onClick={handlePreviousClick}>
+                <IconButton onClick={handlePreviousClick} size="large">
                     <ChevronLeftIcon />
                 </IconButton>
                 <MonthText>{format(viewState.currentMonth, 'MMMM yyyy')}</MonthText>
-                <IconButton onClick={handleNextClick}>
+                <IconButton onClick={handleNextClick} size="large">
                     <ChevronRightIcon />
                 </IconButton>
             </NavContainer>

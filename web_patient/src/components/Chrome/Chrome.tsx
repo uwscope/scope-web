@@ -1,8 +1,9 @@
-import { BottomNavigation, BottomNavigationAction, withTheme } from '@material-ui/core';
-import EqualizerIcon from '@material-ui/icons/Equalizer';
-import FaceIcon from '@material-ui/icons/Face';
-import HomeIcon from '@material-ui/icons/Home';
-import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck';
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import FaceIcon from '@mui/icons-material/Face';
+import HomeIcon from '@mui/icons-material/Home';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';

@@ -1,4 +1,5 @@
-import { Paper, Typography, withTheme } from '@material-ui/core';
+import { Paper, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 

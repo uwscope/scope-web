@@ -1,3 +1,5 @@
+import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
     Button,
     Divider,
@@ -11,10 +13,8 @@ import {
     MenuItem,
     Switch,
     Typography,
-    withTheme,
-} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+} from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { format, isSameDay } from 'date-fns';
 import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -160,7 +160,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                     {getString('Careplan_add_activity')}
                 </Button>
             }>
-            <Grid container alignItems="center" spacing={1} justify="center">
+            <Grid container alignItems="center" spacing={1} justifyContent="center">
                 <Grid item>
                     <Typography color={viewState.showActivities ? 'textSecondary' : 'textPrimary'}>
                         {getString('Careplan_view_calendar')}
@@ -188,16 +188,14 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                         keepMounted
                         open={Boolean(viewState.moreTargetEl)}
                         onClose={handleMoreClose}>
-                        <MenuItem button onClick={handleActivate}>
+                        <MenuItem onClick={handleActivate}>
                             {getString(
                                 viewState.selectedActivity?.isActive
                                     ? 'Careplan_activity_item_deactivate'
                                     : 'Careplan_activity_item_activate'
                             )}
                         </MenuItem>
-                        <MenuItem button onClick={handleDelete}>
-                            {getString('Careplan_activity_item_delete')}
-                        </MenuItem>
+                        <MenuItem onClick={handleDelete}>{getString('Careplan_activity_item_delete')}</MenuItem>
                     </Menu>
                     {Object.keys(groupedActivities).map((lifeareaId) => {
                         const activities = groupedActivities[lifeareaId];
@@ -249,7 +247,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                     <IconButton
                                                         edge="end"
                                                         aria-label="more"
-                                                        onClick={(e) => handleMoreClick(activity, e)}>
+                                                        onClick={(e) => handleMoreClick(activity, e)}
+                                                        size="large">
                                                         <MoreVertIcon />
                                                     </IconButton>
                                                 </ListItemSecondaryAction>

@@ -1,5 +1,5 @@
-import { Divider, List, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
-import { styled } from '@material-ui/styles';
+import { Divider, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { styled } from '@mui/styles';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';

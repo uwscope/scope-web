@@ -1,4 +1,5 @@
-import { FormControl, FormControlLabel, Radio, RadioGroup, Slider, TextField, withTheme } from '@material-ui/core';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Slider, TextField } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -37,6 +38,7 @@ const PageSuccess: FunctionComponent<{
             case 'No':
                 return getString('Form_activity_log_success_no');
             case 'SomethingElse':
+            default:
                 return getString('Form_activity_log_success_something_else');
         }
     };

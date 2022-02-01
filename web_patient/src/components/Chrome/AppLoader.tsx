@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Fade, Paper, Typography } from '@material-ui/core';
-import zIndex from '@material-ui/core/styles/zIndex';
+import { Box, CircularProgress, Fade, Paper, Typography } from '@mui/material';
+// import { zIndex } from '@mui/material/styles';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -10,7 +10,7 @@ const Cover = styled(Fade)({
     top: 0,
     bottom: 0,
     background: 'white',
-    zIndex: zIndex.modal + 1,
+    zIndex: 2000, //zIndex.modal + 1,
 });
 
 export interface IAppLoaderProps {

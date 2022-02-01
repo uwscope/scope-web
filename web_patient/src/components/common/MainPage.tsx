@@ -1,4 +1,4 @@
-import { withTheme } from '@material-ui/core';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 

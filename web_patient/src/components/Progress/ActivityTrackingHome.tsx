@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
