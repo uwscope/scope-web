@@ -19,7 +19,7 @@ import { format, isSameDay } from 'date-fns';
 import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DayOfWeekFlags } from 'shared/enums';
 import { IActivity, IScheduledActivity, KeyedMap } from 'shared/types';
@@ -49,7 +49,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         appConfig: { lifeAreas },
     } = rootStore;
     const { taskItems, activities } = patientStore;
-    const history = useHistory();
+    const navigate = useNavigate();
     const viewState = useLocalObservable<{
         selectedDate: Date;
         showActivities: boolean;
@@ -82,7 +82,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleTaskClick = action((item: IScheduledActivity) => () => {
-        history.push(
+        navigate(
             getFormPath(ParameterValues.form.activityLog, {
                 [Parameters.activityId]: item.activityId,
                 [Parameters.taskId]: item.scheduleId,

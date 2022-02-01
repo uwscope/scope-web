@@ -2,7 +2,7 @@ import { TextField } from '@mui/material';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { useHistory, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import ListDetailPage, { IListItem } from 'src/components/ValuesInventory/ListDetailPage';
 import { getActivitiesString } from 'src/components/ValuesInventory/values';
 import { Routes } from 'src/services/routes';
@@ -11,6 +11,9 @@ import { useStores } from 'src/stores/stores';
 
 export const LifeAreaDetail: FunctionComponent = observer(() => {
     const { lifeareaId } = useParams<{ lifeareaId: string }>();
+    if (!lifeareaId) {
+        return null;
+    }
     const rootStore = useStores();
     const { patientStore } = rootStore;
     const lifeareaContent = rootStore.getLifeAreaContent(lifeareaId);
@@ -28,10 +31,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         addedValue: '',
     }));
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     const handleAddValue = action(() => {

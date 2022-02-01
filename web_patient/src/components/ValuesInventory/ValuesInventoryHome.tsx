@@ -3,7 +3,7 @@ import { styled } from '@mui/styles';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DetailPage } from 'src/components/common/DetailPage';
 import { getActivitiesString, getLifeAreaIcon, getValuesString } from 'src/components/ValuesInventory/values';
@@ -18,11 +18,11 @@ const InstructionText = styled(Typography)({
 export const ValuesInventoryHome: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { lifeAreas } = rootStore.appConfig;
-    const history = useHistory();
+    const navigate = useNavigate();
     const { patientStore } = rootStore;
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     return (

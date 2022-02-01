@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { ActivitySuccessType } from 'shared/enums';
 import { IActivityLog } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
@@ -19,13 +19,13 @@ export const ClickableTableRow = styled(TableRow)({
 });
 
 export const ActivityTrackingHome: FunctionComponent = observer(() => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const { patientStore } = useStores();
 
     const viewState = useLocalObservable<{ selectedLog?: IActivityLog }>(() => ({}));
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     const getSuccessString = (success?: ActivitySuccessType) => {

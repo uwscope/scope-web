@@ -22,7 +22,7 @@ import withTheme from '@mui/styles/withTheme';
 import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { getString } from 'src/services/strings';
 import styled from 'styled-components';
 
@@ -77,7 +77,7 @@ const Transition = React.forwardRef(
 
 export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) => {
     const { isOpen, title, pages, canClose, onClose, onSubmit, onNext, submitToast } = props;
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const state = useLocalObservable<{
         closeConfirmOpen: boolean;
@@ -95,7 +95,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         state.closeConfirmOpen = false;
         onClose && onClose();
 
-        history.goBack();
+        navigate(-1);
     });
 
     const closeAction = action(() => {

@@ -3,7 +3,7 @@ import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { IScheduledActivity } from 'shared/types';
 import { MainPage } from 'src/components/common/MainPage';
 import ScheduledListItem from 'src/components/common/ScheduledListItem';
@@ -27,11 +27,11 @@ const CompactList = withTheme(
 
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { todayItems, config, scheduledAssessments } = rootStore.patientStore;
 
     const onTaskClick = action((item: IScheduledActivity) => () => {
-        history.push(
+        navigate(
             getFormPath(ParameterValues.form.activityLog, {
                 [Parameters.activityId]: item.activityId,
                 [Parameters.taskId]: item.scheduleId,
@@ -114,8 +114,8 @@ export const HomePage: FunctionComponent = observer(() => {
                 <CompactList>
                     {!!todayItems && todayItems.length > 0 ? (
                         todayItems.map((item, idx) => (
-                            <Fragment>
-                                <ScheduledListItem key={item.scheduleId} item={item} onClick={onTaskClick(item)} />
+                            <Fragment key={item.scheduleId}>
+                                <ScheduledListItem item={item} onClick={onTaskClick(item)} />
                                 {idx < todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
                         ))
