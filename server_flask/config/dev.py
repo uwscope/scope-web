@@ -4,7 +4,7 @@ import scope.config
 from config.base import Config
 
 # Path is relative to server_flask
-DEV_LOCAL_FLASK_CONFIG_PATH = "../secrets/configuration/dev_local_flask.yaml"
+DEV_LOCAL_FLASK_CONFIG_PATH = "../secrets/configuration/flask_dev_local.yaml"
 
 
 class DevelopmentConfig(Config):
