@@ -9,6 +9,18 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
+OPTIONAL_PROPERTIES = [
+    "primaryCancerDiagnosis",
+    "dateOfCancerDiagnosis",
+    "currentTreatmentRegimen",
+    "currentTreatmentRegimenOther",
+    "currentTreatmentRegimenNotes",
+    "psychDiagnosis",
+    "pastPsychHistory",
+    "pastSubstanceUse",
+    "psychSocialBackground",
+]
+
 
 def fake_clinical_history_factory(
     *, faker_factory: faker.Faker, validate: bool = True
@@ -30,7 +42,13 @@ def fake_clinical_history_factory(
             "currentTreatmentRegimenNotes": faker_factory.text(),
             "psychDiagnosis": faker_factory.text(),
             "pastPsychHistory": faker_factory.text(),
+            "pastSubstanceUse": faker_factory.text(),
+            "psychSocialBackground": faker_factory.text(),
         }
+
+        # Remove a randomly sampled subset of optional parameters.
+        for key in fake_utils.fake_sample_random_values(OPTIONAL_PROPERTIES):
+            del fake_clinical_history[key]
 
         if validate:
             scope.schema.raise_for_invalid(
