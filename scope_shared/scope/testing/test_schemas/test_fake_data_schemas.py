@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-import faker
-import jschon
 from pprint import pprint
-import pytest
 from typing import Callable
 
+import faker
+import jschon
+import pytest
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_life_areas
-import scope.testing.fake_data.fixtures_fake_values_inventory
 import scope.testing.fake_data.fixtures_fake_patient_profile
+import scope.testing.fake_data.fixtures_fake_values_inventory
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,14 @@ TEST_CONFIGS = [
         name="patient-profile",
         schema=scope.schema.patient_profile_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="clinical-history",
+        schema=scope.schema.clinical_history_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
             faker_factory=faker_factory,
         ),
         expected_valid=True,
@@ -60,6 +69,7 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
 ]
+
 
 @pytest.mark.parametrize(
     ["config"],
