@@ -94,7 +94,7 @@ SCHEMAS = {
 # Instead of attempting to manually maintain a loading order,
 # we brute force loading generations of the dependency graph while ensuring we maintain progress.
 
-CATALOG = jschon.create_catalog("2020-12", default=False)
+CATALOG = jschon.create_catalog("2020-12")
 schemas_remaining = [key_current for key_current in SCHEMAS.keys()]
 progress = True
 while progress:
