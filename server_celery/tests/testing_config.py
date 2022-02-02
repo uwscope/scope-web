@@ -13,10 +13,10 @@ DEVELOPMENT_CONFIGS = [
             config_path="../secrets/configuration/documentdb.yaml",
         ),
         database_config=scope.config.DatabaseConfig.load(
-            config_path="../secrets/configuration/dev_database.yaml",
+            config_path="../secrets/configuration/database_dev.yaml",
         ),
         flask_config=scope.config.FlaskConfig.load(
-            config_path="../secrets/configuration/dev_local_flask.yaml",
+            config_path="../secrets/configuration/flask_dev_local.yaml",
         ),
     )
 ]

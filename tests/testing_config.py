@@ -9,11 +9,11 @@ INSTANCE_SSH_CONFIG = aws_infrastructure.tasks.ssh.SSHConfig.load(
 DOCUMENTDB_CONFIG = scope.config.DocumentDBConfig.load(
     config_path="./secrets/configuration/documentdb.yaml",
 )
-DEMO_DATABASE_CONFIG = scope.config.DatabaseConfig.load(
-    config_path="./secrets/configuration/demo_database.yaml",
+DATABASE_DEMO_CONFIG = scope.config.DatabaseConfig.load(
+    config_path="./secrets/configuration/database_demo.yaml",
 )
-DEV_DATABASE_CONFIG = scope.config.DatabaseConfig.load(
-    config_path="./secrets/configuration/dev_database.yaml",
+DATABASE_DEV_CONFIG = scope.config.DatabaseConfig.load(
+    config_path="./secrets/configuration/database_dev.yaml",
 )
 
 DATABASE_TESTING_CONFIGS = [
@@ -21,14 +21,14 @@ DATABASE_TESTING_CONFIGS = [
         name="database_dev",
         instance_ssh_config=INSTANCE_SSH_CONFIG,
         documentdb_config=DOCUMENTDB_CONFIG,
-        database_config=DEV_DATABASE_CONFIG,
+        database_config=DATABASE_DEV_CONFIG,
         flask_config=None,
     ),
     scope.testing.testing_config.TestingConfig(
         name="database_demo",
         instance_ssh_config=INSTANCE_SSH_CONFIG,
         documentdb_config=DOCUMENTDB_CONFIG,
-        database_config=DEMO_DATABASE_CONFIG,
+        database_config=DATABASE_DEMO_CONFIG,
         flask_config=None,
     ),
 ]
@@ -38,9 +38,9 @@ DEVELOPMENT_TESTING_CONFIGS = [
         name="development_local",
         instance_ssh_config=INSTANCE_SSH_CONFIG,
         documentdb_config=DOCUMENTDB_CONFIG,
-        database_config=DEV_DATABASE_CONFIG,
+        database_config=DATABASE_DEV_CONFIG,
         flask_config=scope.config.FlaskConfig.load(
-            config_path="./secrets/configuration/dev_local_flask.yaml",
+            config_path="./secrets/configuration/flask_dev_local.yaml",
         ),
     ),
 ]
@@ -50,5 +50,5 @@ UNIQUE_DOCUMENTDB_CONFIGS = [
 ]
 
 UNIQUE_DATABASE_CONFIGS = [
-    DEV_DATABASE_CONFIG,
+    DATABASE_DEV_CONFIG,
 ]
