@@ -5,9 +5,6 @@
 	"description": "ISafetyPlan Type",
 	"type": "object",
 	"properties": {
-		"_id": {
-			"type": "string"
-		},
 		"_type": { "const": "safetyPlan" },
 		"_rev": { "type": "number" },
 		"assigned": {
@@ -29,8 +26,16 @@
 		},
 		"distractions": {
 			"type": "array",
-			"$comment": "Test the typescript code. Either (string | IContact)[], or a mix of both.",
-			"items": { "type": "string" }
+			"items": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"$ref": "/schemas/contact"
+					}
+				]
+			}
 		},
 		"supporters": {
 			"type": "array",
@@ -56,5 +61,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "_rev", "assigned", "assignedDate"]
+	"required": ["_type", "assigned", "assignedDate"]
 }
