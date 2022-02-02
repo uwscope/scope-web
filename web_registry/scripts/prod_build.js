@@ -8,4 +8,13 @@ console.log(`Building production in ${paths.appBuildProd}.`);
 rimraf.sync(paths.appBuildProd);
 
 const compiler = webpack(webpackConfig);
-compiler.run();
+compiler.run(((err, stats) => {
+    if (err) {
+        console.error(err);
+        return;
+    } else {
+        console.log(stats.toString({
+            colors: true,
+        }))
+    }
+}));
