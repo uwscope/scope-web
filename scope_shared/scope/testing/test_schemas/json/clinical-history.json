@@ -2,7 +2,7 @@
 	"_type": "clinicalHistory",
 	"_rev": 1,
 	"primaryCancerDiagnosis": "primaryCancerDiagnosis",
-	"dateOfCancerDiagnosis": "dateOfCancerDiagnosis",
+	"dateOfCancerDiagnosis": "2012-10-23",
 	"currentTreatmentRegimen": {
 		"Surgery": true,
 		"Chemotherapy": true,
