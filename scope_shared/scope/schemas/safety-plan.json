@@ -11,7 +11,10 @@
 			"type": "boolean"
 		},
 		"assignedDate": {
-			"type": "string"
+			"$ref": "/schemas/regexes#/properties/date"
+		},
+		"lastUpdatedDate": {
+			"$ref": "/schemas/regexes#/properties/date"
 		},
 		"reasonsForLiving": {
 			"type": "string"
