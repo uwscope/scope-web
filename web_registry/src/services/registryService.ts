@@ -45,7 +45,7 @@ class RegistryService implements IRegistryService {
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
-            timeout: 1000,
+            timeout: 15000,
             headers: { 'X-Custom-Header': 'foobar' },
         });
 

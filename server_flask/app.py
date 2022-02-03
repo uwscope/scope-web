@@ -8,6 +8,7 @@ from markupsafe import escape
 
 import blueprints.app.config
 import blueprints.registry.patient_profile
+import blueprints.registry.patients
 import database
 from blueprints.patient.safety_plan import patient_safety_plan_blueprint
 
@@ -16,11 +17,9 @@ from blueprints.patient.values_inventory import patient_values_inventory_bluepri
 from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
 from blueprints.registry.case_reviews import registry_case_reviews_blueprint
 from blueprints.registry.clinical_history import registry_clinical_history_blueprint
-from blueprints.registry.patients import registry_patients_blueprint
 from blueprints.registry.safety_plan import registry_safety_plan_blueprint
 from blueprints.registry.sessions import registry_sessions_blueprint
 from blueprints.registry.values_inventory import registry_values_inventory_blueprint
-from fake import getFakePatient, getRandomFakePatients
 
 
 def create_app():
@@ -50,36 +49,10 @@ def create_app():
     # Database connection
     database.Database().init_app(app=app)
 
-    # Temporary store for patients
-    patients = getRandomFakePatients()
-    patient_map = {p["identity"]["identityId"]: p for p in patients}
-
-    # API TODO:
-    # - check method
-    # - check parameters
-    # - return appropriate error message and code
-
     @app.route("/auth")
     @as_json
     def auth():
         return {"name": "Luke Skywalker", "authToken": "my token"}
-
-    @app.route("/patients")
-    @as_json
-    def get_patients():
-        return {"patients": patients}
-
-    @app.route("/patient/<recordId>", methods=["GET"])
-    @as_json
-    def get_patient_data(recordId):
-        if request.method == "GET":
-            if recordId == None or patient_map.get(recordId, None) == None:
-                return "Patient not found", 404
-
-            return patient_map[recordId]
-
-        else:
-            return "Method not allowed", 405
 
     # Basic status endpoint.
     # TODO - move this into a blueprint
@@ -94,9 +67,11 @@ def create_app():
     )
 
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
-    # app.register_blueprint(registry_patients_blueprint)  # url_prefix="/patients"
     app.register_blueprint(
-        blueprints.registry.patient_profile.patient_profile_blueprint, url_prefix="/patient/"
+        blueprints.registry.patients.patients_blueprint, url_prefix="/",
+    )
+    app.register_blueprint(
+        blueprints.registry.patient_profile.patient_profile_blueprint, url_prefix="/patient/",
     )
     # app.register_blueprint(
     #     registry_clinical_history_blueprint

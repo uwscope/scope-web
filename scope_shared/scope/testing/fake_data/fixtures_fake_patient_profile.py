@@ -28,7 +28,10 @@ def fake_patient_profile_factory(
             "clinicCode": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ClinicCode
             ),
-            "birthdate": str(faker_factory.date_of_birth()),
+            "birthdate": datetime.combine(
+                faker_factory.date_of_birth(),
+                datetime.min.time(),  # 00:00.00.00
+            ).isoformat(),
             "sex": fake_utils.fake_enum_value(scope.testing.fake_data.enums.PatientSex),
             "gender": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.PatientGender
