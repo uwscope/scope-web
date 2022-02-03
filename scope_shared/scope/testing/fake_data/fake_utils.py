@@ -26,5 +26,5 @@ def fake_enum_flag_values(enum):
 
 
 def fake_sample_random_values(values: list) -> list:
-    N = random.randint(0, len(values))
-    return random.sample(values, N)
+    n = random.randint(0, len(values))
+    return random.sample(values, n)
