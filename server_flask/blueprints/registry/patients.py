@@ -10,6 +10,7 @@ from utils import validate_schema
 
 import fake
 import scope.database.patients
+import scope.database.patient.patient_profile
 
 # @app.route("/patients")
 # @as_json
@@ -47,6 +48,7 @@ patients_blueprint = Blueprint(
 def get_patients():
     context = request_context()
 
+    # List of documents from the patients collection
     patients = scope.database.patients.get_patients(
         database=context.database,
     )
@@ -59,10 +61,36 @@ def get_patients():
             FAKE_PATIENT_MAP[patient_id] = fake.getFakePatient()
             FAKE_PATIENT_MAP[patient_id]["identity"]["identityId"] = patient_id
 
+    # Populate a document to return.
+    # Initially based on fields that were in the fake data.
+    patient_documents = {}
+    for patient_current in patients:
+        patient_id = patient_current["_set_id"]
+        patient_collection = context.database.get_collection(patient_current["collection"])
 
+        patient_document_current = {
+            "identity": FAKE_PATIENT_MAP[patient_id]["identity"],
+            # "profile": FAKE_PATIENT_MAP[patient_id]["profile"],
+            "profile": scope.database.patient.patient_profile.get_patient_profile(
+                collection=patient_collection
+            ),
+            "clinicalHistory": FAKE_PATIENT_MAP[patient_id]["clinicalHistory"],
+            # Sessions
+            "sessions": FAKE_PATIENT_MAP[patient_id]["sessions"],
+            # Assessments
+            "assessments": FAKE_PATIENT_MAP[patient_id]["assessments"],
+            "scheduledAssessments": FAKE_PATIENT_MAP[patient_id]["scheduledAssessments"],
+            "assessmentLogs": FAKE_PATIENT_MAP[patient_id]["assessmentLogs"],
+            # Activities
+            "activities": FAKE_PATIENT_MAP[patient_id]["activities"],
+            # Mood logs
+            "moodLogs": FAKE_PATIENT_MAP[patient_id]["moodLogs"],
+        }
+
+        patient_documents[patient_id] = patient_document_current
 
     return {
-        "patients": list(FAKE_PATIENT_MAP.values())
+        "patients": list(patient_documents.values())
     }
 
     # patients = scope.database.patient.patients.get_patients(database=context.database)
