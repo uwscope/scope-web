@@ -1,6 +1,10 @@
 import random
 
 
+def fake_boolean_value() -> bool:
+    return random.choice([True, False])
+
+
 def fake_enum_value(enum):
     """
     Given an instance of enum.Enum, randomly choose a value.
