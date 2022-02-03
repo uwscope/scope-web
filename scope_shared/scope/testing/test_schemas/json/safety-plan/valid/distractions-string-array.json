@@ -2,8 +2,9 @@
 	"_type": "safetyPlan",
 	"_rev": 1,
 	"assigned": true,
-	"assignedDate": "some date",
+	"assignedDate": "2010-01-01",
 	"reasonsForLiving": "To stare at Mt. Rainier.",
+	"distractions": ["Love watching TV.", "Love watching Ted Lasso."],
 	"supporters": [
 		{
 			"contactType": "Person",

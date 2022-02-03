@@ -1,46 +1,27 @@
-from typing import List, Optional
+from typing import Optional
 
 import pymongo
-import pymongo.database
-import pymongo.errors
-import pymongo.results
+import pymongo.collection
+import scope.database.collection_utils
+
+DOCUMENT_TYPE = "clinicalHistory"
 
 
 def get_clinical_history(
-    *, database: pymongo.database.Database, collection_name: str
+    *,
+    collection: pymongo.collection.Collection,
 ) -> Optional[dict]:
-    """
-    Retrieve "clinicalHistory" document.
-    """
-    collection = database.get_collection(name=collection_name)
-
-    query = {
-        "_type": "clinicalHistory",
-    }
-
-    # Find the document with highest `v`.
-    clinical_history = collection.find_one(
-        filter=query, sort=[("_rev", pymongo.DESCENDING)]
+    return scope.database.collection_utils.get_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
     )
 
-    if "_id" in clinical_history:
-        clinical_history["_id"] = str(clinical_history["_id"])
-    # TODO: Verify schema against clinical-history json.
 
-    return clinical_history
-
-
-def create_clinical_history(
-    *, database: pymongo.database.Database, collection_name: str, clinical_history: dict
-) -> pymongo.results.InsertOneResult:
-    """
-    Create the "valuesInventory" document.
-    """
-
-    collection = database.get_collection(name=collection_name)
-
-    try:
-        result = collection.insert_one(document=clinical_history)
-        return result
-    except pymongo.errors.DuplicateKeyError:
-        return None
+def put_clinical_history(
+    *, collection: pymongo.collection.Collection, clinical_history: dict
+) -> scope.database.collection_utils.PutResult:
+    return scope.database.collection_utils.put_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        document=clinical_history,
+    )

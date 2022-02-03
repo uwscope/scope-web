@@ -3,6 +3,11 @@
 from enum import Enum
 
 
+class ContactType(Enum):
+    Person = "Person"
+    Service = "Service"
+
+
 class ClinicCode(Enum):
     Breast = "Breast"
     Endocrine = "Endocrine"
@@ -174,7 +179,7 @@ class DayOfWeek(Enum):
     Friday = "Friday"
     Saturday = "Saturday"
     Sunday = "Sunday"
-    
+
 
 class DueType(Enum):
     Exact = "Exact"

@@ -1,44 +1,27 @@
-from typing import List, Optional
+from typing import Optional
 
 import pymongo
-import pymongo.database
-import pymongo.errors
-import pymongo.results
+import pymongo.collection
+import scope.database.collection_utils
+
+DOCUMENT_TYPE = "safetyPlan"
 
 
 def get_safety_plan(
-    *, database: pymongo.database.Database, collection_name: str
+    *,
+    collection: pymongo.collection.Collection,
 ) -> Optional[dict]:
-    """
-    Retrieve "safetyPlan" document.
-    """
-    collection = database.get_collection(name=collection_name)
-
-    query = {
-        "_type": "safetyPlan",
-    }
-
-    # Find the document with highest `v`.
-    safety_plan = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
-
-    if "_id" in safety_plan:
-        safety_plan["_id"] = str(safety_plan["_id"])
-    # TODO: Verify schema against safety-plan json.
-
-    return safety_plan
+    return scope.database.collection_utils.get_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+    )
 
 
-def create_safety_plan(
-    *, database: pymongo.database.Database, collection_name: str, safety_plan: dict
-) -> pymongo.results.InsertOneResult:
-    """
-    Create the "valuesInventory" document.
-    """
-
-    collection = database.get_collection(name=collection_name)
-
-    try:
-        result = collection.insert_one(document=safety_plan)
-        return result
-    except pymongo.errors.DuplicateKeyError:
-        return None
+def put_safety_plan(
+    *, collection: pymongo.collection.Collection, safety_plan: dict
+) -> scope.database.collection_utils.PutResult:
+    return scope.database.collection_utils.put_singleton(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        document=safety_plan,
+    )

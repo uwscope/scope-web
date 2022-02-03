@@ -1,0 +1,15 @@
+{
+	"_type": "safetyPlan",
+	"_rev": 1,
+	"assigned": true,
+	"assignedDate": "2010-01-01",
+	"reasonsForLiving": "To stare at Mt. Rainier.",
+	"supporters": [
+		{
+			"contactType": "Person",
+			"name": "Name",
+			"address": "Address",
+			"phoneNumber": "Number"
+		}
+	]
+}
