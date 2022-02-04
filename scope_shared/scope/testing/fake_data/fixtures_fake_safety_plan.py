@@ -1,6 +1,5 @@
 import random
-from datetime import datetime
-from typing import Callable
+from typing import Callable, List
 
 import faker
 import pytest
@@ -21,6 +20,7 @@ OPTIONAL_PROPERTIES = [
     "urgentServices",
     "safeEnvironment",
 ]
+
 
 # TODO: Move this to fake_utils.py if other fixtures need this method.
 def generate_contacts(*, faker_factory: faker.Faker) -> list:
@@ -48,8 +48,9 @@ def fake_safety_plan_factory(
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(),
             "copingStrategies": faker_factory.texts(),
-            "distractions": faker_factory.texts()
-            + generate_contacts(faker_factory=faker_factory),
+            "distractions": random.shuffle(
+                faker_factory.texts() + generate_contacts(faker_factory=faker_factory)
+            ),
             "supporters": generate_contacts(faker_factory=faker_factory),
             "professionalSupporters": generate_contacts(faker_factory=faker_factory),
             "urgentServices": generate_contacts(faker_factory=faker_factory),
