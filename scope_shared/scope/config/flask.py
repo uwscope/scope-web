@@ -22,6 +22,26 @@ class FlaskConfig:
     database_user: str
     database_password: str
 
+    def encode(self) -> dict:
+        result = {
+            "baseurl": self.baseurl,
+            "secret_key": self.secret_key,
+            "documentdb": {
+                "host": self.documentdb_host,
+                "directconnection": self.documentdb_directconnection,
+                "tlsinsecure": self.documentdb_tlsinsecure,
+            },
+            "database": {
+                "name": self.database_name,
+                "user": self.database_user,
+                "password": self.database_password,
+            },
+        }
+        if self.documentdb_port:
+            result["documentdb"]["port"] = self.documentdb_port
+
+        return result
+
     @staticmethod
     def load(config_path: Union[Path, str]):
         config_path = Path(config_path)
@@ -38,7 +58,7 @@ class FlaskConfig:
             baseurl=config_dict["baseurl"],
             secret_key=config_dict["secret_key"],
             documentdb_host=config_dict["documentdb"]["host"],
-            documentdb_port=config_dict["documentdb"].get("host", None),
+            documentdb_port=config_dict["documentdb"].get("port", None),
             documentdb_directconnection=config_dict["documentdb"]["directconnection"],
             documentdb_tlsinsecure=config_dict["documentdb"]["tlsinsecure"],
             database_name=config_dict["database"]["name"],
@@ -56,6 +76,13 @@ class FlaskClientConfig:
     """
 
     baseurl: str
+
+    def encode(self) -> dict:
+        result = {
+            "baseurl": self.baseurl,
+        }
+
+        return result
 
     @staticmethod
     def load(config_path: Union[Path, str]):

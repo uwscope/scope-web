@@ -6,6 +6,7 @@ const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
     mode: 'production',
+    bail: true,
     devtool: 'source-map',
 
     // Disable minification for easier debugging

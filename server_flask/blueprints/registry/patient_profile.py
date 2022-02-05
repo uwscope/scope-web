@@ -1,5 +1,5 @@
-from flask import Blueprint, abort, current_app, jsonify, request
-from flask_json import as_json
+import flask
+import flask_json
 import http
 import pymongo.errors
 
@@ -10,7 +10,7 @@ import scope.database.patients
 from scope.schema import patient_profile_schema
 from utils import validate_schema
 
-patient_profile_blueprint = Blueprint(
+patient_profile_blueprint = flask.Blueprint(
     "patient_profile_blueprint",
     __name__,
 )
@@ -20,7 +20,7 @@ patient_profile_blueprint = Blueprint(
     "/<string:patient_id>/patient_profile",
     methods=["GET"],
 )
-@as_json
+@flask_json.as_json
 def get_patient_profile(patient_id):
     # TODO: Require authentication
 
@@ -34,7 +34,7 @@ def get_patient_profile(patient_id):
         patient_id=patient_id,
     )
     if patient_document is None:
-        abort(http.HTTPStatus.NOT_FOUND)
+        flask.abort(http.HTTPStatus.NOT_FOUND)
 
     # Obtain patient collection
     patient_collection = context.database.get_collection(patient_document["collection"])
@@ -46,7 +46,7 @@ def get_patient_profile(patient_id):
     if document_retrieved is None:
         # TODO: This is the correct semantics, evaluate impact on client versus some kind of empty response.
         #       Or should initialization of a patient include populating such documents.
-        abort(http.HTTPStatus.NOT_FOUND)
+        flask.abort(http.HTTPStatus.NOT_FOUND)
 
     return document_retrieved
 
@@ -56,7 +56,7 @@ def get_patient_profile(patient_id):
     methods=["PUT"],
 )
 @validate_schema(patient_profile_schema)
-@as_json
+@flask_json.as_json
 def put_patient_profile(patient_id):
     # TODO: Require authentication
 
@@ -70,18 +70,18 @@ def put_patient_profile(patient_id):
         patient_id=patient_id,
     )
     if patient_document is None:
-        abort(http.HTTPStatus.NOT_FOUND)
+        flask.abort(http.HTTPStatus.NOT_FOUND)
 
     # Obtain patient collection
     patient_collection = context.database.get_collection(patient_document["collection"])
 
     # Obtain the document being put
-    document = request.json
+    document = flask.request.json
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"
     if "_id" in document:
-        abort(http.HTTPStatus.BAD_REQUEST)
+        flask.abort(http.HTTPStatus.BAD_REQUEST)
 
     # Store the document
     try:
@@ -91,7 +91,7 @@ def put_patient_profile(patient_id):
         )
 
         return result.document
-    except pymongo.errors.DuplicateKeyError as e:
+    except pymongo.errors.DuplicateKeyError:
         # Indicates a race condition, return error and current revision to client
         document_conflict = scope.database.patient.patient_profile.get_patient_profile(
             collection=patient_collection

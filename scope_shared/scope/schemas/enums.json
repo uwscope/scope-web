@@ -125,7 +125,8 @@
 				},
 				"Surveillance": {
 					"type": "boolean"
-				}
+				},
+				"Other": { "type": "boolean" }
 			},
 			"required": [
 				"Surgery",

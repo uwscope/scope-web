@@ -326,35 +326,35 @@ def data_fake_identity_factory() -> dict:
 #     return fake_profile
 
 
-def data_fake_clinical_history_factory() -> dict:
-    fake_clinical_history = {
-        # "_id": str(bson.objectid.ObjectId()),
-        "_type": "clinicalHistory",
-        "_rev": 1,
-        "primaryCancerDiagnosis": "primaryCancerDiagnosis",
-        "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",  # TODO: date pattern needs to be fixed in schema
-        "currentTreatmentRegimen": {
-            "Surgery": True,
-            "Chemotherapy": True,
-            "Radiation": True,
-            "Stem Cell Transplant": True,
-            "Immunotherapy": True,
-            "CAR-T": True,
-            "Endocrine": True,
-            "Surveillance": True,
-        },
-        "currentTreatmentRegimenOther": "currentTreatmentRegimenOther",
-        "currentTreatmentRegimenNotes": "currentTreatmentRegimenNotes",
-        "psychDiagnosis": "psychDiagnosis",
-        "pastPsychHistory": "pastPsychHistory",
-        "pastSubstanceUse": "pastSubstanceUse",
-        "psychSocialBackground": "psychSocialBackground",
-    }
+# def data_fake_clinical_history_factory() -> dict:
+#     fake_clinical_history = {
+#         # "_id": str(bson.objectid.ObjectId()),
+#         "_type": "clinicalHistory",
+#         "_rev": 1,
+#         "primaryCancerDiagnosis": "primaryCancerDiagnosis",
+#         "dateOfCancerDiagnosis": "dateOfCancerDiagnosis",
+#         "currentTreatmentRegimen": {
+#             "Surgery": True,
+#             "Chemotherapy": True,
+#             "Radiation": True,
+#             "Stem Cell Transplant": True,
+#             "Immunotherapy": True,
+#             "CAR-T": True,
+#             "Endocrine": True,
+#             "Surveillance": True,
+#         },
+#         "currentTreatmentRegimenOther": "currentTreatmentRegimenOther",
+#         "currentTreatmentRegimenNotes": "currentTreatmentRegimenNotes",
+#         "psychDiagnosis": "psychDiagnosis",
+#         "pastPsychHistory": "pastPsychHistory",
+#         "pastSubstanceUse": "pastSubstanceUse",
+#         "psychSocialBackground": "psychSocialBackground",
+#     }
 
-    # Verify the schema
-    result = clinical_history_schema.evaluate(JSON(fake_clinical_history))
-    assert result.output("basic")["valid"] == True
-    return fake_clinical_history
+#     # Verify the schema
+#     result = clinical_history_schema.evaluate(JSON(fake_clinical_history))
+#     assert result.output("basic")["valid"] == True
+#     return fake_clinical_history
 
 
 # def data_fake_values_inventory_factory() -> dict:
@@ -935,15 +935,13 @@ def fixture_data_fake_patient_factory() -> Callable[[], dict]:
     return data_fake_patient_factory
 
 
-@pytest.fixture(name="data_fake_clinical_history_factory")
-def fixture_data_fake_clinical_history_factory() -> Callable[[], dict]:
-    """
-    Fixture for data_fake_clinical_history_factory.
-
-    Provides a factory for obtaining data for a fake clinical history.
-    """
-
-    return data_fake_clinical_history_factory
+# @pytest.fixture(name="data_fake_clinical_history_factory")
+# def fixture_data_fake_clinical_history_factory() -> Callable[[], dict]:
+#     """
+#     Fixture for data_fake_clinical_history_factory.
+#     Provides a factory for obtaining data for a fake clinical history.
+#     """
+#     return data_fake_clinical_history_factory
 
 
 @pytest.fixture(name="data_fake_values_inventory_factory")

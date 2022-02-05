@@ -66,6 +66,9 @@ def prod_serve(context):
     Start Flask, listening on `0.0.0.0:4000`.
 
     For production purposes, synchronously executes in the current terminal.
+
+    Is a thin wrapper around `waitress-serve`,
+    because that script will be executed in a production environment that does not include this task.
     """
 
     with context.cd(Path(FLASK_DIR)):

@@ -24,7 +24,7 @@
 			"$ref": "/schemas/enums#/properties/clinicCode"
 		},
 		"birthdate": {
-			"$ref": "/schemas/regexes#/properties/birthdate"
+			"$ref": "/schemas/regexes#/properties/date"
 		},
 		"sex": {
 			"$ref": "/schemas/enums#/properties/sex"

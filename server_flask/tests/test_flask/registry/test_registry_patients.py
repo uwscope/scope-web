@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Callable
 from urllib.parse import urljoin
 
@@ -11,10 +12,35 @@ import tests.testing_config
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
-# TODO: James to Review
-pytest.skip("Not reviewed", allow_module_level=True)
+def test_get_patients(
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test retrieving patients.
+    """
 
-# @pytest.mark.skip(reason="Taking too much time")
+    session = flask_session_unauthenticated_factory()
+
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "patients",
+        ),
+    )
+    assert response.ok
+
+    pprint(response.json())
+
+    assert False
+
+
+# TODO: James to Review
+@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_all_patients(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -107,7 +133,8 @@ def test_flask_get_all_patients(
     )
 
 
-# @pytest.mark.skip(reason="Taking too much time")
+# TODO: James to Review
+@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_patient(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -189,6 +216,8 @@ def test_flask_get_patient(
     )
 
 
+# TODO: James to Review
+@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_nonexistent_patient(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
@@ -210,7 +239,8 @@ def test_flask_get_nonexistent_patient(
     assert response.status_code == 404  # Not Found
 
 
-# @pytest.mark.skip(reason="Taking too much time")
+# TODO: James to Review
+@pytest.mark.skip(reason="Not reviewed")
 def test_flask_create_patient(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -342,6 +372,8 @@ def test_flask_create_patient(
     )
 
 
+# TODO: James to Review
+@pytest.mark.skip(reason="Not reviewed")
 def test_flask_update_patient_405(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,

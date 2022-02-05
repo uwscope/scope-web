@@ -16,7 +16,9 @@ setuptools.setup(
         "pymongo",
         "requests",
         "ruamel.yaml",
-        "jschon",
+        # jschon is active and < 1.0,
+        # pin a specific version to prevent breaking changes
+        "jschon==0.8.3",
         "faker",  # TODO: To remove, used only in development
         "lorem",  # TODO: To remove
         "numpy",  # TODO: To remove
