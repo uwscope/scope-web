@@ -7,9 +7,9 @@ const combineUrl = (baseUrl: string, path: string) => {
     return [baseUrl, path].map((s) => _.trim(s, '/')).join('/');
 };
 
-const appService = getAppServiceInstance(combineUrl(__API__, 'app'));
-const patientService = getPatientServiceInstance(combineUrl(__API__, 'patient'));
-const configService = getConfigServiceInstance(__API__);
+const appService = getAppServiceInstance(combineUrl(CLIENT_CONFIG.flaskBaseUrl, 'app'));
+const patientService = getPatientServiceInstance(combineUrl(CLIENT_CONFIG.flaskBaseUrl, 'patient'));
+const configService = getConfigServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
 
 export interface IRootService {
     appService: IAppService;
