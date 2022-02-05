@@ -1,24 +1,24 @@
 import _ from 'lodash';
 import { getAppServiceInstance, IAppService } from 'src/services/appService';
-import { getAuthServiceInstance, IAuthService } from 'src/services/authService';
+import { getConfigServiceInstance, IConfigService } from 'src/services/configService';
 import { getPatientServiceInstance, IPatientService } from 'src/services/patientService';
 
 const combineUrl = (baseUrl: string, path: string) => {
     return [baseUrl, path].map((s) => _.trim(s, '/')).join('/');
 };
 
-const authService = getAuthServiceInstance(__API__);
 const appService = getAppServiceInstance(combineUrl(__API__, 'app'));
 const patientService = getPatientServiceInstance(combineUrl(__API__, 'patient'));
+const configService = getConfigServiceInstance(__API__);
 
 export interface IRootService {
-    authService: IAuthService;
     appService: IAppService;
     patientService: IPatientService;
+    configService: IConfigService;
 }
 
 export const useServices = () => ({
-    authService,
     appService,
     patientService,
+    configService,
 });

@@ -1,6 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
 import { IAppConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
-import { defaultAppConfig } from 'src/services/configs';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
@@ -37,23 +36,24 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE for Patients';
+    public appConfig: IAppConfig;
 
     // UI states
 
     // Promise queries
     private readonly loginQuery: PromiseQuery<IUser | undefined>;
-    private readonly configQuery: PromiseQuery<IAppConfig>;
     private readonly quoteQuery: PromiseQuery<string>;
     private readonly loadQuery: PromiseQuery<PromiseSettledResult<void>[]>;
 
-    constructor() {
+    constructor(serverConfig: IAppConfig) {
         this.patientStore = new PatientStore();
         this.authStore = new AuthStore();
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
-        this.configQuery = new PromiseQuery(defaultAppConfig, 'configQuery');
         this.quoteQuery = new PromiseQuery('', 'quoteQuery');
         this.loadQuery = new PromiseQuery([], 'loadQuery');
+
+        this.appConfig = serverConfig;
 
         makeAutoObservable(this);
     }
@@ -73,11 +73,6 @@ export class RootStore implements IRootStore {
     }
 
     @computed
-    public get appConfig() {
-        return this.configQuery.value || defaultAppConfig;
-    }
-
-    @computed
     public get inspirationalQuote() {
         return this.quoteQuery.value || '';
     }
@@ -94,16 +89,7 @@ export class RootStore implements IRootStore {
 
     @action.bound
     public async load() {
-        await this.loadQuery.fromPromise(
-            Promise.allSettled([this.loadAppConfig(), this.loadQuotes(), this.patientStore.load()])
-        );
-    }
-
-    @action.bound
-    public async loadAppConfig() {
-        const { appService } = useServices();
-        const promise = appService.getAppConfig();
-        await this.configQuery.fromPromise(promise);
+        await this.loadQuery.fromPromise(Promise.allSettled([this.loadQuotes(), this.patientStore.load()]));
     }
 
     @action.bound
