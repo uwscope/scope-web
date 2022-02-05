@@ -7,11 +7,13 @@ import pytest
 import requests
 import scope.config
 import scope.database.patients
+import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
+@pytest.mark.skip(reason="Not defined / implemented")
 def test_get_patients(
     database_temp_patient_factory: Callable[
         [],
@@ -34,9 +36,7 @@ def test_get_patients(
     )
     assert response.ok
 
-    pprint(response.json())
-
-    assert False
+    # pprint(response.json())
 
 
 # TODO: James to Review

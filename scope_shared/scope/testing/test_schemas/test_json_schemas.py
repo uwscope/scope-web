@@ -23,14 +23,8 @@ TEST_CONFIGS = [
     ConfigTestJSONSchema(
         name="clinical-history",
         schema=scope.schema.clinical_history_schema,
-        document_path="clinical-history/valid/all-properties.json",
+        document_path="clinical-history.json",
         expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="clinical-history",
-        schema=scope.schema.clinical_history_schema,
-        document_path="clinical-history/invalid/bad-date-dateOfCancerDiagnosis.json",
-        expected_valid=False,
     ),
     # identity
     ConfigTestJSONSchema(
@@ -55,25 +49,25 @@ TEST_CONFIGS = [
     ),
     # safetyPlan
     ConfigTestJSONSchema(
-        name="safety-plan",
+        name="safety-plan-valid-some-properties",
         schema=scope.schema.safety_plan_schema,
         document_path="safety-plan/valid/some-properties.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="safety-plan",
+        name="safety-plan-valid-distractions-mix-string-and-contact",
         schema=scope.schema.safety_plan_schema,
         document_path="safety-plan/valid/distractions-mix-string-and-contact.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="safety-plan",
+        name="safety-plan-valid-distractions-string-array",
         schema=scope.schema.safety_plan_schema,
         document_path="safety-plan/valid/distractions-string-array.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="safety-plan",
+        name="safety-plan-valid-distractions-contact-array",
         schema=scope.schema.safety_plan_schema,
         document_path="safety-plan/valid/distractions-contact-array.json",
         expected_valid=True,
@@ -116,6 +110,9 @@ def test_json_schema(config: ConfigTestJSONSchema):
     result = config.schema.evaluate(jschon.JSON.loads(json)).output("detailed")
 
     if result["valid"] != config.expected_valid:
-        pprint(result)
+        # if not result["valid"]:
+        #     pprint(json)
+        #     print()
+        #     pprint(result)
 
         assert result["valid"] == config.expected_valid

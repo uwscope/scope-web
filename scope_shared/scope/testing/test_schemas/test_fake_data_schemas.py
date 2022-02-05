@@ -112,6 +112,9 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
         result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
         if result["valid"] != config.expected_valid:
-            pprint(result)
+            # if not result["valid"]:
+            #     pprint(data)
+            #     print()
+            #     pprint(result)
 
             assert result["valid"] == config.expected_valid

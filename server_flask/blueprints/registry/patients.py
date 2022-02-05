@@ -26,9 +26,11 @@ def _frankenfake_document(
 ) -> dict:
     result_document = copy.deepcopy(fake_document)
 
-    result_document["profile"] = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
-    )
+    # Disable frankenfake
+    #
+    # result_document["profile"] = scope.database.patient.patient_profile.get_patient_profile(
+    #     collection=patient_collection
+    # )
 
     return result_document
 
