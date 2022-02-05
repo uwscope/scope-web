@@ -1,5 +1,11 @@
-import { CssBaseline } from '@material-ui/core';
-import { ThemeProvider } from '@material-ui/core/styles';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { CssBaseline } from '@mui/material';
+import {
+    StyledEngineProvider,
+    Theme,
+    ThemeProvider,
+} from '@mui/material/styles';
 import { action, configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -8,6 +14,11 @@ import App from 'src/App';
 import { RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import createAppTheme from 'src/styles/theme';
+
+declare module '@mui/styles/defaultTheme' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface DefaultTheme extends Theme {}
+}
 
 // Strict enforcements for mobx
 configure({
@@ -28,13 +39,17 @@ const theme = createAppTheme();
 ReactDOM.render(
     <React.StrictMode>
         <CssBaseline>
-            <StoreProvider store={store}>
-                <ThemeProvider theme={theme}>
-                    <BrowserRouter>
-                        <App />
-                    </BrowserRouter>
-                </ThemeProvider>
-            </StoreProvider>
+            <StyledEngineProvider injectFirst>
+                <StoreProvider store={store}>
+                    <ThemeProvider theme={theme}>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <BrowserRouter>
+                                <App />
+                            </BrowserRouter>
+                        </LocalizationProvider>
+                    </ThemeProvider>
+                </StoreProvider>
+            </StyledEngineProvider>
         </CssBaseline>
     </React.StrictMode>,
     document.getElementById('root')
@@ -46,27 +61,3 @@ declare let module: any;
 if (module.hot) {
     module.hot.accept();
 }
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-    // Use the window load event to keep the page load performant
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
-    });
-}
-
-const randomNotification = (registration: ServiceWorkerRegistration) => {
-    registration.showNotification('Showing notification from pwa');
-};
-
-// Request notification permission
-
-console.log('Getting Permission');
-Notification.requestPermission().then((result) => {
-    console.log('Got permission response', result);
-    if (result === 'granted') {
-        navigator.serviceWorker.ready.then((registration) => {
-            randomNotification(registration);
-        });
-    }
-});

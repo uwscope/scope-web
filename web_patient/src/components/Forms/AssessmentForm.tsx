@@ -9,8 +9,8 @@ import {
     TableHead,
     TableRow,
     TextField,
-    withTheme,
-} from '@material-ui/core';
+} from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

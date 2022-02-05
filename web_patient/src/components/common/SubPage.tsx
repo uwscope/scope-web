@@ -1,4 +1,5 @@
-import { Typography, withTheme } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -7,15 +8,15 @@ const PageHeader = withTheme(
         position: 'fixed',
         fontWeight: 600,
         [props.theme.breakpoints.up('phone')]: {
-            fontSize: 24,
+            fontSize: '1.5em',
             padding: props.theme.spacing(4, 2),
         },
         [props.theme.breakpoints.up('tablet')]: {
-            fontSize: 34,
+            fontSize: '2em',
             padding: props.theme.spacing(4, 8),
         },
         [props.theme.breakpoints.up('laptop')]: {
-            fontSize: 48,
+            fontSize: '2.5em',
             padding: props.theme.spacing(4, 20),
         },
     }))

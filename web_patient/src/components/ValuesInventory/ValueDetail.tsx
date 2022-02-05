@@ -5,13 +5,14 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    SelectChangeEvent,
     styled,
     TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { useHistory, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { ILifeAreaValueActivity } from 'shared/types';
 import ListDetailPage, { IListItem } from 'src/components/ValuesInventory/ListDetailPage';
 import { getActivityDetailText } from 'src/components/ValuesInventory/values';
@@ -24,6 +25,10 @@ const DropDown = styled(FormControl)({
 
 export const ValueDetail: FunctionComponent = observer(() => {
     const { valueId } = useParams<{ lifeareaId: string; valueId: string }>();
+    if (!valueId) {
+        return null;
+    }
+
     const rootStore = useStores();
     const { patientStore } = rootStore;
     const value = patientStore.getValueById(valueId);
@@ -46,10 +51,10 @@ export const ValueDetail: FunctionComponent = observer(() => {
         importance: 0,
     }));
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     const handleAddActivity = action(() => {
@@ -75,11 +80,11 @@ export const ValueDetail: FunctionComponent = observer(() => {
         viewState.activityName = event.target.value;
     });
 
-    const handleChangeEnjoyment = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleChangeEnjoyment = action((event: SelectChangeEvent<number>) => {
         viewState.enjoyment = Number(event.target.value);
     });
 
-    const handleChangeImportance = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleChangeImportance = action((event: SelectChangeEvent<number>) => {
         viewState.importance = Number(event.target.value);
     });
 

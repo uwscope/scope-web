@@ -1,5 +1,6 @@
-import { AppBar, IconButton, Toolbar, Typography, withTheme } from '@material-ui/core';
-import BackIcon from '@material-ui/icons/ArrowBack';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
+import BackIcon from '@mui/icons-material/ArrowBack';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -39,7 +40,12 @@ export const DetailPage: FunctionComponent<IDetailPageProps> = (props) => {
         <PageContainer>
             <AppBar>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={onBack} aria-label="back">
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={onBack}
+                        aria-label="back"
+                        size="large">
                         <BackIcon />
                     </IconButton>
                     <Typography variant="h6" noWrap>

@@ -1,4 +1,8 @@
+import CloseIcon from '@mui/icons-material/Close';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import {
+    Alert,
     AppBar,
     Button,
     Dialog,
@@ -12,17 +16,13 @@ import {
     Snackbar,
     Toolbar,
     Typography,
-    withTheme,
-} from '@material-ui/core';
-import { TransitionProps } from '@material-ui/core/transitions';
-import CloseIcon from '@material-ui/icons/Close';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import { Alert } from '@material-ui/lab';
+} from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
+import withTheme from '@mui/styles/withTheme';
 import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { getString } from 'src/services/strings';
 import styled from 'styled-components';
 
@@ -69,16 +69,15 @@ const PageContent = withTheme(
     }))
 );
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & { children?: React.ReactElement },
-    ref: React.Ref<unknown>
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+const Transition = React.forwardRef(
+    (props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
+        return <Slide direction="up" ref={ref} {...props} />;
+    }
+);
 
 export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) => {
     const { isOpen, title, pages, canClose, onClose, onSubmit, onNext, submitToast } = props;
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const state = useLocalObservable<{
         closeConfirmOpen: boolean;
@@ -96,7 +95,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         state.closeConfirmOpen = false;
         onClose && onClose();
 
-        history.goBack();
+        navigate(-1);
     });
 
     const closeAction = action(() => {
@@ -156,7 +155,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         <Dialog fullScreen open={isOpen} onClose={closeAction} TransitionComponent={Transition}>
             <AppBar>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={closeAction} aria-label="close">
+                    <IconButton edge="start" color="inherit" onClick={closeAction} aria-label="close" size="large">
                         <CloseIcon />
                     </IconButton>
                     <Typography variant="h6">{title}</Typography>

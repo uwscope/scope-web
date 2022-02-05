@@ -2,6 +2,7 @@
 **/.idea/
 /.vscode/launch.json
 /.vscode/settings.json
+**/.vscode/settings.json
 
 # Python caches
 **/__pycache__/

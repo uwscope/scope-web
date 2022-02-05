@@ -1,4 +1,4 @@
-import DateFnsUtils from '@date-io/date-fns';
+import { DatePicker, TimePicker } from '@mui/lab';
 import {
     Checkbox,
     Chip,
@@ -14,12 +14,12 @@ import {
     ListSubheader,
     MenuItem,
     Select,
+    SelectChangeEvent,
     Switch,
     TextField,
     Typography,
-    withTheme,
-} from '@material-ui/core';
-import { DatePicker, MuiPickersUtilsProvider, TimePicker } from '@material-ui/pickers';
+} from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -128,11 +128,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
-    const handleSelectValue = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleSelectValue = action((event: SelectChangeEvent<string>) => {
         dataState.value = event.target.value as string;
     });
 
-    const handleSelectLifearea = action((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleSelectLifearea = action((event: SelectChangeEvent<string>) => {
         dataState.lifeareaId = event.target.value as string;
     });
 
@@ -165,7 +165,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             multiline
                         />
                         {valueActivities.length > 0 && (
-                            <Grid container justify="flex-end">
+                            <Grid container justifyContent="flex-end">
                                 <Chip
                                     variant="outlined"
                                     color="primary"
@@ -174,7 +174,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                     onClick={handleOpenImportActivity}
                                 />
                                 <Dialog
-                                    maxWidth="xs"
+                                    maxWidth="phone"
                                     open={viewState.openActivityDialog}
                                     onClose={() => handleImportActivityItemClick(undefined)}>
                                     <DialogTitle>
@@ -285,20 +285,22 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_date_label' : 'Form_add_activity_date')}
                 content={
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <DatePicker
-                            fullWidth
-                            inputVariant="outlined"
-                            format="MM/dd/yyyy"
-                            margin="none"
-                            value={dataState.startDate || ''}
-                            onChange={(date: Date | null) => handleValueChange('startDate', date)}
-                            disablePast={true}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                    </MuiPickersUtilsProvider>
+                    <DatePicker
+                        value={dataState.startDate || ''}
+                        onChange={(date: Date | null) => handleValueChange('startDate', date)}
+                        renderInput={(params) => (
+                            <TextField
+                                variant="outlined"
+                                margin="none"
+                                fullWidth
+                                {...params}
+                                InputLabelProps={{
+                                    shrink: true,
+                                    sx: { position: 'relative' },
+                                }}
+                            />
+                        )}
+                    />
                 }
             />
 
@@ -306,21 +308,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_time_label' : 'Form_add_activity_time')}
                 content={
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <TimePicker
-                            fullWidth
-                            inputVariant="outlined"
-                            format="hh:mm a"
-                            margin="none"
-                            value={new Date(1, 1, 1, dataState.timeOfDay, 0, 0) || new Date()}
-                            onChange={(date: Date | null) => handleValueChange('timeOfDay', date?.getHours())}
-                            ampm={true}
-                            views={['hours']}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                    </MuiPickersUtilsProvider>
+                    <TimePicker
+                        value={new Date(1, 1, 1, dataState.timeOfDay, 0, 0) || new Date()}
+                        onChange={(date: Date | null) => handleValueChange('timeOfDay', date?.getHours())}
+                        renderInput={(params) => (
+                            <TextField
+                                variant="outlined"
+                                margin="none"
+                                fullWidth
+                                {...params}
+                                InputLabelProps={{
+                                    shrink: true,
+                                    sx: { position: 'relative' },
+                                }}
+                            />
+                        )}
+                        ampm={true}
+                        views={['hours']}
+                    />
                 }
             />
 
@@ -328,7 +333,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_reminder_section' : 'Form_add_activity_reminder')}
                 content={
-                    <Grid container alignItems="center" spacing={1} justify="flex-start">
+                    <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
                         <Grid item>
                             <Typography>{getString('Form_button_no')}</Typography>
                         </Grid>
@@ -356,23 +361,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         !!activity ? 'Form_add_activity_reminder_time_label' : 'Form_add_activity_reminder_time'
                     )}
                     content={
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <TimePicker
-                                fullWidth
-                                inputVariant="outlined"
-                                format="hh:mm a"
-                                margin="none"
-                                value={new Date(1, 1, 1, dataState.reminderTimeOfDay, 0, 0) || new Date()}
-                                onChange={(date: Date | null) =>
-                                    handleValueChange('reminderTimeOfDay', date?.getHours())
-                                }
-                                ampm={true}
-                                views={['hours']}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
-                        </MuiPickersUtilsProvider>
+                        <TimePicker
+                            value={new Date(1, 1, 1, dataState.reminderTimeOfDay, 0, 0) || new Date()}
+                            onChange={(date: Date | null) => handleValueChange('reminderTimeOfDay', date?.getHours())}
+                            renderInput={(params) => (
+                                <TextField
+                                    variant="outlined"
+                                    margin="none"
+                                    fullWidth
+                                    {...params}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                        sx: { position: 'relative' },
+                                    }}
+                                />
+                            )}
+                            ampm={true}
+                            views={['hours']}
+                        />
                     }
                 />
             )}
@@ -384,7 +390,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_repetition_section' : 'Form_add_activity_repetition')}
                 content={
-                    <Grid container alignItems="center" spacing={1} justify="flex-start">
+                    <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
                         <Grid item>
                             <Typography>{getString('Form_button_no')}</Typography>
                         </Grid>

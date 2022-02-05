@@ -1,4 +1,5 @@
-import { Slider, TextField, withTheme } from '@material-ui/core';
+import { Slider, TextField } from '@mui/material';
+import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';

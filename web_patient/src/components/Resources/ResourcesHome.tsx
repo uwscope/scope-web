@@ -1,9 +1,9 @@
-import { List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@material-ui/core';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { List, ListItem, ListItemIcon, ListItemText, ListSubheader } from '@mui/material';
 import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DetailPage } from 'src/components/common/DetailPage';
 import { getResourceLink } from 'src/services/routes';
@@ -13,10 +13,10 @@ import { useStores } from 'src/stores/stores';
 export const ResourcesHome: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { resources } = rootStore.appConfig;
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     return (

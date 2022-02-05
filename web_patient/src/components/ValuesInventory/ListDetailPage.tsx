@@ -1,3 +1,5 @@
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
     Button,
     Dialog,
@@ -9,9 +11,7 @@ import {
     ListItem,
     ListItemSecondaryAction,
     ListItemText,
-} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
+} from '@mui/material';
 import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
@@ -115,7 +115,8 @@ export const ListDetailPage: FunctionComponent<IListDetailPageProps> = (props) =
                                             <IconButton
                                                 edge="end"
                                                 aria-label="more"
-                                                onClick={() => onItemDelete(item.id)}>
+                                                onClick={() => onItemDelete(item.id)}
+                                                size="large">
                                                 <DeleteIcon />
                                             </IconButton>
                                         </ListItemSecondaryAction>
@@ -137,7 +138,8 @@ export const ListDetailPage: FunctionComponent<IListDetailPageProps> = (props) =
                                             <IconButton
                                                 edge="end"
                                                 aria-label="more"
-                                                onClick={() => onItemDelete(item.id)}>
+                                                onClick={() => onItemDelete(item.id)}
+                                                size="large">
                                                 <DeleteIcon />
                                             </IconButton>
                                         </ListItemSecondaryAction>
@@ -151,7 +153,7 @@ export const ListDetailPage: FunctionComponent<IListDetailPageProps> = (props) =
             <Button variant="contained" color="primary" size="small" startIcon={<AddIcon />} onClick={onOpenAdd}>
                 {addButtonText}
             </Button>
-            <Dialog open={openAdd} onClose={onCancelAdd} fullWidth maxWidth="xs">
+            <Dialog open={openAdd} onClose={onCancelAdd} fullWidth maxWidth="phone">
                 <DialogTitle id="form-dialog-title">{addDialogTitle}</DialogTitle>
                 <DialogContent>{addContent}</DialogContent>
                 <DialogActions>

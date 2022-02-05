@@ -1,4 +1,4 @@
-import { List, ListItem } from '@material-ui/core';
+import { List, ListItem } from '@mui/material';
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
 import MyNotesImageSrc from 'src/assets/mynotes.jpeg';

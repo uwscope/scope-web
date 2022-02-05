@@ -1,9 +1,9 @@
-import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { IAssessmentLog } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
@@ -20,14 +20,14 @@ export const ClickableTableRow = styled(TableRow)({
 
 export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = observer((props) => {
     const { assessmentType } = props;
-    const history = useHistory();
+    const navigate = useNavigate();
     const rootStore = useStores();
     const { patientStore } = rootStore;
 
     const viewState = useLocalObservable<{ selectedLog?: IAssessmentLog }>(() => ({}));
 
     const handleGoBack = action(() => {
-        history.goBack();
+        navigate(-1);
     });
 
     const handleLogClick = action((log: IAssessmentLog) => {
