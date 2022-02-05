@@ -1,5 +1,6 @@
 import copy
 import http
+import pprint
 import requests
 from typing import Callable
 from urllib.parse import urljoin
@@ -14,7 +15,7 @@ import tests.testing_config
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
-QUERY_PATH = "patient/{patient_id}/patient_profile"
+QUERY_PATH = "patient/{patient_id}/profile"
 
 
 def test_get_patient_profile(
@@ -53,7 +54,7 @@ def test_get_patient_profile(
     assert response.ok
 
     # Confirm it matches expected document, with addition of an "_id" and a "_rev"
-    document_retrieved = response.json()
+    document_retrieved = response.json()["profile"]
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
     assert "_rev" in document_retrieved
@@ -127,7 +128,7 @@ def test_put_patient_profile(
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored = response.json()
+    document_stored = response.json()["profile"]
     assert "_id" in document_stored
     del document_stored["_id"]
     assert "_rev" in document_stored
@@ -225,7 +226,7 @@ def test_put_patient_profile_update(
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored = response.json()
+    document_stored = response.json()["profile"]
 
     # To store an updated document, remove the "_id"
     document_update = copy.deepcopy(document_stored)
@@ -242,7 +243,7 @@ def test_put_patient_profile_update(
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_updated = response.json()
+    document_updated = response.json()["profile"]
 
     assert document_stored["_id"] != document_updated["_id"]
     assert document_stored["_rev"] != document_updated["_rev"]
@@ -288,7 +289,7 @@ def test_put_patient_profile_update_invalid(
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored_rev1 = response.json()
+    document_stored_rev1 = response.json()["profile"]
 
     # Store an update
     document_update = copy.deepcopy(document_stored_rev1)
@@ -317,7 +318,7 @@ def test_put_patient_profile_update_invalid(
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()
+    document_conflict = response.json()["profile"]
     assert document_conflict["_rev"] == 2
 
     # Attempting to store the "_rev" == 1 document should fail, result in a duplicate on "_rev" == 2
@@ -334,5 +335,5 @@ def test_put_patient_profile_update_invalid(
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()
+    document_conflict = response.json()["profile"]
     assert document_conflict["_rev"] == 2

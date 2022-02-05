@@ -59,7 +59,7 @@ def create_app():
     @app.route("/")
     @as_json
     def status():
-        return {"flask_status": "ok"}
+        return {}
 
     # App blueprints
     app.register_blueprint(

@@ -1,9 +1,11 @@
 import random
 from datetime import datetime
+
 from typing import Callable
 
 import faker
 import pytest
+import scope.database.format_utils
 import scope.database.patient.patient_profile
 import scope.schema
 import scope.testing.fake_data.enums
@@ -12,12 +14,14 @@ import scope.testing.fake_data.fake_utils as fake_utils
 
 def fake_patient_profile_factory(
     *, faker_factory: faker.Faker, validate: bool = True
-) -> Callable[[], dict]:
+) -> Callable[..., dict]:
     """
     Obtain a factory that will generate fake patient profile documents.
     """
 
-    def factory() -> dict:
+    factory_validate = validate
+
+    def factory(validate: bool = factory_validate) -> dict:
         name = "{} {}".format(faker_factory.first_name(), faker_factory.last_name())
         mrn = "{}".format(random.randrange(10000, 1000000))
 
@@ -28,10 +32,9 @@ def fake_patient_profile_factory(
             "clinicCode": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ClinicCode
             ),
-            "birthdate": datetime.combine(
+            "birthdate": scope.database.format_utils.format_date(
                 faker_factory.date_of_birth(),
-                datetime.min.time(),  # 00:00.00.00
-            ).isoformat(),
+            ),
             "sex": fake_utils.fake_enum_value(scope.testing.fake_data.enums.PatientSex),
             "gender": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.PatientGender

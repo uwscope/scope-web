@@ -1,10 +1,8 @@
+import flask
+import functools
 import http
 import json
-from functools import wraps
-
-from flask import abort, current_app, jsonify, request
-from flask_json import json_response
-from jschon import JSON
+import jschon
 
 
 # TODO: Confirm location of the function with James.
@@ -12,21 +10,23 @@ from jschon import JSON
 
 def validate_schema(schema_object):
     def decorator(f):
-        @wraps(f)
+        @functools.wraps(f)
         def wrapper(*args, **kwargs):
             # For .evaluate to work, its argument needs to be of type '<class 'jschon.json.JSON'>'
             # current_app.logger.info(schema_object)
-            result = schema_object.evaluate(JSON.loads(json.dumps(request.json)))
+            result = schema_object.evaluate(jschon.JSON(flask.request.json))
             # current_app.logger.info(result.output("basic"))
 
-            if result.output("flag")["valid"] == False:
-                abort(
+            if not result.output("flag")["valid"]:
+                flask.abort(flask.make_response(
+                    flask.jsonify({
+                        "message": "Schema validation failed.",
+                        "error": result.output("detailed"),
+                        "request": flask.request.json,
+                    }),
                     http.HTTPStatus.BAD_REQUEST,
-                    jsonify(
-                        message="Invalid contents.",
-                        error=result.output("basic"),
-                    ),
-                )
+                ))
+
             return f(*args, **kwargs)
 
         return wrapper

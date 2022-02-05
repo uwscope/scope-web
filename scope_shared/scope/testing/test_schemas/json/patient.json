@@ -11,7 +11,7 @@
 		"name": "patientName",
 		"MRN": "mrn",
 		"clinicCode": "Transplant – Auto",
-		"birthdate": "1991-08-19 00:00:00",
+		"birthdate": "1991-08-19T00:00:00Z",
 		"sex": "Male",
 		"discussionFlag": {
 			"Flag as safety risk": true,
@@ -39,7 +39,7 @@
 		"_type": "valuesInventory",
 		"_rev": 1,
 		"assigned": true,
-		"assignedDate": "some date",
+		"assignedDate": "1991-08-19T00:00:00Z",
 		"values": [
 			{
 				"id": "id",
@@ -64,7 +64,7 @@
 		"_type": "safetyPlan",
 		"_rev": 1,
 		"assigned": true,
-		"assignedDate": "2010-01-01 00:00:00",
+		"assignedDate": "1991-08-19T00:00:00Z",
 		"reasonsForLiving": "reasons",
 		"warningSigns": ["warningSign1", "warningSign2"],
 		"copingStrategies": ["copingStrategies1", "copingStrategies2"],

@@ -265,8 +265,8 @@ def put_set_element(
     - An existing "_rev" will be incremented.
     """
 
-    # Normalization includes making a copy
-    document = normalize_document(document=document)
+    # Work with a copy
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -297,6 +297,7 @@ def put_set_element(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
+    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
     document = normalize_document(document=document)
 
@@ -320,8 +321,8 @@ def put_singleton(
     - An existing "_rev" will be incremented.
     """
 
-    # Normalization includes making a copy
-    document = normalize_document(document=document)
+    # Work with a copy
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -345,6 +346,7 @@ def put_singleton(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
+    document = normalize_document(document=document)
     result = collection.insert_one(document=document)
     document = normalize_document(document=document)
 

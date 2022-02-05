@@ -11,7 +11,7 @@
 			"type": "string"
 		},
 		"dateOfCancerDiagnosis": {
-			"$ref": "/schemas/regexes#/properties/date"
+			"type": "string"
 		},
 		"currentTreatmentRegimen": {
 			"$ref": "/schemas/enums#/properties/cancerTreatmentRegimenFlags"

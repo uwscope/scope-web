@@ -22,6 +22,6 @@ def test_status(
     )
     assert response.ok
 
-    assert response.json() == {
-        "flask_status": "ok",
-    }
+    response_json = response.json()
+    assert "status" in response_json
+    assert response_json["status"] == 200
