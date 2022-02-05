@@ -1,18 +1,11 @@
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { CssBaseline } from '@mui/material';
-import {
-    StyledEngineProvider,
-    Theme,
-    ThemeProvider,
-} from '@mui/material/styles';
-import { action, configure } from 'mobx';
+import { StyledEngineProvider, Theme, ThemeProvider } from '@mui/material/styles';
+import { configure } from 'mobx';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
 import App from 'src/App';
-import { RootStore } from 'src/stores/RootStore';
-import { StoreProvider } from 'src/stores/stores';
 import createAppTheme from 'src/styles/theme';
 
 declare module '@mui/styles/defaultTheme' {
@@ -29,26 +22,17 @@ configure({
     disableErrorBoundaries: true,
 });
 
-const store = new RootStore();
-
-// TODO: Temporary login
-action(() => store.load())();
-
 const theme = createAppTheme();
 
 ReactDOM.render(
     <React.StrictMode>
         <CssBaseline>
             <StyledEngineProvider injectFirst>
-                <StoreProvider store={store}>
-                    <ThemeProvider theme={theme}>
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <BrowserRouter>
-                                <App />
-                            </BrowserRouter>
-                        </LocalizationProvider>
-                    </ThemeProvider>
-                </StoreProvider>
+                <ThemeProvider theme={theme}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <App />
+                    </LocalizationProvider>
+                </ThemeProvider>
             </StyledEngineProvider>
         </CssBaseline>
     </React.StrictMode>,

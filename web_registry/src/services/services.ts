@@ -1,8 +1,5 @@
-import {
-    getRegistryServiceInstance,
-    IRegistryService,
-} from 'src/services/registryService';
-import { IConfigService, getConfigServiceInstance } from './configService';
+import { getConfigServiceInstance, IConfigService } from 'src/services/configService';
+import { getRegistryServiceInstance, IRegistryService } from 'src/services/registryService';
 
 const registryService = getRegistryServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
 const configService = getConfigServiceInstance(CLIENT_CONFIG.flaskBaseUrl);
