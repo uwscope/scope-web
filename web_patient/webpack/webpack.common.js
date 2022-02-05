@@ -5,32 +5,24 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    mode: 'development',
-
     entry: {
-        app: ['@babel/polyfill', paths.appIndex, 'webpack-hot-middleware/client'],
+        app: ['@babel/polyfill', paths.appIndex],
     },
 
-    devtool: 'inline-source-map',
-
-    // Which extensions Webpack will resolve when files import other files
+    // Extensions Webpack will resolve when files import other files
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         plugins: [new TsconfigPathsPlugin({ configFile: paths.tsconfig })],
-        fallback: {
-            url: require.resolve('url/'),
-        },
     },
 
     output: {
-        path: paths.appBuild,
         publicPath: '/',
         filename: '[name].[fullhash].js',
     },
 
     module: {
         rules: [
-            // Our primary Typescript loader, loading .tsx or .ts
+            // Primary Typescript loader, loading .tsx or .ts
             {
                 test: /\.tsx?$/,
                 use: [
@@ -44,24 +36,27 @@ module.exports = {
                 ],
                 exclude: /node_modules/,
             },
+            // Image resources
             {
-                test: /\.(png|jpe?g)/,
+                test: /\.(jpe?g|png|gif|svg)$/i,
                 type: 'asset/resource',
             },
         ],
     },
 
+    externals: {
+        clientConfig: 'clientConfig',
+    },
+
     plugins: [
-        new HtmlWebpackPlugin({ template: paths.appIndexTemplate }),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.DefinePlugin({
-            __API__: paths.localDevServerHost,
+        new HtmlWebpackPlugin({
+            template: paths.appIndexTemplate,
         }),
         new CopyWebpackPlugin({
-            patterns: [
-                { from: 'src/assets/resources', to: 'resources' },
-                { from: 'src/assets/pwa', to: '.' },
-            ],
+            patterns: [{ from: 'config', to: 'config' }],
+        }),
+        new CopyWebpackPlugin({
+            patterns: [{ from: 'src/assets/resources', to: 'resources' }],
         }),
     ],
 };
