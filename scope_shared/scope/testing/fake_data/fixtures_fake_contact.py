@@ -1,3 +1,9 @@
+"""
+Contacts are not stored documents.
+
+They are generated and stored as elements of other documents.
+"""
+
 import random
 from typing import Callable
 
@@ -7,7 +13,7 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-OPTIONAL_PROPERTIES = [
+OPTIONAL_KEYS = [
     "address",
     "phoneNumber",
     "emergencyNumber",
@@ -34,8 +40,10 @@ def fake_contact_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
-            del fake_contact[key]
+        fake_contact = scope.testing.fake_data.fake_utils.fake_optional(
+            document=fake_contact,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_contact
 

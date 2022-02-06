@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Callable
+from pprint import pprint
+from typing import Callable, Union
 
 import faker
 import jschon
@@ -18,7 +19,7 @@ import scope.testing.fake_data.fixtures_fake_values_inventory
 class ConfigTestFakeDataSchema:
     name: str
     schema: jschon.JSONSchema
-    data_factory: Callable[[], dict]
+    data_factory: Callable[[], Union[dict, list]]
     expected_valid: bool
 
     # Used to indicate test is not resolved
@@ -74,18 +75,24 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # TODO: what schema applies here?
+        # TODO: There currently is no schema defined for life areas. I think:
+        #       - life-area.json should describe one of the documents found in server_flask/app_config/life_areas.
+        #       - life-areas.json should describe a list of such documents.
         XFAIL_TEST_HAS_TODO=True,
         name="life-areas",
+        # TODO: This should then be life_areas_schema
         schema=scope.schema.values_inventory_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory,
+        data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        XFAIL_TEST_HAS_TODO=True,
+        # XFAIL_TEST_HAS_TODO=True,
         name="values-inventory",
         schema=scope.schema.values_inventory_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory,
+        data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
+            faker_factory=faker_factory,
+            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+        ),
         expected_valid=True,
     ),
 ]
@@ -108,9 +115,9 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
         result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
         if result["valid"] != config.expected_valid:
-            # if not result["valid"]:
-            #     pprint(data)
-            #     print()
-            #     pprint(result)
+            if not result["valid"]:
+                pprint(data)
+                print()
+                pprint(result)
 
             assert result["valid"] == config.expected_valid
