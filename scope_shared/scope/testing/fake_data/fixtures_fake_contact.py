@@ -1,5 +1,4 @@
 import random
-from datetime import datetime
 from typing import Callable
 
 import faker
@@ -16,14 +15,14 @@ OPTIONAL_PROPERTIES = [
 
 
 def fake_contact_factory(
-    *, faker_factory: faker.Faker, validate: bool = True
+    *,
+    faker_factory: faker.Faker,
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake contact documents.
     """
 
     def factory() -> dict:
-
         fake_contact = {
             "contactType": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ContactType
@@ -35,14 +34,8 @@ def fake_contact_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in fake_utils.fake_sample_random_values(OPTIONAL_PROPERTIES):
+        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
             del fake_contact[key]
-
-        if validate:
-            scope.schema.raise_for_invalid(
-                schema=scope.schema.contact_schema,
-                document=fake_contact,
-            )
 
         return fake_contact
 
@@ -56,8 +49,18 @@ def fixture_data_fake_contact_factory(
     """
     Fixture for data_fake_contact_factory.
     """
-
-    return fake_contact_factory(
+    unvalidated_factory = fake_contact_factory(
         faker_factory=faker,
-        validate=True,
     )
+
+    def factory() -> dict:
+        fake_contact = unvalidated_factory()
+
+        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+            schema=scope.schema.contact_schema,
+            document=fake_contact,
+        )
+
+        return fake_contact
+
+    return factory

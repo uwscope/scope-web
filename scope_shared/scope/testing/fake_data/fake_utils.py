@@ -1,4 +1,6 @@
+import jschon
 import random
+import pytest
 
 
 def fake_boolean_value() -> bool:
@@ -28,3 +30,14 @@ def fake_enum_flag_values(enum):
 def fake_sample_random_values(values: list) -> list:
     n = random.randint(0, len(values))
     return random.sample(values, n)
+
+
+def xfail_for_invalid(*, schema: jschon.JSONSchema, document) -> None:
+    """
+    Verify a document matches a schema, xfail if it does not.
+    """
+
+    result = schema.evaluate(jschon.JSON(document))
+
+    if not result.valid:
+        pytest.xfail("Fake data schema invalid.")

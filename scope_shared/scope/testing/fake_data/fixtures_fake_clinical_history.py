@@ -1,5 +1,4 @@
 import random
-from datetime import datetime
 from typing import Callable
 
 import faker
@@ -23,18 +22,26 @@ OPTIONAL_PROPERTIES = [
 
 
 def fake_clinical_history_factory(
-    *, faker_factory: faker.Faker, validate: bool = True
+    *,
+    faker_factory: faker.Faker,
 ) -> Callable[[], dict]:
     """
-    Obtain a factory that will generate fake patient clinical history documents.
+    Obtain a factory that will generate fake clinical history documents.
     """
 
     def factory() -> dict:
+        # This date is not actually a date, is intentionally flexible
+        dateFormat = random.choice([
+            "%x",
+            "%B %Y",
+            "%Y",
+        ])
+        dateOfCancerDiagnosis = faker_factory.date_object().strftime(dateFormat)
 
         fake_clinical_history = {
             "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
             "primaryCancerDiagnosis": faker_factory.text(),
-            "dateOfCancerDiagnosis": faker_factory.date(),
+            "dateOfCancerDiagnosis": dateOfCancerDiagnosis,
             "currentTreatmentRegimen": fake_utils.fake_enum_flag_values(
                 scope.testing.fake_data.enums.CancerTreatmentRegimen
             ),
@@ -47,14 +54,8 @@ def fake_clinical_history_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in fake_utils.fake_sample_random_values(OPTIONAL_PROPERTIES):
+        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
             del fake_clinical_history[key]
-
-        if validate:
-            scope.schema.raise_for_invalid(
-                schema=scope.schema.clinical_history_schema,
-                document=fake_clinical_history,
-            )
 
         return fake_clinical_history
 
@@ -69,7 +70,18 @@ def fixture_data_fake_clinical_history_factory(
     Fixture for data_fake_clinical_history_factory.
     """
 
-    return fake_clinical_history_factory(
+    unvalidated_factory = fake_clinical_history_factory(
         faker_factory=faker,
-        validate=True,
     )
+
+    def factory() -> dict:
+        fake_clinical_history = unvalidated_factory()
+
+        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+            schema=scope.schema.clinical_history_schema,
+            document=fake_clinical_history,
+        )
+
+        return fake_clinical_history
+
+    return factory
