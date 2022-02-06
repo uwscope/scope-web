@@ -1,10 +1,9 @@
+import copy
 import jschon
-import random
+import math
 import pytest
-
-
-def fake_boolean_value() -> bool:
-    return random.choice([True, False])
+import random
+from typing import List
 
 
 def fake_enum_value(enum):
@@ -27,9 +26,21 @@ def fake_enum_flag_values(enum):
     return flags
 
 
-def fake_sample_random_values(values: list) -> list:
-    n = random.randint(0, len(values))
-    return random.sample(values, n)
+def fake_optional(*, document: dict, optional_keys: List[str]) -> dict:
+    """
+    Delete optional keys, limiting total rate of missing keys.
+    """
+
+    max_missing_rate = .2
+    max_number_missing = math.ceil(len(optional_keys) * max_missing_rate)
+    number_missing = random.randint(0, max_number_missing)
+    missing_keys = random.sample(optional_keys, k=number_missing)
+
+    fake_optional_document = copy.deepcopy(document)
+    for key in missing_keys:
+        del fake_optional_document[key]
+
+    return fake_optional_document
 
 
 def xfail_for_invalid(*, schema: jschon.JSONSchema, document) -> None:

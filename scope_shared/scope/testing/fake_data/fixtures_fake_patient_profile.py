@@ -10,7 +10,7 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-OPTIONAL_PROPERTIES = [
+OPTIONAL_KEYS = [
     "clinicCode",
     "birthdate",
     "sex",
@@ -28,7 +28,7 @@ OPTIONAL_PROPERTIES = [
 def fake_patient_profile_factory(
     *,
     faker_factory: faker.Faker,
-) -> Callable[..., dict]:
+) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake patient profile documents.
     """
@@ -72,8 +72,10 @@ def fake_patient_profile_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
-            del fake_patient_profile[key]
+        fake_patient_profile = scope.testing.fake_data.fake_utils.fake_optional(
+            document=fake_patient_profile,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_patient_profile
 

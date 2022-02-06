@@ -8,7 +8,7 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-OPTIONAL_PROPERTIES = [
+OPTIONAL_KEYS = [
     "primaryCancerDiagnosis",
     "dateOfCancerDiagnosis",
     "currentTreatmentRegimen",
@@ -54,8 +54,10 @@ def fake_clinical_history_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
-            del fake_clinical_history[key]
+        fake_clinical_history = scope.testing.fake_data.fake_utils.fake_optional(
+            document=fake_clinical_history,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_clinical_history
 

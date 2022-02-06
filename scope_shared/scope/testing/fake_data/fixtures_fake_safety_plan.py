@@ -11,7 +11,7 @@ import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 import scope.testing.fake_data.fixtures_fake_contact
 
-OPTIONAL_PROPERTIES = [
+OPTIONAL_KEYS = [
     "lastUpdatedDate",
     "reasonsForLiving",
     "warningSigns",
@@ -41,7 +41,7 @@ def fake_safety_plan_factory(
 
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
-            "assigned": fake_utils.fake_boolean_value(),
+            "assigned": random.choice([True, False]),
             "assignedDate": scope.database.format_utils.format_date(faker_factory.date_object()),
             "lastUpdatedDate": scope.database.format_utils.format_date(faker_factory.date_object()),
             "reasonsForLiving": faker_factory.text(),
@@ -55,8 +55,10 @@ def fake_safety_plan_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        for key in faker_factory.random_sample(OPTIONAL_PROPERTIES):
-            del fake_safety_plan[key]
+        fake_safety_plan = scope.testing.fake_data.fake_utils.fake_optional(
+            document=fake_safety_plan,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_safety_plan
 
