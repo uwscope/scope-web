@@ -91,7 +91,7 @@ TEST_CONFIGS = [
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
-            life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
         ),
         expected_valid=True,
     ),

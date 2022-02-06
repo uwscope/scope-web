@@ -17,14 +17,14 @@ OPTIONAL_KEYS = [
 def _fake_value(
     *,
     faker_factory: faker.Faker,
-    life_areas: List[dict],  # Life areas will be sampled from this
+    fake_life_areas: List[dict],  # Life areas will be sampled from this
 ) -> dict:
     return {
         "id": "WHAT IS THIS",
         "name": faker_factory.text(),
         "dateCreated": scope.database.format_utils.format_date(faker_factory.date_object()),
         "dateEdited": scope.database.format_utils.format_date(faker_factory.date_object()),
-        "lifeareaId": random.choice(life_areas)["id"],
+        "lifeareaId": random.choice(fake_life_areas)["id"],
         "activities": [
             {
                 "id": "id",
@@ -49,7 +49,7 @@ def _fake_value(
 def fake_values_inventory_factory(
     *,
     faker_factory: faker.Faker,
-    life_areas: List[dict],  # Life areas will be sampled from this
+    fake_life_areas: List[dict],  # Life areas will be sampled from this
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake value inventory documents.
@@ -63,7 +63,7 @@ def fake_values_inventory_factory(
             "values": [
                 _fake_value(
                     faker_factory=faker_factory,
-                    life_areas=life_areas,
+                    fake_life_areas=fake_life_areas,
                 ) for count in range(random.randint(1, 5))
             ],
         }
@@ -91,7 +91,7 @@ def fixture_data_fake_values_inventory_factory(
 
     unvalidated_factory = fake_values_inventory_factory(
         faker_factory=faker,
-        life_areas=data_fake_life_areas,
+        fake_life_areas=data_fake_life_areas,
     )
 
     def factory() -> dict:
