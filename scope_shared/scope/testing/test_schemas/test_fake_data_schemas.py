@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pprint import pprint
 from typing import Callable
 
 import faker
@@ -32,8 +31,6 @@ faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
-        # TODO: Failing it because James would like to review. It should pass otherwise.
-        XFAIL_TEST_HAS_TODO=True,
         name="contact",
         schema=scope.schema.contact_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
@@ -50,8 +47,6 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # TODO: Failing it because James would like to review. It should pass otherwise.
-        XFAIL_TEST_HAS_TODO=True,
         name="clinical-history",
         schema=scope.schema.clinical_history_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
@@ -60,12 +55,13 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # TODO: Failing it because James would like to review. It should pass otherwise.
-        XFAIL_TEST_HAS_TODO=True,
         name="safety-plan",
         schema=scope.schema.safety_plan_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_safety_plan.fake_safety_plan_factory(
             faker_factory=faker_factory,
+            fake_contact_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
+                faker_factory=faker_factory,
+            )
         ),
         expected_valid=True,
     ),

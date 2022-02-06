@@ -5,8 +5,15 @@
 	"description": "IClinicalHistory Type",
 	"type": "object",
 	"properties": {
-		"_type": { "const": "clinicalHistory" },
-		"_rev": { "type": "number" },
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "clinicalHistory"
+		},
+		"_rev": {
+			"type": "number"
+		},
 		"primaryCancerDiagnosis": {
 			"type": "string"
 		},
