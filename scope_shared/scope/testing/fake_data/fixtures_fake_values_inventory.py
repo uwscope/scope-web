@@ -14,36 +14,46 @@ OPTIONAL_KEYS = [
 ]
 
 
+def _fake_activity(
+    *,
+    faker_factory: faker.Faker,
+) -> dict:
+    """
+    This is currently tested by inclusion in the values inventory schema.
+    If moved out on its own, it should probably get its own tests.
+    """
+
+    return {
+        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT
+        "id": "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT",
+        "name": faker_factory.text(),
+        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT
+        "valueId": "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT",
+        "dateCreated": scope.database.format_utils.format_date(faker_factory.date_object()),
+        "dateEdited": scope.database.format_utils.format_date(faker_factory.date_object()),
+        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT
+        "lifeareaId": "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT",
+    }
+
+
 def _fake_value(
     *,
     faker_factory: faker.Faker,
     fake_life_areas: List[dict],  # Life areas will be sampled from this
 ) -> dict:
+    """
+    This is currently tested by inclusion in the values inventory schema.
+    If moved out on its own, it should probably get its own tests.
+    """
+
     return {
-        # TODO: WHAT IS THIS ID
-        "id": "WHAT IS THIS",
+        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT
+        "id": "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT",
         "name": faker_factory.text(),
         "dateCreated": scope.database.format_utils.format_date(faker_factory.date_object()),
         "dateEdited": scope.database.format_utils.format_date(faker_factory.date_object()),
         "lifeareaId": random.choice(fake_life_areas)["id"],
-        "activities": [
-            {
-                "id": "id",
-                "name": "name",
-                "valueId": "",
-                "dateCreated": "",
-                "dateEdited": "",
-                "lifeareaId": "",
-            },
-            {
-                "id": "id",
-                "name": "name",
-                "valueId": "",
-                "dateCreated": "",
-                "dateEdited": "",
-                "lifeareaId": "",
-            },
-        ],
+        "activities": [_fake_activity(faker_factory=faker_factory) for count in range(1, 5)],
     }
 
 

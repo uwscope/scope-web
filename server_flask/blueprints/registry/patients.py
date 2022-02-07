@@ -9,8 +9,10 @@ import time
 import fake
 from request_context import request_context
 import scope.database.patients
+import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
-
+import scope.database.patient.safety_plan
+import scope.database.patient.values_inventory
 
 FAKE_PATIENT_MAP = {}
 
@@ -26,11 +28,18 @@ def _frankenfake_document(
 ) -> dict:
     result_document = copy.deepcopy(fake_document)
 
-    # Disable frankenfake
-    #
-    # result_document["profile"] = scope.database.patient.patient_profile.get_patient_profile(
-    #     collection=patient_collection
-    # )
+    result_document["clinicalHistory"] = scope.database.patient.clinical_history.get_clinical_history(
+        collection=patient_collection
+    )
+    result_document["profile"] = scope.database.patient.patient_profile.get_patient_profile(
+        collection=patient_collection
+    )
+    result_document["safetyPlan"] = scope.database.patient.safety_plan.get_safety_plan(
+        collection=patient_collection
+    )
+    result_document["valuesInventory"] = scope.database.patient.values_inventory.get_values_inventory(
+        collection=patient_collection
+    )
 
     return result_document
 
@@ -61,7 +70,7 @@ def get_patients():
     # Initially based on fields that were in the fake data.
     time_start_patients = time.perf_counter()
     time_per_patient = []
-    patient_documents = {}
+    patient_documents = []
     for patient_current in patients:
         patient_id = patient_current["_set_id"]
         patient_collection = context.database.get_collection(patient_current["collection"])
@@ -72,7 +81,7 @@ def get_patients():
             patient_collection=patient_collection,
         )
 
-        patient_documents[patient_id] = patient_document_current
+        patient_documents.append(patient_document_current)
 
         time_per_patient.append(time.perf_counter())
 
@@ -84,8 +93,21 @@ def get_patients():
         print("Time Patient: {}".format(time_per_patient_current - time_call_start), flush=True)
     print("Time Call End: {}".format(time_call_end - time_call_start), flush=True)
 
+    # Transition code to establish a "sparse" representation
+    patient_documents_sparse = [
+        {
+            "identity": {
+                "_type": "identity",
+                "identityId": patient_current["identity"]["identityId"],
+                "name": patient_current["profile"]["name"]
+            },
+        }
+        for patient_current in patient_documents
+    ]
+
     return {
-        "patients": list(patient_documents.values())
+        "patients": patient_documents,
+        "patientsSparse": patient_documents_sparse,
     }
 
 
