@@ -8,6 +8,7 @@ import {
     ILifeAreaValueActivity,
     IMoodLog,
     IPatientConfig,
+    ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
 } from 'shared/types';
@@ -24,6 +25,8 @@ export interface IPatientStore {
     readonly activities: IActivity[];
     readonly values: ILifeAreaValue[];
     readonly valueActivities: ILifeAreaValueActivity[];
+    readonly safetyPlan: ISafetyPlan;
+
     readonly activityLogs: IActivityLog[];
     readonly assessmentLogs: IAssessmentLog[];
     readonly moodLogs: IMoodLog[];
@@ -55,6 +58,8 @@ export interface IPatientStore {
     ) => void;
     deleteActivityFromValue: (valueId: string, activityId: string) => void;
 
+    updateSafetyPlan: (safetyPlan: ISafetyPlan) => Promise<void>;
+
     addActivity: (activity: IActivity) => Promise<boolean>;
     updateActivity: (activity: IActivity) => Promise<boolean>;
 }
@@ -66,6 +71,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadScheduledAssessmentsQuery: PromiseQuery<IScheduledAssessment[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
     private readonly loadLifeareaValuesQuery: PromiseQuery<ILifeAreaValue[]>;
+    private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
     private readonly loadActivityLogsQuery: PromiseQuery<IActivityLog[]>;
     private readonly loadAssessmentLogsQuery: PromiseQuery<IAssessmentLog[]>;
     private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
@@ -80,6 +86,7 @@ export class PatientStore implements IPatientStore {
         this.loadQuery = new PromiseQuery<PromiseSettledResult<any>[]>([], 'loadQuery');
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
         this.loadLifeareaValuesQuery = new PromiseQuery<ILifeAreaValue[]>([], 'loadLifeareaValuesQuery');
+        this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(undefined, 'loadSafetyPlan');
         this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>([], 'loadActivityLogsQuery');
         this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>([], 'loadAssessmentLogsQuery');
         this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>([], 'loadMoodLogsQuery');
@@ -123,6 +130,10 @@ export class PatientStore implements IPatientStore {
 
     @computed public get valueActivities() {
         return flatten(this.values.map((v) => v.activities));
+    }
+
+    @computed public get safetyPlan() {
+        return this.loadSafetyPlanQuery.value || { assigned: false };
     }
 
     @computed public get activityLogs() {
@@ -169,6 +180,7 @@ export class PatientStore implements IPatientStore {
                 this.loadLifeareaValuesQuery.fromPromise(patientService.getValuesInventory()),
                 this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
                 this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
+                this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
             ])
         );
     }
@@ -333,6 +345,14 @@ export class PatientStore implements IPatientStore {
             console.assert(foundActivity >= 0, `Activity not found: ${activityId}`);
             console.assert(foundValue >= 0, `Value not found: ${valueId}`);
         }
+    }
+
+    @action.bound
+    public async updateSafetyPlan(safetyPlan: ISafetyPlan) {
+        const { patientService } = useServices();
+
+        const promise = patientService.updateSafetyPlan(safetyPlan);
+        await this.loadSafetyPlanQuery.fromPromise(promise);
     }
 
     @action.bound

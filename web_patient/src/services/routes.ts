@@ -26,6 +26,7 @@ export const ParameterValues = {
         activityLog: 'log-activity',
         addActivity: 'add-activity',
         editActivity: 'edit-activity',
+        safetyPlan: 'safety-plan',
     },
 };
 
@@ -57,7 +58,7 @@ export const getFormLink = (formId: string, query?: { [key: string]: string }) =
     };
 };
 
-export const getFormPath = (formId: string, query: { [key: string]: string }) => {
+export const getFormPath = (formId: string, query: { [key: string]: string } = {}) => {
     const link = getFormLink(formId, query);
     return `${link.pathname}${link.search}`;
 };

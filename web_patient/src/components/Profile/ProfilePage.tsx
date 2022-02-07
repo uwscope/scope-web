@@ -5,7 +5,7 @@ import MyNotesImageSrc from 'src/assets/mynotes.jpeg';
 import MySafetyPlanImageSrc from 'src/assets/safetyplan.jpeg';
 import ListCard from 'src/components/common/ListCard';
 import { MainPage } from 'src/components/common/MainPage';
-import { Routes } from 'src/services/routes';
+import { getFormPath, ParameterValues, Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 
 export const ProfilePage: FunctionComponent = () => {
@@ -26,7 +26,7 @@ export const ProfilePage: FunctionComponent = () => {
                         imageUrl={MyNotesImageSrc}
                     />
                 </ListItem>
-                <ListItem disableGutters={true}>
+                <ListItem disableGutters={true} component={Link} to={getFormPath(ParameterValues.form.safetyPlan)}>
                     <ListCard
                         title="My Safety Plan"
                         subtitle="Emergency contacts and resources"

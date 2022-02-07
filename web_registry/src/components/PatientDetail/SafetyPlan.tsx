@@ -4,7 +4,6 @@ import { Grid } from '@mui/material';
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
-import { IContact } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
 import { getString } from 'src/services/strings';
@@ -67,17 +66,15 @@ export const SafetyPlan: FunctionComponent = observer(() => {
                     sm={6}
                     minLine={2}
                     multiline={true}
-                    label="Distractions"
-                    value={safetyPlan.distractions
-                        ?.map((value) => {
-                            if (value instanceof String) {
-                                return value;
-                            } else if (!!(value as IContact)?.name) {
-                                return (value as IContact)?.name;
-                            }
-                        })
-                        .filter((v) => v != undefined)
-                        .join('\n')}
+                    label="Social Distractions"
+                    value={safetyPlan.socialDistractions?.map((value) => value.name).join('\n')}
+                />
+                <GridTextField
+                    sm={6}
+                    minLine={2}
+                    multiline={true}
+                    label="Setting Distractions"
+                    value={safetyPlan.settingDistractions?.join('\n')}
                 />
                 <GridTextField
                     sm={6}
@@ -91,7 +88,7 @@ export const SafetyPlan: FunctionComponent = observer(() => {
                     minLine={2}
                     multiline={true}
                     label="Professional Support"
-                    value={safetyPlan.supporters?.map((value) => value.name).join('\n')}
+                    value={safetyPlan.professionals?.map((value) => value.name).join('\n')}
                 />
                 <GridTextField
                     sm={6}

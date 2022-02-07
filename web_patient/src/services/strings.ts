@@ -199,6 +199,42 @@ const _strings = {
 
     Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
     Form_submit_error_retry: 'Retry',
+
+    Safetyplan_title: 'Safety plan',
+    Safetyplan_reasons_for_living_title: 'Reasons for living',
+    Safetyplan_reasons_for_living_description: 'What are my reasons for living?',
+    Safetyplan_warning_signs_title: 'Warning signs',
+    Safetyplan_warning_signs_description:
+        'What are some thoughts, images, mood, situation, or behavior that might trigger a crisis?',
+    Safetyplan_coping_strategies_title: 'Internal coping strategies',
+    Safetyplan_coping_strategies_description:
+        'What are some things I can do to take my mine off my problems without contacting another person (relaxation techniques, physical activities)?',
+    Safetyplan_social_distraction_person_title: 'Social distraction',
+    Safetyplan_social_distraction_person_description: 'Who are the people that provide positive distraction?',
+    Safetyplan_social_distraction_setting_title: 'Social settings',
+    Safetyplan_social_distraction_setting_description: 'What are social settings that provide positive distraction?',
+    Safetyplan_name: 'Name',
+    Safetyplan_phone: 'Phone number',
+    Safetyplan_people_help_title: 'Social support',
+    Safetyplan_people_help_description: 'Who are the people I can ask for help?',
+    Safetyplan_professional_help_title: 'Professional help',
+    Safetyplan_professional_help_description: 'Who are the professionals I can contact during a crisis?',
+    Safetyplan_agency_help_title: 'Professional service',
+    Safetyplan_agency_help_description: 'What are the services or agencies I can contact during a crisis?',
+    Safetyplan_clinician_name: 'Clinician name',
+    Safetyplan_clinician_pager: 'Pager or emergency contact number',
+    Safetyplan_local_care_name: 'Local urgent care service',
+    Safetyplan_local_care_address: 'Service address',
+    Safetyplan_local_care_phone: 'Service phone number',
+    Safetyplan_add: 'Add another',
+    Safetyplan_add_place: 'Add place',
+    Safetyplan_add_person: 'Add person',
+    Safetyplan_suicide_hotline_title: 'Suicide prevention lifeline phone',
+    Safetyplan_suicide_hotline_phone: '1-800-273-TALK(8255)',
+    Safetyplan_environment_title: 'Safe environment',
+    Safetyplan_environment_description: 'What are some ways I can make the environment safe?',
+    Safetyplan_submit_success:
+        'Thank you for updating your safety plan. Your responses will be available to your psychosocial care team.',
 };
 
 type Strings = typeof _strings;

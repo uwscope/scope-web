@@ -15,11 +15,11 @@ import {
     MenuItem,
     Select,
     SelectChangeEvent,
+    Stack,
     Switch,
     TextField,
     Typography,
 } from '@mui/material';
-import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -31,7 +31,6 @@ import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import styled from 'styled-components';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
@@ -57,12 +56,6 @@ const getDayString = (day: DayOfWeekFlags) => {
     }
     return 'Unknown';
 };
-
-const TextFieldWithBottomMargin = withTheme(
-    styled(TextField)((props) => ({
-        marginBottom: props.theme.spacing(1),
-    }))
-);
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
@@ -149,13 +142,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const namePage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString('Form_add_activity_describe_name')}
                 help={getString('Form_add_activity_describe_name_help')}
                 content={
                     <Fragment>
-                        <TextFieldWithBottomMargin
+                        <TextField
                             fullWidth
                             value={dataState.name}
                             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -167,6 +160,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         {valueActivities.length > 0 && (
                             <Grid container justifyContent="flex-end">
                                 <Chip
+                                    sx={{ marginTop: 1 }}
                                     variant="outlined"
                                     color="primary"
                                     size="small"
@@ -238,11 +232,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Select>
                 }
             />
-        </Fragment>
+        </Stack>
     );
 
     const editPage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString('Form_add_activity_describe_name_label')}
                 content={
@@ -257,13 +251,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString('Form_add_activity_describe_value_label')}
                 content={<TextField fullWidth value={dataState.value} disabled variant="outlined" multiline />}
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString('Form_add_activity_describe_lifearea_label')}
@@ -277,11 +269,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-        </Fragment>
+        </Stack>
     );
 
     const schedulePage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_date_label' : 'Form_add_activity_date')}
                 content={
@@ -303,7 +295,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_time_label' : 'Form_add_activity_time')}
@@ -328,7 +319,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_reminder_section' : 'Form_add_activity_reminder')}
@@ -353,7 +343,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Grid>
                 }
             />
-
             {dataState.hasReminder && (
                 <FormSection
                     addPaddingTop
@@ -382,11 +371,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     }
                 />
             )}
-        </Fragment>
+        </Stack>
     );
 
     const repetitionPage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_repetition_section' : 'Form_add_activity_repetition')}
                 content={
@@ -440,7 +429,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     }
                 />
             )}
-        </Fragment>
+        </Stack>
     );
 
     const pages = [

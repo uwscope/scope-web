@@ -195,14 +195,15 @@ export interface IContact {
 
 export interface ISafetyPlan {
     assigned: boolean;
-    assignedDate: Date;
+    assignedDate?: Date;
     lastUpdatedDate?: Date;
     reasonsForLiving?: string;
     warningSigns?: string[];
     copingStrategies?: string[];
-    distractions?: (string | IContact)[];
+    socialDistractions?: IContact[];
+    settingDistractions?: string[];
     supporters?: IContact[];
-    professionalSupporters?: IContact[];
+    professionals?: IContact[];
     urgentServices?: IContact[];
     safeEnvironment?: string[];
 }
