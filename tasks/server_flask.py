@@ -10,7 +10,7 @@ import aws_infrastructure.tasks.terminal
 from aws_infrastructure.tasks.collection import compose_collection
 from invoke import Collection, task
 
-FLASK_DIR = "./server_flask"
+SERVER_FLASK_PATH = "./server_flask"
 INSTANCE_SSH_CONFIG_PATH = "./secrets/configuration/instance_ssh.yaml"
 DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 
@@ -39,7 +39,7 @@ def dev_serve(context):
                 remote_host=documentdb_config.endpoint,
                 remote_port=documentdb_config.port,
             ) as ssh_port_forward:
-                with context.cd(Path(FLASK_DIR)):
+                with context.cd(Path(SERVER_FLASK_PATH)):
                     context.run(
                         # Instead of using `flask run`, import the app normally, then run it.
                         # Did this because `flask run` was eating an ImportError, not giving a useful error message.
@@ -71,7 +71,7 @@ def prod_serve(context):
     because that script will be executed in a production environment that does not include this task.
     """
 
-    with context.cd(Path(FLASK_DIR)):
+    with context.cd(Path(SERVER_FLASK_PATH)):
         context.run(
             command=" ".join(
                 [
