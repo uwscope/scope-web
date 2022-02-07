@@ -16,7 +16,17 @@ DEPENDENCIES = {
             './server_flask',
         ],
         yarn_dirs=[
+            './web_patient',
             './web_registry',
+            './web_shared',
+        ]
+    ),
+    'javascript': aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=None,
+        yarn_dirs=[
+            './web_patient',
+            './web_registry',
+            './web_shared',
         ]
     ),
     'python': aws_infrastructure.tasks.library.dependencies.Dependency(
@@ -31,18 +41,28 @@ DEPENDENCIES = {
         pipfile_dirs=['.'],
         yarn_dirs=None
     ),
-    'celery': aws_infrastructure.tasks.library.dependencies.Dependency(
+    'server_celery': aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=['./server_celery'],
         yarn_dirs=None
     ),
-    'flask': aws_infrastructure.tasks.library.dependencies.Dependency(
+    'server_flask': aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=['./server_flask'],
         yarn_dirs=None
     ),
-    'registry': aws_infrastructure.tasks.library.dependencies.Dependency(
+    'web_patient': aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=None,
-        yarn_dirs=['./web_registry']
+        yarn_dirs=[
+            './web_patient',
+            './web_shared',
+        ]
     ),
+    'web_registry': aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=None,
+        yarn_dirs=[
+            './web_registry',
+            './web_shared',
+        ]
+),
 }
 
 
