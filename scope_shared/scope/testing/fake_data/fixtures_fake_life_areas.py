@@ -34,8 +34,7 @@ def fake_life_areas_factory() -> Callable[[], List[dict]]:
 
 
 @pytest.fixture(name="data_fake_life_areas_factory")
-def fixture_data_fake_life_areas_factory(
-) -> Callable[[], List[dict]]:
+def fixture_data_fake_life_areas_factory() -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_life_areas_factory.
     """
@@ -57,7 +56,7 @@ def fixture_data_fake_life_areas_factory(
 
 
 @pytest.fixture(name="data_fake_life_areas")
-def fixture_data_fake_life_areas_factory(
+def fixture_data_fake_life_areas(
     *,
     data_fake_life_areas_factory: Callable[[], List[dict]],
 ) -> List[dict]:

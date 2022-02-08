@@ -4,20 +4,18 @@ from urllib.parse import urljoin
 from flask import Blueprint, Flask, request
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
-from markupsafe import escape
 
 import blueprints.app.config
 import blueprints.registry.patient_profile
+import blueprints.registry.safety_plan
 import blueprints.registry.patients
 import database
-from blueprints.patient.safety_plan import patient_safety_plan_blueprint
 
 # Import patient & registry blueprints.
 from blueprints.patient.values_inventory import patient_values_inventory_blueprint
 from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
 from blueprints.registry.case_reviews import registry_case_reviews_blueprint
 from blueprints.registry.clinical_history import registry_clinical_history_blueprint
-from blueprints.registry.safety_plan import registry_safety_plan_blueprint
 from blueprints.registry.sessions import registry_sessions_blueprint
 from blueprints.registry.values_inventory import registry_values_inventory_blueprint
 
@@ -63,15 +61,22 @@ def create_app():
 
     # App blueprints
     app.register_blueprint(
-        blueprints.app.config.app_config_blueprint, url_prefix="/app",
+        blueprints.app.config.app_config_blueprint,
+        url_prefix="/app",
     )
 
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(
-        blueprints.registry.patients.patients_blueprint, url_prefix="/",
+        blueprints.registry.patients.patients_blueprint,
+        url_prefix="/",
     )
     app.register_blueprint(
-        blueprints.registry.patient_profile.patient_profile_blueprint, url_prefix="/patient/",
+        blueprints.registry.patient_profile.patient_profile_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.safety_plan.safety_plan_blueprint,
+        url_prefix="/patient/",
     )
     # app.register_blueprint(
     #     registry_clinical_history_blueprint

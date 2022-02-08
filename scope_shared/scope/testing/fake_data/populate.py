@@ -20,7 +20,7 @@ def populate_database(
     database: pymongo.database.Database,
     populate_patients: int,
 ):
-    faker_factory = faker.Faker()
+    faker_factory = faker.Faker(locale="la")
 
     for patient_count in range(populate_patients):
         patient_current = scope.database.patients.create_patient(database=database)
@@ -38,10 +38,14 @@ def _populate_patient(
     patient_collection: pymongo.collection.Collection,
 ):
     # Obtain factories used by other factories
-    fake_contact_factory = scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
-        faker_factory=faker_factory,
+    fake_contact_factory = (
+        scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
+            faker_factory=faker_factory,
+        )
     )
-    fake_life_areas_factory = scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()
+    fake_life_areas_factory = (
+        scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()
+    )
 
     # Obtain fixed documents
     fake_life_areas = fake_life_areas_factory()
@@ -53,13 +57,15 @@ def _populate_patient(
     fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
         faker_factory=faker_factory,
     )
-    fake_safety_plan_factory = scope.testing.fake_data.fixtures_fake_safety_plan.fake_safety_plan_factory(
-        faker_factory=faker_factory,
-        fake_contact_factory=fake_contact_factory,
+    fake_safety_plan_factory = (
+        scope.testing.fake_data.fixtures_fake_safety_plan.fake_safety_plan_factory(
+            faker_factory=faker_factory,
+            fake_contact_factory=fake_contact_factory,
+        )
     )
     fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
         faker_factory=faker_factory,
-        fake_life_areas=fake_life_areas
+        fake_life_areas=fake_life_areas,
     )
 
     # Put appropriate documents
