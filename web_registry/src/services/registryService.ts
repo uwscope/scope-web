@@ -93,7 +93,7 @@ class RegistryService implements IRegistryService {
         };
 
         const handleRequest = (request: AxiosRequestConfig) => {
-            if (request.method?.toLowerCase() === 'put' && request.data) {
+            if (request.method?.toLowerCase() === 'put' && request.data && request.data._id) {
                 request.data._rev = this.revIds[request.data._id];
                 delete request.data._id;
             }
