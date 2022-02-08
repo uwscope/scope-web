@@ -1,6 +1,5 @@
 import flask
 import flask_json
-import http
 import pymongo.errors
 
 from request_context import request_context
@@ -29,12 +28,10 @@ def get_patient_profile(patient_id):
 
     # Retrieve the current patient profile
     document_retrieved = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
+        collection=patient_collection,
     )
     if document_retrieved is None:
-        # TODO: This is the correct semantics, evaluate impact on client versus some kind of empty response.
-        #       Or should initialization of a patient include populating such documents.
-        flask.abort(http.HTTPStatus.NOT_FOUND)
+        context.abort_document_not_found()
 
     return {
         "profile": document_retrieved,
@@ -59,12 +56,7 @@ def put_patient_profile(patient_id):
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"
     if "_id" in document:
-        raise flask.abort(flask.make_response(
-            flask.jsonify({
-                "message": "Put must not include \"_id\".",
-            }),
-            http.HTTPStatus.BAD_REQUEST,
-        ))
+        context.abort_put_with_id()
 
     # Store the document
     try:
@@ -73,18 +65,16 @@ def put_patient_profile(patient_id):
             patient_profile=document,
         )
     except pymongo.errors.DuplicateKeyError:
-        # Indicates a revision race condition, return error and current revision to client
+        # Indicates a revision race condition, return error with current revision
         document_conflict = scope.database.patient.patient_profile.get_patient_profile(
             collection=patient_collection
         )
-        raise flask.abort(flask.make_response(
-            flask.jsonify({
-                "message": "Revision conflict.",
+        context.abort_revision_conflict(
+            document={
                 "profile": document_conflict,
-            }),
-            http.HTTPStatus.CONFLICT,
-        ))
-
-    return {
-        "profile": result.document,
-    }
+            }
+        )
+    else:
+        return {
+            "profile": result.document,
+        }
