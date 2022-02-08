@@ -62,7 +62,7 @@ DEPENDENCIES = {
             './web_registry',
             './web_shared',
         ]
-),
+    ),
 }
 
 

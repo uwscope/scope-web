@@ -86,7 +86,6 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # XFAIL_TEST_HAS_TODO=True,
         name="values-inventory",
         schema=scope.schema.values_inventory_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(

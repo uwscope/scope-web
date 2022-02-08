@@ -20,7 +20,7 @@ def populate_database(
     database: pymongo.database.Database,
     populate_patients: int,
 ):
-    faker_factory = faker.Faker()
+    faker_factory = faker.Faker(locale="la")
 
     for patient_count in range(populate_patients):
         patient_current = scope.database.patients.create_patient(database=database)
