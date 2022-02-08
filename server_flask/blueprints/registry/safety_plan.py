@@ -25,14 +25,14 @@ def get_safety_plan(patient_id):
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
-    document_retrieved = scope.database.patient.safety_plan.get_safety_plan(
+    document = scope.database.patient.safety_plan.get_safety_plan(
         collection=patient_collection,
     )
-    if document_retrieved is None:
+    if document is None:
         context.abort_document_not_found()
 
     return {
-        "safetyplan": document_retrieved
+        "safetyplan": document,
     }
 
 

@@ -62,7 +62,7 @@ TEST_CONFIGS = [
             faker_factory=faker_factory,
             fake_contact_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
                 faker_factory=faker_factory,
-            )
+            ),
         ),
         expected_valid=True,
     ),

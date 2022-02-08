@@ -20,9 +20,12 @@ class RequestContext:
 
     @staticmethod
     def _abort(response: dict, status: int) -> NoReturn:
-        flask.abort(flask.make_response(
-            flask.jsonify(response), status,
-        ))
+        flask.abort(
+            flask.make_response(
+                flask.jsonify(response),
+                status,
+            )
+        )
 
     @staticmethod
     def abort_document_not_found() -> NoReturn:
@@ -46,7 +49,7 @@ class RequestContext:
     def abort_put_with_id() -> NoReturn:
         RequestContext._abort(
             {
-                "message": "Put must not include \"_id\".",
+                "message": 'Put must not include "_id".',
             },
             http.HTTPStatus.BAD_REQUEST,
         )
@@ -54,7 +57,8 @@ class RequestContext:
     @staticmethod
     def abort_revision_conflict(*, document: dict) -> NoReturn:
         RequestContext._abort(
-            document | {
+            document
+            | {
                 "message": "Revision conflict.",
             },
             http.HTTPStatus.CONFLICT,
@@ -72,7 +76,9 @@ class RequestContext:
             RequestContext.abort_patient_not_found()
 
         # Obtain patient collection
-        patient_collection = self.database.get_collection(patient_document["collection"])
+        patient_collection = self.database.get_collection(
+            patient_document["collection"]
+        )
 
         return patient_collection
 

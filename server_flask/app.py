@@ -61,18 +61,22 @@ def create_app():
 
     # App blueprints
     app.register_blueprint(
-        blueprints.app.config.app_config_blueprint, url_prefix="/app",
+        blueprints.app.config.app_config_blueprint,
+        url_prefix="/app",
     )
 
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(
-        blueprints.registry.patients.patients_blueprint, url_prefix="/",
+        blueprints.registry.patients.patients_blueprint,
+        url_prefix="/",
     )
     app.register_blueprint(
-        blueprints.registry.patient_profile.patient_profile_blueprint, url_prefix="/patient/",
+        blueprints.registry.patient_profile.patient_profile_blueprint,
+        url_prefix="/patient/",
     )
     app.register_blueprint(
-        blueprints.registry.safety_plan.safety_plan_blueprint, url_prefix="/patient/",
+        blueprints.registry.safety_plan.safety_plan_blueprint,
+        url_prefix="/patient/",
     )
     # app.register_blueprint(
     #     registry_clinical_history_blueprint

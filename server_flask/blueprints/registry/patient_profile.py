@@ -27,14 +27,14 @@ def get_patient_profile(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Retrieve the current patient profile
-    document_retrieved = scope.database.patient.patient_profile.get_patient_profile(
+    document = scope.database.patient.patient_profile.get_patient_profile(
         collection=patient_collection,
     )
-    if document_retrieved is None:
+    if document is None:
         context.abort_document_not_found()
 
     return {
-        "profile": document_retrieved,
+        "profile": document,
     }
 
 

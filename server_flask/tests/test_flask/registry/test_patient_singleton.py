@@ -82,10 +82,12 @@ def test_patient_singleton_get(
 
     # Store the document
     document = document_factory()
-    result = config.database_put_function(**{
-        "collection": temp_patient.collection,
-        config.database_put_function_document_parameter_name: document,
-    })
+    result = config.database_put_function(
+        **{
+            "collection": temp_patient.collection,
+            config.database_put_function_document_parameter_name: document,
+        }
+    )
     assert result.inserted_count == 1
 
     # Retrieve the document via Flask
@@ -222,9 +224,11 @@ def test_patient_singleton_put(
     assert document == document_stored
 
     # Retrieve the document
-    document_retrieved = config.database_get_function(**{
-        "collection": temp_patient.collection,
-    })
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+        }
+    )
 
     # Confirm it matches expected document
     assert document_retrieved is not None
@@ -350,9 +354,11 @@ def test_patient_singleton_put_update(
     assert document_stored["_rev"] != document_updated["_rev"]
 
     # Retrieve the document
-    document_retrieved = config.database_get_function(**{
-        "collection": temp_patient.collection,
-    })
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+        }
+    )
 
     # Confirm it matches updated document
     assert document_retrieved["_id"] == document_updated["_id"]
