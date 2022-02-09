@@ -1,7 +1,7 @@
 from typing import Optional
 
 import pymongo
-import pymongo.results
+import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "valuesInventory"
