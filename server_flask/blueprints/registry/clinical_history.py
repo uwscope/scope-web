@@ -1,62 +1,75 @@
-import http
-from functools import wraps
-
+import flask
+import flask_json
+import pymongo.errors
 import scope.database
 import scope.database.patient.clinical_history
-from flask import Blueprint, abort, current_app, jsonify, request
-from flask_json import as_json
 from request_context import request_context
 from scope.schema import clinical_history_schema
 from utils import validate_schema
 
-registry_clinical_history_blueprint = Blueprint(
-    "registry_clinical_history_blueprint", __name__, url_prefix="/patients"
-)
+clinical_history_blueprint = flask.Blueprint("clinical_history_blueprint", __name__)
 
 
-# NOTE: Passing the patient collection name for now. Will fix this after auth workflow is finalized.
-@registry_clinical_history_blueprint.route(
-    "/<string:patient_collection>/clinicalhistory", methods=["GET"]
+@clinical_history_blueprint.route(
+    "/<string:patient_id>/clinicalhistory", methods=["GET"]
 )
-@as_json
-def get_patient_clinical_history(patient_collection):
+@flask_json.as_json
+def get_clinical_history(patient_id):
+    # TODO: Require authentication
+
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.clinical_history.get_clinical_history(
-        database=context.database, collection_name=patient_collection
+    document = scope.database.patient.clinical_history.get_clinical_history(
+        collection=patient_collection,
     )
+    if document is None:
+        context.abort_document_not_found()
 
-    if result:
-        return result, http.HTTPStatus.OK
-    else:
-        abort(http.HTTPStatus.NOT_FOUND)
+    return {
+        "clinicalhistory": document,
+    }
 
 
-@registry_clinical_history_blueprint.route(
-    "/<string:patient_collection>/clinicalhistory", methods=["PUT"]
+@clinical_history_blueprint.route(
+    "/<string:patient_id>/clinicalhistory", methods=["PUT"]
 )
 @validate_schema(clinical_history_schema)
-@as_json
-def update_patient_clinical_history(patient_collection):
+@flask_json.as_json
+def put_clinical_history(patient_id):
 
-    clinical_history = request.json
-
-    if "_id" in clinical_history:
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
-
-    # Update _rev
-    clinical_history["_rev"] = clinical_history["_rev"] + 1
+    # TODO: Require authentication
 
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.clinical_history.create_clinical_history(
-        database=context.database,
-        collection_name=patient_collection,
-        clinical_history=clinical_history,
-    )
+    # Obtain the document being put
+    document = flask.request.json
 
-    if result is not None:
-        return str(result.inserted_id), http.HTTPStatus.OK
+    # Previously stored documents contain an "_id",
+    # documents to be put must not already contain an "_id"
+    if "_id" in document:
+        context.abort_put_with_id()
+
+    # Store the document
+    try:
+        result = scope.database.patient.clinical_history.put_clinical_history(
+            collection=patient_collection,
+            clinical_history=document,
+        )
+    except pymongo.errors.DuplicateKeyError:
+        # Indicates a revision race condition, return error with current revision
+        document_conflict = (
+            scope.database.patient.clinical_history.get_clinical_history(
+                collection=patient_collection
+            )
+        )
+        context.abort_revision_conflict(
+            document={
+                "clinicalhistory": document_conflict,
+            }
+        )
     else:
-        # NOTE: Send back the latest version of the document. Hold off on that.
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
+        return {
+            "clinicalhistory": result.document,
+        }

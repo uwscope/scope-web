@@ -31,11 +31,13 @@ def fake_clinical_history_factory(
 
     def factory() -> dict:
         # This date is not actually a date, is intentionally flexible
-        dateFormat = random.choice([
-            "%x",
-            "%B %Y",
-            "%Y",
-        ])
+        dateFormat = random.choice(
+            [
+                "%x",
+                "%B %Y",
+                "%Y",
+            ]
+        )
         dateOfCancerDiagnosis = faker_factory.date_object().strftime(dateFormat)
 
         fake_clinical_history = {
@@ -54,7 +56,7 @@ def fake_clinical_history_factory(
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        fake_clinical_history = scope.testing.fake_data.fake_utils.fake_optional(
+        fake_clinical_history = fake_utils.fake_optional(
             document=fake_clinical_history,
             optional_keys=OPTIONAL_KEYS,
         )

@@ -1,21 +1,20 @@
-from dataclasses import dataclass
 import copy
 import http
+from dataclasses import dataclass
 from pprint import pprint
+from typing import Callable
+from urllib.parse import urljoin
 
 import pymongo.collection
 import pytest
 import requests
-from typing import Callable
-from urllib.parse import urljoin
-
 import scope.config
 import scope.database.collection_utils
-import scope.database.patients
+import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
+import scope.database.patients
 import scope.testing.fixtures_database_temp_patient
-import scope.testing.fake_data.fixtures_fake_patient_profile
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -50,6 +49,15 @@ TEST_CONFIGS = [
         database_put_function_document_parameter_name="safety_plan",
         flask_query_type="safetyplan",
         flask_response_document_key="safetyplan",
+    ),
+    ConfigTestPatientSingleton(
+        name="clinicalhistory",
+        document_factory_fixture_name="data_fake_clinical_history_factory",
+        database_get_function=scope.database.patient.clinical_history.get_clinical_history,
+        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
+        database_put_function_document_parameter_name="clinical_history",
+        flask_query_type="clinicalhistory",
+        flask_response_document_key="clinicalhistory",
     ),
 ]
 
