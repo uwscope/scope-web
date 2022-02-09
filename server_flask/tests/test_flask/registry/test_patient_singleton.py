@@ -109,7 +109,7 @@ def test_patient_singleton_get(
     )
     assert result.inserted_count == 1
 
-    Retrieve the document via Flask
+    # Retrieve the document via Flask
     query = QUERY.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
