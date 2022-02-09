@@ -10,14 +10,13 @@ import blueprints.registry.clinical_history
 import blueprints.registry.patient_profile
 import blueprints.registry.patients
 import blueprints.registry.safety_plan
+import blueprints.registry.values_inventory
 import database
 
 # Import patient & registry blueprints.
-from blueprints.patient.values_inventory import patient_values_inventory_blueprint
 from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
 from blueprints.registry.case_reviews import registry_case_reviews_blueprint
 from blueprints.registry.sessions import registry_sessions_blueprint
-from blueprints.registry.values_inventory import registry_values_inventory_blueprint
 
 
 def create_app():
@@ -82,9 +81,10 @@ def create_app():
         blueprints.registry.clinical_history.clinical_history_blueprint,
         url_prefix="/patient/",
     )
-    # app.register_blueprint(
-    #     registry_values_inventory_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/values"
+    app.register_blueprint(
+        blueprints.registry.values_inventory.values_inventory_blueprint,
+        url_prefix="/patient/",
+    )
     # app.register_blueprint(
     #     registry_safety_plan_blueprint
     # )  # url_prefix="/patients/<patient_collection>/safety"

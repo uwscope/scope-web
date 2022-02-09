@@ -5,9 +5,6 @@
 	"description": "IValuesInventory Type",
 	"type": "object",
 	"properties": {
-		"_id": {
-			"type": "string"
-		},
 		"_type": {
 			"const": "valuesInventory"
 		},
