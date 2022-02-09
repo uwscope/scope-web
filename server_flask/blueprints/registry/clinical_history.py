@@ -11,7 +11,8 @@ clinical_history_blueprint = flask.Blueprint("clinical_history_blueprint", __nam
 
 
 @clinical_history_blueprint.route(
-    "/<string:patient_id>/clinicalhistory", methods=["GET"]
+    "/<string:patient_id>/clinicalhistory",
+    methods=["GET"],
 )
 @flask_json.as_json
 def get_clinical_history(patient_id):
@@ -32,7 +33,8 @@ def get_clinical_history(patient_id):
 
 
 @clinical_history_blueprint.route(
-    "/<string:patient_id>/clinicalhistory", methods=["PUT"]
+    "/<string:patient_id>/clinicalhistory",
+    methods=["PUT"],
 )
 @validate_schema(clinical_history_schema)
 @flask_json.as_json

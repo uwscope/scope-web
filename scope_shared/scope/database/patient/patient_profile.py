@@ -1,7 +1,7 @@
-import pymongo
-import pymongo.results
 from typing import Optional
 
+import pymongo
+import pymongo.results
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "patientProfile"
@@ -20,7 +20,7 @@ def get_patient_profile(
 def put_patient_profile(
     *,
     collection: pymongo.collection.Collection,
-    patient_profile: dict
+    patient_profile: dict,
 ) -> scope.database.collection_utils.PutResult:
     return scope.database.collection_utils.put_singleton(
         collection=collection,

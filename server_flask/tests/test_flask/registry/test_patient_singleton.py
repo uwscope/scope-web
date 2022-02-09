@@ -66,7 +66,7 @@ TEST_CONFIGS = [
         database_get_function=scope.database.patient.values_inventory.get_values_inventory,
         database_put_function=scope.database.patient.values_inventory.put_values_inventory,
         database_put_function_document_parameter_name="values_inventory",
-        flask_query_type="values",
+        flask_query_type="valuesinventory",
         flask_response_document_key="valuesinventory",
     ),
 ]

@@ -10,7 +10,10 @@ from utils import validate_schema
 values_inventory_blueprint = flask.Blueprint("values_inventory_blueprint", __name__)
 
 
-@values_inventory_blueprint.route("/<string:patient_id>/values", methods=["GET"])
+@values_inventory_blueprint.route(
+    "/<string:patient_id>/valuesinventory",
+    methods=["GET"],
+)
 @flask_json.as_json
 def get_values_inventory(patient_id):
     # TODO: Require authentication
@@ -29,7 +32,10 @@ def get_values_inventory(patient_id):
     }
 
 
-@values_inventory_blueprint.route("/<string:patient_id>/values", methods=["PUT"])
+@values_inventory_blueprint.route(
+    "/<string:patient_id>/valuesinventory",
+    methods=["PUT"],
+)
 @validate_schema(values_inventory_schema)
 @flask_json.as_json
 def put_patient_values(patient_id):

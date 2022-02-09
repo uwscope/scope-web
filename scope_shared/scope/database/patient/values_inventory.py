@@ -18,7 +18,9 @@ def get_values_inventory(
 
 
 def put_values_inventory(
-    *, collection: pymongo.collection.Collection, values_inventory: dict
+    *,
+    collection: pymongo.collection.Collection,
+    values_inventory: dict,
 ) -> scope.database.collection_utils.PutResult:
     return scope.database.collection_utils.put_singleton(
         collection=collection,

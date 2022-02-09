@@ -18,7 +18,9 @@ def get_safety_plan(
 
 
 def put_safety_plan(
-    *, collection: pymongo.collection.Collection, safety_plan: dict
+    *,
+    collection: pymongo.collection.Collection,
+    safety_plan: dict,
 ) -> scope.database.collection_utils.PutResult:
     return scope.database.collection_utils.put_singleton(
         collection=collection,
