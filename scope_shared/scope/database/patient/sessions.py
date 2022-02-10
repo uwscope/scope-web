@@ -8,6 +8,8 @@ import pymongo.database
 import pymongo.errors
 import pymongo.results
 
+DOCUMENT_TYPE = "session"
+
 
 def get_sessions(
     *, database: pymongo.database.Database, collection_name: str

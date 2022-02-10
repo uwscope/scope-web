@@ -8,7 +8,7 @@ import pymongo.database
 import pymongo.errors
 import pymongo.results
 
-TYPE = "caseReview"
+DOCUMENT_TYPE = "caseReview"
 
 
 def get_case_reviews(
@@ -22,7 +22,7 @@ def get_case_reviews(
 
     # Find unique review ids and then get document with latest _rev from them.
     pipeline = [
-        {"$match": {"_type": TYPE}},
+        {"$match": {"_type": DOCUMENT_TYPE}},
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -51,7 +51,7 @@ def get_case_review(
 
     collection = database.get_collection(name=collection_name)
 
-    query = {"_type": TYPE, "_review_id": review_id}
+    query = {"_type": DOCUMENT_TYPE, "_review_id": review_id}
 
     # Find the document with highest `_rev`.
     case_review = collection.find_one(filter=query, sort=[("_rev", pymongo.DESCENDING)])
@@ -73,7 +73,7 @@ def create_case_review(
     collection = database.get_collection(name=collection_name)
 
     # Make sure _review_id does not already exist.
-    query = {"_type": TYPE, "_review_id": case_review["_review_id"]}
+    query = {"_type": DOCUMENT_TYPE, "_review_id": case_review["_review_id"]}
     if collection.find_one(filter=query) is None:
         try:
             result = collection.insert_one(document=case_review)
