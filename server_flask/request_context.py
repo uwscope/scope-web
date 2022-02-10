@@ -1,9 +1,9 @@
-import flask
 import http
+from typing import NoReturn, cast
+
+import flask
 import pymongo.collection
 import pymongo.database
-from typing import cast, NoReturn
-
 import scope.database.patients
 
 
@@ -49,7 +49,25 @@ class RequestContext:
     def abort_put_with_id() -> NoReturn:
         RequestContext._abort(
             {
-                "message": 'Put must not include "_id".',
+                "message": 'PUT must not include "_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_post_with_id() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'POST must not include "_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_post_with_rev() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'POST must not include "_rev".',
             },
             http.HTTPStatus.BAD_REQUEST,
         )
@@ -62,6 +80,16 @@ class RequestContext:
                 "message": "Revision conflict.",
             },
             http.HTTPStatus.CONFLICT,
+        )
+
+    @staticmethod
+    def abort_pymongo_operation_failure(*, document: dict) -> NoReturn:
+        RequestContext._abort(
+            document
+            | {
+                "message": "Pymongo operation failure.",
+            },
+            http.HTTPStatus.INTERNAL_SERVER_ERROR,  # TODO: Is the correct code for this?
         )
 
     def patient_collection(self, *, patient_id: str) -> pymongo.collection.Collection:
