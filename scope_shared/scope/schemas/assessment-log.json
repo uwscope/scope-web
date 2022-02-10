@@ -9,7 +9,7 @@
 		"_log_id": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"_rev": { "_type": "number" },
+		"_rev": { "type": "number" },
 		"_type": { "const": "assessmentLog" },
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
@@ -39,7 +39,7 @@
 			"type": "number"
 		}
 	},
-	"additionalProperties": true,
+	"additionalProperties": false,
 	"required": [
 		"_log_id",
 		"_type",

@@ -10,10 +10,11 @@
 		},
 		"_type": { "const": "identity" },
 		"_rev": { "type": "number" },
+		"identityId": { "type": "string" },
 		"name": {
 			"type": "string"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "name"]
+	"required": ["_type", "identityId", "name"]
 }

@@ -8,7 +8,7 @@
 		"_log_id": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"_rev": { "_type": "number" },
+		"_rev": { "type": "number" },
 		"_type": { "const": "activityLog" },
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"

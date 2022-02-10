@@ -170,7 +170,8 @@
 				},
 				"Supportive Therapy": {
 					"type": "boolean"
-				}
+				},
+				"Other": { "type": "boolean" }
 			},
 			"required": [
 				"Behavioral Activation",
