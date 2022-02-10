@@ -28,6 +28,8 @@ def test_app_config(
 
     # TODO: Anant: Define and check a schema
 
-    assert "assessments" in config
-    assert "lifeAreas" in config
-    assert "resources" in config
+    assert "auth" in config
+    assert "content" in config
+    assert "assessments" in config["content"]
+    assert "lifeAreas" in config["content"]
+    assert "resources" in config["content"]

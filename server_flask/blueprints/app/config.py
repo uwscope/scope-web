@@ -25,33 +25,39 @@ def get_app_config():
     """
 
     # Load assessments configurations
-    assessments = []
+    content_assessments = []
     for path_current in Path(APP_CONFIG_ASSESSMENTS_PATH).iterdir():
         if path_current.match("*.json"):
             with open(path_current) as config_file:
                 config_json = json.load(config_file)
-                assessments.append(config_json)
+                content_assessments.append(config_json)
 
     # Load life areas configurations
-    life_areas = []
+    content_life_areas = []
     for path_current in Path(APP_CONFIG_LIFE_AREAS_PATH).iterdir():
         if path_current.match("*.json"):
             with open(path_current) as config_file:
                 config_json = json.load(config_file)
-                life_areas.append(config_json)
+                content_life_areas.append(config_json)
 
     # Load resources configurations
-    resources = []
+    content_resources = []
     for path_current in Path(APP_CONFIG_RESOURCES_PATH).iterdir():
         if path_current.match("*.json"):
             with open(path_current) as config_file:
                 config_json = json.load(config_file)
-                resources.append(config_json)
+                content_resources.append(config_json)
 
     result = {
-        "assessments": assessments,
-        "lifeAreas": life_areas,
-        "resources": resources,
+        "auth": {
+            "poolid": flask.current_app.config.COGNITO_POOLID,
+            "clientid": flask.current_app.config.COGNITO_CLIENTID,
+        },
+        "content": {
+            "assessments": content_assessments,
+            "lifeAreas": content_life_areas,
+            "resources": content_resources,
+        }
     }
 
     return result, http.HTTPStatus.OK
