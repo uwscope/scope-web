@@ -9,56 +9,58 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-OPTIONAL_KEYS = [
+OPTIONAL_KEYS_VALUES_INVENTORY = [
+    "lastUpdatedDate",
     "values",
+]
+
+OPTIONAL_KEYS_ACTIVITY = [
+    "enjoyment",
+    "importance",
 ]
 
 
 def _fake_activity(
     *,
     faker_factory: faker.Faker,
-    value_id: str,
-    life_area_id: str,
 ) -> dict:
     """
     This is currently tested by inclusion in the values inventory schema.
     If moved out on its own, it should probably get its own tests.
     """
 
-    return {
-        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT
-        "id": "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT",
+    fake_activity = {
         "name": faker_factory.text(),
-        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT
-        "valueId": value_id,
         "dateCreated": scope.database.format_utils.format_date(
             faker_factory.date_object()
         ),
         "dateEdited": scope.database.format_utils.format_date(
             faker_factory.date_object()
         ),
-        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT, IT SEEMS REDUNDANT FROM THE PARENT
-        "lifeareaId": life_area_id,
         "enjoyment": random.randint(1, 5),
         "importance": random.randint(1, 5),
     }
+
+    # Remove a randomly sampled subset of optional parameters.
+    fake_activity = fake_utils.fake_optional(
+        document=fake_activity,
+        optional_keys=OPTIONAL_KEYS_ACTIVITY,
+    )
+
+    return fake_activity
 
 
 def _fake_value(
     *,
     faker_factory: faker.Faker,
-    fake_life_area: dict,  # lifeareaId will be sampled from this
+    fake_life_area: dict,  # lifeareaId will be taken from this
 ) -> dict:
     """
     This is currently tested by inclusion in the values inventory schema.
     If moved out on its own, it should probably get its own tests.
     """
 
-    value_id = "WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT."
-
     return {
-        # TODO: WHAT IS THIS ID, WHERE IS IT USED, DO WE NEED IT
-        "id": value_id,
         "name": faker_factory.text(),
         "dateCreated": scope.database.format_utils.format_date(
             faker_factory.date_object()
@@ -70,10 +72,8 @@ def _fake_value(
         "activities": [
             _fake_activity(
                 faker_factory=faker_factory,
-                value_id=value_id,
-                life_area_id=fake_life_area["id"],
             )
-            for count in range(1, 5)
+            for _ in range(1, 5)
         ],
     }
 
@@ -96,20 +96,23 @@ def fake_values_inventory_factory(
             "assignedDate": scope.database.format_utils.format_date(
                 faker_factory.date_object()
             ),
+            "lastUpdatedDate": scope.database.format_utils.format_date(
+                faker_factory.date_object()
+            ),
             "values": [
                 _fake_value(
                     faker_factory=faker_factory,
                     fake_life_area=fake_life_area,
                 )
                 for fake_life_area in fake_life_areas
-                for count in range(random.randint(1, 5))
+                for _ in range(random.randint(1, 5))
             ],
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        fake_values_inventory = scope.testing.fake_data.fake_utils.fake_optional(
+        fake_values_inventory = fake_utils.fake_optional(
             document=fake_values_inventory,
-            optional_keys=OPTIONAL_KEYS,
+            optional_keys=OPTIONAL_KEYS_VALUES_INVENTORY,
         )
 
         return fake_values_inventory

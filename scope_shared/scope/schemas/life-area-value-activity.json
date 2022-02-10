@@ -5,22 +5,13 @@
 	"description": "ILifeAreaValueActivity Type",
 	"type": "object",
 	"properties": {
-		"id": {
-			"type": "string"
-		},
 		"name": {
-			"type": "string"
-		},
-		"valueId": {
 			"type": "string"
 		},
 		"dateCreated": {
 			"type": "string"
 		},
 		"dateEdited": {
-			"type": "string"
-		},
-		"lifeareaId": {
 			"type": "string"
 		},
 		"enjoyment": {
@@ -31,5 +22,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["id", "name", "valueId", "dateCreated", "dateEdited", "lifeareaId"]
+	"required": ["name", "dateCreated", "dateEdited"]
 }
