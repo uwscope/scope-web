@@ -223,7 +223,6 @@ export interface ILifeAreaContent {
 }
 
 export interface ILifeAreaValue {
-    id: string;
     name: string;
     dateCreated: Date;
     dateEdited: Date;
@@ -232,12 +231,9 @@ export interface ILifeAreaValue {
 }
 
 export interface ILifeAreaValueActivity {
-    id: string;
     name: string;
-    valueId: string;
     dateCreated: Date;
     dateEdited: Date;
-    lifeareaId: string;
     enjoyment?: number;
     importance?: number;
 }

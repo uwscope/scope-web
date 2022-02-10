@@ -17,13 +17,11 @@ const lorem = new LoremIpsum({
 export const getFakeLifeareaValues = (): ILifeAreaValue[] => {
     return [
         {
-            id: 'inventory-value-1',
             lifeareaId: 'education',
             name: 'some inventory value 1',
             activities: getFakeLifeareaValueActivities('education', 'some inventory value 1'),
         } as ILifeAreaValue,
         {
-            id: 'inventory-value-1',
             lifeareaId: 'recreation',
             name: 'some inventory value 2',
             activities: getFakeLifeareaValueActivities('recreation', 'some inventory value 2'),
@@ -36,7 +34,6 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
         {
             id: `activity for ${lifeareaId}-${valueId} 1`,
             name: 'some inventory activity',
-            valueId: valueId,
             lifeareaId,
             enjoyment: random(1, 10),
             importance: random(1, 10),
@@ -46,7 +43,6 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
         {
             id: `activity for ${lifeareaId}-${valueId} 2`,
             name: 'some inventory activity 2',
-            valueId: valueId,
             lifeareaId,
             enjoyment: random(1, 10),
             importance: random(1, 10),
