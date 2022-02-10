@@ -1,15 +1,14 @@
-import faker
-from pprint import pprint
-import pytest
 import random
+from pprint import pprint
 from typing import Callable
 
+import faker
+import pytest
 import scope.database.format_utils
 import scope.database.patient.safety_plan
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
-import scope.testing.fake_data.fixtures_fake_contact
 
 OPTIONAL_KEYS = [
     "lastUpdatedDate",
@@ -36,26 +35,38 @@ def fake_safety_plan_factory(
     def factory() -> dict:
         distractions = []
         distractions.extend(faker_factory.texts(nb_texts=random.randint(1, 5)))
-        distractions.extend([fake_contact_factory() for count in range(random.randint(1, 5))])
+        distractions.extend(
+            [fake_contact_factory() for count in range(random.randint(1, 5))]
+        )
         random.shuffle(distractions)
 
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDate": scope.database.format_utils.format_date(faker_factory.date_object()),
-            "lastUpdatedDate": scope.database.format_utils.format_date(faker_factory.date_object()),
+            "assignedDate": scope.database.format_utils.format_date(
+                faker_factory.date_object()
+            ),
+            "lastUpdatedDate": scope.database.format_utils.format_date(
+                faker_factory.date_object()
+            ),
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "distractions": distractions,
-            "supporters": [fake_contact_factory() for count in range(random.randint(1, 5))],
-            "professionalSupporters": [fake_contact_factory() for count in range(random.randint(1, 5))],
-            "urgentServices": [fake_contact_factory() for count in range(random.randint(1, 5))],
+            "supporters": [
+                fake_contact_factory() for count in range(random.randint(1, 5))
+            ],
+            "professionalSupporters": [
+                fake_contact_factory() for count in range(random.randint(1, 5))
+            ],
+            "urgentServices": [
+                fake_contact_factory() for count in range(random.randint(1, 5))
+            ],
             "safeEnvironment": faker_factory.texts(nb_texts=random.randint(1, 5)),
         }
 
         # Remove a randomly sampled subset of optional parameters.
-        fake_safety_plan = scope.testing.fake_data.fake_utils.fake_optional(
+        fake_safety_plan = fake_utils.fake_optional(
             document=fake_safety_plan,
             optional_keys=OPTIONAL_KEYS,
         )
@@ -82,7 +93,7 @@ def fixture_data_fake_safety_plan_factory(
     def factory() -> dict:
         fake_safety_plan = unvalidated_factory()
 
-        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+        fake_utils.xfail_for_invalid(
             schema=scope.schema.safety_plan_schema,
             document=fake_safety_plan,
         )

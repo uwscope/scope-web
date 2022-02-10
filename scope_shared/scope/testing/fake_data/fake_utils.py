@@ -1,9 +1,36 @@
+import base64
 import copy
-import jschon
+import hashlib
 import math
-import pytest
 import random
+import uuid
 from typing import List
+
+import jschon
+import pytest
+
+
+def fake_unique_id() -> str:
+    """
+    Generate a id that:
+    - Is guaranteed to be URL safe.
+    - Is expected to be unique.
+
+    # NOTE: Same as _generate_patient_id method in patients model file.
+
+    """
+
+    # Obtain uniqueness
+    generated_uuid = uuid.uuid4()
+    # Manage length so these don't seem obscenely long
+    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=6).digest()
+    # Obtain URL safety and MongoDB collection name compatibility.
+    generated_base64 = base64.b32encode(generated_digest).decode("ascii").casefold()
+
+    # Remove terminating "=="
+    clean_generated_base64 = generated_base64.rstrip("=")
+
+    return clean_generated_base64
 
 
 def fake_enum_value(enum):
@@ -31,7 +58,7 @@ def fake_optional(*, document: dict, optional_keys: List[str]) -> dict:
     Delete optional keys, limiting total rate of missing keys.
     """
 
-    max_missing_rate = .2
+    max_missing_rate = 0.2
     max_number_missing = math.ceil(len(optional_keys) * max_missing_rate)
     number_missing = random.randint(0, max_number_missing)
     missing_keys = random.sample(optional_keys, k=number_missing)
