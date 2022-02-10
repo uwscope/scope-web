@@ -1,11 +1,9 @@
 import copy
-import http
 from dataclasses import dataclass
-from pprint import pprint
+import http
 from typing import Callable
 from urllib.parse import urljoin
 
-import pymongo.collection
 import pytest
 import requests
 import scope.config
@@ -14,7 +12,6 @@ import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.values_inventory
-import scope.database.patients
 import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
 
@@ -60,16 +57,15 @@ TEST_CONFIGS = [
         flask_query_type="clinicalhistory",
         flask_response_document_key="clinicalhistory",
     ),
-    # TODO: Commented because database PUT takes way too much time.
-    # ConfigTestPatientSingleton(
-    #     name="valuesinventory",
-    #     document_factory_fixture_name="data_fake_values_inventory_factory",
-    #     database_get_function=scope.database.patient.values_inventory.get_values_inventory,
-    #     database_put_function=scope.database.patient.values_inventory.put_values_inventory,
-    #     database_put_function_document_parameter_name="values_inventory",
-    #     flask_query_type="valuesinventory",
-    #     flask_response_document_key="valuesinventory",
-    # ),
+    ConfigTestPatientSingleton(
+        name="valuesinventory",
+        document_factory_fixture_name="data_fake_values_inventory_factory",
+        database_get_function=scope.database.patient.values_inventory.get_values_inventory,
+        database_put_function=scope.database.patient.values_inventory.put_values_inventory,
+        database_put_function_document_parameter_name="values_inventory",
+        flask_query_type="valuesinventory",
+        flask_response_document_key="valuesinventory",
+    ),
 ]
 
 
