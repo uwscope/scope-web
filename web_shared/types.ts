@@ -275,12 +275,15 @@ export interface IPatientList {
     patients: IPatient[];
 }
 
+// James 2/10: This appears to be a duplicate of below
 export interface IAppConfig {
     assessments: IAssessmentContent[];
     lifeAreas: ILifeAreaContent[];
     resources: IResourceContent[];
 }
 
+// James 2/10: This appears to be a duplicate of below,
+//             except below also has additional fields added to it
 export interface IAssessmentContent {
     id: string;
     name: string;
@@ -289,12 +292,15 @@ export interface IAssessmentContent {
     options: { text: string; value: number }[];
 }
 
+// James 2/10: This appears to be a duplicate of below,
+//             except below is lacking id
 export interface IResourceContent {
     id: string;
     name: string;
     resources: IResourceItem[];
 }
 
+// James 2/10: This appears to be a duplicate of below
 export interface IResourceItem {
     name: string;
     filename: string;
@@ -306,6 +312,20 @@ export interface IPatientConfig {
     assignedAssessmentIds: string[];
 }
 
+// James 2/10: I would like to introduce this, after the rename below
+//             Keeping the same name for this new config seems right
+//             It also means no changes in the client code for getting the top-level config
+// export interface IAppConfig {
+//     auth: iAppAuthConfig;
+//     content: IAppContent;
+// }
+//
+// export interface iAppAuthConfig {
+//     poolid: string;
+//     clientid: string;
+// }
+
+// James 2/10: I would like to rename this to be IAppContentConfig
 export interface IAppConfig {
     assessments: IAssessmentContent[];
     lifeAreas: ILifeAreaContent[];
