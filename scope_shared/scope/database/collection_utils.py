@@ -1,9 +1,8 @@
 import copy
 from dataclasses import dataclass
-import pymongo.collection
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
+import pymongo.collection
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
@@ -255,7 +254,7 @@ def put_set_element(
     collection: pymongo.collection.Collection,
     document_type: str,
     set_id: str,
-    document: dict
+    document: dict,
 ) -> PutResult:
     """
     Put a set element document.
@@ -271,26 +270,26 @@ def put_set_element(
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
     if "_id" in document:
-        raise ValueError("Document must not have existing \"_id\"")
+        raise ValueError('Document must not have existing "_id"')
 
     # If a document includes a "_type", it must match document_type.
     if "_type" in document:
         if document["_type"] != document_type:
-            raise ValueError("document[\"_type\"] must match document_type")
+            raise ValueError('document["_type"] must match document_type')
     else:
         document["_type"] = document_type
 
     # If a document includes a "_set_id", it must match set_id.
     if "_set_id" in document:
         if document["_set_id"] != set_id:
-            raise ValueError("document[\"_set_id\"] must match set_id")
+            raise ValueError('document["_set_id"] must match set_id')
     else:
         document["_set_id"] = set_id
 
     # Increment the "_rev"
     if "_rev" in document:
         if not isinstance(document["_rev"], int):
-            raise ValueError("document[\"_rev\"] must be int")
+            raise ValueError('document["_rev"] must be int')
 
         document["_rev"] += 1
     else:
@@ -302,9 +301,7 @@ def put_set_element(
     document = normalize_document(document=document)
 
     return PutResult(
-        inserted_count=1,
-        inserted_id=str(result.inserted_id),
-        document=document
+        inserted_count=1, inserted_id=str(result.inserted_id), document=document
     )
 
 
@@ -312,7 +309,7 @@ def put_singleton(
     *,
     collection: pymongo.collection.Collection,
     document_type: str,
-    document: dict
+    document: dict,
 ) -> PutResult:
     """
     Put a singleton document.
@@ -327,19 +324,19 @@ def put_singleton(
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
     if "_id" in document:
-        raise ValueError("Document must not have existing \"_id\"")
+        raise ValueError('Document must not have existing "_id"')
 
     # If a document includes a "_type", it must match document_type.
     if "_type" in document:
         if document["_type"] != document_type:
-            raise ValueError("document[\"_type\"] must match document_type")
+            raise ValueError('document["_type"] must match document_type')
     else:
         document["_type"] = document_type
 
     # Increment the "_rev"
     if "_rev" in document:
         if not isinstance(document["_rev"], int):
-            raise ValueError("document[\"_rev\"] must be int")
+            raise ValueError('document["_rev"] must be int')
 
         document["_rev"] += 1
     else:
@@ -353,5 +350,5 @@ def put_singleton(
     return PutResult(
         inserted_count=1,
         inserted_id=str(result.inserted_id),
-        document=document
+        document=document,
     )
