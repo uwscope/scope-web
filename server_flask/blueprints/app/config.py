@@ -50,8 +50,8 @@ def get_app_config():
 
     result = {
         "auth": {
-            "poolid": flask.current_app.config.COGNITO_POOLID,
-            "clientid": flask.current_app.config.COGNITO_CLIENTID,
+            "poolid": flask.current_app.config["COGNITO_POOLID"],
+            "clientid": flask.current_app.config["COGNITO_CLIENTID"],
         },
         "content": {
             "assessments": content_assessments,
