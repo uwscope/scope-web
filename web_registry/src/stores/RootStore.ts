@@ -11,6 +11,9 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
+    // James 2/10: This will instead become:
+    // appContentConfig: IAppContentConfig;
+    // Code that uses it will need changed
     appConfig: IAppConfig;
 
     // UI states
@@ -34,6 +37,7 @@ export class RootStore implements IRootStore {
 
     constructor(serverConfig: IAppConfig) {
         // As more is added to serverConfig, it will become a type and this will be split up
+        // James 2/10: When added, the IAppAuthConfig would be passed into the AuthStore?
         this.appConfig = serverConfig;
         this.patientsStore = new PatientsStore();
         this.authStore = new AuthStore();
