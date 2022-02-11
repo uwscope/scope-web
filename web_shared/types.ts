@@ -275,31 +275,6 @@ export interface IPatientList {
     patients: IPatient[];
 }
 
-export interface IAppConfig {
-    assessments: IAssessmentContent[];
-    lifeAreas: ILifeAreaContent[];
-    resources: IResourceContent[];
-}
-
-export interface IAssessmentContent {
-    id: string;
-    name: string;
-    instruction: string;
-    questions: { question: string; id: string }[];
-    options: { text: string; value: number }[];
-}
-
-export interface IResourceContent {
-    id: string;
-    name: string;
-    resources: IResourceItem[];
-}
-
-export interface IResourceItem {
-    name: string;
-    filename: string;
-}
-
 export interface IPatientConfig {
     assignedValuesInventory: boolean;
     assignedSafetyPlan: boolean;
@@ -307,6 +282,16 @@ export interface IPatientConfig {
 }
 
 export interface IAppConfig {
+    auth: IAppAuthConfig;
+    content: IAppContentConfig;
+}
+
+export interface IAppAuthConfig {
+    poolid: string;
+    clientid: string;
+}
+
+export interface IAppContentConfig {
     assessments: IAssessmentContent[];
     lifeAreas: ILifeAreaContent[];
     resources: IResourceContent[];
@@ -329,6 +314,7 @@ export interface ILifeAreaContent {
 }
 
 export interface IResourceContent {
+    id: string;
     name: string;
     resources: IResourceItem[];
 }

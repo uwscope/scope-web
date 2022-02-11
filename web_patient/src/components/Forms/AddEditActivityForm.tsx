@@ -66,9 +66,9 @@ const TextFieldWithBottomMargin = withTheme(
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
-    const { patientStore, appConfig } = rootStore;
+    const { patientStore, appContentConfig } = rootStore;
     const { valueActivities, values } = patientStore;
-    const { lifeAreas } = appConfig;
+    const { lifeAreas } = appContentConfig;
 
     const activityId = getRouteParameter(Parameters.activityId);
 

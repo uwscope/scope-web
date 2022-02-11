@@ -68,7 +68,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { recordId } = useParams<{ recordId: string | undefined }>();
     const currentPatient = rootStore.getPatientByRecordId(recordId);
-    const validAssessments = rootStore.appConfig.assessments;
+    const validAssessments = rootStore.appContentConfig.assessments;
 
     React.useEffect(
         action(() => {

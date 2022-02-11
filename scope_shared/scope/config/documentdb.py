@@ -10,7 +10,7 @@ class DocumentDBConfig:
     """
     Configuration for a DocumentDB cluster.
 
-    Includes internal fields the cluster will use to configure itself.
+    Includes internal fields used for configuration.
     """
 
     admin_user: str

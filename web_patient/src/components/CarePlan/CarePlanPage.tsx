@@ -46,7 +46,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const {
         patientStore,
-        appConfig: { lifeAreas },
+        appContentConfig: { lifeAreas },
     } = rootStore;
     const { taskItems, activities } = patientStore;
     const navigate = useNavigate();

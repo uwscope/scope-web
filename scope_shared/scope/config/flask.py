@@ -9,11 +9,13 @@ class FlaskConfig:
     """
     Configuration for a Flask instance.
 
-    Includes internal fields the instance will use to configure itself.
+    Includes internal fields used for configuration.
     """
 
     baseurl: str
     secret_key: str
+    cognito_poolid: str
+    cognito_clientid: str
     documentdb_host: str
     documentdb_port: Optional[int]
     documentdb_directconnection: bool
@@ -26,6 +28,10 @@ class FlaskConfig:
         result = {
             "baseurl": self.baseurl,
             "secret_key": self.secret_key,
+            "cognito": {
+                "poolid": self.cognito_poolid,
+                "clientid": self.cognito_clientid,
+            },
             "documentdb": {
                 "host": self.documentdb_host,
                 "directconnection": self.documentdb_directconnection,
@@ -57,6 +63,8 @@ class FlaskConfig:
         return FlaskConfig(
             baseurl=config_dict["baseurl"],
             secret_key=config_dict["secret_key"],
+            cognito_poolid=config_dict["cognito"]["poolid"],
+            cognito_clientid=config_dict["cognito"]["clientid"],
             documentdb_host=config_dict["documentdb"]["host"],
             documentdb_port=config_dict["documentdb"].get("port", None),
             documentdb_directconnection=config_dict["documentdb"]["directconnection"],

@@ -17,7 +17,7 @@ const InstructionText = styled(Typography)({
 
 export const ValuesInventoryHome: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const { lifeAreas } = rootStore.appConfig;
+    const { lifeAreas } = rootStore.appContentConfig;
     const navigate = useNavigate();
     const { patientStore } = rootStore;
 
