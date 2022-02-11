@@ -1,5 +1,5 @@
 import { action, makeAutoObservable } from 'mobx';
-import { IAppConfig } from 'shared/types';
+import { IAppConfig, IAppContentConfig } from 'shared/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 import { IPatientStore } from 'src/stores/PatientStore';
@@ -11,10 +11,7 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
-    // James 2/10: This will instead become:
-    // appContentConfig: IAppContentConfig;
-    // Code that uses it will need changed
-    appConfig: IAppConfig;
+    appContentConfig: IAppContentConfig;
 
     // UI states
 
@@ -33,14 +30,14 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE Registry';
-    public appConfig: IAppConfig;
+    public appContentConfig: IAppContentConfig;
 
     constructor(serverConfig: IAppConfig) {
         // As more is added to serverConfig, it will become a type and this will be split up
         // James 2/10: When added, the IAppAuthConfig would be passed into the AuthStore?
-        this.appConfig = serverConfig;
+        this.appContentConfig = serverConfig.content;
         this.patientsStore = new PatientsStore();
-        this.authStore = new AuthStore();
+        this.authStore = new AuthStore(serverConfig.auth);
 
         makeAutoObservable(this);
     }

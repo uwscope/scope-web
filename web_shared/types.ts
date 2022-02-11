@@ -275,58 +275,23 @@ export interface IPatientList {
     patients: IPatient[];
 }
 
-// James 2/10: This appears to be a duplicate of below
-export interface IAppConfig {
-    assessments: IAssessmentContent[];
-    lifeAreas: ILifeAreaContent[];
-    resources: IResourceContent[];
-}
-
-// James 2/10: This appears to be a duplicate of below,
-//             except below also has additional fields added to it
-export interface IAssessmentContent {
-    id: string;
-    name: string;
-    instruction: string;
-    questions: { question: string; id: string }[];
-    options: { text: string; value: number }[];
-}
-
-// James 2/10: This appears to be a duplicate of below,
-//             except below is lacking id
-export interface IResourceContent {
-    id: string;
-    name: string;
-    resources: IResourceItem[];
-}
-
-// James 2/10: This appears to be a duplicate of below
-export interface IResourceItem {
-    name: string;
-    filename: string;
-}
-
 export interface IPatientConfig {
     assignedValuesInventory: boolean;
     assignedSafetyPlan: boolean;
     assignedAssessmentIds: string[];
 }
 
-// James 2/10: I would like to introduce this, after the rename below
-//             Keeping the same name for this new config seems right
-//             It also means no changes in the client code for getting the top-level config
-// export interface IAppConfig {
-//     auth: iAppAuthConfig;
-//     content: IAppContent;
-// }
-//
-// export interface iAppAuthConfig {
-//     poolid: string;
-//     clientid: string;
-// }
-
-// James 2/10: I would like to rename this to be IAppContentConfig
 export interface IAppConfig {
+    auth: IAppAuthConfig;
+    content: IAppContentConfig;
+}
+
+export interface IAppAuthConfig {
+    poolid: string;
+    clientid: string;
+}
+
+export interface IAppContentConfig {
     assessments: IAssessmentContent[];
     lifeAreas: ILifeAreaContent[];
     resources: IResourceContent[];
@@ -349,6 +314,7 @@ export interface ILifeAreaContent {
 }
 
 export interface IResourceContent {
+    id: string;
     name: string;
     resources: IResourceItem[];
 }

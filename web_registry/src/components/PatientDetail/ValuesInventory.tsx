@@ -11,7 +11,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
     const {
-        appConfig: { lifeAreas },
+        appContentConfig: { lifeAreas },
     } = useStores();
     const currentPatient = usePatient();
     const { valuesInventory } = currentPatient;

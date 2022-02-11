@@ -1,5 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
-import { IAppConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
+import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
@@ -12,7 +12,7 @@ export interface IRootStore {
 
     // App metadata
     appTitle: string;
-    appConfig: IAppConfig;
+    appContentConfig: IAppContentConfig;
 
     // UI states
     loadState: PromiseState;
@@ -36,7 +36,7 @@ export class RootStore implements IRootStore {
 
     // App metadata
     public appTitle = 'SCOPE for Patients';
-    public appConfig: IAppConfig;
+    public appContentConfig: IAppContentConfig;
 
     // UI states
 
@@ -53,7 +53,7 @@ export class RootStore implements IRootStore {
         this.quoteQuery = new PromiseQuery('', 'quoteQuery');
         this.loadQuery = new PromiseQuery([], 'loadQuery');
 
-        this.appConfig = serverConfig;
+        this.appContentConfig = serverConfig.content;
 
         makeAutoObservable(this);
     }
@@ -79,12 +79,12 @@ export class RootStore implements IRootStore {
 
     @action.bound
     public getAssessmentContent(assessmentId: string) {
-        return this.appConfig.assessments.find((s) => s.name.toLowerCase() == assessmentId.toLowerCase());
+        return this.appContentConfig.assessments.find((s) => s.name.toLowerCase() == assessmentId.toLowerCase());
     }
 
     @action.bound
     public getLifeAreaContent(lifearea: string) {
-        return this.appConfig.lifeAreas.find((la) => la.id == lifearea);
+        return this.appContentConfig.lifeAreas.find((la) => la.id == lifearea);
     }
 
     @action.bound
