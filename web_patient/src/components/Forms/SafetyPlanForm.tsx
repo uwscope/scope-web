@@ -55,16 +55,19 @@ const StringListFormSection = (props: IStringListFormSectionProps) => {
                             </IconButton>
                         </Box>
                     ))}
-                    <Button
-                        sx={{ marginTop: 1, alignSelf: 'flex-end' }}
-                        disabled={!stringList[0]}
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={onAddListItem}>
-                        {getString('Safetyplan_add')}
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography sx={{ paddingRight: 1 }}>{`${stringList.length + 1}.`}</Typography>
+                        <Button
+                            sx={{ marginTop: 1, alignSelf: 'flex-start' }}
+                            disabled={!stringList[stringList.length - 1]}
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            startIcon={<AddIcon />}
+                            onClick={onAddListItem}>
+                            {getString('Safetyplan_add')}
+                        </Button>
+                    </Box>
                 </Stack>
             }
         />
@@ -171,16 +174,19 @@ const ContactListFormSection = (props: IContactListFormSectionProps) => {
                             </IconButton>
                         </Grid>
                     ))}
-                    <Button
-                        sx={{ marginTop: 1, alignSelf: 'flex-end' }}
-                        disabled={!contactList[0]?.name}
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={onAddContactItem}>
-                        {getString('Safetyplan_add')}
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography sx={{ paddingRight: 1 }}>{`${contactList.length + 1}.`}</Typography>
+                        <Button
+                            sx={{ marginTop: 1, alignSelf: 'flex-start' }}
+                            disabled={!contactList[contactList.length - 1] || !contactList[contactList.length - 1].name}
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            startIcon={<AddIcon />}
+                            onClick={onAddContactItem}>
+                            {getString('Safetyplan_add')}
+                        </Button>
+                    </Box>
                 </Stack>
             }
         />
@@ -195,11 +201,6 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
     const safetyPlan = patientStore.safetyPlan;
 
     const dataState = useLocalObservable<ISafetyPlan>(() => ({ ...safetyPlan }));
-
-    const handleNext = action((prev: number) => {
-        prev;
-        // TODO: save
-    });
 
     const handleSubmit = action(async () => {
         await patientStore.updateSafetyPlan(dataState);
@@ -436,7 +437,6 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
             isOpen={true}
             canClose={false}
             pages={pages}
-            onNext={handleNext}
             onSubmit={handleSubmit}
             submitToast={getString('Safetyplan_submit_success')}
         />
