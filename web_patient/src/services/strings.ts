@@ -67,10 +67,10 @@ const _strings = {
     Form_activity_log_submit_success:
         'Thank you for checking in. Your responses will be available to your psychosocial care team.',
 
-    Profile_inventory_title: 'My Values Inventory',
+    Profile_inventory_title: 'Values & Activities Inventory',
     Profile_inventory_subtitle: 'Values and activities that align with your life goals',
 
-    Values_inventory_title: 'Values Inventory',
+    Values_inventory_title: 'Values & Activities Inventory',
     Values_inventory_instruction1:
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
     Values_inventory_instruction2:
@@ -112,10 +112,10 @@ const _strings = {
     Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',
     Values_inventory_dialog_add_activity_importance: 'Importance (0-10)',
 
-    Profile_resources_title: 'My Resources',
+    Profile_resources_title: 'Worksheets',
     Profile_resources_subtitle: 'Shared documents and learning resources',
 
-    Resources_title: 'My Resources',
+    Resources_title: 'Worksheets',
 
     Progress_phq_assessment_title: 'PHQ-9 Assessments',
     Progress_gad_assessment_title: 'GAD-7 Assessments',
@@ -200,7 +200,10 @@ const _strings = {
     Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
     Form_submit_error_retry: 'Retry',
 
-    Safetyplan_title: 'Safety plan',
+    Profile_safety_plan_title: 'Safety Plan',
+    Profile_safety_plan_subtitle: 'Emergency contacts and resources',
+
+    Safetyplan_title: 'Safety Plan',
     Safetyplan_reasons_for_living_title: 'Reasons for living',
     Safetyplan_reasons_for_living_description: 'What are my reasons for living?',
     Safetyplan_warning_signs_title: 'Warning signs',

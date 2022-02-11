@@ -15,6 +15,7 @@ const CardContainer = withTheme(
         display: 'flex',
         flexGrow: 1,
         width: '100%',
+        padding: props.theme.spacing(2),
         backgroundColor: props.theme.customPalette.panel,
         borderRadius: props.theme.spacing(1),
         [props.theme.breakpoints.up('phone')]: {
@@ -53,16 +54,16 @@ const CardContentContainer = styled(CardContent)({
 export interface IListCardProps {
     title: string;
     subtitle?: string;
-    imageUrl: string;
+    imageSrc: string;
 }
 
 export const ListCard: FunctionComponent<IListCardProps> = (props) => {
-    const { title, subtitle, imageUrl } = props;
+    const { title, subtitle, imageSrc } = props;
 
     return (
         <CardButton focusRipple>
             <CardContainer>
-                <CardMediaContainer image={imageUrl} title={title} />
+                <CardMediaContainer src={imageSrc} title={title} component="img" />
                 <CardContentContainer>
                     <Typography component="h5" variant="h5">
                         {title}
