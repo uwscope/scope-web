@@ -76,12 +76,18 @@ class RegistryService implements IRegistryService {
         return response.data;
     }
 
-    public async updatePatientProfile(recordId: string, patientProfile: Partial<IPatientProfile>): Promise<IPatient> {
-        // Work around since backend doesn't exist
+    public async updatePatientProfile(recordId: string, patientProfile: IPatientProfile): Promise<IPatient> {
+        // // TODO: clean this out into some kind of helper
+        // const patientProfileStored = patientProfile as IStoredDocument;
+        // if(!!patientProfileStored._id) {
+        //     delete patientProfileStored._id;
+        // }
+
         try {
-            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}`, {
-                profile: patientProfile,
-            });
+            const response = await this.axiosInstance.put<IPatient>(
+                `/patient/${recordId}/profile`,
+                patientProfile,
+            );
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));

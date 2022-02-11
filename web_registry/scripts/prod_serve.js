@@ -15,7 +15,7 @@ app.get('/*', function (req, res) {
 });
 
 port = 3000;
-host = '0.0.0.0'
+host = '0.0.0.0';
 server = app.listen(port, host);
 server.on('listening', function () {
     console.log(`Listening on http://${server.address().address}:${server.address().port}/.`);

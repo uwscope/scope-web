@@ -5,10 +5,12 @@ export const clearTime = (date: Date) => {
     return setMilliseconds(setSeconds(setMinutes(setHours(date, 0), 0), 0), 0);
 };
 
+// TODO: Remove after migration is complete
 const isoDateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d*)?$/;
+const isoDateFormatNew = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d*)?Z$/;
 
 const isIsoDateString = (value: any): boolean => {
-    return !!value && typeof value === 'string' && isoDateFormat.test(value);
+    return !!value && typeof value === 'string' && (isoDateFormat.test(value) || isoDateFormatNew.test(value));
 };
 
 export const handleDates = (body: any) => {

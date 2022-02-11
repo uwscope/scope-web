@@ -7,9 +7,12 @@ import pytest
 import requests
 import scope.config
 import scope.database.patients
+import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
+
+pytest.skip("Will be deleted in future.", allow_module_level=True)
 
 
 def test_get_patients(
@@ -34,13 +37,9 @@ def test_get_patients(
     )
     assert response.ok
 
-    pprint(response.json())
-
-    assert False
+    # pprint(response.json())
 
 
-# TODO: James to Review
-@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_all_patients(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -133,8 +132,6 @@ def test_flask_get_all_patients(
     )
 
 
-# TODO: James to Review
-@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_patient(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -169,7 +166,7 @@ def test_flask_get_patient(
     )
     assert response.ok
     response_json = response.json()
-  
+
     # Ensure body of response is our fake patient
     assert response_json.get("_type") == data_fake_patient.get("_type")
     assert response_json.get("identity") == data_fake_patient.get("identity")
@@ -216,8 +213,6 @@ def test_flask_get_patient(
     )
 
 
-# TODO: James to Review
-@pytest.mark.skip(reason="Not reviewed")
 def test_flask_get_nonexistent_patient(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
@@ -239,8 +234,6 @@ def test_flask_get_nonexistent_patient(
     assert response.status_code == 404  # Not Found
 
 
-# TODO: James to Review
-@pytest.mark.skip(reason="Not reviewed")
 def test_flask_create_patient(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,
@@ -372,8 +365,6 @@ def test_flask_create_patient(
     )
 
 
-# TODO: James to Review
-@pytest.mark.skip(reason="Not reviewed")
 def test_flask_update_patient_405(
     database_client: pymongo.database.Database,
     flask_client_config: scope.config.FlaskClientConfig,

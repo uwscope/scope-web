@@ -1,17 +1,33 @@
 import random
-from datetime import datetime
+
 from typing import Callable
 
 import faker
 import pytest
+import scope.database.format_utils
 import scope.database.patient.patient_profile
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
+OPTIONAL_KEYS = [
+    "clinicCode",
+    "birthdate",
+    "sex",
+    "gender",
+    "pronoun",
+    "race",
+    # "primaryOncologyProvider",
+    # "primaryCareManager",
+    "discussionFlag",
+    "followupSchedule",
+    "depressionTreatmentStatus",
+]
+
 
 def fake_patient_profile_factory(
-    *, faker_factory: faker.Faker, validate: bool = True
+    *,
+    faker_factory: faker.Faker,
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake patient profile documents.
@@ -28,10 +44,9 @@ def fake_patient_profile_factory(
             "clinicCode": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ClinicCode
             ),
-            "birthdate": datetime.combine(
+            "birthdate": scope.database.format_utils.format_date(
                 faker_factory.date_of_birth(),
-                datetime.min.time(),  # 00:00.00.00
-            ).isoformat(),
+            ),
             "sex": fake_utils.fake_enum_value(scope.testing.fake_data.enums.PatientSex),
             "gender": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.PatientGender
@@ -56,11 +71,11 @@ def fake_patient_profile_factory(
             ),
         }
 
-        if validate:
-            scope.schema.raise_for_invalid(
-                schema=scope.schema.patient_profile_schema,
-                document=fake_patient_profile,
-            )
+        # Remove a randomly sampled subset of optional parameters.
+        fake_patient_profile = scope.testing.fake_data.fake_utils.fake_optional(
+            document=fake_patient_profile,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_patient_profile
 
@@ -75,7 +90,18 @@ def fixture_data_fake_patient_profile_factory(
     Fixture for data_fake_patient_profile_factory.
     """
 
-    return fake_patient_profile_factory(
+    unvalidated_factory = fake_patient_profile_factory(
         faker_factory=faker,
-        validate=True,
     )
+
+    def factory() -> dict:
+        fake_patient_profile = unvalidated_factory()
+
+        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+            schema=scope.schema.patient_profile_schema,
+            document=fake_patient_profile,
+        )
+
+        return fake_patient_profile
+
+    return factory

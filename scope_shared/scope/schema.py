@@ -74,7 +74,7 @@ SCHEMAS = {
     "patient_schema": "patient.json",
     "patient_profile_schema": "patient-profile.json",
     "referral_status_schema": "referral-status.json",
-    "regexes": "regexes.json",
+    "regexes": "datetime.json",
     "safety_plan_schema": "safety-plan.json",
     "scheduled_activity_schema": "scheduled-activity.json",
     "scheduled_activities_schema": "scheduled-activities.json",

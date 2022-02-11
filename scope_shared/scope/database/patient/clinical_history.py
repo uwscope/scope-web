@@ -18,7 +18,9 @@ def get_clinical_history(
 
 
 def put_clinical_history(
-    *, collection: pymongo.collection.Collection, clinical_history: dict
+    *,
+    collection: pymongo.collection.Collection,
+    clinical_history: dict,
 ) -> scope.database.collection_utils.PutResult:
     return scope.database.collection_utils.put_singleton(
         collection=collection,

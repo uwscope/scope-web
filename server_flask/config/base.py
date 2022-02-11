@@ -71,8 +71,3 @@ class Config:
     #
     # Additional fixed configuration
     #
-
-    JSON_ADD_STATUS: bool = False
-    """
-    Expected by FlaskJSON. Disables inclusion of "status" field in response body.
-    """
