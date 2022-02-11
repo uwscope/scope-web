@@ -39,6 +39,11 @@ export const HomePage: FunctionComponent = observer(() => {
         );
     });
 
+    const onSafetyPlanClick = action(() => {
+        navigate(Routes.profile);
+        navigate(getFormPath(ParameterValues.form.safetyPlan));
+    });
+
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
@@ -61,7 +66,7 @@ export const HomePage: FunctionComponent = observer(() => {
                     )}
                     {config.assignedValuesInventory && config.assignedSafetyPlan && <Divider variant="middle" />}
                     {!!config.assignedSafetyPlan && (
-                        <ListItem button>
+                        <ListItem button onClick={onSafetyPlanClick}>
                             <ListItemAvatar>
                                 <Avatar
                                     alt={getString('Home_safety_button_text')}
