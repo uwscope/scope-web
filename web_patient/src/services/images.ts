@@ -9,9 +9,9 @@ const _images = {
     Home_values_button_image: MyValuesInventoryImageSrc,
     Home_safety_button_image: MySafetyPlanImageSrc,
     Home_mood_button_image: MoodLoggingImageSrc,
-    Profile_values_button_image: MyValuesInventoryImageSrc,
-    Profile_safety_button_image: MySafetyPlanImageSrc,
-    Profile_worksheets_button_image: MyWorksheetsImageSrc,
+    Resources_values_button_image: MyValuesInventoryImageSrc,
+    Resources_safety_button_image: MySafetyPlanImageSrc,
+    Resources_worksheets_button_image: MyWorksheetsImageSrc,
     Progress_activity_button_image: ActivityProgressImageSrc,
 };
 

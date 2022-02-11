@@ -27,8 +27,6 @@ export interface IRootStore {
     load: () => void;
 }
 
-export type NavigationPath = 'home' | 'careplan' | 'progress' | 'profile';
-
 export class RootStore implements IRootStore {
     // Stores
     public patientStore: IPatientStore;

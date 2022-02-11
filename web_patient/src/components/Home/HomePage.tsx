@@ -40,8 +40,13 @@ export const HomePage: FunctionComponent = observer(() => {
     });
 
     const onSafetyPlanClick = action(() => {
-        navigate(Routes.profile);
+        navigate(Routes.resources);
         navigate(getFormPath(ParameterValues.form.safetyPlan));
+    });
+
+    const onValuesInventoryClick = action(() => {
+        navigate(Routes.resources);
+        navigate(`${Routes.resources}/${Routes.valuesInventory}`);
     });
 
     return (
@@ -54,7 +59,7 @@ export const HomePage: FunctionComponent = observer(() => {
             <Section title={getString('Home_things_title')}>
                 <CompactList>
                     {!!config.assignedValuesInventory && (
-                        <ListItem button component={Link} to={Routes.valuesInventory}>
+                        <ListItem button onClick={onValuesInventoryClick}>
                             <ListItemAvatar>
                                 <Avatar
                                     alt={getString('Home_values_button_text')}

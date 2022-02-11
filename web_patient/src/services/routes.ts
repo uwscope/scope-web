@@ -4,12 +4,12 @@ export const Routes = {
     home: 'home',
     careplan: 'careplan',
     progress: 'progress',
-    profile: 'profile',
-    valuesInventory: 'profile/inventory',
-    resources: 'profile/resources',
-    phqProgress: 'progress/phq',
-    gadProgress: 'progress/gad',
-    activityProgress: 'progress/activities',
+    resources: 'resources',
+    valuesInventory: 'inventory',
+    worksheets: 'worksheets',
+    phqProgress: 'phq',
+    gadProgress: 'gad',
+    activityProgress: 'activities',
 };
 
 export const Parameters = {

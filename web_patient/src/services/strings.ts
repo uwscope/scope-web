@@ -14,7 +14,7 @@ const _strings = {
     Navigation_home: 'Home',
     Navigation_careplan: 'Care plan',
     Navigation_progress: 'Progress',
-    Navigation_profile: 'Profile',
+    Navigation_resources: 'Resources',
 
     Home_quote_title: 'Quote of the day',
     Home_things_title: 'Requested by provider',
@@ -67,8 +67,8 @@ const _strings = {
     Form_activity_log_submit_success:
         'Thank you for checking in. Your responses will be available to your psychosocial care team.',
 
-    Profile_inventory_title: 'Values & Activities Inventory',
-    Profile_inventory_subtitle: 'Values and activities that align with your life goals',
+    Resources_inventory_title: 'Values & Activities Inventory',
+    Resources_inventory_subtitle: 'Values and activities that align with your life goals',
 
     Values_inventory_title: 'Values & Activities Inventory',
     Values_inventory_instruction1:
@@ -112,8 +112,8 @@ const _strings = {
     Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',
     Values_inventory_dialog_add_activity_importance: 'Importance (0-10)',
 
-    Profile_resources_title: 'Worksheets',
-    Profile_resources_subtitle: 'Shared documents and learning resources',
+    Resources_resources_title: 'Worksheets',
+    Resources_resources_subtitle: 'Shared documents and learning resources',
 
     Resources_title: 'Worksheets',
 
@@ -200,8 +200,8 @@ const _strings = {
     Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
     Form_submit_error_retry: 'Retry',
 
-    Profile_safety_plan_title: 'Safety Plan',
-    Profile_safety_plan_subtitle: 'Emergency contacts and resources',
+    Resources_safety_plan_title: 'Safety Plan',
+    Resources_safety_plan_subtitle: 'Emergency contacts and resources',
 
     Safetyplan_title: 'Safety Plan',
     Safetyplan_reasons_for_living_title: 'Reasons for living',

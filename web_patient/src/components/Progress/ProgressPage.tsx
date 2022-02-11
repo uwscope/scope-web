@@ -14,13 +14,13 @@ export const ProgressPage: FunctionComponent = () => {
                 <ListItem disableGutters={true} component={Link} to={Routes.phqProgress}>
                     <ListCard
                         title={getString('Progress_phq_assessment_title')}
-                        imageSrc={getImage('Profile_values_button_image')}
+                        imageSrc={getImage('Resources_values_button_image')}
                     />
                 </ListItem>
                 <ListItem disableGutters={true} component={Link} to={Routes.gadProgress}>
                     <ListCard
                         title={getString('Progress_gad_assessment_title')}
-                        imageSrc={getImage('Profile_values_button_image')}
+                        imageSrc={getImage('Resources_values_button_image')}
                     />
                 </ListItem>
                 <ListItem disableGutters={true} component={Link} to={Routes.activityProgress}>
