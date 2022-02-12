@@ -1,5 +1,4 @@
 import random
-from pprint import pprint
 from typing import Callable
 
 import faker
@@ -21,7 +20,6 @@ def fake_session_factory(
     """
 
     def factory() -> dict:
-
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
             "sessionId": fake_utils.fake_unique_id(),

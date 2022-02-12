@@ -1,5 +1,4 @@
 import random
-from pprint import pprint
 from typing import Callable
 
 import faker
@@ -36,7 +35,7 @@ def fake_safety_plan_factory(
         distractions = []
         distractions.extend(faker_factory.texts(nb_texts=random.randint(1, 5)))
         distractions.extend(
-            [fake_contact_factory() for count in range(random.randint(1, 5))]
+            [fake_contact_factory() for _ in range(random.randint(1, 5))]
         )
         random.shuffle(distractions)
 
@@ -54,13 +53,13 @@ def fake_safety_plan_factory(
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "distractions": distractions,
             "supporters": [
-                fake_contact_factory() for count in range(random.randint(1, 5))
+                fake_contact_factory() for _ in range(random.randint(1, 5))
             ],
             "professionalSupporters": [
-                fake_contact_factory() for count in range(random.randint(1, 5))
+                fake_contact_factory() for _ in range(random.randint(1, 5))
             ],
             "urgentServices": [
-                fake_contact_factory() for count in range(random.randint(1, 5))
+                fake_contact_factory() for _ in range(random.randint(1, 5))
             ],
             "safeEnvironment": faker_factory.texts(nb_texts=random.randint(1, 5)),
         }

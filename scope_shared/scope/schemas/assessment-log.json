@@ -9,8 +9,12 @@
 		"_log_id": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"_rev": { "type": "number" },
-		"_type": { "const": "assessmentLog" },
+		"_rev": {
+			"type": "number"
+		},
+		"_type": {
+			"const": "assessmentLog"
+		},
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
 		},

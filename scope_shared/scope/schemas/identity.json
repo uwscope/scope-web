@@ -8,9 +8,15 @@
 		"_id": {
 			"type": "string"
 		},
-		"_type": { "const": "identity" },
-		"_rev": { "type": "number" },
-		"identityId": { "type": "string" },
+		"_type": {
+			"const": "identity"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"identityId": {
+			"type": "string"
+		},
 		"name": {
 			"type": "string"
 		}

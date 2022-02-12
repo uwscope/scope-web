@@ -8,8 +8,12 @@
 		"_assessment_id": {
 			"type": "string"
 		},
-		"_type": { "const": "assessment" },
-		"_rev": { "type": "number" },
+		"_type": {
+			"const": "assessment"
+		},
+		"_rev": {
+			"type": "number"
+		},
 		"assessmentName": {
 			"type": "string"
 		},

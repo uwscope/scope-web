@@ -1,8 +1,7 @@
 import copy
 from dataclasses import dataclass
-from typing import List, Optional
-
 import pymongo.collection
+from typing import List, Optional
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
@@ -301,7 +300,9 @@ def put_set_element(
     document = normalize_document(document=document)
 
     return PutResult(
-        inserted_count=1, inserted_id=str(result.inserted_id), document=document
+        inserted_count=1,
+        inserted_id=str(result.inserted_id),
+        document=document,
     )
 
 

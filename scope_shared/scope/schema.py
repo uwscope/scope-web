@@ -1,8 +1,7 @@
+import jschon
 import json
 from pathlib import Path
 from typing import Optional
-
-import jschon
 
 # Declare each schema in order to support code analysis/completion
 activity_schema: Optional[jschon.JSONSchema] = None

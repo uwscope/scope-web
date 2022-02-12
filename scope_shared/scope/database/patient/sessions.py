@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-import pymongo
 import pymongo.collection
 import scope.database.collection_utils
 

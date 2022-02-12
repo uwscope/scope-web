@@ -8,11 +8,15 @@
 		"_id": {
 			"type": "string"
 		},
-		"_type": { "const": "caseReview" },
+		"_type": {
+			"const": "caseReview"
+		},
 		"_set_id": {
 			"type": "string"
 		},
-		"_rev": { "type": "number" },
+		"_rev": {
+			"type": "number"
+		},
 		"reviewId": {
 			"type": "string"
 		},
