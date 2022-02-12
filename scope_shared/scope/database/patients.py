@@ -54,20 +54,6 @@ def create_patient(
         patient_id=generated_patient_id
     )
 
-    # Store the patient document
-    # TODO: In theory the later steps could still fail.
-    #       We may eventually want a "ready" state on each patient.
-    patient_document = {
-        "collection": generated_patient_collection,
-    }
-    result = scope.database.collection_utils.put_set_element(
-        collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
-        set_id=generated_patient_id,
-        document=patient_document,
-    )
-    patient_document = result.document
-
     # Create the patient collection with a sentinel document
     patient_collection = database.get_collection(generated_patient_collection)
     result = scope.database.collection_utils.put_singleton(
@@ -78,6 +64,19 @@ def create_patient(
 
     # Create the index on the patient collection
     scope.database.collection_utils.ensure_index(collection=patient_collection)
+
+    # Atomically store the patient document.
+    # Do this last, because it means all other steps have already succeeded.
+    patient_document = {
+        "collection": generated_patient_collection,
+    }
+    result = scope.database.collection_utils.put_set_element(
+        collection=patients_collection,
+        document_type=PATIENT_DOCUMENT_TYPE,
+        set_id=generated_patient_id,
+        document=patient_document,
+    )
+    patient_document = result.document
 
     return patient_document
 
@@ -107,7 +106,6 @@ def delete_patient(
         return False
 
     # Delete the document and the database.
-    # There is likely a race condition here, but our semantics for destructive deletion are weak.
     database.drop_collection(existing_document["collection"])
     scope.database.collection_utils.delete_set_element(
         collection=patients_collection,

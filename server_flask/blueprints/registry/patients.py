@@ -93,16 +93,34 @@ def get_patients():
         print("Time Patient: {}".format(time_per_patient_current - time_call_start), flush=True)
     print("Time Call End: {}".format(time_call_end - time_call_start), flush=True)
 
+    # TODO: We should require that a "patient"
+    #       always have a "profile" document that includes "name" and "mrn".
+    #
+    # For now, we explicitly filter on patients being "valid".
+    patient_documents_filtered = []
+    for patient_document_current in patient_documents:
+        filter_pass = (
+            ("identity" in patient_document_current) and
+            ("identityId" in patient_document_current["identity"]) and
+            ("profile" in patient_document_current) and
+            ("name" in patient_document_current["profile"]) and
+            ("mrn" in patient_document_current["profile"])
+        )
+        if filter_pass:
+            patient_documents_filtered.append(patient_document_current)
+
+    patient_documents = patient_documents_filtered
+
     # Transition code to establish a "sparse" representation
     patient_documents_sparse = [
         {
             "identity": {
                 "_type": "identity",
-                "identityId": patient_current["identity"]["identityId"],
-                "name": patient_current["profile"]["name"]
+                "identityId": patient_document_current["identity"]["identityId"],
+                "name": patient_document_current["profile"]["name"]
             },
         }
-        for patient_current in patient_documents
+        for patient_document_current in patient_documents
     ]
 
     return {
