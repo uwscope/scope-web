@@ -176,7 +176,7 @@ export interface IPatientProfile {
 export interface IClinicalHistory {
     primaryCancerDiagnosis?: string;
     // Date is a string to allow flexibility for social worker.
-    // This particulate date is never used for any computations.
+    // This particular date is never used for any computations.
     dateOfCancerDiagnosis?: string;
     currentTreatmentRegimen?: CancerTreatmentRegimenFlags;
     currentTreatmentRegimenOther?: string;
@@ -223,7 +223,6 @@ export interface ILifeAreaContent {
 }
 
 export interface ILifeAreaValue {
-    id: string;
     name: string;
     dateCreated: Date;
     dateEdited: Date;
@@ -232,12 +231,9 @@ export interface ILifeAreaValue {
 }
 
 export interface ILifeAreaValueActivity {
-    id: string;
     name: string;
-    valueId: string;
     dateCreated: Date;
     dateEdited: Date;
-    lifeareaId: string;
     enjoyment?: number;
     importance?: number;
 }
@@ -324,15 +320,21 @@ export interface IResourceItem {
     filename: string;
 }
 
-// Removed for merge on 2/5
-//
-// export interface IStoredDocument {
-//     _id: string;
-//     _type: string;
-//     _set_id?: string;
-//     _rev: number;
-// }
-
 export const isSession = (session: ISession | ICaseReview): session is ISession => {
     return (session as ISession)?.sessionId !== undefined;
 };
+
+//
+// James 2/12: These are temporary so the patient app will compile.
+//             Jina should remove when she finishes type edits in the patient app.
+//
+
+export interface ILifeAreaValue {
+    id: string;
+}
+
+export interface ILifeAreaValueActivity {
+    id: string;
+    valueId: string;
+    lifeareaId: string;
+}

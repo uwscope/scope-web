@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { IPatientListResponse } from 'shared/serviceTypes';
 import { handleDates } from 'shared/time';
 import {
     IAssessment,
@@ -6,11 +7,11 @@ import {
     ICaseReview,
     IClinicalHistory,
     IPatient,
-    IPatientList,
     IPatientProfile,
     ISafetyPlan,
     ISession,
     IValuesInventory,
+    KeyedMap,
 } from 'shared/types';
 
 // TODO: https://github.com/axios/axios#interceptors
@@ -42,6 +43,24 @@ export interface IRegistryService {
 class RegistryService implements IRegistryService {
     private readonly axiosInstance: AxiosInstance;
 
+    private revIds: KeyedMap<string> = {};
+
+    // // Singletons
+    // profile
+    // clinicalHistory
+    // valuesInventory
+    // safetyPlan
+
+    // // Arrays
+    // sessions
+    // caseReviews
+    // assessments
+    // scheduledAssessments
+    // assessmentLogs
+    // activities
+    // scheduledActivities
+    // activityLogs
+
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
@@ -49,14 +68,45 @@ class RegistryService implements IRegistryService {
             headers: { 'X-Custom-Header': 'foobar' },
         });
 
-        this.axiosInstance.interceptors.response.use((response) => {
+        const handleDocuments = (body: any) => {
+            if (body === null || body === undefined || typeof body !== 'object') {
+                return body;
+            }
+
+            if (!!body._id && !!body._rev) {
+                this.revIds[body._id] = body._rev;
+            }
+
+            for (const key of Object.keys(body)) {
+                const value = body[key];
+                if (typeof value === 'object') {
+                    handleDocuments(value);
+                }
+            }
+        };
+
+        const handleResponse = (response: AxiosResponse) => {
             handleDates(response.data);
+            handleDocuments(response.data);
+
             return response;
-        });
+        };
+
+        const handleRequest = (request: AxiosRequestConfig) => {
+            if (request.method?.toLowerCase() === 'put' && request.data && request.data._id) {
+                request.data._rev = this.revIds[request.data._id];
+                delete request.data._id;
+            }
+            return request;
+        };
+
+        this.axiosInstance.interceptors.response.use(handleResponse);
+
+        this.axiosInstance.interceptors.request.use(handleRequest);
     }
 
     public async getPatients(): Promise<IPatient[]> {
-        const response = await this.axiosInstance.get<IPatientList>('/patients');
+        const response = await this.axiosInstance.get<IPatientListResponse>('/patients');
         return response.data && response.data.patients;
     }
 
@@ -77,17 +127,8 @@ class RegistryService implements IRegistryService {
     }
 
     public async updatePatientProfile(recordId: string, patientProfile: IPatientProfile): Promise<IPatient> {
-        // // TODO: clean this out into some kind of helper
-        // const patientProfileStored = patientProfile as IStoredDocument;
-        // if(!!patientProfileStored._id) {
-        //     delete patientProfileStored._id;
-        // }
-
         try {
-            const response = await this.axiosInstance.put<IPatient>(
-                `/patient/${recordId}/profile`,
-                patientProfile,
-            );
+            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}/profile`, patientProfile);
             return response.data;
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
