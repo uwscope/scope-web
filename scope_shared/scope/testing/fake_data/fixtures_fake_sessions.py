@@ -1,9 +1,7 @@
+import pytest
 import random
-from pprint import pprint
 from typing import Callable, List
 
-import faker
-import pytest
 import scope.database.format_utils
 import scope.schema
 import scope.testing.fake_data.fake_utils as fake_utils
@@ -12,12 +10,12 @@ import scope.testing.fake_data.fake_utils as fake_utils
 def fake_sessions_factory(
     *,
     fake_session_factory: Callable[[], dict],
-) -> Callable[[], List]:
+) -> Callable[[], List[dict]]:
     """
     Obtain a factory that will generate a list of fake session documents.
     """
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
 
         fake_sessions = [fake_session_factory() for _ in range(random.randint(1, 5))]
 
@@ -29,7 +27,7 @@ def fake_sessions_factory(
 @pytest.fixture(name="data_fake_sessions_factory")
 def fixture_data_fake_sessions_factory(
     data_fake_session_factory: Callable[[], dict],
-) -> Callable[[], dict]:
+) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_session_factory.
     """
@@ -38,7 +36,7 @@ def fixture_data_fake_sessions_factory(
         fake_session_factory=data_fake_session_factory,
     )
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
         fake_sessions = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
