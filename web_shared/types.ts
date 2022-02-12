@@ -176,7 +176,7 @@ export interface IPatientProfile {
 export interface IClinicalHistory {
     primaryCancerDiagnosis?: string;
     // Date is a string to allow flexibility for social worker.
-    // This particulate date is never used for any computations.
+    // This particular date is never used for any computations.
     dateOfCancerDiagnosis?: string;
     currentTreatmentRegimen?: CancerTreatmentRegimenFlags;
     currentTreatmentRegimenOther?: string;
@@ -319,15 +319,6 @@ export interface IResourceItem {
     name: string;
     filename: string;
 }
-
-// Removed for merge on 2/5
-//
-// export interface IStoredDocument {
-//     _id: string;
-//     _type: string;
-//     _set_id?: string;
-//     _rev: number;
-// }
 
 export const isSession = (session: ISession | ICaseReview): session is ISession => {
     return (session as ISession)?.sessionId !== undefined;
