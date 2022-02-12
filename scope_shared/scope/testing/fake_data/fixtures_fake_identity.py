@@ -1,10 +1,7 @@
 """
-Contacts are not stored documents.
-
-They are generated and stored as elements of other documents.
+This will need to be overhauled as identity is defined.
 """
 
-import random
 from typing import Callable
 
 import faker
