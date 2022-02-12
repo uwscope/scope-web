@@ -45,7 +45,6 @@ def post_case_reviews(patient_id):
     """
     Creates a new case review in the patient record and returns the case review result.
     """
-
     # TODO: Require authentication
 
     context = request_context()
@@ -65,22 +64,14 @@ def post_case_reviews(patient_id):
         context.abort_post_with_rev()
 
     # Store the document
-    try:
-        result = scope.database.patient.case_reviews.post_case_review(
-            collection=patient_collection,
-            case_review=document,
-        )
-    except pymongo.errors.OperationFailure:  # NOTE: Should we use PyMongoError base class instead?
-        # Indicates a database operation failure.
-        context.abort_pymongo_operation_failure(
-            document={
-                "casereview": document,
-            }
-        )
-    else:
-        return {
-            "casereview": result.document,
-        }
+    result = scope.database.patient.case_reviews.post_case_review(
+        collection=patient_collection,
+        case_review=document,
+    )
+
+    return {
+        "casereview": result.document,
+    }
 
 
 @case_reviews_blueprint.route(
@@ -113,7 +104,6 @@ def get_case_review(patient_id, review_id):
 @validate_schema(case_review_schema)
 @flask_json.as_json
 def put_case_review(patient_id, review_id):
-
     # TODO: Require authentication
 
     context = request_context()

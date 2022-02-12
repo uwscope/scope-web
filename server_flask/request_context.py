@@ -82,16 +82,6 @@ class RequestContext:
             http.HTTPStatus.CONFLICT,
         )
 
-    @staticmethod
-    def abort_pymongo_operation_failure(*, document: dict) -> NoReturn:
-        RequestContext._abort(
-            document
-            | {
-                "message": "Pymongo operation failure.",
-            },
-            http.HTTPStatus.INTERNAL_SERVER_ERROR,  # TODO: Is the correct code for this?
-        )
-
     def patient_collection(self, *, patient_id: str) -> pymongo.collection.Collection:
         # Use patient ID to confirm validity and obtain collection
         # TODO: As part of authentication, determine if we can cache this.
