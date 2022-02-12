@@ -137,6 +137,8 @@ def test_patient_set_get(
         documents_retrieved, key=lambda d: d[config.document_id]
     )
 
+    assert documents == documents_retrieved
+
 
 @pytest.mark.parametrize(
     ["config"],
@@ -171,6 +173,35 @@ def test_patient_set_get_invalid(
         ),
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    # TODO: Anant extend this test based on analogous cases in singleton
+    #
+    # # Retrieve a valid patient but an invalid document
+    # query = query.format(
+    #     patient_id=temp_patient.patient_id,
+    #     query_type="invalid",
+    # )
+    # response = session.get(
+    #     url=urljoin(
+    #         flask_client_config.baseurl,
+    #         query,
+    #     ),
+    # )
+    # assert response.status_code == http.HTTPStatus.NOT_FOUND
+    #
+    # # Retrieve a valid patient and a valid document,
+    # # but fail because we have not put that document
+    # query = query.format(
+    #     patient_id=temp_patient.patient_id,
+    #     query_type=config.flask_query_type,
+    # )
+    # response = session.get(
+    #     url=urljoin(
+    #         flask_client_config.baseurl,
+    #         query,
+    #     ),
+    # )
+    # assert response.status_code == http.HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.parametrize(
@@ -283,7 +314,6 @@ def test_patient_set_post_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes an "_id"
-
     document["_id"] = "invalid"
     response = session.post(
         url=urljoin(
@@ -311,7 +341,9 @@ def test_patient_set_put_invalid(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test that put is not allowd on set.
+    Test that put is not allowed on set.
+
+    TODO Anant: James left this in place, not sure what we're doing here pending semantics
     """
 
     temp_patient = database_temp_patient_factory()
@@ -328,7 +360,7 @@ def test_patient_set_put_invalid(
             query,
         ),
     )
-    assert response.status_code == 405
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
 
 
 @pytest.mark.parametrize(
@@ -347,7 +379,7 @@ def test_patient_set_element_get(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test retrieving a set.
+    Test retrieving a set element.
     """
 
     temp_patient = database_temp_patient_factory()
@@ -356,9 +388,8 @@ def test_patient_set_element_get(
         config.document_factory_fixture_set_element
     )
 
-    # Store the documents
+    # Store the document
     document = document_factory()
-
     result = config.database_post_function(
         **{
             "collection": temp_patient.collection,
@@ -509,7 +540,6 @@ def test_patient_set_element_put_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes an "_id"
-
     document["_id"] = "invalid"
     response = session.put(
         url=urljoin(
@@ -519,6 +549,10 @@ def test_patient_set_element_put_invalid(
         json=document,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # TODO Anant: Is this where we should do something about a set
+    #             element being put to a location that doesn't match its internal ID?
+
 
 
 @pytest.mark.parametrize(
