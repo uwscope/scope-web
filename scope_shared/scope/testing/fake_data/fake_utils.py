@@ -16,8 +16,9 @@ def fake_unique_id() -> str:
     - Is guaranteed to be URL safe.
     - Is expected to be unique.
 
-    # NOTE: Same as _generate_patient_id method in patients model file.
-
+    TODO: Same as _generate_patient_id method in patients model file.
+          We may want a general purpose function for this.
+          In which case we would then also remove this.
     """
 
     # Obtain uniqueness
