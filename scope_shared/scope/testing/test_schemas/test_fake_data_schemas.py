@@ -38,9 +38,35 @@ faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
-        name="identity",
-        schema=scope.schema.identity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_identity.fake_identity_factory(
+        # TODO: what schema applies here?
+        XFAIL_TEST_HAS_TODO=True,
+        name="activity",
+        schema=scope.schema.activity_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="case-review",
+        schema=scope.schema.case_review_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="case-reviews",
+        schema=scope.schema.case_reviews_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
+            fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
+                faker_factory=faker_factory,
+            ),
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="clinical-history",
+        schema=scope.schema.clinical_history_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
             faker_factory=faker_factory,
         ),
         expected_valid=True,
@@ -54,9 +80,9 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        name="referral-status",
-        schema=scope.schema.referral_status_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
+        name="identity",
+        schema=scope.schema.identity_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_identity.fake_identity_factory(
             faker_factory=faker_factory,
         ),
         expected_valid=True,
@@ -76,19 +102,10 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        name="clinical-history",
-        schema=scope.schema.clinical_history_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
+        name="referral-status",
+        schema=scope.schema.referral_status_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
             faker_factory=faker_factory,
-        ),
-        expected_valid=True,
-    ),
-    ConfigTestFakeDataSchema(
-        name="values-inventory",
-        schema=scope.schema.values_inventory_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
-            faker_factory=faker_factory,
-            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
         ),
         expected_valid=True,
     ),
@@ -128,29 +145,12 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        name="case-review",
-        schema=scope.schema.case_review_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
+        name="values-inventory",
+        schema=scope.schema.values_inventory_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
+            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
         ),
-        expected_valid=True,
-    ),
-    ConfigTestFakeDataSchema(
-        name="case-reviews",
-        schema=scope.schema.case_reviews_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
-            fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
-                faker_factory=faker_factory,
-            ),
-        ),
-        expected_valid=True,
-    ),
-    ConfigTestFakeDataSchema(
-        # TODO: what schema applies here?
-        XFAIL_TEST_HAS_TODO=True,
-        name="activity",
-        schema=scope.schema.activity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
         expected_valid=True,
     ),
 ]
