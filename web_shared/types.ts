@@ -323,3 +323,18 @@ export interface IResourceItem {
 export const isSession = (session: ISession | ICaseReview): session is ISession => {
     return (session as ISession)?.sessionId !== undefined;
 };
+
+//
+// James 2/12: These are temporary so the patient app will compile.
+//             Jina should remove when she finishes type edits in the patient app.
+//
+
+export interface ILifeAreaValue {
+    id: string;
+}
+
+export interface ILifeAreaValueActivity {
+    id: string;
+    valueId: string;
+    lifeareaId: string;
+}
