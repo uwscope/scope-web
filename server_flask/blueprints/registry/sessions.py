@@ -7,9 +7,6 @@ from request_context import request_context
 from scope.schema import session_schema
 from utils import validate_schema
 
-# NOTE: Rename this file to `sessions.py`. VSCode isn't showing function definitions and autocomplete for Anant if file name is `sessions.py``
-
-
 sessions_blueprint = flask.Blueprint(
     "sessions_blueprint",
     __name__,
@@ -68,22 +65,14 @@ def post_session(patient_id):
         context.abort_post_with_rev()
 
     # Store the document
-    try:
-        result = scope.database.patient.sessions.post_session(
-            collection=patient_collection,
-            session=document,
-        )
-    except pymongo.errors.OperationFailure:  # NOTE: Should we use PyMongoError base class instead?
-        # Indicates a database operation failure.
-        context.abort_pymongo_operation_failure(
-            document={
-                "session": document,
-            }
-        )
-    else:
-        return {
-            "session": result.document,
-        }
+    result = scope.database.patient.sessions.post_session(
+        collection=patient_collection,
+        session=document,
+    )
+
+    return {
+        "session": result.document,
+    }
 
 
 @sessions_blueprint.route(
