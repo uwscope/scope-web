@@ -31,13 +31,15 @@ def fixture_database_temp_patient_factory(
 
     # Actual factory for obtaining a client for a temporary Collection.
     def factory() -> DatabaseTempPatient:
-        temp_patient_document_create = scope.database.patients.create_patient(database=database_client)
+        temp_patient_document_create = scope.database.patients.create_patient(
+            database=database_client
+        )
         temp_patient = DatabaseTempPatient(
             patient_id=temp_patient_document_create["_set_id"],
             patient_document=temp_patient_document_create,
             collection=database_client.get_collection(
                 name=temp_patient_document_create["collection"]
-            )
+            ),
         )
 
         temp_patients.append(temp_patient)

@@ -7,6 +7,7 @@ shortLorem = TextLorem(srange=(4, 8), prange=(1, 3))
 
 # TODO: still unclear how to handle references
 
+
 def data_fake_activity_factory() -> dict:
     fake_activity = {
         "_type": "activity",

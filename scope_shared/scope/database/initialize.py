@@ -87,5 +87,5 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
         scope.database.collection_utils.put_singleton(
             collection=patients_collection,
             document_type="sentinel",
-            document={}
+            document={},
         )
