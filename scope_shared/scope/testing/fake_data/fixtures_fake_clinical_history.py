@@ -81,7 +81,7 @@ def fixture_data_fake_clinical_history_factory(
     def factory() -> dict:
         fake_clinical_history = unvalidated_factory()
 
-        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+        fake_utils.xfail_for_invalid(
             schema=scope.schema.clinical_history_schema,
             document=fake_clinical_history,
         )

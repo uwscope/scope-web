@@ -3,7 +3,8 @@
 	"identity": {
 		"_type": "identity",
 		"_rev": 1,
-		"name": "patient name?"
+		"name": "Harry Potter",
+		"identityId": "Lily Potter's Son"
 	},
 	"patientProfile": {
 		"_type": "patientProfile",

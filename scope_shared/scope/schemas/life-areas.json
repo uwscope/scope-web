@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/life-areas",
+	"title": "ILifeAreaContent[]",
+	"$comment": "Should $id be life-area-contents?",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/life-area",
+		"$comment": "Should $ref be life-area-content?"
+	},
+	"additionalProperties": false,
+	"required": []
+}

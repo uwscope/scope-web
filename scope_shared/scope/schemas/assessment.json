@@ -6,10 +6,14 @@
 	"type": "object",
 	"properties": {
 		"_assessment_id": {
-			"_type": "string"
+			"type": "string"
 		},
-		"_type": { "const": "assessment" },
-		"_rev": { "_type": "number" },
+		"_type": {
+			"const": "assessment"
+		},
+		"_rev": {
+			"type": "number"
+		},
 		"assessmentName": {
 			"type": "string"
 		},

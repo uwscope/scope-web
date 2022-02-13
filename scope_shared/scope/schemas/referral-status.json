@@ -10,6 +10,9 @@
 		},
 		"referralStatus": {
 			"$ref": "/schemas/enums#/properties/referralStatus"
+		},
+		"referralOther": {
+			"type": "string"
 		}
 	},
 	"additionalProperties": false,

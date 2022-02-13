@@ -1,5 +1,4 @@
 import random
-
 from typing import Callable
 
 import faker
@@ -97,7 +96,7 @@ def fixture_data_fake_patient_profile_factory(
     def factory() -> dict:
         fake_patient_profile = unvalidated_factory()
 
-        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+        fake_utils.xfail_for_invalid(
             schema=scope.schema.patient_profile_schema,
             document=fake_patient_profile,
         )

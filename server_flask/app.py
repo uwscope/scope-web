@@ -6,17 +6,17 @@ from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 
 import blueprints.app.config
+import blueprints.registry.case_reviews
 import blueprints.registry.clinical_history
 import blueprints.registry.patient_profile
 import blueprints.registry.patients
 import blueprints.registry.safety_plan
+import blueprints.registry.sessions
 import blueprints.registry.values_inventory
 import database
 
 # Import patient & registry blueprints.
 from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
-from blueprints.registry.case_reviews import registry_case_reviews_blueprint
-from blueprints.registry.sessions import registry_sessions_blueprint
 
 
 def create_app():
@@ -85,15 +85,15 @@ def create_app():
         blueprints.registry.values_inventory.values_inventory_blueprint,
         url_prefix="/patient/",
     )
-    # app.register_blueprint(
-    #     registry_safety_plan_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/safety"
-    # app.register_blueprint(
-    #     registry_sessions_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/sessions"
-    # app.register_blueprint(
-    #     registry_case_reviews_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/casereviews"
+
+    app.register_blueprint(
+        blueprints.registry.sessions.sessions_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.case_reviews.case_reviews_blueprint,
+        url_prefix="/patient/",
+    )
     # app.register_blueprint(
     #     registry_assessment_logs_blueprint
     # )  # url_prefix="/patients/<patient_collection>/assessmentlogs"

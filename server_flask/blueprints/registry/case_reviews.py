@@ -1,115 +1,139 @@
-import http
-from functools import wraps
-
+import flask
+import flask_json
+import pymongo.errors
 import scope.database
 import scope.database.patient.case_reviews
-from flask import Blueprint, abort, current_app, jsonify, request
-from flask_json import as_json
 from request_context import request_context
 from scope.schema import case_review_schema
 from utils import validate_schema
 
-registry_case_reviews_blueprint = Blueprint(
-    "registry_case_reviews_blueprint", __name__, url_prefix="/patients"
+case_reviews_blueprint = flask.Blueprint(
+    "case_reviews_blueprint",
+    __name__,
 )
 
 
-@registry_case_reviews_blueprint.route(
-    "/<string:patient_collection>/casereviews", methods=["GET"]
+@case_reviews_blueprint.route(
+    "/<string:patient_id>/casereviews",
+    methods=["GET"],
 )
-@as_json
-def get_case_reviews(patient_collection):
+@flask_json.as_json
+def get_case_reviews(patient_id):
+    # TODO: Require authentication
+
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.case_reviews.get_case_reviews(
-        database=context.database, collection_name=patient_collection
+    documents = scope.database.patient.case_reviews.get_case_reviews(
+        collection=patient_collection,
     )
+    if documents is None:
+        context.abort_document_not_found()
 
-    if result:
-        return result, http.HTTPStatus.OK
-    else:
-        abort(http.HTTPStatus.NOT_FOUND)
+    return {
+        "casereviews": documents,
+    }
 
 
-@registry_case_reviews_blueprint.route(
-    "/<string:patient_collection>/casereviews", methods=["POST"]
+@case_reviews_blueprint.route(
+    "/<string:patient_id>/casereviews",
+    methods=["POST"],
 )
 @validate_schema(case_review_schema)
-@as_json
-def create_case_review(patient_collection):
+@flask_json.as_json
+def post_case_reviews(patient_id):
     """
-    Adds a new case review in the patient record and returns the case review.
+    Creates a new case review in the patient record and returns the case review result.
     """
-
-    case_review = request.json
-
-    if "_id" in case_review:
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
+    # TODO: Require authentication
 
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.case_reviews.create_case_review(
-        database=context.database,
-        collection_name=patient_collection,
-        case_review=case_review,
+    # Obtain the document being put
+    document = flask.request.json
+
+    # Previously stored documents contain an "_id",
+    # documents to be post must not already contain an "_id"
+    if "_id" in document:
+        context.abort_post_with_id()
+
+    # Previously stored documents contain an "_rev",
+    # documents to be post must not already contain a "_rev"
+    if "_rev" in document:
+        context.abort_post_with_rev()
+
+    # Store the document
+    result = scope.database.patient.case_reviews.post_case_review(
+        collection=patient_collection,
+        case_review=document,
     )
 
-    if result is not None:
-        case_review.update({"_id": str(result.inserted_id)})
-        return case_review, http.HTTPStatus.OK
-    else:
-        # NOTE: Send back the latest version of the document. Hold off on that.
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
+    return {
+        "casereview": result.document,
+    }
 
 
-@registry_case_reviews_blueprint.route(
-    "/<string:patient_collection>/casereviews/<string:review_id>", methods=["GET"]
+@case_reviews_blueprint.route(
+    "/<string:patient_id>/casereview/<string:review_id>",
+    methods=["GET"],
 )
-@as_json
-def get_case_review(patient_collection, review_id):
+@flask_json.as_json
+def get_case_review(patient_id, review_id):
+    # TODO: Require authentication
+
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.case_reviews.get_case_review(
-        database=context.database,
-        collection_name=patient_collection,
-        review_id=review_id,
+    document = scope.database.patient.case_reviews.get_case_review(
+        collection=patient_collection,
+        set_id=review_id,
     )
+    if document is None:
+        context.abort_document_not_found()
 
-    if result:
-        return result, http.HTTPStatus.OK
-    else:
-        abort(http.HTTPStatus.NOT_FOUND)
+    return {
+        "casereview": document,
+    }
 
 
-@registry_case_reviews_blueprint.route(
-    "/<string:patient_collection>/casereviews/<string:review_id>", methods=["PUT"]
+@case_reviews_blueprint.route(
+    "/<string:patient_id>/casereview/<string:review_id>",
+    methods=["PUT"],
 )
 @validate_schema(case_review_schema)
-@as_json
-def update_case_review(patient_collection, review_id):
-
-    case_review = request.json
-
-    if "_id" in case_review:
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
-
-    # Update _rev
-    case_review["_rev"] += 1
-
-    # NOTE: Assume client is not sending review_id as part of json.
-    case_review.update({"_review_id": review_id})
+@flask_json.as_json
+def put_case_review(patient_id, review_id):
+    # TODO: Require authentication
 
     context = request_context()
+    patient_collection = context.patient_collection(patient_id=patient_id)
 
-    result = scope.database.patient.case_reviews.update_case_review(
-        database=context.database,
-        collection_name=patient_collection,
-        case_review=case_review,
-    )
+    # Obtain the document being put
+    document = flask.request.json
 
-    if result is not None:
-        case_review.update({"_id": str(result.inserted_id)})
-        return case_review, http.HTTPStatus.OK
+    # Previously stored documents contain an "_id",
+    # documents to be put must not already contain an "_id"
+    if "_id" in document:
+        context.abort_put_with_id()
+
+    # Store the document
+    try:
+        result = scope.database.patient.case_reviews.put_case_review(
+            collection=patient_collection,
+            case_review=document,
+        )
+    except pymongo.errors.DuplicateKeyError:
+        # Indicates a revision race condition, return error with current revision
+        document_conflict = scope.database.patient.case_reviews.get_case_review(
+            collection=patient_collection, set_id=review_id
+        )
+        context.abort_revision_conflict(
+            document={
+                "casereview": document_conflict,
+            }
+        )
     else:
-        # NOTE: Send back the latest version of the document. Hold off on that.
-        abort(http.HTTPStatus.UNPROCESSABLE_ENTITY)  # 422
+        return {
+            "casereview": result.document,
+        }

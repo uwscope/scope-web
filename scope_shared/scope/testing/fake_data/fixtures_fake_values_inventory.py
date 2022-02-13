@@ -3,6 +3,7 @@ from typing import Callable, List
 
 import faker
 import pytest
+import scope.database.document_utils as document_utils
 import scope.database.format_utils
 import scope.database.patient.patient_profile
 import scope.schema
@@ -115,7 +116,7 @@ def fake_values_inventory_factory(
             optional_keys=OPTIONAL_KEYS_VALUES_INVENTORY,
         )
 
-        return fake_values_inventory
+        return document_utils.normalize_document(document=fake_values_inventory)
 
     return factory
 

@@ -5,13 +5,20 @@ from typing import Callable, Union
 import faker
 import jschon
 import pytest
+import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_case_review
+import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
+import scope.testing.fake_data.fixtures_fake_identity
 import scope.testing.fake_data.fixtures_fake_life_areas
 import scope.testing.fake_data.fixtures_fake_patient_profile
+import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
+import scope.testing.fake_data.fixtures_fake_session
+import scope.testing.fake_data.fixtures_fake_sessions
 import scope.testing.fake_data.fixtures_fake_values_inventory
 
 
@@ -32,11 +39,59 @@ faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
+        # TODO: what schema applies here?
+        XFAIL_TEST_HAS_TODO=True,
+        name="activity",
+        schema=scope.schema.activity_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="case-review",
+        schema=scope.schema.case_review_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="case-reviews",
+        schema=scope.schema.case_reviews_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
+            fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
+                faker_factory=faker_factory,
+            ),
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="clinical-history",
+        schema=scope.schema.clinical_history_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
         name="contact",
         schema=scope.schema.contact_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
             faker_factory=faker_factory,
         ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="identity",
+        schema=scope.schema.identity_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_identity.fake_identity_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_valid=True,
+    ),
+    ConfigTestFakeDataSchema(
+        name="life-areas",
+        schema=scope.schema.life_areas_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
@@ -48,9 +103,9 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        name="clinical-history",
-        schema=scope.schema.clinical_history_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
+        name="referral-status",
+        schema=scope.schema.referral_status_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
             faker_factory=faker_factory,
         ),
         expected_valid=True,
@@ -67,22 +122,27 @@ TEST_CONFIGS = [
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # TODO: what schema applies here?
-        XFAIL_TEST_HAS_TODO=True,
-        name="activity",
-        schema=scope.schema.activity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
+        name="session",
+        schema=scope.schema.session_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_session.fake_session_factory(
+            faker_factory=faker_factory,
+            fake_referral_status_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
+                faker_factory=faker_factory,
+            ),
+        ),
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
-        # TODO: There currently is no schema defined for life areas. I think:
-        #       - life-area.json should describe one of the documents found in server_flask/app_config/life_areas.
-        #       - life-areas.json should describe a list of such documents.
-        XFAIL_TEST_HAS_TODO=True,
-        name="life-areas",
-        # TODO: This should then be life_areas_schema
-        schema=scope.schema.values_inventory_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
+        name="sessions",
+        schema=scope.schema.sessions_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_sessions.fake_sessions_factory(
+            fake_session_factory=scope.testing.fake_data.fixtures_fake_session.fake_session_factory(
+                faker_factory=faker_factory,
+                fake_referral_status_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
+                    faker_factory=faker_factory,
+                ),
+            ),
+        ),
         expected_valid=True,
     ),
     ConfigTestFakeDataSchema(
@@ -111,8 +171,13 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
 
     for count in range(TEST_ITERATIONS):
         data = config.data_factory()
-        result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
+        # Test that data is normalized
+        is_normalized = data == document_utils.normalize_value(value=data)
+        assert is_normalized
+
+        # Test the schema
+        result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
         if result["valid"] != config.expected_valid:
             if not result["valid"]:
                 pprint(data)
