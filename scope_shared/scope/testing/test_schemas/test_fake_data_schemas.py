@@ -5,6 +5,7 @@ from typing import Callable, Union
 import faker
 import jschon
 import pytest
+import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_case_review
@@ -170,8 +171,13 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
 
     for count in range(TEST_ITERATIONS):
         data = config.data_factory()
-        result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
 
+        # Test that data is normalized
+        is_normalized = (data == document_utils.normalize_value(value=data))
+        assert is_normalized
+
+        # Test the schema
+        result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
         if result["valid"] != config.expected_valid:
             if not result["valid"]:
                 pprint(data)

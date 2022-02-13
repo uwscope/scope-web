@@ -3,7 +3,8 @@ from typing import Callable
 
 import faker
 import pytest
-import scope.database.format_utils
+import scope.database.document_utils as document_utils
+import scope.database.format_utils as format_utils
 import scope.database.patient.sessions
 import scope.schema
 import scope.testing.fake_data.enums
@@ -23,7 +24,7 @@ def fake_session_factory(
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
             "sessionId": fake_utils.fake_unique_id(),
-            "date": scope.database.format_utils.format_date(
+            "date": format_utils.format_date(
                 faker_factory.date_object()
             ),
             "sessionType": fake_utils.fake_enum_value(
@@ -46,7 +47,7 @@ def fake_session_factory(
             "sessionNote": faker_factory.text(),
         }
 
-        return fake_session
+        return document_utils.normalize_document(document=fake_session)
 
     return factory
 

@@ -3,6 +3,7 @@ from typing import Callable, List
 
 import faker
 import pytest
+import scope.database.document_utils as document_utils
 import scope.database.format_utils
 import scope.database.patient.patient_profile
 import scope.schema
@@ -73,7 +74,7 @@ def _fake_value(
                 value_id=value_id,
                 life_area_id=fake_life_area["id"],
             )
-            for count in range(1, 5)
+            for _ in range(1, 5)
         ],
     }
 
@@ -102,7 +103,7 @@ def fake_values_inventory_factory(
                     fake_life_area=fake_life_area,
                 )
                 for fake_life_area in fake_life_areas
-                for count in range(random.randint(1, 5))
+                for _ in range(random.randint(1, 5))
             ],
         }
 
@@ -112,7 +113,7 @@ def fake_values_inventory_factory(
             optional_keys=OPTIONAL_KEYS,
         )
 
-        return fake_values_inventory
+        return document_utils.normalize_document(document=fake_values_inventory)
 
     return factory
 

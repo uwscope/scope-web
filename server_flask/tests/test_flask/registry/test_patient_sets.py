@@ -7,7 +7,8 @@ from urllib.parse import urljoin
 import pytest
 import requests
 import scope.config
-import scope.database.collection_utils
+import scope.database.collection_utils as collection_utils
+import scope.database.document_utils as document_utils
 import scope.database.patient.case_reviews
 import scope.database.patient.sessions
 import scope.testing.fixtures_database_temp_patient
@@ -23,8 +24,8 @@ class ConfigTestPatientSet:
     document_factory_fixture_set_element: str
     database_get_set_function: Callable[[...], List[dict]]
     database_get_function: Callable[[...], dict]
-    database_post_function: Callable[[...], scope.database.collection_utils.PutResult]
-    database_put_function: Callable[[...], scope.database.collection_utils.PutResult]
+    database_post_function: Callable[[...], collection_utils.PutResult]
+    database_put_function: Callable[[...], collection_utils.PutResult]
     database_document_parameter_name: str
     flask_query_set_type: str
     flask_query_set_element_type: str
@@ -129,13 +130,7 @@ def test_patient_set_get(
         del document_retrieved["_rev"]
         assert "_set_id" in document_retrieved
         del document_retrieved["_set_id"]
-
-    assert len(documents) == len(documents_retrieved)
-
-    # NOTE: @James: Is there a need to update `normalize_document` in collection_utils to avoid sorting.
-    assert sorted(documents, key=lambda d: d[config.document_id]) == sorted(
-        documents_retrieved, key=lambda d: d[config.document_id]
-    )
+    documents_retrieved = document_utils.normalize_documents(documents=documents_retrieved)
 
     assert documents == documents_retrieved
 

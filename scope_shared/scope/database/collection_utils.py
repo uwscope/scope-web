@@ -1,7 +1,8 @@
-import copy
 from dataclasses import dataclass
 import pymongo.collection
 from typing import List, Optional
+
+import scope.database.document_utils as document_utils
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
@@ -9,38 +10,6 @@ PRIMARY_COLLECTION_INDEX = [
     ("_rev", pymongo.DESCENDING),
 ]
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
-
-
-def normalize_document(
-    *,
-    document: dict,
-) -> dict:
-    """
-    Obtain a new document in normalized format.
-    """
-
-    normalized_document = {}
-    keys_remaining = list(document.keys())
-
-    # Dictionaries preserve order, so ensure these are first
-    keys_prefix = ["_id", "_type", "_set_id", "_rev"]
-    for key_current in keys_prefix:
-        if key_current in keys_remaining:
-            value_current = document[key_current]
-
-            if key_current == "_id":
-                # Ensure _id can serialize
-                normalized_document[key_current] = str(value_current)
-            else:
-                normalized_document[key_current] = copy.deepcopy(value_current)
-
-            keys_remaining.remove(key_current)
-
-    # And then the remaining keys
-    for key_current in keys_remaining:
-        normalized_document[key_current] = copy.deepcopy(document[key_current])
-
-    return normalized_document
 
 
 def delete_set_element(
@@ -147,7 +116,7 @@ def get_set(
         result = list(pipeline_result)
 
     # Normalize the results
-    result = [normalize_document(document=result_current) for result_current in result]
+    result = [document_utils.normalize_document(document=result_current) for result_current in result]
 
     return result
 
@@ -195,7 +164,7 @@ def get_set_element(
         document = pipeline_result.next()
 
     # Normalize the document
-    document = normalize_document(document=document)
+    document = document_utils.normalize_document(document=document)
 
     return document
 
@@ -236,7 +205,7 @@ def get_singleton(
         result = pipeline_result.next()
 
     # Normalize the result
-    result = normalize_document(document=result)
+    result = document_utils.normalize_document(document=result)
 
     return result
 
@@ -264,7 +233,7 @@ def put_set_element(
     """
 
     # Work with a copy
-    document = copy.deepcopy(document)
+    document = document_utils.normalize_document(document=document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -295,9 +264,9 @@ def put_set_element(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
-    document = normalize_document(document=document)
+    document = document_utils.normalize_document(document=document)
     result = collection.insert_one(document=document)
-    document = normalize_document(document=document)
+    document = document_utils.normalize_document(document=document)
 
     return PutResult(
         inserted_count=1,
@@ -320,7 +289,7 @@ def put_singleton(
     """
 
     # Work with a copy
-    document = copy.deepcopy(document)
+    document = document_utils.normalize_document(document=document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -344,9 +313,9 @@ def put_singleton(
         document["_rev"] = 1
 
     # insert_one will modify the document to insert an "_id"
-    document = normalize_document(document=document)
+    document = document_utils.normalize_document(document=document)
     result = collection.insert_one(document=document)
-    document = normalize_document(document=document)
+    document = document_utils.normalize_document(document=document)
 
     return PutResult(
         inserted_count=1,

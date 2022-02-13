@@ -2,7 +2,7 @@ import pytest
 import random
 from typing import Callable, List
 
-import scope.database.format_utils
+import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -16,10 +16,9 @@ def fake_sessions_factory(
     """
 
     def factory() -> List[dict]:
-
         fake_sessions = [fake_session_factory() for _ in range(random.randint(1, 5))]
 
-        return fake_sessions
+        return document_utils.normalize_documents(documents=fake_sessions)
 
     return factory
 
