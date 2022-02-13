@@ -12,7 +12,7 @@ import { useStores } from 'src/stores/stores';
 
 export const WorksheetsHome: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const { resources } = rootStore.appConfig;
+    const { resources } = rootStore.appContentConfig;
     const navigate = useNavigate();
 
     const handleGoBack = action(() => {

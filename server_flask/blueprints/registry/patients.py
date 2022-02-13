@@ -1,50 +1,70 @@
 import copy
-import flask
-import flask_json
 import http
 import logging
-import pymongo.collection
 import time
 
 import fake
-from request_context import request_context
-import scope.database.patients
+import flask
+import flask_json
+import pymongo.collection
+import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
+import scope.database.patient.sessions
 import scope.database.patient.values_inventory
+import scope.database.patients
+from request_context import request_context
 
 FAKE_PATIENT_MAP = {}
 
 patients_blueprint = flask.Blueprint(
-    "patients_blueprint", __name__,
+    "patients_blueprint",
+    __name__,
 )
 
 
 def _frankenfake_document(
     *,
     fake_document: dict,
-    patient_collection: pymongo.collection.Collection
+    patient_collection: pymongo.collection.Collection,
 ) -> dict:
     result_document = copy.deepcopy(fake_document)
 
-    result_document["clinicalHistory"] = scope.database.patient.clinical_history.get_clinical_history(
+    result_document[
+        "clinicalHistory"
+    ] = scope.database.patient.clinical_history.get_clinical_history(
         collection=patient_collection
     )
-    result_document["profile"] = scope.database.patient.patient_profile.get_patient_profile(
+    result_document[
+        "profile"
+    ] = scope.database.patient.patient_profile.get_patient_profile(
         collection=patient_collection
     )
     result_document["safetyPlan"] = scope.database.patient.safety_plan.get_safety_plan(
         collection=patient_collection
     )
-    result_document["valuesInventory"] = scope.database.patient.values_inventory.get_values_inventory(
+    result_document[
+        "valuesInventory"
+    ] = scope.database.patient.values_inventory.get_values_inventory(
+        collection=patient_collection
+    )
+    result_document["sessions"] = scope.database.patient.sessions.get_sessions(
+        collection=patient_collection
+    )
+    result_document[
+        "caseReviews"
+    ] = scope.database.patient.case_reviews.get_case_reviews(
         collection=patient_collection
     )
 
     return result_document
 
 
-@patients_blueprint.route("/patients", methods=["GET"])
+@patients_blueprint.route(
+    "/patients",
+    methods=["GET"],
+)
 @flask_json.as_json
 def get_patients():
     context = request_context()
@@ -73,7 +93,9 @@ def get_patients():
     patient_documents = []
     for patient_current in patients:
         patient_id = patient_current["_set_id"]
-        patient_collection = context.database.get_collection(patient_current["collection"])
+        patient_collection = context.database.get_collection(
+            patient_current["collection"]
+        )
 
         patient_document_current = FAKE_PATIENT_MAP[patient_id]
         patient_document_current = _frankenfake_document(
@@ -87,22 +109,49 @@ def get_patients():
 
     time_call_end = time.perf_counter()
 
-    print("Time Call Patients: {}".format(time_call_patients - time_call_start), flush=True)
-    print("Time Start Patients: {}".format(time_start_patients - time_call_start), flush=True)
+    print(
+        "Time Call Patients: {}".format(time_call_patients - time_call_start),
+        flush=True,
+    )
+    print(
+        "Time Start Patients: {}".format(time_start_patients - time_call_start),
+        flush=True,
+    )
     for time_per_patient_current in time_per_patient:
-        print("Time Patient: {}".format(time_per_patient_current - time_call_start), flush=True)
+        print(
+            "Time Patient: {}".format(time_per_patient_current - time_call_start),
+            flush=True,
+        )
     print("Time Call End: {}".format(time_call_end - time_call_start), flush=True)
+
+    # TODO: We should require that a "patient"
+    #       always have a "profile" document that includes "name" and "mrn".
+    #
+    # For now, we explicitly filter on patients being "valid".
+    patient_documents_filtered = []
+    for patient_document_current in patient_documents:
+        filter_pass = (
+            ("identity" in patient_document_current)
+            and ("identityId" in patient_document_current["identity"])
+            and ("profile" in patient_document_current)
+            and ("name" in patient_document_current["profile"])
+            and ("mrn" in patient_document_current["profile"])
+        )
+        if filter_pass:
+            patient_documents_filtered.append(patient_document_current)
+
+    patient_documents = patient_documents_filtered
 
     # Transition code to establish a "sparse" representation
     patient_documents_sparse = [
         {
             "identity": {
                 "_type": "identity",
-                "identityId": patient_current["identity"]["identityId"],
-                "name": patient_current["profile"]["name"]
+                "identityId": patient_document_current["identity"]["identityId"],
+                "name": patient_document_current["profile"]["name"],
             },
         }
-        for patient_current in patient_documents
+        for patient_document_current in patient_documents
     ]
 
     return {

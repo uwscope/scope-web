@@ -2,12 +2,17 @@ from scope.testing.testing_check_fixtures import testing_check_fixtures
 from scope.testing.testing_config import TestingConfig
 
 PYTEST_PLUGINS = [
-    "scope.testing.fake_data.fixtures_fake_patient_profile",
-    "scope.testing.fake_data.fixtures_fake_contact",
-    "scope.testing.fake_data.fixtures_fake_safety_plan",
+    "scope.testing.fake_data.fixtures_fake_case_review",
+    "scope.testing.fake_data.fixtures_fake_case_reviews",
     "scope.testing.fake_data.fixtures_fake_clinical_history",
-    "scope.testing.fake_data.fixtures_fake_values_inventory",
+    "scope.testing.fake_data.fixtures_fake_contact",
     "scope.testing.fake_data.fixtures_fake_life_areas",
+    "scope.testing.fake_data.fixtures_fake_patient_profile",
+    "scope.testing.fake_data.fixtures_fake_referral_status",
+    "scope.testing.fake_data.fixtures_fake_safety_plan",
+    "scope.testing.fake_data.fixtures_fake_session",
+    "scope.testing.fake_data.fixtures_fake_sessions",
+    "scope.testing.fake_data.fixtures_fake_values_inventory",
     "scope.testing.fixtures_config",
     "scope.testing.fixtures_database",
     "scope.testing.fixtures_database_temp_collection",

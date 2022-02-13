@@ -1,18 +1,20 @@
 from dataclasses import dataclass
 from pathlib import Path
 import ruamel.yaml
+from typing import List
 from typing import Union
 
 
 @dataclass(frozen=True)
-class DatabaseClientConfig:
+class CognitoClientConfig:
     """
-    Configuration for a database.
+    Configuration for a AWS Cognito User Pool.
+
+    Excludes internal fields that a client should not access.
     """
 
-    name: str
-    user: str
-    password: str
+    poolid: str
+    clientid: str
 
     @staticmethod
     def load(config_path: Union[Path, str]):
@@ -22,15 +24,14 @@ class DatabaseClientConfig:
             yaml = ruamel.yaml.YAML(typ="safe", pure=True)
             config_dict = yaml.load(config_file)
 
-        return DatabaseConfig.parse(config_dict)
+        return CognitoClientConfig.parse(config_dict)
 
     @staticmethod
     def parse(config_dict: dict):
-        return DatabaseConfig(
-            name=config_dict["name"],
-            user=config_dict["user"],
-            password=config_dict["password"],
+        return CognitoClientConfig(
+            poolid=config_dict["poolid"],
+            clientid=config_dict["clientid"],
         )
 
 
-DatabaseConfig = DatabaseClientConfig
+CognitoConfig = CognitoClientConfig

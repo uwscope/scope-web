@@ -37,6 +37,7 @@ class PatientGender(Enum):
     NonBinary = "Non-binary/Non-conforming"
     Other = "Other"
 
+
 class PatientRace(Enum):
     Native = "American Indian or Alaska Native"
     Asian = "Asian or Asian American"
@@ -44,6 +45,7 @@ class PatientRace(Enum):
     Pacific = "Native Hawaiian or Other Pacific Islander"
     White = "White"
     Unknown = "Unknown"
+
 
 class PatientEthnicity(Enum):
     Hispanic = "Hispanic or Latino/Latina/Latinx"
@@ -160,6 +162,7 @@ class AssessmentFrequency(Enum):
     Weekly = "Once a week"
     Biweekly = "Every 2 weeks"
     Monthly = "Monthly"
+
 
 class DayOfWeek(Enum):
     Monday = "Monday"

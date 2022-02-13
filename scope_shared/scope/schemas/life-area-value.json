@@ -5,17 +5,14 @@
 	"description": "ILifeAreaValue Type",
 	"type": "object",
 	"properties": {
-		"id": {
-			"type": "string"
-		},
 		"name": {
 			"type": "string"
 		},
 		"dateCreated": {
-			"type": "string"
+			"$ref": "/schemas/datetime#/properties/date"
 		},
 		"dateEdited": {
-			"type": "string"
+			"$ref": "/schemas/datetime#/properties/date"
 		},
 		"lifeareaId": {
 			"type": "string"
@@ -28,5 +25,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["id", "name", "dateCreated", "dateEdited", "lifeareaId", "activities"]
+	"required": ["name", "dateCreated", "dateEdited", "lifeareaId", "activities"]
 }

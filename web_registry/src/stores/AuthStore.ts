@@ -5,7 +5,7 @@ import {
     CognitoUserSession,
 } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
-import { IUser } from 'shared/types';
+import { IAppAuthConfig, IUser } from 'shared/types';
 import { PromiseQuery } from 'src/services/promiseQuery';
 
 const poolData = {
@@ -35,6 +35,8 @@ export interface IAuthStore {
 }
 
 export class AuthStore implements IAuthStore {
+    public authConfig: IAppAuthConfig;
+
     public authState = AuthState.Initialized;
 
     public authUser?: CognitoUser;
@@ -46,7 +48,9 @@ export class AuthStore implements IAuthStore {
     // Promise queries
     private readonly authQuery: PromiseQuery<CognitoUserSession>;
 
-    constructor() {
+    constructor(authConfig: IAppAuthConfig) {
+        this.authConfig = authConfig;
+
         this.authQuery = new PromiseQuery<CognitoUserSession>(
             undefined,
             'authQuery'

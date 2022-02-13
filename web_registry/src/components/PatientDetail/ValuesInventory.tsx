@@ -11,7 +11,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
     const {
-        appConfig: { lifeAreas },
+        appContentConfig: { lifeAreas },
     } = useStores();
     const currentPatient = usePatient();
     const { valuesInventory } = currentPatient;
@@ -23,7 +23,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         ?.map((v) => {
             return v.activities.map((a) => {
                 return {
-                    id: a.id,
                     value: v.name,
                     lifearea: lifeareaMap[v.lifeareaId],
                     name: a.name,
@@ -88,8 +87,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {activities.map((activity) => (
-                                    <TableRow key={activity.id}>
+                                {activities.map((activity, idx) => (
+                                    <TableRow key={idx}>
                                         <TableCell component="th" scope="row">
                                             {format(activity.lastEdited, 'MM/dd/yyyy')}
                                         </TableCell>

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { IAppConfig } from 'shared/types';
-import { defaultAppConfig } from 'src/services/configs';
+import { defaultAppContentConfig } from 'src/services/configs';
 
 export interface IConfigService {
     getServerConfig(): Promise<IAppConfig>;
@@ -17,14 +17,14 @@ class ConfigService implements IConfigService {
     }
 
     public async getServerConfig(): Promise<IAppConfig> {
-        try {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 1000));
-            const response = await this.axiosInstance.get<IAppConfig>('app/config');
+        await new Promise((resolve) => setTimeout(() => resolve(null), 3000));
+        const response = await this.axiosInstance.get<IAppConfig>('app/config');
 
-            return response.data;
-        } catch (error) {
-            return defaultAppConfig;
-        }
+        // TODO: Jina needs to reconcile configs.ts with server_flask/app_config
+        //       Then we can remove this.
+        response.data.content = defaultAppContentConfig;
+
+        return response.data;
     }
 }
 

@@ -3,7 +3,8 @@
 	"identity": {
 		"_type": "identity",
 		"_rev": 1,
-		"name": "patient name?"
+		"name": "Harry Potter",
+		"identityId": "Lily Potter's Son"
 	},
 	"patientProfile": {
 		"_type": "patientProfile",
@@ -39,22 +40,18 @@
 		"_type": "valuesInventory",
 		"_rev": 1,
 		"assigned": true,
-		"assignedDate": "1991-08-19T00:00:00Z",
+		"assignedDate": "2012-12-12T00:00:00Z",
 		"values": [
 			{
-				"id": "id",
 				"name": "name",
-				"dateCreated": "",
-				"dateEdited": "",
+				"dateCreated": "2012-12-12T00:00:00Z",
+				"dateEdited": "2012-12-12T00:00:00Z",
 				"lifeareaId": "",
 				"activities": [
 					{
-						"id": "id",
 						"name": "name",
-						"valueId": "",
-						"dateCreated": "",
-						"dateEdited": "",
-						"lifeareaId": ""
+						"dateCreated": "2012-12-12T00:00:00Z",
+						"dateEdited": "2012-12-12T00:00:00Z"
 					}
 				]
 			}

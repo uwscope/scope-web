@@ -11,7 +11,6 @@ def test_documentdb_client_admin(
     """
     Test for documentdb_client_admin.
     """
-
     documentdb_client_admin = scope.testing.fixtures_documentdb._fixture_documentdb_client_admin(
         explicit_check_fixtures=True,
         documentdb_config=documentdb_config,

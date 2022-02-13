@@ -18,6 +18,8 @@ clinical_history_schema: Optional[jschon.JSONSchema] = None
 contact_schema: Optional[jschon.JSONSchema] = None
 enums_schema: Optional[jschon.JSONSchema] = None
 identity_schema: Optional[jschon.JSONSchema] = None
+life_area_schema: Optional[jschon.JSONSchema] = None
+life_areas_schema: Optional[jschon.JSONSchema] = None
 life_area_value_schema: Optional[jschon.JSONSchema] = None
 life_area_value_activity_schema: Optional[jschon.JSONSchema] = None
 log_schema: Optional[jschon.JSONSchema] = None
@@ -66,6 +68,8 @@ SCHEMAS = {
     "contact_schema": "contact.json",
     "enums_schema": "enums.json",
     "identity_schema": "identity.json",
+    "life_area_schema": "life-area.json",
+    "life_areas_schema": "life-areas.json",
     "life_area_value_schema": "life-area-value.json",
     "life_area_value_activity_schema": "life-area-value-activity.json",
     "log_schema": "log.json",

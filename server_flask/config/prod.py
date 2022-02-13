@@ -13,6 +13,8 @@ class ProductionConfig(Config):
         Config.__init__(
             self=self,
             secret_key=flask_config.secret_key,
+            cognito_poolid=flask_config.cognito_poolid,
+            cognito_clientid=flask_config.cognito_clientid,
             documentdb_host=flask_config.documentdb_host,
             documentdb_port=flask_config.documentdb_port,
             documentdb_directconnection=flask_config.documentdb_directconnection,

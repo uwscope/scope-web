@@ -2,7 +2,6 @@ import { CssBaseline } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import withTheme from '@mui/styles/withTheme';
-import { observer } from 'mobx-react';
 import { default as React, FunctionComponent } from 'react';
 import Footer from 'src/components/chrome/Footer';
 import styled from 'styled-components';
@@ -38,7 +37,7 @@ export interface IChromeProps {
     children: React.ReactNode;
 }
 
-export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
+export const Chrome: FunctionComponent<IChromeProps> = (props) => {
     return (
         <RootContainer>
             <CssBaseline />
@@ -49,6 +48,6 @@ export const Chrome: FunctionComponent<IChromeProps> = observer((props) => {
             <Footer></Footer>
         </RootContainer>
     );
-});
+};
 
 export default Chrome;

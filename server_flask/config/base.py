@@ -8,6 +8,16 @@ class Config:
     SECRET_KEY is required by Flask, used for signing session cookies.
     """
 
+    COGNITO_POOLID: str
+    """
+    ID of the AWS Cognito user pool.
+    """
+
+    COGNITO_CLIENTID: str
+    """
+    Client ID for AWS Cognito user pool.
+    """
+
     DOCUMENTDB_HOST: str
     """
     Host of DocumentDB cluster.
@@ -47,6 +57,8 @@ class Config:
         self,
         *,
         secret_key: str,
+        cognito_poolid: str,
+        cognito_clientid: str,
         documentdb_host: str,
         documentdb_port: int,
         documentdb_directconnection: bool,
@@ -60,6 +72,8 @@ class Config:
         """
 
         self.SECRET_KEY = secret_key
+        self.COGNITO_POOLID = cognito_poolid
+        self.COGNITO_CLIENTID = cognito_clientid
         self.DOCUMENTDB_HOST = documentdb_host
         self.DOCUMENTDB_PORT = documentdb_port
         self.DOCUMENTDB_DIRECTCONNECTION = documentdb_directconnection

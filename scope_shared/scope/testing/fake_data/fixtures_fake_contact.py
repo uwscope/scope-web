@@ -64,7 +64,7 @@ def fixture_data_fake_contact_factory(
     def factory() -> dict:
         fake_contact = unvalidated_factory()
 
-        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+        fake_utils.xfail_for_invalid(
             schema=scope.schema.contact_schema,
             document=fake_contact,
         )

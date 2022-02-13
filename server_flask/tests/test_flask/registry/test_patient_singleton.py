@@ -69,7 +69,7 @@ TEST_CONFIGS = [
 ]
 
 
-QUERY = "patient/{patient_id}/{query_type}"
+QUERY_SINGLETON = "patient/{patient_id}/{query_type}"
 
 
 @pytest.mark.parametrize(
@@ -106,7 +106,7 @@ def test_patient_singleton_get(
     assert result.inserted_count == 1
 
     # Retrieve the document via Flask
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -151,7 +151,7 @@ def test_patient_singleton_get_invalid(
     session = flask_session_unauthenticated_factory()
 
     # Retrieve an invalid patient via Flask
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id="invalid",
         query_type=config.flask_query_type,
     )
@@ -216,7 +216,7 @@ def test_patient_singleton_put(
 
     # Store a document via Flask
     document = document_factory()
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -279,7 +279,7 @@ def test_patient_singleton_put_invalid(
     document_factory = request.getfixturevalue(config.document_factory_fixture_name)
 
     # Invalid document that does not match any schema
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -332,7 +332,7 @@ def test_patient_singleton_put_update(
 
     # Store a document via Flask
     document = document_factory()
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -405,7 +405,7 @@ def test_patient_singleton_put_update_invalid(
 
     # Store a document via Flask
     document = document_factory()
-    query = QUERY.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )

@@ -9,6 +9,10 @@ from pathlib import Path
 import pytest
 from typing import Callable, List
 
+import scope.database.document_utils as document_utils
+import scope.schema
+import scope.testing.fake_data.fake_utils as fake_utils
+
 APP_CONFIG_LIFE_AREAS_PATH = Path(
     Path(__file__).parent, "../../../../server_flask/app_config/life_areas/"
 )
@@ -28,7 +32,7 @@ def fake_life_areas_factory() -> Callable[[], List[dict]]:
                     config_json = json.load(config_file)
                     fake_life_areas.append(config_json)
 
-        return fake_life_areas
+        return document_utils.normalize_documents(documents=fake_life_areas)
 
     return factory
 
@@ -44,11 +48,10 @@ def fixture_data_fake_life_areas_factory() -> Callable[[], List[dict]]:
     def factory() -> List[dict]:
         fake_life_areas = unvalidated_factory()
 
-        # TODO: Need life_areas_schema
-        # scope.testing.fake_data.fake_utils.xfail_for_invalid(
-        #     schema=scope.schema.life_areas_schema,
-        #     document=fake_life_areas,
-        # )
+        fake_utils.xfail_for_invalid(
+            schema=scope.schema.life_areas_schema,
+            document=fake_life_areas,
+        )
 
         return fake_life_areas
 

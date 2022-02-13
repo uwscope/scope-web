@@ -1,9 +1,9 @@
-import flask
 import http
+from typing import NoReturn, cast
+
+import flask
 import pymongo.collection
 import pymongo.database
-from typing import cast, NoReturn
-
 import scope.database.patients
 
 
@@ -49,7 +49,25 @@ class RequestContext:
     def abort_put_with_id() -> NoReturn:
         RequestContext._abort(
             {
-                "message": 'Put must not include "_id".',
+                "message": 'PUT must not include "_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_post_with_id() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'POST must not include "_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_post_with_rev() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'POST must not include "_rev".',
             },
             http.HTTPStatus.BAD_REQUEST,
         )

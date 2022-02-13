@@ -1,8 +1,8 @@
 {
 	"_type": "session",
-	"_session_id": "1",
+	"sessionId": "1",
 	"_rev": 1,
-	"date": "date",
+	"date": "2019-11-01T00:00:00Z",
 	"sessionType": "Telehealth",
 	"billableMinutes": 45,
 	"medicationChange": "medicationChange",

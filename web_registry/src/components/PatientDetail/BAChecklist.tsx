@@ -21,7 +21,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 
 export const BAChecklist: FunctionComponent = observer(() => {
     const {
-        appConfig: { resources },
+        appContentConfig: { resources },
     } = useStores();
     const currentPatient = usePatient();
 

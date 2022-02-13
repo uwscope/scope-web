@@ -11,7 +11,7 @@ import { sortAssessmentIds } from 'src/utils/assessment';
 
 export const ProgressInformation: FunctionComponent = observer(() => {
     const {
-        appConfig: { assessments },
+        appContentConfig: { assessments },
     } = useStores();
 
     const currentPatient = usePatient();

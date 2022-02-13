@@ -13,13 +13,24 @@ def test_unique_documentdb_credentials(
     """
 
     if "UNIQUE_DOCUMENTDB_CONFIGS" in request.module.__dict__:
-        documentdb_configs: List[scope.config.DocumentDBConfig] = request.module.UNIQUE_DOCUMENTDB_CONFIGS
+        documentdb_configs: List[
+            scope.config.DocumentDBConfig
+        ] = request.module.UNIQUE_DOCUMENTDB_CONFIGS
     else:
         raise ImportError(name="UNIQUE_DOCUMENTDB_CONFIGS not found in test module.")
 
-    for (documentdb_config_current, documentdb_config_different) in itertools.combinations(documentdb_configs, 2):
-        assert documentdb_config_current.admin_user != documentdb_config_different.admin_user
-        assert documentdb_config_current.admin_password != documentdb_config_different.admin_password
+    for (
+        documentdb_config_current,
+        documentdb_config_different,
+    ) in itertools.combinations(documentdb_configs, 2):
+        assert (
+            documentdb_config_current.admin_user
+            != documentdb_config_different.admin_user
+        )
+        assert (
+            documentdb_config_current.admin_password
+            != documentdb_config_different.admin_password
+        )
 
 
 def test_unique_database_credentials(
@@ -32,20 +43,29 @@ def test_unique_database_credentials(
     """
 
     if "UNIQUE_DOCUMENTDB_CONFIGS" in request.module.__dict__:
-        documentdb_configs: List[scope.config.DocumentDBConfig] = request.module.UNIQUE_DOCUMENTDB_CONFIGS
+        documentdb_configs: List[
+            scope.config.DocumentDBConfig
+        ] = request.module.UNIQUE_DOCUMENTDB_CONFIGS
     else:
         raise ImportError(name="UNIQUE_DOCUMENTDB_CONFIGS not found in test module.")
 
     if "UNIQUE_DATABASE_CONFIGS" in request.module.__dict__:
-        database_configs: List[scope.config.DatabaseConfig] = request.module.UNIQUE_DATABASE_CONFIGS
+        database_configs: List[
+            scope.config.DatabaseConfig
+        ] = request.module.UNIQUE_DATABASE_CONFIGS
     else:
         raise ImportError(name="UNIQUE_DATABASE_CONFIGS not found in test module.")
 
     for database_config_current in database_configs:
         for documentdb_config_current in documentdb_configs:
             assert database_config_current.user != documentdb_config_current.admin_user
-            assert database_config_current.password != documentdb_config_current.admin_password
+            assert (
+                database_config_current.password
+                != documentdb_config_current.admin_password
+            )
 
-    for (database_config_current, database_config_different) in itertools.combinations(database_configs, 2):
+    for (database_config_current, database_config_different) in itertools.combinations(
+        database_configs, 2
+    ):
         assert database_config_current.user != database_config_different.user
         assert database_config_current.password != database_config_different.password

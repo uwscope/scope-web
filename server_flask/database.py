@@ -13,8 +13,12 @@ class Database:
     It internally assigns a connection to each thread.
     This class therefore does not request or release database connections.
     """
+
     @staticmethod
-    def init_app(*, app: flask.Flask,):
+    def init_app(
+        *,
+        app: flask.Flask,
+    ):
         database = scope.documentdb.client.documentdb_client_database(
             # Connect to the provided host
             host=app.config["DOCUMENTDB_HOST"],

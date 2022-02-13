@@ -1,4 +1,4 @@
-import { IAppConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
+import { IAppContentConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 
 const phq9Assessment: IAssessmentContent = {
     id: 'phq-9',
@@ -496,7 +496,7 @@ const resources = [
     },
 ];
 
-export const defaultAppConfig: IAppConfig = {
+export const defaultAppContentConfig: IAppContentConfig = {
     assessments: [phq9Assessment, gad7Assessment],
     lifeAreas: [
         relationshipLifeArea,
