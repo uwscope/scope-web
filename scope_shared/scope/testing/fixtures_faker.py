@@ -9,4 +9,4 @@ def faker_seed():
     That provides more deterministic tests, but we would prefer more coverage over time.
     The "consistency" of fake data was also sometimes confusing in a development database.
     """
-    return random.randint(0, 2 ** 32)
+    return random.randint(0, 2**32)

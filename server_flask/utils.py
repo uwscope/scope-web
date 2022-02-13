@@ -18,14 +18,18 @@ def validate_schema(schema_object):
             # current_app.logger.info(result.output("basic"))
 
             if not result.output("flag")["valid"]:
-                flask.abort(flask.make_response(
-                    flask.jsonify({
-                        "message": "Schema validation failed.",
-                        "error": result.output("detailed"),
-                        "request": flask.request.json,
-                    }),
-                    http.HTTPStatus.BAD_REQUEST,
-                ))
+                flask.abort(
+                    flask.make_response(
+                        flask.jsonify(
+                            {
+                                "message": "Schema validation failed.",
+                                "error": result.output("detailed"),
+                                "request": flask.request.json,
+                            }
+                        ),
+                        http.HTTPStatus.BAD_REQUEST,
+                    )
+                )
 
             return f(*args, **kwargs)
 

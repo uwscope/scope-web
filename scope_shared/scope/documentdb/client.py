@@ -21,17 +21,25 @@ def _documentdb_client(
     # Check if we are responsible for an SSH connection and a port forward
     if instance_ssh_config is not None:
         if context_manager is None:
-            raise ValueError("If instance_ssh_config is provided, then context_manager is required")
+            raise ValueError(
+                "If instance_ssh_config is provided, then context_manager is required"
+            )
         if not direct_connection:
-            raise ValueError("If instance_ssh_config is provided, then direct_connection must be True")
+            raise ValueError(
+                "If instance_ssh_config is provided, then direct_connection must be True"
+            )
         if not tls_insecure:
-            raise ValueError("If instance_ssh_config is provided, then tls_insecure must be True")
+            raise ValueError(
+                "If instance_ssh_config is provided, then tls_insecure must be True"
+            )
 
     # Determine a host and port to connect, set up a port forward if necessary
     if instance_ssh_config is not None:
         # We are responsible for setting up an SSH connection and a port forward
         ssh_client = context_manager.enter_context(
-            aws_infrastructure.tasks.ssh.SSHClientContextManager(ssh_config=instance_ssh_config)
+            aws_infrastructure.tasks.ssh.SSHClientContextManager(
+                ssh_config=instance_ssh_config
+            )
         )
         port_forward = context_manager.enter_context(
             aws_infrastructure.tasks.ssh.SSHPortForwardContextManager(

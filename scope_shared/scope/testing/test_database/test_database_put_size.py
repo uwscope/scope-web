@@ -11,7 +11,7 @@ from typing import Callable
     [
         [1 * 1024],
         [30 * 1024],
-        # Previously observed a failure near 32k
+        # Previously observed a failure near 32k due to SSH issues
         [35 * 1024],
         [64 * 1024],
         [1024 * 1024],
@@ -33,10 +33,10 @@ def test_database_put_size(
     """
 
     collection = database_temp_collection_factory()
-    content = ''.join(random.choice(string.ascii_letters) for _ in range(size))
+    content = "".join(random.choice(string.ascii_letters) for _ in range(size))
 
     collection.insert_one(
         document={
-            "content": content
-        }
+            "content": content,
+        },
     )

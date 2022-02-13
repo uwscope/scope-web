@@ -131,11 +131,11 @@ def get_patients():
     patient_documents_filtered = []
     for patient_document_current in patient_documents:
         filter_pass = (
-            ("identity" in patient_document_current) and
-            ("identityId" in patient_document_current["identity"]) and
-            ("profile" in patient_document_current) and
-            ("name" in patient_document_current["profile"]) and
-            ("mrn" in patient_document_current["profile"])
+            ("identity" in patient_document_current)
+            and ("identityId" in patient_document_current["identity"])
+            and ("profile" in patient_document_current)
+            and ("name" in patient_document_current["profile"])
+            and ("mrn" in patient_document_current["profile"])
         )
         if filter_pass:
             patient_documents_filtered.append(patient_document_current)

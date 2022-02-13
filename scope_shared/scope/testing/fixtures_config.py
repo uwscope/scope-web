@@ -93,7 +93,9 @@ def fixture_flask_config(
     """
 
     if testing_config.flask_config is None:
-        pytest.skip("No flask_config in testing_config \"{}\"".format(testing_config.name))
+        pytest.skip(
+            'No flask_config in testing_config "{}"'.format(testing_config.name)
+        )
 
     return testing_config.flask_config
 

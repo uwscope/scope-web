@@ -10,6 +10,7 @@ class TestingConfig:
     """
     Container for all of the configurations that define a testing environment.
     """
+
     name: str
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig
     documentdb_config: scope.config.DocumentDBConfig

@@ -57,7 +57,7 @@ def get_app_config():
             "assessments": content_assessments,
             "lifeAreas": content_life_areas,
             "resources": content_resources,
-        }
+        },
     }
 
     return result, http.HTTPStatus.OK

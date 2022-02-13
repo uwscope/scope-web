@@ -94,7 +94,9 @@ def task_initialize(
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
 ):
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(instance_ssh_config_path)
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
+        instance_ssh_config_path
+    )
     documentdb_config = scope.config.DocumentDBConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseConfig.load(database_config_path)
 
@@ -121,7 +123,9 @@ def task_populate(
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
 ):
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(instance_ssh_config_path)
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
+        instance_ssh_config_path
+    )
     documentdb_config = scope.config.DocumentDBConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseConfig.load(database_config_path)
 
@@ -160,7 +164,9 @@ def task_reset(
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
 ):
-    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(instance_ssh_config_path)
+    instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
+        instance_ssh_config_path
+    )
     documentdb_config = scope.config.DocumentDBConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseConfig.load(database_config_path)
 
