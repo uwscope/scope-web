@@ -43,19 +43,13 @@ def fake_safety_plan_factory(
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDate": format_utils.format_date(
-                faker_factory.date_object()
-            ),
-            "lastUpdatedDate": format_utils.format_date(
-                faker_factory.date_object()
-            ),
+            "assignedDate": format_utils.format_date(faker_factory.date_object()),
+            "lastUpdatedDate": format_utils.format_date(faker_factory.date_object()),
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "distractions": distractions,
-            "supporters": [
-                fake_contact_factory() for _ in range(random.randint(1, 5))
-            ],
+            "supporters": [fake_contact_factory() for _ in range(random.randint(1, 5))],
             "professionalSupporters": [
                 fake_contact_factory() for _ in range(random.randint(1, 5))
             ],

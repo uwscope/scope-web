@@ -173,7 +173,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
         data = config.data_factory()
 
         # Test that data is normalized
-        is_normalized = (data == document_utils.normalize_value(value=data))
+        is_normalized = data == document_utils.normalize_value(value=data)
         assert is_normalized
 
         # Test the schema

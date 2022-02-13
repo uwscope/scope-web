@@ -130,7 +130,9 @@ def test_patient_set_get(
         del document_retrieved["_rev"]
         assert "_set_id" in document_retrieved
         del document_retrieved["_set_id"]
-    documents_retrieved = document_utils.normalize_documents(documents=documents_retrieved)
+    documents_retrieved = document_utils.normalize_documents(
+        documents=documents_retrieved
+    )
 
     assert documents == documents_retrieved
 
@@ -547,7 +549,6 @@ def test_patient_set_element_put_invalid(
 
     # TODO Anant: Is this where we should do something about a set
     #             element being put to a location that doesn't match its internal ID?
-
 
 
 @pytest.mark.parametrize(

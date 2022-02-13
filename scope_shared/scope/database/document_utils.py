@@ -38,9 +38,7 @@ def normalize_document(
     return normalized_document
 
 
-def _normalize_documents_key(
-    document
-) -> str:
+def _normalize_documents_key(document) -> str:
     """
     Provide a consistent sort of documents.
 

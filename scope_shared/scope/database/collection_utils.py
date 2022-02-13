@@ -116,7 +116,10 @@ def get_set(
         result = list(pipeline_result)
 
     # Normalize the results
-    result = [document_utils.normalize_document(document=result_current) for result_current in result]
+    result = [
+        document_utils.normalize_document(document=result_current)
+        for result_current in result
+    ]
 
     return result
 
