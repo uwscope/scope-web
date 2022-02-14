@@ -31,32 +31,41 @@ def _frankenfake_document(
 ) -> dict:
     result_document = copy.deepcopy(fake_document)
 
-    result_document[
-        "clinicalHistory"
-    ] = scope.database.patient.clinical_history.get_clinical_history(
+    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
         collection=patient_collection
     )
-    result_document[
-        "profile"
-    ] = scope.database.patient.patient_profile.get_patient_profile(
+    if clinical_history:
+        result_document["clinicalHistory"] = clinical_history
+
+    profile = scope.database.patient.patient_profile.get_patient_profile(
         collection=patient_collection
     )
-    result_document["safetyPlan"] = scope.database.patient.safety_plan.get_safety_plan(
+    if profile:
+        result_document["profile"] = profile
+
+    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
         collection=patient_collection
     )
-    result_document[
-        "valuesInventory"
-    ] = scope.database.patient.values_inventory.get_values_inventory(
+    if safety_plan:
+        result_document["safetyPlan"] = safety_plan
+
+    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
         collection=patient_collection
     )
-    result_document["sessions"] = scope.database.patient.sessions.get_sessions(
+    if values_inventory:
+        result_document["valuesInventory"] = values_inventory
+
+    sessions = scope.database.patient.sessions.get_sessions(
         collection=patient_collection
     )
-    result_document[
-        "caseReviews"
-    ] = scope.database.patient.case_reviews.get_case_reviews(
+    if sessions:
+        result_document["sessions"] = sessions
+        
+    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
         collection=patient_collection
     )
+    if case_reviews:
+        result_document["caseReviews"] = case_reviews
 
     return result_document
 
@@ -85,6 +94,8 @@ def get_patients():
         if patient_id not in FAKE_PATIENT_MAP:
             FAKE_PATIENT_MAP[patient_id] = fake.getFakePatient()
             FAKE_PATIENT_MAP[patient_id]["identity"]["identityId"] = patient_id
+
+    print(FAKE_PATIENT_MAP.keys(), flush=True)
 
     # Populate a document to return.
     # Initially based on fields that were in the fake data.
@@ -131,12 +142,16 @@ def get_patients():
     patient_documents_filtered = []
     for patient_document_current in patient_documents:
         filter_pass = (
-            ("identity" in patient_document_current)
-            and ("identityId" in patient_document_current["identity"])
+            True
+            and ("identity" in patient_document_current)
             and ("profile" in patient_document_current)
+            and ("identityId" in patient_document_current["identity"])
             and ("name" in patient_document_current["profile"])
-            and ("mrn" in patient_document_current["profile"])
+            and ("MRN" in patient_document_current["profile"])
         )
+
+        print(filter_pass, flush=True)
+
         if filter_pass:
             patient_documents_filtered.append(patient_document_current)
 
@@ -149,6 +164,7 @@ def get_patients():
                 "_type": "identity",
                 "identityId": patient_document_current["identity"]["identityId"],
                 "name": patient_document_current["profile"]["name"],
+                "MRN": patient_document_current["profile"]["MRN"],
             },
         }
         for patient_document_current in patient_documents
