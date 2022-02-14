@@ -1,16 +1,14 @@
-import { flatten, remove } from 'lodash';
 import { action, computed, makeAutoObservable } from 'mobx';
 import {
     IActivity,
     IActivityLog,
     IAssessmentLog,
-    ILifeAreaValue,
-    ILifeAreaValueActivity,
     IMoodLog,
     IPatientConfig,
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
+    IValuesInventory,
 } from 'shared/types';
 import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -23,8 +21,7 @@ export interface IPatientStore {
 
     readonly config: IPatientConfig;
     readonly activities: IActivity[];
-    readonly values: ILifeAreaValue[];
-    readonly valueActivities: ILifeAreaValueActivity[];
+    readonly valuesInventory: IValuesInventory;
     readonly safetyPlan: ISafetyPlan;
 
     readonly activityLogs: IActivityLog[];
@@ -38,7 +35,6 @@ export interface IPatientStore {
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getScheduledAssessmentById: (schedulId: string) => IScheduledAssessment | undefined;
     getActivityById: (activityId: string) => IActivity | undefined;
-    getValueById: (valueId: string) => ILifeAreaValue | undefined;
 
     // Data load/save
     load: () => Promise<void>;
@@ -46,18 +42,7 @@ export interface IPatientStore {
     saveMoodLog: (moodLog: IMoodLog) => Promise<boolean>;
     saveAssessmentLog: (assessmentData: IAssessmentLog) => Promise<boolean>;
 
-    addValueToLifearea: (lifeareaId: string, value: string) => void;
-    deleteValueFromLifearea: (lifeareaId: string, valueId: string) => void;
-    addActivityToValue: (valueId: string, activity: string, enjoyment: number, importance: number) => void;
-    updateActivityInValue: (
-        valueId: string,
-        activityId: string,
-        activity: string,
-        enjoyment: number,
-        importance: number
-    ) => void;
-    deleteActivityFromValue: (valueId: string, activityId: string) => void;
-
+    updateValuesInventory: (inventory: IValuesInventory) => Promise<void>;
     updateSafetyPlan: (safetyPlan: ISafetyPlan) => Promise<void>;
 
     addActivity: (activity: IActivity) => Promise<boolean>;
@@ -70,7 +55,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadScheduledActivitiesQuery: PromiseQuery<IScheduledActivity[]>;
     private readonly loadScheduledAssessmentsQuery: PromiseQuery<IScheduledAssessment[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
-    private readonly loadLifeareaValuesQuery: PromiseQuery<ILifeAreaValue[]>;
+    private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
     private readonly loadActivityLogsQuery: PromiseQuery<IActivityLog[]>;
     private readonly loadAssessmentLogsQuery: PromiseQuery<IAssessmentLog[]>;
@@ -80,12 +65,12 @@ export class PatientStore implements IPatientStore {
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>([], 'loadScheduledActivitiesQuery');
         this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
             [],
-            'loadScheduledActivitiesQuery'
+            'loadScheduledActivitiesQuery',
         );
         this.loadConfigQuery = new PromiseQuery<IPatientConfig>(undefined, 'loadConfigQuery');
         this.loadQuery = new PromiseQuery<PromiseSettledResult<any>[]>([], 'loadQuery');
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
-        this.loadLifeareaValuesQuery = new PromiseQuery<ILifeAreaValue[]>([], 'loadLifeareaValuesQuery');
+        this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'loadValuesInventoryQuery');
         this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(undefined, 'loadSafetyPlan');
         this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>([], 'loadActivityLogsQuery');
         this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>([], 'loadAssessmentLogsQuery');
@@ -124,12 +109,12 @@ export class PatientStore implements IPatientStore {
         return (this.loadActivitiesQuery.value || []).filter((a) => !a.isDeleted);
     }
 
-    @computed public get values() {
-        return this.loadLifeareaValuesQuery.value || [];
-    }
-
-    @computed public get valueActivities() {
-        return flatten(this.values.map((v) => v.activities));
+    @computed public get valuesInventory() {
+        return (
+            this.loadValuesInventoryQuery.value || {
+                assigned: false,
+            }
+        );
     }
 
     @computed public get safetyPlan() {
@@ -163,11 +148,6 @@ export class PatientStore implements IPatientStore {
         return this.activities.find((a) => a.activityId == activityId);
     }
 
-    @action.bound
-    public getValueById(valueId: string) {
-        return this.values.find((v) => v.id == valueId);
-    }
-
     @action
     public async load() {
         const { patientService } = useServices();
@@ -177,11 +157,11 @@ export class PatientStore implements IPatientStore {
                 this.loadScheduledAssessmentsQuery.fromPromise(patientService.getScheduledAssessments()),
                 this.loadConfigQuery.fromPromise(patientService.getPatientConfig()),
                 this.loadActivitiesQuery.fromPromise(patientService.getActivities()),
-                this.loadLifeareaValuesQuery.fromPromise(patientService.getValuesInventory()),
+                this.loadValuesInventoryQuery.fromPromise(patientService.getValuesInventory()),
                 this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
                 this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
                 this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
-            ])
+            ]),
         );
     }
 
@@ -238,113 +218,10 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async saveValuesInventory(inventory: ILifeAreaValue[]) {
+    public async updateValuesInventory(inventory: IValuesInventory) {
         const { patientService } = useServices();
 
-        await this.loadLifeareaValuesQuery.fromPromise(patientService.updateValuesInventory(inventory));
-    }
-
-    @action.bound
-    public async addValueToLifearea(lifeareaId: string, value: string) {
-        const newValue = {
-            id: '',
-            name: value,
-            dateCreated: new Date(),
-            dateEdited: new Date(),
-            lifeareaId,
-            activities: [],
-        } as ILifeAreaValue;
-
-        const prevValues = this.values.slice();
-        prevValues.push(newValue);
-
-        await this.updateValuesInventory(prevValues);
-    }
-
-    @action.bound
-    public async deleteValueFromLifearea(lifeareaId: string, valueId: string) {
-        const foundValue = this.values.find((v) => v.id == valueId);
-
-        if (!!foundValue && foundValue.lifeareaId == lifeareaId) {
-            const prevValues = this.values.slice();
-
-            remove(prevValues, (v) => v.id == valueId);
-
-            await this.updateValuesInventory(prevValues);
-        } else {
-            console.assert(true, `Lifearea value not found: ${lifeareaId} - ${valueId}`);
-        }
-    }
-
-    @action.bound
-    public async addActivityToValue(valueId: string, activity: string, enjoyment: number, importance: number) {
-        const found = this.values.findIndex((v) => v.id == valueId);
-
-        if (found >= 0) {
-            const prevValues = this.values.slice();
-            const foundValue = prevValues[found];
-
-            foundValue.activities = foundValue.activities || [];
-            foundValue.activities.push({
-                id: Date.now().toString(),
-                valueId: valueId,
-                name: activity,
-                enjoyment,
-                importance,
-            } as ILifeAreaValueActivity);
-
-            await this.updateValuesInventory(prevValues);
-        } else {
-            console.assert(true, `Lifearea value not found: ${valueId}`);
-        }
-    }
-
-    @action.bound
-    public async updateActivityInValue(
-        valueId: string,
-        activityId: string,
-        activity: string,
-        enjoyment: number,
-        importance: number
-    ) {
-        const foundValueIndex = this.values.findIndex((v) => v.id == valueId);
-
-        if (foundValueIndex >= 0) {
-            const prevValues = this.values.slice();
-            const foundValue = prevValues[foundValueIndex];
-            const foundValueActivities = foundValue.activities || [];
-
-            const foundActivity = foundValueActivities.find((a) => a.id == activityId && a.valueId == valueId);
-            if (!!foundActivity) {
-                foundActivity.name = activity;
-                foundActivity.enjoyment = enjoyment;
-                foundActivity.importance = importance;
-
-                foundValue.activities = foundValueActivities;
-
-                await this.updateValuesInventory(prevValues);
-            }
-        } else {
-            console.assert(foundValueIndex >= 0, `Lifearea value and activity not found: ${valueId} ${activityId}`);
-        }
-    }
-
-    @action.bound
-    public async deleteActivityFromValue(valueId: string, activityId: string) {
-        const foundActivity = this.valueActivities.findIndex((a) => a.id == activityId);
-        const foundValue = this.values.findIndex((v) => v.id == valueId);
-
-        if (foundActivity >= 0 && foundValue >= 0) {
-            const prevValues = this.values.slice();
-            const value = prevValues[foundValue];
-
-            remove(value.activities, (a) => a.id == activityId);
-
-            await this.updateValuesInventory(prevValues);
-        } else {
-            console.assert(foundActivity >= 0, `Activity not found: ${activityId}`);
-            console.assert(foundValue >= 0, `Value not found: ${valueId}`);
-        }
+        await this.loadValuesInventoryQuery.fromPromise(patientService.updateValuesInventory(inventory));
     }
 
     @action.bound
@@ -390,11 +267,5 @@ export class PatientStore implements IPatientStore {
         }
 
         return false;
-    }
-
-    private async updateValuesInventory(values: ILifeAreaValue[]) {
-        const { patientService } = useServices();
-
-        await this.loadLifeareaValuesQuery.fromPromise(patientService.updateValuesInventory(values));
     }
 }

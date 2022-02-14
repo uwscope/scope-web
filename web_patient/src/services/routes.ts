@@ -67,13 +67,6 @@ export const getLevel = (path: string) => {
     return path.split('/').length;
 };
 
-export const getLifeAreaLink = (lifearea: string) => {
-    return {
-        pathname: `${Routes.valuesInventory}/${lifearea}`,
-        relative: false,
-    };
-};
-
 export const getResourceLink = (filename: string) => {
     return `/resources/${filename}`;
 };

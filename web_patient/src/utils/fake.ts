@@ -11,6 +11,7 @@ import {
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
+    IValuesInventory,
 } from 'shared/types';
 
 const lorem = new LoremIpsum({
@@ -24,15 +25,18 @@ const lorem = new LoremIpsum({
     },
 });
 
-export const getFakeLifeareaValues = (): ILifeAreaValue[] => {
-    return [
-        {
-            id: 'inventory-value-1',
-            lifeareaId: 'education',
-            name: 'some inventory value',
-            activities: getFakeLifeareaValueActivities('education'),
-        } as ILifeAreaValue,
-    ];
+export const getFakeValuesInventory = (): IValuesInventory => {
+    return {
+        assigned: true,
+        assignedDate: new Date(),
+        values: [
+            {
+                lifeareaId: 'education',
+                name: 'some inventory value',
+                activities: getFakeLifeareaValueActivities(),
+            } as ILifeAreaValue,
+        ],
+    };
 };
 
 export const getFakeSafetyPlan = (): ISafetyPlan => {
@@ -42,13 +46,10 @@ export const getFakeSafetyPlan = (): ISafetyPlan => {
     } as ISafetyPlan;
 };
 
-export const getFakeLifeareaValueActivities = (lifeareaId: string): ILifeAreaValueActivity[] => {
+export const getFakeLifeareaValueActivities = (): ILifeAreaValueActivity[] => {
     return [
         {
-            id: 'inventory-activity',
             name: 'some inventory activity',
-            valueId: 'inventory-value-1',
-            lifeareaId,
             enjoyment: 5,
             importance: 6,
         } as ILifeAreaValueActivity,

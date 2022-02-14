@@ -9,7 +9,6 @@ import AssessmentHome from 'src/components/Progress/AssessmentHome';
 import ProgressPage from 'src/components/Progress/ProgressPage';
 import ResourcesPage from 'src/components/Resources/ResourcesPage';
 import LifeAreaDetail from 'src/components/ValuesInventory/LifeAreaDetail';
-import ValueDetail from 'src/components/ValuesInventory/ValueDetail';
 import ValuesInventoryHome from 'src/components/ValuesInventory/ValuesInventoryHome';
 import WorksheetsHome from 'src/components/Worksheets/WorksheetsHome';
 import { Routes } from 'src/services/routes';
@@ -24,10 +23,6 @@ export const App: FunctionComponent = () => {
                             path={`/${Routes.resources}/*`}
                             element={
                                 <RouterSwitch>
-                                    <Route
-                                        path={`/${Routes.valuesInventory}/:lifeareaId/:valueId`}
-                                        element={<ValueDetail />}
-                                    />
                                     <Route
                                         path={`/${Routes.valuesInventory}/:lifeareaId`}
                                         element={<LifeAreaDetail />}

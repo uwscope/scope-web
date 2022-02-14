@@ -10,33 +10,34 @@ export interface IFormSectionProps {
     content: string | React.ReactElement;
 }
 
-const Container = withTheme(
+export const Container = withTheme(
     styled.div<{ $addPaddingTop: boolean }>((props) => ({
         paddingTop: props.$addPaddingTop ? props.theme.spacing(4) : 0,
-    }))
-);
-const ContentContainer = withTheme(
-    styled.div((props) => ({
-        padding: props.theme.spacing(0, 0),
-    }))
+    })),
 );
 
-const PromptText = withTheme(
+export const ContentContainer = withTheme(
+    styled.div((props) => ({
+        padding: props.theme.spacing(0, 0),
+    })),
+);
+
+export const PromptText = withTheme(
     styled.div((props) => ({
         fontSize: props.theme.typography.h6.fontSize,
         fontWeight: props.theme.typography.fontWeightBold,
         padding: props.theme.spacing(0, 0, 1, 0),
         lineHeight: 1,
-    }))
+    })),
 );
 
-const SubPromptText = withTheme(
+export const SubPromptText = withTheme(
     styled.div((props) => ({
         fontSize: props.theme.typography.h6.fontSize,
         padding: props.theme.spacing(0, 0, 1, 0),
         lineHeight: 1,
         color: props.theme.palette.primary.dark,
-    }))
+    })),
 );
 
 export const HelperText = withTheme(

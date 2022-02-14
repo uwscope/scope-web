@@ -9,6 +9,7 @@ const _strings = {
     Form_button_cancel: 'Cancel',
     Form_button_close: 'Close',
     Form_button_ok: 'Okay',
+    Form_button_delete: 'Delete',
     Form_submit_thankyou: 'Thank you',
 
     Navigation_home: 'Home',
@@ -78,35 +79,36 @@ const _strings = {
     Values_inventory_instruction3:
         'The inventory consists of five life areas. You can fill them out in any order you wish.',
     Values_inventory_instruction4: 'Tap on any life area to start filling the inventory.',
+
+    Values_inventory_values_existing_title: 'Your existing values:',
+    Values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
+    Values_inventory_values_example_title: 'Example values',
+    Values_inventory_values_more_title: 'List additional values',
+
     Values_inventory_lifearea: 'Life area',
     Values_inventory_value_singular: 'value',
     Values_inventory_value_plural: 'values',
     Values_inventory_activity_singular: 'activity',
     Values_inventory_activity_plural: 'activities',
 
-    Values_inventory_values_none: 'List one or more of your personal values that fit with this life area',
+    Values_inventory_add_activity: 'Add activity',
+    Values_inventory_add_value: 'Add value',
+
     Values_inventory_values_example_values: 'Example values',
-    Values_inventory_values_header: 'Your values',
-    Values_inventory_values_help:
-        'Below are your values for this life area. Tap on a value to add or modify activities associated with the value, or add more values to this life area.',
 
     Values_inventory_value_item_example_activities: 'Example activities',
     Values_inventory_value_item_activities_none: 'List one or more activities associated with this value.',
-    Values_inventory_value_item_examples:
-        'Tell my child I love them every day\nMake a special breakfast for my child on Saturday\nTake my child to the park on Saturday\nPick up my child from school promptly each day',
-    Values_inventory_value_item_activities_header: 'Your activities',
-    Values_inventory_value_item_activities_help:
-        'Below are your activities for this value. Tap on an activity to modify, or add more activities to this value.',
-
     Values_inventory_value_item_activities_enjoyment: 'Enjoyment',
     Values_inventory_value_item_activities_importance: 'Importance',
 
     Values_inventory_dialog_add_value: 'Add value',
-    Values_inventory_dialog_add_value_label: 'Value name',
+    Values_inventory_dialog_add_value_label: 'Name your value',
+
+    Values_inventory_dialog_edit_value: 'Edit value',
 
     Values_inventory_dialog_add_activity: 'Add activity',
-    Values_inventory_dialog_add_activity_edit: 'Edit activity',
-    Values_inventory_dialog_add_activity_name: 'Activity name',
+    Values_inventory_dialog_edit_activity: 'Edit activity',
+    Values_inventory_dialog_add_activity_label: 'Name your activity',
     Values_inventory_dialog_add_activity_prompt:
         'For this activity, rate how much you enjoy doing it and how important it is for you to do it. 0 being low and 10 being high.',
     Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',

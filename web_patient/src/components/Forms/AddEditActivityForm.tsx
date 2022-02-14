@@ -24,7 +24,7 @@ import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { DayOfWeekFlags, daysOfWeekFlagValues } from 'shared/enums';
-import { IActivity, ILifeAreaValueActivity, KeyedMap } from 'shared/types';
+import { IActivity, KeyedMap } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
@@ -57,10 +57,16 @@ const getDayString = (day: DayOfWeekFlags) => {
     return 'Unknown';
 };
 
+interface ImportableActivity {
+    activity: string;
+    value: string;
+    lifeareaId: string;
+}
+
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
-    const { valueActivities, values } = patientStore;
+    const { valuesInventory } = patientStore;
     const { lifeAreas } = appContentConfig;
 
     const activityId = getRouteParameter(Parameters.activityId);
@@ -93,14 +99,25 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         isDeleted: activity?.isDeleted || true,
     }));
 
-    const groupedActivities: KeyedMap<ILifeAreaValueActivity[]> = {};
-    valueActivities.forEach((activity) => {
-        const lifearea = activity.lifeareaId;
+    const values = valuesInventory?.values || [];
+    const groupedActivities: KeyedMap<ImportableActivity[]> = {};
+    let activityCount = 0;
+
+    values.forEach((value) => {
+        const lifearea = value.lifeareaId;
         if (!groupedActivities[lifearea]) {
             groupedActivities[lifearea] = [];
         }
 
-        groupedActivities[lifearea].push(activity);
+        value.activities.forEach((activity) => {
+            groupedActivities[lifearea].push({
+                activity: activity.name,
+                value: value.name,
+                lifeareaId: lifearea,
+            });
+
+            activityCount += groupedActivities[lifearea].length;
+        });
     });
 
     const handleSubmit = action(() => {
@@ -111,12 +128,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         viewState.openActivityDialog = true;
     });
 
-    const handleImportActivityItemClick = action((activity: ILifeAreaValueActivity | undefined) => {
+    const handleImportActivityItemClick = action((activity: ImportableActivity | undefined) => {
         viewState.openActivityDialog = false;
 
         if (!!activity) {
-            dataState.name = activity.name;
-            dataState.value = patientStore.getValueById(activity.valueId)?.name || '';
+            dataState.name = activity.activity;
+            dataState.value = activity.value;
             dataState.lifeareaId = activity.lifeareaId;
         }
     });
@@ -157,7 +174,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             variant="outlined"
                             multiline
                         />
-                        {valueActivities.length > 0 && (
+                        {activityCount > 0 && (
                             <Grid container justifyContent="flex-end">
                                 <Chip
                                     sx={{ marginTop: 1 }}
@@ -180,13 +197,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                             {Object.keys(groupedActivities).map((lifearea) => (
                                                 <Fragment key={lifearea}>
                                                     <ListSubheader disableGutters>{lifearea}</ListSubheader>
-                                                    {groupedActivities[lifearea].map((activity) => (
+                                                    {groupedActivities[lifearea].map((activity, idx) => (
                                                         <ListItem
                                                             disableGutters
                                                             button
                                                             onClick={() => handleImportActivityItemClick(activity)}
-                                                            key={activity.id}>
-                                                            <ListItemText primary={activity.name} />
+                                                            key={idx}>
+                                                            <ListItemText primary={activity.activity} />
                                                         </ListItem>
                                                     ))}
                                                 </Fragment>
@@ -206,8 +223,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 help={getString('Form_add_activity_describe_value_help')}
                 content={
                     <Select variant="outlined" value={dataState.value || ''} onChange={handleSelectValue} fullWidth>
-                        {values.map((value) => (
-                            <MenuItem key={value.id} value={value.name}>
+                        {values.map((value, idx) => (
+                            <MenuItem key={idx} value={value.name}>
                                 {value.name}
                             </MenuItem>
                         ))}
