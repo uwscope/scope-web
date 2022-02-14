@@ -1,4 +1,4 @@
-import { FormControl, FormControlLabel, Radio, RadioGroup, Slider, TextField } from '@mui/material';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Slider, Stack, TextField } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -19,7 +19,7 @@ export interface IActivityLoggingFormProps extends IFormProps {}
 const SliderContainer = withTheme(
     styled.div((props) => ({
         padding: props.theme.spacing(8, 2),
-    }))
+    })),
 );
 
 const PageSuccess: FunctionComponent<{
@@ -46,7 +46,7 @@ const PageSuccess: FunctionComponent<{
     const showAlternative = successValue == 'SomethingElse';
 
     return (
-        <div>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString('Form_activity_log_success_prompt')}
                 subPrompt={activityName}
@@ -92,7 +92,7 @@ const PageSuccess: FunctionComponent<{
                     />
                 </div>
             )}
-        </div>
+        </Stack>
     );
 };
 

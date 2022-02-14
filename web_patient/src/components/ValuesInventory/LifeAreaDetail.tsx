@@ -6,7 +6,6 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     FormControl,
     Grid,
@@ -22,11 +21,11 @@ import {
 import { random } from 'lodash';
 import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ILifeAreaValue, ILifeAreaValueActivity, IValuesInventory } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
-import FormSection, { Container, ContentContainer, PromptText, SubPromptText } from 'src/components/Forms/FormSection';
+import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getActivityDetailText } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
@@ -91,49 +90,50 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
     });
 
     return (
-        <Container>
+        <Stack spacing={0}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <SubPromptText>{value.name}</SubPromptText>
+                <SubHeaderText>{value.name}</SubHeaderText>
                 <IconButton aria-label="edit" onClick={handleEditValue}>
                     <EditIcon />
                 </IconButton>
             </Stack>
-            <ContentContainer>
-                <Stack spacing={4}>
-                    {value.activities.map((activity, idx) => (
-                        <Grid container direction="row" alignItems="flex-start" key={idx}>
-                            <Grid item>
-                                <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
-                            </Grid>
-                            <Grid item flexGrow={1}>
-                                <Stack spacing={1}>
-                                    <Typography>{activity.name}</Typography>
-                                    <Typography>
-                                        {getActivityDetailText(activity.enjoyment, activity.importance)}
-                                    </Typography>
-                                </Stack>
-                            </Grid>
-                            <IconButton size="small" aria-label="edit" onClick={() => handleEditActivityItem(idx)}>
-                                <EditIcon fontSize="small" />
-                            </IconButton>
+            <Stack spacing={1}>
+                {value.activities.map((activity, idx) => (
+                    <Grid container direction="row" alignItems="flex-start" key={idx} flexWrap="nowrap">
+                        <Grid item>
+                            <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
                         </Grid>
-                    ))}
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography sx={{ paddingRight: 1 }}>{`${value.activities.length + 1}.`}</Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            startIcon={<AddIcon />}
-                            onClick={handleAddActivityItem}>
-                            {getString('Values_inventory_add_activity')}
-                        </Button>
-                    </Box>
-                </Stack>
-            </ContentContainer>
+                        <Grid item flexGrow={1} overflow="hidden">
+                            <Stack spacing={0}>
+                                <Typography variant="body1" noWrap>
+                                    {activity.name}
+                                </Typography>
+                                <HelperText>
+                                    {getActivityDetailText(activity.enjoyment, activity.importance)}
+                                </HelperText>
+                            </Stack>
+                        </Grid>
+                        <IconButton size="small" aria-label="edit" onClick={() => handleEditActivityItem(idx)}>
+                            <EditIcon fontSize="small" />
+                        </IconButton>
+                    </Grid>
+                ))}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography sx={{ paddingRight: 1 }}>{`${value.activities.length + 1}.`}</Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={handleAddActivityItem}>
+                        {getString('Values_inventory_add_activity')}
+                    </Button>
+                </Box>
+            </Stack>
             {viewState.openAddActivity && (
                 <AddEditActivityDialog
                     open={viewState.openAddActivity}
+                    value={value.name}
                     activity={viewState.editActivityIdx >= 0 ? value.activities[viewState.editActivityIdx] : undefined}
                     examples={activityExamples}
                     handleCancel={handleCancelActivity}
@@ -141,13 +141,14 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     handleDelete={viewState.editActivityIdx >= 0 ? handleDeleteActivity : undefined}
                 />
             )}
-        </Container>
+        </Stack>
     );
 });
 
 const AddEditValueDialog: FunctionComponent<{
     open: boolean;
     isEdit: boolean;
+    lifearea: string;
     value: string;
     examples: string[];
     handleChange: (change: string) => void;
@@ -155,7 +156,7 @@ const AddEditValueDialog: FunctionComponent<{
     handleDelete?: () => void;
     handleSave: () => void;
 }> = (props) => {
-    const { open, isEdit, value, examples, handleCancel, handleChange, handleDelete, handleSave } = props;
+    const { open, isEdit, lifearea, value, examples, handleCancel, handleChange, handleDelete, handleSave } = props;
     return (
         <Dialog open={open} fullWidth maxWidth="phone">
             <DialogTitle id="form-dialog-title">
@@ -164,16 +165,19 @@ const AddEditValueDialog: FunctionComponent<{
                     : getString('Values_inventory_dialog_add_value')}
             </DialogTitle>
             <DialogContent>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    variant="outlined"
-                    label={getString('Values_inventory_dialog_add_value_label')}
-                    value={value}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(event.target.value)}
-                    fullWidth
-                />
-                <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
+                <Stack spacing={2}>
+                    <SubHeaderText>{lifearea}</SubHeaderText>
+                    <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        variant="outlined"
+                        label={getString('Values_inventory_dialog_add_value_label')}
+                        value={value}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(event.target.value)}
+                        fullWidth
+                    />
+                </Stack>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCancel} color="primary">
@@ -194,13 +198,14 @@ const AddEditValueDialog: FunctionComponent<{
 
 const AddEditActivityDialog: FunctionComponent<{
     open: boolean;
+    value: string;
     activity?: ILifeAreaValueActivity;
     examples: string[];
     handleCancel: () => void;
     handleDelete?: () => void;
     handleSave: (newActivity: ILifeAreaValueActivity) => void;
 }> = observer((props) => {
-    const { open, activity, examples, handleCancel, handleDelete, handleSave } = props;
+    const { open, value, activity, examples, handleCancel, handleDelete, handleSave } = props;
     const isEdit = !!activity;
 
     const viewState = useLocalObservable<{
@@ -214,9 +219,10 @@ const AddEditActivityDialog: FunctionComponent<{
     }));
 
     const canSave =
-        viewState.name != activity?.name ||
-        viewState.enjoyment != activity?.enjoyment ||
-        viewState.importance != activity?.importance;
+        !!viewState.name &&
+        (viewState.name != activity?.name ||
+            viewState.enjoyment != activity?.enjoyment ||
+            viewState.importance != activity?.importance);
 
     const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
         viewState.name = event.target.value;
@@ -238,53 +244,52 @@ const AddEditActivityDialog: FunctionComponent<{
                     : getString('Values_inventory_dialog_add_activity')}
             </DialogTitle>
             <DialogContent>
-                <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    variant="outlined"
-                    label={getString('Values_inventory_dialog_add_activity_label')}
-                    value={viewState.name}
-                    onChange={handleChangeName}
-                    fullWidth
-                />
-                <DialogContentText>{getString('Values_inventory_dialog_add_activity_prompt')}</DialogContentText>
-                <Grid container spacing={3} component="div">
-                    <Grid item component="div">
-                        <FormControl>
-                            <InputLabel id="activity_enjoyment">
-                                {getString('Values_inventory_dialog_add_activity_enjoyment')}
-                            </InputLabel>
-                            <Select
-                                labelId="activity_enjoyment"
-                                value={viewState.enjoyment}
-                                onChange={handleChangeEnjoyment}>
-                                {[...Array(11).keys()].map((v) => (
-                                    <MenuItem key={v} value={v}>
-                                        {v}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item component="div">
-                        <FormControl>
-                            <InputLabel id="activity_importance">
-                                {getString('Values_inventory_dialog_add_activity_importance')}
-                            </InputLabel>
-                            <Select
-                                labelId="activity_importance"
-                                value={viewState.importance}
-                                onChange={handleChangeImportance}>
-                                {[...Array(11).keys()].map((v) => (
-                                    <MenuItem key={v} value={v}>
-                                        {v}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                </Grid>
+                <Stack spacing={2}>
+                    <SubHeaderText>{value}</SubHeaderText>
+                    <Examples title={getString('Values_inventory_value_item_example_activities')} examples={examples} />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        variant="outlined"
+                        label={getString('Values_inventory_dialog_add_activity_label')}
+                        value={viewState.name}
+                        onChange={handleChangeName}
+                        fullWidth
+                    />
+                    <HelperText>{getString('Values_inventory_dialog_add_activity_prompt')}</HelperText>
+                    <FormControl fullWidth>
+                        <InputLabel id="activity-enjoyment">
+                            {getString('Values_inventory_dialog_add_activity_enjoyment')}
+                        </InputLabel>
+                        <Select
+                            labelId="activity-enjoyment-label"
+                            id="activity-enjoyment"
+                            value={viewState.enjoyment}
+                            onChange={handleChangeEnjoyment}>
+                            {[...Array(11).keys()].map((v) => (
+                                <MenuItem key={v} value={v}>
+                                    {v}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel id="activity-importance-label">
+                            {getString('Values_inventory_dialog_add_activity_importance')}
+                        </InputLabel>
+                        <Select
+                            labelId="activity-importance-label"
+                            id="activity-importance"
+                            value={viewState.importance}
+                            onChange={handleChangeImportance}>
+                            {[...Array(11).keys()].map((v) => (
+                                <MenuItem key={v} value={v}>
+                                    {v}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Stack>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCancel} color="primary">
@@ -315,12 +320,12 @@ const AddEditActivityDialog: FunctionComponent<{
 const Examples: FunctionComponent<{ title: string; examples: string[] }> = (props) => {
     const { title, examples } = props;
     return (
-        <div>
+        <HelperText>
             <div>{`${title}:`}</div>
             {examples.map((ex, idx) => (
                 <div key={idx}>{`${idx + 1}. ${ex}`}</div>
             ))}
-        </div>
+        </HelperText>
     );
 };
 
@@ -444,24 +449,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         viewState.openAddValue = false;
     });
 
-    // const handleDeleteValue = action((valueId: string) => {
-    //     patientStore.deleteValueFromLifearea(lifeareaId, valueId);
-    // });
-
-    // const handleChangeValue = action((event: React.ChangeEvent<HTMLInputElement>) => {
-    //     viewState.addedValue = event.target.value;
-    // });
-
-    // const handleOpenAdd = action(() => {
-    //     viewState.openAdd = true;
-    //     viewState.addedValue = '';
-    // });
-
-    // const handleCancelAdd = action(() => {
-    //     viewState.openAdd = false;
-    //     viewState.addedValue = '';
-    // });
-
     const valueExamples = lifeareaContent.examples.map((e) => e.name);
     const activityExamples = lifeareaContent.examples[
         random(lifeareaContent.examples.length - 1, false)
@@ -469,7 +456,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     return (
         <DetailPage title={lifeareaContent.name} onBack={handleGoBack}>
-            <Stack spacing={4}>
+            <Stack spacing={6}>
                 {values?.filter((v) => v.lifeareaId == lifeareaId).length == 0 ? (
                     <FormSection
                         prompt={getString('Values_inventory_values_existing_title')}
@@ -482,22 +469,24 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         }
                     />
                 ) : (
-                    <Fragment>
-                        <PromptText>{getString('Values_inventory_values_existing_title')}</PromptText>
-                        {values.map((value, idx) => {
-                            if (value.lifeareaId == lifeareaId) {
-                                return (
-                                    <ValueEditFormSection
-                                        value={value}
-                                        activityExamples={activityExamples}
-                                        handleEditValue={handleEditValue(idx)}
-                                        handleSaveValueActivities={handleSaveValueActivities(idx)}
-                                        key={idx}
-                                    />
-                                );
-                            }
-                        })}
-                    </Fragment>
+                    <Stack spacing={0}>
+                        <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
+                        <Stack spacing={4}>
+                            {values.map((value, idx) => {
+                                if (value.lifeareaId == lifeareaId) {
+                                    return (
+                                        <ValueEditFormSection
+                                            value={value}
+                                            activityExamples={activityExamples}
+                                            handleEditValue={handleEditValue(idx)}
+                                            handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                            key={idx}
+                                        />
+                                    );
+                                }
+                            })}
+                        </Stack>
+                    </Stack>
                 )}
                 <FormSection
                     prompt={
@@ -520,6 +509,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             <AddEditValueDialog
                 open={viewState.openAddValue}
                 isEdit={viewState.editValueIdx >= 0}
+                lifearea={lifeareaContent.name}
                 value={viewState.newValue}
                 examples={valueExamples}
                 handleCancel={handleCancelValue}
