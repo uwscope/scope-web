@@ -8,12 +8,14 @@ import scope.database.patient.safety_plan
 import scope.database.patient.sessions
 import scope.database.patient.values_inventory
 import scope.database.patients
+import scope.database.providers
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
 import scope.testing.fake_data.fixtures_fake_life_areas
 import scope.testing.fake_data.fixtures_fake_patient_profile
+import scope.testing.fake_data.fixtures_fake_provider
 import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
@@ -35,6 +37,16 @@ def populate_database(
         _populate_patient(
             faker_factory=faker_factory,
             patient_collection=patient_collection,
+        )
+
+    # TODO: Pass populate_providers integer as argument.
+    providers_collection = database.get_collection(
+        scope.database.providers.PROVIDERS_COLLECTION
+    )
+    for _ in range(10):
+        _populate_providers(
+            faker_factory=faker_factory,
+            providers_collection=providers_collection,
         )
 
 
@@ -114,3 +126,23 @@ def _populate_patient(
             collection=patient_collection,
             case_review=case_review,
         )
+
+
+def _populate_providers(
+    *,
+    faker_factory: faker.Faker,
+    providers_collection: pymongo.collection.Collection,
+):
+
+    # Obtain necessary document factory
+    fake_provider_factory = (
+        scope.testing.fake_data.fixtures_fake_provider.fake_provider_factory(
+            faker_factory=faker_factory,
+        )
+    )
+
+    # Put appropriate document
+    scope.database.providers.create_provider(
+        collection=providers_collection,
+        provider=fake_provider_factory(),
+    )
