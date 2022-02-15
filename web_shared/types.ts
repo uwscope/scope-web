@@ -5,7 +5,6 @@ import {
     BehavioralStrategyChecklistFlags,
     CancerTreatmentRegimenFlags,
     ClinicCode,
-    ContactType,
     DayOfWeek,
     DayOfWeekFlags,
     DepressionTreatmentStatus,
@@ -188,7 +187,6 @@ export interface IClinicalHistory {
 }
 
 export interface IContact {
-    contactType: ContactType;
     name: string;
     address?: string;
     phoneNumber?: string;

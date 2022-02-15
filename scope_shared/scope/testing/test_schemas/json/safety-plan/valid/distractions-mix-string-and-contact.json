@@ -1,31 +1,27 @@
 {
-	"_type": "safetyPlan",
-	"_rev": 1,
-	"assigned": true,
-	"assignedDate": "2010-01-01T00:00:00Z",
-	"reasonsForLiving": "To stare at Mt. Rainier.",
-	"distractions": [
-		"Love watching TV.",
-		{
-			"contactType": "Person",
-			"name": "Name",
-			"address": "Address",
-			"phoneNumber": "Number"
-		},
-		"Love watching TV.",
-		{
-			"contactType": "Person",
-			"name": "Name",
-			"address": "Address",
-			"phoneNumber": "Number"
-		}
-	],
-	"supporters": [
-		{
-			"contactType": "Person",
-			"name": "Name",
-			"address": "Address",
-			"phoneNumber": "Number"
-		}
-	]
+    "_type": "safetyPlan",
+    "_rev": 1,
+    "assigned": true,
+    "assignedDate": "2010-01-01T00:00:00Z",
+    "reasonsForLiving": "To stare at Mt. Rainier.",
+    "socialDistractions": [
+        {
+            "name": "Name",
+            "address": "Address",
+            "phoneNumber": "Number"
+        },
+        {
+            "name": "Name",
+            "address": "Address",
+            "phoneNumber": "Number"
+        }
+    ],
+    "settingDistractions": ["Love watching TV.", "Love watching TV."],
+    "supporters": [
+        {
+            "name": "Name",
+            "address": "Address",
+            "phoneNumber": "Number"
+        }
+    ]
 }

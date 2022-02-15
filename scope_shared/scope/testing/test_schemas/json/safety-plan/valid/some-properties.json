@@ -6,10 +6,9 @@
 	"reasonsForLiving": "To stare at Mt. Rainier.",
 	"supporters": [
 		{
-			"contactType": "Person",
-			"name": "Name",
-			"address": "Address",
-			"phoneNumber": "Number"
-		}
+            "name": "Name",
+            "address": "Address",
+            "phoneNumber": "Number"
+        }
 	]
 }

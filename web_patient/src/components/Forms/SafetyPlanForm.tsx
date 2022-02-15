@@ -4,7 +4,6 @@ import { Box, Button, Grid, IconButton, Stack, TextField, Typography } from '@mu
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { ContactType } from 'shared/enums';
 import { IContact, ISafetyPlan } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
@@ -74,8 +73,8 @@ const StringListFormSection = (props: IStringListFormSectionProps) => {
     );
 };
 
-const getEmptyContact = (contactType: ContactType) => {
-    return { name: '', phoneNumber: '', address: '', emergencyNumber: '', contactType };
+const getEmptyContact = () => {
+    return { name: '', phoneNumber: '', address: '', emergencyNumber: '' };
 };
 
 interface IContactLabels {
@@ -237,10 +236,10 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
         (dataState as any)[listKey] = list;
     });
 
-    const onAddContactItem = (key: string, contactType: ContactType) =>
+    const onAddContactItem = (key: string) =>
         action(() => {
             const list = (dataState as any)[key] || [];
-            list.push(getEmptyContact(contactType));
+            list.push(getEmptyContact());
             (dataState as any)[key] = list;
         });
 
@@ -312,14 +311,14 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                         contactList={
                             dataState.socialDistractions && dataState.socialDistractions.length > 0
                                 ? dataState.socialDistractions
-                                : [getEmptyContact('Person')]
+                                : [getEmptyContact()]
                         }
                         fieldLabels={{ name: getString('Safetyplan_name'), phoneNumber: getString('Safetyplan_phone') }}
                         onContactItemChange={(change: IContact, idx: number) =>
                             onContactItemChange('socialDistractions', idx, change)
                         }
                         onDeleteContactItem={(idx: number) => onDeleteContactItem('socialDistractions', idx)}
-                        onAddContactItem={onAddContactItem('socialDistractions', 'Person')}
+                        onAddContactItem={onAddContactItem('socialDistractions')}
                     />
 
                     <StringListFormSection
@@ -349,14 +348,14 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                         contactList={
                             dataState.supporters && dataState.supporters.length > 0
                                 ? dataState.supporters
-                                : [getEmptyContact('Person')]
+                                : [getEmptyContact()]
                         }
                         fieldLabels={{ name: getString('Safetyplan_name'), phoneNumber: getString('Safetyplan_phone') }}
                         onContactItemChange={(change: IContact, idx: number) =>
                             onContactItemChange('supporters', idx, change)
                         }
                         onDeleteContactItem={(idx: number) => onDeleteContactItem('supporters', idx)}
-                        onAddContactItem={onAddContactItem('supporters', 'Person')}
+                        onAddContactItem={onAddContactItem('supporters')}
                     />
                 </Stack>
             ),
@@ -376,7 +375,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                         contactList={
                             dataState.professionals && dataState.professionals.length > 0
                                 ? dataState.professionals
-                                : [getEmptyContact('Professional')]
+                                : [getEmptyContact()]
                         }
                         fieldLabels={{
                             name: getString('Safetyplan_clinician_name'),
@@ -387,7 +386,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                             onContactItemChange('professionals', idx, change)
                         }
                         onDeleteContactItem={(idx: number) => onDeleteContactItem('professionals', idx)}
-                        onAddContactItem={onAddContactItem('professionals', 'Professional')}
+                        onAddContactItem={onAddContactItem('professionals')}
                     />
                     <ContactListFormSection
                         prompt={getString('Safetyplan_agency_help_title')}
@@ -395,7 +394,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                         contactList={
                             dataState.urgentServices && dataState.urgentServices.length > 0
                                 ? dataState.urgentServices
-                                : [getEmptyContact('Service')]
+                                : [getEmptyContact()]
                         }
                         fieldLabels={{
                             name: getString('Safetyplan_local_care_name'),
@@ -406,7 +405,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
                             onContactItemChange('urgentServices', idx, change)
                         }
                         onDeleteContactItem={(idx: number) => onDeleteContactItem('urgentServices', idx)}
-                        onAddContactItem={onAddContactItem('urgentServices', 'Service')}
+                        onAddContactItem={onAddContactItem('urgentServices')}
                     />
                 </Stack>
             ),

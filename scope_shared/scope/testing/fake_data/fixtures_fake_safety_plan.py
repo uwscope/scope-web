@@ -15,9 +15,10 @@ OPTIONAL_KEYS = [
     "reasonsForLiving",
     "warningSigns",
     "copingStrategies",
-    "distractions",
+    "socialDistractions",
+    "settingDistractions",
     "supporters",
-    "professionalSupporters",
+    "professionals",
     "urgentServices",
     "safeEnvironment",
 ]
@@ -33,13 +34,6 @@ def fake_safety_plan_factory(
     """
 
     def factory() -> dict:
-        distractions = []
-        distractions.extend(faker_factory.texts(nb_texts=random.randint(1, 5)))
-        distractions.extend(
-            [fake_contact_factory() for _ in range(random.randint(1, 5))]
-        )
-        random.shuffle(distractions)
-
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
@@ -48,9 +42,10 @@ def fake_safety_plan_factory(
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
-            "distractions": distractions,
+            "socialDistractions": [fake_contact_factory() for _ in range(random.randint(1, 5))],
+            "settingDistractions": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "supporters": [fake_contact_factory() for _ in range(random.randint(1, 5))],
-            "professionalSupporters": [
+            "professionals": [
                 fake_contact_factory() for _ in range(random.randint(1, 5))
             ],
             "urgentServices": [

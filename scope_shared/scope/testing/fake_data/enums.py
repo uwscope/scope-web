@@ -3,11 +3,6 @@
 from enum import Enum
 
 
-class ContactType(Enum):
-    Person = "Person"
-    Service = "Service"
-
-
 class ClinicCode(Enum):
     Breast = "Breast"
     Endocrine = "Endocrine"
