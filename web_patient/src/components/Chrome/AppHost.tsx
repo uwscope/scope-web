@@ -1,8 +1,10 @@
 import { Box, CircularProgress, Fade, Typography } from '@mui/material';
+import _ from 'lodash';
 import { observer } from 'mobx-react';
 import { default as React, Fragment, FunctionComponent, useEffect, useState } from 'react';
 import { Login } from 'src/components/Chrome/Login';
-import { useServices } from 'src/services/services';
+import { getPatientServiceInstance } from 'src/services/patientService';
+import { IRootService, ServiceProvider, useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import styled, { withTheme } from 'styled-components';
@@ -21,7 +23,7 @@ const LoginContainer = withTheme(
         [props.theme.breakpoints.up('md')]: {
             width: '50%',
         },
-    }))
+    })),
 );
 
 const ProgressContainer = withTheme(
@@ -38,7 +40,7 @@ const ProgressContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 const FailureContainer = withTheme(
@@ -50,7 +52,7 @@ const FailureContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 export interface IAppHost {
@@ -61,10 +63,12 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const { children } = props;
 
     const [store, setStore] = useState<IRootStore>();
+    const [service, setService] = useState<IRootService>(useServices());
     const [failed, setFailed] = useState(false);
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
-        const { configService } = useServices();
+        const { configService } = service;
 
         configService
             .getServerConfig()
@@ -72,7 +76,6 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 // Create the RootStore
                 const newStore = new RootStore(serverConfig);
                 setStore(newStore);
-                newStore.load();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
@@ -80,19 +83,40 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             });
     }, []);
 
+    useEffect(() => {
+        const { appService, configService } = service;
+
+        if (store?.authStore.isAuthenticated && store?.authStore.currentUserIdentity?.authToken) {
+            const newPatientService = getPatientServiceInstance(
+                [CLIENT_CONFIG.flaskBaseUrl, 'patient', store?.authStore.currentUserIdentity.identityId]
+                    .map((s) => _.trim(s, '/'))
+                    .join('/'),
+            );
+            const newService = {
+                appService,
+                configService,
+                patientService: newPatientService,
+            };
+
+            newPatientService.applyAuth(store?.authStore.currentUserIdentity?.authToken);
+            setService(newService);
+            setReady(true);
+        }
+    }, [store?.authStore.isAuthenticated]);
+
     return (
         <Fragment>
-            {store?.authStore.isAuthenticated && (
+            {ready && store && (
                 <Fragment>
-                    <StoreProvider store={store}>{children}</StoreProvider>
+                    <ServiceProvider service={service}>
+                        <StoreProvider store={store}>{children}</StoreProvider>
+                    </ServiceProvider>
                 </Fragment>
             )}
             <Fade in={!store?.authStore.isAuthenticated} timeout={500}>
                 <LoginContainer>
                     {!!store ? (
-                        <StoreProvider store={store}>
-                            <Login />
-                        </StoreProvider>
+                        <Login authStore={store.authStore} />
                     ) : !failed ? (
                         <ProgressContainer>
                             <CircularProgress />

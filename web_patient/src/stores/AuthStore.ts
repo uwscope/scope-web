@@ -36,7 +36,7 @@ export class AuthStore implements IAuthStore {
     public authData?: any;
 
     // App metadata
-    public appTitle = 'SCOPE Registry';
+    public appTitle = 'SCOPE Patient app';
 
     // Promise queries
     private readonly authQuery: PromiseQuery<CognitoUserSession>;
@@ -68,7 +68,7 @@ export class AuthStore implements IAuthStore {
 
         // Pretend authentication worked
         return {
-            identityId: 'fakeid',
+            identityId: 'cxo6c3pbha',
             name: 'Fake User',
             authToken: 'fake auth token',
         };

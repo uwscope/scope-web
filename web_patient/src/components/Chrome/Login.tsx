@@ -2,8 +2,7 @@ import { Avatar, Button, Checkbox, FormControlLabel, TextField } from '@mui/mate
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import Logo from 'src/assets/scope-logo.png';
-import { AuthState } from 'src/stores/AuthStore';
-import { useStores } from 'src/stores/stores';
+import { AuthState, IAuthStore } from 'src/stores/AuthStore';
 import styled, { withTheme } from 'styled-components';
 
 const Container = withTheme(
@@ -17,7 +16,7 @@ const Container = withTheme(
         width: 400,
         padding: 50,
         [props.theme.breakpoints.down('md')]: {},
-    }))
+    })),
 );
 
 const ButtonContainer = styled.div({
@@ -112,8 +111,8 @@ const PasswordUpdateForm: FunctionComponent<{
     );
 };
 
-export const Login: FunctionComponent = observer(() => {
-    const { authStore } = useStores();
+export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer((props) => {
+    const { authStore } = props;
 
     const onLogin = (username: string, password: string) => {
         authStore.login(username, password);

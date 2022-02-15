@@ -151,18 +151,21 @@ export class PatientStore implements IPatientStore {
     @action
     public async load() {
         const { patientService } = useServices();
-        await this.loadQuery.fromPromise(
-            Promise.allSettled([
-                this.loadScheduledActivitiesQuery.fromPromise(patientService.getScheduledActivities()),
-                this.loadScheduledAssessmentsQuery.fromPromise(patientService.getScheduledAssessments()),
-                this.loadConfigQuery.fromPromise(patientService.getPatientConfig()),
-                this.loadActivitiesQuery.fromPromise(patientService.getActivities()),
-                this.loadValuesInventoryQuery.fromPromise(patientService.getValuesInventory()),
-                this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
-                this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
-                this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
-            ]),
-        );
+
+        if (!this.loadQuery.pending) {
+            await this.loadQuery.fromPromise(
+                Promise.allSettled([
+                    this.loadScheduledActivitiesQuery.fromPromise(patientService.getScheduledActivities()),
+                    this.loadScheduledAssessmentsQuery.fromPromise(patientService.getScheduledAssessments()),
+                    this.loadConfigQuery.fromPromise(patientService.getPatientConfig()),
+                    this.loadActivitiesQuery.fromPromise(patientService.getActivities()),
+                    this.loadValuesInventoryQuery.fromPromise(patientService.getValuesInventory()),
+                    this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
+                    this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
+                    this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
+                ]),
+            );
+        }
     }
 
     @action.bound

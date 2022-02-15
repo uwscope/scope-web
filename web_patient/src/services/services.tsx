@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import React, { createContext, FC, ReactElement, ReactNode, useContext } from 'react';
 import { getAppServiceInstance, IAppService } from 'src/services/appService';
 import { getConfigServiceInstance, IConfigService } from 'src/services/configService';
 import { getPatientServiceInstance, IPatientService } from 'src/services/patientService';
@@ -17,8 +18,20 @@ export interface IRootService {
     configService: IConfigService;
 }
 
-export const useServices = () => ({
+export const ServiceContext = createContext<IRootService>({
     appService,
     patientService,
     configService,
 });
+
+export type ServiceComponent = FC<{
+    service: IRootService;
+    children: ReactNode;
+}>;
+
+export const ServiceProvider: ServiceComponent = ({ children, service }): ReactElement => {
+    console.log('new patient service', service.patientService);
+    return <ServiceContext.Provider value={service}>{children}</ServiceContext.Provider>;
+};
+
+export const useServices = () => useContext(ServiceContext) as IRootService;
