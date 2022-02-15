@@ -23,6 +23,8 @@ import {
 } from 'src/utils/fake';
 
 export interface IPatientService {
+    applyAuth(authToken: string): void;
+
     getValuesInventory(): Promise<IValuesInventory>;
     updateValuesInventory(values: IValuesInventory): Promise<IValuesInventory>;
 
@@ -49,8 +51,10 @@ export interface IPatientService {
 
 class PatientService implements IPatientService {
     private readonly axiosInstance: AxiosInstance;
+    private authRequestInterceptor: number | undefined;
 
     constructor(baseUrl: string) {
+        console.log(baseUrl);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             timeout: 1000,
@@ -60,6 +64,21 @@ class PatientService implements IPatientService {
         this.axiosInstance.interceptors.response.use((response) => {
             handleDates(response.data);
             return response;
+        });
+    }
+
+    public applyAuth(authToken: string) {
+        if (this.authRequestInterceptor) {
+            this.axiosInstance.interceptors.request.eject(this.authRequestInterceptor);
+        }
+
+        this.authRequestInterceptor = this.axiosInstance.interceptors.request.use(async (config) => {
+            const bearer = `Bearer ${authToken}`;
+            if (!!config.headers) {
+                config.headers.Authorization = bearer;
+            }
+
+            return config;
         });
     }
 
