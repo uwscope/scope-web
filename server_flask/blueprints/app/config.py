@@ -1,10 +1,10 @@
+import flask
+import flask_json
 import http
 import json
 import random
 from pathlib import Path
 
-import flask
-import flask_json
 
 APP_CONFIG_ASSESSMENTS_PATH = "./app_config/assessments"
 APP_CONFIG_LIFE_AREAS_PATH = "./app_config/life_areas"
