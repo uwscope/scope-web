@@ -92,6 +92,22 @@ class CancerTreatmentRegimen(Enum):
     Other = "Other"
 
 
+class IdentityType(Enum):
+    Patient = "patient"
+    SocialWorker = "socialWorker"
+    Psychiatrist = "psychiatrist"
+    Oncologist = "oncologist"
+    StudyStaff = "studyStaff"
+
+
+# TODO: Should we separate ProviderIdentityType out from IdentityType?
+class ProviderIdentityType(Enum):
+    SocialWorker = "socialWorker"
+    Psychiatrist = "psychiatrist"
+    Oncologist = "oncologist"
+    StudyStaff = "studyStaff"
+
+
 class Referral(Enum):
     Psychiatry = "Psychiatry"
     Psychology = "Psychology"
