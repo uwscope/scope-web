@@ -1,8 +1,8 @@
 import pymongo.database
-
 import scope.config
 import scope.database.collection_utils
 import scope.database.patients
+import scope.database.providers
 
 
 def ensure_database_exists(
@@ -61,6 +61,7 @@ def ensure_database_initialized(
     """
 
     _initialize_patients_collection(database=database)
+    _initialize_providers_collection(database=database)
 
 
 def _initialize_patients_collection(*, database: pymongo.database.Database):
@@ -86,6 +87,34 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     if result is None:
         scope.database.collection_utils.put_singleton(
             collection=patients_collection,
+            document_type="sentinel",
+            document={},
+        )
+
+
+def _initialize_providers_collection(*, database: pymongo.database.Database):
+    """
+    Initialize a providers collection.
+
+    Initialization should be idempotent.
+    """
+
+    # Ensure a providers collection
+    providers_collection = database.get_collection(
+        scope.database.providers.PROVIDERS_COLLECTION
+    )
+
+    # Ensure the expected index
+    scope.database.collection_utils.ensure_index(collection=providers_collection)
+
+    # Ensure a sentinel document in that collection
+    result = scope.database.collection_utils.get_singleton(
+        collection=providers_collection,
+        document_type="sentinel",
+    )
+    if result is None:
+        scope.database.collection_utils.put_singleton(
+            collection=providers_collection,
             document_type="sentinel",
             document={},
         )
