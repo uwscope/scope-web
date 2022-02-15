@@ -9,7 +9,7 @@
 			"type": "string"
 		},
 		"_type": {
-			"const": "identity"
+			"$ref": "/schemas/enums#/properties/identityType"
 		},
 		"_rev": {
 			"type": "number"
