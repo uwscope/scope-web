@@ -1,12 +1,16 @@
-import flask
-import flask_json
 import http
 import json
+import random
 from pathlib import Path
+
+import flask
+import flask_json
 
 APP_CONFIG_ASSESSMENTS_PATH = "./app_config/assessments"
 APP_CONFIG_LIFE_AREAS_PATH = "./app_config/life_areas"
 APP_CONFIG_RESOURCES_PATH = "./app_config/resources"
+APP_QUOTES_PATH = "./app_config/quotes.json"
+
 
 app_config_blueprint = flask.Blueprint(
     "app_config_blueprint",
@@ -61,3 +65,24 @@ def get_app_config():
     }
 
     return result, http.HTTPStatus.OK
+
+
+@app_config_blueprint.route(
+    "/quote",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_app_quote():
+    """
+    Obtain a quote to be used by client.
+    """
+
+    quotes_path = Path(APP_QUOTES_PATH)
+
+    # Load quotes configurations
+    if quotes_path.match("*.json"):
+        with open(quotes_path) as quotes_file:
+            quotes_json = json.load(quotes_file)
+
+    # TODO: Should the return be {"quote": random.choice(quotes_json)}, http.HTTPStatus.OK
+    return random.choice(quotes_json), http.HTTPStatus.OK
