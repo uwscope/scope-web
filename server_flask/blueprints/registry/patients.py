@@ -60,7 +60,7 @@ def _frankenfake_document(
     )
     if sessions:
         result_document["sessions"] = sessions
-        
+
     case_reviews = scope.database.patient.case_reviews.get_case_reviews(
         collection=patient_collection
     )
