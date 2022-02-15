@@ -21,7 +21,10 @@ def fake_identity_factory(
 
     def factory() -> dict:
         fake_identity = {
-            "_type": "identity",
+            # TODO: Pass identity type as an argument to be able to generate specific identity.
+            "_type": fake_utils.fake_enum_value(
+                scope.testing.fake_data.enums.IdentityType
+            ),
             "identityId": fake_utils.fake_unique_id(),
             "name": faker_factory.name(),
         }
