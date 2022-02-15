@@ -1,10 +1,9 @@
 import base64
 import hashlib
-import pymongo.database
-from typing import List
-from typing import Optional
 import uuid
+from typing import List, Optional
 
+import pymongo.database
 import scope.database.collection_utils
 
 PATIENT_DOCUMENT_TYPE = "patient"
@@ -74,6 +73,65 @@ def create_patient(
         collection=patients_collection,
         document_type=PATIENT_DOCUMENT_TYPE,
         set_id=generated_patient_id,
+        document=patient_document,
+    )
+    patient_document = result.document
+
+    return patient_document
+
+
+# TODO: Remove once auth/login works.
+# This method is similar to create_patient except it takes a static patient_id.
+# Additionally, (1) it drops the patien_<patient_id> collection before re-creating it, and
+# (2) deletes the patient set with `_set_id=patient_id` from patients collection.
+def create_persistent_patient(
+    *,
+    database: pymongo.database.Database,
+    patient_id: str,
+) -> dict:
+    """
+    Create a patient document and collection using provided patient_id, return the patient document.
+    """
+
+    assert patient_id == "persistent"  # Remove if you expect any other patient_id.
+
+    patients_collection = database.get_collection(PATIENTS_COLLECTION)
+
+    # Obtain a collection name for the given patient ID.
+    generated_patient_collection = _patient_collection_name(patient_id=patient_id)
+
+    # Drop the persistent patient collection if it exists.
+    database.drop_collection(generated_patient_collection)
+
+    # Create the patient collection with a sentinel document
+    patient_collection = database.get_collection(generated_patient_collection)
+    result = scope.database.collection_utils.put_singleton(
+        collection=patient_collection,
+        document_type="sentinel",
+        document={},
+    )
+
+    # Create the index on the patient collection
+    scope.database.collection_utils.ensure_index(collection=patient_collection)
+
+    # Atomically store the patient document.
+    # Do this last, because it means all other steps have already succeeded.
+    patient_document = {
+        "collection": generated_patient_collection,
+    }
+
+    # Delete the persistent patient set element from patients collection to avoid duplicate key error.
+    scope.database.collection_utils.delete_set_element(
+        collection=patients_collection,
+        document_type=PATIENT_DOCUMENT_TYPE,
+        set_id=patient_id,
+        destructive=True,
+    )
+
+    result = scope.database.collection_utils.put_set_element(
+        collection=patients_collection,
+        document_type=PATIENT_DOCUMENT_TYPE,
+        set_id=patient_id,
         document=patient_document,
     )
     patient_document = result.document
