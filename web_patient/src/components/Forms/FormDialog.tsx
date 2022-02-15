@@ -212,7 +212,9 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                 <Dialog open={state.submitSuccessOpen} onClose={handleSubmitSuccessClose}>
                     <DialogTitle>{getString('Form_submit_thankyou')}</DialogTitle>
                     <DialogContent>
-                        <DialogContentText>{submitToast}</DialogContentText>
+                        <Typography variant="body1" sx={{ lineHeight: '1.14rem' }}>
+                            {submitToast}
+                        </Typography>
                     </DialogContent>
                     <DialogActions>
                         <Button color="primary" onClick={handleSubmitSuccessClose}>

@@ -30,9 +30,6 @@ def fake_contact_factory(
 
     def factory() -> dict:
         fake_contact = {
-            "contactType": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.ContactType
-            ),
             "name": faker_factory.name(),
             "address": faker_factory.address(),
             "phoneNumber": faker_factory.phone_number(),

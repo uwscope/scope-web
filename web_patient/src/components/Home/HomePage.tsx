@@ -39,6 +39,16 @@ export const HomePage: FunctionComponent = observer(() => {
         );
     });
 
+    const onSafetyPlanClick = action(() => {
+        navigate(Routes.resources);
+        navigate(getFormPath(ParameterValues.form.safetyPlan));
+    });
+
+    const onValuesInventoryClick = action(() => {
+        navigate(Routes.resources);
+        navigate(`${Routes.resources}/${Routes.valuesInventory}`);
+    });
+
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
@@ -49,7 +59,7 @@ export const HomePage: FunctionComponent = observer(() => {
             <Section title={getString('Home_things_title')}>
                 <CompactList>
                     {!!config.assignedValuesInventory && (
-                        <ListItem button component={Link} to={Routes.valuesInventory}>
+                        <ListItem button onClick={onValuesInventoryClick}>
                             <ListItemAvatar>
                                 <Avatar
                                     alt={getString('Home_values_button_text')}
@@ -61,7 +71,7 @@ export const HomePage: FunctionComponent = observer(() => {
                     )}
                     {config.assignedValuesInventory && config.assignedSafetyPlan && <Divider variant="middle" />}
                     {!!config.assignedSafetyPlan && (
-                        <ListItem button>
+                        <ListItem button onClick={onSafetyPlanClick}>
                             <ListItemAvatar>
                                 <Avatar
                                     alt={getString('Home_safety_button_text')}

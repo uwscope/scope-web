@@ -15,23 +15,22 @@ import {
     MenuItem,
     Select,
     SelectChangeEvent,
+    Stack,
     Switch,
     TextField,
     Typography,
 } from '@mui/material';
-import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { DayOfWeekFlags, daysOfWeekFlagValues } from 'shared/enums';
-import { IActivity, ILifeAreaValueActivity, KeyedMap } from 'shared/types';
+import { IActivity, KeyedMap } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import styled from 'styled-components';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
@@ -58,16 +57,16 @@ const getDayString = (day: DayOfWeekFlags) => {
     return 'Unknown';
 };
 
-const TextFieldWithBottomMargin = withTheme(
-    styled(TextField)((props) => ({
-        marginBottom: props.theme.spacing(1),
-    }))
-);
+interface ImportableActivity {
+    activity: string;
+    value: string;
+    lifeareaId: string;
+}
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
-    const { valueActivities, values } = patientStore;
+    const { valuesInventory } = patientStore;
     const { lifeAreas } = appContentConfig;
 
     const activityId = getRouteParameter(Parameters.activityId);
@@ -100,14 +99,25 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         isDeleted: activity?.isDeleted || true,
     }));
 
-    const groupedActivities: KeyedMap<ILifeAreaValueActivity[]> = {};
-    valueActivities.forEach((activity) => {
-        const lifearea = activity.lifeareaId;
+    const values = valuesInventory?.values || [];
+    const groupedActivities: KeyedMap<ImportableActivity[]> = {};
+    let activityCount = 0;
+
+    values.forEach((value) => {
+        const lifearea = value.lifeareaId;
         if (!groupedActivities[lifearea]) {
             groupedActivities[lifearea] = [];
         }
 
-        groupedActivities[lifearea].push(activity);
+        value.activities.forEach((activity) => {
+            groupedActivities[lifearea].push({
+                activity: activity.name,
+                value: value.name,
+                lifeareaId: lifearea,
+            });
+
+            activityCount += groupedActivities[lifearea].length;
+        });
     });
 
     const handleSubmit = action(() => {
@@ -118,12 +128,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         viewState.openActivityDialog = true;
     });
 
-    const handleImportActivityItemClick = action((activity: ILifeAreaValueActivity | undefined) => {
+    const handleImportActivityItemClick = action((activity: ImportableActivity | undefined) => {
         viewState.openActivityDialog = false;
 
         if (!!activity) {
-            dataState.name = activity.name;
-            dataState.value = patientStore.getValueById(activity.valueId)?.name || '';
+            dataState.name = activity.activity;
+            dataState.value = activity.value;
             dataState.lifeareaId = activity.lifeareaId;
         }
     });
@@ -149,13 +159,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const namePage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString('Form_add_activity_describe_name')}
                 help={getString('Form_add_activity_describe_name_help')}
                 content={
                     <Fragment>
-                        <TextFieldWithBottomMargin
+                        <TextField
                             fullWidth
                             value={dataState.name}
                             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -164,9 +174,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             variant="outlined"
                             multiline
                         />
-                        {valueActivities.length > 0 && (
+                        {activityCount > 0 && (
                             <Grid container justifyContent="flex-end">
                                 <Chip
+                                    sx={{ marginTop: 1 }}
                                     variant="outlined"
                                     color="primary"
                                     size="small"
@@ -186,13 +197,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                             {Object.keys(groupedActivities).map((lifearea) => (
                                                 <Fragment key={lifearea}>
                                                     <ListSubheader disableGutters>{lifearea}</ListSubheader>
-                                                    {groupedActivities[lifearea].map((activity) => (
+                                                    {groupedActivities[lifearea].map((activity, idx) => (
                                                         <ListItem
                                                             disableGutters
                                                             button
                                                             onClick={() => handleImportActivityItemClick(activity)}
-                                                            key={activity.id}>
-                                                            <ListItemText primary={activity.name} />
+                                                            key={idx}>
+                                                            <ListItemText primary={activity.activity} />
                                                         </ListItem>
                                                     ))}
                                                 </Fragment>
@@ -212,8 +223,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 help={getString('Form_add_activity_describe_value_help')}
                 content={
                     <Select variant="outlined" value={dataState.value || ''} onChange={handleSelectValue} fullWidth>
-                        {values.map((value) => (
-                            <MenuItem key={value.id} value={value.name}>
+                        {values.map((value, idx) => (
+                            <MenuItem key={idx} value={value.name}>
                                 {value.name}
                             </MenuItem>
                         ))}
@@ -238,11 +249,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Select>
                 }
             />
-        </Fragment>
+        </Stack>
     );
 
     const editPage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString('Form_add_activity_describe_name_label')}
                 content={
@@ -257,13 +268,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString('Form_add_activity_describe_value_label')}
                 content={<TextField fullWidth value={dataState.value} disabled variant="outlined" multiline />}
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString('Form_add_activity_describe_lifearea_label')}
@@ -277,11 +286,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-        </Fragment>
+        </Stack>
     );
 
     const schedulePage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_date_label' : 'Form_add_activity_date')}
                 content={
@@ -303,7 +312,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_time_label' : 'Form_add_activity_time')}
@@ -328,7 +336,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     />
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_reminder_section' : 'Form_add_activity_reminder')}
@@ -353,7 +360,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Grid>
                 }
             />
-
             {dataState.hasReminder && (
                 <FormSection
                     addPaddingTop
@@ -382,11 +388,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     }
                 />
             )}
-        </Fragment>
+        </Stack>
     );
 
     const repetitionPage = (
-        <Fragment>
+        <Stack spacing={4}>
             <FormSection
                 prompt={getString(!!activity ? 'Form_add_activity_repetition_section' : 'Form_add_activity_repetition')}
                 content={
@@ -440,7 +446,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     }
                 />
             )}
-        </Fragment>
+        </Stack>
     );
 
     const pages = [

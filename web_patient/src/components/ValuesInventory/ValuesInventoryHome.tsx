@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DetailPage } from 'src/components/common/DetailPage';
 import { getActivitiesString, getLifeAreaIcon, getValuesString } from 'src/components/ValuesInventory/values';
-import { Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
@@ -33,22 +32,18 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
             <InstructionText paragraph>{getString('Values_inventory_instruction4')}</InstructionText>
             <List>
                 {lifeAreas.map((la, idx) => {
-                    const lifeareaValues = patientStore.values.filter((v) => v.lifeareaId == la.id);
+                    const lifeareaValues =
+                        patientStore.valuesInventory?.values?.filter((v) => v.lifeareaId == la.id) || [];
                     const activitiesCount = lifeareaValues.map((v) => v.activities.length).reduce((l, r) => l + r, 0);
 
                     return (
-                        <Fragment>
-                            <ListItem
-                                disableGutters
-                                button
-                                key={la.id}
-                                component={Link}
-                                to={`/${Routes.valuesInventory}/${la.id}`}>
+                        <Fragment key={la.id}>
+                            <ListItem disableGutters button component={Link} to={`${la.id}`}>
                                 <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
                                 <ListItemText
                                     primary={la.name}
                                     secondary={`${getValuesString(lifeareaValues.length)}; ${getActivitiesString(
-                                        activitiesCount
+                                        activitiesCount,
                                     )}`}
                                 />
                             </ListItem>

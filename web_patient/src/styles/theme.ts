@@ -75,7 +75,7 @@ export default function createAppTheme() {
         },
         breakpoints: {
             values: {
-                phone: 0,
+                phone: 360,
                 tablet: 480,
                 laptop: 1024,
                 desktop: 1280,

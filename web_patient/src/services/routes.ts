@@ -4,12 +4,12 @@ export const Routes = {
     home: 'home',
     careplan: 'careplan',
     progress: 'progress',
-    profile: 'profile',
-    valuesInventory: 'profile/inventory',
-    resources: 'profile/resources',
-    phqProgress: 'progress/phq',
-    gadProgress: 'progress/gad',
-    activityProgress: 'progress/activities',
+    resources: 'resources',
+    valuesInventory: 'inventory',
+    worksheets: 'worksheets',
+    phqProgress: 'phq',
+    gadProgress: 'gad',
+    activityProgress: 'activities',
 };
 
 export const Parameters = {
@@ -26,6 +26,7 @@ export const ParameterValues = {
         activityLog: 'log-activity',
         addActivity: 'add-activity',
         editActivity: 'edit-activity',
+        safetyPlan: 'safety-plan',
     },
 };
 
@@ -57,20 +58,13 @@ export const getFormLink = (formId: string, query?: { [key: string]: string }) =
     };
 };
 
-export const getFormPath = (formId: string, query: { [key: string]: string }) => {
+export const getFormPath = (formId: string, query: { [key: string]: string } = {}) => {
     const link = getFormLink(formId, query);
     return `${link.pathname}${link.search}`;
 };
 
 export const getLevel = (path: string) => {
     return path.split('/').length;
-};
-
-export const getLifeAreaLink = (lifearea: string) => {
-    return {
-        pathname: `${Routes.valuesInventory}/${lifearea}`,
-        relative: false,
-    };
 };
 
 export const getResourceLink = (filename: string) => {

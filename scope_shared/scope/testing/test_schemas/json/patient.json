@@ -1,120 +1,128 @@
 {
-	"_type": "patient",
-	"identity": {
-		"_type": "identity",
-		"_rev": 1,
-		"name": "Harry Potter",
-		"identityId": "Lily Potter's Son"
-	},
-	"patientProfile": {
-		"_type": "patientProfile",
-		"_rev": 1,
-		"name": "patientName",
-		"MRN": "mrn",
-		"clinicCode": "Transplant – Auto",
-		"birthdate": "1991-08-19T00:00:00Z",
-		"sex": "Male",
-		"discussionFlag": {
-			"Flag as safety risk": true,
-			"Flag for discussion": false
-		},
-		"followupSchedule": "1-week follow-up",
-		"depressionTreatmentStatus": "CoCM"
-	},
-	"clinicalHistory": {
-		"_type": "clinicalHistory",
-		"_rev": 1,
-		"primaryCancerDiagnosis": "test",
-		"currentTreatmentRegimen": {
-			"Surgery": true,
-			"Chemotherapy": true,
-			"Radiation": true,
-			"Stem Cell Transplant": true,
-			"Immunotherapy": true,
-			"CAR-T": true,
-			"Endocrine": true,
-			"Surveillance": true
-		}
-	},
-	"valuesInventory": {
-		"_type": "valuesInventory",
-		"_rev": 1,
-		"assigned": true,
-		"assignedDate": "2012-12-12T00:00:00Z",
-		"values": [
-			{
-				"name": "name",
-				"dateCreated": "2012-12-12T00:00:00Z",
-				"dateEdited": "2012-12-12T00:00:00Z",
-				"lifeareaId": "",
-				"activities": [
-					{
-						"name": "name",
-						"dateCreated": "2012-12-12T00:00:00Z",
-						"dateEdited": "2012-12-12T00:00:00Z"
-					}
-				]
-			}
-		]
-	},
-	"safetyPlan": {
-		"_type": "safetyPlan",
-		"_rev": 1,
-		"assigned": true,
-		"assignedDate": "1991-08-19T00:00:00Z",
-		"reasonsForLiving": "reasons",
-		"warningSigns": ["warningSign1", "warningSign2"],
-		"copingStrategies": ["copingStrategies1", "copingStrategies2"],
-		"distractions": ["distractions1", "distractions2"],
-		"supporters": [
-			{
-				"contactType": "Person",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			},
-			{
-				"contactType": "Service",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			}
-		],
-		"professionalSupporters": [
-			{
-				"contactType": "Person",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			},
-			{
-				"contactType": "Service",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			}
-		],
-		"urgentServices": [
-			{
-				"contactType": "Person",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			},
-			{
-				"contactType": "Service",
-				"name": "name",
-				"address": "addresss",
-				"phoneNumber": "phoneNumber",
-				"emergencyNumber": "emergencyNumber"
-			}
-		],
-		"safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
-	},
-	"sessions": []
+    "_type": "patient",
+    "identity": {
+        "_type": "identity",
+        "_rev": 1,
+        "name": "Harry Potter",
+        "identityId": "Lily Potter's Son"
+    },
+    "patientProfile": {
+        "_type": "patientProfile",
+        "_rev": 1,
+        "name": "patientName",
+        "MRN": "mrn",
+        "clinicCode": "Transplant – Auto",
+        "birthdate": "1991-08-19T00:00:00Z",
+        "sex": "Male",
+        "discussionFlag": {
+            "Flag as safety risk": true,
+            "Flag for discussion": false
+        },
+        "followupSchedule": "1-week follow-up",
+        "depressionTreatmentStatus": "CoCM"
+    },
+    "clinicalHistory": {
+        "_type": "clinicalHistory",
+        "_rev": 1,
+        "primaryCancerDiagnosis": "test",
+        "currentTreatmentRegimen": {
+            "Surgery": true,
+            "Chemotherapy": true,
+            "Radiation": true,
+            "Stem Cell Transplant": true,
+            "Immunotherapy": true,
+            "CAR-T": true,
+            "Endocrine": true,
+            "Surveillance": true
+        }
+    },
+    "valuesInventory": {
+        "_type": "valuesInventory",
+        "_rev": 1,
+        "assigned": true,
+        "assignedDate": "2012-12-12T00:00:00Z",
+        "values": [
+            {
+                "name": "name",
+                "dateCreated": "2012-12-12T00:00:00Z",
+                "dateEdited": "2012-12-12T00:00:00Z",
+                "lifeareaId": "",
+                "activities": [
+                    {
+                        "name": "name",
+                        "dateCreated": "2012-12-12T00:00:00Z",
+                        "dateEdited": "2012-12-12T00:00:00Z"
+                    }
+                ]
+            }
+        ]
+    },
+    "safetyPlan": {
+        "_type": "safetyPlan",
+        "_rev": 1,
+        "assigned": true,
+        "assignedDate": "1991-08-19T00:00:00Z",
+        "reasonsForLiving": "reasons",
+        "warningSigns": ["warningSign1", "warningSign2"],
+        "copingStrategies": ["copingStrategies1", "copingStrategies2"],
+        "socialDistractions": [
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            },
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            }
+        ],
+        "settingDistractions": ["setting distractions1", "setting distractions2"],
+        "supporters": [
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            },
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            }
+        ],
+        "professionals": [
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            },
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            }
+        ],
+        "urgentServices": [
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            },
+            {
+                "name": "name",
+                "address": "addresss",
+                "phoneNumber": "phoneNumber",
+                "emergencyNumber": "emergencyNumber"
+            }
+        ],
+        "safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
+    },
+    "sessions": []
 }

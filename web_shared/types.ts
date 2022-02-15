@@ -5,7 +5,6 @@ import {
     BehavioralStrategyChecklistFlags,
     CancerTreatmentRegimenFlags,
     ClinicCode,
-    ContactType,
     DayOfWeek,
     DayOfWeekFlags,
     DepressionTreatmentStatus,
@@ -188,7 +187,6 @@ export interface IClinicalHistory {
 }
 
 export interface IContact {
-    contactType: ContactType;
     name: string;
     address?: string;
     phoneNumber?: string;
@@ -197,21 +195,22 @@ export interface IContact {
 
 export interface ISafetyPlan {
     assigned: boolean;
-    assignedDate: Date;
+    assignedDate?: Date;
     lastUpdatedDate?: Date;
     reasonsForLiving?: string;
     warningSigns?: string[];
     copingStrategies?: string[];
-    distractions?: (string | IContact)[];
+    socialDistractions?: IContact[];
+    settingDistractions?: string[];
     supporters?: IContact[];
-    professionalSupporters?: IContact[];
+    professionals?: IContact[];
     urgentServices?: IContact[];
     safeEnvironment?: string[];
 }
 
 export interface IValuesInventory {
     assigned: boolean;
-    assignedDate: Date;
+    assignedDate?: Date;
     lastUpdatedDate?: Date;
     values?: ILifeAreaValue[];
 }
@@ -323,18 +322,3 @@ export interface IResourceItem {
 export const isSession = (session: ISession | ICaseReview): session is ISession => {
     return (session as ISession)?.sessionId !== undefined;
 };
-
-//
-// James 2/12: These are temporary so the patient app will compile.
-//             Jina should remove when she finishes type edits in the patient app.
-//
-
-export interface ILifeAreaValue {
-    id: string;
-}
-
-export interface ILifeAreaValueActivity {
-    id: string;
-    valueId: string;
-    lifeareaId: string;
-}

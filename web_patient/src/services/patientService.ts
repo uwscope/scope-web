@@ -5,26 +5,26 @@ import {
     IActivity,
     IActivityLog,
     IAssessmentLog,
-    ILifeAreaValue,
     IMoodLog,
     IPatientConfig,
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
+    IValuesInventory,
 } from 'shared/types';
 import {
     getFakeActivities,
     getFakeAssessmentLog,
-    getFakeLifeareaValues,
     getFakePatientConfig,
     getFakeSafetyPlan,
     getFakeScheduledActivities,
     getFakeScheduledAssessments,
+    getFakeValuesInventory,
 } from 'src/utils/fake';
 
 export interface IPatientService {
-    getValuesInventory(): Promise<ILifeAreaValue[]>;
-    updateValuesInventory(values: ILifeAreaValue[]): Promise<ILifeAreaValue[]>;
+    getValuesInventory(): Promise<IValuesInventory>;
+    updateValuesInventory(values: IValuesInventory): Promise<IValuesInventory>;
 
     getSafetyPlan(): Promise<ISafetyPlan>;
     updateSafetyPlan(safetyPlan: ISafetyPlan): Promise<ISafetyPlan>;
@@ -63,23 +63,24 @@ class PatientService implements IPatientService {
         });
     }
 
-    public async getValuesInventory(): Promise<ILifeAreaValue[]> {
+    public async getValuesInventory(): Promise<IValuesInventory> {
         // Work around since backend doesn't exist
         try {
-            const response = await this.axiosInstance.get<ILifeAreaValue[]>(`/values`);
+            const response = await this.axiosInstance.get<IValuesInventory>(`/values`);
             return response.data;
         } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(getFakeLifeareaValues()), 500));
+            return await new Promise((resolve) => setTimeout(() => resolve(getFakeValuesInventory()), 500));
         }
     }
 
-    public async updateValuesInventory(values: ILifeAreaValue[]): Promise<ILifeAreaValue[]> {
+    public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
         // Work around since backend doesn't exist
+        inventory.lastUpdatedDate = new Date();
         try {
-            const response = await this.axiosInstance.put<ILifeAreaValue[]>(`/values`, values);
+            const response = await this.axiosInstance.put<IValuesInventory>(`/values`, inventory);
             return response.data;
         } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(values), 500));
+            return await new Promise((resolve) => setTimeout(() => resolve(inventory), 500));
         }
     }
 

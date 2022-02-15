@@ -184,9 +184,6 @@ export const daysOfWeekFlagValues = [
 export const activitySuccessTypeValues = ['Yes', 'SomethingElse', 'No'];
 export type ActivitySuccessType = typeof activitySuccessTypeValues[number];
 
-export const contactTypeValues = ['Person', 'Service'];
-export type ContactType = typeof contactTypeValues[number];
-
 export type BAChecklistFlags = { [item in BehavioralActivationChecklistItem]: boolean };
 export type BehavioralStrategyChecklistFlags = { [item in BehavioralStrategyChecklistItem]: boolean };
 export type ReferralStatusFlags = { [item in Referral]: ReferralStatus };
