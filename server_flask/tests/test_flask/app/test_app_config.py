@@ -33,3 +33,24 @@ def test_app_config(
     assert "assessments" in config["content"]
     assert "lifeAreas" in config["content"]
     assert "resources" in config["content"]
+
+
+def test_app_quote(
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    # Obtain a session
+    session = flask_session_unauthenticated_factory()
+
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            "app/quote",
+        ),
+    )
+
+    assert response.ok
+
+    quote = response.json()
+
+    assert type(quote) == str

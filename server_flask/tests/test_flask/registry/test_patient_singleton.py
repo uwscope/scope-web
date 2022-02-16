@@ -1,13 +1,13 @@
 import copy
 from dataclasses import dataclass
 import http
+import pytest
+import requests
 from typing import Callable
 from urllib.parse import urljoin
 
-import pytest
-import requests
 import scope.config
-import scope.database.collection_utils
+import scope.database.collection_utils as collection_utils
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
@@ -23,13 +23,22 @@ class ConfigTestPatientSingleton:
     name: str
     document_factory_fixture_name: str
     database_get_function: Callable[[...], dict]
-    database_put_function: Callable[[...], scope.database.collection_utils.PutResult]
+    database_put_function: Callable[[...], collection_utils.PutResult]
     database_put_function_document_parameter_name: str
     flask_query_type: str
     flask_response_document_key: str
 
 
 TEST_CONFIGS = [
+    ConfigTestPatientSingleton(
+        name="clinicalhistory",
+        document_factory_fixture_name="data_fake_clinical_history_factory",
+        database_get_function=scope.database.patient.clinical_history.get_clinical_history,
+        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
+        database_put_function_document_parameter_name="clinical_history",
+        flask_query_type="clinicalhistory",
+        flask_response_document_key="clinicalhistory",
+    ),
     ConfigTestPatientSingleton(
         name="profile",
         document_factory_fixture_name="data_fake_patient_profile_factory",
@@ -47,15 +56,6 @@ TEST_CONFIGS = [
         database_put_function_document_parameter_name="safety_plan",
         flask_query_type="safetyplan",
         flask_response_document_key="safetyplan",
-    ),
-    ConfigTestPatientSingleton(
-        name="clinicalhistory",
-        document_factory_fixture_name="data_fake_clinical_history_factory",
-        database_get_function=scope.database.patient.clinical_history.get_clinical_history,
-        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
-        database_put_function_document_parameter_name="clinical_history",
-        flask_query_type="clinicalhistory",
-        flask_response_document_key="clinicalhistory",
     ),
     ConfigTestPatientSingleton(
         name="valuesinventory",
