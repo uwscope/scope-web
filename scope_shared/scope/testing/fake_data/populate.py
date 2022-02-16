@@ -28,7 +28,15 @@ def populate_database(
 ):
     faker_factory = faker.Faker(locale="la")
 
-    for patient_count in range(populate_patients):
+    patient_current = scope.database.patients.create_patient(database=database, patient_id="persistent")
+    patient_collection = database.get_collection(patient_current["collection"])
+
+    _populate_patient(
+        faker_factory=faker_factory,
+        patient_collection=patient_collection,
+    )
+
+    for patient_count in range(populate_patients - 1):
         patient_current = scope.database.patients.create_patient(database=database)
         patient_collection = database.get_collection(patient_current["collection"])
 
