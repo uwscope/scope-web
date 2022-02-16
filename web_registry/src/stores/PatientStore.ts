@@ -64,7 +64,7 @@ export class PatientStore implements IPatientStore {
     // Values inventory and safety plan
     public valuesInventory: IValuesInventory = {
         assigned: false,
-        assignedDate: new Date(),
+        assignedDateTime: new Date(),
     };
 
     public safetyPlan: ISafetyPlan = {
@@ -105,7 +105,7 @@ export class PatientStore implements IPatientStore {
         // Values inventory and safety plan
         this.valuesInventory = patient.valuesInventory || {
             assigned: false,
-            assignedDate: new Date(),
+            assignedDateTime: new Date(),
             values: getFakeLifeareaValues(),
         };
 
@@ -187,7 +187,7 @@ export class PatientStore implements IPatientStore {
         const { registryService } = useServices();
         const promise = registryService.updatePatientValuesInventory(this.recordId, {
             assigned: true,
-            assignedDate: new Date(),
+            assignedDateTime: new Date(),
         });
 
         this.runPromiseAfterLoad(promise);

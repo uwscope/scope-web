@@ -5,7 +5,8 @@ import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
-import { DetailPage } from 'src/components/common/DetailPage';
+import ContentLoader from 'src/components/Chrome/ContentLoader';
+import DetailPage from 'src/components/common/DetailPage';
 import { getActivitiesString, getLifeAreaIcon, getValuesString } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
@@ -30,28 +31,35 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
             <InstructionText paragraph>{getString('Values_inventory_instruction2')}</InstructionText>
             <InstructionText paragraph>{getString('Values_inventory_instruction3')}</InstructionText>
             <InstructionText paragraph>{getString('Values_inventory_instruction4')}</InstructionText>
-            <List>
-                {lifeAreas.map((la, idx) => {
-                    const lifeareaValues =
-                        patientStore.valuesInventory?.values?.filter((v) => v.lifeareaId == la.id) || [];
-                    const activitiesCount = lifeareaValues.map((v) => v.activities.length).reduce((l, r) => l + r, 0);
+            <ContentLoader
+                state={patientStore.loadValuesInventoryState}
+                name="values & activities inventory"
+                onRetry={() => patientStore.loadValuesInventory()}>
+                <List>
+                    {lifeAreas.map((la, idx) => {
+                        const lifeareaValues =
+                            patientStore.valuesInventory?.values?.filter((v) => v.lifeareaId == la.id) || [];
+                        const activitiesCount = lifeareaValues
+                            .map((v) => v.activities.length)
+                            .reduce((l, r) => l + r, 0);
 
-                    return (
-                        <Fragment key={la.id}>
-                            <ListItem disableGutters button component={Link} to={`${la.id}`}>
-                                <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
-                                <ListItemText
-                                    primary={la.name}
-                                    secondary={`${getValuesString(lifeareaValues.length)}; ${getActivitiesString(
-                                        activitiesCount,
-                                    )}`}
-                                />
-                            </ListItem>
-                            {idx < lifeAreas.length - 1 && <Divider variant="middle" />}
-                        </Fragment>
-                    );
-                })}
-            </List>
+                        return (
+                            <Fragment key={la.id}>
+                                <ListItem disableGutters button component={Link} to={`${la.id}`}>
+                                    <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
+                                    <ListItemText
+                                        primary={la.name}
+                                        secondary={`${getValuesString(lifeareaValues.length)}; ${getActivitiesString(
+                                            activitiesCount,
+                                        )}`}
+                                    />
+                                </ListItem>
+                                {idx < lifeAreas.length - 1 && <Divider variant="middle" />}
+                            </Fragment>
+                        );
+                    })}
+                </List>
+            </ContentLoader>
         </DetailPage>
     );
 });

@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
+import _ from 'lodash';
 import { random } from 'lodash';
+import { IValuesInventoryResponse } from 'shared/serviceTypes';
 import { handleDates } from 'shared/time';
 import {
     IActivity,
@@ -19,7 +21,6 @@ import {
     getFakeSafetyPlan,
     getFakeScheduledActivities,
     getFakeScheduledAssessments,
-    getFakeValuesInventory,
 } from 'src/utils/fake';
 
 export interface IPatientService {
@@ -54,7 +55,6 @@ class PatientService implements IPatientService {
     private authRequestInterceptor: number | undefined;
 
     constructor(baseUrl: string) {
-        console.log(baseUrl);
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
             timeout: 1000,
@@ -83,24 +83,13 @@ class PatientService implements IPatientService {
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IValuesInventory>(`/values`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(getFakeValuesInventory()), 500));
-        }
+        const response = await this.axiosInstance.get<IValuesInventoryResponse>(`/valuesinventory`);
+        return response.data?.valuesinventory;
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
-        // Work around since backend doesn't exist
-        inventory.lastUpdatedDate = new Date();
-        try {
-            const response = await this.axiosInstance.put<IValuesInventory>(`/values`, inventory);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(inventory), 500));
-        }
+        const response = await this.axiosInstance.put<IValuesInventory>(`/valuesinventory`, inventory);
+        return response.data;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
@@ -254,4 +243,5 @@ class PatientService implements IPatientService {
     }
 }
 
-export const getPatientServiceInstance = (baseUrl: string) => new PatientService(baseUrl) as IPatientService;
+export const getPatientServiceInstance = (baseUrl: string, patientId: string) =>
+    new PatientService([baseUrl, 'patient', patientId].map((s) => _.trim(s, '/')).join('/')) as IPatientService;

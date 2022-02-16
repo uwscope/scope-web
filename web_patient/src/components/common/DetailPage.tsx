@@ -57,3 +57,5 @@ export const DetailPage: FunctionComponent<IDetailPageProps> = (props) => {
         </PageContainer>
     );
 };
+
+export default DetailPage;

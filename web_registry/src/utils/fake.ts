@@ -37,8 +37,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             lifeareaId,
             enjoyment: random(1, 10),
             importance: random(1, 10),
-            dateCreated: new Date(),
-            dateEdited: new Date(),
+            createdDateTime: new Date(),
+            editedDateTime: new Date(),
         } as ILifeAreaValueActivity,
         {
             id: `activity for ${lifeareaId}-${valueId} 2`,
@@ -46,8 +46,8 @@ export const getFakeLifeareaValueActivities = (lifeareaId: string, valueId: stri
             lifeareaId,
             enjoyment: random(1, 10),
             importance: random(1, 10),
-            dateCreated: new Date(),
-            dateEdited: new Date(),
+            createdDateTime: new Date(),
+            editedDateTime: new Date(),
         } as ILifeAreaValueActivity,
     ];
 };
