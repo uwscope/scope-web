@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
+import { IQuoteResponse } from 'shared/serviceTypes';
 import { IAppConfig } from 'shared/types';
-import { getQuote } from 'src/services/quotes';
 
 export interface IAppService {
     getAppConfig(): Promise<IAppConfig>;
@@ -27,14 +27,8 @@ class AppService implements IAppService {
     }
 
     public async getInspirationalQuote(): Promise<string> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<string>(`/quote`);
-            return response.data;
-        } catch (error) {
-            const quote = getQuote();
-            return await new Promise((resolve) => setTimeout(() => resolve(quote), 1000));
-        }
+        const response = await this.axiosInstance.get<IQuoteResponse>(`/quote`);
+        return response.data?.quote?.quote;
     }
 }
 

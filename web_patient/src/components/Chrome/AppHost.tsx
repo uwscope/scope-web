@@ -4,7 +4,7 @@ import { runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import { default as React, Fragment, FunctionComponent, useEffect } from 'react';
 import { Login } from 'src/components/Chrome/Login';
-import { getPatientServiceInstance } from 'src/services/patientService';
+import { getPatientServiceInstance } from 'shared/patientService';
 import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';

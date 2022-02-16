@@ -73,7 +73,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     React.useEffect(
         action(() => {
             if (currentPatient) {
-                currentPatient.getPatientData();
+                currentPatient.load();
             }
         }),
         []

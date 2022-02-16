@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from 'src/App';
 import createAppTheme from 'src/styles/theme';
-import { isDev } from 'src/utils/env';
+import { isDev } from 'shared/env';
 
 declare module '@mui/styles/defaultTheme' {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
