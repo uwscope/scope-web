@@ -52,6 +52,7 @@ def get_app_config():
                 config_json = json.load(config_file)
                 content_resources.append(config_json)
 
+    # TODO: This should be a "config" object containing these fields
     result = {
         "auth": {
             "poolid": flask.current_app.config["COGNITO_POOLID"],
@@ -64,7 +65,7 @@ def get_app_config():
         },
     }
 
-    return result, http.HTTPStatus.OK
+    return result
 
 
 @app_config_blueprint.route(
@@ -84,5 +85,8 @@ def get_app_quote():
         with open(quotes_path) as quotes_file:
             quotes_json = json.load(quotes_file)
 
-    # TODO: Should the return be {"quote": random.choice(quotes_json)}, http.HTTPStatus.OK
-    return random.choice(quotes_json), http.HTTPStatus.OK
+    return {
+        "quote": {
+            "quote": random.choice(quotes_json)
+        }
+    }
