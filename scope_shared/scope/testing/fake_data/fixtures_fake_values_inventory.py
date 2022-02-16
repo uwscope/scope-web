@@ -11,13 +11,8 @@ import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS_VALUES_INVENTORY = [
-    "lastUpdatedDate",
+    "lastUpdatedDateTime",
     "values",
-]
-
-OPTIONAL_KEYS_ACTIVITY = [
-    "enjoyment",
-    "importance",
 ]
 
 
@@ -32,21 +27,15 @@ def _fake_activity(
 
     fake_activity = {
         "name": faker_factory.text(),
-        "dateCreated": scope.database.format_utils.format_date(
-            faker_factory.date_object()
+        "createdDateTime": scope.database.format_utils.format_date(
+            faker_factory.date_time()
         ),
-        "dateEdited": scope.database.format_utils.format_date(
-            faker_factory.date_object()
+        "editedDateTime": scope.database.format_utils.format_date(
+            faker_factory.date_time()
         ),
-        "enjoyment": random.randint(1, 5),
-        "importance": random.randint(1, 5),
+        "enjoyment": random.randint(1, 10),
+        "importance": random.randint(1, 10),
     }
-
-    # Remove a randomly sampled subset of optional parameters.
-    fake_activity = fake_utils.fake_optional(
-        document=fake_activity,
-        optional_keys=OPTIONAL_KEYS_ACTIVITY,
-    )
 
     return fake_activity
 
@@ -63,11 +52,11 @@ def _fake_value(
 
     return {
         "name": faker_factory.text(),
-        "dateCreated": scope.database.format_utils.format_date(
-            faker_factory.date_object()
+        "createdDateTime": scope.database.format_utils.format_date(
+            faker_factory.date_time()
         ),
-        "dateEdited": scope.database.format_utils.format_date(
-            faker_factory.date_object()
+        "editedDateTime": scope.database.format_utils.format_date(
+            faker_factory.date_time()
         ),
         "lifeareaId": fake_life_area["id"],
         "activities": [
@@ -94,11 +83,11 @@ def fake_values_inventory_factory(
         fake_values_inventory = {
             "_type": "valuesInventory",
             "assigned": random.choice([True, False]),
-            "assignedDate": scope.database.format_utils.format_date(
-                faker_factory.date_object()
+            "assignedDateTime": scope.database.format_utils.format_date(
+                faker_factory.date_time()
             ),
-            "lastUpdatedDate": scope.database.format_utils.format_date(
-                faker_factory.date_object()
+            "lastUpdatedDateTime": scope.database.format_utils.format_date(
+                faker_factory.date_time()
             ),
             "values": [
                 _fake_value(
