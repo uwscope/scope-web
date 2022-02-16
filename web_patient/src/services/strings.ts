@@ -11,6 +11,7 @@ const _strings = {
     Form_button_ok: 'Okay',
     Form_button_delete: 'Delete',
     Form_submit_thankyou: 'Thank you',
+    Form_error_text: 'Sorry, there was an error processing your request. Please try again.',
 
     Navigation_home: 'Home',
     Navigation_careplan: 'Care plan',

@@ -68,7 +68,7 @@ export class AuthStore implements IAuthStore {
 
         // Pretend authentication worked
         return {
-            identityId: 'cxo6c3pbha',
+            identityId: '7ja2mhl5py',
             name: 'Fake User',
             authToken: 'fake auth token',
         };

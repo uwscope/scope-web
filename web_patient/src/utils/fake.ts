@@ -28,7 +28,7 @@ const lorem = new LoremIpsum({
 export const getFakeValuesInventory = (): IValuesInventory => {
     return {
         assigned: true,
-        assignedDate: new Date(),
+        assignedDateTime: new Date(),
         values: [
             {
                 lifeareaId: 'education',
@@ -42,7 +42,7 @@ export const getFakeValuesInventory = (): IValuesInventory => {
 export const getFakeSafetyPlan = (): ISafetyPlan => {
     return {
         assigned: true,
-        assignedDate: addDays(new Date(), -random(1, 14)),
+        assignedDateTime: addDays(new Date(), -random(1, 14)),
     } as ISafetyPlan;
 };
 

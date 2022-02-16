@@ -1,10 +1,11 @@
 import { Box, CircularProgress, Fade, Typography } from '@mui/material';
 import _ from 'lodash';
-import { observer } from 'mobx-react';
-import { default as React, Fragment, FunctionComponent, useEffect, useState } from 'react';
+import { runInAction } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
+import { default as React, Fragment, FunctionComponent, useEffect } from 'react';
 import { Login } from 'src/components/Chrome/Login';
 import { getPatientServiceInstance } from 'src/services/patientService';
-import { IRootService, ServiceProvider, useServices } from 'src/services/services';
+import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import styled, { withTheme } from 'styled-components';
@@ -62,62 +63,61 @@ export interface IAppHost {
 export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const { children } = props;
 
-    const [store, setStore] = useState<IRootStore>();
-    const [service, setService] = useState<IRootService>(useServices());
-    const [failed, setFailed] = useState(false);
-    const [ready, setReady] = useState(false);
+    const state = useLocalObservable<{
+        store: IRootStore | undefined;
+        failed: boolean;
+        ready: boolean;
+    }>(() => ({
+        store: undefined,
+        failed: false,
+        ready: false,
+    }));
 
     useEffect(() => {
-        const { configService } = service;
+        const { configService } = useServices();
 
         configService
             .getServerConfig()
             .then((serverConfig) => {
                 // Create the RootStore
                 const newStore = new RootStore(serverConfig);
-                setStore(newStore);
+                runInAction(() => {
+                    state.store = newStore;
+                });
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
-                setFailed(true);
+                runInAction(() => {
+                    state.failed = true;
+                });
             });
     }, []);
 
     useEffect(() => {
-        const { appService, configService } = service;
-
-        if (store?.authStore.isAuthenticated && store?.authStore.currentUserIdentity?.authToken) {
-            const newPatientService = getPatientServiceInstance(
-                [CLIENT_CONFIG.flaskBaseUrl, 'patient', store?.authStore.currentUserIdentity.identityId]
-                    .map((s) => _.trim(s, '/'))
-                    .join('/'),
-            );
-            const newService = {
-                appService,
-                configService,
-                patientService: newPatientService,
-            };
-
-            newPatientService.applyAuth(store?.authStore.currentUserIdentity?.authToken);
-            setService(newService);
-            setReady(true);
-        }
-    }, [store?.authStore.isAuthenticated]);
+        runInAction(() => {
+            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.authToken) {
+                const newPatientService = getPatientServiceInstance(
+                    CLIENT_CONFIG.flaskBaseUrl,
+                    state.store?.authStore.currentUserIdentity?.identityId,
+                );
+                state.store?.createPatientStore(newPatientService);
+                state.ready = true;
+            }
+        });
+    }, [state.store?.authStore.isAuthenticated]);
 
     return (
         <Fragment>
-            {ready && store && (
+            {state.ready && state.store && (
                 <Fragment>
-                    <ServiceProvider service={service}>
-                        <StoreProvider store={store}>{children}</StoreProvider>
-                    </ServiceProvider>
+                    <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
-            <Fade in={!store?.authStore.isAuthenticated} timeout={500}>
+            <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <LoginContainer>
-                    {!!store ? (
-                        <Login authStore={store.authStore} />
-                    ) : !failed ? (
+                    {!!state.store ? (
+                        <Login authStore={state.store.authStore} />
+                    ) : !state.failed ? (
                         <ProgressContainer>
                             <CircularProgress />
                             <Box sx={{ height: 40 }} />

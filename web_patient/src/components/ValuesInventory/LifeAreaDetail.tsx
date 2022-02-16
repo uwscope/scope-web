@@ -3,10 +3,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import {
     Box,
     Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     FormControl,
     Grid,
     IconButton,
@@ -25,20 +21,32 @@ import React, { FunctionComponent } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ILifeAreaValue, ILifeAreaValueActivity, IValuesInventory } from 'shared/types';
 import { DetailPage } from 'src/components/common/DetailPage';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getActivityDetailText } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
 interface IValueEditFormSection {
+    error: boolean;
+    loading: boolean;
     value: ILifeAreaValue;
     activityExamples: string[];
     handleEditValue: () => void;
-    handleSaveValueActivities: (newValue: ILifeAreaValue) => void;
+    handleCancelEditActivity: () => void;
+    handleSaveValueActivities: (newValue: ILifeAreaValue) => Promise<void>;
 }
 
 const ValueEditFormSection = observer((props: IValueEditFormSection) => {
-    const { value, activityExamples, handleEditValue, handleSaveValueActivities } = props;
+    const {
+        error,
+        loading,
+        value,
+        activityExamples,
+        handleEditValue,
+        handleCancelEditActivity,
+        handleSaveValueActivities,
+    } = props;
 
     const viewState = useLocalObservable<{
         openAddActivity: boolean;
@@ -58,7 +66,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         viewState.editActivityIdx = idx;
     });
 
-    const handleSaveActivity = action((newActivity: ILifeAreaValueActivity) => {
+    const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
         const newValue = { ...toJS(value) };
         newValue.activities = newValue.activities || [];
 
@@ -68,24 +76,33 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             newValue.activities.push(newActivity);
         }
 
-        handleSaveValueActivities(newValue);
+        await handleSaveValueActivities(newValue);
 
-        viewState.openAddActivity = false;
+        runInAction(() => {
+            if (!error) {
+                viewState.openAddActivity = false;
+            }
+        });
     });
 
-    const handleDeleteActivity = action(() => {
+    const handleDeleteActivity = action(async () => {
         const newValue = { ...toJS(value) };
         newValue.activities = newValue.activities || [];
 
         if (viewState.editActivityIdx >= 0) {
             newValue.activities.splice(viewState.editActivityIdx, 1);
-            handleSaveValueActivities(newValue);
+            await handleSaveValueActivities(newValue);
         }
 
-        viewState.openAddActivity = false;
+        runInAction(() => {
+            if (!error) {
+                viewState.openAddActivity = false;
+            }
+        });
     });
 
     const handleCancelActivity = action(() => {
+        handleCancelEditActivity();
         viewState.openAddActivity = false;
     });
 
@@ -132,6 +149,8 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             </Stack>
             {viewState.openAddActivity && (
                 <AddEditActivityDialog
+                    error={error}
+                    loading={loading}
                     open={viewState.openAddActivity}
                     value={value.name}
                     activity={viewState.editActivityIdx >= 0 ? value.activities[viewState.editActivityIdx] : undefined}
@@ -151,20 +170,37 @@ const AddEditValueDialog: FunctionComponent<{
     lifearea: string;
     value: string;
     examples: string[];
+    error?: boolean;
+    loading?: boolean;
     handleChange: (change: string) => void;
     handleCancel: () => void;
     handleDelete?: () => void;
     handleSave: () => void;
 }> = (props) => {
-    const { open, isEdit, lifearea, value, examples, handleCancel, handleChange, handleDelete, handleSave } = props;
+    const {
+        open,
+        isEdit,
+        lifearea,
+        value,
+        examples,
+        error,
+        loading,
+        handleCancel,
+        handleChange,
+        handleDelete,
+        handleSave,
+    } = props;
     return (
-        <Dialog open={open} fullWidth maxWidth="phone">
-            <DialogTitle id="form-dialog-title">
-                {isEdit
+        <StatefulDialog
+            open={open}
+            error={error}
+            loading={loading}
+            title={
+                isEdit
                     ? getString('Values_inventory_dialog_edit_value')
-                    : getString('Values_inventory_dialog_add_value')}
-            </DialogTitle>
-            <DialogContent>
+                    : getString('Values_inventory_dialog_add_value')
+            }
+            content={
                 <Stack spacing={2}>
                     <SubHeaderText>{lifearea}</SubHeaderText>
                     <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
@@ -178,26 +214,19 @@ const AddEditValueDialog: FunctionComponent<{
                         fullWidth
                     />
                 </Stack>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleCancel} color="primary">
-                    {getString('Form_button_cancel')}
-                </Button>
-                {handleDelete && (
-                    <Button onClick={handleDelete} color="primary">
-                        {getString('Form_button_delete')}
-                    </Button>
-                )}
-                <Button onClick={handleSave} color="primary" disabled={!value}>
-                    {getString('Form_button_save')}
-                </Button>
-            </DialogActions>
-        </Dialog>
+            }
+            handleCancel={handleCancel}
+            handleDelete={handleDelete}
+            handleSave={handleSave}
+            disableSave={!value}
+        />
     );
 };
 
 const AddEditActivityDialog: FunctionComponent<{
     open: boolean;
+    error: boolean;
+    loading: boolean;
     value: string;
     activity?: ILifeAreaValueActivity;
     examples: string[];
@@ -205,7 +234,7 @@ const AddEditActivityDialog: FunctionComponent<{
     handleDelete?: () => void;
     handleSave: (newActivity: ILifeAreaValueActivity) => void;
 }> = observer((props) => {
-    const { open, value, activity, examples, handleCancel, handleDelete, handleSave } = props;
+    const { open, error, loading, value, activity, examples, handleCancel, handleDelete, handleSave } = props;
     const isEdit = !!activity;
 
     const viewState = useLocalObservable<{
@@ -237,13 +266,16 @@ const AddEditActivityDialog: FunctionComponent<{
     });
 
     return (
-        <Dialog open={open} fullWidth maxWidth="phone">
-            <DialogTitle id="form-dialog-title">
-                {isEdit
+        <StatefulDialog
+            open={open}
+            error={error}
+            loading={loading}
+            title={
+                isEdit
                     ? getString('Values_inventory_dialog_edit_activity')
-                    : getString('Values_inventory_dialog_add_activity')}
-            </DialogTitle>
-            <DialogContent>
+                    : getString('Values_inventory_dialog_add_activity')
+            }
+            content={
                 <Stack spacing={2}>
                     <SubHeaderText>{value}</SubHeaderText>
                     <Examples title={getString('Values_inventory_value_item_example_activities')} examples={examples} />
@@ -290,30 +322,18 @@ const AddEditActivityDialog: FunctionComponent<{
                         </Select>
                     </FormControl>
                 </Stack>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleCancel} color="primary">
-                    {getString('Form_button_cancel')}
-                </Button>
-                {handleDelete && (
-                    <Button onClick={handleDelete} color="primary">
-                        {getString('Form_button_delete')}
-                    </Button>
-                )}
-                <Button
-                    onClick={() =>
-                        handleSave({
-                            ...toJS(viewState),
-                            dateCreated: activity?.dateCreated || new Date(),
-                            dateEdited: new Date(),
-                        })
-                    }
-                    color="primary"
-                    disabled={!canSave}>
-                    {getString('Form_button_save')}
-                </Button>
-            </DialogActions>
-        </Dialog>
+            }
+            handleCancel={handleCancel}
+            handleDelete={handleDelete}
+            handleSave={() =>
+                handleSave({
+                    ...toJS(viewState),
+                    createdDateTime: activity?.createdDateTime || new Date(),
+                    editedDateTime: new Date(),
+                })
+            }
+            disableSave={!canSave}
+        />
     );
 });
 
@@ -341,6 +361,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     if (!lifeareaContent) {
         return null;
     }
+
+    const error =
+        patientStore.loadValuesInventoryState === 'Rejected' || patientStore.loadValuesInventoryState === 'Conflicted';
+
+    const loading = patientStore.loadValuesInventoryState === 'Pending';
 
     const values = patientStore.valuesInventory?.values || [];
 
@@ -375,6 +400,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleCancelValue = action(() => {
         viewState.openAddValue = false;
+        patientStore.resetLoadValuesInventoryState();
+    });
+
+    const handleCancelEditActivity = action(() => {
+        patientStore.resetLoadValuesInventoryState();
     });
 
     const handleChangeValue = action((change: string) => {
@@ -389,14 +419,14 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
         if (viewState.editValueIdx >= 0) {
             newValues[viewState.editValueIdx].name = viewState.newValue;
-            newValues[viewState.editValueIdx].dateEdited = new Date();
+            newValues[viewState.editValueIdx].editedDateTime = new Date();
         } else {
             newValues.push({
                 name: viewState.newValue,
                 lifeareaId: lifeareaId,
                 activities: [],
-                dateCreated: new Date(),
-                dateEdited: new Date(),
+                createdDateTime: new Date(),
+                editedDateTime: new Date(),
             } as ILifeAreaValue);
         }
 
@@ -409,7 +439,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         await patientStore.updateValuesInventory(newValuesInventory);
 
         runInAction(() => {
-            viewState.openAddValue = false;
+            if (patientStore.loadValuesInventoryState == 'Fulfilled') {
+                viewState.openAddValue = false;
+            }
         });
     });
 
@@ -448,7 +480,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
         await patientStore.updateValuesInventory(newValuesInventory);
 
-        viewState.openAddValue = false;
+        if (patientStore.loadValuesInventoryState == 'Fulfilled') {
+            viewState.openAddValue = false;
+        }
     });
 
     const valueExamples = lifeareaContent.examples.map((e) => e.name);
@@ -478,9 +512,12 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                 if (value.lifeareaId == lifeareaId) {
                                     return (
                                         <ValueEditFormSection
+                                            error={error}
+                                            loading={loading}
                                             value={value}
                                             activityExamples={activityExamples}
                                             handleEditValue={handleEditValue(idx)}
+                                            handleCancelEditActivity={handleCancelEditActivity}
                                             handleSaveValueActivities={handleSaveValueActivities(idx)}
                                             key={idx}
                                         />
@@ -514,6 +551,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 lifearea={lifeareaContent.name}
                 value={viewState.newValue}
                 examples={valueExamples}
+                error={error}
+                loading={loading}
                 handleCancel={handleCancelValue}
                 handleChange={handleChangeValue}
                 handleSave={handleSaveValue}

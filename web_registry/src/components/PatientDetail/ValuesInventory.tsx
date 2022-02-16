@@ -15,7 +15,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     } = useStores();
     const currentPatient = usePatient();
     const { valuesInventory } = currentPatient;
-    const { assigned, assignedDate, lastUpdatedDate, values } = valuesInventory;
+    const { assigned, assignedDateTime, lastUpdatedDateTime, values } = valuesInventory;
 
     const lifeareaMap = Object.assign({}, ...lifeAreas.map((la) => ({ [la.id]: la.name }))) as KeyedMap<string>;
 
@@ -28,22 +28,25 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     name: a.name,
                     enjoyment: a.enjoyment,
                     importance: a.importance,
-                    lastEdited: a.dateEdited,
+                    lastEdited: a.editedDateTime,
                 };
             });
         })
         .reduce((a, b) => a.concat(b), []);
 
     var dateStrings: string[] = [];
-    if (assigned && !!assignedDate) {
+    if (assigned && !!assignedDateTime) {
         dateStrings.push(
-            `${getString('patient_values_inventory_assigned_date')} ${format(assignedDate, 'MM/dd/yyyy')}`
+            `${getString('patient_values_inventory_assigned_date')} ${format(assignedDateTime, 'MM/dd/yyyy')}`,
         );
     }
 
-    if (!!lastUpdatedDate) {
+    if (!!lastUpdatedDateTime) {
         dateStrings.push(
-            `${getString('patient_values_inventory_activity_date_header')} ${format(lastUpdatedDate, 'MM/dd/yyyy')}`
+            `${getString('patient_values_inventory_activity_date_header')} ${format(
+                lastUpdatedDateTime,
+                'MM/dd/yyyy',
+            )}`,
         );
     }
 
