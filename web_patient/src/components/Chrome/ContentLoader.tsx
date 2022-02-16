@@ -1,7 +1,7 @@
 import { Button, Fade, LinearProgress, Snackbar, Stack } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { FunctionComponent } from 'react';
-import { PromiseState } from 'src/services/promiseQuery';
+import { PromiseState } from 'shared/promiseQuery';
 
 export const ContentLoader: FunctionComponent<{
     state: PromiseState;

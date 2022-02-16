@@ -10,9 +10,9 @@ import {
     IScheduledAssessment,
     IValuesInventory,
 } from 'shared/types';
-import { IPatientService } from 'src/services/patientService';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
-import { getLogger } from 'src/utils/logger';
+import { IPatientService } from 'shared/patientService';
+import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { getLogger } from 'shared/logger';
 import { isScheduledForDay } from 'src/utils/schedule';
 
 export interface IPatientStore {

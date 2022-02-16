@@ -1,4 +1,4 @@
-import { isDev } from 'src/utils/env';
+import { isDev } from 'shared/env';
 
 type TelemetryLog<T> = { eventName: string; getLog?: (error?: Error, result?: T) => LogData };
 

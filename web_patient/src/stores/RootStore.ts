@@ -1,7 +1,7 @@
 import { action, computed, makeAutoObservable } from 'mobx';
 import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
-import { getPatientServiceInstance, IPatientService } from 'src/services/patientService';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
+import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';

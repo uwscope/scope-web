@@ -1,19 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
-import _ from 'lodash';
-import { random } from 'lodash';
-import { IValuesInventoryResponse } from 'shared/serviceTypes';
-import { handleDates } from 'shared/time';
-import {
-    IActivity,
-    IActivityLog,
-    IAssessmentLog,
-    IMoodLog,
-    IPatientConfig,
-    ISafetyPlan,
-    IScheduledActivity,
-    IScheduledAssessment,
-    IValuesInventory,
-} from 'shared/types';
+import _, { random } from 'lodash';
 import {
     getFakeActivities,
     getFakeAssessmentLog,
@@ -21,10 +6,26 @@ import {
     getFakeSafetyPlan,
     getFakeScheduledActivities,
     getFakeScheduledAssessments,
-} from 'src/utils/fake';
+} from 'shared/fake';
+import { IServiceBase, ServiceBase } from 'shared/serviceBase';
+import { IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import {
+    IActivity,
+    IActivityLog,
+    IAssessmentLog,
+    IMoodLog,
+    IPatient,
+    IPatientConfig,
+    ISafetyPlan,
+    IScheduledActivity,
+    IScheduledAssessment,
+    IValuesInventory,
+} from 'shared/types';
 
-export interface IPatientService {
+export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
+
+    getPatient(): Promise<IPatient>;
 
     getValuesInventory(): Promise<IValuesInventory>;
     updateValuesInventory(values: IValuesInventory): Promise<IValuesInventory>;
@@ -50,36 +51,14 @@ export interface IPatientService {
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
 }
 
-class PatientService implements IPatientService {
-    private readonly axiosInstance: AxiosInstance;
-    private authRequestInterceptor: number | undefined;
-
+class PatientService extends ServiceBase implements IPatientService {
     constructor(baseUrl: string) {
-        this.axiosInstance = axios.create({
-            baseURL: baseUrl,
-            timeout: 1000,
-            headers: { 'X-Custom-Header': 'foobar' },
-        });
-
-        this.axiosInstance.interceptors.response.use((response) => {
-            handleDates(response.data);
-            return response;
-        });
+        super(baseUrl);
     }
 
-    public applyAuth(authToken: string) {
-        if (this.authRequestInterceptor) {
-            this.axiosInstance.interceptors.request.eject(this.authRequestInterceptor);
-        }
-
-        this.authRequestInterceptor = this.axiosInstance.interceptors.request.use(async (config) => {
-            const bearer = `Bearer ${authToken}`;
-            if (!!config.headers) {
-                config.headers.Authorization = bearer;
-            }
-
-            return config;
-        });
+    public async getPatient(): Promise<IPatient> {
+        const response = await this.axiosInstance.get<IPatientResponse>('');
+        return response.data?.patient;
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {
@@ -88,8 +67,8 @@ class PatientService implements IPatientService {
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
-        const response = await this.axiosInstance.put<IValuesInventory>(`/valuesinventory`, inventory);
-        return response.data;
+        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
+        return response.data?.valuesinventory;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {

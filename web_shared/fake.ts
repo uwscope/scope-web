@@ -123,7 +123,7 @@ export const getFakeScheduledActivities = (daysBefore: number, daysAfter: number
                     reminder: date,
                 } as IScheduledActivity;
             });
-        })
+        }),
     );
 
     return items;
