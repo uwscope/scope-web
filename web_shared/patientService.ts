@@ -7,6 +7,7 @@ import {
     getFakeScheduledActivities,
     getFakeScheduledAssessments,
 } from 'shared/fake';
+import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
 import { IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
 import {
@@ -51,6 +52,8 @@ export interface IPatientService extends IServiceBase {
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
 }
 
+const logger = getLogger('patientService');
+
 class PatientService extends ServiceBase implements IPatientService {
     constructor(baseUrl: string) {
         super(baseUrl);
@@ -67,6 +70,10 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
+        logger.assert(
+            (inventory as any)._type === 'valuesInventory',
+            `invalid _type for values inventory: ${(inventory as any)._type}`,
+        );
         const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
         return response.data?.valuesinventory;
     }
