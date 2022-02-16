@@ -110,11 +110,12 @@ def get_patients():
             FAKE_PATIENT_MAP[patient_id] = fake.getFakePatient()
             FAKE_PATIENT_MAP[patient_id]["identity"]["identityId"] = patient_id
 
-    if len(set(FAKE_EMPTY_PATIENTS).intersection(FAKE_PATIENT_MAP.keys())) == 0:
+    NUMBER_EMPTY = math.ceil(len(FAKE_PATIENT_MAP.keys()) * .3) 
+    if len(set(FAKE_EMPTY_PATIENTS).intersection(FAKE_PATIENT_MAP.keys())) < NUMBER_EMPTY:
         FAKE_EMPTY_PATIENTS.clear()
         FAKE_EMPTY_PATIENTS.extend(random.sample(
             list(FAKE_PATIENT_MAP.keys()),
-            math.ceil(len(FAKE_PATIENT_MAP.keys()) * .2)
+            NUMBER_EMPTY,
         ))
 
     # Populate a document to return.
