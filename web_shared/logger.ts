@@ -9,6 +9,7 @@ export interface ILogger {
     debug(message: string, data?: LogData): void;
     error(error: Error, data?: LogData): void;
     // For telemetry
+    assert(condition: boolean, message: string): void;
     event(name: string, data?: LogData): void;
     startEvent(name: string): void;
     endEvent(name: string, failed: boolean, data?: LogData): void;
@@ -108,6 +109,12 @@ export const getLogger = (logSource: string): ILogger => {
         }
     };
 
+    const assert = (condition: boolean, message: string) => {
+        if (!condition) {
+            logError(new Error(message));
+        }
+    };
+
     return {
         debug,
         error: logError,
@@ -115,5 +122,6 @@ export const getLogger = (logSource: string): ILogger => {
         startEvent,
         endEvent,
         logFunction,
+        assert,
     };
 };
