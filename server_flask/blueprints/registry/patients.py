@@ -34,13 +34,20 @@ def _frankenfake_document(
     patient_collection: pymongo.collection.Collection,
 ) -> dict:
     if patient_id in FAKE_EMPTY_PATIENTS:
+        profile = scope.database.patient.patient_profile.get_patient_profile(
+            collection=patient_collection
+        )
+        if profile is None:
+            profile = fake_document["profile"]
+
         result_document = {
             "identity": {
                 "identityId": fake_document["identity"]["identityId"],
+                "name": profile["name"],
             },
             "profile": {
-                "name": fake_document["profile"]["name"],
-                "MRN": fake_document["profile"]["MRN"],
+                "name": profile["name"],
+                "MRN": profile["MRN"],
             }
         }
     else:

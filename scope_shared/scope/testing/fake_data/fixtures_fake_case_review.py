@@ -1,9 +1,9 @@
-import random
-from pprint import pprint
+import datetime
 from typing import Callable
 
 import faker
 import pytest
+import scope.database.format_utils as format_utils
 import scope.database.format_utils
 import scope.database.patient.case_reviews
 import scope.schema
@@ -24,8 +24,10 @@ def fake_case_review_factory(
         fake_case_review = {
             "_type": scope.database.patient.case_reviews.DOCUMENT_TYPE,
             "reviewId": fake_utils.fake_unique_id(),
-            "date": scope.database.format_utils.format_date(
-                faker_factory.date_object()
+            "date": format_utils.format_date(
+                faker_factory.date_between_dates(
+                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
+                )
             ),
             # TODO: identity information
             # "consultingPsychiatrist": fake_identity_factory(),
