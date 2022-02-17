@@ -1,8 +1,16 @@
+import { AxiosError } from 'axios';
 import { action, computed, makeAutoObservable, observable } from 'mobx';
 
-export type PromiseState = 'Unknown' | 'Pending' | 'Fulfilled' | 'Rejected';
+export type PromiseState = 'Unknown' | 'Pending' | 'Fulfilled' | 'Rejected' | 'Conflicted';
 
-export interface IPromiseQuery<T> {
+export interface IPromiseQueryBase {
+    readonly state: PromiseState;
+    readonly error: boolean;
+    readonly pending: boolean;
+    readonly done: boolean;
+}
+
+export interface IPromiseQuery<T> extends IPromiseQueryBase {
     readonly value: T | undefined;
     readonly state: PromiseState;
     readonly error: boolean;
@@ -30,12 +38,12 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
 
     @computed
     public get done() {
-        return this.state === 'Fulfilled' || this.state === 'Rejected';
+        return this.state === 'Fulfilled' || this.error;
     }
 
     @computed
     public get error() {
-        return this.state === 'Rejected';
+        return this.state === 'Rejected' || this.state === 'Conflicted';
     }
 
     public fromPromise(promise: Promise<T>): Promise<T> {
@@ -52,9 +60,18 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
                 return value;
             })
             .catch((error) => {
-                action(`${this._name} rejected`, () => {
-                    this.state = 'Rejected';
-                })();
+                const axiosError = error as AxiosError;
+                if (axiosError.response?.status == 409) {
+                    action(`${this._name} conflicted`, () => {
+                        this.state = 'Conflicted';
+                        this.value = axiosError.response?.data;
+                    })();
+                } else {
+                    action(`${this._name} rejected`, () => {
+                        this.state = 'Rejected';
+                    })();
+                }
+
                 throw error;
             });
     }

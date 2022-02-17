@@ -9,6 +9,9 @@ export type StoreComponent = FC<{
 }>;
 
 export const StoreProvider: StoreComponent = ({ children, store }): ReactElement => {
+    // Store provider should never be accessed unless the app is ready to load patient data
+    store?.load();
+
     return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
 

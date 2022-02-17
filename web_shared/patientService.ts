@@ -1,17 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { random } from 'lodash';
-import { handleDates } from 'shared/time';
-import {
-    IActivity,
-    IActivityLog,
-    IAssessmentLog,
-    IMoodLog,
-    IPatientConfig,
-    ISafetyPlan,
-    IScheduledActivity,
-    IScheduledAssessment,
-    IValuesInventory,
-} from 'shared/types';
+import { compareAsc } from 'date-fns';
+import _, { random } from 'lodash';
 import {
     getFakeActivities,
     getFakeAssessmentLog,
@@ -19,10 +7,28 @@ import {
     getFakeSafetyPlan,
     getFakeScheduledActivities,
     getFakeScheduledAssessments,
-    getFakeValuesInventory,
-} from 'src/utils/fake';
+} from 'shared/fake';
+import { getLogger } from 'shared/logger';
+import { IServiceBase, ServiceBase } from 'shared/serviceBase';
+import { IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import {
+    IActivity,
+    IActivityLog,
+    IAssessmentLog,
+    IMoodLog,
+    IPatient,
+    IPatientConfig,
+    ISafetyPlan,
+    IScheduledActivity,
+    IScheduledAssessment,
+    IValuesInventory,
+} from 'shared/types';
 
-export interface IPatientService {
+export interface IPatientService extends IServiceBase {
+    applyAuth(authToken: string): void;
+
+    getPatient(): Promise<IPatient>;
+
     getValuesInventory(): Promise<IValuesInventory>;
     updateValuesInventory(values: IValuesInventory): Promise<IValuesInventory>;
 
@@ -47,41 +53,34 @@ export interface IPatientService {
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
 }
 
-class PatientService implements IPatientService {
-    private readonly axiosInstance: AxiosInstance;
+const logger = getLogger('patientService');
 
+class PatientService extends ServiceBase implements IPatientService {
     constructor(baseUrl: string) {
-        this.axiosInstance = axios.create({
-            baseURL: baseUrl,
-            timeout: 1000,
-            headers: { 'X-Custom-Header': 'foobar' },
-        });
+        super(baseUrl);
+    }
 
-        this.axiosInstance.interceptors.response.use((response) => {
-            handleDates(response.data);
-            return response;
-        });
+    public async getPatient(): Promise<IPatient> {
+        const response = await this.axiosInstance.get<IPatientResponse>('');
+        return response.data?.patient;
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IValuesInventory>(`/values`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(getFakeValuesInventory()), 500));
-        }
+        const response = await this.axiosInstance.get<IValuesInventoryResponse>(`/valuesinventory`);
+        const inventory = response.data?.valuesinventory;
+        inventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
+        return inventory;
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
-        // Work around since backend doesn't exist
-        inventory.lastUpdatedDate = new Date();
-        try {
-            const response = await this.axiosInstance.put<IValuesInventory>(`/values`, inventory);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(inventory), 500));
-        }
+        logger.assert(
+            (inventory as any)._type === 'valuesInventory',
+            `invalid _type for values inventory: ${(inventory as any)._type}`,
+        );
+        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
+        const updatedInventory = response.data?.valuesinventory;
+        updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
+        return updatedInventory;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
@@ -235,4 +234,5 @@ class PatientService implements IPatientService {
     }
 }
 
-export const getPatientServiceInstance = (baseUrl: string) => new PatientService(baseUrl) as IPatientService;
+export const getPatientServiceInstance = (baseUrl: string, patientId: string) =>
+    new PatientService([baseUrl, 'patient', patientId].map((s) => _.trim(s, '/')).join('/')) as IPatientService;

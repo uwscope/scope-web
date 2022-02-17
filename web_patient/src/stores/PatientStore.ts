@@ -10,8 +10,9 @@ import {
     IScheduledAssessment,
     IValuesInventory,
 } from 'shared/types';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
-import { useServices } from 'src/services/services';
+import { IPatientService } from 'shared/patientService';
+import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { getLogger } from 'shared/logger';
 import { isScheduledForDay } from 'src/utils/schedule';
 
 export interface IPatientStore {
@@ -30,6 +31,14 @@ export interface IPatientStore {
 
     // UI states
     loadState: PromiseState;
+    loadActivitiesState: PromiseState;
+    loadScheduledActivitiesState: PromiseState;
+    loadScheduledAssessmentsState: PromiseState;
+    loadConfigState: PromiseState;
+    loadSafetyPlanState: PromiseState;
+    loadActivityLogsState: PromiseState;
+    loadAssessmentLogsState: PromiseState;
+    loadMoodLogsState: PromiseState;
 
     // Helpers
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
@@ -42,12 +51,19 @@ export interface IPatientStore {
     saveMoodLog: (moodLog: IMoodLog) => Promise<boolean>;
     saveAssessmentLog: (assessmentData: IAssessmentLog) => Promise<boolean>;
 
-    updateValuesInventory: (inventory: IValuesInventory) => Promise<void>;
     updateSafetyPlan: (safetyPlan: ISafetyPlan) => Promise<void>;
 
     addActivity: (activity: IActivity) => Promise<boolean>;
     updateActivity: (activity: IActivity) => Promise<boolean>;
+
+    // Values inventory
+    loadValuesInventoryState: PromiseState;
+    loadValuesInventory: () => Promise<void>;
+    updateValuesInventory: (inventory: IValuesInventory) => Promise<void>;
+    resetLoadValuesInventoryState: () => void;
 }
+
+const logger = getLogger('PatientStore');
 
 export class PatientStore implements IPatientStore {
     private readonly loadQuery: PromiseQuery<any[]>;
@@ -61,7 +77,11 @@ export class PatientStore implements IPatientStore {
     private readonly loadAssessmentLogsQuery: PromiseQuery<IAssessmentLog[]>;
     private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
 
-    constructor() {
+    private readonly patientService: IPatientService;
+
+    constructor(patientService: IPatientService) {
+        this.patientService = patientService;
+
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>([], 'loadScheduledActivitiesQuery');
         this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
             [],
@@ -81,6 +101,42 @@ export class PatientStore implements IPatientStore {
 
     @computed public get loadState() {
         return this.loadQuery.state;
+    }
+
+    @computed public get loadValuesInventoryState() {
+        return this.loadValuesInventoryQuery.state;
+    }
+
+    @computed public get loadActivitiesState() {
+        return this.loadActivitiesQuery.state;
+    }
+
+    @computed public get loadScheduledActivitiesState() {
+        return this.loadScheduledActivitiesQuery.state;
+    }
+
+    @computed public get loadScheduledAssessmentsState() {
+        return this.loadScheduledAssessmentsQuery.state;
+    }
+
+    @computed public get loadConfigState() {
+        return this.loadConfigQuery.state;
+    }
+
+    @computed public get loadSafetyPlanState() {
+        return this.loadSafetyPlanQuery.state;
+    }
+
+    @computed public get loadActivityLogsState() {
+        return this.loadActivityLogsQuery.state;
+    }
+
+    @computed public get loadAssessmentLogsState() {
+        return this.loadAssessmentLogsQuery.state;
+    }
+
+    @computed public get loadMoodLogsState() {
+        return this.loadMoodLogsQuery.state;
     }
 
     @computed public get taskItems() {
@@ -150,26 +206,28 @@ export class PatientStore implements IPatientStore {
 
     @action
     public async load() {
-        const { patientService } = useServices();
-        await this.loadQuery.fromPromise(
-            Promise.allSettled([
-                this.loadScheduledActivitiesQuery.fromPromise(patientService.getScheduledActivities()),
-                this.loadScheduledAssessmentsQuery.fromPromise(patientService.getScheduledAssessments()),
-                this.loadConfigQuery.fromPromise(patientService.getPatientConfig()),
-                this.loadActivitiesQuery.fromPromise(patientService.getActivities()),
-                this.loadValuesInventoryQuery.fromPromise(patientService.getValuesInventory()),
-                this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
-                this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
-                this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
-            ]),
-        );
+        console.log('load called');
+        if (!this.loadQuery.pending) {
+            await this.loadQuery.fromPromise(
+                Promise.allSettled([
+                    // this.loadScheduledActivitiesQuery.fromPromise(patientService.getScheduledActivities()),
+                    // this.loadScheduledAssessmentsQuery.fromPromise(patientService.getScheduledAssessments()),
+                    this.loadConfigQuery.fromPromise(this.patientService.getPatientConfig()),
+                    // this.loadActivitiesQuery.fromPromise(patientService.getActivities()),
+                    // this.loadValuesInventoryQuery.fromPromise(patientService.getValuesInventory()),
+                    // this.loadActivityLogsQuery.fromPromise(patientService.getActivityLogs()),
+                    // this.loadAssessmentLogsQuery.fromPromise(patientService.getAssessmentLogs()),
+                    // this.loadSafetyPlanQuery.fromPromise(patientService.getSafetyPlan()),
+                ]),
+            );
+        }
+
+        await this.loadValuesInventory();
     }
 
     @action.bound
     public async completeScheduledActivity(scheduledItem: IScheduledActivity, activityLog: IActivityLog) {
-        const { patientService } = useServices();
-
-        const promise = patientService.addActivityLog(activityLog).then((addedLog) => {
+        const promise = this.patientService.addActivityLog(activityLog).then((addedLog) => {
             const newLogs = this.activityLogs.slice() || [];
             newLogs.push(addedLog);
             return newLogs;
@@ -187,9 +245,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async saveMoodLog(moodLog: IMoodLog) {
-        const { patientService } = useServices();
-
-        const promise = patientService.addMoodLog(moodLog).then((addedLog) => {
+        const promise = this.patientService.addMoodLog(moodLog).then((addedLog) => {
             const newLogs = this.moodLogs.slice() || [];
             newLogs.push(addedLog);
             return newLogs;
@@ -202,9 +258,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async saveAssessmentLog(assessmentLog: IAssessmentLog) {
-        const { patientService } = useServices();
-
-        const promise = patientService.addAssessmentLog(assessmentLog).then((addedLog) => {
+        const promise = this.patientService.addAssessmentLog(assessmentLog).then((addedLog) => {
             const newLogs = this.assessmentLogs.slice() || [];
             newLogs.push(addedLog);
             return newLogs;
@@ -213,30 +267,19 @@ export class PatientStore implements IPatientStore {
         await this.loadAssessmentLogsQuery.fromPromise(promise);
         console.log('TODO: Mark assessment as done on the server and reload client config');
 
-        await this.loadConfigQuery.fromPromise(patientService.getPatientConfig());
+        await this.loadConfigQuery.fromPromise(this.patientService.getPatientConfig());
         return true;
     }
 
     @action.bound
-    public async updateValuesInventory(inventory: IValuesInventory) {
-        const { patientService } = useServices();
-
-        await this.loadValuesInventoryQuery.fromPromise(patientService.updateValuesInventory(inventory));
-    }
-
-    @action.bound
     public async updateSafetyPlan(safetyPlan: ISafetyPlan) {
-        const { patientService } = useServices();
-
-        const promise = patientService.updateSafetyPlan(safetyPlan);
+        const promise = this.patientService.updateSafetyPlan(safetyPlan);
         await this.loadSafetyPlanQuery.fromPromise(promise);
     }
 
     @action.bound
     public async addActivity(activity: IActivity) {
-        const { patientService } = useServices();
-
-        const promise = patientService.addActivity(activity).then((addedActivity) => {
+        const promise = this.patientService.addActivity(activity).then((addedActivity) => {
             const newActivities = this.activities.slice() || [];
             newActivities.push(addedActivity);
             return newActivities;
@@ -255,9 +298,7 @@ export class PatientStore implements IPatientStore {
         console.assert(found >= 0, 'Activity to update not found');
 
         if (found >= 0) {
-            const { patientService } = useServices();
-
-            const promise = patientService.updateActivity(activity).then((updatedActivity) => {
+            const promise = this.patientService.updateActivity(activity).then((updatedActivity) => {
                 prevActivities[found] = updatedActivity;
                 return prevActivities;
             });
@@ -267,5 +308,31 @@ export class PatientStore implements IPatientStore {
         }
 
         return false;
+    }
+
+    @action.bound
+    public async loadValuesInventory() {
+        await this.loadAndLogQuery<IValuesInventory>(
+            this.patientService.getValuesInventory,
+            this.loadValuesInventoryQuery,
+        );
+    }
+
+    @action.bound
+    public async updateValuesInventory(inventory: IValuesInventory) {
+        const loggedCall = logger.logFunction<IValuesInventory>({ eventName: 'updateValuesInventory' })(() =>
+            this.patientService.updateValuesInventory(inventory),
+        );
+        await this.loadValuesInventoryQuery.fromPromise(loggedCall);
+    }
+
+    @action.bound
+    public resetLoadValuesInventoryState() {
+        this.loadValuesInventoryQuery.state = this.loadActivitiesQuery.value != undefined ? 'Fulfilled' : 'Unknown';
+    }
+
+    private async loadAndLogQuery<T>(queryCall: () => Promise<T>, promiseQuery: PromiseQuery<T>) {
+        const loggedCall = logger.logFunction<T>({ eventName: queryCall.name })(queryCall.bind(this.patientService));
+        await promiseQuery.fromPromise(loggedCall);
     }
 }

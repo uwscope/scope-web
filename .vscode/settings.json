@@ -1,8 +1,6 @@
 {
     "typescript.tsdk": "./node_modules/typescript/lib",
     "typescript.preferences.importModuleSpecifier": "non-relative",
-    "tslint.enable": true,
-    "tslint.autoFixOnSave": false,
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
     "files.exclude": {
@@ -10,14 +8,12 @@
         "build": true
     },
     "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-    },
+    "editor.codeActionsOnSave": ["source.fixAll.eslint"],
     "prettier.tabWidth": 4,
     "prettier.printWidth": 120,
     "prettier.singleQuote": true,
     "prettier.jsxBracketSameLine": true,
-    "prettier.disableLanguages": ["markdown"],
+    "prettier.trailingComma": "all",
     "[ejs]": {
         "editor.insertSpaces": true,
         "editor.tabSize": 4

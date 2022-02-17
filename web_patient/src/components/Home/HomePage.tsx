@@ -49,6 +49,8 @@ export const HomePage: FunctionComponent = observer(() => {
         navigate(`${Routes.resources}/${Routes.valuesInventory}`);
     });
 
+    console.log(rootStore.inspirationalQuote);
+
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
