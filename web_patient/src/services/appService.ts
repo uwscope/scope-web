@@ -28,8 +28,9 @@ class AppService implements IAppService {
 
     public async getInspirationalQuote(): Promise<string> {
         const response = await this.axiosInstance.get<IQuoteResponse>(`/quote`);
-        return response.data?.quote?.quote;
+        return response.data?.quote;
     }
 }
 
-export const getAppServiceInstance = (baseUrl: string) => new AppService(baseUrl) as IAppService;
+export const getAppServiceInstance = (baseUrl: string) =>
+    new AppService(baseUrl) as IAppService;

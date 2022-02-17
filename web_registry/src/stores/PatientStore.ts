@@ -87,7 +87,6 @@ export class PatientStore implements IPatientStore {
     private readonly patientService: IPatientService;
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
-
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
 

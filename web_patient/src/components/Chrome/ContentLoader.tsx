@@ -25,7 +25,8 @@ export const ContentLoader: FunctionComponent<{
                     style={{
                         transitionDelay: state.pending ? '800ms' : '0ms',
                     }}
-                    unmountOnExit>
+                    unmountOnExit
+                >
                     <LinearProgress />
                 </Fade>
             </Box>
