@@ -93,7 +93,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 {activities.map((activity, idx) => (
                                     <TableRow key={idx}>
                                         <TableCell component="th" scope="row">
-                                            {format(activity.lastEdited, 'MM/dd/yyyy')}
+                                            {!!activity.lastEdited ? format(activity.lastEdited, 'MM/dd/yyyy') : '--'}
                                         </TableCell>
                                         <TableCell>{activity.name}</TableCell>
                                         <TableCell>{activity.enjoyment}</TableCell>

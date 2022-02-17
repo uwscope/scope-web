@@ -1,3 +1,4 @@
+import { compareAsc } from 'date-fns';
 import _, { random } from 'lodash';
 import {
     getFakeActivities,
@@ -66,7 +67,9 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async getValuesInventory(): Promise<IValuesInventory> {
         const response = await this.axiosInstance.get<IValuesInventoryResponse>(`/valuesinventory`);
-        return response.data?.valuesinventory;
+        const inventory = response.data?.valuesinventory;
+        inventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
+        return inventory;
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
