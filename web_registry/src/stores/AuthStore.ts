@@ -1,12 +1,7 @@
-import {
-    AuthenticationDetails,
-    CognitoUser,
-    CognitoUserPool,
-    CognitoUserSession,
-} from 'amazon-cognito-identity-js';
+import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
+import { PromiseQuery } from 'shared/promiseQuery';
 import { IAppAuthConfig, IUser } from 'shared/types';
-import { PromiseQuery } from 'src/services/promiseQuery';
 
 const poolData = {
     UserPoolId: 'us-west-1_G5EgsKP1m',

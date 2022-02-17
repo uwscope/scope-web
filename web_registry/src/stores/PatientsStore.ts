@@ -1,7 +1,7 @@
 import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
 import { AllClinicCode, ClinicCode } from 'shared/enums';
 import { IPatient } from 'shared/types';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains, unique } from 'src/utils/array';

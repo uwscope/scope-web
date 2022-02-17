@@ -1,7 +1,10 @@
 import { Box, CircularProgress, Fade, Typography } from '@mui/material';
-import { observer } from 'mobx-react';
-import { default as React, Fragment, FunctionComponent, useEffect, useState } from 'react';
+import _ from 'lodash';
+import { runInAction } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
+import { default as React, Fragment, FunctionComponent, useEffect } from 'react';
 import { Login } from 'src/components/Chrome/Login';
+import { getPatientServiceInstance } from 'shared/patientService';
 import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
@@ -21,7 +24,7 @@ const LoginContainer = withTheme(
         [props.theme.breakpoints.up('md')]: {
             width: '50%',
         },
-    }))
+    })),
 );
 
 const ProgressContainer = withTheme(
@@ -38,7 +41,7 @@ const ProgressContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 const FailureContainer = withTheme(
@@ -50,7 +53,7 @@ const FailureContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 export interface IAppHost {
@@ -60,8 +63,15 @@ export interface IAppHost {
 export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const { children } = props;
 
-    const [store, setStore] = useState<IRootStore>();
-    const [failed, setFailed] = useState(false);
+    const state = useLocalObservable<{
+        store: IRootStore | undefined;
+        failed: boolean;
+        ready: boolean;
+    }>(() => ({
+        store: undefined,
+        failed: false,
+        ready: false,
+    }));
 
     useEffect(() => {
         const { configService } = useServices();
@@ -71,29 +81,43 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             .then((serverConfig) => {
                 // Create the RootStore
                 const newStore = new RootStore(serverConfig);
-                setStore(newStore);
-                newStore.load();
+                runInAction(() => {
+                    state.store = newStore;
+                });
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
-                setFailed(true);
+                runInAction(() => {
+                    state.failed = true;
+                });
             });
     }, []);
 
+    useEffect(() => {
+        runInAction(() => {
+            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.authToken) {
+                const newPatientService = getPatientServiceInstance(
+                    CLIENT_CONFIG.flaskBaseUrl,
+                    state.store?.authStore.currentUserIdentity?.identityId,
+                );
+                state.store?.createPatientStore(newPatientService);
+                state.ready = true;
+            }
+        });
+    }, [state.store?.authStore.isAuthenticated]);
+
     return (
         <Fragment>
-            {store?.authStore.isAuthenticated && (
+            {state.ready && state.store && (
                 <Fragment>
-                    <StoreProvider store={store}>{children}</StoreProvider>
+                    <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
-            <Fade in={!store?.authStore.isAuthenticated} timeout={500}>
+            <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <LoginContainer>
-                    {!!store ? (
-                        <StoreProvider store={store}>
-                            <Login />
-                        </StoreProvider>
-                    ) : !failed ? (
+                    {!!state.store ? (
+                        <Login authStore={state.store.authStore} />
+                    ) : !state.failed ? (
                         <ProgressContainer>
                             <CircularProgress />
                             <Box sx={{ height: 40 }} />

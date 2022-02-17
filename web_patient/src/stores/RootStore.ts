@@ -1,6 +1,7 @@
 import { action, computed, makeAutoObservable } from 'mobx';
 import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
-import { PromiseQuery, PromiseState } from 'src/services/promiseQuery';
+import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
+import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
@@ -18,6 +19,8 @@ export interface IRootStore {
     loadState: PromiseState;
     loginState: PromiseState;
     inspirationalQuote: string;
+
+    createPatientStore: (patientService: IPatientService) => void;
 
     // Helpers
     getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
@@ -44,8 +47,10 @@ export class RootStore implements IRootStore {
     private readonly loadQuery: PromiseQuery<PromiseSettledResult<void>[]>;
 
     constructor(serverConfig: IAppConfig) {
-        this.patientStore = new PatientStore();
         this.authStore = new AuthStore();
+
+        // Create a dummy patient store which should fail if tried to access
+        this.patientStore = new PatientStore(getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, 'invalid'));
 
         this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
         this.quoteQuery = new PromiseQuery('', 'quoteQuery');
@@ -66,13 +71,18 @@ export class RootStore implements IRootStore {
         if (this.loadQuery.state == 'Pending') {
             return this.loadQuery.state;
         } else {
-            return this.patientStore.loadState;
+            return this.patientStore?.loadState || 'Unknown';
         }
     }
 
     @computed
     public get inspirationalQuote() {
         return this.quoteQuery.value || '';
+    }
+    @action.bound
+    public async createPatientStore(patientService: IPatientService) {
+        // This is a bit twisted, but patient store/service doesn't make sense to exist until we have a patient id, and it makes more sense for the store to own the service.
+        this.patientStore = new PatientStore(patientService);
     }
 
     @action.bound
