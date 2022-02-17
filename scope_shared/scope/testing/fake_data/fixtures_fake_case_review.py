@@ -26,7 +26,7 @@ def fake_case_review_factory(
             "reviewId": fake_utils.fake_unique_id(),
             "date": format_utils.format_date(
                 faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(6 * 30)
+                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )
             ),
             # TODO: identity information

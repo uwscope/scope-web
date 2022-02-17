@@ -27,7 +27,7 @@ def fake_session_factory(
             "sessionId": fake_utils.fake_unique_id(),
             "date": format_utils.format_date(
                 faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(6 * 30)
+                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )
             ),
             "sessionType": fake_utils.fake_enum_value(
