@@ -18,5 +18,5 @@ export interface IValuesInventoryResponse extends IServiceResponse {
 }
 
 export interface IQuoteResponse extends IServiceResponse {
-    quote: { quote: string };
+    quote: string;
 }
