@@ -164,7 +164,7 @@ def test_patient_singleton_get_invalid(
     assert response.status_code == http.HTTPStatus.NOT_FOUND
 
     # Retrieve a valid patient but an invalid document
-    query = query.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type="invalid",
     )
@@ -178,7 +178,7 @@ def test_patient_singleton_get_invalid(
 
     # Retrieve a valid patient and a valid document,
     # but fail because we have not put that document
-    query = query.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -465,3 +465,42 @@ def test_patient_singleton_put_update_invalid(
     # Contents of the response should indicate that current "_rev" == 2
     document_conflict = response.json()[config.flask_response_document_key]
     assert document_conflict["_rev"] == 2
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_singleton_post_not_allowed(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSingleton,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test that POST returns with 405.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+
+    # Generate a document via Flask
+    document = document_factory()
+    query = QUERY_SINGLETON.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_type,
+    )
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
