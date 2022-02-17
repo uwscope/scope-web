@@ -37,6 +37,7 @@ def _frankenfake_document(
         result_document = {
             "identity": {
                 "identityId": fake_document["identity"]["identityId"],
+                "name": fake_document["profile"]["name"],
             },
             "profile": {
                 "name": fake_document["profile"]["name"],
