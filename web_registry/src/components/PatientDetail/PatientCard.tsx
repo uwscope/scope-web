@@ -1,10 +1,10 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Button, Divider, Grid, LinearProgress, Typography } from '@mui/material';
+import { Button, Divider, Grid, LinearProgress, Snackbar, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
 import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { IPatientProfile, KeyedMap } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
@@ -51,6 +51,16 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
     const { loading, error } = props;
     const patient = usePatient();
     const { profile } = patient;
+
+    const [openError, setOpenError] = useState(error);
+
+    useEffect(() => {
+        setOpenError(error);
+    }, [error]);
+
+    const handleErrorClose = () => {
+        setOpenError(false);
+    };
 
     const handleClose = action(() => {
         state.open = false;
@@ -140,6 +150,12 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                         error={error}
                     />
                 )}
+                <Snackbar
+                    open={openError && !state.open}
+                    message={`Sorry, there was an error processing your request. Please try again.`}
+                    autoHideDuration={2000}
+                    onClose={handleErrorClose}
+                />
             </Grid>
         </Container>
     );
