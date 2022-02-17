@@ -36,7 +36,10 @@ def get_clinical_history(patient_id):
     "/<string:patient_id>/clinicalhistory",
     methods=["PUT"],
 )
-@validate_schema(clinical_history_schema)
+@validate_schema(
+    schema=clinical_history_schema,
+    key="clinicalhistory",
+)
 @flask_json.as_json
 def put_clinical_history(patient_id):
 
@@ -46,7 +49,7 @@ def put_clinical_history(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["clinicalhistory"]
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"

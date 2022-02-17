@@ -41,7 +41,9 @@ def get_case_reviews(patient_id):
     "/<string:patient_id>/casereviews",
     methods=["POST"],
 )
-@validate_schema(case_review_schema)
+@validate_schema(
+    schema=case_review_schema,
+)
 @flask_json.as_json
 def post_case_reviews(patient_id):
     """
@@ -103,7 +105,9 @@ def get_case_review(patient_id, review_id):
     "/<string:patient_id>/casereview/<string:review_id>",
     methods=["PUT"],
 )
-@validate_schema(case_review_schema)
+@validate_schema(
+    schema=case_review_schema,
+)
 @flask_json.as_json
 def put_case_review(patient_id, review_id):
     # TODO: Require authentication

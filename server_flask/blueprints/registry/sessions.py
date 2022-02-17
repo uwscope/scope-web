@@ -41,7 +41,9 @@ def get_sessions(patient_id):
     "/<string:patient_id>/sessions",
     methods=["POST"],
 )
-@validate_schema(session_schema)
+@validate_schema(
+    schema=session_schema,
+)
 @flask_json.as_json
 def post_session(patient_id):
     """
@@ -104,7 +106,9 @@ def get_session(patient_id, session_id):
     "/<string:patient_id>/session/<string:session_id>",
     methods=["PUT"],
 )
-@validate_schema(session_schema)
+@validate_schema(
+    schema=session_schema,
+)
 @flask_json.as_json
 def put_session(patient_id, session_id):
 

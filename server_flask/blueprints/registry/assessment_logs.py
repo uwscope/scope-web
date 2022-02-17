@@ -34,7 +34,9 @@ def get_assessment_logs(patient_collection):
 @registry_assessment_logs_blueprint.route(
     "/<string:patient_collection>/assessmentlogs", methods=["POST"]
 )
-@validate_schema(assessment_log_schema)
+@validate_schema(
+    schema=assessment_log_schema,
+)
 @as_json
 def create_assessment_log(patient_collection):
     """
@@ -84,7 +86,9 @@ def get_assessment_log(patient_collection, log_id):
 @registry_assessment_logs_blueprint.route(
     "/<string:patient_collection>/assessmentlogs/<string:log_id>", methods=["PUT"]
 )
-@validate_schema(assessment_log_schema)
+@validate_schema(
+    schema=assessment_log_schema,
+)
 @as_json
 def update_assessment_log(patient_collection, log_id):
 

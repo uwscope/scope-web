@@ -42,7 +42,10 @@ def get_patient_profile(patient_id):
     "/<string:patient_id>/profile",
     methods=["PUT"],
 )
-@validate_schema(patient_profile_schema)
+@validate_schema(
+    schema=patient_profile_schema,
+    key="profile",
+)
 @flask_json.as_json
 def put_patient_profile(patient_id):
     # TODO: Require authentication
@@ -51,7 +54,7 @@ def put_patient_profile(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["profile"]
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"
