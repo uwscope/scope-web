@@ -46,6 +46,11 @@
             "description": "PatientPronoun Type",
             "enum": ["He/Him", "She/Her", "They/Them"]
         },
+        "ethnicity": {
+            "type": "string",
+            "description": "PatientEthnicity Type",
+            "enum": ["Hispanic or Latino/Latina/Latinx", "Not Hispanic or Latino/Latina/Latinx", "Unknown"]
+        },
         "race": {
             "type": "object",
             "description": "PatientRaceFlags Type",

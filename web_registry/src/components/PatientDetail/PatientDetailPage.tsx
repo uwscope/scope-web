@@ -172,7 +172,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                     <LeftPaneContainer elevation={3} square>
                         <Grid container spacing={1} direction="column" justifyContent="flex-start" alignItems="stretch">
                             <Grid item>
-                                <PatientCard loading={currentPatient.state == 'Pending'} />
+                                <PatientCard loading={currentPatient.loadProfileState.pending} />
                             </Grid>
                             <Grid item>
                                 <Divider variant="middle" />

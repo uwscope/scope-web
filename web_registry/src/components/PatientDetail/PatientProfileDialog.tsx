@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
-import { action, observable } from 'mobx';
-import { observer } from 'mobx-react';
+import { action } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import {
     clinicCodeValues,
@@ -55,7 +55,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         <Grid container spacing={2} alignItems="stretch">
             {getTextField('Patient Name', name, 'name')}
             {getTextField('MRN', MRN, 'MRN')}
-            {getDropdownField('Clinic Code', clinicCode, clinicCodeValues, 'clinicCode')}
+            {getDropdownField('Clinic Code', clinicCode || '', clinicCodeValues, 'clinicCode')}
             <GridDateField
                 editable
                 label="Date of Birth"
@@ -66,23 +66,23 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
                 sm={12}
                 editable
                 label="Race"
-                flags={race}
+                flags={Object.assign({}, ...patientRaceValues.map((x) => ({ [x]: !!race?.[x] })))}
                 flagOrder={[...patientRaceValues]}
                 onChange={(flags) => onValueChange('race', flags)}
             />
-            {getDropdownField('Ethnicity', ethnicity, patientEthnicityValues, 'race')}
-            {getDropdownField('Sex', sex, patientSexValues, 'sex')}
-            {getDropdownField('Gender', gender, patientGenderValues, 'gender')}
-            {getDropdownField('Pronouns', pronoun, patientPronounValues, 'pronoun')}
+            {getDropdownField('Ethnicity', ethnicity || '', patientEthnicityValues, 'ethnicity')}
+            {getDropdownField('Sex', sex || '', patientSexValues, 'sex')}
+            {getDropdownField('Gender', gender || '', patientGenderValues, 'gender')}
+            {getDropdownField('Pronouns', pronoun || '', patientPronounValues, 'pronoun')}
             {getTextField('Primary Oncology Provider', primaryOncologyProvider, 'primaryOncologyProvider')}
             {getTextField('Primary Care Manager', primaryCareManager, 'primaryCareManager')}
             {getDropdownField(
                 'Treatment Status',
-                depressionTreatmentStatus,
+                depressionTreatmentStatus || '',
                 depressionTreatmentStatusValues,
-                'depressionTreatmentStatus'
+                'depressionTreatmentStatus',
             )}
-            {getDropdownField('Follow-up Schedule', followupSchedule, followupScheduleValues, 'followupSchedule')}
+            {getDropdownField('Follow-up Schedule', followupSchedule || '', followupScheduleValues, 'followupSchedule')}
         </Grid>
     );
 };
@@ -92,7 +92,7 @@ const emptyProfile = {
     MRN: '',
     clinicCode: undefined,
     birthdate: undefined,
-    race: {},
+    race: undefined,
     ethnicity: undefined,
     sex: undefined,
     gender: undefined,
@@ -102,8 +102,6 @@ const emptyProfile = {
     depressionTreatmentStatus: undefined,
     followupSchedule: undefined,
 } as IPatientProfile;
-
-const state = observable<IPatientProfile>(emptyProfile);
 
 interface IDialogProps {
     open: boolean;
@@ -122,12 +120,7 @@ export interface IAddPatientProfileDialogProps extends IDialogProps {
 export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialogProps> = observer((props) => {
     const { onAddPatient, open, onClose } = props;
 
-    React.useEffect(
-        action(() => {
-            Object.assign(state, emptyProfile);
-        }),
-        [props.open]
-    );
+    const state = useLocalObservable<IPatientProfile>(() => emptyProfile);
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -158,12 +151,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> = observer((props) => {
     const { profile, open, onClose, onSavePatient } = props;
 
-    React.useEffect(
-        action(() => {
-            Object.assign(state, profile);
-        }),
-        []
-    );
+    const state = useLocalObservable<IPatientProfile>(() => ({ ...profile }));
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;

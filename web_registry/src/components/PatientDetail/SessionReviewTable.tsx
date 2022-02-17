@@ -57,9 +57,9 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
     const { sessionOrReviews, onSessionClick, onReviewClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
-        const id = param.getValue(param.id, 'id') as string;
+        const id = param.row['id'] as string;
 
-        if (param.getValue(param.id, 'type') == 'Case Review') {
+        if (param.row['type'] == 'Case Review') {
             onReviewClick && onReviewClick(id);
         } else {
             onSessionClick && onSessionClick(id);

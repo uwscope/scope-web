@@ -14,7 +14,7 @@ import styled from 'styled-components';
 const Container = withTheme(
     styled.div((props) => ({
         padding: props.theme.spacing(2.5),
-    }))
+    })),
 );
 
 const Name = styled(Typography)({
@@ -26,7 +26,7 @@ const Name = styled(Typography)({
 const EditButton = withTheme(
     styled(Button)((props) => ({
         marginLeft: props.theme.spacing(1),
-    }))
+    })),
 );
 
 const Header = styled.div({
@@ -123,12 +123,14 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                     <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
                     <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
                 </Grid>
-                <EditPatientProfileDialog
-                    profile={profile}
-                    open={state.open}
-                    onClose={handleClose}
-                    onSavePatient={onSave}
-                />
+                {state.open && (
+                    <EditPatientProfileDialog
+                        profile={profile}
+                        open={state.open}
+                        onClose={handleClose}
+                        onSavePatient={onSave}
+                    />
+                )}
             </Grid>
         </Container>
     );
