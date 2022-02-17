@@ -11,7 +11,7 @@ import {
     IValuesInventory,
 } from 'shared/types';
 import { IPatientService } from 'shared/patientService';
-import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { IPromiseQueryState, PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { getLogger } from 'shared/logger';
 import { isScheduledForDay } from 'src/utils/schedule';
 
@@ -57,7 +57,7 @@ export interface IPatientStore {
     updateActivity: (activity: IActivity) => Promise<boolean>;
 
     // Values inventory
-    loadValuesInventoryState: PromiseState;
+    loadValuesInventoryState: IPromiseQueryState;
     loadValuesInventory: () => Promise<void>;
     updateValuesInventory: (inventory: IValuesInventory) => Promise<void>;
     resetLoadValuesInventoryState: () => void;
@@ -104,7 +104,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get loadValuesInventoryState() {
-        return this.loadValuesInventoryQuery.state;
+        return this.loadValuesInventoryQuery;
     }
 
     @computed public get loadActivitiesState() {

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
@@ -14,6 +14,7 @@ import {
 } from 'shared/enums';
 import { IPatientProfile } from 'shared/types';
 import { GridDateField, GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 
 interface IEditPatientProfileContentProps extends Partial<IPatientProfile> {
     onValueChange: (key: string, value: any) => void;
@@ -37,8 +38,14 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         onValueChange,
     } = props;
 
-    const getTextField = (label: string, value: any, propName: string) => (
-        <GridTextField editable label={label} value={value} onChange={(text) => onValueChange(propName, text)} />
+    const getTextField = (label: string, value: any, propName: string, required?: boolean) => (
+        <GridTextField
+            editable
+            label={label}
+            value={value}
+            onChange={(text) => onValueChange(propName, text)}
+            required={required}
+        />
     );
 
     const getDropdownField = (label: string, value: any, options: any, propName: string) => (
@@ -53,8 +60,8 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
 
     return (
         <Grid container spacing={2} alignItems="stretch">
-            {getTextField('Patient Name', name, 'name')}
-            {getTextField('MRN', MRN, 'MRN')}
+            {getTextField('Patient Name', name, 'name', true)}
+            {getTextField('MRN', MRN, 'MRN', true)}
             {getDropdownField('Clinic Code', clinicCode || '', clinicCodeValues, 'clinicCode')}
             <GridDateField
                 editable
@@ -105,6 +112,8 @@ const emptyProfile = {
 
 interface IDialogProps {
     open: boolean;
+    error?: boolean;
+    loading?: boolean;
     onClose: () => void;
 }
 
@@ -118,7 +127,7 @@ export interface IAddPatientProfileDialogProps extends IDialogProps {
 }
 
 export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialogProps> = observer((props) => {
-    const { onAddPatient, open, onClose } = props;
+    const { onAddPatient, open, error, loading, onClose } = props;
 
     const state = useLocalObservable<IPatientProfile>(() => emptyProfile);
 
@@ -131,25 +140,21 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
     });
 
     return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Add Patient</DialogTitle>
-            <DialogContent dividers>
-                <EditPatientProfileContent {...state} onValueChange={onValueChange} />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Cancel
-                </Button>
-                <Button onClick={onSave} color="primary">
-                    Save
-                </Button>
-            </DialogActions>
-        </Dialog>
+        <StatefulDialog
+            open={open}
+            error={error}
+            loading={loading}
+            title="Add Patient"
+            content={<EditPatientProfileContent {...state} onValueChange={onValueChange} />}
+            handleCancel={onClose}
+            handleSave={onSave}
+            disableSave={!state.name || !state.MRN}
+        />
     );
 });
 
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> = observer((props) => {
-    const { profile, open, onClose, onSavePatient } = props;
+    const { profile, open, error, loading, onClose, onSavePatient } = props;
 
     const state = useLocalObservable<IPatientProfile>(() => ({ ...profile }));
 
@@ -162,19 +167,15 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
     });
 
     return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Edit Patient Information</DialogTitle>
-            <DialogContent dividers>
-                <EditPatientProfileContent {...state} onValueChange={onValueChange} />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Cancel
-                </Button>
-                <Button onClick={onSave} color="primary">
-                    Save
-                </Button>
-            </DialogActions>
-        </Dialog>
+        <StatefulDialog
+            open={open}
+            error={error}
+            loading={loading}
+            title="Edit Patient Information"
+            content={<EditPatientProfileContent {...state} onValueChange={onValueChange} />}
+            handleCancel={onClose}
+            handleSave={onSave}
+            disableSave={!state.name || !state.MRN}
+        />
     );
 });

@@ -2,7 +2,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Button, Divider, Grid, LinearProgress, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { format } from 'date-fns';
-import { action, observable } from 'mobx';
+import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { IPatientProfile, KeyedMap } from 'shared/types';
@@ -44,24 +44,31 @@ const state = observable<{ open: boolean }>({
 
 export interface IPatientCardProps {
     loading?: boolean;
+    error?: boolean;
 }
 
 export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props) => {
-    const { loading } = props;
+    const { loading, error } = props;
     const patient = usePatient();
     const { profile } = patient;
 
     const handleClose = action(() => {
         state.open = false;
+        patient.loadProfileState.resetState();
     });
 
     const handleOpen = action(() => {
         state.open = true;
     });
 
-    const onSave = action((newPatient: IPatientProfile) => {
-        patient?.updateProfile(newPatient);
-        state.open = false;
+    const onSave = action(async (newPatient: IPatientProfile) => {
+        await patient.updateProfile(newPatient);
+
+        runInAction(() => {
+            if (!patient.loadProfileState.error) {
+                state.open = false;
+            }
+        });
     });
 
     const generateRaceText = (flags: KeyedMap<boolean | string>) => {
@@ -129,6 +136,8 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                         open={state.open}
                         onClose={handleClose}
                         onSavePatient={onSave}
+                        loading={loading}
+                        error={error}
                     />
                 )}
             </Grid>

@@ -71,8 +71,6 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async getProfile(): Promise<IPatientProfile> {
         const response = await this.axiosInstance.get<IPatientProfileResponse>(`/profile`);
-
-        console.log(response.data?.profile.race);
         return response.data?.profile;
     }
 
@@ -81,7 +79,9 @@ class PatientService extends ServiceBase implements IPatientService {
             (profile as any)._type === 'patientProfile',
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
+
         const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, profile);
+
         return response.data?.profile;
     }
 

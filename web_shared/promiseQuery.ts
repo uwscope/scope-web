@@ -3,30 +3,35 @@ import { action, computed, makeAutoObservable, observable } from 'mobx';
 
 export type PromiseState = 'Unknown' | 'Pending' | 'Fulfilled' | 'Rejected' | 'Conflicted';
 
-export interface IPromiseQueryBase {
+export interface IPromiseQueryState {
     readonly state: PromiseState;
     readonly error: boolean;
     readonly pending: boolean;
     readonly done: boolean;
+    resetState: () => void;
 }
 
-export interface IPromiseQuery<T> extends IPromiseQueryBase {
+export interface IPromiseQuery<T> extends IPromiseQueryState {
     readonly value: T | undefined;
     readonly state: PromiseState;
     readonly error: boolean;
     readonly pending: boolean;
     readonly done: boolean;
+    readonly name: string;
 }
 
 export class PromiseQuery<T> implements IPromiseQuery<T> {
-    private _name: string;
+    private _conflictFieldName: string | undefined;
+
+    public name: string;
 
     @observable public value: T | undefined;
     @observable public state: PromiseState = 'Unknown';
 
-    constructor(defaultValue: T | undefined, name: string) {
+    constructor(defaultValue: T | undefined, name: string, conflictFieldName?: string) {
+        this._conflictFieldName = conflictFieldName;
         this.value = defaultValue;
-        this._name = name;
+        this.name = name;
 
         makeAutoObservable(this);
     }
@@ -47,7 +52,7 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
     }
 
     public fromPromise(promise: Promise<T>): Promise<T> {
-        action(`${this._name} start`, () => {
+        action(`${this.name} start`, () => {
             this.state = 'Pending';
         })();
 
@@ -62,17 +67,23 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
             .catch((error) => {
                 const axiosError = error as AxiosError;
                 if (axiosError.response?.status == 409) {
-                    action(`${this._name} conflicted`, () => {
+                    action(`${this.name} conflicted`, () => {
                         this.state = 'Conflicted';
-                        this.value = axiosError.response?.data;
+                        this.value = this._conflictFieldName
+                            ? axiosError.response?.data?.[this._conflictFieldName]
+                            : axiosError.response?.data;
                     })();
                 } else {
-                    action(`${this._name} rejected`, () => {
+                    action(`${this.name} rejected`, () => {
                         this.state = 'Rejected';
                     })();
                 }
 
                 throw error;
             });
+    }
+
+    public resetState() {
+        this.state = this.value != undefined ? 'Fulfilled' : 'Unknown';
     }
 }

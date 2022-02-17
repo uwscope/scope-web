@@ -362,11 +362,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         return null;
     }
 
-    const error =
-        patientStore.loadValuesInventoryState === 'Rejected' || patientStore.loadValuesInventoryState === 'Conflicted';
-
-    const loading = patientStore.loadValuesInventoryState === 'Pending';
-
     const values = patientStore.valuesInventory?.values || [];
 
     const viewState = useLocalObservable<{
@@ -439,7 +434,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         await patientStore.updateValuesInventory(newValuesInventory);
 
         runInAction(() => {
-            if (patientStore.loadValuesInventoryState == 'Fulfilled') {
+            if (!patientStore.loadValuesInventoryState.error) {
                 viewState.openAddValue = false;
             }
         });
@@ -480,7 +475,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
         await patientStore.updateValuesInventory(newValuesInventory);
 
-        if (patientStore.loadValuesInventoryState == 'Fulfilled') {
+        if (!patientStore.loadValuesInventoryState.error) {
             viewState.openAddValue = false;
         }
     });
@@ -512,8 +507,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                 if (value.lifeareaId == lifeareaId) {
                                     return (
                                         <ValueEditFormSection
-                                            error={error}
-                                            loading={loading}
+                                            error={patientStore.loadValuesInventoryState.error}
+                                            loading={patientStore.loadValuesInventoryState.pending}
                                             value={value}
                                             activityExamples={activityExamples}
                                             handleEditValue={handleEditValue(idx)}
@@ -551,8 +546,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 lifearea={lifeareaContent.name}
                 value={viewState.newValue}
                 examples={valueExamples}
-                error={error}
-                loading={loading}
+                error={patientStore.loadValuesInventoryState.error}
+                loading={patientStore.loadValuesInventoryState.pending}
                 handleCancel={handleCancelValue}
                 handleChange={handleChangeValue}
                 handleSave={handleSaveValue}
