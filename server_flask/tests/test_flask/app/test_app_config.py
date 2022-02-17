@@ -51,6 +51,6 @@ def test_app_quote(
 
     assert response.ok
 
-    quote = response.json()
-
-    assert type(quote) == str
+    response_json = response.json()
+    assert "quote" in response_json
+    assert type(response_json["quote"]) == str
