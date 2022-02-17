@@ -29,8 +29,8 @@ class ConfigTestPatientSet:
     database_document_parameter_name: str
     flask_query_set_type: str
     flask_query_set_element_type: str
-    flask_response_document_set_key: str
-    flask_response_document_set_element_key: str
+    flask_document_set_key: str
+    flask_document_set_element_key: str
     document_id: str
 
 
@@ -46,8 +46,8 @@ TEST_CONFIGS = [
         database_document_parameter_name="session",
         flask_query_set_type="sessions",
         flask_query_set_element_type="session",
-        flask_response_document_set_key="sessions",
-        flask_response_document_set_element_key="session",
+        flask_document_set_key="sessions",
+        flask_document_set_element_key="session",
         document_id="sessionId",
     ),
     ConfigTestPatientSet(
@@ -61,8 +61,8 @@ TEST_CONFIGS = [
         database_document_parameter_name="case_review",
         flask_query_set_type="casereviews",
         flask_query_set_element_type="casereview",
-        flask_response_document_set_key="casereviews",
-        flask_response_document_set_element_key="casereview",
+        flask_document_set_key="casereviews",
+        flask_document_set_element_key="casereview",
         document_id="reviewId",
     ),
 ]
@@ -121,10 +121,10 @@ def test_patient_set_get(
     )
     assert response.ok
 
-    assert config.flask_response_document_set_key in response.json()
+    assert config.flask_document_set_key in response.json()
 
     # Confirm it matches expected documents, with addition of an "_id", "_rev", and "_set_id"
-    documents_retrieved = response.json()[config.flask_response_document_set_key]
+    documents_retrieved = response.json()[config.flask_document_set_key]
     for document_retrieved in documents_retrieved:
         assert "_id" in document_retrieved
         del document_retrieved["_id"]
@@ -175,8 +175,8 @@ def test_patient_set_get_empty(
     )
     assert response.ok
     documents_retrieved = response.json()
-    assert config.flask_response_document_set_key in documents_retrieved
-    assert documents_retrieved[config.flask_response_document_set_key] == []
+    assert config.flask_document_set_key in documents_retrieved
+    assert documents_retrieved[config.flask_document_set_key] == []
 
 
 @pytest.mark.parametrize(
@@ -266,12 +266,12 @@ def test_patient_set_post(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={config.flask_document_set_element_key: document},
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
-    document_stored = response.json()[config.flask_response_document_set_element_key]
+    document_stored = response.json()[config.flask_document_set_element_key]
     assert "_id" in document_stored
     del document_stored["_id"]
     assert "_rev" in document_stored
@@ -322,19 +322,32 @@ def test_patient_set_post_invalid(
         config.document_factory_fixture_set_element
     )
 
-    # Invalid document that does not match any schema
     document = document_factory()
     query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_type,
     )
+
+    # Invalid document that is not nested under the document key
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that does not match any schema
     response = session.post(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
         json={
-            "_invalid": "invalid",
+            config.flask_document_set_element_key: {
+                "_invalid": "invalid",
+            }
         },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
@@ -346,7 +359,31 @@ def test_patient_set_post_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={config.flask_document_set_element_key: document},
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that already includes an "_rev"
+    del document["_id"]
+    document["_rev"] = "invalid"
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={config.flask_document_set_element_key: document},
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that already includes an "_set_id"
+    del document["_rev"]
+    document["_set_id"] = "invalid"
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={config.flask_document_set_element_key: document},
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
@@ -438,8 +475,9 @@ def test_patient_set_element_get(
     )
     assert response.ok
 
+    assert config.flask_document_set_element_key in response.json()
     # Confirm it matches expected document, with addition of an "_id", "_rev", and "_set_id"
-    document_retrieved = response.json()[config.flask_response_document_set_element_key]
+    document_retrieved = response.json()[config.flask_document_set_element_key]
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
     assert "_rev" in document_retrieved
@@ -552,13 +590,13 @@ def test_patient_set_element_put(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={config.flask_document_set_element_key: document},
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
-    assert config.flask_response_document_set_element_key in response.json()
-    document_stored = response.json()[config.flask_response_document_set_element_key]
+    assert config.flask_document_set_element_key in response.json()
+    document_stored = response.json()[config.flask_document_set_element_key]
     assert "_id" in document_stored
     del document_stored["_id"]
     assert "_rev" in document_stored
@@ -626,7 +664,7 @@ def test_patient_set_element_put_invalid(
             query,
         ),
         json={
-            "_invalid": "invalid",
+            config.flask_document_set_element_key: {"_invalid": "invalid"},
         },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
@@ -638,7 +676,9 @@ def test_patient_set_element_put_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={
+            config.flask_document_set_element_key: document,
+        },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
@@ -683,12 +723,12 @@ def test_patient_set_element_put_update(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={config.flask_document_set_element_key: document},
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and "_set_id"
-    document_stored = response.json()[config.flask_response_document_set_element_key]
+    document_stored = response.json()[config.flask_document_set_element_key]
 
     # To store an updated document, remove the "_id"
     document_update = copy.deepcopy(document_stored)
@@ -700,12 +740,12 @@ def test_patient_set_element_put_update(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={config.flask_document_set_element_key: document_update},
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
-    document_updated = response.json()[config.flask_response_document_set_element_key]
+    document_updated = response.json()[config.flask_document_set_element_key]
 
     assert document_stored["_id"] != document_updated["_id"]
     assert document_stored["_rev"] != document_updated["_rev"]
@@ -762,14 +802,12 @@ def test_patient_set_element_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={config.flask_document_set_element_key: document},
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and "_set_id"
-    document_stored_rev1 = response.json()[
-        config.flask_response_document_set_element_key
-    ]
+    document_stored_rev1 = response.json()[config.flask_document_set_element_key]
 
     # Store an update that will be assigned "_rev" == 2
     document_update = copy.deepcopy(document_stored_rev1)
@@ -781,7 +819,7 @@ def test_patient_set_element_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={config.flask_document_set_element_key: document_update},
     )
     assert response.ok
 
@@ -792,12 +830,12 @@ def test_patient_set_element_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={config.flask_document_set_element_key: document_update},
     )
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_response_document_set_element_key]
+    document_conflict = response.json()[config.flask_document_set_element_key]
     assert document_conflict["_rev"] == 2
 
     # Attempting to store the "_rev" == 1 document should fail, result in a duplicate on "_rev" == 2
@@ -809,12 +847,12 @@ def test_patient_set_element_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={config.flask_document_set_element_key: document_update},
     )
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_response_document_set_element_key]
+    document_conflict = response.json()[config.flask_document_set_element_key]
     assert document_conflict["_rev"] == 2
 
 
