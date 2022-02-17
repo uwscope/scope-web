@@ -28,7 +28,9 @@ def get_sessions(patient_id):
         collection=patient_collection,
     )
     if documents is None:
-        context.abort_document_not_found()
+        return {
+            "sessions": [],
+        }
 
     return {
         "sessions": documents,

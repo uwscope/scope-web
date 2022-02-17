@@ -28,7 +28,9 @@ def get_case_reviews(patient_id):
         collection=patient_collection,
     )
     if documents is None:
-        context.abort_document_not_found()
+        return {
+            "casereviews": [],
+        }
 
     return {
         "casereviews": documents,

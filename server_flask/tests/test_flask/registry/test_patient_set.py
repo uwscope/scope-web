@@ -121,6 +121,8 @@ def test_patient_set_get(
     )
     assert response.ok
 
+    assert config.flask_response_document_set_key in response.json()
+
     # Confirm it matches expected documents, with addition of an "_id", "_rev", and "_set_id"
     documents_retrieved = response.json()[config.flask_response_document_set_key]
     for document_retrieved in documents_retrieved:
@@ -142,6 +144,46 @@ def test_patient_set_get(
     [[config] for config in TEST_CONFIGS],
     ids=[config.name for config in TEST_CONFIGS],
 )
+def test_patient_set_get_empty(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test retrieving an empty set for patient.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+
+    # Retrieve a valid patient and a valid document,
+    # but get an empty list because fail with 404 because we have not put that document
+    query = QUERY_SET.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_type,
+    )
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.ok
+    documents_retrieved = response.json()
+    assert config.flask_response_document_set_key in documents_retrieved
+    assert documents_retrieved[config.flask_response_document_set_key] == []
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
 def test_patient_set_get_invalid(
     request: pytest.FixtureRequest,
     config: ConfigTestPatientSet,
@@ -156,6 +198,7 @@ def test_patient_set_get_invalid(
     Test retrieving a set for invalid patient.
     """
 
+    temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
 
     # Retrieve an invalid patient via Flask
@@ -171,34 +214,20 @@ def test_patient_set_get_invalid(
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
 
-    # TODO: Anant extend this test based on analogous cases in singleton
-    #
-    # # Retrieve a valid patient but an invalid document
-    # query = query.format(
-    #     patient_id=temp_patient.patient_id,
-    #     query_type="invalid",
-    # )
-    # response = session.get(
-    #     url=urljoin(
-    #         flask_client_config.baseurl,
-    #         query,
-    #     ),
-    # )
-    # assert response.status_code == http.HTTPStatus.NOT_FOUND
-    #
-    # # Retrieve a valid patient and a valid document,
-    # # but fail because we have not put that document
-    # query = query.format(
-    #     patient_id=temp_patient.patient_id,
-    #     query_type=config.flask_query_type,
-    # )
-    # response = session.get(
-    #     url=urljoin(
-    #         flask_client_config.baseurl,
-    #         query,
-    #     ),
-    # )
-    # assert response.status_code == http.HTTPStatus.NOT_FOUND
+    # TODO: James: Should we be POSTing some documents before the following GET code.
+
+    # Retrieve a valid patient but an invalid document type
+    query = QUERY_SET.format(
+        patient_id=temp_patient.patient_id,
+        query_type="invalid",
+    )
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.parametrize(
@@ -426,6 +455,71 @@ def test_patient_set_element_get(
     [[config] for config in TEST_CONFIGS],
     ids=[config.name for config in TEST_CONFIGS],
 )
+def test_patient_set_element_get_invalid(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test retrieving an invalid set element.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Store the document
+    document = document_factory()
+    result = config.database_post_function(
+        **{
+            "collection": temp_patient.collection,
+            config.database_document_parameter_name: document,
+        }
+    )
+    assert result.inserted_count == 1
+
+    # Retrieve an invalid patient's set element via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id="invalid",
+        query_type=config.flask_query_set_element_type,
+        set_id=result.document[config.document_id],
+    )
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    # Retrieve a nonexistant set element for a valid patient
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id="invalid",
+    )
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
 def test_patient_set_element_put(
     request: pytest.FixtureRequest,
     config: ConfigTestPatientSet,
@@ -463,6 +557,7 @@ def test_patient_set_element_put(
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
+    assert config.flask_response_document_set_element_key in response.json()
     document_stored = response.json()[config.flask_response_document_set_element_key]
     assert "_id" in document_stored
     del document_stored["_id"]
@@ -721,3 +816,45 @@ def test_patient_set_element_put_update_invalid(
     # Contents of the response should indicate that current "_rev" == 2
     document_conflict = response.json()[config.flask_response_document_set_element_key]
     assert document_conflict["_rev"] == 2
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_set_element_post_invalid(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test that post is not allowed on set element.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Store a document via Flask
+    document = document_factory()
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document[config.document_id],
+    )
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
