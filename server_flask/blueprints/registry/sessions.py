@@ -43,6 +43,7 @@ def get_sessions(patient_id):
 )
 @validate_schema(
     schema=session_schema,
+    key="session",
 )
 @flask_json.as_json
 def post_session(patient_id):
@@ -56,12 +57,17 @@ def post_session(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["session"]
 
     # Previously stored documents contain an "_id",
     # documents to be post must not already contain an "_id"
     if "_id" in document:
         context.abort_post_with_id()
+
+    # Previously stored documents contain a "_set_id",
+    # documents to be post must not already contain an "_set_id"
+    if "_set_id" in document:
+        context.abort_post_with_set_id()
 
     # Previously stored documents contain an "_rev",
     # documents to be post must not already contain a "_rev"
@@ -108,6 +114,7 @@ def get_session(patient_id, session_id):
 )
 @validate_schema(
     schema=session_schema,
+    key="session",
 )
 @flask_json.as_json
 def put_session(patient_id, session_id):
@@ -118,7 +125,7 @@ def put_session(patient_id, session_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["session"]
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"

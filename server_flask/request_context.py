@@ -64,6 +64,15 @@ class RequestContext:
         )
 
     @staticmethod
+    def abort_post_with_set_id() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'POST must not include "_set_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
     def abort_post_with_rev() -> NoReturn:
         RequestContext._abort(
             {
