@@ -40,7 +40,10 @@ def get_safety_plan(patient_id):
     "/<string:patient_id>/safetyplan",
     methods=["PUT"],
 )
-@validate_schema(safety_plan_schema)
+@validate_schema(
+    schema=safety_plan_schema,
+    key="safetyplan",
+)
 @flask_json.as_json
 def put_safety_plan(patient_id):
     # TODO: Require authentication
@@ -49,7 +52,7 @@ def put_safety_plan(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["safetyplan"]
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"

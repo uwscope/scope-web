@@ -5,17 +5,41 @@ import json
 import jschon
 
 
-# TODO: Confirm location of the function with James.
+def validate_schema(
+    *,
+    schema: jschon.JSONSchema,
+    key: str = None,
+):
+    """
+    Validate a schema against the request body.
+    """
 
-
-def validate_schema(schema_object):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            # For .evaluate to work, its argument needs to be of type '<class 'jschon.json.JSON'>'
-            # current_app.logger.info(schema_object)
-            result = schema_object.evaluate(jschon.JSON(flask.request.json))
-            # current_app.logger.info(result.output("basic"))
+            # Body JSON
+            document = flask.request.json
+
+            if key:
+                if key not in document:
+                    flask.abort(
+                        flask.make_response(
+                            flask.jsonify(
+                                {
+                                    "message": 'Schema validation failed, key not found "".'.format(
+                                        key
+                                    ),
+                                    "request": flask.request.json,
+                                }
+                            ),
+                            http.HTTPStatus.BAD_REQUEST,
+                        )
+                    )
+
+                document = document[key]
+
+            # Argument needs to be of type jschon.json.JSON
+            result = schema.evaluate(jschon.JSON(document))
 
             if not result.output("flag")["valid"]:
                 flask.abort(
