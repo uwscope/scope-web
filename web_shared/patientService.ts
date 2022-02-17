@@ -78,7 +78,9 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for values inventory: ${(inventory as any)._type}`,
         );
         const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
-        return response.data?.valuesinventory;
+        const updatedInventory = response.data?.valuesinventory;
+        updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
+        return updatedInventory;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
