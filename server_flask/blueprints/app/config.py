@@ -86,5 +86,5 @@ def get_app_quote():
             quotes_json = json.load(quotes_file)
 
     return {
-        "quote": random.choice(quotes_json)
+        "quote": random.choice(quotes_json),
     }
