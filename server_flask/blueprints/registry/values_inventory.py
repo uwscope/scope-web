@@ -36,17 +36,19 @@ def get_values_inventory(patient_id):
     "/<string:patient_id>/valuesinventory",
     methods=["PUT"],
 )
-@validate_schema(values_inventory_schema)
+@validate_schema(
+    schema=values_inventory_schema,
+    key="valuesinventory",
+)
 @flask_json.as_json
-def put_patient_values(patient_id):
-
+def put_values_inventory(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json
+    document = flask.request.json["valuesinventory"]
 
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"
