@@ -27,7 +27,9 @@ def fake_session_factory(
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
             "sessionId": fake_utils.fake_unique_id(),
             "date": format_utils.format_date(
-                faker_factory.date_between_dates(date_start=datetime.date(2021, 6, 1))
+                faker_factory.date_between_dates(
+                    date_start=datetime.datetime.now() - datetime.timedelta(6 * 30)
+                )
             ),
             "sessionType": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.SessionType

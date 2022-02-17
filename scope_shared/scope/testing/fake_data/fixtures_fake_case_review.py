@@ -25,7 +25,9 @@ def fake_case_review_factory(
             "_type": scope.database.patient.case_reviews.DOCUMENT_TYPE,
             "reviewId": fake_utils.fake_unique_id(),
             "date": format_utils.format_date(
-                faker_factory.date_between_dates(date_start=datetime.date(2021, 6, 1))
+                faker_factory.date_between_dates(
+                    date_start=datetime.datetime.now() - datetime.timedelta(6 * 30)
+                )
             ),
             # TODO: identity information
             # "consultingPsychiatrist": fake_identity_factory(),
