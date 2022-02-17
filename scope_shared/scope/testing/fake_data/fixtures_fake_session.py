@@ -16,7 +16,6 @@ def fake_session_factory(
     *,
     faker_factory: faker.Faker,
     fake_referral_status_factory: Callable[[], dict],
-    idx: int = None,
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake session documents.
