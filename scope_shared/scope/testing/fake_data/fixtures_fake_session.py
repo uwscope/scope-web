@@ -1,3 +1,4 @@
+import datetime
 import random
 from typing import Callable
 
@@ -24,7 +25,11 @@ def fake_session_factory(
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
             "sessionId": fake_utils.fake_unique_id(),
-            "date": format_utils.format_date(faker_factory.date_object()),
+            "date": format_utils.format_date(
+                faker_factory.date_between_dates(
+                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
+                )
+            ),
             "sessionType": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.SessionType
             ),
