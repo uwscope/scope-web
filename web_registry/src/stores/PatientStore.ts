@@ -2,7 +2,7 @@ import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, toJS, when } from 'mobx';
 import { getLogger } from 'shared/logger';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
-import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { IPromiseQueryBase, PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import {
     IActivity,
     IActivityLog,
@@ -29,6 +29,8 @@ export interface IPatientStore extends IPatient {
     readonly name: string;
     readonly age: number;
     readonly state: PromiseState;
+
+    readonly loadValuesInventoryState: IPromiseQueryBase;
 
     readonly latestSession: ISession | undefined;
 
@@ -148,6 +150,10 @@ export class PatientStore implements IPatientStore {
         return this.loadPatientDataQuery.state;
     }
 
+    @computed get loadValuesInventoryState() {
+        return this.loadValuesInventoryQuery;
+    }
+
     @computed get latestSession() {
         if (this.sessions.length > 0) {
             return this.sessions[this.sessions.length - 1];
@@ -194,7 +200,7 @@ export class PatientStore implements IPatientStore {
     public async assignValuesInventory() {
         console.log('current values inventory', toJS(this.valuesInventory));
         const promise = this.patientService.updateValuesInventory({
-            ...this.valuesInventory,
+            ...toJS(this.valuesInventory),
             assigned: true,
             assignedDateTime: new Date(),
         });

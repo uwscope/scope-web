@@ -55,7 +55,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
             id={getString('patient_detail_subsection_values_inventory_hash')}
             title={getString('patient_detail_subsection_values_inventory_title')}
             inlineTitle={dateStrings.join(', ')}
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient?.loadValuesInventoryState.pending}
+            error={currentPatient?.loadValuesInventoryState.error}
             actionButtons={[
                 {
                     icon: assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
