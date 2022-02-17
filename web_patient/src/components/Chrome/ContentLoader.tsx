@@ -1,17 +1,15 @@
 import { Button, Fade, LinearProgress, Snackbar, Stack } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { FunctionComponent } from 'react';
-import { PromiseState } from 'shared/promiseQuery';
+import { IPromiseQueryState } from 'shared/promiseQuery';
 
 export const ContentLoader: FunctionComponent<{
-    state: PromiseState;
+    state: IPromiseQueryState;
     name: string;
     onRetry?: () => void;
     children: React.ReactNode;
 }> = (props) => {
     const { state, name, children, onRetry } = props;
-    const loading = state === 'Pending';
-    const error = state === 'Rejected' || state === 'Conflicted';
 
     const retryAction = onRetry && (
         <Button color="secondary" size="small" onClick={onRetry}>
@@ -23,17 +21,18 @@ export const ContentLoader: FunctionComponent<{
         <Stack spacing={0}>
             <Box sx={{ height: 4 }}>
                 <Fade
-                    in={loading}
+                    in={state.pending}
                     style={{
-                        transitionDelay: loading ? '800ms' : '0ms',
+                        transitionDelay: state.pending ? '800ms' : '0ms',
                     }}
-                    unmountOnExit>
+                    unmountOnExit
+                >
                     <LinearProgress />
                 </Fade>
             </Box>
-            <Box sx={{ opacity: loading ? 0.5 : 1 }}>{children}</Box>
+            <Box sx={{ opacity: state.pending ? 0.5 : 1 }}>{children}</Box>
             <Snackbar
-                open={error}
+                open={state.error}
                 message={`Sorry, there was an error retrieving ${name}. Please try again.`}
                 action={retryAction}
             />

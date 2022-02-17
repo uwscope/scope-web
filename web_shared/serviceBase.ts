@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { handleDates } from 'shared/time';
 import { KeyedMap } from 'shared/types';
 
@@ -41,6 +41,15 @@ export class ServiceBase implements IServiceBase {
             return response;
         };
 
+        const handleError = (error: AxiosError) => {
+            if (error.response?.status == 409 && error.response != undefined) {
+                handleDates(error.response?.data);
+                handleDocuments(error.response?.data);
+            }
+
+            throw error;
+        };
+
         const handleRequest = (request: AxiosRequestConfig) => {
             if (request.method?.toLowerCase() === 'put' && request.data && request.data._id) {
                 request.data._rev = this.revIds[request.data._id];
@@ -49,7 +58,7 @@ export class ServiceBase implements IServiceBase {
             return request;
         };
 
-        this.axiosInstance.interceptors.response.use(handleResponse);
+        this.axiosInstance.interceptors.response.use(handleResponse, handleError);
 
         this.axiosInstance.interceptors.request.use(handleRequest);
     }

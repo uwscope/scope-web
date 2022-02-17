@@ -32,4 +32,5 @@ class AppService implements IAppService {
     }
 }
 
-export const getAppServiceInstance = (baseUrl: string) => new AppService(baseUrl) as IAppService;
+export const getAppServiceInstance = (baseUrl: string) =>
+    new AppService(baseUrl) as IAppService;
