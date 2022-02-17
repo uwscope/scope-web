@@ -483,7 +483,7 @@ def test_patient_singleton_post_not_allowed(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test that POST returns with 405.
+    Test that POST is not allowed.
     """
 
     temp_patient = database_temp_patient_factory()
