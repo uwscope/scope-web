@@ -51,9 +51,13 @@ export class ServiceBase implements IServiceBase {
         };
 
         const handleRequest = (request: AxiosRequestConfig) => {
-            if (request.method?.toLowerCase() === 'put' && request.data && request.data._id) {
-                request.data._rev = this.revIds[request.data._id];
-                delete request.data._id;
+            if (request.method?.toLowerCase() === 'put' && request.data) {
+                // Get the name of the document. Assume that it is the only field in the data
+                const docName = Object.keys(request.data)[0];
+                if (!!docName && request.data[docName] && request.data[docName]._id) {
+                    request.data[docName]._rev = this.revIds[request.data[docName]._id];
+                    delete request.data[docName]._id;
+                }
             }
             return request;
         };

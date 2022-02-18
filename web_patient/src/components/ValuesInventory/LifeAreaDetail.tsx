@@ -68,7 +68,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
 
     const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
         const newValue = { ...toJS(value) };
-        newValue.activities = newValue.activities || [];
+        newValue.activities = newValue.activities?.slice() || [];
 
         if (viewState.editActivityIdx >= 0) {
             newValue.activities[viewState.editActivityIdx] = newActivity;
@@ -87,7 +87,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
 
     const handleDeleteActivity = action(async () => {
         const newValue = { ...toJS(value) };
-        newValue.activities = newValue.activities || [];
+        newValue.activities = newValue.activities?.slice() || [];
 
         if (viewState.editActivityIdx >= 0) {
             newValue.activities.splice(viewState.editActivityIdx, 1);
@@ -426,7 +426,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
 
         const newValuesInventory = {
-            ...toJS(valuesInventory),
+            ...clonedInventory,
             lastUpdatedDateTime: new Date(),
             values: newValues,
         } as IValuesInventory;
@@ -445,11 +445,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             const { valuesInventory } = patientStore;
             const clonedInventory = toJS(valuesInventory);
 
-            const newValues = clonedInventory.values || [];
+            const newValues = clonedInventory.values?.slice() || [];
             newValues[idx] = newValue;
 
             const newValuesInventory = {
-                ...toJS(valuesInventory),
+                ...clonedInventory,
                 lastUpdatedDateTime: new Date(),
                 values: newValues,
             } as IValuesInventory;
