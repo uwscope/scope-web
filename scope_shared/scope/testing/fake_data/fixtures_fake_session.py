@@ -4,6 +4,7 @@ from typing import Callable
 
 import faker
 import pytest
+import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.database.patient.sessions
@@ -24,7 +25,7 @@ def fake_session_factory(
     def factory() -> dict:
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
-            "sessionId": fake_utils.fake_unique_id(),
+            "sessionId": collection_utils.generate_set_id(),
             "date": format_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)

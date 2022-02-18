@@ -1,37 +1,10 @@
-import base64
 import copy
-import hashlib
 import math
 import random
-import uuid
 from typing import List
 
 import jschon
 import pytest
-
-
-def fake_unique_id() -> str:
-    """
-    Generate a id that:
-    - Is guaranteed to be URL safe.
-    - Is expected to be unique.
-
-    TODO: Same as _generate_patient_id method in patients model file.
-          We may want a general purpose function for this.
-          In which case we would then also remove this.
-    """
-
-    # Obtain uniqueness
-    generated_uuid = uuid.uuid4()
-    # Manage length so these don't seem obscenely long
-    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=6).digest()
-    # Obtain URL safety and MongoDB collection name compatibility.
-    generated_base64 = base64.b32encode(generated_digest).decode("ascii").casefold()
-
-    # Remove terminating "=="
-    clean_generated_base64 = generated_base64.rstrip("=")
-
-    return clean_generated_base64
 
 
 def fake_enum_value(enum):
