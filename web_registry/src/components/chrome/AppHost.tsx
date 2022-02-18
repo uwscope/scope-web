@@ -1,12 +1,7 @@
 import { Box, CircularProgress, Fade, Typography } from '@mui/material';
-import { observer } from 'mobx-react';
-import {
-    default as React,
-    Fragment,
-    FunctionComponent,
-    useEffect,
-    useState,
-} from 'react';
+import { observer, useLocalObservable } from 'mobx-react';
+import { runInAction } from 'mobx';
+import { default as React, Fragment, FunctionComponent, useEffect } from 'react';
 import Splash from 'src/assets/splash-image.jpg';
 import Login from 'src/components/chrome/Login';
 import { useServices } from 'src/services/services';
@@ -33,7 +28,7 @@ const ImageContainer = withTheme(
         [props.theme.breakpoints.up('md')]: {
             width: '50%',
         },
-    }))
+    })),
 );
 
 const LoginContainer = withTheme(
@@ -49,7 +44,7 @@ const LoginContainer = withTheme(
         [props.theme.breakpoints.up('md')]: {
             width: '50%',
         },
-    }))
+    })),
 );
 
 const ProgressContainer = withTheme(
@@ -66,7 +61,7 @@ const ProgressContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 const FailureContainer = withTheme(
@@ -78,7 +73,7 @@ const FailureContainer = withTheme(
         [props.theme.breakpoints.down('md')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 const SplashImage = styled.img({
@@ -94,8 +89,13 @@ export interface IAppHost {
 export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const { children } = props;
 
-    const [store, setStore] = useState<IRootStore>();
-    const [failed, setFailed] = useState(false);
+    const state = useLocalObservable<{
+        store: IRootStore | undefined;
+        failed: boolean;
+    }>(() => ({
+        store: undefined,
+        failed: false,
+    }));
 
     useEffect(() => {
         const { configService } = useServices();
@@ -105,46 +105,47 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             .then((serverConfig) => {
                 // Create the RootStore
                 const newStore = new RootStore(serverConfig);
-                setStore(newStore);
+                runInAction(() => {
+                    state.store = newStore;
+                });
                 newStore.load();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
-                setFailed(true);
+                runInAction(() => {
+                    state.failed = true;
+                });
             });
     }, []);
 
     return (
         <Fragment>
-            {store?.authStore.isAuthenticated && (
+            {state.store?.authStore.isAuthenticated && (
                 <Fragment>
-                    <StoreProvider store={store}>{children}</StoreProvider>
+                    <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
-            <Fade in={!store?.authStore.isAuthenticated} timeout={500}>
+            <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <RootContainer>
                     <ImageContainer>
                         <SplashImage src={Splash} />
                     </ImageContainer>
                     <LoginContainer>
-                        {!!store ? (
-                            <StoreProvider store={store}>
+                        {!!state.store ? (
+                            <StoreProvider store={state.store}>
                                 <Login />
                             </StoreProvider>
-                        ) : !failed ? (
+                        ) : !state.failed ? (
                             <ProgressContainer>
                                 <CircularProgress />
                                 <Box sx={{ height: 40 }} />
-                                <Typography>
-                                    Connecting to service...
-                                </Typography>
+                                <Typography>Connecting to service...</Typography>
                             </ProgressContainer>
                         ) : (
                             <FailureContainer>
                                 <Typography variant="h1">Sorry!</Typography>
                                 <Typography variant="h5">
-                                    The registry is not available at this
-                                    moment. Please try again later.
+                                    The registry is not available at this moment. Please try again later.
                                 </Typography>
                             </FailureContainer>
                         )}

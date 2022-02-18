@@ -1,8 +1,9 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, toJS, when } from 'mobx';
+import { discussionFlagValues, patientRaceValues } from 'shared/enums';
 import { getLogger } from 'shared/logger';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
-import { IPromiseQueryBase, PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { IPromiseQueryState, PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import {
     IActivity,
     IActivityLog,
@@ -30,14 +31,15 @@ export interface IPatientStore extends IPatient {
     readonly age: number;
     readonly state: PromiseState;
 
-    readonly loadValuesInventoryState: IPromiseQueryBase;
+    readonly loadValuesInventoryState: IPromiseQueryState;
+    readonly loadProfileState: IPromiseQueryState;
 
     readonly latestSession: ISession | undefined;
 
     load(): void;
 
-    updateProfile(profile: Partial<IPatientProfile>): void;
-    updateClinicalHistory(history: Partial<IClinicalHistory>): void;
+    updateProfile(profile: IPatientProfile): Promise<void>;
+    updateClinicalHistory(history: Partial<IClinicalHistory>): Promise<void>;
 
     assignValuesInventory(): void;
     assignSafetyPlan(): void;
@@ -57,12 +59,6 @@ export interface IPatientStore extends IPatient {
 
 export class PatientStore implements IPatientStore {
     public identity: IIdentity;
-
-    // Patient info
-    public profile: IPatientProfile = {
-        name: '',
-        MRN: '',
-    };
 
     public clinicalHistory: IClinicalHistory = {};
 
@@ -92,6 +88,7 @@ export class PatientStore implements IPatientStore {
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
+    private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
 
     constructor(patient: IPatient) {
         console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
@@ -103,7 +100,6 @@ export class PatientStore implements IPatientStore {
         this.identity = patient.identity;
 
         // Patient info
-        this.profile = patient.profile || this.profile;
         this.clinicalHistory = patient.clinicalHistory || this.clinicalHistory;
 
         // Safety plan
@@ -125,11 +121,13 @@ export class PatientStore implements IPatientStore {
 
         this.moodLogs = patient.moodLogs || this.moodLogs;
 
-        this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData');
+        this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData', 'patient');
         this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(
             patient.valuesInventory,
             'loadValuesInventory',
+            'valuesinventory',
         );
+        this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile', 'profile');
 
         makeAutoObservable(this);
     }
@@ -154,6 +152,10 @@ export class PatientStore implements IPatientStore {
         return this.loadValuesInventoryQuery;
     }
 
+    @computed get loadProfileState() {
+        return this.loadProfileQuery;
+    }
+
     @computed get latestSession() {
         if (this.sessions.length > 0) {
             return this.sessions[this.sessions.length - 1];
@@ -164,9 +166,17 @@ export class PatientStore implements IPatientStore {
 
     @computed get valuesInventory() {
         return (
-            this.loadValuesInventoryQuery.value ||
-            this.loadPatientDataQuery.value?.valuesInventory || {
+            this.loadValuesInventoryQuery.value || {
                 assigned: false,
+            }
+        );
+    }
+
+    @computed get profile() {
+        return (
+            this.loadProfileQuery.value || {
+                name: '',
+                MRN: '',
             }
         );
     }
@@ -174,6 +184,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async load() {
         await this.loadAndLogQuery<IPatient>(this.patientService.getPatient, this.loadPatientDataQuery);
+        await this.loadAndLogQuery<IPatientProfile>(this.patientService.getProfile, this.loadProfileQuery);
         await this.loadAndLogQuery<IValuesInventory>(
             this.patientService.getValuesInventory,
             this.loadValuesInventoryQuery,
@@ -181,11 +192,18 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async updateProfile(patientProfile: Partial<IPatientProfile>) {
-        const { registryService } = useServices();
-        const promise = registryService.updatePatientProfile(this.recordId, patientProfile);
+    public async updateProfile(patientProfile: IPatientProfile) {
+        const promise = this.patientService.updateProfile({
+            ...toJS(this.profile),
+            ...toJS(patientProfile),
+            race: Object.assign({}, ...patientRaceValues.map((x) => ({ [x]: !!patientProfile.race?.[x] }))),
+            discussionFlag: Object.assign(
+                {},
+                ...discussionFlagValues.map((x) => ({ [x]: !!patientProfile.discussionFlag?.[x] })),
+            ),
+        });
 
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<IPatientProfile>(() => promise, this.loadProfileQuery);
     }
 
     @action.bound
@@ -198,7 +216,6 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async assignValuesInventory() {
-        console.log('current values inventory', toJS(this.valuesInventory));
         const promise = this.patientService.updateValuesInventory({
             ...toJS(this.valuesInventory),
             assigned: true,
@@ -400,18 +417,23 @@ export class PatientStore implements IPatientStore {
 
     private async loadAndLogQuery<T>(queryCall: () => Promise<T>, promiseQuery: PromiseQuery<T>) {
         const effect = async () => {
-            const loggedCall = logger.logFunction<T>({ eventName: queryCall.name })(
+            const loggedCall = logger.logFunction<T>({ eventName: promiseQuery.name })(
                 queryCall.bind(this.patientService),
             );
             await promiseQuery.fromPromise(loggedCall);
         };
 
         if (promiseQuery.state == 'Pending') {
-            when(() => {
-                return promiseQuery.state != 'Pending';
-            }, effect);
+            when(
+                () => {
+                    return promiseQuery.state != 'Pending';
+                },
+                async () => {
+                    await effect();
+                },
+            );
         } else {
-            effect();
+            await effect();
         }
     }
 }

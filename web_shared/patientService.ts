@@ -10,7 +10,7 @@ import {
 } from 'shared/fake';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
-import { IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import { IPatientProfileResponse, IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
@@ -18,6 +18,7 @@ import {
     IMoodLog,
     IPatient,
     IPatientConfig,
+    IPatientProfile,
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
@@ -28,6 +29,9 @@ export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
 
     getPatient(): Promise<IPatient>;
+
+    getProfile(): Promise<IPatientProfile>;
+    updateProfile(profile: IPatientProfile): Promise<IPatientProfile>;
 
     getValuesInventory(): Promise<IValuesInventory>;
     updateValuesInventory(values: IValuesInventory): Promise<IValuesInventory>;
@@ -63,6 +67,22 @@ class PatientService extends ServiceBase implements IPatientService {
     public async getPatient(): Promise<IPatient> {
         const response = await this.axiosInstance.get<IPatientResponse>('');
         return response.data?.patient;
+    }
+
+    public async getProfile(): Promise<IPatientProfile> {
+        const response = await this.axiosInstance.get<IPatientProfileResponse>(`/profile`);
+        return response.data?.profile;
+    }
+
+    public async updateProfile(profile: IPatientProfile): Promise<IPatientProfile> {
+        logger.assert(
+            (profile as any)._type === 'patientProfile',
+            `invalid _type for patient profile: ${(profile as any)._type}`,
+        );
+
+        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, profile);
+
+        return response.data?.profile;
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {

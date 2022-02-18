@@ -11,35 +11,12 @@ PATIENT_DOCUMENT_TYPE = "patient"
 PATIENTS_COLLECTION = "patients"
 
 
-def _generate_patient_id() -> str:
-    """
-    Generate a patient_id that:
-    - Is guaranteed to be URL safe.
-    - Is guaranteed to be compatible with MongoDB collection naming.
-    - Is expected to be unique.
-    """
-
-    # Obtain uniqueness
-    generated_uuid = uuid.uuid4()
-    # Manage length so these don't seem obscenely long
-    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=6).digest()
-    # Obtain URL safety and MongoDB collection name compatibility.
-    generated_base64 = base64.b32encode(generated_digest).decode("ascii").casefold()
-
-    # Remove terminating "=="
-    clean_generated_base64 = generated_base64.rstrip("=")
-
-    return clean_generated_base64
-
-
 def _patient_collection_name(*, patient_id: str) -> str:
     return "patient_{}".format(patient_id)
 
 
 def create_patient(
-    *,
-    database: pymongo.database.Database,
-    patient_id: str = None
+    *, database: pymongo.database.Database, patient_id: str = None
 ) -> dict:
     """
     Create a patient document and collection, return the patient document.
@@ -51,11 +28,9 @@ def create_patient(
     # A set element with the generated_patient_id ensures the patient_id is unique.
     # We can therefore also use it as our collection name.
     if patient_id is None:
-        patient_id = _generate_patient_id()
+        patient_id = scope.database.collection_utils.generate_set_id()
 
-    generated_patient_collection = _patient_collection_name(
-        patient_id=patient_id
-    )
+    generated_patient_collection = _patient_collection_name(patient_id=patient_id)
 
     # Create the patient collection with a sentinel document
     patient_collection = database.get_collection(generated_patient_collection)
