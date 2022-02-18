@@ -1,6 +1,9 @@
+import base64
 from dataclasses import dataclass
+import hashlib
 import pymongo.collection
 from typing import List, Optional
+import uuid
 
 import scope.database.document_utils as document_utils
 
@@ -10,6 +13,27 @@ PRIMARY_COLLECTION_INDEX = [
     ("_rev", pymongo.DESCENDING),
 ]
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
+
+
+def generate_unique_id() -> str:
+    """
+    Generates an id that:
+    - Is guaranteed to be URL safe.
+    - Is guaranteed to be compatible with MongoDB collection naming.
+    - Is expected to be unique.
+    """
+
+    # Obtain uniqueness
+    generated_uuid = uuid.uuid4()
+    # Manage length so these don't seem obscenely long
+    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=6).digest()
+    # Obtain URL safety and MongoDB collection name compatibility.
+    generated_base64 = base64.b32encode(generated_digest).decode("ascii").casefold()
+
+    # Remove terminating "=="
+    clean_generated_base64 = generated_base64.rstrip("=")
+
+    return clean_generated_base64
 
 
 def delete_set_element(
