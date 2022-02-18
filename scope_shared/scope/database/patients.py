@@ -28,7 +28,7 @@ def create_patient(
     # A set element with the generated_patient_id ensures the patient_id is unique.
     # We can therefore also use it as our collection name.
     if patient_id is None:
-        patient_id = scope.database.collection_utils.generate_unique_id()
+        patient_id = scope.database.collection_utils.generate_set_id()
 
     generated_patient_collection = _patient_collection_name(patient_id=patient_id)
 

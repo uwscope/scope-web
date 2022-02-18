@@ -23,7 +23,7 @@ def fake_identity_factory(
     def factory() -> dict:
         fake_identity = {
             "_type": "identity",
-            "identityId": collection_utils.generate_unique_id(),
+            "identityId": collection_utils.generate_set_id(),
             "name": faker_factory.name(),
         }
 

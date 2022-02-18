@@ -15,7 +15,7 @@ PRIMARY_COLLECTION_INDEX = [
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
 
 
-def generate_unique_id() -> str:
+def generate_set_id() -> str:
     """
     Generates an id that:
     - Is guaranteed to be URL safe.

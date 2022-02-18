@@ -24,7 +24,7 @@ def fake_case_review_factory(
 
         fake_case_review = {
             "_type": scope.database.patient.case_reviews.DOCUMENT_TYPE,
-            "reviewId": collection_utils.generate_unique_id(),
+            "reviewId": collection_utils.generate_set_id(),
             "date": format_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
