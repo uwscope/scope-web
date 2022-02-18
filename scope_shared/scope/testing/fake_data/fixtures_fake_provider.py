@@ -6,6 +6,7 @@ from typing import Callable
 
 import faker
 import pytest
+import scope.database.collection_utils as collection_utils
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
@@ -25,7 +26,7 @@ def fake_provider_factory(
             "_type": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ProviderIdentityType
             ),
-            "identityId": fake_utils.fake_unique_id(),
+            "identityId": collection_utils.generate_set_id(),
             "name": faker_factory.name(),
         }
 

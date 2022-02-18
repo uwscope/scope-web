@@ -1,6 +1,6 @@
 import pymongo.database
 import scope.config
-import scope.database.collection_utils
+import scope.database.collection_utils as collection_utils
 import scope.database.patients
 import scope.database.providers
 
@@ -77,15 +77,15 @@ def _initialize_patients_collection(*, database: pymongo.database.Database):
     )
 
     # Ensure the expected index
-    scope.database.collection_utils.ensure_index(collection=patients_collection)
+    collection_utils.ensure_index(collection=patients_collection)
 
     # Ensure a sentinel document in that collection
-    result = scope.database.collection_utils.get_singleton(
+    result = collection_utils.get_singleton(
         collection=patients_collection,
         document_type="sentinel",
     )
     if result is None:
-        scope.database.collection_utils.put_singleton(
+        collection_utils.put_singleton(
             collection=patients_collection,
             document_type="sentinel",
             document={},
@@ -105,15 +105,15 @@ def _initialize_providers_collection(*, database: pymongo.database.Database):
     )
 
     # Ensure the expected index
-    scope.database.collection_utils.ensure_index(collection=providers_collection)
+    collection_utils.ensure_index(collection=providers_collection)
 
     # Ensure a sentinel document in that collection
-    result = scope.database.collection_utils.get_singleton(
+    result = collection_utils.get_singleton(
         collection=providers_collection,
         document_type="sentinel",
     )
     if result is None:
-        scope.database.collection_utils.put_singleton(
+        collection_utils.put_singleton(
             collection=providers_collection,
             document_type="sentinel",
             document={},

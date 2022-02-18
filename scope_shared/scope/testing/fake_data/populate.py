@@ -30,12 +30,14 @@ def populate_database(
 ):
     faker_factory = faker.Faker(locale="la")
 
+    # TODO: Remove when patient app includes authentication
     if (
         scope.database.patients.get_patient(database=database, patient_id="persistent")
         is None
     ):
         patient_current = scope.database.patients.create_patient(
-            database=database, patient_id="persistent"
+            database=database,
+            patient_id="persistent",
         )
         patient_collection = database.get_collection(patient_current["collection"])
 
@@ -54,10 +56,11 @@ def populate_database(
         )
 
     # TODO: Pass populate_providers integer as argument.
+    populate_providers = 10
     providers_collection = database.get_collection(
         scope.database.providers.PROVIDERS_COLLECTION
     )
-    for _ in range(10):
+    for _ in range(populate_providers):
         _populate_providers(
             faker_factory=faker_factory,
             providers_collection=providers_collection,

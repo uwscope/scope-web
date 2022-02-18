@@ -204,7 +204,13 @@
 		"identityType": {
 			"type": "string",
 			"description": "Identity Types",
-			"enum": ["patient", "socialWorker", "psychiatrist", "oncologist", "studyStaff"]
+			"enum": [
+				"patient",
+				"socialWorker",
+				"psychiatrist",
+				"oncologist",
+				"studyStaff"
+			]
 		},
 		"pronoun": {
 			"type": "string",
@@ -269,7 +275,11 @@
 		"sex": {
 			"type": "string",
 			"description": "PatientSex Type",
-			"enum": ["Male", "Female", "Intersex"]
+			"enum": [
+				"Male",
+				"Female",
+				"Intersex"
+			]
 		}
 	}
 }
