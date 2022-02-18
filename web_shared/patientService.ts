@@ -10,7 +10,12 @@ import {
 } from 'shared/fake';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
-import { IPatientProfileResponse, IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import {
+    IPatientProfileRequest,
+    IPatientProfileResponse,
+    IPatientResponse,
+    IValuesInventoryResponse,
+} from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
@@ -24,6 +29,7 @@ import {
     IScheduledAssessment,
     IValuesInventory,
 } from 'shared/types';
+import { IValuesInventoryRequest } from './serviceTypes';
 
 export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
@@ -80,7 +86,9 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
-        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, profile);
+        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, {
+            profile,
+        } as IPatientProfileRequest);
 
         return response.data?.profile;
     }
@@ -97,7 +105,9 @@ class PatientService extends ServiceBase implements IPatientService {
             (inventory as any)._type === 'valuesInventory',
             `invalid _type for values inventory: ${(inventory as any)._type}`,
         );
-        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
+        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, {
+            valuesinventory: inventory,
+        } as IValuesInventoryRequest);
         const updatedInventory = response.data?.valuesinventory;
         updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
         return updatedInventory;
