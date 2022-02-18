@@ -39,6 +39,7 @@ def _patient_collection_name(*, patient_id: str) -> str:
 def create_patient(
     *,
     database: pymongo.database.Database,
+    patient_id: str = None
 ) -> dict:
     """
     Create a patient document and collection, return the patient document.
@@ -49,9 +50,11 @@ def create_patient(
     # Obtain a unique ID and collection name for the patient.
     # A set element with the generated_patient_id ensures the patient_id is unique.
     # We can therefore also use it as our collection name.
-    generated_patient_id = _generate_patient_id()
+    if patient_id is None:
+        patient_id = _generate_patient_id()
+
     generated_patient_collection = _patient_collection_name(
-        patient_id=generated_patient_id
+        patient_id=patient_id
     )
 
     # Create the patient collection with a sentinel document
@@ -73,7 +76,7 @@ def create_patient(
     result = scope.database.collection_utils.put_set_element(
         collection=patients_collection,
         document_type=PATIENT_DOCUMENT_TYPE,
-        set_id=generated_patient_id,
+        set_id=patient_id,
         document=patient_document,
     )
     patient_document = result.document

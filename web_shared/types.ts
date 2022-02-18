@@ -210,8 +210,8 @@ export interface ISafetyPlan {
 
 export interface IValuesInventory {
     assigned: boolean;
-    assignedDate?: Date;
-    lastUpdatedDate?: Date;
+    assignedDateTime?: Date;
+    lastUpdatedDateTime?: Date;
     values?: ILifeAreaValue[];
 }
 
@@ -223,16 +223,16 @@ export interface ILifeAreaContent {
 
 export interface ILifeAreaValue {
     name: string;
-    dateCreated: Date;
-    dateEdited: Date;
+    createdDateTime: Date;
+    editedDateTime: Date;
     lifeareaId: string;
     activities: ILifeAreaValueActivity[];
 }
 
 export interface ILifeAreaValueActivity {
     name: string;
-    dateCreated: Date;
-    dateEdited: Date;
+    createdDateTime: Date;
+    editedDateTime: Date;
     enjoyment?: number;
     importance?: number;
 }

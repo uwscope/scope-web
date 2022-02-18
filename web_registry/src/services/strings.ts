@@ -1,6 +1,7 @@
 const _strings = {
     dialog_action_cancel: 'Cancel',
     dialog_action_save: 'Save',
+    dialog_error_text: 'Sorry, we ran into a problem processing your request. Please try again.',
 
     patient_detail_section_behavior_strategies_title: 'Behavioral Strategies',
     patient_detail_section_behavior_strategies_hash: 'behavioral',

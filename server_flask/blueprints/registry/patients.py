@@ -1,7 +1,9 @@
 import copy
 import http
 import logging
-import time
+import math
+import random
+# import time
 
 import fake
 import flask
@@ -16,6 +18,7 @@ import scope.database.patient.values_inventory
 import scope.database.patients
 from request_context import request_context
 
+FAKE_EMPTY_PATIENTS = []
 FAKE_PATIENT_MAP = {}
 
 patients_blueprint = flask.Blueprint(
@@ -26,46 +29,65 @@ patients_blueprint = flask.Blueprint(
 
 def _frankenfake_document(
     *,
+    patient_id: str,
     fake_document: dict,
     patient_collection: pymongo.collection.Collection,
 ) -> dict:
-    result_document = copy.deepcopy(fake_document)
+    if patient_id in FAKE_EMPTY_PATIENTS:
+        profile = scope.database.patient.patient_profile.get_patient_profile(
+            collection=patient_collection
+        )
+        if profile is None:
+            profile = fake_document["profile"]
 
-    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
-        collection=patient_collection
-    )
-    if clinical_history:
-        result_document["clinicalHistory"] = clinical_history
+        result_document = {
+            "identity": {
+                "identityId": fake_document["identity"]["identityId"],
+                "name": profile["name"],
+            },
+            "profile": {
+                "name": profile["name"],
+                "MRN": profile["MRN"],
+            }
+        }
+    else:
+        result_document = copy.deepcopy(fake_document)
 
-    profile = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
-    )
-    if profile:
-        result_document["profile"] = profile
+        clinical_history = scope.database.patient.clinical_history.get_clinical_history(
+            collection=patient_collection
+        )
+        if clinical_history:
+            result_document["clinicalHistory"] = clinical_history
 
-    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
-        collection=patient_collection
-    )
-    if safety_plan:
-        result_document["safetyPlan"] = safety_plan
+        profile = scope.database.patient.patient_profile.get_patient_profile(
+            collection=patient_collection
+        )
+        if profile:
+            result_document["profile"] = profile
 
-    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection
-    )
-    if values_inventory:
-        result_document["valuesInventory"] = values_inventory
+        safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+            collection=patient_collection
+        )
+        if safety_plan:
+            result_document["safetyPlan"] = safety_plan
 
-    sessions = scope.database.patient.sessions.get_sessions(
-        collection=patient_collection
-    )
-    if sessions:
-        result_document["sessions"] = sessions
-        
-    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
-        collection=patient_collection
-    )
-    if case_reviews:
-        result_document["caseReviews"] = case_reviews
+        values_inventory = scope.database.patient.values_inventory.get_values_inventory(
+            collection=patient_collection
+        )
+        if values_inventory:
+            result_document["valuesInventory"] = values_inventory
+
+        sessions = scope.database.patient.sessions.get_sessions(
+            collection=patient_collection
+        )
+        if sessions:
+            result_document["sessions"] = sessions
+
+        case_reviews = scope.database.patient.case_reviews.get_case_reviews(
+            collection=patient_collection
+        )
+        if case_reviews:
+            result_document["caseReviews"] = case_reviews
 
     return result_document
 
@@ -78,14 +100,14 @@ def _frankenfake_document(
 def get_patients():
     context = request_context()
 
-    time_call_start = time.perf_counter()
+    # time_call_start = time.perf_counter()
 
     # List of documents from the patients collection
     patients = scope.database.patients.get_patients(
         database=context.database,
     )
 
-    time_call_patients = time.perf_counter()
+    # time_call_patients = time.perf_counter()
 
     # TODO: Remove fake data generation when this is fully implemented
     # Ensure fake data exists for each patient
@@ -95,45 +117,54 @@ def get_patients():
             FAKE_PATIENT_MAP[patient_id] = fake.getFakePatient()
             FAKE_PATIENT_MAP[patient_id]["identity"]["identityId"] = patient_id
 
-    print(FAKE_PATIENT_MAP.keys(), flush=True)
+    NUMBER_EMPTY = math.ceil(len(FAKE_PATIENT_MAP.keys()) * .3) 
+    if len(set(FAKE_EMPTY_PATIENTS).intersection(FAKE_PATIENT_MAP.keys())) < NUMBER_EMPTY:
+        FAKE_EMPTY_PATIENTS.clear()
+        FAKE_EMPTY_PATIENTS.extend(random.sample(
+            list(FAKE_PATIENT_MAP.keys()),
+            NUMBER_EMPTY,
+        ))
 
     # Populate a document to return.
     # Initially based on fields that were in the fake data.
-    time_start_patients = time.perf_counter()
-    time_per_patient = []
+
+    # time_start_patients = time.perf_counter()
+    # time_per_patient = []
+
     patient_documents = []
     for patient_current in patients:
         patient_id = patient_current["_set_id"]
+        patient_document_current = FAKE_PATIENT_MAP[patient_id]
+
         patient_collection = context.database.get_collection(
             patient_current["collection"]
         )
-
-        patient_document_current = FAKE_PATIENT_MAP[patient_id]
         patient_document_current = _frankenfake_document(
+            patient_id=patient_id,
             fake_document=patient_document_current,
             patient_collection=patient_collection,
         )
 
         patient_documents.append(patient_document_current)
 
-        time_per_patient.append(time.perf_counter())
+        # time_per_patient.append(time.perf_counter())
 
-    time_call_end = time.perf_counter()
-
-    print(
-        "Time Call Patients: {}".format(time_call_patients - time_call_start),
-        flush=True,
-    )
-    print(
-        "Time Start Patients: {}".format(time_start_patients - time_call_start),
-        flush=True,
-    )
-    for time_per_patient_current in time_per_patient:
-        print(
-            "Time Patient: {}".format(time_per_patient_current - time_call_start),
-            flush=True,
-        )
-    print("Time Call End: {}".format(time_call_end - time_call_start), flush=True)
+    # time_call_end = time.perf_counter()
+    #
+    # print(
+    #     "Time Call Patients: {}".format(time_call_patients - time_call_start),
+    #     flush=True,
+    # )
+    # print(
+    #     "Time Start Patients: {}".format(time_start_patients - time_call_start),
+    #     flush=True,
+    # )
+    # for time_per_patient_current in time_per_patient:
+    #     print(
+    #         "Time Patient: {}".format(time_per_patient_current - time_call_start),
+    #         flush=True,
+    #     )
+    # print("Time Call End: {}".format(time_call_end - time_call_start), flush=True)
 
     # TODO: We should require that a "patient"
     #       always have a "profile" document that includes "name" and "mrn".
@@ -149,8 +180,6 @@ def get_patients():
             and ("name" in patient_document_current["profile"])
             and ("MRN" in patient_document_current["profile"])
         )
-
-        print(filter_pass, flush=True)
 
         if filter_pass:
             patient_documents_filtered.append(patient_document_current)
@@ -209,6 +238,7 @@ def get_patient(patient_id):
     # Initially based on fields that were in the fake data.
     patient_document = FAKE_PATIENT_MAP[patient_id]
     patient_document = _frankenfake_document(
+        patient_id=patient_id,
         fake_document=patient_document,
         patient_collection=patient_collection,
     )

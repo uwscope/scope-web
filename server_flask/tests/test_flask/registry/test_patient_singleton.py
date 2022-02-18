@@ -1,13 +1,13 @@
 import copy
 from dataclasses import dataclass
 import http
+import pytest
+import requests
 from typing import Callable
 from urllib.parse import urljoin
 
-import pytest
-import requests
 import scope.config
-import scope.database.collection_utils
+import scope.database.collection_utils as collection_utils
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
@@ -23,13 +23,22 @@ class ConfigTestPatientSingleton:
     name: str
     document_factory_fixture_name: str
     database_get_function: Callable[[...], dict]
-    database_put_function: Callable[[...], scope.database.collection_utils.PutResult]
+    database_put_function: Callable[[...], collection_utils.PutResult]
     database_put_function_document_parameter_name: str
     flask_query_type: str
-    flask_response_document_key: str
+    flask_document_key: str
 
 
 TEST_CONFIGS = [
+    ConfigTestPatientSingleton(
+        name="clinicalhistory",
+        document_factory_fixture_name="data_fake_clinical_history_factory",
+        database_get_function=scope.database.patient.clinical_history.get_clinical_history,
+        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
+        database_put_function_document_parameter_name="clinical_history",
+        flask_query_type="clinicalhistory",
+        flask_document_key="clinicalhistory",
+    ),
     ConfigTestPatientSingleton(
         name="profile",
         document_factory_fixture_name="data_fake_patient_profile_factory",
@@ -37,7 +46,7 @@ TEST_CONFIGS = [
         database_put_function=scope.database.patient.patient_profile.put_patient_profile,
         database_put_function_document_parameter_name="patient_profile",
         flask_query_type="profile",
-        flask_response_document_key="profile",
+        flask_document_key="profile",
     ),
     ConfigTestPatientSingleton(
         name="safetyplan",
@@ -46,16 +55,7 @@ TEST_CONFIGS = [
         database_put_function=scope.database.patient.safety_plan.put_safety_plan,
         database_put_function_document_parameter_name="safety_plan",
         flask_query_type="safetyplan",
-        flask_response_document_key="safetyplan",
-    ),
-    ConfigTestPatientSingleton(
-        name="clinicalhistory",
-        document_factory_fixture_name="data_fake_clinical_history_factory",
-        database_get_function=scope.database.patient.clinical_history.get_clinical_history,
-        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
-        database_put_function_document_parameter_name="clinical_history",
-        flask_query_type="clinicalhistory",
-        flask_response_document_key="clinicalhistory",
+        flask_document_key="safetyplan",
     ),
     ConfigTestPatientSingleton(
         name="valuesinventory",
@@ -64,7 +64,7 @@ TEST_CONFIGS = [
         database_put_function=scope.database.patient.values_inventory.put_values_inventory,
         database_put_function_document_parameter_name="values_inventory",
         flask_query_type="valuesinventory",
-        flask_response_document_key="valuesinventory",
+        flask_document_key="valuesinventory",
     ),
 ]
 
@@ -119,7 +119,7 @@ def test_patient_singleton_get(
     assert response.ok
 
     # Confirm it matches expected document, with addition of an "_id" and a "_rev"
-    document_retrieved = response.json()[config.flask_response_document_key]
+    document_retrieved = response.json()[config.flask_document_key]
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
     assert "_rev" in document_retrieved
@@ -164,7 +164,7 @@ def test_patient_singleton_get_invalid(
     assert response.status_code == http.HTTPStatus.NOT_FOUND
 
     # Retrieve a valid patient but an invalid document
-    query = query.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type="invalid",
     )
@@ -178,7 +178,7 @@ def test_patient_singleton_get_invalid(
 
     # Retrieve a valid patient and a valid document,
     # but fail because we have not put that document
-    query = query.format(
+    query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
@@ -189,6 +189,47 @@ def test_patient_singleton_get_invalid(
         ),
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_singleton_post_not_allowed(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSingleton,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test that POST is not allowed.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+
+    # Generate a document via Flask
+    query = QUERY_SINGLETON.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_type,
+    )
+    document = document_factory()
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={
+            config.flask_document_key: document,
+        },
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
 
 
 @pytest.mark.parametrize(
@@ -215,22 +256,24 @@ def test_patient_singleton_put(
     document_factory = request.getfixturevalue(config.document_factory_fixture_name)
 
     # Store a document via Flask
-    document = document_factory()
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
+    document = document_factory()
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={
+            config.flask_document_key: document,
+        },
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored = response.json()[config.flask_response_document_key]
+    document_stored = response.json()[config.flask_document_key]
     assert "_id" in document_stored
     del document_stored["_id"]
     assert "_rev" in document_stored
@@ -278,18 +321,32 @@ def test_patient_singleton_put_invalid(
     session = flask_session_unauthenticated_factory()
     document_factory = request.getfixturevalue(config.document_factory_fixture_name)
 
-    # Invalid document that does not match any schema
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
+
+    # Invalid document that is not nested under the document key
+    document = document_factory()
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that does not match any schema
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
         json={
-            "_invalid": "invalid",
+            config.flask_document_key: {
+                "_invalid": "invalid",
+            },
         },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
@@ -302,7 +359,9 @@ def test_patient_singleton_put_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={
+            config.flask_document_key: document,
+        },
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
@@ -330,23 +389,26 @@ def test_patient_singleton_put_update(
     session = flask_session_unauthenticated_factory()
     document_factory = request.getfixturevalue(config.document_factory_fixture_name)
 
-    # Store a document via Flask
-    document = document_factory()
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
+
+    # Store a document via Flask
+    document = document_factory()
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={
+            config.flask_document_key: document,
+        },
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored = response.json()[config.flask_response_document_key]
+    document_stored = response.json()[config.flask_document_key]
 
     # To store an updated document, remove the "_id"
     document_update = copy.deepcopy(document_stored)
@@ -358,12 +420,14 @@ def test_patient_singleton_put_update(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={
+            config.flask_document_key: document_update,
+        },
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_updated = response.json()[config.flask_response_document_key]
+    document_updated = response.json()[config.flask_document_key]
 
     assert document_stored["_id"] != document_updated["_id"]
     assert document_stored["_rev"] != document_updated["_rev"]
@@ -403,23 +467,26 @@ def test_patient_singleton_put_update_invalid(
     session = flask_session_unauthenticated_factory()
     document_factory = request.getfixturevalue(config.document_factory_fixture_name)
 
-    # Store a document via Flask
-    document = document_factory()
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
+
+    # Store a document via Flask
+    document = document_factory()
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json=document,
+        json={
+            config.flask_document_key: document,
+        },
     )
     assert response.ok
 
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored_rev1 = response.json()[config.flask_response_document_key]
+    document_stored_rev1 = response.json()[config.flask_document_key]
 
     # Store an update that will be assigned "_rev" == 2
     document_update = copy.deepcopy(document_stored_rev1)
@@ -430,7 +497,9 @@ def test_patient_singleton_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={
+            config.flask_document_key: document_update,
+        },
     )
     assert response.ok
 
@@ -441,12 +510,14 @@ def test_patient_singleton_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={
+            config.flask_document_key: document_update,
+        },
     )
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_response_document_key]
+    document_conflict = response.json()[config.flask_document_key]
     assert document_conflict["_rev"] == 2
 
     # Attempting to store the "_rev" == 1 document should fail, result in a duplicate on "_rev" == 2
@@ -458,10 +529,12 @@ def test_patient_singleton_put_update_invalid(
             flask_client_config.baseurl,
             query,
         ),
-        json=document_update,
+        json={
+            config.flask_document_key: document_update,
+        },
     )
     assert response.status_code == http.HTTPStatus.CONFLICT
 
     # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_response_document_key]
+    document_conflict = response.json()[config.flask_document_key]
     assert document_conflict["_rev"] == 2

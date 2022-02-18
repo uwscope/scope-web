@@ -5,88 +5,103 @@
 	"description": "Enum types",
 	"type": "object",
 	"properties": {
-		"activitySuccessType": {
+		"clinicCode": {
 			"type": "string",
-			"description": "ActivitySuccessType Type",
-			"enum": ["Yes", "SomethingElse", "No"]
+			"description": "ClinicCode Type",
+			"enum": [
+				"Breast",
+				"Endocrine",
+				"GI",
+				"GI – Pancreatic",
+				"GU",
+				"GYN",
+				"HEME",
+				"HEME – Sickle Cell",
+				"HNL",
+				"Immunotherapy",
+				"Melanoma/Renal",
+				"Neuro",
+				"NW Hospital",
+				"Sarcoma",
+				"Transplant – Auto",
+				"Transplant – Allo",
+				"Transplant – CAR-T",
+				"Transplant – LTFU",
+				"Transplant – TTC",
+				"Other"
+			]
 		},
-		"assessmentFrequency": {
+		"sex": {
 			"type": "string",
-			"description": "AssessmentFrequency Type",
-			"enum": ["Daily", "Once a week", "Every 2 weeks", "Monthly", "None"]
+			"description": "PatientSex Type",
+			"enum": ["Male", "Female", "Intersex"]
 		},
-		"bAChecklistFlags": {
+		"gender": {
+			"type": "string",
+			"description": "PatientGender Type",
+			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
+		},
+		"pronoun": {
+			"type": "string",
+			"description": "PatientPronoun Type",
+			"enum": ["He/Him", "She/Her", "They/Them"]
+		},
+		"ethnicity": {
+			"type": "string",
+			"description": "PatientEthnicity Type",
+			"enum": ["Hispanic or Latino/Latina/Latinx", "Not Hispanic or Latino/Latina/Latinx", "Unknown"]
+		},
+		"race": {
 			"type": "object",
-			"description": "BAChecklistFlags Type",
+			"description": "PatientRaceFlags Type",
 			"properties": {
-				"Review of the BA model": {
+				"American Indian or Alaska Native": {
 					"type": "boolean"
 				},
-				"Values and goals assessment": {
+				"Asian or Asian American": {
 					"type": "boolean"
 				},
-				"Activity scheduling": {
+				"Black or African American": { "type": "boolean" },
+				"Native Hawaiian or Other Pacific Islander": {
 					"type": "boolean"
 				},
-				"Mood and activity monitoring": {
+				"White": {
 					"type": "boolean"
 				},
-				"Relaxation": {
+				"Unknown": { "type": "boolean" }
+			},
+			"required": [
+				"American Indian or Alaska Native",
+				"Asian or Asian American",
+				"Black or African American",
+				"Native Hawaiian or Other Pacific Islander",
+				"White",
+				"Unknown"
+			]
+		},
+		"discussionFlags": {
+			"type": "object",
+			"description": "DiscussionFlags Type",
+			"$comment": "TODO: Figure out if there is a better way to design discussionFlag.",
+			"properties": {
+				"Flag as safety risk": {
 					"type": "boolean"
 				},
-				"Positive reinforcement": {
-					"type": "boolean"
-				},
-				"Managing avoidance behaviors": {
-					"type": "boolean"
-				},
-				"Problem-solving": {
+				"Flag for discussion": {
 					"type": "boolean"
 				}
 			},
-			"required": [
-				"Review of the BA model",
-				"Values and goals assessment",
-				"Activity scheduling",
-				"Mood and activity monitoring",
-				"Relaxation",
-				"Positive reinforcement",
-				"Managing avoidance behaviors",
-				"Problem-solving"
-			]
+			"required": ["Flag as safety risk", "Flag for discussion"]
 		},
-		"behavioralStrategyChecklistFlags": {
-			"type": "object",
-			"description": "BehavioralStrategyChecklistFlags Type",
-			"properties": {
-				"Behavioral Activation": {
-					"type": "boolean"
-				},
-				"Motivational Interviewing": {
-					"type": "boolean"
-				},
-				"Problem Solving Therapy": {
-					"type": "boolean"
-				},
-				"Cognitive Therapy": {
-					"type": "boolean"
-				},
-				"Mindfulness Strategies": {
-					"type": "boolean"
-				},
-				"Supportive Therapy": {
-					"type": "boolean"
-				},
-				"Other": { "type": "boolean" }
-			},
-			"required": [
-				"Behavioral Activation",
-				"Motivational Interviewing",
-				"Problem Solving Therapy",
-				"Cognitive Therapy",
-				"Mindfulness Strategies",
-				"Supportive Therapy"
-			]
+		"followupSchedule": {
+			"type": "string",
+			"description": "FollowupSchedule Type",
+			"enum": ["1-week follow-up", "2-week follow-up", "4-week follow-up"]
+		},
+		"depressionTreatmentStatus": {
+			"type": "string",
+			"description": "DepressionTreatmentStatus Type",
+			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending", "Other"]
 		},
 		"cancerTreatmentRegimenFlags": {
 			"type": "object",
@@ -131,108 +146,82 @@
 				"Surveillance"
 			]
 		},
-		"clinicCode": {
+		"sessionType": {
 			"type": "string",
-			"description": "ClinicCode Type",
-			"enum": [
-				"Breast",
-				"Endocrine",
-				"GI",
-				"GI – Pancreatic",
-				"GU",
-				"GYN",
-				"HEME",
-				"HEME – Sickle Cell",
-				"HNL",
-				"Immunotherapy",
-				"Melanoma/Renal",
-				"Neuro",
-				"NW Hospital",
-				"Sarcoma",
-				"Transplant – Auto",
-				"Transplant – Allo",
-				"Transplant – CAR-T",
-				"Transplant – LTFU",
-				"Transplant – TTC",
-				"Other"
-			]
+			"description": "SessionType Type",
+			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
 		},
-		"dayOfWeek": {
-			"type": "string",
-			"description": "DayOfWeek Type",
-			"enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-		},
-		"depressionTreatmentStatus": {
-			"type": "string",
-			"description": "DepressionTreatmentStatus Type",
-			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending", "Other"]
-		},
-
-		"discussionFlags": {
+		"behavioralStrategyChecklistFlags": {
 			"type": "object",
-			"description": "DiscussionFlags Type",
-			"$comment": "TODO: Figure out if there is a better way to design discussionFlag.",
+			"description": "BehavioralStrategyChecklistFlags Type",
 			"properties": {
-				"Flag as safety risk": {
+				"Behavioral Activation": {
 					"type": "boolean"
 				},
-				"Flag for discussion": {
+				"Motivational Interviewing": {
+					"type": "boolean"
+				},
+				"Problem Solving Therapy": {
+					"type": "boolean"
+				},
+				"Cognitive Therapy": {
+					"type": "boolean"
+				},
+				"Mindfulness Strategies": {
+					"type": "boolean"
+				},
+				"Supportive Therapy": {
+					"type": "boolean"
+				},
+				"Other": { "type": "boolean" }
+			},
+			"required": [
+				"Behavioral Activation",
+				"Motivational Interviewing",
+				"Problem Solving Therapy",
+				"Cognitive Therapy",
+				"Mindfulness Strategies",
+				"Supportive Therapy"
+			]
+		},
+		"bAChecklistFlags": {
+			"type": "object",
+			"description": "BAChecklistFlags Type",
+			"properties": {
+				"Review of the BA model": {
+					"type": "boolean"
+				},
+				"Values and goals assessment": {
+					"type": "boolean"
+				},
+				"Activity scheduling": {
+					"type": "boolean"
+				},
+				"Mood and activity monitoring": {
+					"type": "boolean"
+				},
+				"Relaxation": {
+					"type": "boolean"
+				},
+				"Positive reinforcement": {
+					"type": "boolean"
+				},
+				"Managing avoidance behaviors": {
+					"type": "boolean"
+				},
+				"Problem-solving": {
 					"type": "boolean"
 				}
 			},
-			"required": ["Flag as safety risk", "Flag for discussion"]
-		},
-		"dueType": {
-			"type": "string",
-			"description": "DueType Type",
-			"enum": ["Exact", "ChunkOfDay", "Day", "Week"]
-		},
-		"followupSchedule": {
-			"type": "string",
-			"description": "FollowupSchedule Type",
-			"enum": ["1-week follow-up", "2-week follow-up", "4-week follow-up"]
-		},
-		"gender": {
-			"type": "string",
-			"description": "PatientGender Type",
-			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
-		},
-		"identityType": {
-			"type": "string",
-			"description": "Identity Types",
-			"enum": ["patient", "socialWorker", "psychiatrist", "oncologist", "studyStaff"]
-		},
-		"pronoun": {
-			"type": "string",
-			"description": "PatientPronoun Type",
-			"enum": ["He/Him", "She/Her", "They/Them"]
-		},
-		"race": {
-			"type": "object",
-			"description": "PatientRaceFlags Type",
-			"properties": {
-				"American Indian or Alaska Native": {
-					"type": "boolean"
-				},
-				"Asian or Asian American": {
-					"type": "boolean"
-				},
-				"Black or African American": { "type": "boolean" },
-				"Native Hawaiian or Other Pacific Islander": {
-					"type": "boolean"
-				},
-				"White": {
-					"type": "boolean"
-				},
-				"Unknown": { "type": "boolean" }
-			},
 			"required": [
-				"American Indian or Alaska Native",
-				"Asian or Asian American",
-				"Black or African American",
-				"Native Hawaiian or Other Pacific Islander",
-				"White",
-				"Unknown"
+				"Review of the BA model",
+				"Values and goals assessment",
+				"Activity scheduling",
+				"Mood and activity monitoring",
+				"Relaxation",
+				"Positive reinforcement",
+				"Managing avoidance behaviors",
+				"Problem-solving"
 			]
 		},
 		"referral": {
@@ -253,15 +242,25 @@
 			"description": "ReferralStatus Type",
 			"enum": ["Not Referred", "Pending", "Active", "Completed"]
 		},
-		"sessionType": {
+		"assessmentFrequency": {
 			"type": "string",
-			"description": "SessionType Type",
-			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
+			"description": "AssessmentFrequency Type",
+			"enum": ["Daily", "Once a week", "Every 2 weeks", "Monthly", "None"]
 		},
-		"sex": {
+		"dayOfWeek": {
 			"type": "string",
-			"description": "PatientSex Type",
-			"enum": ["Male", "Female", "Intersex"]
+			"description": "DayOfWeek Type",
+			"enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		},
+		"dueType": {
+			"type": "string",
+			"description": "DueType Type",
+			"enum": ["Exact", "ChunkOfDay", "Day", "Week"]
+		},
+		"activitySuccessType": {
+			"type": "string",
+			"description": "ActivitySuccessType Type",
+			"enum": ["Yes", "SomethingElse", "No"]
 		}
 	}
 }

@@ -250,7 +250,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     ];
 
     const onRowClick = action((param: GridRowParams) => {
-        const id = param.getValue(param.id, 'id') as string;
+        const id = param.row['id'] as string;
         const data = assessmentLogs.find((a) => a.logId == id);
 
         if (!!data) {

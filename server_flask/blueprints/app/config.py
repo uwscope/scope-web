@@ -2,11 +2,15 @@ import flask
 import flask_json
 import http
 import json
+import random
 from pathlib import Path
+
 
 APP_CONFIG_ASSESSMENTS_PATH = "./app_config/assessments"
 APP_CONFIG_LIFE_AREAS_PATH = "./app_config/life_areas"
 APP_CONFIG_RESOURCES_PATH = "./app_config/resources"
+APP_QUOTES_PATH = "./app_config/quotes.json"
+
 
 app_config_blueprint = flask.Blueprint(
     "app_config_blueprint",
@@ -48,6 +52,7 @@ def get_app_config():
                 config_json = json.load(config_file)
                 content_resources.append(config_json)
 
+    # TODO: This should be a "config" object containing these fields
     result = {
         "auth": {
             "poolid": flask.current_app.config["COGNITO_POOLID"],
@@ -60,4 +65,26 @@ def get_app_config():
         },
     }
 
-    return result, http.HTTPStatus.OK
+    return result
+
+
+@app_config_blueprint.route(
+    "/quote",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_app_quote():
+    """
+    Obtain a quote to be used by client.
+    """
+
+    quotes_path = Path(APP_QUOTES_PATH)
+
+    # Load quotes configurations
+    if quotes_path.match("*.json"):
+        with open(quotes_path) as quotes_file:
+            quotes_json = json.load(quotes_file)
+
+    return {
+        "quote": random.choice(quotes_json),
+    }

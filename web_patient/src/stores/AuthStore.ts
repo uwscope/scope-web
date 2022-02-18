@@ -1,7 +1,7 @@
 import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
 import { IUser } from 'shared/types';
-import { PromiseQuery } from 'src/services/promiseQuery';
+import { PromiseQuery } from 'shared/promiseQuery';
 
 const poolData = {
     UserPoolId: 'us-west-1_G5EgsKP1m',
@@ -36,7 +36,7 @@ export class AuthStore implements IAuthStore {
     public authData?: any;
 
     // App metadata
-    public appTitle = 'SCOPE Registry';
+    public appTitle = 'SCOPE Patient app';
 
     // Promise queries
     private readonly authQuery: PromiseQuery<CognitoUserSession>;
@@ -68,7 +68,7 @@ export class AuthStore implements IAuthStore {
 
         // Pretend authentication worked
         return {
-            identityId: 'fakeid',
+            identityId: 'persistent',
             name: 'Fake User',
             authToken: 'fake auth token',
         };
