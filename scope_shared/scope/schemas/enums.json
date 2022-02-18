@@ -261,6 +261,11 @@
 			"type": "string",
 			"description": "ActivitySuccessType Type",
 			"enum": ["Yes", "SomethingElse", "No"]
+		},
+		"identityType": {
+			"type": "string",
+			"description": "Identity Types",
+			"enum": ["patient", "socialWorker", "psychiatrist", "oncologist", "studyStaff"]
 		}
 	}
 }

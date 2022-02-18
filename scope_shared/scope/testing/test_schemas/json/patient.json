@@ -1,7 +1,7 @@
 {
 	"_type": "patient",
 	"identity": {
-		"_type": "identity",
+		"_type": "patient",
 		"_rev": 1,
 		"name": "Harry Potter",
 		"identityId": "Lily Potter's Son"
