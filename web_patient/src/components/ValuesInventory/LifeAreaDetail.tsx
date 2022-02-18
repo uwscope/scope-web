@@ -426,7 +426,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
 
         const newValuesInventory = {
-            ...toJS(valuesInventory),
+            ...clonedInventory,
             lastUpdatedDateTime: new Date(),
             values: newValues,
         } as IValuesInventory;
@@ -449,7 +449,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             newValues[idx] = newValue;
 
             const newValuesInventory = {
-                ...toJS(clonedInventory),
+                ...clonedInventory,
                 lastUpdatedDateTime: new Date(),
                 values: newValues,
             } as IValuesInventory;
