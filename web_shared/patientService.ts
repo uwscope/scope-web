@@ -10,7 +10,12 @@ import {
 } from 'shared/fake';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
-import { IPatientProfileResponse, IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import {
+    IPatientProfileRequest,
+    IPatientProfileResponse,
+    IPatientResponse,
+    IValuesInventoryResponse
+} from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
@@ -80,7 +85,11 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
-        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, profile);
+        const request = {
+            'profile': profile
+        } as IPatientProfileRequest;
+
+        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, request);
 
         return response.data?.profile;
     }

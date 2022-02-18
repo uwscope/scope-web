@@ -26,7 +26,7 @@ def validate_schema(
                         flask.make_response(
                             flask.jsonify(
                                 {
-                                    "message": 'Schema validation failed, key not found "".'.format(
+                                    "message": 'Schema validation failed, key not found "{}".'.format(
                                         key
                                     ),
                                     "request": flask.request.json,

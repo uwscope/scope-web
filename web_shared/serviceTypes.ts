@@ -13,7 +13,11 @@ export interface IPatientResponse extends IServiceResponse {
     patient: IPatient;
 }
 
-export interface IPatientProfileResponse extends IPatientProfile {
+export interface IPatientProfileRequest {
+    profile: IPatientProfile;
+}
+
+export interface IPatientProfileResponse extends IServiceResponse {
     profile: IPatientProfile;
 }
 
