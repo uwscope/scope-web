@@ -46,15 +46,6 @@ class RequestContext:
         )
 
     @staticmethod
-    def abort_put_with_id() -> NoReturn:
-        RequestContext._abort(
-            {
-                "message": 'PUT must not include "_id".',
-            },
-            http.HTTPStatus.BAD_REQUEST,
-        )
-
-    @staticmethod
     def abort_post_with_id() -> NoReturn:
         RequestContext._abort(
             {
@@ -77,6 +68,24 @@ class RequestContext:
         RequestContext._abort(
             {
                 "message": 'POST must not include "_rev".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_put_with_id() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'PUT must not include "_id".',
+            },
+            http.HTTPStatus.BAD_REQUEST,
+        )
+
+    @staticmethod
+    def abort_put_with_mismatched_setid() -> NoReturn:
+        RequestContext._abort(
+            {
+                "message": 'PUT location must match "_set_id".',
             },
             http.HTTPStatus.BAD_REQUEST,
         )
