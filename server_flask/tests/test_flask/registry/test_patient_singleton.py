@@ -118,8 +118,11 @@ def test_patient_singleton_get(
     )
     assert response.ok
 
-    # Confirm it matches expected document, with addition of an "_id" and a "_rev"
+    # Obtain the document
+    assert config.flask_document_key in response.json()
     document_retrieved = response.json()[config.flask_document_key]
+
+    # Confirm it matches expected document, with addition of an "_id" and a "_rev"
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
     assert "_rev" in document_retrieved
@@ -326,17 +329,6 @@ def test_patient_singleton_put_invalid(
         query_type=config.flask_query_type,
     )
 
-    # Invalid document that is not nested under the document key
-    document = document_factory()
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json=document,
-    )
-    assert response.status_code == http.HTTPStatus.BAD_REQUEST
-
     # Invalid document that does not match any schema
     response = session.put(
         url=urljoin(
@@ -345,9 +337,20 @@ def test_patient_singleton_put_invalid(
         ),
         json={
             config.flask_document_key: {
-                "_invalid": "invalid",
+                "invalid": "invalid",
             },
         },
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that is not nested under the document key
+    document = document_factory()
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
