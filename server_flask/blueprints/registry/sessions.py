@@ -27,10 +27,11 @@ def get_sessions(patient_id):
     documents = scope.database.patient.sessions.get_sessions(
         collection=patient_collection,
     )
-    if documents is None:
-        return {
-            "sessions": [],
-        }
+
+    # Validate and normalize the response
+    documents = request_utils.set_get_response_validate(
+        documents=documents,
+    )
 
     return {
         "sessions": documents,
@@ -59,20 +60,10 @@ def post_session(patient_id):
     # Obtain the document being put
     document = flask.request.json["session"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be post must not already contain an "_id"
-    if "_id" in document:
-        context.abort_post_with_id()
-
-    # POST will assign a "_set_id",
-    # documents to be post must not already contain a "_set_id"
-    if "_set_id" in document:
-        context.abort_post_with_set_id()
-
-    # Previously stored documents contain an "_rev",
-    # documents to be post must not already contain a "_rev"
-    if "_rev" in document:
-        context.abort_post_with_rev()
+    # Validate and normalize the request
+    document = request_utils.set_post_request_validate(
+        document=document,
+    )
 
     # Store the document
     result = scope.database.patient.sessions.post_session(
@@ -80,8 +71,13 @@ def post_session(patient_id):
         session=document,
     )
 
+    # Validate and normalize the response
+    document_response = request_utils.set_post_response_validate(
+        document=result.document,
+    )
+
     return {
-        "session": result.document,
+        "session": document_response,
     }
 
 
@@ -100,8 +96,11 @@ def get_session(patient_id, session_id):
         collection=patient_collection,
         set_id=session_id,
     )
-    if document is None:
-        context.abort_document_not_found()
+
+    # Validate and normalize the response
+    document = request_utils.singleton_get_response_validate(
+        document=document,
+    )
 
     return {
         "session": document,
@@ -126,15 +125,11 @@ def put_session(patient_id, session_id):
     # Obtain the document being put
     document = flask.request.json["session"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be put must not already contain an "_id"
-    if "_id" in document:
-        context.abort_put_with_id()
-
-    # If a "_set_id" exists, it must match put location
-    if "_set_id" in document:
-        if document["_set_id"] != session_id:
-            context.abort_put_with_mismatched_setid()
+    # Validate and normalize the request
+    document = request_utils.set_element_put_request_validate(
+        document=document,
+        set_id=session_id,
+    )
 
     # Store the document
     try:
@@ -148,12 +143,22 @@ def put_session(patient_id, session_id):
         document_conflict = scope.database.patient.sessions.get_session(
             collection=patient_collection, set_id=session_id
         )
-        context.abort_revision_conflict(
+        # Validate and normalize the response
+        document_conflict = request_utils.singleton_put_response_validate(
+            document=document_conflict
+        )
+
+        request_utils.abort_revision_conflict(
             document={
                 "session": document_conflict,
             }
         )
     else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
+
         return {
-            "session": result.document,
+            "session": document_response,
         }
