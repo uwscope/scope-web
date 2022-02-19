@@ -15,6 +15,29 @@ PRIMARY_COLLECTION_INDEX = [
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
 
 
+@dataclass(frozen=True)
+class PutResult:
+    inserted_count: int
+    inserted_id: str
+    document: dict
+
+
+@dataclass(frozen=True)
+class SetPostResult:
+    inserted_count: int
+    inserted_id: str
+    inserted_set_id: str
+    document: dict
+
+
+@dataclass(frozen=True)
+class SetPutResult:
+    inserted_count: int
+    inserted_id: str
+    inserted_set_id: str
+    document: dict
+
+
 def generate_set_id() -> str:
     """
     Generates an id that:
@@ -237,11 +260,61 @@ def get_singleton(
     return result
 
 
-@dataclass(frozen=True)
-class PutResult:
-    inserted_count: int
-    inserted_id: str
-    document: dict
+def post_set_element(
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    document: dict,
+) -> SetPostResult:
+    """
+    Put a set element document.
+    - Document must not already include an "_id".
+    - An existing "_type" must match document_type.
+    - Document must not already include an "_set_id".
+    - Document must not already include an "_rev".
+    """
+
+    # Work with a copy
+    document = document_utils.normalize_document(document=document)
+
+    # Document must not include an "_id",
+    # as this indicates it was retrieved from the database.
+    if "_id" in document:
+        raise ValueError('Document must not have existing "_id"')
+
+    # If a document includes a "_type", it must match document_type.
+    if "_type" in document:
+        if document["_type"] != document_type:
+            raise ValueError('document["_type"] must match document_type')
+    else:
+        document["_type"] = document_type
+
+    # Document must not include an "_set_id",
+    # as post expects to assign this.
+    if "_set_id" in document:
+        raise ValueError('Document must not have existing "_set_id"')
+
+    # Document must not include an "_rev",
+    # as this indicates it was retrieved from the database.
+    if "_rev" in document:
+        raise ValueError('Document must not have existing "_rev"')
+
+    # Generate a "_set_id" and a "_rev"
+    generated_set_id = generate_set_id()
+    document["_set_id"] = generated_set_id
+    document["_rev"] = 1
+
+    # insert_one will modify the document to insert an "_id"
+    document = document_utils.normalize_document(document=document)
+    result = collection.insert_one(document=document)
+    document = document_utils.normalize_document(document=document)
+
+    return SetPostResult(
+        inserted_count=1,
+        inserted_id=str(result.inserted_id),
+        inserted_set_id=generated_set_id,
+        document=document,
+    )
 
 
 def put_set_element(
@@ -250,7 +323,7 @@ def put_set_element(
     document_type: str,
     set_id: str,
     document: dict,
-) -> PutResult:
+) -> SetPutResult:
     """
     Put a set element document.
     - Document must not already include an "_id".
@@ -295,9 +368,10 @@ def put_set_element(
     result = collection.insert_one(document=document)
     document = document_utils.normalize_document(document=document)
 
-    return PutResult(
+    return SetPutResult(
         inserted_count=1,
         inserted_id=str(result.inserted_id),
+        inserted_set_id=set_id,
         document=document,
     )
 
