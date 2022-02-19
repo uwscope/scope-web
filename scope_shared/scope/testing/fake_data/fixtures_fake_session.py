@@ -51,7 +51,7 @@ def fake_session_factory(
             "sessionNote": faker_factory.text(),
         }
 
-        return document_utils.normalize_document(document=fake_session)
+        return fake_session
 
     return factory
 

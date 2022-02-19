@@ -1,4 +1,5 @@
 import base64
+import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
@@ -160,15 +161,12 @@ def get_set(
         if not pipeline_result.alive:
             return None
 
-        result = list(pipeline_result)
+        documents = list(pipeline_result)
 
-    # Normalize the results
-    result = [
-        document_utils.normalize_document(document=result_current)
-        for result_current in result
-    ]
+    # Normalize the list of documents
+    documents = document_utils.normalize_documents(documents=documents)
 
-    return result
+    return documents
 
 
 def get_set_element(
@@ -252,12 +250,12 @@ def get_singleton(
         if not pipeline_result.alive:
             return None
 
-        result = pipeline_result.next()
+        document = pipeline_result.next()
 
-    # Normalize the result
-    result = document_utils.normalize_document(document=result)
+    # Normalize the document
+    document = document_utils.normalize_document(document=document)
 
-    return result
+    return document
 
 
 def post_set_element(
@@ -275,7 +273,7 @@ def post_set_element(
     """
 
     # Work with a copy
-    document = document_utils.normalize_document(document=document)
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -333,7 +331,7 @@ def put_set_element(
     """
 
     # Work with a copy
-    document = document_utils.normalize_document(document=document)
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -390,7 +388,7 @@ def put_singleton(
     """
 
     # Work with a copy
-    document = document_utils.normalize_document(document=document)
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.

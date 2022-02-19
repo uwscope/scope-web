@@ -60,7 +60,7 @@ def fake_safety_plan_factory(
             optional_keys=OPTIONAL_KEYS,
         )
 
-        return document_utils.normalize_document(document=fake_safety_plan)
+        return fake_safety_plan
 
     return factory
 

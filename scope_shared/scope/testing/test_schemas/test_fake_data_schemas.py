@@ -172,10 +172,6 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
     for count in range(TEST_ITERATIONS):
         data = config.data_factory()
 
-        # Test that data is normalized
-        is_normalized = data == document_utils.normalize_value(value=data)
-        assert is_normalized
-
         # Test the schema
         result = config.schema.evaluate(jschon.JSON(data)).output("detailed")
         if result["valid"] != config.expected_valid:
