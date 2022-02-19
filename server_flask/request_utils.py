@@ -1,8 +1,90 @@
 import flask
 import functools
 import http
-import json
 import jschon
+from typing import NoReturn
+
+
+def _flask_abort(response: dict, status: int) -> NoReturn:
+    flask.abort(
+        flask.make_response(
+            flask.jsonify(response),
+            status,
+        )
+    )
+
+
+def abort_document_not_found() -> NoReturn:
+    _flask_abort(
+        {
+            "message": "Document not found.",
+        },
+        http.HTTPStatus.NOT_FOUND,
+    )
+
+
+def abort_patient_not_found() -> NoReturn:
+    _flask_abort(
+        {
+            "message": "Patient not found.",
+        },
+        http.HTTPStatus.NOT_FOUND,
+    )
+
+
+def abort_post_with_id() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'POST must not include "_id".',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_post_with_set_id() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'POST must not include "_set_id".',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_post_with_rev() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'POST must not include "_rev".',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_put_with_id() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'PUT must not include "_id".',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_put_with_mismatched_setid() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'PUT location must match "_set_id".',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_revision_conflict(*, document: dict) -> NoReturn:
+    _flask_abort(
+        document
+        | {
+            "message": "Revision conflict.",
+        },
+        http.HTTPStatus.CONFLICT,
+    )
 
 
 def validate_schema(
