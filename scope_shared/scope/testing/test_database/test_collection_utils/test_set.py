@@ -1,3 +1,5 @@
+import copy
+
 import pymongo.collection
 import pymongo.errors
 import pytest
@@ -95,7 +97,7 @@ def test_get_set_element(
     # Remove the "_id" field that was created upon insertion
     del result["_id"]
 
-    assert result == {"_type": "set", "_set_id": "1", "_rev": "2"}
+    assert result == {"_type": "set", "_set_id": "1", "_rev": "2",}
 
 
 def test_get_set_element_not_found(
@@ -114,6 +116,107 @@ def test_get_set_element_not_found(
     )
 
     assert result is None
+
+
+@pytest.mark.parametrize(
+    ["document"],
+    [
+        [
+            {
+                "_type": "set",
+            }
+        ],
+        [{}],
+    ],
+    ids=[
+        "with_type",
+        "no_type",
+    ],
+)
+def test_post_set_element(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    document: dict,
+):
+    """
+    Test post of a set element.
+    """
+
+    collection = database_temp_collection_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    # Initial insert should generate "_rev" 1
+    result = scope.database.collection_utils.post_set_element(
+        collection=collection,
+        document_type="set",
+        document=document,
+    )
+
+    document = result.document
+
+    assert result.inserted_count == 1
+    assert result.inserted_id == document["_id"]
+    assert result.inserted_set_id == document["_set_id"]
+
+    del document["_id"]
+    del document["_set_id"]
+    assert document == {
+        "_type": "set",
+        "_rev": 1,
+    }
+
+
+def test_post_set_element_with_id_failure(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Post of an existing "_id" should fail, as this means document is already in the database.
+    """
+
+    collection = database_temp_collection_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.post_set_element(
+            collection=collection,
+            document_type="set",
+            document={"_id": "not allowed",},
+        )
+
+
+def test_post_set_element_with_rev_failure(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Post of an existing "_rev" should fail, as this means document is already in the database.
+    """
+
+    collection = database_temp_collection_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.post_set_element(
+            collection=collection,
+            document_type="set",
+            document={"_rev": "not allowed",},
+        )
+
+
+def test_post_set_element_with_set_id_failure(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Post of an existing "_set_id" should fail, as post expects to assign "_set_id".
+    """
+
+    collection = database_temp_collection_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.post_set_element(
+            collection=collection,
+            document_type="set",
+            document={"_set_id": "not allowed",},
+        )
 
 
 @pytest.mark.parametrize(
@@ -149,7 +252,7 @@ def test_put_set_element(
     document: dict,
 ):
     """
-    Test insert of a set element.
+    Test put of a set element.
     """
 
     collection = database_temp_collection_factory()
@@ -198,7 +301,7 @@ def test_put_set_element_with_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
-    Insert of an existing "_id" should fail, as this means document is already in the database.
+    Put of an existing "_id" should fail, as this means document is already in the database.
     """
 
     collection = database_temp_collection_factory()
@@ -209,7 +312,7 @@ def test_put_set_element_with_id_failure(
             collection=collection,
             document_type="set",
             set_id="set_id",
-            document={"_id": "not allowed"},
+            document={"_id": "not allowed",},
         )
 
 
@@ -217,7 +320,7 @@ def test_put_set_element_duplicate_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
-    Insert of an duplicate "_rev" should fail.
+    Put of an duplicate "_rev" should fail.
     """
 
     collection = database_temp_collection_factory()
@@ -262,7 +365,7 @@ def test_put_set_element_invalid_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
-    Insert of non-integer "_rev" should fail.
+    Put of non-integer "_rev" should fail.
     """
 
     collection = database_temp_collection_factory()
