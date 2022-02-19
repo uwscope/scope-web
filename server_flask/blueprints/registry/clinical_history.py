@@ -4,8 +4,8 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.clinical_history
 from request_context import request_context
+import request_utils
 from scope.schema import clinical_history_schema
-from utils import validate_schema
 
 clinical_history_blueprint = flask.Blueprint("clinical_history_blueprint", __name__)
 
@@ -36,7 +36,7 @@ def get_clinical_history(patient_id):
     "/<string:patient_id>/clinicalhistory",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=clinical_history_schema,
     key="clinicalhistory",
 )

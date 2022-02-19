@@ -5,8 +5,8 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.safety_plan
 from request_context import request_context
+import request_utils
 from scope.schema import safety_plan_schema
-from utils import validate_schema
 
 safety_plan_blueprint = flask.Blueprint(
     "safety_plan_blueprint",
@@ -40,7 +40,7 @@ def get_safety_plan(patient_id):
     "/<string:patient_id>/safetyplan",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=safety_plan_schema,
     key="safetyplan",
 )

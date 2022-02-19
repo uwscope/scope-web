@@ -4,8 +4,8 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.case_reviews
 from request_context import request_context
+import request_utils
 from scope.schema import case_review_schema
-from utils import validate_schema
 
 case_reviews_blueprint = flask.Blueprint(
     "case_reviews_blueprint",
@@ -41,7 +41,7 @@ def get_case_reviews(patient_id):
     "/<string:patient_id>/casereviews",
     methods=["POST"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=case_review_schema,
     key="casereview",
 )
@@ -111,7 +111,7 @@ def get_case_review(patient_id, review_id):
     "/<string:patient_id>/casereview/<string:casereview_id>",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=case_review_schema,
     key="casereview",
 )

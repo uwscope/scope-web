@@ -3,11 +3,11 @@ import flask_json
 import pymongo.errors
 
 from request_context import request_context
+import request_utils
 import scope.database
 import scope.database.patient.patient_profile
 import scope.database.patients
 from scope.schema import patient_profile_schema
-from utils import validate_schema
 
 patient_profile_blueprint = flask.Blueprint(
     "patient_profile_blueprint",
@@ -42,7 +42,7 @@ def get_patient_profile(patient_id):
     "/<string:patient_id>/profile",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=patient_profile_schema,
     key="profile",
 )

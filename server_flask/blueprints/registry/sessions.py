@@ -4,8 +4,8 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.sessions
 from request_context import request_context
+import request_utils
 from scope.schema import session_schema
-from utils import validate_schema
 
 sessions_blueprint = flask.Blueprint(
     "sessions_blueprint",
@@ -41,7 +41,7 @@ def get_sessions(patient_id):
     "/<string:patient_id>/sessions",
     methods=["POST"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=session_schema,
     key="session",
 )
@@ -112,7 +112,7 @@ def get_session(patient_id, session_id):
     "/<string:patient_id>/session/<string:session_id>",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=session_schema,
     key="session",
 )
