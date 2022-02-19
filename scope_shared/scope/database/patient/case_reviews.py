@@ -4,7 +4,8 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "caseReview"
-DOCUMENT_ID = "reviewId"
+# TODO: Semantic ID
+# DOCUMENT_ID = "reviewId"
 
 
 def get_case_reviews(
@@ -12,7 +13,7 @@ def get_case_reviews(
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Retrieve list of "caseReview" document.
+    Get list of "caseReview" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -27,7 +28,7 @@ def get_case_review(
     set_id: str,
 ) -> Optional[dict]:
     """
-    Retrieve "caseReview" document.
+    Get "caseReview" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -41,15 +42,14 @@ def post_case_review(
     *,
     collection: pymongo.collection.Collection,
     case_review: dict,
-) -> scope.database.collection_utils.PutResult:
+) -> scope.database.collection_utils.SetPostResult:
     """
-    Create the "caseReview" document.
+    Post "caseReview" document.
     """
 
-    return scope.database.collection_utils.put_set_element(
+    return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
-        set_id=case_review[DOCUMENT_ID],
         document=case_review,
     )
 
@@ -58,15 +58,15 @@ def put_case_review(
     *,
     collection: pymongo.collection.Collection,
     case_review: dict,
+    set_id: str,
 ):
     """
-    Update the "caseReview" document.
+    Put "caseReview" document.
     """
-    # NOTE: Exactly same as post_case_review, but keeping it here if we need additional computation.
 
     return scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
-        set_id=case_review[DOCUMENT_ID],
+        set_id=set_id,
         document=case_review,
     )
