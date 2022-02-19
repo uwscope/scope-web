@@ -4,8 +4,8 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.values_inventory
 from request_context import request_context
+import request_utils
 from scope.schema import values_inventory_schema
-from utils import validate_schema
 
 values_inventory_blueprint = flask.Blueprint("values_inventory_blueprint", __name__)
 
@@ -36,7 +36,7 @@ def get_values_inventory(patient_id):
     "/<string:patient_id>/valuesinventory",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=values_inventory_schema,
     key="valuesinventory",
 )
