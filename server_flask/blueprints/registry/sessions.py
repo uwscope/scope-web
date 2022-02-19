@@ -48,7 +48,7 @@ def get_sessions(patient_id):
 @flask_json.as_json
 def post_session(patient_id):
     """
-    Creates a new session in the patient record and returns the session.
+    Creates and return a new session.
     """
 
     # TODO: Require authentication
@@ -64,8 +64,8 @@ def post_session(patient_id):
     if "_id" in document:
         context.abort_post_with_id()
 
-    # Previously stored documents contain a "_set_id",
-    # documents to be post must not already contain an "_set_id"
+    # POST will assign a "_set_id",
+    # documents to be post must not already contain a "_set_id"
     if "_set_id" in document:
         context.abort_post_with_set_id()
 
@@ -118,7 +118,6 @@ def get_session(patient_id, session_id):
 )
 @flask_json.as_json
 def put_session(patient_id, session_id):
-
     # TODO: Require authentication
 
     context = request_context()
@@ -132,11 +131,17 @@ def put_session(patient_id, session_id):
     if "_id" in document:
         context.abort_put_with_id()
 
+    # If a "_set_id" exists, it must match put location
+    if "_set_id" in document:
+        if document["_set_id"] != session_id:
+            context.abort_put_with_mismatched_setid()
+
     # Store the document
     try:
         result = scope.database.patient.sessions.put_session(
             collection=patient_collection,
             session=document,
+            set_id=session_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision

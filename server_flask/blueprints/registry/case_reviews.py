@@ -108,7 +108,7 @@ def get_case_review(patient_id, review_id):
 
 
 @case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:review_id>",
+    "/<string:patient_id>/casereview/<string:casereview_id>",
     methods=["PUT"],
 )
 @validate_schema(
@@ -116,7 +116,7 @@ def get_case_review(patient_id, review_id):
     key="casereview",
 )
 @flask_json.as_json
-def put_case_review(patient_id, review_id):
+def put_case_review(patient_id, casereview_id):
     # TODO: Require authentication
 
     context = request_context()
@@ -130,6 +130,11 @@ def put_case_review(patient_id, review_id):
     if "_id" in document:
         context.abort_put_with_id()
 
+    # If a "_set_id" exists, it must match put location
+    if "_set_id" in document:
+        if document["_set_id"] != casereview_id:
+            context.abort_put_with_mismatched_setid()
+
     # Store the document
     try:
         result = scope.database.patient.case_reviews.put_case_review(
@@ -139,7 +144,7 @@ def put_case_review(patient_id, review_id):
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
         document_conflict = scope.database.patient.case_reviews.get_case_review(
-            collection=patient_collection, set_id=review_id
+            collection=patient_collection, set_id=casereview_id
         )
         context.abort_revision_conflict(
             document={
