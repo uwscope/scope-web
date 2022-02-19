@@ -25,11 +25,15 @@ def get_safety_plan(patient_id):
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
+    # Get the document
     document = scope.database.patient.safety_plan.get_safety_plan(
         collection=patient_collection,
     )
-    if document is None:
-        context.abort_document_not_found()
+
+    # Validate and normalize the response
+    document = request_utils.singleton_get_response_validate(
+        document=document,
+    )
 
     return {
         "safetyplan": document,
@@ -54,10 +58,10 @@ def put_safety_plan(patient_id):
     # Obtain the document being put
     document = flask.request.json["safetyplan"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be put must not already contain an "_id"
-    if "_id" in document:
-        context.abort_put_with_id()
+    # Validate and normalize the request
+    document = request_utils.singleton_put_request_validate(
+        document=document,
+    )
 
     # Store the document
     try:
@@ -70,12 +74,21 @@ def put_safety_plan(patient_id):
         document_conflict = scope.database.patient.safety_plan.get_safety_plan(
             collection=patient_collection
         )
-        context.abort_revision_conflict(
+        # Validate and normalize the response
+        document_conflict = request_utils.singleton_put_response_validate(
+            document=document_conflict
+        )
+
+        request_utils.abort_revision_conflict(
             document={
                 "safetyplan": document_conflict,
             }
         )
     else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
         return {
-            "safetyplan": result.document,
+            "safetyplan": document_response,
         }

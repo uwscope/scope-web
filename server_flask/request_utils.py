@@ -87,6 +87,27 @@ def abort_revision_conflict(*, document: dict) -> NoReturn:
     )
 
 
+def singleton_get_response_validate(*, document: dict) -> dict:
+    # If database get found None, return a 404
+    if document is None:
+        abort_document_not_found()
+
+    return document
+
+
+def singleton_put_request_validate(*, document: dict) -> dict:
+    # Previously stored documents contain an "_id",
+    # documents to be put must not already contain an "_id"
+    if "_id" in document:
+        abort_put_with_id()
+
+    return document
+
+
+def singleton_put_response_validate(*, document: dict) -> dict:
+    return document
+
+
 def validate_schema(
     *,
     schema: jschon.JSONSchema,
