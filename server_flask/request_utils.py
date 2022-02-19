@@ -2,7 +2,7 @@ import flask
 import functools
 import http
 import jschon
-from typing import NoReturn
+from typing import List, NoReturn
 
 
 def _flask_abort(response: dict, status: int) -> NoReturn:
@@ -85,6 +85,59 @@ def abort_revision_conflict(*, document: dict) -> NoReturn:
         },
         http.HTTPStatus.CONFLICT,
     )
+
+
+def set_get_response_validate(*, documents: List[dict]) -> List[dict]:
+    # If database get found None, return an empty list
+    if documents is None:
+        documents = []
+
+    return documents
+
+
+def set_post_request_validate(*, document: dict) -> dict:
+    # Previously stored documents contain an "_id",
+    # documents to be post must not already contain an "_id"
+    if "_id" in document:
+        abort_post_with_id()
+
+    # Previously stored documents contain a "_set_id",
+    # documents to be post must not already contain an "_set_id"
+    if "_set_id" in document:
+        abort_post_with_set_id()
+
+    # Previously stored documents contain an "_rev",
+    # documents to be post must not already contain a "_rev"
+    if "_rev" in document:
+        abort_post_with_rev()
+
+    return document
+
+
+def set_post_response_validate(*, document: dict) -> dict:
+    return document
+
+
+def set_element_get_response_validate(*, document: dict) -> dict:
+    # If database get found None, return a 404
+    if document is None:
+        abort_document_not_found()
+
+    return document
+
+
+def set_element_put_request_validate(*, document: dict, set_id: str) -> dict:
+    # Previously stored documents contain an "_id",
+    # documents to be put must not already contain an "_id"
+    if "_id" in document:
+        abort_put_with_id()
+
+    # If a "_set_id" exists, it must match put location
+    if "_set_id" in document:
+        if document["_set_id"] != set_id:
+            abort_put_with_mismatched_setid()
+
+    return document
 
 
 def singleton_get_response_validate(*, document: dict) -> dict:

@@ -27,10 +27,11 @@ def get_case_reviews(patient_id):
     documents = scope.database.patient.case_reviews.get_case_reviews(
         collection=patient_collection,
     )
-    if documents is None:
-        return {
-            "casereviews": [],
-        }
+
+    # Validate and normalize the response
+    documents = request_utils.set_get_response_validate(
+        documents=documents,
+    )
 
     return {
         "casereviews": documents,
@@ -58,20 +59,10 @@ def post_case_reviews(patient_id):
     # Obtain the document being put
     document = flask.request.json["casereview"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be post must not already contain an "_id"
-    if "_id" in document:
-        context.abort_post_with_id()
-
-    # Previously stored documents contain a "_set_id",
-    # documents to be post must not already contain an "_set_id"
-    if "_set_id" in document:
-        context.abort_post_with_set_id()
-
-    # Previously stored documents contain an "_rev",
-    # documents to be post must not already contain a "_rev"
-    if "_rev" in document:
-        context.abort_post_with_rev()
+    # Validate and normalize the request
+    document = request_utils.set_post_request_validate(
+        document=document,
+    )
 
     # Store the document
     result = scope.database.patient.case_reviews.post_case_review(
@@ -79,8 +70,13 @@ def post_case_reviews(patient_id):
         case_review=document,
     )
 
+    # Validate and normalize the response
+    document_response = request_utils.set_post_response_validate(
+        document=result.document,
+    )
+
     return {
-        "casereview": result.document,
+        "casereview": document_response,
     }
 
 
@@ -95,12 +91,16 @@ def get_case_review(patient_id, review_id):
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
+    # Get the document
     document = scope.database.patient.case_reviews.get_case_review(
         collection=patient_collection,
         set_id=review_id,
     )
-    if document is None:
-        context.abort_document_not_found()
+
+    # Validate and normalize the response
+    document = request_utils.singleton_get_response_validate(
+        document=document,
+    )
 
     return {
         "casereview": document,
@@ -125,33 +125,40 @@ def put_case_review(patient_id, casereview_id):
     # Obtain the document being put
     document = flask.request.json["casereview"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be put must not already contain an "_id"
-    if "_id" in document:
-        context.abort_put_with_id()
-
-    # If a "_set_id" exists, it must match put location
-    if "_set_id" in document:
-        if document["_set_id"] != casereview_id:
-            context.abort_put_with_mismatched_setid()
+    # Validate and normalize the request
+    document = request_utils.set_element_put_request_validate(
+        document=document,
+        set_id=casereview_id,
+    )
 
     # Store the document
     try:
         result = scope.database.patient.case_reviews.put_case_review(
             collection=patient_collection,
             case_review=document,
+            set_id=casereview_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
         document_conflict = scope.database.patient.case_reviews.get_case_review(
             collection=patient_collection, set_id=casereview_id
         )
-        context.abort_revision_conflict(
+        # Validate and normalize the response
+        document_conflict = request_utils.singleton_put_response_validate(
+            document=document_conflict
+        )
+
+        request_utils.abort_revision_conflict(
             document={
                 "casereview": document_conflict,
             }
         )
     else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
+
         return {
-            "casereview": result.document,
+            "casereview": document_response,
         }
