@@ -262,6 +262,7 @@ def post_set_element(
     *,
     collection: pymongo.collection.Collection,
     document_type: str,
+    semantic_set_id: Optional[str],
     document: dict,
 ) -> SetPostResult:
     """
@@ -270,6 +271,9 @@ def post_set_element(
     - An existing "_type" must match document_type.
     - Document must not already include an "_set_id".
     - Document must not already include an "_rev".
+    - semantic_set_id may indicate a field that will be treated like "_set_id".
+      - Document must not already include an "semantic_set_id".
+      - "semantic_set_id" will additionally be set to "_set_id".
     """
 
     # Work with a copy
@@ -302,6 +306,15 @@ def post_set_element(
     document["_set_id"] = generated_set_id
     document["_rev"] = 1
 
+    # If a semantic_set_id is specified
+    if semantic_set_id:
+        # Document must not include a semantic set id,
+        # as post expects to assign this.
+        if semantic_set_id in document:
+            raise ValueError('Document must not have existing "{}"'.format(semantic_set_id))
+
+        document[semantic_set_id] = generated_set_id
+
     # insert_one will modify the document to insert an "_id"
     document = document_utils.normalize_document(document=document)
     result = collection.insert_one(document=document)
@@ -319,6 +332,7 @@ def put_set_element(
     *,
     collection: pymongo.collection.Collection,
     document_type: str,
+    semantic_set_id: Optional[str],
     set_id: str,
     document: dict,
 ) -> SetPutResult:
@@ -328,6 +342,10 @@ def put_set_element(
     - An existing "_type" must match document_type.
     - An existing "_set_id" must match set_id.
     - An existing "_rev" will be incremented.
+    - semantic_set_id may indicate a field that will be treated like "_set_id".
+      - An existing "semantic_set_id" must match set_id.
+      - An existing "semantic_set_id" must match an existing "_set_id".
+      - "semantic_set_id" will additionally be set to "_set_id".
     """
 
     # Work with a copy
@@ -350,6 +368,7 @@ def put_set_element(
         if document["_set_id"] != set_id:
             raise ValueError('document["_set_id"] must match set_id')
     else:
+        # Set the "_set_id"
         document["_set_id"] = set_id
 
     # Increment the "_rev"
@@ -360,6 +379,16 @@ def put_set_element(
         document["_rev"] += 1
     else:
         document["_rev"] = 1
+
+    # If a semantic_set_id is specified
+    if semantic_set_id:
+        # If a document includes a "semantic_set_id", it must match set_id.
+        if semantic_set_id in document:
+            if document[semantic_set_id] != set_id:
+                raise ValueError('document["{}"] must match set_id'.format(semantic_set_id))
+        else:
+            # Set the "semantic_set_id"
+            document[semantic_set_id] = set_id
 
     # insert_one will modify the document to insert an "_id"
     document = document_utils.normalize_document(document=document)

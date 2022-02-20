@@ -3,7 +3,7 @@ import copy
 import pymongo.collection
 import pymongo.errors
 import pytest
-from typing import Callable
+from typing import Callable, Optional
 
 import scope.database.collection_utils
 
@@ -133,9 +133,21 @@ def test_get_set_element_not_found(
         "no_type",
     ],
 )
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_post_set_element(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
     document: dict,
+    semantic_set_id: Optional[str],
 ):
     """
     Test post of a set element.
@@ -148,25 +160,37 @@ def test_post_set_element(
     result = scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type="set",
+        semantic_set_id=semantic_set_id,
         document=document,
     )
-
-    document = result.document
-
     assert result.inserted_count == 1
-    assert result.inserted_id == document["_id"]
-    assert result.inserted_set_id == document["_set_id"]
 
-    del document["_id"]
-    del document["_set_id"]
-    assert document == {
+    document_expected = {
+        "_id": result.inserted_id,
         "_type": "set",
+        "_set_id": result.inserted_set_id,
         "_rev": 1,
     }
+    if semantic_set_id:
+        document_expected[semantic_set_id] = result.inserted_set_id
+
+    assert result.document == document_expected
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_post_set_element_with_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
     Post of an existing "_id" should fail, as this means document is already in the database.
@@ -179,12 +203,25 @@ def test_post_set_element_with_id_failure(
         scope.database.collection_utils.post_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             document={"_id": "not allowed",},
         )
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_post_set_element_with_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
     Post of an existing "_rev" should fail, as this means document is already in the database.
@@ -197,12 +234,25 @@ def test_post_set_element_with_rev_failure(
         scope.database.collection_utils.post_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             document={"_rev": "not allowed",},
         )
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_post_set_element_with_set_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
     Post of an existing "_set_id" should fail, as post expects to assign "_set_id".
@@ -215,8 +265,18 @@ def test_post_set_element_with_set_id_failure(
         scope.database.collection_utils.post_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             document={"_set_id": "not allowed",},
         )
+
+    if semantic_set_id:
+        with pytest.raises(ValueError):
+            scope.database.collection_utils.post_set_element(
+                collection=collection,
+                document_type="set",
+                semantic_set_id=semantic_set_id,
+                document={semantic_set_id: "not allowed", },
+            )
 
 
 @pytest.mark.parametrize(
@@ -226,6 +286,25 @@ def test_post_set_element_with_set_id_failure(
             {
                 "_type": "set",
                 "_set_id": "set_id",
+                "semanticSetId": "set_id",
+            }
+        ],
+        [
+            {
+                "_type": "set",
+                "_set_id": "set_id",
+            }
+        ],
+        [
+            {
+                "_type": "set",
+                "semanticSetId": "set_id",
+            }
+        ],
+        [
+            {
+                "_set_id": "set_id",
+                "semanticSetId": "set_id",
             }
         ],
         [
@@ -238,18 +317,39 @@ def test_post_set_element_with_set_id_failure(
                 "_set_id": "set_id",
             }
         ],
+        [
+            {
+                "semanticSetId": "set_id",
+            }
+        ],
         [{}],
     ],
     ids=[
+        "with_type_with_set_id_with_semanticSetId",
         "with_type_with_set_id",
-        "with_type_no_set_id",
-        "no_type_with_set_id",
-        "no_type_no_set_id",
+        "with_type_with_semanticSetId",
+        "with_set_id_with_semanticSetId",
+        "with_type",
+        "with_set_id",
+        "with_semanticSetId",
+        "empty"
     ],
+)
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
 )
 def test_put_set_element(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
     document: dict,
+    semantic_set_id: Optional[str],
 ):
     """
     Test put of a set element.
@@ -258,47 +358,65 @@ def test_put_set_element(
     collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
-    # Initial insert should generate "_rev" 1
+    # Initial put should generate "_rev" 1
     result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type="set",
+        semantic_set_id=semantic_set_id,
         set_id="set_id",
         document=document,
     )
 
+    # Document we expect
+    document_expected = copy.deepcopy(document)
+    document_expected["_type"] = "set"
+    document_expected["_set_id"] = "set_id"
+    document_expected["_rev"] = 1
+    if semantic_set_id:
+        document_expected[semantic_set_id] = "set_id"
+
+    # Document we obtained
     document = result.document
     assert result.inserted_count == 1
     assert result.inserted_id == document["_id"]
-
     del document["_id"]
-    assert document == {
-        "_type": "set",
-        "_set_id": "set_id",
-        "_rev": 1,
-    }
 
-    # Second insert of same document should generate "_rev" 2
+    assert document == document_expected
+
+    # Second put of same document should generate "_rev" 2
     result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type="set",
+        semantic_set_id=semantic_set_id,
         set_id="set_id",
         document=document,
     )
 
+    # Expect the increment to "_rev"
+    document_expected["_rev"] = 2
+
     document = result.document
     assert result.inserted_count == 1
     assert result.inserted_id == document["_id"]
-
     del document["_id"]
-    assert document == {
-        "_type": "set",
-        "_set_id": "set_id",
-        "_rev": 2,
-    }
+
+    assert document == document_expected
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_put_set_element_with_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
     Put of an existing "_id" should fail, as this means document is already in the database.
@@ -311,16 +429,29 @@ def test_put_set_element_with_id_failure(
         scope.database.collection_utils.put_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             set_id="set_id",
             document={"_id": "not allowed",},
         )
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_put_set_element_duplicate_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
-    Put of an duplicate "_rev" should fail.
+    Put of a duplicate "_rev" should fail.
     """
 
     collection = database_temp_collection_factory()
@@ -329,6 +460,7 @@ def test_put_set_element_duplicate_rev_failure(
     scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type="set",
+        semantic_set_id=semantic_set_id,
         set_id="set_id",
         document={},
     )
@@ -336,6 +468,7 @@ def test_put_set_element_duplicate_rev_failure(
     scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type="set",
+        semantic_set_id=semantic_set_id,
         set_id="set_id",
         document={
             "_rev": 1,
@@ -346,6 +479,7 @@ def test_put_set_element_duplicate_rev_failure(
         scope.database.collection_utils.put_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             set_id="set_id",
             document={},
         )
@@ -354,6 +488,7 @@ def test_put_set_element_duplicate_rev_failure(
         scope.database.collection_utils.put_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             set_id="set_id",
             document={
                 "_rev": 1,
@@ -361,8 +496,20 @@ def test_put_set_element_duplicate_rev_failure(
         )
 
 
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
 def test_put_set_element_invalid_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
 ):
     """
     Put of non-integer "_rev" should fail.
@@ -375,8 +522,55 @@ def test_put_set_element_invalid_rev_failure(
         scope.database.collection_utils.put_set_element(
             collection=collection,
             document_type="set",
+            semantic_set_id=semantic_set_id,
             set_id="set_id",
             document={
                 "_rev": "1",
             },
         )
+
+
+@pytest.mark.parametrize(
+    ["semantic_set_id"],
+    [
+        ["semanticSetId"],
+        [None],
+    ],
+    ids=[
+        "with_semantic_set_id",
+        "without_semantic_set_id",
+    ]
+)
+def test_put_set_element_mismatched_set_id_failure(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+    semantic_set_id: Optional[str],
+):
+    """
+    Put of existing but mismatched set id should fail.
+    """
+
+    collection = database_temp_collection_factory()
+    scope.database.collection_utils.ensure_index(collection=collection)
+
+    with pytest.raises(ValueError):
+        scope.database.collection_utils.put_set_element(
+            collection=collection,
+            document_type="set",
+            semantic_set_id=semantic_set_id,
+            set_id="set_id",
+            document={
+                "_set_id": "invalid",
+            },
+        )
+
+    if semantic_set_id:
+        with pytest.raises(ValueError):
+            scope.database.collection_utils.put_set_element(
+                collection=collection,
+                document_type="set",
+                semantic_set_id=semantic_set_id,
+                set_id="set_id",
+                document={
+                    semantic_set_id: "invalid",
+                },
+            )
