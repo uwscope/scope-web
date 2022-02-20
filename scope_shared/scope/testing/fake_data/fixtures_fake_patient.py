@@ -363,7 +363,7 @@ def data_fake_identity_factory() -> dict:
 #         "_type": "valuesInventory",
 #         "_rev": 1,
 #         "assigned": True,
-#         "assignedDate": "assignedDate",  # TODO: date pattern needs to be fixed in schema
+#         "assignedDate": "assignedDate",
 #         "values": [
 #             {
 #                 "id": "id",

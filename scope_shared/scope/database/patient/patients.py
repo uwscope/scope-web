@@ -17,7 +17,6 @@ Duplicated code from ../patients pending separation of responsibilities.
 # PATIENTS_COLLECTION_NAME = "patients"
 #
 #
-# # TODO: relying on uniqueness of patient name seems highly problematic
 # def collection_for_patient(*, patient_name: str):
 #     """
 #     Obtain the name of the collection for a specified patient.
@@ -219,7 +218,6 @@ Duplicated code from ../patients pending separation of responsibilities.
 #         }
 #     )
 #     if result is None:
-#         # TODO: Talk to James about this. Only insert documents if values exist in 'patient' dict
 #         if identity is not None:
 #             identity_result = patients_collection.insert_one(document=identity)
 #             patient["identity"].update({"_id": str(identity_result.inserted_id)})
@@ -352,7 +350,5 @@ Duplicated code from ../patients pending separation of responsibilities.
 #         patient = _build_patient_json(database, patient_collection)
 #
 #         patients.append(patient)
-#
-#     # TODO: Verify schema against each patient in patients
 #
 #     return patients
