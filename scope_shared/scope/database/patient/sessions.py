@@ -4,8 +4,7 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "session"
-# TODO: Semantic ID
-# DOCUMENT_ID = "sessionId"
+SEMANTIC_SET_ID = "sessionId"
 
 
 def get_sessions(
@@ -50,6 +49,7 @@ def post_session(
     return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
         document=session,
     )
 
@@ -67,6 +67,7 @@ def put_session(
     return scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
         document=session,
     )

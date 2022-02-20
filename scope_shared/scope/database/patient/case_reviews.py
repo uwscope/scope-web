@@ -4,8 +4,7 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "caseReview"
-# TODO: Semantic ID
-# DOCUMENT_ID = "reviewId"
+SEMANTIC_SET_ID = "caseReviewId"
 
 
 def get_case_reviews(
@@ -50,6 +49,7 @@ def post_case_review(
     return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
         document=case_review,
     )
 
