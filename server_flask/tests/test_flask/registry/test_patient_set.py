@@ -1,14 +1,13 @@
 import copy
 import http
 from dataclasses import dataclass
+import pytest
+import requests
 from typing import Callable, List
 from urllib.parse import urljoin
 
-import pytest
-import requests
 import scope.config
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.case_reviews
 import scope.database.patient.sessions
 import scope.testing.fixtures_database_temp_patient
@@ -20,56 +19,51 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
     name: str
+    semantic_set_id: str
     document_factory_fixture_set: str
     document_factory_fixture_set_element: str
     database_get_set_function: Callable[[...], List[dict]]
     database_get_function: Callable[[...], dict]
-    database_post_function: Callable[[...], collection_utils.PutResult]
-    database_put_function: Callable[[...], collection_utils.PutResult]
+    database_post_function: Callable[[...], collection_utils.SetPostResult]
     database_document_parameter_name: str
     flask_query_set_type: str
-    flask_query_set_element_type: str
     flask_document_set_key: str
+    flask_query_set_element_type: str
     flask_document_set_element_key: str
-    document_id: str
 
 
 TEST_CONFIGS = [
     ConfigTestPatientSet(
-        name="sessions",
-        document_factory_fixture_set="data_fake_sessions_factory",
-        document_factory_fixture_set_element="data_fake_session_factory",
-        database_get_set_function=scope.database.patient.sessions.get_sessions,
-        database_get_function=scope.database.patient.sessions.get_session,
-        database_post_function=scope.database.patient.sessions.post_session,
-        database_put_function=scope.database.patient.sessions.put_session,
-        database_document_parameter_name="session",
-        flask_query_set_type="sessions",
-        flask_query_set_element_type="session",
-        flask_document_set_key="sessions",
-        flask_document_set_element_key="session",
-        document_id="sessionId",
-    ),
-    ConfigTestPatientSet(
-        name="case-reviews",
+        name="casereviews",
+        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
         document_factory_fixture_set="data_fake_case_reviews_factory",
         document_factory_fixture_set_element="data_fake_case_review_factory",
         database_get_set_function=scope.database.patient.case_reviews.get_case_reviews,
         database_get_function=scope.database.patient.case_reviews.get_case_review,
         database_post_function=scope.database.patient.case_reviews.post_case_review,
-        database_put_function=scope.database.patient.case_reviews.put_case_review,
         database_document_parameter_name="case_review",
         flask_query_set_type="casereviews",
-        flask_query_set_element_type="casereview",
         flask_document_set_key="casereviews",
+        flask_query_set_element_type="casereview",
         flask_document_set_element_key="casereview",
-        document_id="reviewId",
+    ),
+    ConfigTestPatientSet(
+        name="sessions",
+        semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_sessions_factory",
+        document_factory_fixture_set_element="data_fake_session_factory",
+        database_get_set_function=scope.database.patient.sessions.get_sessions,
+        database_get_function=scope.database.patient.sessions.get_session,
+        database_post_function=scope.database.patient.sessions.post_session,
+        database_document_parameter_name="session",
+        flask_query_set_type="sessions",
+        flask_document_set_key="sessions",
+        flask_query_set_element_type="session",
+        flask_document_set_element_key="session",
     ),
 ]
 
-
 QUERY_SET = "patient/{patient_id}/{query_type}"
-
 QUERY_SET_ELEMENT = "patient/{patient_id}/{query_type}/{set_id}"
 
 
@@ -121,20 +115,23 @@ def test_patient_set_get(
     )
     assert response.ok
 
+    # Obtain the documents
     assert config.flask_document_set_key in response.json()
-
-    # Confirm it matches expected documents, with addition of an "_id", "_rev", and "_set_id"
     documents_retrieved = response.json()[config.flask_document_set_key]
+
+    # Confirm they match expected documents,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     for document_retrieved in documents_retrieved:
         assert "_id" in document_retrieved
         del document_retrieved["_id"]
-        assert "_rev" in document_retrieved
-        del document_retrieved["_rev"]
         assert "_set_id" in document_retrieved
         del document_retrieved["_set_id"]
-    documents_retrieved = document_utils.normalize_documents(
-        documents=documents_retrieved
-    )
+        assert "_rev" in document_retrieved
+        del document_retrieved["_rev"]
+
+        if config.semantic_set_id:
+            assert config.semantic_set_id in document_retrieved
+            del document_retrieved[config.semantic_set_id]
 
     assert documents == documents_retrieved
 
@@ -161,8 +158,8 @@ def test_patient_set_get_empty(
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
 
-    # Retrieve a valid patient and a valid document,
-    # but get an empty list because fail with 404 because we have not put that document
+    # Retrieve a valid patient and a valid set,
+    # but get an empty list because we have not put any elements
     query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_type,
@@ -174,9 +171,8 @@ def test_patient_set_get_empty(
         ),
     )
     assert response.ok
-    documents_retrieved = response.json()
-    assert config.flask_document_set_key in documents_retrieved
-    assert documents_retrieved[config.flask_document_set_key] == []
+    assert config.flask_document_set_key in response.json()
+    assert response.json()[config.flask_document_set_key] == []
 
 
 @pytest.mark.parametrize(
@@ -214,9 +210,7 @@ def test_patient_set_get_invalid(
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
 
-    # TODO: James: Should we be POSTing some documents before the following GET code.
-
-    # Retrieve a valid patient but an invalid document type
+    # Retrieve a valid patient but an invalid set
     query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
         query_type="invalid",
@@ -255,7 +249,7 @@ def test_patient_set_post(
         config.document_factory_fixture_set_element
     )
 
-    # Store a document via Flask
+    # Post a new document via Flask
     document = document_factory()
     query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
@@ -266,18 +260,29 @@ def test_patient_set_post(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document},
+        json={
+            config.flask_document_set_element_key: document,
+        },
     )
     assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
+    # Response body includes the stored document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
+    assert config.flask_document_set_element_key in response.json()
     document_stored = response.json()[config.flask_document_set_element_key]
+    document_stored_set_id = document_stored["_set_id"]
+
     assert "_id" in document_stored
     del document_stored["_id"]
-    assert "_rev" in document_stored
-    del document_stored["_rev"]
     assert "_set_id" in document_stored
     del document_stored["_set_id"]
+    assert "_rev" in document_stored
+    del document_stored["_rev"]
+
+    if config.semantic_set_id:
+        assert document_stored[config.semantic_set_id] == document_stored_set_id
+        assert config.semantic_set_id in document_stored
+        del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -285,7 +290,7 @@ def test_patient_set_post(
     document_retrieved = config.database_get_function(
         **{
             "collection": temp_patient.collection,
-            "set_id": document[config.document_id],
+            "set_id": document_stored_set_id,
         }
     )
 
@@ -293,10 +298,14 @@ def test_patient_set_post(
     assert document_retrieved is not None
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
-    assert "_rev" in document_retrieved
-    del document_retrieved["_rev"]
     assert "_set_id" in document_retrieved
     del document_retrieved["_set_id"]
+    assert "_rev" in document_retrieved
+    del document_retrieved["_rev"]
+
+    if config.semantic_set_id:
+        assert config.semantic_set_id in document_retrieved
+        del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -316,27 +325,19 @@ def test_patient_set_post_invalid(
     flask_client_config: scope.config.FlaskClientConfig,
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
+    """
+    Test adding an invalid document to set.
+    """
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
     document_factory = request.getfixturevalue(
         config.document_factory_fixture_set_element
     )
 
-    document = document_factory()
     query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_type,
     )
-
-    # Invalid document that is not nested under the document key
-    response = session.post(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json=document,
-    )
-    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that does not match any schema
     response = session.post(
@@ -352,7 +353,19 @@ def test_patient_set_post_invalid(
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
+    # Invalid document that is not nested under the document key
+    document = document_factory()
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
     # Invalid document that already includes an "_id"
+    document = document_factory()
     document["_id"] = "invalid"
     response = session.post(
         url=urljoin(
@@ -363,20 +376,8 @@ def test_patient_set_post_invalid(
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
-    # Invalid document that already includes an "_rev"
-    del document["_id"]
-    document["_rev"] = "invalid"
-    response = session.post(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json={config.flask_document_set_element_key: document},
-    )
-    assert response.status_code == http.HTTPStatus.BAD_REQUEST
-
     # Invalid document that already includes an "_set_id"
-    del document["_rev"]
+    document = document_factory()
     document["_set_id"] = "invalid"
     response = session.post(
         url=urljoin(
@@ -387,13 +388,38 @@ def test_patient_set_post_invalid(
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
+    # Invalid document that already includes an "_rev"
+    document = document_factory()
+    document["_rev"] = "invalid"
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={config.flask_document_set_element_key: document},
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that already includes a semantic id
+    if config.semantic_set_id:
+        document = document_factory()
+        document[config.semantic_set_id] = "invalid"
+        response = session.post(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+            json={config.flask_document_set_element_key: document},
+        )
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
 
 @pytest.mark.parametrize(
     ["config"],
     [[config] for config in TEST_CONFIGS],
     ids=[config.name for config in TEST_CONFIGS],
 )
-def test_patient_set_put_invalid(
+def test_patient_set_put_not_allowed(
     request: pytest.FixtureRequest,
     config: ConfigTestPatientSet,
     database_temp_patient_factory: Callable[
@@ -405,8 +431,6 @@ def test_patient_set_put_invalid(
 ):
     """
     Test that put is not allowed on set.
-
-    TODO Anant: James left this in place, not sure what we're doing here pending semantics
     """
 
     temp_patient = database_temp_patient_factory()
@@ -462,10 +486,11 @@ def test_patient_set_element_get(
     assert result.inserted_count == 1
 
     # Retrieve the set element via Flask
+    document_set_id = result.inserted_set_id
     query = QUERY_SET_ELEMENT.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_element_type,
-        set_id=result.document[config.document_id],
+        set_id=document_set_id,
     )
     response = session.get(
         url=urljoin(
@@ -475,15 +500,23 @@ def test_patient_set_element_get(
     )
     assert response.ok
 
+    # Confirm it matches expected document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     assert config.flask_document_set_element_key in response.json()
-    # Confirm it matches expected document, with addition of an "_id", "_rev", and "_set_id"
     document_retrieved = response.json()[config.flask_document_set_element_key]
+
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
+    assert "_set_id" in document_retrieved
+    assert document_retrieved["_set_id"] == document_set_id
+    del document_retrieved["_set_id"]
     assert "_rev" in document_retrieved
     del document_retrieved["_rev"]
-    assert "_set_id" in document_retrieved
-    del document_retrieved["_set_id"]
+
+    if config.semantic_set_id:
+        assert config.semantic_set_id in document_retrieved
+        assert document_retrieved[config.semantic_set_id] == document_set_id
+        del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -509,12 +542,11 @@ def test_patient_set_element_get_invalid(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-
     document_factory = request.getfixturevalue(
         config.document_factory_fixture_set_element
     )
 
-    # Store the document
+    # Store a document so that a set in theory exists
     document = document_factory()
     result = config.database_post_function(
         **{
@@ -524,11 +556,11 @@ def test_patient_set_element_get_invalid(
     )
     assert result.inserted_count == 1
 
-    # Retrieve an invalid patient's set element via Flask
+    # Retrieve an invalid patient set element via Flask
     query = QUERY_SET_ELEMENT.format(
         patient_id="invalid",
         query_type=config.flask_query_set_element_type,
-        set_id=result.document[config.document_id],
+        set_id=result.inserted_set_id,
     )
     response = session.get(
         url=urljoin(
@@ -538,7 +570,22 @@ def test_patient_set_element_get_invalid(
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
 
-    # Retrieve a nonexistant set element for a valid patient
+    # Retrieve a valid patient but invalid document
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type="invalid",
+        set_id=result.inserted_set_id,
+    )
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    # Retrieve a valid patient and a valid document
+    # but fail because the set_id is wrong
     query = QUERY_SET_ELEMENT.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_element_type,
@@ -558,6 +605,48 @@ def test_patient_set_element_get_invalid(
     [[config] for config in TEST_CONFIGS],
     ids=[config.name for config in TEST_CONFIGS],
 )
+def test_patient_set_element_post_not_allowed(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test that post is not allowed on set element.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Store a document via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=collection_utils.generate_set_id(),
+    )
+    document = document_factory()
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
 def test_patient_set_element_put(
     request: pytest.FixtureRequest,
     config: ConfigTestPatientSet,
@@ -569,40 +658,50 @@ def test_patient_set_element_put(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test storing an element in set.
+    Test putting a set element.
     """
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(
-        config.document_factory_fixture_set_element
-    )
+    document_factory = request.getfixturevalue(config.document_factory_fixture_set_element)
 
-    # Update a document via Flask
+    # Generate document and set_id to assign in
     document = document_factory()
+    document_set_id = collection_utils.generate_set_id()
+
+    # Store a document via Flask
     query = QUERY_SET_ELEMENT.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_element_type,
-        set_id=document[config.document_id],
+        set_id=document_set_id,
     )
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document},
+        json={
+            config.flask_document_set_element_key: document,
+        },
     )
     assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
-    assert config.flask_document_set_element_key in response.json()
+    # Response body includes the stored document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     document_stored = response.json()[config.flask_document_set_element_key]
     assert "_id" in document_stored
     del document_stored["_id"]
-    assert "_rev" in document_stored
-    del document_stored["_rev"]
     assert "_set_id" in document_stored
+    assert document_stored["_set_id"] == document_set_id
     del document_stored["_set_id"]
+    assert "_rev" in document_stored
+    assert document_stored["_rev"] == 1
+    del document_stored["_rev"]
+
+    if config.semantic_set_id:
+        assert config.semantic_set_id in document_stored
+        assert document_stored[config.semantic_set_id] == document_set_id
+        del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -610,7 +709,7 @@ def test_patient_set_element_put(
     document_retrieved = config.database_get_function(
         **{
             "collection": temp_patient.collection,
-            "set_id": document[config.document_id],
+            "set_id": document_set_id,
         }
     )
 
@@ -618,10 +717,16 @@ def test_patient_set_element_put(
     assert document_retrieved is not None
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
+    assert "_set_id" in document_retrieved
+    assert document_retrieved["_set_id"] == document_set_id
+    del document_retrieved["_set_id"]
     assert "_rev" in document_retrieved
     del document_retrieved["_rev"]
-    assert "_set_id" in document_retrieved
-    del document_retrieved["_set_id"]
+
+    if config.semantic_set_id:
+        assert config.semantic_set_id in document_retrieved
+        assert document_retrieved[config.semantic_set_id] == document_set_id
+        del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -642,7 +747,7 @@ def test_patient_set_element_put_invalid(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test updating an invalid element in set.
+    Test putting an invalid set element.
     """
 
     temp_patient = database_temp_patient_factory()
@@ -651,13 +756,13 @@ def test_patient_set_element_put_invalid(
         config.document_factory_fixture_set_element
     )
 
-    # Invalid document that does not match any schema
-    document = document_factory()
     query = QUERY_SET_ELEMENT.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_set_element_type,
-        set_id=document[config.document_id],
+        set_id=collection_utils.generate_set_id(),
     )
+
+    # Invalid document that does not match any schema
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
@@ -669,7 +774,19 @@ def test_patient_set_element_put_invalid(
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
+    # Invalid document that is not nested under the document key
+    document = document_factory()
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
     # Invalid document that already includes an "_id"
+    document = document_factory()
     document["_id"] = "invalid"
     response = session.put(
         url=urljoin(
@@ -682,8 +799,34 @@ def test_patient_set_element_put_invalid(
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
-    # TODO Anant: Is this where we should do something about a set
-    #             element being put to a location that doesn't match its internal ID?
+    # Invalid document that already includes a mismatched "_set_id"
+    document = document_factory()
+    document["_set_id"] = "invalid"
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={
+            config.flask_document_set_element_key: document,
+        },
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that already includes a mismatched semantic id
+    if config.semantic_set_id:
+        document = document_factory()
+        document[config.semantic_set_id] = "invalid"
+        response = session.put(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+            json={
+                config.flask_document_set_element_key: document,
+            },
+        )
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -712,51 +855,65 @@ def test_patient_set_element_put_update(
     )
 
     # Store a document via Flask
-    document = document_factory()
-    query = QUERY_SET_ELEMENT.format(
+    query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
-        query_type=config.flask_query_set_element_type,
-        set_id=document[config.document_id],
+        query_type=config.flask_query_set_type,
     )
-    response = session.put(
+    document = document_factory()
+    response = session.post(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document},
+        json={
+            config.flask_document_set_element_key: document,
+        },
     )
     assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id", "_rev", and "_set_id"
+    # Response body includes the stored document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     document_stored = response.json()[config.flask_document_set_element_key]
+    document_stored_set_id = document_stored["_set_id"]
 
     # To store an updated document, remove the "_id"
     document_update = copy.deepcopy(document_stored)
     del document_update["_id"]
 
     # Store an update via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document_update},
+        json={
+            config.flask_document_set_element_key: document_update,
+        },
     )
     assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id", "_rev", and a "_set_id"
+    # Response body includes the stored document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     document_updated = response.json()[config.flask_document_set_element_key]
 
     assert document_stored["_id"] != document_updated["_id"]
+    assert document_stored["_set_id"] == document_updated["_set_id"]
     assert document_stored["_rev"] != document_updated["_rev"]
     assert document_stored["_rev"] + 1 == document_updated["_rev"]
-    assert document_stored["_set_id"] == document_updated["_set_id"]
+
+    if config.semantic_set_id:
+        assert document_stored[config.semantic_set_id] == document_updated[config.semantic_set_id]
 
     # Retrieve the document
     document_retrieved = config.database_get_function(
         **{
             "collection": temp_patient.collection,
-            "set_id": document_stored[config.document_id],
+            "set_id": document_stored_set_id,
         }
     )
 
@@ -791,35 +948,45 @@ def test_patient_set_element_put_update_invalid(
     )
 
     # Store a document via Flask
-    document = document_factory()
-    query = QUERY_SET_ELEMENT.format(
+    query = QUERY_SET.format(
         patient_id=temp_patient.patient_id,
-        query_type=config.flask_query_set_element_type,
-        set_id=document[config.document_id],
+        query_type=config.flask_query_set_type,
     )
-    response = session.put(
+    document = document_factory()
+    response = session.post(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document},
+        json={
+            config.flask_document_set_element_key: document,
+        },
     )
     assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id", "_rev", and "_set_id"
+    # Response body includes the stored document,
+    # with addition of an "_id", "_rev", "_set_id", and semantic id
     document_stored_rev1 = response.json()[config.flask_document_set_element_key]
+    document_stored_set_id = document_stored_rev1["_set_id"]
 
     # Store an update that will be assigned "_rev" == 2
     document_update = copy.deepcopy(document_stored_rev1)
     del document_update["_id"]
 
     # Store an update via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
-        json={config.flask_document_set_element_key: document_update},
+        json={
+            config.flask_document_set_element_key: document_update,
+        },
     )
     assert response.ok
 
@@ -854,45 +1021,3 @@ def test_patient_set_element_put_update_invalid(
     # Contents of the response should indicate that current "_rev" == 2
     document_conflict = response.json()[config.flask_document_set_element_key]
     assert document_conflict["_rev"] == 2
-
-
-@pytest.mark.parametrize(
-    ["config"],
-    [[config] for config in TEST_CONFIGS],
-    ids=[config.name for config in TEST_CONFIGS],
-)
-def test_patient_set_element_post_invalid(
-    request: pytest.FixtureRequest,
-    config: ConfigTestPatientSet,
-    database_temp_patient_factory: Callable[
-        [],
-        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
-    ],
-    flask_client_config: scope.config.FlaskClientConfig,
-    flask_session_unauthenticated_factory: Callable[[], requests.Session],
-):
-    """
-    Test that post is not allowed on set element.
-    """
-
-    temp_patient = database_temp_patient_factory()
-    session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(
-        config.document_factory_fixture_set_element
-    )
-
-    # Store a document via Flask
-    document = document_factory()
-    query = QUERY_SET_ELEMENT.format(
-        patient_id=temp_patient.patient_id,
-        query_type=config.flask_query_set_element_type,
-        set_id=document[config.document_id],
-    )
-    response = session.post(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json=document,
-    )
-    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
