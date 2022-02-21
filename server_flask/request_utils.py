@@ -2,7 +2,7 @@ import flask
 import functools
 import http
 import jschon
-from typing import List, NoReturn
+from typing import List, NoReturn, Optional
 
 
 def _flask_abort(response: dict, status: int) -> NoReturn:
@@ -41,6 +41,15 @@ def abort_post_with_id() -> NoReturn:
     )
 
 
+def abort_post_with_semantic_set_id(*, semantic_set_id: str) -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'POST must not include "{}".'.format(semantic_set_id),
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
 def abort_post_with_set_id() -> NoReturn:
     _flask_abort(
         {
@@ -68,7 +77,16 @@ def abort_put_with_id() -> NoReturn:
     )
 
 
-def abort_put_with_mismatched_setid() -> NoReturn:
+def abort_put_with_mismatched_semantic_set_id(*, semantic_set_id: str) -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'PUT location must match "{}".'.format(semantic_set_id),
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
+def abort_put_with_mismatched_set_id() -> NoReturn:
     _flask_abort(
         {
             "message": 'PUT location must match "_set_id".',
@@ -95,7 +113,7 @@ def set_get_response_validate(*, documents: List[dict]) -> List[dict]:
     return documents
 
 
-def set_post_request_validate(*, document: dict) -> dict:
+def set_post_request_validate(*, semantic_set_id: Optional[str], document: dict) -> dict:
     # Previously stored documents contain an "_id",
     # documents to be post must not already contain an "_id"
     if "_id" in document:
@@ -105,6 +123,13 @@ def set_post_request_validate(*, document: dict) -> dict:
     # documents to be post must not already contain an "_set_id"
     if "_set_id" in document:
         abort_post_with_set_id()
+
+    # If a semantic_set_id is specified,
+    # previously stored documents contain a semantic_set_id,
+    # documents to be post must not already contain a semantic_set_id
+    if semantic_set_id:
+        if semantic_set_id in document:
+            abort_post_with_semantic_set_id(semantic_set_id=semantic_set_id)
 
     # Previously stored documents contain an "_rev",
     # documents to be post must not already contain a "_rev"
@@ -126,7 +151,7 @@ def set_element_get_response_validate(*, document: dict) -> dict:
     return document
 
 
-def set_element_put_request_validate(*, document: dict, set_id: str) -> dict:
+def set_element_put_request_validate(*, semantic_set_id: Optional[str], document: dict, set_id: str) -> dict:
     # Previously stored documents contain an "_id",
     # documents to be put must not already contain an "_id"
     if "_id" in document:
@@ -135,7 +160,13 @@ def set_element_put_request_validate(*, document: dict, set_id: str) -> dict:
     # If a "_set_id" exists, it must match put location
     if "_set_id" in document:
         if document["_set_id"] != set_id:
-            abort_put_with_mismatched_setid()
+            abort_put_with_mismatched_set_id()
+
+    # If a semantic_set_id is specified and exists, it must match put location
+    if semantic_set_id:
+        if semantic_set_id in document:
+            if document[semantic_set_id] != set_id:
+                abort_put_with_mismatched_semantic_set_id(semantic_set_id=semantic_set_id)
 
     return document
 

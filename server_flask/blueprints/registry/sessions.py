@@ -62,6 +62,7 @@ def post_session(patient_id):
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
+        semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
         document=document,
     )
 
@@ -127,6 +128,7 @@ def put_session(patient_id, session_id):
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
+        semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
         document=document,
         set_id=session_id,
     )

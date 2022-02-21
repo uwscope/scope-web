@@ -68,5 +68,6 @@ def put_case_review(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         set_id=set_id,
+        semantic_set_id=SEMANTIC_SET_ID,
         document=case_review,
     )

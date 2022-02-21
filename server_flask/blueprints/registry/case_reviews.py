@@ -61,6 +61,7 @@ def post_case_reviews(patient_id):
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
+        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
         document=document,
     )
 
@@ -81,11 +82,11 @@ def post_case_reviews(patient_id):
 
 
 @case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:review_id>",
+    "/<string:patient_id>/casereview/<string:casereview_id>",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_case_review(patient_id, review_id):
+def get_case_review(patient_id, casereview_id):
     # TODO: Require authentication
 
     context = request_context()
@@ -94,7 +95,7 @@ def get_case_review(patient_id, review_id):
     # Get the document
     document = scope.database.patient.case_reviews.get_case_review(
         collection=patient_collection,
-        set_id=review_id,
+        set_id=casereview_id,
     )
 
     # Validate and normalize the response
@@ -127,6 +128,7 @@ def put_case_review(patient_id, casereview_id):
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
+        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
         document=document,
         set_id=casereview_id,
     )
