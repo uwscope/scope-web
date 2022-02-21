@@ -97,7 +97,11 @@ def test_get_set_element(
     # Remove the "_id" field that was created upon insertion
     del result["_id"]
 
-    assert result == {"_type": "set", "_set_id": "1", "_rev": "2",}
+    assert result == {
+        "_type": "set",
+        "_set_id": "1",
+        "_rev": "2",
+    }
 
 
 def test_get_set_element_not_found(
@@ -142,7 +146,7 @@ def test_get_set_element_not_found(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_post_set_element(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -186,7 +190,7 @@ def test_post_set_element(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_post_set_element_with_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -204,7 +208,9 @@ def test_post_set_element_with_id_failure(
             collection=collection,
             document_type="set",
             semantic_set_id=semantic_set_id,
-            document={"_id": "not allowed",},
+            document={
+                "_id": "not allowed",
+            },
         )
 
 
@@ -217,7 +223,7 @@ def test_post_set_element_with_id_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_post_set_element_with_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -235,7 +241,9 @@ def test_post_set_element_with_rev_failure(
             collection=collection,
             document_type="set",
             semantic_set_id=semantic_set_id,
-            document={"_rev": "not allowed",},
+            document={
+                "_rev": "not allowed",
+            },
         )
 
 
@@ -248,7 +256,7 @@ def test_post_set_element_with_rev_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_post_set_element_with_set_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -266,7 +274,9 @@ def test_post_set_element_with_set_id_failure(
             collection=collection,
             document_type="set",
             semantic_set_id=semantic_set_id,
-            document={"_set_id": "not allowed",},
+            document={
+                "_set_id": "not allowed",
+            },
         )
 
     if semantic_set_id:
@@ -275,7 +285,9 @@ def test_post_set_element_with_set_id_failure(
                 collection=collection,
                 document_type="set",
                 semantic_set_id=semantic_set_id,
-                document={semantic_set_id: "not allowed", },
+                document={
+                    semantic_set_id: "not allowed",
+                },
             )
 
 
@@ -332,7 +344,7 @@ def test_post_set_element_with_set_id_failure(
         "with_type",
         "with_set_id",
         "with_semanticSetId",
-        "empty"
+        "empty",
     ],
 )
 @pytest.mark.parametrize(
@@ -344,7 +356,7 @@ def test_post_set_element_with_set_id_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_put_set_element(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -412,7 +424,7 @@ def test_put_set_element(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_put_set_element_with_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -431,7 +443,9 @@ def test_put_set_element_with_id_failure(
             document_type="set",
             semantic_set_id=semantic_set_id,
             set_id="set_id",
-            document={"_id": "not allowed",},
+            document={
+                "_id": "not allowed",
+            },
         )
 
 
@@ -444,7 +458,7 @@ def test_put_set_element_with_id_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_put_set_element_duplicate_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -505,7 +519,7 @@ def test_put_set_element_duplicate_rev_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_put_set_element_invalid_rev_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
@@ -539,7 +553,7 @@ def test_put_set_element_invalid_rev_failure(
     ids=[
         "with_semantic_set_id",
         "without_semantic_set_id",
-    ]
+    ],
 )
 def test_put_set_element_mismatched_set_id_failure(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],

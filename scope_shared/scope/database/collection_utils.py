@@ -311,7 +311,9 @@ def post_set_element(
         # Document must not include a semantic set id,
         # as post expects to assign this.
         if semantic_set_id in document:
-            raise ValueError('Document must not have existing "{}"'.format(semantic_set_id))
+            raise ValueError(
+                'Document must not have existing "{}"'.format(semantic_set_id)
+            )
 
         document[semantic_set_id] = generated_set_id
 
@@ -385,7 +387,9 @@ def put_set_element(
         # If a document includes a "semantic_set_id", it must match set_id.
         if semantic_set_id in document:
             if document[semantic_set_id] != set_id:
-                raise ValueError('document["{}"] must match set_id'.format(semantic_set_id))
+                raise ValueError(
+                    'document["{}"] must match set_id'.format(semantic_set_id)
+                )
         else:
             # Set the "semantic_set_id"
             document[semantic_set_id] = set_id

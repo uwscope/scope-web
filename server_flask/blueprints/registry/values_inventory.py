@@ -7,7 +7,10 @@ from request_context import request_context
 import request_utils
 from scope.schema import values_inventory_schema
 
-values_inventory_blueprint = flask.Blueprint("values_inventory_blueprint", __name__,)
+values_inventory_blueprint = flask.Blueprint(
+    "values_inventory_blueprint",
+    __name__,
+)
 
 
 @values_inventory_blueprint.route(
@@ -67,8 +70,10 @@ def put_values_inventory(patient_id):
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.values_inventory.get_values_inventory(
-            collection=patient_collection
+        document_conflict = (
+            scope.database.patient.values_inventory.get_values_inventory(
+                collection=patient_collection
+            )
         )
         # Validate and normalize the response
         document_conflict = request_utils.singleton_put_response_validate(

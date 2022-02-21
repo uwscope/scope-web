@@ -28,8 +28,13 @@ def populate_database(
 ):
     faker_factory = faker.Faker(locale="la")
 
-    if scope.database.patients.get_patient(database=database, patient_id="persistent") is None:
-        patient_current = scope.database.patients.create_patient(database=database, patient_id="persistent")
+    if (
+        scope.database.patients.get_patient(database=database, patient_id="persistent")
+        is None
+    ):
+        patient_current = scope.database.patients.create_patient(
+            database=database, patient_id="persistent"
+        )
         patient_collection = database.get_collection(patient_current["collection"])
 
         _populate_patient(

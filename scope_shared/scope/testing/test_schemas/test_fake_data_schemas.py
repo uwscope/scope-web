@@ -288,7 +288,9 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
             document_singleton["_id"] = str(bson.objectid.ObjectId())
             assert "_rev" not in document_singleton
             document_singleton["_rev"] = 1
-            document_singleton = document_utils.normalize_document(document=document_singleton)
+            document_singleton = document_utils.normalize_document(
+                document=document_singleton
+            )
 
             _assert_schema(
                 data=document_singleton,
@@ -303,8 +305,12 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
             assert "_set_id" not in document_singleton
             if config.expected_semantic_set_id:
                 assert config.expected_semantic_set_id not in document_singleton
-                document_set_element[config.expected_semantic_set_id] = document_set_element["_set_id"]
-            document_set_element = document_utils.normalize_document(document=document_set_element)
+                document_set_element[
+                    config.expected_semantic_set_id
+                ] = document_set_element["_set_id"]
+            document_set_element = document_utils.normalize_document(
+                document=document_set_element
+            )
 
             _assert_schema(
                 data=document_set_element,

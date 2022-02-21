@@ -663,7 +663,9 @@ def test_patient_set_element_put(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_set_element)
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
 
     # Generate document and set_id to assign in
     document = document_factory()
@@ -907,7 +909,10 @@ def test_patient_set_element_put_update(
     assert document_stored["_rev"] + 1 == document_updated["_rev"]
 
     if config.semantic_set_id:
-        assert document_stored[config.semantic_set_id] == document_updated[config.semantic_set_id]
+        assert (
+            document_stored[config.semantic_set_id]
+            == document_updated[config.semantic_set_id]
+        )
 
     # Retrieve the document
     document_retrieved = config.database_get_function(
