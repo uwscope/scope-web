@@ -17,7 +17,7 @@
 		"_rev": {
 			"type": "number"
 		},
-		"reviewId": {
+		"caseReviewId": {
 			"type": "string"
 		},
 		"date": {
@@ -48,7 +48,6 @@
 	"$comment": "consultingPsychiatrist is required. Removed it from the required list because identity fixture isn't clear yet.",
 	"required": [
 		"_type",
-		"reviewId",
 		"date",
 		"medicationChange",
 		"behavioralStrategyChange",

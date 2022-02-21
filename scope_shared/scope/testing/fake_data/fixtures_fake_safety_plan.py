@@ -42,7 +42,9 @@ def fake_safety_plan_factory(
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
-            "socialDistractions": [fake_contact_factory() for _ in range(random.randint(1, 5))],
+            "socialDistractions": [
+                fake_contact_factory() for _ in range(random.randint(1, 5))
+            ],
             "settingDistractions": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "supporters": [fake_contact_factory() for _ in range(random.randint(1, 5))],
             "professionals": [
@@ -60,7 +62,7 @@ def fake_safety_plan_factory(
             optional_keys=OPTIONAL_KEYS,
         )
 
-        return document_utils.normalize_document(document=fake_safety_plan)
+        return fake_safety_plan
 
     return factory
 

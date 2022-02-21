@@ -105,7 +105,7 @@ def fake_values_inventory_factory(
             optional_keys=OPTIONAL_KEYS_VALUES_INVENTORY,
         )
 
-        return document_utils.normalize_document(document=fake_values_inventory)
+        return fake_values_inventory
 
     return factory
 

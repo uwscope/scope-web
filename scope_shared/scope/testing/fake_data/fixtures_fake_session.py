@@ -1,11 +1,9 @@
 import datetime
+import faker
+import pytest
 import random
 from typing import Callable
 
-import faker
-import pytest
-import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.database.patient.sessions
 import scope.schema
@@ -25,7 +23,6 @@ def fake_session_factory(
     def factory() -> dict:
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
-            "sessionId": collection_utils.generate_set_id(),
             "date": format_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
@@ -51,7 +48,7 @@ def fake_session_factory(
             "sessionNote": faker_factory.text(),
         }
 
-        return document_utils.normalize_document(document=fake_session)
+        return fake_session
 
     return factory
 

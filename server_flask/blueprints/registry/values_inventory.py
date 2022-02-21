@@ -4,10 +4,13 @@ import pymongo.errors
 import scope.database
 import scope.database.patient.values_inventory
 from request_context import request_context
+import request_utils
 from scope.schema import values_inventory_schema
-from utils import validate_schema
 
-values_inventory_blueprint = flask.Blueprint("values_inventory_blueprint", __name__)
+values_inventory_blueprint = flask.Blueprint(
+    "values_inventory_blueprint",
+    __name__,
+)
 
 
 @values_inventory_blueprint.route(
@@ -21,11 +24,15 @@ def get_values_inventory(patient_id):
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
+    # Get the document
     document = scope.database.patient.values_inventory.get_values_inventory(
         collection=patient_collection,
     )
-    if document is None:
-        context.abort_document_not_found()
+
+    # Validate and normalize the response
+    document = request_utils.singleton_get_response_validate(
+        document=document,
+    )
 
     return {
         "valuesinventory": document,
@@ -36,7 +43,7 @@ def get_values_inventory(patient_id):
     "/<string:patient_id>/valuesinventory",
     methods=["PUT"],
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=values_inventory_schema,
     key="valuesinventory",
 )
@@ -50,10 +57,10 @@ def put_values_inventory(patient_id):
     # Obtain the document being put
     document = flask.request.json["valuesinventory"]
 
-    # Previously stored documents contain an "_id",
-    # documents to be put must not already contain an "_id"
-    if "_id" in document:
-        context.abort_put_with_id()
+    # Validate and normalize the request
+    document = request_utils.singleton_put_request_validate(
+        document=document,
+    )
 
     # Store the document
     try:
@@ -68,12 +75,21 @@ def put_values_inventory(patient_id):
                 collection=patient_collection
             )
         )
-        context.abort_revision_conflict(
+        # Validate and normalize the response
+        document_conflict = request_utils.singleton_put_response_validate(
+            document=document_conflict
+        )
+
+        request_utils.abort_revision_conflict(
             document={
                 "valuesinventory": document_conflict,
             }
         )
     else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
         return {
-            "valuesinventory": result.document,
+            "valuesinventory": document_response,
         }
