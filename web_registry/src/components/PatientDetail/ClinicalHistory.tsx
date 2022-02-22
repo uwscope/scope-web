@@ -1,11 +1,13 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
-import { action, observable } from 'mobx';
-import { observer } from 'mobx-react';
+import { Grid } from '@mui/material';
+import { action, runInAction } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { cancerTreatmentRegimenValues } from 'shared/enums';
 import { IClinicalHistory } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 import { usePatient } from 'src/stores/stores';
 
 interface IClinicalHistoryContentProps extends Partial<IClinicalHistory> {
@@ -52,8 +54,12 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
                 sm={12}
                 editable={editable}
                 label="Current Treatment Regimen"
-                flags={currentTreatmentRegimen}
+                flags={Object.assign(
+                    {},
+                    ...cancerTreatmentRegimenValues.map((x) => ({ [x]: !!currentTreatmentRegimen?.[x] })),
+                )}
                 other={currentTreatmentRegimenOther}
+                flagOrder={[...cancerTreatmentRegimenValues]}
                 onChange={(flags) => onValueChange('currentTreatmentRegimen', flags)}
                 onOtherChange={(text) => onValueChange('currentTreatmentRegimenOther', text)}
             />
@@ -114,34 +120,25 @@ const ClinicalHistoryContent: FunctionComponent<IClinicalHistoryContentProps> = 
     );
 };
 
-const defaultTreatmentRegimen = {
-    Surgery: false,
-    Chemotherapy: false,
-    Radiation: false,
-    'Stem Cell Transplant': false,
-    Immunotherapy: false,
-    'CAR-T': false,
-    Endocrine: false,
-    Surveillance: false,
-    Other: false,
-};
-
-const state = observable<{ open: boolean } & IClinicalHistory>({
-    open: false,
-    primaryCancerDiagnosis: '',
-    currentTreatmentRegimen: defaultTreatmentRegimen,
-    currentTreatmentRegimenOther: '',
-    currentTreatmentRegimenNotes: '',
-    dateOfCancerDiagnosis: '',
-    psychDiagnosis: '',
-    pastPsychHistory: '',
-    pastSubstanceUse: '',
-    psychSocialBackground: '',
-});
-
 export const ClinicalHistory: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
     const { clinicalHistory } = currentPatient;
+
+    const state = useLocalObservable<{ open: boolean } & IClinicalHistory>(() => ({
+        open: false,
+        primaryCancerDiagnosis: clinicalHistory.primaryCancerDiagnosis || '',
+        currentTreatmentRegimen: Object.assign(
+            {},
+            ...cancerTreatmentRegimenValues.map((x) => ({ [x]: !!clinicalHistory.currentTreatmentRegimen?.[x] })),
+        ),
+        currentTreatmentRegimenOther: clinicalHistory.currentTreatmentRegimenOther || '',
+        currentTreatmentRegimenNotes: clinicalHistory.currentTreatmentRegimenNotes || '',
+        dateOfCancerDiagnosis: clinicalHistory.dateOfCancerDiagnosis || '',
+        psychDiagnosis: clinicalHistory.psychDiagnosis || '',
+        pastPsychHistory: clinicalHistory.pastPsychHistory || '',
+        pastSubstanceUse: clinicalHistory.pastSubstanceUse || '',
+        psychSocialBackground: clinicalHistory.psychSocialBackground || '',
+    }));
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
@@ -149,6 +146,8 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
 
     const handleClose = action(() => {
         state.open = false;
+
+        currentPatient.loadClinicalHistoryState.resetState();
     });
 
     const handleOpen = action(() => {
@@ -159,34 +158,36 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
         state.open = true;
     });
 
-    const onSave = action(() => {
+    const onSave = action(async () => {
         const { open, ...patientData } = { ...state };
-        currentPatient?.updateClinicalHistory(patientData);
-        state.open = false;
+        await currentPatient?.updateClinicalHistory(patientData);
+
+        runInAction(() => {
+            if (!currentPatient.loadClinicalHistoryState.error) {
+                state.open = false;
+            }
+        });
     });
 
     return (
         <ActionPanel
             id="clinical-history"
             title="Clinical History and Diagnosis"
-            loading={currentPatient?.state == 'Pending'}
+            error={currentPatient?.loadClinicalHistoryState.error}
+            loading={currentPatient?.loadClinicalHistoryState.pending}
+            showSnackbar={!state.open}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <ClinicalHistoryContent editable={false} {...clinicalHistory} onValueChange={onValueChange} />
 
-            <Dialog open={state.open} onClose={handleClose}>
-                <DialogTitle>Edit Clinical History</DialogTitle>
-                <DialogContent dividers>
-                    <ClinicalHistoryContent editable={true} {...state} onValueChange={onValueChange} />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={onSave} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <StatefulDialog
+                open={state.open}
+                error={currentPatient?.loadClinicalHistoryState.error}
+                loading={currentPatient?.loadClinicalHistoryState.pending}
+                handleCancel={handleClose}
+                handleSave={onSave}
+                title="Edit Clinical History"
+                content={<ClinicalHistoryContent editable={true} {...state} onValueChange={onValueChange} />}
+            />
         </ActionPanel>
     );
 });

@@ -16,11 +16,14 @@ import {
     IPatientResponse,
     IValuesInventoryResponse,
     IValuesInventoryRequest,
+    IClinicalHistoryRequest,
+    IClinicalHistoryResponse,
 } from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
     IAssessmentLog,
+    IClinicalHistory,
     IMoodLog,
     IPatient,
     IPatientConfig,
@@ -44,6 +47,9 @@ export interface IPatientService extends IServiceBase {
 
     getSafetyPlan(): Promise<ISafetyPlan>;
     updateSafetyPlan(safetyPlan: ISafetyPlan): Promise<ISafetyPlan>;
+
+    getClinicalHistory(): Promise<IClinicalHistory>;
+    updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory>;
 
     getScheduledActivities(): Promise<IScheduledActivity[]>;
     getActivities(): Promise<IActivity[]>;
@@ -91,6 +97,24 @@ class PatientService extends ServiceBase implements IPatientService {
         } as IPatientProfileRequest);
 
         return response.data?.profile;
+    }
+
+    public async getClinicalHistory(): Promise<IClinicalHistory> {
+        const response = await this.axiosInstance.get<IClinicalHistoryResponse>(`/clinicalhistory`);
+        return response.data?.clinicalhistory;
+    }
+
+    public async updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory> {
+        logger.assert(
+            (history as any)._type === 'clinicalHistory',
+            `invalid _type for patient clinical history: ${(history as any)._type}`,
+        );
+
+        const response = await this.axiosInstance.put<IClinicalHistoryResponse>(`/clinicalhistory`, {
+            clinicalhistory: history,
+        } as IClinicalHistoryRequest);
+
+        return response.data?.clinicalhistory;
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {
