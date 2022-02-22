@@ -8,18 +8,24 @@ from pprint import pprint
 import pytest
 from typing import Callable, List, Optional, Union
 
+import scope.database.patient.activities
 import scope.database.patient.case_reviews
+import scope.database.patient.mood_logs
 import scope.database.patient.sessions
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.schema
+
 import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
 import scope.testing.fake_data.fixtures_fake_identity
 import scope.testing.fake_data.fixtures_fake_life_areas
+import scope.testing.fake_data.fixtures_fake_mood_log
+import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
 import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
@@ -49,15 +55,38 @@ faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
-        # TODO: what schema applies here?
-        XFAIL_TEST_HAS_TODO=True,
         name="activity",
         schema=scope.schema.activity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_activity.data_fake_activity_factory,
+        data_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
+            faker_factory=faker_factory,
+            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+            fake_values_inventory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
+                faker_factory=faker_factory,
+                fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+            )(),
+        ),
         expected_document=True,
-        expected_singleton=True,
+        expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id="TODO",
+        expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
+    ),
+    ConfigTestFakeDataSchema(
+        name="activities",
+        schema=scope.schema.activities_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_activities.fake_activities_factory(
+            fake_activity_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
+                faker_factory=faker_factory,
+                fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+                fake_values_inventory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
+                    faker_factory=faker_factory,
+                    fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
+                )(),
+            )
+        ),
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
     ),
     ConfigTestFakeDataSchema(
         name="case-review",
@@ -122,6 +151,30 @@ TEST_CONFIGS = [
         name="life-areas",
         schema=scope.schema.life_areas_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="mood-log",
+        schema=scope.schema.mood_log_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_mood_log.fake_mood_log_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
+    ),
+    ConfigTestFakeDataSchema(
+        name="mood-logs",
+        schema=scope.schema.mood_logs_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_mood_logs.fake_mood_logs_factory(
+            fake_mood_log_factory=scope.testing.fake_data.fixtures_fake_mood_log.fake_mood_log_factory(
+                faker_factory=faker_factory,
+            ),
+        ),
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
