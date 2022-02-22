@@ -8,7 +8,7 @@ import scope.database.patient.safety_plan
 import scope.database.patient.sessions
 import scope.database.patient.values_inventory
 import scope.database.patients
-import scope.database.providers
+import scope.database.provider_identities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
