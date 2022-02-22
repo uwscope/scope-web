@@ -4,7 +4,7 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "session"
-DOCUMENT_ID = "sessionId"
+SEMANTIC_SET_ID = "sessionId"
 
 
 def get_sessions(
@@ -12,7 +12,7 @@ def get_sessions(
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Retrieve list of "session" document.
+    Get list of "session" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -27,7 +27,7 @@ def get_session(
     set_id: str,
 ) -> Optional[dict]:
     """
-    Retrieve "session" document.
+    Get "session" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -41,15 +41,15 @@ def post_session(
     *,
     collection: pymongo.collection.Collection,
     session: dict,
-) -> scope.database.collection_utils.PutResult:
+) -> scope.database.collection_utils.SetPostResult:
     """
-    Create the "session" document.
+    Post "session" document.
     """
 
-    return scope.database.collection_utils.put_set_element(
+    return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
-        set_id=session[DOCUMENT_ID],
+        semantic_set_id=SEMANTIC_SET_ID,
         document=session,
     )
 
@@ -58,15 +58,16 @@ def put_session(
     *,
     collection: pymongo.collection.Collection,
     session: dict,
-):
+    set_id: str,
+) -> scope.database.collection_utils.SetPutResult:
     """
-    Update the "session" document.
+    Put "session" document.
     """
-    # NOTE: Exactly same as post_session, but keeping it here if we need additional computation.
 
     return scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
-        set_id=session[DOCUMENT_ID],
+        semantic_set_id=SEMANTIC_SET_ID,
+        set_id=set_id,
         document=session,
     )

@@ -8,9 +8,11 @@ def normalize_document(
     document: dict,
 ) -> dict:
     """
-    Obtain a new document in normalized format.
-
-    Creates a deep copy as part of normalization.
+    Normalize a document.
+    - Creates a deep copy as part of normalization.
+    - Goal of normalization is to support equality comparison.
+    - Any modification (e.g., deleting a field) may require re-normalization for equality comparison.
+    - Normalization is shallow, requiring any descendents are already normalized.
     """
 
     normalized_document = {}
@@ -26,25 +28,28 @@ def normalize_document(
                 # Ensure _id can serialize
                 normalized_document[key_current] = str(value_current)
             else:
-                normalized_document[key_current] = normalize_value(value=value_current)
+                normalized_document[key_current] = value_current
 
             keys_remaining.remove(key_current)
 
     # And then the remaining keys, sorted for normalization
     keys_remaining = sorted(keys_remaining)
     for key_current in keys_remaining:
-        normalized_document[key_current] = normalize_value(value=document[key_current])
+        normalized_document[key_current] = document[key_current]
 
     return normalized_document
 
 
 def _normalize_documents_key(document) -> str:
     """
-    Provide a consistent sort of documents.
+    Provide a consistent sort of documents, sufficient to enable list comparison.
 
     For efficiency, sort documents by any "_id" field.
-    For robustness, sort anything by its JSON encoding.
-    This is obviously inefficient, but is stable for now.
+    If all documents in a pair of lists contain "_id" fields, this will order them for comparison.
+    If only some documents contain "_id" fields, they are already not equal.
+
+    For robustness, sort any document by its JSON encoding.
+    This is obviously inefficient, but is robust to any combination of fields.
     """
     if isinstance(document, dict) and "_id" in document:
         return "_id:{}".format(document["_id"])
@@ -57,9 +62,13 @@ def normalize_documents(
     documents: List[dict],
 ) -> List[dict]:
     """
-    Obtain a new list of documents in normalized format.
-
-    Creates a deep copy as part of normalization.
+    Normalize a list of documents.
+    - Creates a deep copy as part of normalization.
+    - Goal of normalization is to support equality comparison.
+    - Any modification (e.g., deleting a field)
+      of any element of the list
+      may require re-normalization for equality comparison.
+    - Normalization is shallow, requiring any descendents are already normalized.
     """
 
     normalized_documents = []
@@ -69,19 +78,3 @@ def normalize_documents(
     normalized_documents = sorted(normalized_documents, key=_normalize_documents_key)
 
     return normalized_documents
-
-
-def normalize_value(
-    *,
-    value: object,
-) -> object:
-    # Normalize a dict
-    if isinstance(value, dict):
-        return normalize_document(document=value)
-
-    # Normalize a list where every element is a dict
-    if isinstance(value, list):
-        if all([isinstance(item_current, dict) for item_current in value]):
-            return normalize_documents(documents=value)
-
-    return copy.deepcopy(value)

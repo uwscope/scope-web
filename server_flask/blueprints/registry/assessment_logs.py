@@ -6,8 +6,8 @@ import scope.database.patient.assessment_logs
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_json import as_json
 from request_context import request_context
+import request_utils
 from scope.schema import assessment_log_schema
-from utils import validate_schema
 
 registry_assessment_logs_blueprint = Blueprint(
     "registry_assessment_logs_blueprint", __name__, url_prefix="/patients"
@@ -34,7 +34,7 @@ def get_assessment_logs(patient_collection):
 @registry_assessment_logs_blueprint.route(
     "/<string:patient_collection>/assessmentlogs", methods=["POST"]
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=assessment_log_schema,
 )
 @as_json
@@ -86,7 +86,7 @@ def get_assessment_log(patient_collection, log_id):
 @registry_assessment_logs_blueprint.route(
     "/<string:patient_collection>/assessmentlogs/<string:log_id>", methods=["PUT"]
 )
-@validate_schema(
+@request_utils.validate_schema(
     schema=assessment_log_schema,
 )
 @as_json

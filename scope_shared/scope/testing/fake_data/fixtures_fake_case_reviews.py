@@ -20,7 +20,7 @@ def fake_case_reviews_factory(
             fake_case_review_factory() for _ in range(random.randint(1, 5))
         ]
 
-        return document_utils.normalize_documents(documents=fake_case_reviews)
+        return fake_case_reviews
 
     return factory
 
