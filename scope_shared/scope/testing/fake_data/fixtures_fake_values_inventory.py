@@ -1,9 +1,8 @@
+import faker
+import pytest
 import random
 from typing import Callable, List
 
-import faker
-import pytest
-import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.database.patient.patient_profile
 import scope.schema
@@ -12,7 +11,7 @@ import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS_VALUES_INVENTORY = [
     "lastUpdatedDateTime",
-    # "values", NOTE: Removing from optional because fixtures_fake_activity needs it
+    "values",
 ]
 
 
@@ -44,6 +43,9 @@ def _fake_value(
     """
     This is currently tested by inclusion in the values inventory schema.
     If moved out on its own, it should probably get its own tests.
+
+    Although patients may be asked to populate these,
+    ensure functionality even if they are not yet populated.
     """
 
     return {
@@ -55,7 +57,7 @@ def _fake_value(
             _fake_activity(
                 faker_factory=faker_factory,
             )
-            for _ in range(1, 5)
+            for _ in range(0, 5)
         ],
     }
 
@@ -67,9 +69,10 @@ def fake_values_inventory_factory(
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake value inventory documents.
-    """
 
-    # TODO: Ravi mentioned patient is asked to add at least 1 value and 1 activity for each life area. Confirm again.
+    Although patients may be asked to populate these,
+    ensure functionality even if they are not yet populated.
+    """
 
     def factory() -> dict:
         fake_values_inventory = {
@@ -83,7 +86,7 @@ def fake_values_inventory_factory(
                     fake_life_area=fake_life_area,
                 )
                 for fake_life_area in fake_life_areas
-                for _ in range(random.randint(1, 5))
+                for _ in range(random.randint(0, 5))
             ],
         }
 
@@ -130,7 +133,7 @@ def fixture_data_fake_values_inventory_factory(
 def fixture_data_fake_values_inventory(
     *,
     data_fake_values_inventory_factory: Callable[[], dict],
-) -> List[dict]:
+) -> dict:
     """
     Fixture for data_fake_values_inventory.
     """

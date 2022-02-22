@@ -1,20 +1,19 @@
 import datetime
+import faker
+import pytest
 import random
 from typing import Callable, List
 
-import faker
-import pytest
-import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.schema
-
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
 # TODO: Get the generation verified.
 
+# TODO: James Comment 2/22:  I am not sure this is all correct / consistent
 
 def fake_activity_factory(
     *,
@@ -27,11 +26,11 @@ def fake_activity_factory(
     """
 
     def factory() -> dict:
-
         names = []
         for value in fake_values_inventory["values"]:
             for activity in value["activities"]:
                 names.append(activity["name"])
+
         name = random.choice(
             [
                 faker_factory.text(),
