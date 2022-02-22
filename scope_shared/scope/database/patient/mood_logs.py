@@ -4,7 +4,7 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "moodLog"
-SEMANTIC_SET_ID = "logId"
+SEMANTIC_SET_ID = "moodLogId"
 
 
 def get_mood_logs(

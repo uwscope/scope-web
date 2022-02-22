@@ -17,7 +17,7 @@
 		"_rev": {
 			"type": "number"
 		},
-		"logId": {
+		"moodLogId": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
 		"recordedDate": {
