@@ -4,7 +4,7 @@ from typing import Callable, List
 import faker
 import pytest
 import scope.database.document_utils as document_utils
-import scope.database.format_utils
+import scope.database.format_utils as format_utils
 import scope.database.patient.patient_profile
 import scope.schema
 import scope.testing.fake_data.enums
@@ -12,7 +12,7 @@ import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS_VALUES_INVENTORY = [
     "lastUpdatedDateTime",
-    "values",
+    # "values", NOTE: Removing from optional because fixtures_fake_activity needs it
 ]
 
 
@@ -27,12 +27,8 @@ def _fake_activity(
 
     fake_activity = {
         "name": faker_factory.text(),
-        "createdDateTime": scope.database.format_utils.format_date(
-            faker_factory.date_time()
-        ),
-        "editedDateTime": scope.database.format_utils.format_date(
-            faker_factory.date_time()
-        ),
+        "createdDateTime": format_utils.format_date(faker_factory.date_time()),
+        "editedDateTime": format_utils.format_date(faker_factory.date_time()),
         "enjoyment": random.randint(1, 10),
         "importance": random.randint(1, 10),
     }
@@ -52,12 +48,8 @@ def _fake_value(
 
     return {
         "name": faker_factory.text(),
-        "createdDateTime": scope.database.format_utils.format_date(
-            faker_factory.date_time()
-        ),
-        "editedDateTime": scope.database.format_utils.format_date(
-            faker_factory.date_time()
-        ),
+        "createdDateTime": format_utils.format_date(faker_factory.date_time()),
+        "editedDateTime": format_utils.format_date(faker_factory.date_time()),
         "lifeareaId": fake_life_area["id"],
         "activities": [
             _fake_activity(
@@ -83,12 +75,8 @@ def fake_values_inventory_factory(
         fake_values_inventory = {
             "_type": "valuesInventory",
             "assigned": random.choice([True, False]),
-            "assignedDateTime": scope.database.format_utils.format_date(
-                faker_factory.date_time()
-            ),
-            "lastUpdatedDateTime": scope.database.format_utils.format_date(
-                faker_factory.date_time()
-            ),
+            "assignedDateTime": format_utils.format_date(faker_factory.date_time()),
+            "lastUpdatedDateTime": format_utils.format_date(faker_factory.date_time()),
             "values": [
                 _fake_value(
                     faker_factory=faker_factory,
@@ -136,3 +124,15 @@ def fixture_data_fake_values_inventory_factory(
         return fake_values_inventory
 
     return factory
+
+
+@pytest.fixture(name="data_fake_values_inventory")
+def fixture_data_fake_values_inventory(
+    *,
+    data_fake_values_inventory_factory: Callable[[], dict],
+) -> List[dict]:
+    """
+    Fixture for data_fake_values_inventory.
+    """
+
+    return data_fake_values_inventory_factory()
