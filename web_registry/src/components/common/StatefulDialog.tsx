@@ -31,11 +31,6 @@ export const StatefulDialog: FunctionComponent<{
             <DialogContent dividers>
                 <Stack spacing={2}>
                     <Box sx={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? 'none' : 'auto' }}>{content}</Box>
-                    {error && (
-                        <Typography variant="caption" color="error" sx={{ lineHeight: 1 }}>
-                            {getString('dialog_error_text')}
-                        </Typography>
-                    )}
                 </Stack>
             </DialogContent>
             <Box sx={{ height: 1 }}>
@@ -49,16 +44,25 @@ export const StatefulDialog: FunctionComponent<{
                 </Fade>
             </Box>
             <DialogActions sx={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? 'none' : 'auto' }}>
-                {handleCancel && (
-                    <Button onClick={handleCancel} color="primary">
-                        {getString('dialog_action_cancel')}
-                    </Button>
-                )}
-                {handleSave && (
-                    <Button onClick={handleSave} color="primary" disabled={disableSave}>
-                        {getString('dialog_action_save')}
-                    </Button>
-                )}
+                <Stack direction="column" alignItems="flex-end">
+                    {error && (
+                        <Typography variant="caption" color="error" sx={{ lineHeight: 1 }}>
+                            {getString('dialog_error_text')}
+                        </Typography>
+                    )}
+                    <Stack direction="row">
+                        {handleCancel && (
+                            <Button onClick={handleCancel} color="primary">
+                                {getString('dialog_action_cancel')}
+                            </Button>
+                        )}
+                        {handleSave && (
+                            <Button onClick={handleSave} color="primary" disabled={disableSave}>
+                                {getString('dialog_action_save')}
+                            </Button>
+                        )}
+                    </Stack>
+                </Stack>
             </DialogActions>
         </Dialog>
     );

@@ -162,7 +162,12 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 label="Behavioral Strategies"
-                flags={state.session.behavioralStrategyChecklist}
+                flags={Object.assign(
+                    {},
+                    ...behavioralStrategyChecklistValues.map((x) => ({
+                        [x]: !!state.session.behavioralStrategyChecklist?.[x],
+                    })),
+                )}
                 flagOrder={[...behavioralStrategyChecklistValues]}
                 other={state.session.behavioralStrategyOther}
                 onChange={(flags) => onSessionValueChange('behavioralStrategyChecklist', flags)}
@@ -173,7 +178,12 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 disabled={!state.session.behavioralStrategyChecklist['Behavioral Activation']}
                 label="Behavioral Activation Checklist"
-                flags={state.session.behavioralActivationChecklist}
+                flags={Object.assign(
+                    {},
+                    ...behavioralActivationChecklistValues.map((x) => ({
+                        [x]: !!state.session.behavioralActivationChecklist?.[x],
+                    })),
+                )}
                 flagOrder={[...behavioralActivationChecklistValues]}
                 onChange={(flags) => onSessionValueChange('behavioralActivationChecklist', flags)}
             />

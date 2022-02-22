@@ -1,4 +1,4 @@
-import { IPatient, IPatientProfile, IValuesInventory } from 'shared/types';
+import { IClinicalHistory, IPatient, IPatientProfile, IValuesInventory } from 'shared/types';
 
 interface IServiceResponse {
     status: number;
@@ -19,6 +19,14 @@ export interface IPatientProfileRequest {
 
 export interface IPatientProfileResponse extends IServiceResponse {
     profile: IPatientProfile;
+}
+
+export interface IClinicalHistoryRequest {
+    clinicalhistory: IClinicalHistory;
+}
+
+export interface IClinicalHistoryResponse extends IServiceResponse {
+    clinicalhistory: IClinicalHistory;
 }
 
 export interface IValuesInventoryRequest {
