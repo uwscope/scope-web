@@ -205,11 +205,11 @@
 			"type": "string",
 			"description": "Identity Types",
 			"enum": [
-				"patient",
-				"socialWorker",
-				"psychiatrist",
-				"oncologist",
-				"studyStaff"
+				"patientIdentity",
+				"socialWorkerIdentity",
+				"psychiatristIdentity",
+				"oncologistIdentity",
+				"studyStaffIdentity"
 			]
 		},
 		"pronoun": {
