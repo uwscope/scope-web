@@ -156,8 +156,10 @@ def _populate_patient(
             collection=patient_collection,
             mood_log=mood_log,
         )
-    for activity in fake_activities_factory():
-        scope.database.patient.activities.post_activity(
-            collection=patient_collection,
-            activity=activity,
-        )
+
+    if fake_values_inventory.get("values") is not None:
+        for activity in fake_activities_factory():
+            scope.database.patient.activities.post_activity(
+                collection=patient_collection,
+                activity=activity,
+            )
