@@ -74,10 +74,28 @@ TEST_CONFIGS = [
     ),
     # sessions
     ConfigTestJSONSchema(
-        name="session",
+        name="session-referrals-empty",
         schema=scope.schema.session_schema,
-        document_path="session.json",
+        document_path="session/valid/referrals-empty-list.json",
         expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="session-referrals-not-empty",
+        schema=scope.schema.session_schema,
+        document_path="session/valid/referrals-not-empty-list.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="session-referrals-null",
+        schema=scope.schema.session_schema,
+        document_path="session/valid/referrals-null.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="session-referrals-missing-referralType",
+        schema=scope.schema.session_schema,
+        document_path="session/invalid/referrals-missing-referralType.json",
+        expected_valid=False,
     ),
     ConfigTestJSONSchema(
         name="sessions",
