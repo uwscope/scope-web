@@ -5,11 +5,21 @@
 	"description": "IMoodLog Type",
 	"type": "object",
 	"properties": {
-		"_log_id": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "moodLog"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"logId": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"_type": { "const": "moodLog" },
-		"_rev": { "type": "number" },
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
 		},
@@ -21,5 +31,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_log_id", "_type", "_rev", "recordedDate", "mood"]
+	"required": ["_type", "recordedDate", "mood"]
 }
