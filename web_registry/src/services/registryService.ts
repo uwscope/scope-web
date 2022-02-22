@@ -1,27 +1,12 @@
 import { AxiosResponse } from 'axios';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
 import { IPatientListResponse } from 'shared/serviceTypes';
-import {
-    IAssessment,
-    IAssessmentLog,
-    ICaseReview,
-    IClinicalHistory,
-    IPatient,
-    IPatientProfile,
-    ISafetyPlan,
-    ISession,
-    IValuesInventory
-} from 'shared/types';
+import { IAssessment, IAssessmentLog, ICaseReview, IPatient, ISafetyPlan, ISession } from 'shared/types';
 
 export interface IRegistryService extends IServiceBase {
     getPatients(): Promise<IPatient[]>;
     addPatient(patient: Partial<IPatient>): Promise<IPatient>;
 
-    getPatientData(recordId: string): Promise<IPatient>;
-
-    updatePatientProfile(recordId: string, profile: Partial<IPatientProfile>): Promise<IPatient>;
-    updatePatientClinicalHistory(recordId: string, history: Partial<IClinicalHistory>): Promise<IPatient>;
-    updatePatientValuesInventory(recordId: string, valuesInventory: IValuesInventory): Promise<IPatient>;
     updatePatientSafetyPlan(recordId: string, safetyPlan: Partial<ISafetyPlan>): Promise<IPatient>;
 
     addPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
@@ -72,53 +57,6 @@ class RegistryService extends ServiceBase implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return patient as IPatient;
-        }
-    }
-
-    public async getPatientData(recordId: string): Promise<IPatient> {
-        const response = await this.axiosInstance.get<IPatient>(`/patient/${recordId}`);
-        return response.data;
-    }
-
-    public async updatePatientProfile(recordId: string, patientProfile: IPatientProfile): Promise<IPatient> {
-        try {
-            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}/profile`, patientProfile);
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return { profile: patientProfile } as IPatient;
-        }
-    }
-
-    public async updatePatientClinicalHistory(
-        recordId: string,
-        clinicalHistory: Partial<IClinicalHistory>,
-    ): Promise<IPatient> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}`, {
-                clinicalHistory,
-            });
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return { clinicalHistory } as IPatient;
-        }
-    }
-
-    public async updatePatientValuesInventory(
-        recordId: string,
-        valuesInventory: IValuesInventory,
-    ): Promise<IPatient> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<IPatient>(`/patient/${recordId}/valuesinventory`, {
-                valuesinventory: valuesInventory,
-            });
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return { valuesInventory } as IPatient;
         }
     }
 
