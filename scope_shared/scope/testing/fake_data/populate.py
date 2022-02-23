@@ -22,7 +22,7 @@ import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
-import scope.testing.fake_data.fixtures_fake_life_areas
+import scope.testing.fake_data.fixtures_fake_life_area_contents
 import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
@@ -314,22 +314,22 @@ def _populate_patient(
     _assessments_and_scheduled_assessments()
 
     ################################################################################
-    # Life areas is required to create a values inventory.
+    # Life area contents is required to create a values inventory.
     # Values inventory is required to create activities.
     # - If a value inventory does not include include at least one value,
     #   then we cannot generate any associated activities.
     ################################################################################
     def _values_inventory_and_activities():
         # Create life areas
-        fake_life_areas_factory = (
-            scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()
+        fake_life_area_contents_factory = (
+            scope.testing.fake_data.fixtures_fake_life_area_contents.fake_life_area_contents_factory()
         )
-        life_areas = fake_life_areas_factory()
+        life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
-            life_areas=life_areas,
+            life_areas=life_area_contents,
         )
         values_inventory = fake_values_inventory_factory()
         scope.database.patient.values_inventory.put_values_inventory(
