@@ -1,10 +1,9 @@
 from typing import Optional
 
-import pymongo
 import pymongo.collection
 import scope.database.collection_utils
 
-DOCUMENT_TYPE = "patientProfile"
+DOCUMENT_TYPE = "profile"
 
 
 def get_patient_profile(

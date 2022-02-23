@@ -11,10 +11,16 @@
 		"_type": {
 			"const": "identity"
 		},
+		"_set_id": {
+			"type": "string"
+		},
 		"_rev": {
 			"type": "number"
 		},
 		"identityId": {
+			"type": "string"
+		},
+		"collection": {
 			"type": "string"
 		},
 		"name": {
