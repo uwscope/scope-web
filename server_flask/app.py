@@ -16,6 +16,7 @@ import blueprints.registry.patients
 import blueprints.registry.providers
 import blueprints.registry.safety_plan
 import blueprints.registry.sessions
+import blueprints.registry.scheduled_assessments
 import blueprints.registry.values_inventory
 import database
 
@@ -112,6 +113,10 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.assessments.assessments_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.scheduled_assessments.scheduled_assessments_blueprint,
         url_prefix="/patient/",
     )
     # app.register_blueprint(

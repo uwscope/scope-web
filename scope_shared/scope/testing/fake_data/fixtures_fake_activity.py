@@ -6,6 +6,8 @@ from typing import Callable, List
 
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
+import scope.database.patient.activities
+
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
@@ -47,7 +49,7 @@ def fake_activity_factory(
             activity_name = faker_factory.text()
 
         fake_activity = {
-            "_type": "activity",
+            "_type": scope.database.patient.activities.DOCUMENT_TYPE,
             "name": activity_name,
             "value": activity_value["name"],
             "lifeareaId": activity_value["lifeareaId"],

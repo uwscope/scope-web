@@ -42,7 +42,7 @@ def _fake_assessment(
 def fake_assessment_factory(
     *,
     faker_factory: faker.Faker,
-) -> Callable[[], List[dict]]:
+) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake assessment document.
     """
@@ -115,7 +115,7 @@ def fixture_data_fake_assessment_factory(
 @pytest.fixture(name="data_fake_assessments_factory")
 def fixture_data_fake_assessments_factory(
     faker: faker.Faker,
-) -> Callable[[], dict]:
+) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_assessments_factory.
     """
@@ -135,3 +135,15 @@ def fixture_data_fake_assessments_factory(
         return fake_assessments
 
     return factory
+
+
+@pytest.fixture(name="data_fake_assessments")
+def fixture_data_fake_assessments(
+    *,
+    data_fake_assessments_factory: Callable[[], List[dict]],
+) -> dict:
+    """
+    Fixture for data_fake_assessments.
+    """
+
+    return data_fake_assessments_factory()

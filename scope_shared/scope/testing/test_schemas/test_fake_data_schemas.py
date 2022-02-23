@@ -4,12 +4,13 @@ from dataclasses import dataclass
 import faker
 import jschon
 import pytest
-from typing import Callable, List, Optional, Union
+from typing import Optional
 
 import scope.database.patient.activities
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
+import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
 import scope.database.providers
 import scope.database.collection_utils as collection_utils
@@ -17,8 +18,6 @@ import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
-
-
 import scope.testing.fake_data.fixtures_fake_assessments
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
@@ -33,6 +32,7 @@ import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
 import scope.testing.fake_data.fixtures_fake_sessions
+import scope.testing.fake_data.fixtures_fake_scheduled_assessments
 import scope.testing.fake_data.fixtures_fake_values_inventory
 import scope.testing.schema
 
@@ -42,7 +42,6 @@ class ConfigTestFakeDataSchema:
     name: str
     schema: jschon.JSONSchema
     data_factory_fixture: str
-    # data_factory: Callable[[], Union[dict, List[dict]]]
 
     expected_document: bool
     expected_singleton: bool
@@ -80,9 +79,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="assessment",
         schema=scope.schema.assessment_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_assessments.fake_assessment_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_assessment_factory",
         expected_document=True,  # TODO: @James, are these boolean configurations correct? Tests are passing.
         expected_singleton=False,
         expected_set_element=True,
@@ -91,9 +88,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="assessments",
         schema=scope.schema.assessments_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_assessments_factory",
         expected_document=False,  # TODO: @James, are these boolean configurations correct? Tests are passing.
         expected_singleton=False,
         expected_set_element=False,
@@ -217,6 +212,24 @@ TEST_CONFIGS = [
         name="sessions",
         schema=scope.schema.sessions_schema,
         data_factory_fixture="data_fake_sessions_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="scheduled-assessment",
+        schema=scope.schema.scheduled_assessment_schema,
+        data_factory_fixture="data_fake_scheduled_assessment_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
+    ),
+    ConfigTestFakeDataSchema(
+        name="scheduled-assessments",
+        schema=scope.schema.scheduled_assessments_schema,
+        data_factory_fixture="data_fake_scheduled_assessments_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
