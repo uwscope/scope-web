@@ -8,7 +8,9 @@ from urllib.parse import urljoin
 
 import scope.config
 import scope.database.collection_utils as collection_utils
+import scope.database.patient.activities
 import scope.database.patient.case_reviews
+import scope.database.patient.mood_logs
 import scope.database.patient.sessions
 import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
@@ -34,6 +36,20 @@ class ConfigTestPatientSet:
 
 TEST_CONFIGS = [
     ConfigTestPatientSet(
+        name="activities",
+        semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_activities_factory",
+        document_factory_fixture_set_element="data_fake_activity_factory",
+        database_get_set_function=scope.database.patient.activities.get_activities,
+        database_get_function=scope.database.patient.activities.get_activity,
+        database_post_function=scope.database.patient.activities.post_activity,
+        database_document_parameter_name="activity",
+        flask_query_set_type="activities",
+        flask_document_set_key="activities",
+        flask_query_set_element_type="activity",
+        flask_document_set_element_key="activity",
+    ),
+    ConfigTestPatientSet(
         name="casereviews",
         semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
         document_factory_fixture_set="data_fake_case_reviews_factory",
@@ -46,6 +62,20 @@ TEST_CONFIGS = [
         flask_document_set_key="casereviews",
         flask_query_set_element_type="casereview",
         flask_document_set_element_key="casereview",
+    ),
+    ConfigTestPatientSet(
+        name="moodlogs",
+        semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_mood_logs_factory",
+        document_factory_fixture_set_element="data_fake_mood_log_factory",
+        database_get_set_function=scope.database.patient.mood_logs.get_mood_logs,
+        database_get_function=scope.database.patient.mood_logs.get_mood_log,
+        database_post_function=scope.database.patient.mood_logs.post_mood_log,
+        database_document_parameter_name="mood_log",
+        flask_query_set_type="moodlogs",
+        flask_document_set_key="moodlogs",
+        flask_query_set_element_type="moodlog",
+        flask_document_set_element_key="moodlog",
     ),
     ConfigTestPatientSet(
         name="sessions",
