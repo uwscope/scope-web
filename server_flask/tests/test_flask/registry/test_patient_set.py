@@ -3,12 +3,13 @@ import http
 from dataclasses import dataclass
 import pytest
 import requests
-from typing import Callable, List
+from typing import Callable, List, Union
 from urllib.parse import urljoin
 
 import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patient.activities
+import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
 import scope.database.patient.sessions
@@ -26,7 +27,7 @@ class ConfigTestPatientSet:
     document_factory_fixture_set_element: str
     database_get_set_function: Callable[[...], List[dict]]
     database_get_function: Callable[[...], dict]
-    database_post_function: Callable[[...], collection_utils.SetPostResult]
+    database_post_function: Union[Callable[[...], collection_utils.SetPostResult], None]
     database_document_parameter_name: str
     flask_query_set_type: str
     flask_document_set_key: str
@@ -49,6 +50,20 @@ TEST_CONFIGS = [
         flask_query_set_element_type="activity",
         flask_document_set_element_key="activity",
     ),
+    # ConfigTestPatientSet(
+    #     name="assessments",
+    #     semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
+    #     document_factory_fixture_set="data_fake_assessments_factory",
+    #     document_factory_fixture_set_element="data_fake_assessment_factory",
+    #     database_get_set_function=scope.database.patient.assessments.get_assessments,
+    #     database_get_function=scope.database.patient.assessments.get_assessment,
+    #     database_post_function=None,  # TODO: @James, post_assessment method doesn't exist.
+    #     database_document_parameter_name="assessment",
+    #     flask_query_set_type="assessments",
+    #     flask_document_set_key="assessments",
+    #     flask_query_set_element_type="assessment",
+    #     flask_document_set_element_key="assessment",
+    # ),
     ConfigTestPatientSet(
         name="casereviews",
         semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,

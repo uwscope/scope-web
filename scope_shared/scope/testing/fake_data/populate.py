@@ -3,6 +3,7 @@ import faker
 import pymongo.database
 
 import scope.database.patient.activities
+import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
@@ -14,6 +15,7 @@ import scope.database.patients
 import scope.database.providers
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_assessments
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
@@ -128,7 +130,6 @@ def populate_database(
     #
     # Provider identity factory
     #
-
     fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
         faker_factory=faker_factory,
     )
@@ -194,6 +195,23 @@ def _populate_patient(
     ################################################################################
     # These documents are simple and do not have any cross dependencies.
     ################################################################################
+
+    def _assessments():
+        fake_assessments_factory = scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+            faker_factory=faker_factory,
+        )
+        assessments = fake_assessments_factory()
+
+        for assessment_current in assessments:
+            scope.database.patient.assessments.put_assessment(
+                collection=patient_collection,
+                assessment=assessment_current,
+                set_id=assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
+            )
+
+    _assessments()
+
+
     def _case_reviews():
         fake_case_reviews_factory = scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
             fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
