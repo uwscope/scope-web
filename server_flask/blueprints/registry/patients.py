@@ -75,7 +75,7 @@ def _construct_patient_document(
     # TODO: Remove this faking when identies are complete
     if not profile:
         faked_profile = {
-            "_type": "patientProfile",
+            "_type": "profile",
             "name": "MISSING",
             "MRN": "MISSING",
         }
