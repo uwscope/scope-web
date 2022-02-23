@@ -5,17 +5,21 @@
 	"description": "IAssessment Type",
 	"type": "object",
 	"properties": {
-		"_assessment_id": {
+		"_id": {
 			"type": "string"
 		},
 		"_type": {
 			"const": "assessment"
 		},
+		"_set_id": {
+			"type": "string"
+		},
 		"_rev": {
 			"type": "number"
 		},
-		"assessmentName": {
-			"type": "string"
+		"assessmentId": {
+			"type": "string",
+			"enum": ["gad-7", "medication", "mood", "phq-9"]
 		},
 		"assigned": {
 			"type": "boolean"
@@ -31,5 +35,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_assessment_id", "_type", "assessmentName", "frequency", "dayOfWeek"]
+	"required": ["_type", "assessmentId", "assigned", "assignedDate", "frequency", "dayOfWeek"]
 }

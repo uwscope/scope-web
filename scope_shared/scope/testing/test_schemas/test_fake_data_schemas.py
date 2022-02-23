@@ -7,6 +7,7 @@ import pytest
 from typing import Callable, List, Optional, Union
 
 import scope.database.patient.activities
+import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
 import scope.database.patient.sessions
@@ -16,6 +17,8 @@ import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
+import scope.testing.fake_data.fixtures_fake_assessment
+import scope.testing.fake_data.fixtures_fake_assessments
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
@@ -68,6 +71,28 @@ TEST_CONFIGS = [
         schema=scope.schema.activities_schema,
         data_factory_fixture="data_fake_activities_factory",
         expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="assessment",
+        schema=scope.schema.assessment_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_assessment.fake_assessment_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_document=True,  # TODO: @James, are these boolean configurations correct? Tests are passing.
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
+    ),
+    ConfigTestFakeDataSchema(
+        name="assessments",
+        schema=scope.schema.assessments_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_document=False,  # TODO: @James, are these boolean configurations correct? Tests are passing.
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
