@@ -17,7 +17,8 @@ import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
-import scope.testing.fake_data.fixtures_fake_assessment
+
+
 import scope.testing.fake_data.fixtures_fake_assessments
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
@@ -57,6 +58,7 @@ TEST_ITERATIONS = 100
 faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
+    # TODO: @James; activity and activites could fail because of empty/null values in values inventory
     ConfigTestFakeDataSchema(
         name="activity",
         schema=scope.schema.activity_schema,
@@ -78,7 +80,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="assessment",
         schema=scope.schema.assessment_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_assessment.fake_assessment_factory(
+        data_factory=scope.testing.fake_data.fixtures_fake_assessments.fake_assessment_factory(
             faker_factory=faker_factory,
         ),
         expected_document=True,  # TODO: @James, are these boolean configurations correct? Tests are passing.
