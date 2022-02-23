@@ -1,8 +1,8 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Grid } from '@mui/material';
 import { compareAsc, compareDesc } from 'date-fns';
-import { action, observable, runInAction } from 'mobx';
-import { observer } from 'mobx-react';
+import { action, runInAction } from 'mobx';
+import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import {
     behavioralActivationChecklistValues,
@@ -30,48 +30,50 @@ import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTa
 import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 
-const defaultSession: ISession = {
-    date: clearTime(new Date()),
-    sessionType: 'In person',
-    billableMinutes: 0,
-    medicationChange: '',
-    currentMedications: '',
-    behavioralStrategyChecklist: {
-        'Behavioral Activation': false,
-        'Motivational Interviewing': false,
-        'Problem Solving Therapy': false,
-        'Cognitive Therapy': false,
-        'Mindfulness Strategies': false,
-        'Supportive Therapy': false,
-        Other: false,
-    },
-    behavioralStrategyOther: '',
-    behavioralActivationChecklist: {
-        'Review of the BA model': false,
-        'Values and goals assessment': false,
-        'Activity scheduling': false,
-        'Mood and activity monitoring': false,
-        Relaxation: false,
-        'Positive reinforcement': false,
-        'Managing avoidance behaviors': false,
-        'Problem-solving': false,
-    },
+const getDefaultSession = () =>
+    ({
+        date: clearTime(new Date()),
+        sessionType: 'In person',
+        billableMinutes: 0,
+        medicationChange: '',
+        currentMedications: '',
+        behavioralStrategyChecklist: {
+            'Behavioral Activation': false,
+            'Motivational Interviewing': false,
+            'Problem Solving Therapy': false,
+            'Cognitive Therapy': false,
+            'Mindfulness Strategies': false,
+            'Supportive Therapy': false,
+            Other: false,
+        },
+        behavioralStrategyOther: '',
+        behavioralActivationChecklist: {
+            'Review of the BA model': false,
+            'Values and goals assessment': false,
+            'Activity scheduling': false,
+            'Mood and activity monitoring': false,
+            Relaxation: false,
+            'Positive reinforcement': false,
+            'Managing avoidance behaviors': false,
+            'Problem-solving': false,
+        },
 
-    referrals: [],
+        referrals: [],
 
-    otherRecommendations: '',
-    sessionNote: '',
-};
+        otherRecommendations: '',
+        sessionNote: '',
+    } as ISession);
 
-const defaultReview: ICaseReview = {
-    date: clearTime(new Date()),
-    consultingPsychiatrist: { identityId: '', name: '' },
-    medicationChange: '',
-    behavioralStrategyChange: '',
-    referralsChange: '',
-    otherRecommendations: '',
-    reviewNote: '',
-};
+const getDefaultReview = () =>
+    ({
+        date: clearTime(new Date()),
+        consultingPsychiatrist: { identityId: '', name: '' },
+        medicationChange: '',
+        behavioralStrategyChange: '',
+        referralsChange: '',
+        otherRecommendations: '',
+        reviewNote: '',
+    } as ICaseReview);
 
 interface IState {
     open: boolean;
@@ -84,34 +86,43 @@ interface IState {
     otherReferralFlags: KeyedMap<ReferralStatus>;
 }
 
-const defaultState: IState = {
-    open: false,
-    isNew: false,
-    dateAsc: false,
-    session: defaultSession,
-    review: defaultReview,
-    entryType: 'Session',
-    referralStatusFlags: {
-        Psychiatry: 'Not Referred',
-        Psychology: 'Not Referred',
-        'Patient Navigation': 'Not Referred',
-        'Integrative Medicine': 'Not Referred',
-        'Spiritual Care': 'Not Referred',
-        'Palliative Care': 'Not Referred',
-    },
-    otherReferralFlags: {},
-};
+const getDefaultState = () =>
+    ({
+        open: false,
+        isNew: false,
+        dateAsc: false,
+        session: getDefaultSession(),
+        review: getDefaultReview(),
+        entryType: 'Session',
+        referralStatusFlags: {
+            Psychiatry: 'Not Referred',
+            Psychology: 'Not Referred',
+            'Patient Navigation': 'Not Referred',
+            'Integrative Medicine': 'Not Referred',
+            'Spiritual Care': 'Not Referred',
+            'Palliative Care': 'Not Referred',
+        },
+        otherReferralFlags: {},
+    } as IState);
 
-const state = observable<IState>(defaultState);
+interface ISessionEditProps {
+    session: ISession;
+    referralStatusFlags: ReferralStatusFlags;
+    otherReferralFlags: KeyedMap<ReferralStatus>;
+    onSessionValueChange: (key: string, value: any) => void;
+    onReferralStatusFlagsChange: (flags: ReferralStatusFlags) => void;
+    onOtherReferralFlagsChange: (flags: KeyedMap<ReferralStatus>) => void;
+}
 
-const SessionEdit: FunctionComponent = observer(() => {
-    const onSessionValueChange = action((key: string, value: any) => {
-        (state.session as any)[key] = value;
-    });
-
-    const onValueChange = action((key: string, value: any) => {
-        (state as any)[key] = value;
-    });
+const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
+    const {
+        session,
+        referralStatusFlags,
+        otherReferralFlags,
+        onSessionValueChange,
+        onReferralStatusFlagsChange,
+        onOtherReferralFlagsChange,
+    } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -119,22 +130,22 @@ const SessionEdit: FunctionComponent = observer(() => {
                 editable={true}
                 required={true}
                 label="Session Date"
-                value={state.session.date}
+                value={session.date}
                 onChange={(text) => onSessionValueChange('date', text)}
             />
             <GridDropdownField
                 editable={true}
                 required={true}
                 label="Session Type"
-                value={state.session.sessionType}
+                value={session.sessionType}
                 options={sessionTypeValues}
                 onChange={(text) => onSessionValueChange('sessionType', text)}
             />
             <GridTextField
                 editable={true}
                 label="Billable Minutes"
-                value={state.session.billableMinutes}
-                onChange={(text) => onSessionValueChange('billableMinutes', text)}
+                value={session.billableMinutes}
+                onChange={(text) => onSessionValueChange('billableMinutes', Number.isNaN(Number(text)) ? 0 : text)}
             />
             <GridTextField
                 sm={12}
@@ -143,7 +154,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Medication changes"
-                value={state.session.medicationChange}
+                value={session.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onSessionValueChange('medicationChange', text)}
             />
@@ -155,7 +166,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 maxLine={4}
                 label="Current medications"
                 helperText="Psychotropic and other relevant medications (e.g., steroids, hormone therapies, opioids, etc.)"
-                value={state.session.currentMedications}
+                value={session.currentMedications}
                 onChange={(text) => onSessionValueChange('currentMedications', text)}
             />
             <GridMultiSelectField
@@ -165,23 +176,23 @@ const SessionEdit: FunctionComponent = observer(() => {
                 flags={Object.assign(
                     {},
                     ...behavioralStrategyChecklistValues.map((x) => ({
-                        [x]: !!state.session.behavioralStrategyChecklist?.[x],
+                        [x]: !!session.behavioralStrategyChecklist?.[x],
                     })),
                 )}
                 flagOrder={[...behavioralStrategyChecklistValues]}
-                other={state.session.behavioralStrategyOther}
+                other={session.behavioralStrategyOther}
                 onChange={(flags) => onSessionValueChange('behavioralStrategyChecklist', flags)}
                 onOtherChange={(text) => onSessionValueChange('behavioralStrategyOther', text)}
             />
             <GridMultiSelectField
                 sm={12}
                 editable={true}
-                disabled={!state.session.behavioralStrategyChecklist['Behavioral Activation']}
+                disabled={!session.behavioralStrategyChecklist['Behavioral Activation']}
                 label="Behavioral Activation Checklist"
                 flags={Object.assign(
                     {},
                     ...behavioralActivationChecklistValues.map((x) => ({
-                        [x]: !!state.session.behavioralActivationChecklist?.[x],
+                        [x]: !!session.behavioralActivationChecklist?.[x],
                     })),
                 )}
                 flagOrder={[...behavioralActivationChecklistValues]}
@@ -191,13 +202,13 @@ const SessionEdit: FunctionComponent = observer(() => {
                 sm={12}
                 editable={true}
                 label="Referrals"
-                flags={state.referralStatusFlags}
-                otherFlags={state.otherReferralFlags}
+                flags={referralStatusFlags}
+                otherFlags={otherReferralFlags}
                 options={referralStatusValues}
                 notOption="Not Referred"
                 defaultOption="Pending"
-                onChange={(flags) => onValueChange('referralStatusFlags', flags)}
-                onOtherChange={(otherFlags) => onValueChange('otherReferralFlags', otherFlags)}
+                onChange={(flags) => onReferralStatusFlagsChange(flags as ReferralStatusFlags)}
+                onOtherChange={(otherFlags) => onOtherReferralFlagsChange(otherFlags as KeyedMap<ReferralStatus>)}
             />
             <GridTextField
                 sm={12}
@@ -206,7 +217,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Other recommendations / action items"
-                value={state.session.otherRecommendations}
+                value={session.otherRecommendations}
                 onChange={(text) => onSessionValueChange('otherRecommendations', text)}
             />
             <GridTextField
@@ -216,7 +227,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={10}
                 label="Session Note"
-                value={state.session.sessionNote}
+                value={session.sessionNote}
                 placeholder="Write session notes here"
                 onChange={(text) => onSessionValueChange('sessionNote', text)}
             />
@@ -224,23 +235,26 @@ const SessionEdit: FunctionComponent = observer(() => {
     );
 });
 
-const ReviewEdit: FunctionComponent = observer(() => {
-    const onValueChange = action((key: string, value: any) => {
-        (state.review as any)[key] = value;
-    });
+interface IReviewEditProps {
+    review: ICaseReview;
+    onValueChange: (key: string, value: any) => void;
+}
+
+const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
+    const { review, onValueChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
             <GridDateField
                 editable={true}
                 label="Review Date"
-                value={state.review.date}
+                value={review.date}
                 onChange={(text) => onValueChange('date', text)}
             />
             <GridTextField
                 editable={true}
                 label="Consulting Psychiatrist"
-                value={state.review.consultingPsychiatrist.name}
+                value={review.consultingPsychiatrist.name}
                 onChange={(text) => onValueChange('consultingPsychiatrist', text)}
             />
             <GridTextField
@@ -250,7 +264,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Medication changes"
-                value={state.review.medicationChange}
+                value={review.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onValueChange('medicationChange', text)}
             />
@@ -261,7 +275,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Behavioral strategy changes"
-                value={state.review.behavioralStrategyChange}
+                value={review.behavioralStrategyChange}
                 placeholder="Leave blank if no change to behavioral strategies"
                 onChange={(text) => onValueChange('behavioralStrategyChange', text)}
             />
@@ -272,7 +286,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Referral changes"
-                value={state.review.referralsChange}
+                value={review.referralsChange}
                 placeholder="Leave blank if no change to referrals"
                 onChange={(text) => onValueChange('referralsChange', text)}
             />
@@ -283,7 +297,7 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={4}
                 label="Other recommendations / action items"
-                value={state.review.otherRecommendations}
+                value={review.otherRecommendations}
                 onChange={(text) => onValueChange('otherRecommendations', text)}
             />
             <GridTextField
@@ -293,16 +307,26 @@ const ReviewEdit: FunctionComponent = observer(() => {
                 minLine={4}
                 maxLine={10}
                 label="Review Note"
-                value={state.review.reviewNote}
+                value={review.reviewNote}
                 placeholder="Write review notes here"
                 onChange={(text) => onValueChange('reviewNote', text)}
             />
         </Grid>
     );
-});
+};
 
 export const SessionInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
+
+    const state = useLocalObservable<IState>(getDefaultState);
+
+    const onSessionValueChange = action((key: string, value: any) => {
+        (state.session as any)[key] = value;
+    });
+
+    const onValueChange = action((key: string, value: any) => {
+        (state as any)[key] = value;
+    });
 
     const handleClose = action(() => {
         state.open = false;
@@ -343,7 +367,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     };
 
     const handleAddSession = action(() => {
-        Object.assign(state, defaultState);
+        Object.assign(state, getDefaultState());
         state.open = true;
         state.isNew = true;
         state.entryType = 'Session';
@@ -352,7 +376,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const handleAddReview = action(() => {
-        Object.assign(state.review, defaultReview);
+        Object.assign(state.review, getDefaultReview());
         state.open = true;
         state.isNew = true;
         state.entryType = 'Case Review';
@@ -361,7 +385,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     const handleEditSession = action((sessionId: string) => {
         const session = currentPatient.sessions.find((s) => s.sessionId == sessionId);
 
-        state.session = { ...defaultSession, ...session };
+        state.session = { ...getDefaultSession(), ...session };
         state.open = true;
         state.isNew = false;
         state.entryType = 'Session';
@@ -375,7 +399,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     const handleEditReview = action((caseReviewId: string) => {
         const review = currentPatient.caseReviews.find((s) => s.caseReviewId == caseReviewId);
 
-        state.review = { ...defaultReview, ...review };
+        state.review = { ...getDefaultReview(), ...review };
         state.open = true;
         state.isNew = false;
         state.entryType = 'Case Review';
@@ -411,6 +435,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 .filter((rs) => rs.referralStatus != 'Not Referred');
 
             updatedSession.date = toUTCDateOnly(session.date);
+            updatedSession.billableMinutes = Number(session.billableMinutes);
 
             if (!updatedSession.sessionId) {
                 await currentPatient.addSession(updatedSession);
@@ -516,7 +541,20 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 handleCancel={handleClose}
                 handleSave={onSave}
                 title={`${state.isNew ? 'Add' : 'Edit'} ${state.entryType} Information`}
-                content={state.entryType == 'Session' ? <SessionEdit /> : <ReviewEdit />}
+                content={
+                    state.entryType == 'Session' ? (
+                        <SessionEdit
+                            session={state.session}
+                            referralStatusFlags={state.referralStatusFlags}
+                            otherReferralFlags={state.otherReferralFlags}
+                            onSessionValueChange={onSessionValueChange}
+                            onReferralStatusFlagsChange={(flags) => onValueChange('referralStatusFlags', flags)}
+                            onOtherReferralFlagsChange={(flags) => onValueChange('otherReferralFlags', flags)}
+                        />
+                    ) : (
+                        <ReviewEdit review={state.review} onValueChange={onValueChange} />
+                    )
+                }
                 disableSave={!(state.session || state.review).date || !(state.session || state.review).sessionType}
             />
         </ActionPanel>
