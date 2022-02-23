@@ -41,9 +41,9 @@ patients_blueprint = flask.Blueprint(
 
 
 def _construct_patient_document(
-        *,
-        patient_identity: dict,
-        patient_collection: pymongo.collection.Collection,
+    *,
+    patient_identity: dict,
+    patient_collection: pymongo.collection.Collection,
 ) -> dict:
     patient_document = {}
 
@@ -138,7 +138,9 @@ def get_patients():
     # Construct a full patient document for each
     patient_documents = []
     for patient_identity_current in patient_identities:
-        patient_collection = database.get_collection(patient_identity_current["collection"])
+        patient_collection = database.get_collection(
+            patient_identity_current["collection"]
+        )
 
         patient_documents.append(
             _construct_patient_document(

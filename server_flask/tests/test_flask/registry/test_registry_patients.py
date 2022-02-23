@@ -46,10 +46,7 @@ def test_patients_get(
 
     session = flask_session_unauthenticated_factory()
 
-    created_ids = [
-        database_temp_patient_factory().patient_id
-        for _ in range(5)
-    ]
+    created_ids = [database_temp_patient_factory().patient_id for _ in range(5)]
 
     response = session.get(
         url=urljoin(
