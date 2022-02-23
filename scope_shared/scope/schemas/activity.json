@@ -5,14 +5,20 @@
 	"description": "IActivity Type",
 	"type": "object",
 	"properties": {
-		"_activity_id": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "activity"
+		},
+		"_set_id": {
 			"type": "string"
 		},
 		"_rev": {
 			"type": "number"
 		},
-		"_type": {
-			"const": "activity"
+		"activityId": {
+			"type": "string"
 		},
 		"name": {
 			"type": "string"
@@ -39,7 +45,7 @@
 			"type": "boolean"
 		},
 		"repeatDayFlags": {
-			"type": "string"
+			"$ref": "/schemas/enums#/properties/dayOfWeekFlags"
 		},
 		"isActive": {
 			"type": "boolean"
@@ -50,9 +56,7 @@
 	},
 	"additionalProperties": false,
 	"required": [
-		"_activity_id",
 		"_type",
-		"_rev",
 		"name",
 		"value",
 		"lifeareaId",

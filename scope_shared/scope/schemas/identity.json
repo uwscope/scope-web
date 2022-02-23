@@ -11,10 +11,16 @@
 		"_type": {
 			"$ref": "/schemas/enums#/properties/identityType"
 		},
+		"_set_id": {
+			"type": "string"
+		},
 		"_rev": {
 			"type": "number"
 		},
 		"identityId": {
+			"type": "string"
+		},
+		"collection": {
 			"type": "string"
 		},
 		"name": {

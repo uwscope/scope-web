@@ -103,7 +103,7 @@ class IdentityType(Enum):
 class Referral(Enum):
     Psychiatry = "Psychiatry"
     Psychology = "Psychology"
-    PtNavigation = "Pt Navigation"
+    PatienttNavigation = "Patient Navigation"
     IntegrativeMedicine = "Integrative Medicine"
     SpiritualCare = "Spiritual Care"
     PalliativeCare = "Palliative Care"

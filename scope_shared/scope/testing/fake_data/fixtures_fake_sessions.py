@@ -28,7 +28,7 @@ def fixture_data_fake_sessions_factory(
     data_fake_session_factory: Callable[[], dict],
 ) -> Callable[[], List[dict]]:
     """
-    Fixture for data_fake_session_factory.
+    Fixture for data_fake_sessions_factory.
     """
 
     unvalidated_factory = fake_sessions_factory(

@@ -1,19 +1,26 @@
 import faker
 import pymongo.collection
 import pymongo.database
+import scope.database.patient.activities
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
+import scope.database.patient.mood_logs
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.sessions
 import scope.database.patient.values_inventory
 import scope.database.patients
 import scope.database.provider_identities
+
+import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
 import scope.testing.fake_data.fixtures_fake_life_areas
+import scope.testing.fake_data.fixtures_fake_mood_log
+import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
 import scope.testing.fake_data.fixtures_fake_provider
 import scope.testing.fake_data.fixtures_fake_referral_status
@@ -58,7 +65,7 @@ def populate_database(
     # TODO: Pass populate_providers integer as argument.
     populate_providers = 10
     providers_collection = database.get_collection(
-        scope.database.providers.PROVIDERS_COLLECTION
+        scope.database.provider_identities.PROVIDERS_COLLECTION
     )
     for _ in range(populate_providers):
         _populate_providers(
@@ -96,6 +103,9 @@ def _populate_patient(
         faker_factory=faker_factory,
         fake_life_areas=fake_life_areas,
     )
+    # Obtain fake values inventory document to pass it in fake_activities_factory
+    fake_values_inventory = fake_values_inventory_factory()
+
     fake_safety_plan_factory = (
         scope.testing.fake_data.fixtures_fake_safety_plan.fake_safety_plan_factory(
             faker_factory=faker_factory,
@@ -114,6 +124,20 @@ def _populate_patient(
         fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
             faker_factory=faker_factory,
         ),
+    )
+
+    fake_mood_logs_factory = scope.testing.fake_data.fixtures_fake_mood_logs.fake_mood_logs_factory(
+        fake_mood_log_factory=scope.testing.fake_data.fixtures_fake_mood_log.fake_mood_log_factory(
+            faker_factory=faker_factory,
+        ),
+    )
+
+    fake_activities_factory = scope.testing.fake_data.fixtures_fake_activities.fake_activities_factory(
+        fake_activity_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
+            faker_factory=faker_factory,
+            fake_life_areas=fake_life_areas,
+            fake_values_inventory=fake_values_inventory,
+        )
     )
 
     # Put appropriate documents
@@ -144,6 +168,19 @@ def _populate_patient(
             case_review=case_review,
         )
 
+    for mood_log in fake_mood_logs_factory():
+        scope.database.patient.mood_logs.post_mood_log(
+            collection=patient_collection,
+            mood_log=mood_log,
+        )
+
+    if fake_values_inventory.get("values") is not None:
+        for activity in fake_activities_factory():
+            scope.database.patient.activities.post_activity(
+                collection=patient_collection,
+                activity=activity,
+            )
+
 
 def _populate_providers(
     *,
@@ -159,7 +196,7 @@ def _populate_providers(
     )
 
     # Put appropriate document
-    scope.database.providers.create_provider(
+    scope.database.provider_identities.create_provider(
         collection=providers_collection,
         provider=fake_provider_factory(),
     )
