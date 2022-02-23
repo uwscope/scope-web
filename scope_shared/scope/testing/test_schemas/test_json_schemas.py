@@ -88,8 +88,8 @@ TEST_CONFIGS = [
     ConfigTestJSONSchema(
         name="session-referrals-null",
         schema=scope.schema.session_schema,
-        document_path="session/valid/referrals-null.json",
-        expected_valid=True,
+        document_path="session/invalid/referrals-null.json",
+        expected_valid=False,
     ),
     ConfigTestJSONSchema(
         name="session-referrals-missing-referralType",
