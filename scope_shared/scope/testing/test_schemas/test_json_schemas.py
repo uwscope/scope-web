@@ -40,7 +40,7 @@ TEST_CONFIGS = [
         document_path="patient.json",
         expected_valid=True,
     ),
-    # patientProfile
+    # profile
     ConfigTestJSONSchema(
         name="patient-profile",
         schema=scope.schema.patient_profile_schema,

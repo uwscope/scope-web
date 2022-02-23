@@ -88,7 +88,7 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async updateProfile(profile: IPatientProfile): Promise<IPatientProfile> {
         logger.assert(
-            (profile as any)._type === 'patientProfile',
+            (profile as any)._type === 'profile',
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
