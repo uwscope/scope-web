@@ -49,7 +49,7 @@
 			"items": {
 				"$ref": "/schemas/referral-status"
 			},
-			"minItems": 1
+			"minItems": 0
 		},
 		"otherRecommendations": {
 			"type": "string"
