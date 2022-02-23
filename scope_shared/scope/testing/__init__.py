@@ -9,7 +9,7 @@ PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_case_reviews",
     "scope.testing.fake_data.fixtures_fake_clinical_history",
     "scope.testing.fake_data.fixtures_fake_contact",
-    "scope.testing.fake_data.fixtures_fake_life_areas",
+    "scope.testing.fake_data.fixtures_fake_life_area_contents",
     "scope.testing.fake_data.fixtures_fake_mood_log",
     "scope.testing.fake_data.fixtures_fake_mood_logs",
     "scope.testing.fake_data.fixtures_fake_patient_profile",

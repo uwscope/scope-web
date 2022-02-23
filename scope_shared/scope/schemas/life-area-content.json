@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://uwscope.org/schemas/life-area",
+	"$id": "https://uwscope.org/schemas/life-area-content",
 	"title": "ILifeAreaContent",
 	"description": "ILifeAreaContent Type",
 	"$comment": "Should $id be life-area-content?",
@@ -11,7 +11,7 @@
 		},
 		"name": { "type": "string" },
 		"examples": {
-			"$comment": "Is this ILifeAreaValue[]?",
+			"$comment": "Is this subset of ILifeAreaValue[]?",
 			"type": "array",
 			"items": {
 				"type": "object",
