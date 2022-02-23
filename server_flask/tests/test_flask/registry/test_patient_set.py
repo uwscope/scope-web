@@ -13,6 +13,7 @@ import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
 import scope.database.patient.sessions
+import scope.database.patient.scheduled_assessments
 import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
 
@@ -105,6 +106,20 @@ TEST_CONFIGS = [
         flask_document_set_key="sessions",
         flask_query_set_element_type="session",
         flask_document_set_element_key="session",
+    ),
+    ConfigTestPatientSet(
+        name="scheduledassessments",
+        semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
+        document_factory_fixture_set_element="data_fake_scheduled_assessment_factory",
+        database_get_set_function=scope.database.patient.scheduled_assessments.get_scheduled_assessments,
+        database_get_function=scope.database.patient.scheduled_assessments.get_scheduled_assessment,
+        database_post_function=scope.database.patient.scheduled_assessments.post_scheduled_assessment,
+        database_document_parameter_name="scheduled_assessment",
+        flask_query_set_type="scheduledassessments",
+        flask_document_set_key="scheduledassessments",
+        flask_query_set_element_type="scheduledassessment",
+        flask_document_set_element_key="scheduledassessment",
     ),
 ]
 
