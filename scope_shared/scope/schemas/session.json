@@ -45,18 +45,11 @@
             "$ref": "/schemas/enums#/properties/bAChecklistFlags"
         },
         "referrals": {
-            "oneOf": [
-                {
-                    "type": "array",
-                    "items": {
-                        "$ref": "/schemas/referral-status"
-                    },
-                    "minItems": 0
-                },
-                {
-                    "type": "null"
-                }
-            ]
+            "type": "array",
+            "items": {
+                "$ref": "/schemas/referral-status"
+            },
+            "minItems": 0
         },
         "otherRecommendations": {
             "type": "string"
