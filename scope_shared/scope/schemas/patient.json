@@ -11,7 +11,7 @@
 			"description": "IIdentity schema",
 			"$ref": "/schemas/identity"
 		},
-		"patientProfile": {
+		"profile": {
 			"type": "object",
 			"description": "IPatientProfile schema",
 			"$ref": "/schemas/patient-profile"
@@ -60,5 +60,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "identity", "patientProfile"]
+	"required": ["_type", "identity", "profile"]
 }
