@@ -4,6 +4,7 @@
     "dependencies": {
         "axios": "^0.21.1",
         "date-fns": "^2.17.0",
+        "date-fns-tz": "^1.2.2",
         "lodash": "^4.17.21",
         "lorem-ipsum": "^2.0.3",
         "mobx": "6.0.x"

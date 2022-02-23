@@ -1,10 +1,9 @@
 import { Grid } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
-import { format } from 'date-fns';
-import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { CaseReviewEntryType, SessionType } from 'shared/enums';
+import { formatDateOnly } from 'shared/time';
 import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview, isSession, KeyedMap } from 'shared/types';
 import { Table } from 'src/components/common/Table';
 import styled from 'styled-components';
@@ -23,7 +22,7 @@ const MultilineCell = withTheme(
         overflowY: 'auto',
         height: '100%',
         padding: props.theme.spacing(1, 0),
-    }))
+    })),
 );
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
@@ -50,10 +49,10 @@ interface ISessionTableData {
 export interface ISessionReviewTableProps {
     sessionOrReviews: ReadonlyArray<ISessionOrCaseReview>;
     onSessionClick?: (sessionId: string) => void;
-    onReviewClick?: (reviewId: string) => void;
+    onReviewClick?: (caseReviewId: string) => void;
 }
 
-export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = observer((props) => {
+export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (props) => {
     const { sessionOrReviews, onSessionClick, onReviewClick } = props;
 
     const onRowClick = (param: GridRowParams) => {
@@ -88,7 +87,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
         {
             field: 'type',
             headerName: 'Type',
-            width: 70,
+            width: 80,
             renderHeader,
             align: 'center',
             headerAlign: 'center',
@@ -161,8 +160,8 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
     };
 
     const getSessionData = (session: ISession): ISessionTableData => ({
-        id: session.sessionId,
-        date: `${format(session.date, 'MM/dd/yy')}`,
+        id: session.sessionId || '--',
+        date: `${formatDateOnly(session.date, 'MM/dd/yy')}`,
         type: session.sessionType,
         billableMinutes: session.billableMinutes,
         flag: 'TBD',
@@ -174,8 +173,8 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
     });
 
     const getReviewData = (review: ICaseReview): ISessionTableData => ({
-        id: review.reviewId,
-        date: `${format(review.date, 'MM/dd')}\n${format(review.date, 'yyyy')}`,
+        id: review.caseReviewId || '--',
+        date: `${formatDateOnly(review.date, 'MM/dd/yy')}`,
         type: 'Case Review',
         billableMinutes: NA,
         flag: 'TBD',
@@ -214,6 +213,6 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = o
             />
         </Grid>
     );
-});
+};
 
 export default SessionReviewTable;

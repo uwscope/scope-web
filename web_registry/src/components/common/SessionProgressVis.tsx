@@ -45,7 +45,7 @@ export interface ISessionProgressVisProps {
     sessions: Array<ISessionReviewDataPoint>;
     reviews: Array<ISessionReviewDataPoint>;
     onSessionClick?: (sessionId: string) => void;
-    onReviewClick?: (reviewId: string) => void;
+    onReviewClick?: (caseReviewId: string) => void;
 }
 
 export const SessionProgressVis: FunctionComponent<ISessionProgressVisProps> = (props) => {

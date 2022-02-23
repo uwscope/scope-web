@@ -9,7 +9,6 @@ export interface IRegistryService extends IServiceBase {
 
     updatePatientSafetyPlan(recordId: string, safetyPlan: Partial<ISafetyPlan>): Promise<IPatient>;
 
-    addPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
     getPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
     updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
 
@@ -73,17 +72,6 @@ class RegistryService extends ServiceBase implements IRegistryService {
         }
     }
 
-    public async addPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<ISession>(`/patient/${recordId}/sessions`, session);
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return session as ISession;
-        }
-    }
-
     public async getPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession> {
         // Work around since backend doesn't exist
         try {
@@ -126,7 +114,7 @@ class RegistryService extends ServiceBase implements IRegistryService {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.get<ICaseReview>(
-                `/patient/${recordId}/casereview/${caseReview.reviewId}`,
+                `/patient/${recordId}/casereview/${caseReview.caseReviewId}`,
             );
             return response.data;
         } catch (error) {
@@ -139,7 +127,7 @@ class RegistryService extends ServiceBase implements IRegistryService {
         // Work around since backend doesn't exist
         try {
             const response = await this.axiosInstance.put<ICaseReview>(
-                `/patient/${recordId}/casereview/${caseReview.reviewId}`,
+                `/patient/${recordId}/casereview/${caseReview.caseReviewId}`,
                 caseReview,
             );
             return response.data;

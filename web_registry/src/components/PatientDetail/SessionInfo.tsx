@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { compareAsc, compareDesc } from 'date-fns';
-import { action, observable } from 'mobx';
+import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import {
@@ -14,6 +14,7 @@ import {
     referralStatusValues,
     sessionTypeValues,
 } from 'shared/enums';
+import { toLocalDateOnly, toUTCDateOnly, clearTime } from 'shared/time';
 import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview, KeyedMap } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import {
@@ -24,15 +25,13 @@ import {
     GridTextField,
 } from 'src/components/common/GridField';
 import { SessionProgressVis } from 'src/components/common/SessionProgressVis';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
 import { usePatient } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 
-const newId = 'new';
-
 const defaultSession: ISession = {
-    sessionId: newId,
-    date: new Date(),
+    date: clearTime(new Date()),
     sessionType: 'In person',
     billableMinutes: 0,
     medicationChange: '',
@@ -65,8 +64,7 @@ const defaultSession: ISession = {
 };
 
 const defaultReview: ICaseReview = {
-    reviewId: newId,
-    date: new Date(),
+    date: clearTime(new Date()),
     consultingPsychiatrist: { identityId: '', name: '' },
     medicationChange: '',
     behavioralStrategyChange: '',
@@ -119,12 +117,14 @@ const SessionEdit: FunctionComponent = observer(() => {
         <Grid container spacing={2} alignItems="stretch">
             <GridDateField
                 editable={true}
+                required={true}
                 label="Session Date"
                 value={state.session.date}
                 onChange={(text) => onSessionValueChange('date', text)}
             />
             <GridDropdownField
                 editable={true}
+                required={true}
                 label="Session Type"
                 value={state.session.sessionType}
                 options={sessionTypeValues}
@@ -195,6 +195,7 @@ const SessionEdit: FunctionComponent = observer(() => {
                 otherFlags={state.otherReferralFlags}
                 options={referralStatusValues}
                 notOption="Not Referred"
+                defaultOption="Pending"
                 onChange={(flags) => onValueChange('referralStatusFlags', flags)}
                 onOtherChange={(otherFlags) => onValueChange('otherReferralFlags', otherFlags)}
             />
@@ -305,6 +306,9 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const handleClose = action(() => {
         state.open = false;
+
+        currentPatient.loadSessionsState.resetState();
+        currentPatient.loadCaseReviewsState.resetState();
     });
 
     const _copySessionToState = (session: ISession | undefined) => {
@@ -337,12 +341,12 @@ export const SessionInfo: FunctionComponent = observer(() => {
             state.otherReferralFlags = otherReferralFlags;
         }
     };
+
     const handleAddSession = action(() => {
         Object.assign(state, defaultState);
         state.open = true;
         state.isNew = true;
         state.entryType = 'Session';
-        state.session.sessionId = newId;
 
         _copySessionToState(currentPatient.latestSession);
     });
@@ -352,40 +356,47 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.open = true;
         state.isNew = true;
         state.entryType = 'Case Review';
-        state.review.reviewId = newId;
     });
 
     const handleEditSession = action((sessionId: string) => {
         const session = currentPatient.sessions.find((s) => s.sessionId == sessionId);
 
-        Object.assign(state.session, session);
+        state.session = { ...defaultSession, ...session };
         state.open = true;
         state.isNew = false;
         state.entryType = 'Session';
+        if (!!session && session.date) {
+            state.session.date = toLocalDateOnly(session.date);
+        }
 
         _copySessionToState(session);
     });
 
-    const handleEditReview = action((reviewId: string) => {
-        const review = currentPatient.caseReviews.find((s) => s.reviewId == reviewId);
-        Object.assign(state.review, review);
+    const handleEditReview = action((caseReviewId: string) => {
+        const review = currentPatient.caseReviews.find((s) => s.caseReviewId == caseReviewId);
+
+        state.review = { ...defaultReview, ...review };
         state.open = true;
         state.isNew = false;
         state.entryType = 'Case Review';
+        if (!!review && review.date) {
+            state.review.date = toLocalDateOnly(review.date);
+        }
     });
 
-    const onSave = action(() => {
+    const onSave = action(async () => {
         const { session, review, entryType, referralStatusFlags, otherReferralFlags } = state;
+
         if (entryType == 'Session') {
             // Organize referral flags
-
-            session.referrals = Object.keys(referralStatusFlags)
+            const updatedSession = { ...session };
+            updatedSession.referrals = Object.keys(referralStatusFlags)
                 .map(
                     (flag) =>
                         ({
                             referralType: flag,
                             referralStatus: referralStatusFlags[flag as Referral],
-                        } as IReferralStatus)
+                        } as IReferralStatus),
                 )
                 .concat(
                     Object.keys(otherReferralFlags).map(
@@ -394,24 +405,34 @@ export const SessionInfo: FunctionComponent = observer(() => {
                                 referralType: 'Other',
                                 referralOther: flag,
                                 referralStatus: otherReferralFlags[flag as Referral],
-                            } as IReferralStatus)
-                    )
+                            } as IReferralStatus),
+                    ),
                 )
                 .filter((rs) => rs.referralStatus != 'Not Referred');
 
-            if (session.sessionId == newId) {
-                currentPatient.addSession(session);
+            updatedSession.date = toUTCDateOnly(session.date);
+
+            if (!updatedSession.sessionId) {
+                await currentPatient.addSession(updatedSession);
             } else {
-                currentPatient.updateSession(session);
+                await currentPatient.updateSession(updatedSession);
             }
         } else if (entryType == 'Case Review') {
-            if (review.reviewId == newId) {
-                currentPatient.addCaseReview(review);
+            const updatedReview = { ...review };
+            updatedReview.date = toUTCDateOnly(review.date);
+
+            if (!updatedReview.caseReviewId) {
+                await currentPatient.addCaseReview(updatedReview);
             } else {
-                currentPatient.updateCaseReview(review);
+                await currentPatient.updateCaseReview(updatedReview);
             }
         }
-        state.open = false;
+
+        runInAction(() => {
+            if (!currentPatient.loadClinicalHistoryState.error && !currentPatient.loadCaseReviewsState.error) {
+                state.open = false;
+            }
+        });
     });
 
     const sortedSessionOrReviews = (currentPatient.sessions as ISessionOrCaseReview[])
@@ -433,21 +454,30 @@ export const SessionInfo: FunctionComponent = observer(() => {
             score: log.totalScore || getAssessmentScore(log.pointValues),
         }));
 
-    const sessionDates = currentPatient.sessions.map((s) => ({
-        date: s.date,
-        id: s.sessionId,
-    }));
+    const sessionDates = currentPatient.sessions
+        .filter((s) => !!s.sessionId)
+        .map((s) => ({
+            date: s.date,
+            id: s.sessionId as string,
+        }));
 
-    const reviewDates = currentPatient.caseReviews.map((r) => ({
-        date: r.date,
-        id: r.reviewId,
-    }));
+    const reviewDates = currentPatient.caseReviews
+        .filter((r) => !!r.caseReviewId)
+        .map((r) => ({
+            date: r.date,
+            id: r.caseReviewId as string,
+        }));
+
+    const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadCaseReviewsState.pending;
+    const error = currentPatient?.loadSessionsState.error || currentPatient?.loadCaseReviewsState.error;
 
     return (
         <ActionPanel
             id="sessions"
             title="Sessions and Reviews"
-            loading={currentPatient.state == 'Pending'}
+            loading={loading}
+            error={error}
+            showSnackbar={!state.open}
             actionButtons={[
                 {
                     icon: <AddIcon />,
@@ -479,20 +509,16 @@ export const SessionInfo: FunctionComponent = observer(() => {
                     </Grid>
                 )}
             </Grid>
-            <Dialog open={state.open} onClose={handleClose} maxWidth="md">
-                <DialogTitle>{`${state.isNew ? 'Add' : 'Edit'} ${state.entryType} Information`}</DialogTitle>
-                <DialogContent dividers>
-                    {state.entryType == 'Session' ? <SessionEdit /> : <ReviewEdit />}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={onSave} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <StatefulDialog
+                open={state.open}
+                error={error}
+                loading={loading}
+                handleCancel={handleClose}
+                handleSave={onSave}
+                title={`${state.isNew ? 'Add' : 'Edit'} ${state.entryType} Information`}
+                content={state.entryType == 'Session' ? <SessionEdit /> : <ReviewEdit />}
+                disableSave={!(state.session || state.review).date || !(state.session || state.review).sessionType}
+            />
         </ActionPanel>
     );
 });

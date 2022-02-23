@@ -18,11 +18,16 @@ import {
     IValuesInventoryRequest,
     IClinicalHistoryRequest,
     IClinicalHistoryResponse,
+    ISessionListResponse,
+    ISessionResponse,
+    ICaseReviewListResponse,
+    ISessionRequest,
 } from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
     IAssessmentLog,
+    ICaseReview,
     IClinicalHistory,
     IMoodLog,
     IPatient,
@@ -31,12 +36,14 @@ import {
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
+    ISession,
     IValuesInventory,
 } from 'shared/types';
 
 export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
 
+    // Singletons
     getPatient(): Promise<IPatient>;
 
     getProfile(): Promise<IPatientProfile>;
@@ -50,6 +57,19 @@ export interface IPatientService extends IServiceBase {
 
     getClinicalHistory(): Promise<IClinicalHistory>;
     updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory>;
+
+    // TODO: Move get/update safety plan from registryService
+
+    // Arrays/sets
+    getSessions(): Promise<ISession[]>;
+    addSession(session: ISession): Promise<ISession>;
+    getSession(sessionId: string): Promise<ISession>;
+    updateSession(session: ISession): Promise<ISession>;
+
+    getCaseReviews(): Promise<ICaseReview[]>;
+    // addCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
+    // getCaseReview(caseReviewId: string): Promise<ICaseReview>;
+    // updateCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
 
     getScheduledActivities(): Promise<IScheduledActivity[]>;
     getActivities(): Promise<IActivity[]>;
@@ -155,6 +175,44 @@ class PatientService extends ServiceBase implements IPatientService {
         } catch (error) {
             return await new Promise((resolve) => setTimeout(() => resolve(safetyPlan), 500));
         }
+    }
+
+    public async getSessions(): Promise<ISession[]> {
+        const response = await this.axiosInstance.get<ISessionListResponse>(`/sessions`);
+        return response.data?.sessions;
+    }
+
+    public async addSession(session: ISession): Promise<ISession> {
+        (session as any)._type = 'session';
+
+        logger.assert((session as any)._id == undefined, '_id should not be in the request data');
+        logger.assert((session as any)._rev == undefined, '_rev should not be in the request data');
+        logger.assert((session as any)._set_id == undefined, '_set_id should not be in the request data');
+
+        const response = await this.axiosInstance.post<ISessionResponse>(`/sessions`, { session } as ISessionRequest);
+        return response.data?.session;
+    }
+
+    public async getSession(sessionId: string): Promise<ISession> {
+        const response = await this.axiosInstance.get<ISessionResponse>(`/session/${sessionId}`);
+        return response.data?.session;
+    }
+
+    public async updateSession(session: ISession): Promise<ISession> {
+        logger.assert((session as any)._type === 'session', `invalid _type for session: ${(session as any)._type}`);
+        logger.assert((session as any)._id == undefined, '_id should not be in the request data');
+        logger.assert((session as any)._rev != undefined, '_rev should be in the request data');
+        logger.assert((session as any)._set_id != undefined, '_set_id should be in the request data');
+
+        const response = await this.axiosInstance.put<ISessionResponse>(`/session/${session.sessionId}`, {
+            session,
+        } as ISessionRequest);
+        return response.data?.session;
+    }
+
+    public async getCaseReviews(): Promise<ICaseReview[]> {
+        const response = await this.axiosInstance.get<ICaseReviewListResponse>(`/casereviews`);
+        return response.data?.casereviews;
     }
 
     public async getScheduledActivities(): Promise<IScheduledActivity[]> {

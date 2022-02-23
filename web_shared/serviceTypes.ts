@@ -1,4 +1,4 @@
-import { IClinicalHistory, IPatient, IPatientProfile, IValuesInventory } from 'shared/types';
+import { ICaseReview, IClinicalHistory, IPatient, IPatientProfile, ISession, IValuesInventory } from 'shared/types';
 
 interface IServiceResponse {
     status: number;
@@ -39,4 +39,28 @@ export interface IValuesInventoryResponse extends IServiceResponse {
 
 export interface IQuoteResponse extends IServiceResponse {
     quote: string;
+}
+
+export interface ISessionListResponse extends IServiceResponse {
+    sessions: ISession[];
+}
+
+export interface ISessionResponse extends IServiceResponse {
+    session: ISession;
+}
+
+export interface ISessionRequest extends IServiceResponse {
+    session: ISession;
+}
+
+export interface ICaseReviewListResponse extends IServiceResponse {
+    casereviews: ICaseReview[];
+}
+
+export interface ICaseReviewResponse extends IServiceResponse {
+    casereview: ICaseReview;
+}
+
+export interface ICaseReviewRequest extends IServiceResponse {
+    casereview: ICaseReview;
 }
