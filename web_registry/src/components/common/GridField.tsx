@@ -191,7 +191,6 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => 
     const { editable, label, value, onChange, xs, sm, required } = props;
 
     const handleChange = action((date: Date | null) => {
-        console.log(date);
         if (!!onChange) {
             onChange(!!date ? clearTime(date) : '');
         }

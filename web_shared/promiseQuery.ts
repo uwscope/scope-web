@@ -21,15 +21,12 @@ export interface IPromiseQuery<T> extends IPromiseQueryState {
 }
 
 export class PromiseQuery<T> implements IPromiseQuery<T> {
-    private _conflictFieldName: string | undefined;
-
     public name: string;
 
     @observable public value: T | undefined;
     @observable public state: PromiseState = 'Unknown';
 
-    constructor(defaultValue: T | undefined, name: string, conflictFieldName?: string) {
-        this._conflictFieldName = conflictFieldName;
+    constructor(defaultValue: T | undefined, name: string) {
         this.value = defaultValue;
         this.name = name;
 
@@ -51,7 +48,7 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
         return this.state === 'Rejected' || this.state === 'Conflicted';
     }
 
-    public fromPromise(promise: Promise<T>): Promise<T> {
+    public fromPromise(promise: Promise<T>, onConflict?: (responseData?: any) => T): Promise<T> {
         action(`${this.name} start`, () => {
             this.state = 'Pending';
         })();
@@ -69,9 +66,10 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
                 if (axiosError.response?.status == 409) {
                     action(`${this.name} conflicted`, () => {
                         this.state = 'Conflicted';
-                        this.value = this._conflictFieldName
-                            ? axiosError.response?.data?.[this._conflictFieldName]
-                            : axiosError.response?.data;
+
+                        if (onConflict) {
+                            this.value = onConflict(axiosError.response?.data);
+                        }
                     })();
                 } else {
                     action(`${this.name} rejected`, () => {

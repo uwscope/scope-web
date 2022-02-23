@@ -22,6 +22,8 @@ import {
     ISessionResponse,
     ICaseReviewListResponse,
     ISessionRequest,
+    ICaseReviewResponse,
+    ICaseReviewRequest,
 } from 'shared/serviceTypes';
 import {
     IActivity,
@@ -63,13 +65,11 @@ export interface IPatientService extends IServiceBase {
     // Arrays/sets
     getSessions(): Promise<ISession[]>;
     addSession(session: ISession): Promise<ISession>;
-    getSession(sessionId: string): Promise<ISession>;
     updateSession(session: ISession): Promise<ISession>;
 
     getCaseReviews(): Promise<ICaseReview[]>;
-    // addCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
-    // getCaseReview(caseReviewId: string): Promise<ICaseReview>;
-    // updateCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
+    addCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
+    updateCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
 
     getScheduledActivities(): Promise<IScheduledActivity[]>;
     getActivities(): Promise<IActivity[]>;
@@ -185,7 +185,6 @@ class PatientService extends ServiceBase implements IPatientService {
     public async addSession(session: ISession): Promise<ISession> {
         (session as any)._type = 'session';
 
-        logger.assert((session as any)._id == undefined, '_id should not be in the request data');
         logger.assert((session as any)._rev == undefined, '_rev should not be in the request data');
         logger.assert((session as any)._set_id == undefined, '_set_id should not be in the request data');
 
@@ -193,14 +192,8 @@ class PatientService extends ServiceBase implements IPatientService {
         return response.data?.session;
     }
 
-    public async getSession(sessionId: string): Promise<ISession> {
-        const response = await this.axiosInstance.get<ISessionResponse>(`/session/${sessionId}`);
-        return response.data?.session;
-    }
-
     public async updateSession(session: ISession): Promise<ISession> {
         logger.assert((session as any)._type === 'session', `invalid _type for session: ${(session as any)._type}`);
-        logger.assert((session as any)._id == undefined, '_id should not be in the request data');
         logger.assert((session as any)._rev != undefined, '_rev should be in the request data');
         logger.assert((session as any)._set_id != undefined, '_set_id should be in the request data');
 
@@ -213,6 +206,35 @@ class PatientService extends ServiceBase implements IPatientService {
     public async getCaseReviews(): Promise<ICaseReview[]> {
         const response = await this.axiosInstance.get<ICaseReviewListResponse>(`/casereviews`);
         return response.data?.casereviews;
+    }
+
+    public async addCaseReview(review: ICaseReview): Promise<ICaseReview> {
+        (review as any)._type = 'caseReview';
+        (review.consultingPsychiatrist as any)._type = 'identity';
+
+        logger.assert((review as any)._rev == undefined, '_rev should not be in the request data');
+        logger.assert((review as any)._set_id == undefined, '_set_id should not be in the request data');
+
+        const response = await this.axiosInstance.post<ICaseReviewResponse>(`/casereviews`, {
+            casereview: review,
+        } as ICaseReviewRequest);
+        return response.data?.casereview;
+    }
+
+    public async updateCaseReview(review: ICaseReview): Promise<ICaseReview> {
+        (review.consultingPsychiatrist as any)._type = 'identity';
+
+        logger.assert(
+            (review as any)._type === 'caseReview',
+            `invalid _type for case review: ${(review as any)._type}`,
+        );
+        logger.assert((review as any)._rev != undefined, '_rev should be in the request data');
+        logger.assert((review as any)._set_id != undefined, '_set_id should be in the request data');
+
+        const response = await this.axiosInstance.put<ICaseReviewResponse>(`/casereview/${review.caseReviewId}`, {
+            casereview: review,
+        } as ICaseReviewRequest);
+        return response.data?.casereview;
     }
 
     public async getScheduledActivities(): Promise<IScheduledActivity[]> {

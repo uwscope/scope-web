@@ -237,25 +237,28 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
 
 interface IReviewEditProps {
     review: ICaseReview;
-    onValueChange: (key: string, value: any) => void;
+    onReviewValueChange: (key: string, value: any) => void;
+    onConsultingPsychiatristChange: (name: string) => void;
 }
 
-const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
-    const { review, onValueChange } = props;
+const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
+    const { review, onReviewValueChange, onConsultingPsychiatristChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
             <GridDateField
                 editable={true}
+                required={true}
                 label="Review Date"
                 value={review.date}
-                onChange={(text) => onValueChange('date', text)}
+                onChange={(text) => onReviewValueChange('date', text)}
             />
             <GridTextField
                 editable={true}
+                required={true}
                 label="Consulting Psychiatrist"
                 value={review.consultingPsychiatrist.name}
-                onChange={(text) => onValueChange('consultingPsychiatrist', text)}
+                onChange={(text) => onConsultingPsychiatristChange(`${text}`)}
             />
             <GridTextField
                 sm={12}
@@ -266,7 +269,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
                 label="Medication changes"
                 value={review.medicationChange}
                 placeholder="Leave blank if no change in current medications"
-                onChange={(text) => onValueChange('medicationChange', text)}
+                onChange={(text) => onReviewValueChange('medicationChange', text)}
             />
             <GridTextField
                 sm={12}
@@ -277,7 +280,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
                 label="Behavioral strategy changes"
                 value={review.behavioralStrategyChange}
                 placeholder="Leave blank if no change to behavioral strategies"
-                onChange={(text) => onValueChange('behavioralStrategyChange', text)}
+                onChange={(text) => onReviewValueChange('behavioralStrategyChange', text)}
             />
             <GridTextField
                 sm={12}
@@ -288,7 +291,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
                 label="Referral changes"
                 value={review.referralsChange}
                 placeholder="Leave blank if no change to referrals"
-                onChange={(text) => onValueChange('referralsChange', text)}
+                onChange={(text) => onReviewValueChange('referralsChange', text)}
             />
             <GridTextField
                 sm={12}
@@ -298,7 +301,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
                 maxLine={4}
                 label="Other recommendations / action items"
                 value={review.otherRecommendations}
-                onChange={(text) => onValueChange('otherRecommendations', text)}
+                onChange={(text) => onReviewValueChange('otherRecommendations', text)}
             />
             <GridTextField
                 sm={12}
@@ -309,11 +312,11 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = (props) => {
                 label="Review Note"
                 value={review.reviewNote}
                 placeholder="Write review notes here"
-                onChange={(text) => onValueChange('reviewNote', text)}
+                onChange={(text) => onReviewValueChange('reviewNote', text)}
             />
         </Grid>
     );
-};
+});
 
 export const SessionInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
@@ -322,6 +325,14 @@ export const SessionInfo: FunctionComponent = observer(() => {
 
     const onSessionValueChange = action((key: string, value: any) => {
         (state.session as any)[key] = value;
+    });
+
+    const onReviewValueChange = action((key: string, value: any) => {
+        (state.review as any)[key] = value;
+    });
+
+    const onReviewConsultingPsychiatristChange = action((name: string) => {
+        state.review.consultingPsychiatrist.name = name;
     });
 
     const onValueChange = action((key: string, value: any) => {
@@ -376,7 +387,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const handleAddReview = action(() => {
-        Object.assign(state.review, getDefaultReview());
+        state.review = getDefaultReview();
         state.open = true;
         state.isNew = true;
         state.entryType = 'Case Review';
@@ -409,7 +420,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const onSave = action(async () => {
-        const { session, review, entryType, referralStatusFlags, otherReferralFlags } = state;
+        const { session, review, entryType, referralStatusFlags, otherReferralFlags, isNew } = state;
 
         if (entryType == 'Session') {
             // Organize referral flags
@@ -437,7 +448,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
             updatedSession.date = toUTCDateOnly(session.date);
             updatedSession.billableMinutes = Number(session.billableMinutes);
 
-            if (!updatedSession.sessionId) {
+            if (isNew) {
                 await currentPatient.addSession(updatedSession);
             } else {
                 await currentPatient.updateSession(updatedSession);
@@ -446,7 +457,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
             const updatedReview = { ...review };
             updatedReview.date = toUTCDateOnly(review.date);
 
-            if (!updatedReview.caseReviewId) {
+            if (isNew) {
                 await currentPatient.addCaseReview(updatedReview);
             } else {
                 await currentPatient.updateCaseReview(updatedReview);
@@ -552,10 +563,20 @@ export const SessionInfo: FunctionComponent = observer(() => {
                             onOtherReferralFlagsChange={(flags) => onValueChange('otherReferralFlags', flags)}
                         />
                     ) : (
-                        <ReviewEdit review={state.review} onValueChange={onValueChange} />
+                        <ReviewEdit
+                            review={state.review}
+                            onReviewValueChange={onReviewValueChange}
+                            onConsultingPsychiatristChange={onReviewConsultingPsychiatristChange}
+                        />
                     )
                 }
-                disableSave={!(state.session || state.review).date || !(state.session || state.review).sessionType}
+                disableSave={
+                    state.entryType == 'Session'
+                        ? !state.session.date || !state.session.sessionType
+                        : !state.review.date ||
+                          !state.review.consultingPsychiatrist ||
+                          !state.review.consultingPsychiatrist.name
+                }
             />
         </ActionPanel>
     );
