@@ -17,7 +17,7 @@ APP_CONFIG_LIFE_AREAS_PATH = Path(
 )
 
 
-def fake_life_areas_factory() -> Callable[[], List[dict]]:
+def fake_life_area_contents_factory() -> Callable[[], List[dict]]:
     """
     Obtain a factory that will provide all life area documents.
     """
@@ -36,13 +36,13 @@ def fake_life_areas_factory() -> Callable[[], List[dict]]:
     return factory
 
 
-@pytest.fixture(name="data_fake_life_areas_factory")
-def fixture_data_fake_life_areas_factory() -> Callable[[], List[dict]]:
+@pytest.fixture(name="data_fake_life_area_contents_factory")
+def fixture_data_fake_life_area_contents_factory() -> Callable[[], List[dict]]:
     """
-    Fixture for data_fake_life_areas_factory.
+    Fixture for data_fake_life_area_contents_factory.
     """
 
-    unvalidated_factory = fake_life_areas_factory()
+    unvalidated_factory = fake_life_area_contents_factory()
 
     def factory() -> List[dict]:
         fake_life_areas = unvalidated_factory()

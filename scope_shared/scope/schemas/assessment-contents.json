@@ -1,0 +1,11 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/assessment-contents",
+	"title": "ILifeAreaContent[]",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/assessment-content"
+	},
+	"additionalProperties": false,
+	"required": []
+}
