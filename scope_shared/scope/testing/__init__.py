@@ -4,7 +4,6 @@ from scope.testing.testing_config import TestingConfig
 PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_activity",
     "scope.testing.fake_data.fixtures_fake_activities",
-    "scope.testing.fake_data.fixtures_fake_assessment",
     "scope.testing.fake_data.fixtures_fake_assessments",
     "scope.testing.fake_data.fixtures_fake_case_review",
     "scope.testing.fake_data.fixtures_fake_case_reviews",
