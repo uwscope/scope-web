@@ -2,7 +2,7 @@ import pymongo.database
 import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patients
-import scope.database.providers
+import scope.database.provider_identities
 
 
 def ensure_database_exists(

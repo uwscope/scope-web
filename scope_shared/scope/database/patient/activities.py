@@ -3,16 +3,16 @@ from typing import List, Optional
 import pymongo.collection
 import scope.database.collection_utils
 
-DOCUMENT_TYPE = "caseReview"
-SEMANTIC_SET_ID = "caseReviewId"
+DOCUMENT_TYPE = "activity"
+SEMANTIC_SET_ID = "activityId"
 
 
-def get_case_reviews(
+def get_activities(
     *,
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "caseReview" documents.
+    Get list of "activity" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -21,13 +21,13 @@ def get_case_reviews(
     )
 
 
-def get_case_review(
+def get_activity(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
 ) -> Optional[dict]:
     """
-    Get "caseReview" document.
+    Get "activity" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -37,37 +37,37 @@ def get_case_review(
     )
 
 
-def post_case_review(
+def post_activity(
     *,
     collection: pymongo.collection.Collection,
-    case_review: dict,
+    activity: dict,
 ) -> scope.database.collection_utils.SetPostResult:
     """
-    Post "caseReview" document.
+    Post "activity" document.
     """
 
     return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
-        document=case_review,
+        document=activity,
     )
 
 
-def put_case_review(
+def put_activity(
     *,
     collection: pymongo.collection.Collection,
-    case_review: dict,
+    activity: dict,
     set_id: str,
-):
+) -> scope.database.collection_utils.SetPutResult:
     """
-    Put "caseReview" document.
+    Put "activity" document.
     """
 
     return scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
-        set_id=set_id,
         semantic_set_id=SEMANTIC_SET_ID,
-        document=case_review,
+        set_id=set_id,
+        document=activity,
     )

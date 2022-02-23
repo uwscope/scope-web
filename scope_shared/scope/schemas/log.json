@@ -9,7 +9,7 @@
 			"type": "string"
 		},
 		"recordedDate": {
-			"type": "string"
+			"$ref": "/schemas/datetime#/properties/date"
 		},
 		"comment": {
 			"type": "string"

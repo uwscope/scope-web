@@ -2,29 +2,29 @@ import flask
 import flask_json
 import pymongo.errors
 import scope.database
-import scope.database.patient.case_reviews
+import scope.database.patient.activities
 from request_context import request_context
 import request_utils
-from scope.schema import case_review_schema
+from scope.schema import activity_schema
 
-case_reviews_blueprint = flask.Blueprint(
-    "case_reviews_blueprint",
+activities_blueprint = flask.Blueprint(
+    "activities_blueprint",
     __name__,
 )
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereviews",
+@activities_blueprint.route(
+    "/<string:patient_id>/activities",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_case_reviews(patient_id):
+def get_activities(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
-    documents = scope.database.patient.case_reviews.get_case_reviews(
+    documents = scope.database.patient.activities.get_activities(
         collection=patient_collection,
     )
 
@@ -34,22 +34,22 @@ def get_case_reviews(patient_id):
     )
 
     return {
-        "casereviews": documents,
+        "activities": documents,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereviews",
+@activities_blueprint.route(
+    "/<string:patient_id>/activities",
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=case_review_schema,
-    key="casereview",
+    schema=activity_schema,
+    key="activity",
 )
 @flask_json.as_json
-def post_case_reviews(patient_id):
+def post_activities(patient_id):
     """
-    Creates a new case review in the patient record and returns the case review result.
+    Creates a new activity in the patient record and returns the activity result.
     """
     # TODO: Require authentication
 
@@ -57,18 +57,18 @@ def post_case_reviews(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["casereview"]
+    document = flask.request.json["activity"]
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
-        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
         document=document,
     )
 
     # Store the document
-    result = scope.database.patient.case_reviews.post_case_review(
+    result = scope.database.patient.activities.post_activity(
         collection=patient_collection,
-        case_review=document,
+        activity=document,
     )
 
     # Validate and normalize the response
@@ -77,25 +77,25 @@ def post_case_reviews(patient_id):
     )
 
     return {
-        "casereview": document_response,
+        "activity": document_response,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:casereview_id>",
+@activities_blueprint.route(
+    "/<string:patient_id>/activity/<string:activity_id>",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_case_review(patient_id, casereview_id):
+def get_activity(patient_id, activity_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
-    document = scope.database.patient.case_reviews.get_case_review(
+    document = scope.database.patient.activities.get_activity(
         collection=patient_collection,
-        set_id=casereview_id,
+        set_id=activity_id,
     )
 
     # Validate and normalize the response
@@ -104,46 +104,46 @@ def get_case_review(patient_id, casereview_id):
     )
 
     return {
-        "casereview": document,
+        "activity": document,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:casereview_id>",
+@activities_blueprint.route(
+    "/<string:patient_id>/activity/<string:activity_id>",
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=case_review_schema,
-    key="casereview",
+    schema=activity_schema,
+    key="activity",
 )
 @flask_json.as_json
-def put_case_review(patient_id, casereview_id):
+def put_activity(patient_id, activity_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["casereview"]
+    document = flask.request.json["activity"]
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
-        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
         document=document,
-        set_id=casereview_id,
+        set_id=activity_id,
     )
 
     # Store the document
     try:
-        result = scope.database.patient.case_reviews.put_case_review(
+        result = scope.database.patient.activities.put_activity(
             collection=patient_collection,
-            case_review=document,
-            set_id=casereview_id,
+            activity=document,
+            set_id=activity_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.case_reviews.get_case_review(
-            collection=patient_collection, set_id=casereview_id
+        document_conflict = scope.database.patient.activities.get_activity(
+            collection=patient_collection, set_id=activity_id
         )
         # Validate and normalize the response
         document_conflict = request_utils.singleton_put_response_validate(
@@ -152,7 +152,7 @@ def put_case_review(patient_id, casereview_id):
 
         request_utils.abort_revision_conflict(
             document={
-                "casereview": document_conflict,
+                "activity": document_conflict,
             }
         )
     else:
@@ -162,5 +162,5 @@ def put_case_review(patient_id, casereview_id):
         )
 
         return {
-            "casereview": document_response,
+            "activity": document_response,
         }

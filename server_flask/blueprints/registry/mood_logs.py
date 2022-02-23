@@ -2,29 +2,29 @@ import flask
 import flask_json
 import pymongo.errors
 import scope.database
-import scope.database.patient.case_reviews
+import scope.database.patient.mood_logs
 from request_context import request_context
 import request_utils
-from scope.schema import case_review_schema
+from scope.schema import mood_log_schema
 
-case_reviews_blueprint = flask.Blueprint(
-    "case_reviews_blueprint",
+mood_logs_blueprint = flask.Blueprint(
+    "mood_logs_blueprint",
     __name__,
 )
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereviews",
+@mood_logs_blueprint.route(
+    "/<string:patient_id>/moodlogs",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_case_reviews(patient_id):
+def get_mood_logs(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
-    documents = scope.database.patient.case_reviews.get_case_reviews(
+    documents = scope.database.patient.mood_logs.get_mood_logs(
         collection=patient_collection,
     )
 
@@ -34,41 +34,38 @@ def get_case_reviews(patient_id):
     )
 
     return {
-        "casereviews": documents,
+        "moodlogs": documents,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereviews",
+@mood_logs_blueprint.route(
+    "/<string:patient_id>/moodlogs",
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=case_review_schema,
-    key="casereview",
+    schema=mood_log_schema,
+    key="moodlog",
 )
 @flask_json.as_json
-def post_case_reviews(patient_id):
-    """
-    Creates a new case review in the patient record and returns the case review result.
-    """
+def post_mood_logs(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["casereview"]
+    document = flask.request.json["moodlog"]
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
-        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
         document=document,
     )
 
     # Store the document
-    result = scope.database.patient.case_reviews.post_case_review(
+    result = scope.database.patient.mood_logs.post_mood_log(
         collection=patient_collection,
-        case_review=document,
+        mood_log=document,
     )
 
     # Validate and normalize the response
@@ -77,25 +74,25 @@ def post_case_reviews(patient_id):
     )
 
     return {
-        "casereview": document_response,
+        "moodlog": document_response,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:casereview_id>",
+@mood_logs_blueprint.route(
+    "/<string:patient_id>/moodlog/<string:moodlog_id>",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_case_review(patient_id, casereview_id):
+def get_mood_log(patient_id, moodlog_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
-    document = scope.database.patient.case_reviews.get_case_review(
+    document = scope.database.patient.mood_logs.get_mood_log(
         collection=patient_collection,
-        set_id=casereview_id,
+        set_id=moodlog_id,
     )
 
     # Validate and normalize the response
@@ -104,46 +101,46 @@ def get_case_review(patient_id, casereview_id):
     )
 
     return {
-        "casereview": document,
+        "moodlog": document,
     }
 
 
-@case_reviews_blueprint.route(
-    "/<string:patient_id>/casereview/<string:casereview_id>",
+@mood_logs_blueprint.route(
+    "/<string:patient_id>/moodlog/<string:moodlog_id>",
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=case_review_schema,
-    key="casereview",
+    schema=mood_log_schema,
+    key="moodlog",
 )
 @flask_json.as_json
-def put_case_review(patient_id, casereview_id):
+def put_mood_log(patient_id, moodlog_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["casereview"]
+    document = flask.request.json["moodlog"]
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
-        semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
         document=document,
-        set_id=casereview_id,
+        set_id=moodlog_id,
     )
 
     # Store the document
     try:
-        result = scope.database.patient.case_reviews.put_case_review(
+        result = scope.database.patient.mood_logs.put_mood_log(
             collection=patient_collection,
-            case_review=document,
-            set_id=casereview_id,
+            mood_log=document,
+            set_id=moodlog_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.case_reviews.get_case_review(
-            collection=patient_collection, set_id=casereview_id
+        document_conflict = scope.database.patient.mood_logs.get_mood_log(
+            collection=patient_collection, set_id=moodlog_id
         )
         # Validate and normalize the response
         document_conflict = request_utils.singleton_put_response_validate(
@@ -152,7 +149,7 @@ def put_case_review(patient_id, casereview_id):
 
         request_utils.abort_revision_conflict(
             document={
-                "casereview": document_conflict,
+                "moodlog": document_conflict,
             }
         )
     else:
@@ -162,5 +159,5 @@ def put_case_review(patient_id, casereview_id):
         )
 
         return {
-            "casereview": document_response,
+            "moodlog": document_response,
         }

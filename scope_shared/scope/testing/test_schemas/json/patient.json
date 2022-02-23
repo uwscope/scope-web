@@ -6,8 +6,8 @@
 		"name": "Harry Potter",
 		"identityId": "Lily Potter's Son"
 	},
-	"patientProfile": {
-		"_type": "patientProfile",
+	"profile": {
+		"_type": "profile",
 		"_rev": 1,
 		"name": "patientName",
 		"MRN": "mrn",

@@ -1,4 +1,5 @@
 import base64
+import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
@@ -13,6 +14,29 @@ PRIMARY_COLLECTION_INDEX = [
     ("_rev", pymongo.DESCENDING),
 ]
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
+
+
+@dataclass(frozen=True)
+class PutResult:
+    inserted_count: int
+    inserted_id: str
+    document: dict
+
+
+@dataclass(frozen=True)
+class SetPostResult:
+    inserted_count: int
+    inserted_id: str
+    inserted_set_id: str
+    document: dict
+
+
+@dataclass(frozen=True)
+class SetPutResult:
+    inserted_count: int
+    inserted_id: str
+    inserted_set_id: str
+    document: dict
 
 
 def generate_set_id() -> str:
@@ -137,15 +161,12 @@ def get_set(
         if not pipeline_result.alive:
             return None
 
-        result = list(pipeline_result)
+        documents = list(pipeline_result)
 
-    # Normalize the results
-    result = [
-        document_utils.normalize_document(document=result_current)
-        for result_current in result
-    ]
+    # Normalize the list of documents
+    documents = document_utils.normalize_documents(documents=documents)
 
-    return result
+    return documents
 
 
 def get_set_element(
@@ -229,38 +250,108 @@ def get_singleton(
         if not pipeline_result.alive:
             return None
 
-        result = pipeline_result.next()
+        document = pipeline_result.next()
 
-    # Normalize the result
-    result = document_utils.normalize_document(document=result)
+    # Normalize the document
+    document = document_utils.normalize_document(document=document)
 
-    return result
+    return document
 
 
-@dataclass(frozen=True)
-class PutResult:
-    inserted_count: int
-    inserted_id: str
-    document: dict
+def post_set_element(
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    semantic_set_id: Optional[str],
+    document: dict,
+) -> SetPostResult:
+    """
+    Put a set element document.
+    - Document must not already include an "_id".
+    - An existing "_type" must match document_type.
+    - Document must not already include an "_set_id".
+    - Document must not already include an "_rev".
+    - semantic_set_id may indicate a field that will be treated like "_set_id".
+      - Document must not already include an "semantic_set_id".
+      - "semantic_set_id" will additionally be set to "_set_id".
+    """
+
+    # Work with a copy
+    document = copy.deepcopy(document)
+
+    # Document must not include an "_id",
+    # as this indicates it was retrieved from the database.
+    if "_id" in document:
+        raise ValueError('Document must not have existing "_id"')
+
+    # If a document includes a "_type", it must match document_type.
+    if "_type" in document:
+        if document["_type"] != document_type:
+            raise ValueError('document["_type"] must match document_type')
+    else:
+        document["_type"] = document_type
+
+    # Document must not include an "_set_id",
+    # as post expects to assign this.
+    if "_set_id" in document:
+        raise ValueError('Document must not have existing "_set_id"')
+
+    # Document must not include an "_rev",
+    # as this indicates it was retrieved from the database.
+    if "_rev" in document:
+        raise ValueError('Document must not have existing "_rev"')
+
+    # Generate a "_set_id" and a "_rev"
+    generated_set_id = generate_set_id()
+    document["_set_id"] = generated_set_id
+    document["_rev"] = 1
+
+    # If a semantic_set_id is specified
+    if semantic_set_id:
+        # Document must not include a semantic set id,
+        # as post expects to assign this.
+        if semantic_set_id in document:
+            raise ValueError(
+                'Document must not have existing "{}"'.format(semantic_set_id)
+            )
+
+        document[semantic_set_id] = generated_set_id
+
+    # insert_one will modify the document to insert an "_id"
+    document = document_utils.normalize_document(document=document)
+    result = collection.insert_one(document=document)
+    document = document_utils.normalize_document(document=document)
+
+    return SetPostResult(
+        inserted_count=1,
+        inserted_id=str(result.inserted_id),
+        inserted_set_id=generated_set_id,
+        document=document,
+    )
 
 
 def put_set_element(
     *,
     collection: pymongo.collection.Collection,
     document_type: str,
+    semantic_set_id: Optional[str],
     set_id: str,
     document: dict,
-) -> PutResult:
+) -> SetPutResult:
     """
     Put a set element document.
     - Document must not already include an "_id".
     - An existing "_type" must match document_type.
     - An existing "_set_id" must match set_id.
     - An existing "_rev" will be incremented.
+    - semantic_set_id may indicate a field that will be treated like "_set_id".
+      - An existing "semantic_set_id" must match set_id.
+      - An existing "semantic_set_id" must match an existing "_set_id".
+      - "semantic_set_id" will additionally be set to "_set_id".
     """
 
     # Work with a copy
-    document = document_utils.normalize_document(document=document)
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.
@@ -279,6 +370,7 @@ def put_set_element(
         if document["_set_id"] != set_id:
             raise ValueError('document["_set_id"] must match set_id')
     else:
+        # Set the "_set_id"
         document["_set_id"] = set_id
 
     # Increment the "_rev"
@@ -290,14 +382,27 @@ def put_set_element(
     else:
         document["_rev"] = 1
 
+    # If a semantic_set_id is specified
+    if semantic_set_id:
+        # If a document includes a "semantic_set_id", it must match set_id.
+        if semantic_set_id in document:
+            if document[semantic_set_id] != set_id:
+                raise ValueError(
+                    'document["{}"] must match set_id'.format(semantic_set_id)
+                )
+        else:
+            # Set the "semantic_set_id"
+            document[semantic_set_id] = set_id
+
     # insert_one will modify the document to insert an "_id"
     document = document_utils.normalize_document(document=document)
     result = collection.insert_one(document=document)
     document = document_utils.normalize_document(document=document)
 
-    return PutResult(
+    return SetPutResult(
         inserted_count=1,
         inserted_id=str(result.inserted_id),
+        inserted_set_id=set_id,
         document=document,
     )
 
@@ -316,7 +421,7 @@ def put_singleton(
     """
 
     # Work with a copy
-    document = document_utils.normalize_document(document=document)
+    document = copy.deepcopy(document)
 
     # Document must not include an "_id",
     # as this indicates it was retrieved from the database.

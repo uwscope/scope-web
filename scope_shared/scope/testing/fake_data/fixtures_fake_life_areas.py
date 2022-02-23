@@ -32,7 +32,7 @@ def fake_life_areas_factory() -> Callable[[], List[dict]]:
                     config_json = json.load(config_file)
                     fake_life_areas.append(config_json)
 
-        return document_utils.normalize_documents(documents=fake_life_areas)
+        return fake_life_areas
 
     return factory
 

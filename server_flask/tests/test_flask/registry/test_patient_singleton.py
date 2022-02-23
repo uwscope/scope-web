@@ -21,7 +21,7 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 @dataclass(frozen=True)
 class ConfigTestPatientSingleton:
     name: str
-    document_factory_fixture_name: str
+    document_factory_fixture: str
     database_get_function: Callable[[...], dict]
     database_put_function: Callable[[...], collection_utils.PutResult]
     database_put_function_document_parameter_name: str
@@ -32,7 +32,7 @@ class ConfigTestPatientSingleton:
 TEST_CONFIGS = [
     ConfigTestPatientSingleton(
         name="clinicalhistory",
-        document_factory_fixture_name="data_fake_clinical_history_factory",
+        document_factory_fixture="data_fake_clinical_history_factory",
         database_get_function=scope.database.patient.clinical_history.get_clinical_history,
         database_put_function=scope.database.patient.clinical_history.put_clinical_history,
         database_put_function_document_parameter_name="clinical_history",
@@ -41,7 +41,7 @@ TEST_CONFIGS = [
     ),
     ConfigTestPatientSingleton(
         name="profile",
-        document_factory_fixture_name="data_fake_patient_profile_factory",
+        document_factory_fixture="data_fake_patient_profile_factory",
         database_get_function=scope.database.patient.patient_profile.get_patient_profile,
         database_put_function=scope.database.patient.patient_profile.put_patient_profile,
         database_put_function_document_parameter_name="patient_profile",
@@ -50,7 +50,7 @@ TEST_CONFIGS = [
     ),
     ConfigTestPatientSingleton(
         name="safetyplan",
-        document_factory_fixture_name="data_fake_safety_plan_factory",
+        document_factory_fixture="data_fake_safety_plan_factory",
         database_get_function=scope.database.patient.safety_plan.get_safety_plan,
         database_put_function=scope.database.patient.safety_plan.put_safety_plan,
         database_put_function_document_parameter_name="safety_plan",
@@ -59,7 +59,7 @@ TEST_CONFIGS = [
     ),
     ConfigTestPatientSingleton(
         name="valuesinventory",
-        document_factory_fixture_name="data_fake_values_inventory_factory",
+        document_factory_fixture="data_fake_values_inventory_factory",
         database_get_function=scope.database.patient.values_inventory.get_values_inventory,
         database_put_function=scope.database.patient.values_inventory.put_values_inventory,
         database_put_function_document_parameter_name="values_inventory",
@@ -93,7 +93,7 @@ def test_patient_singleton_get(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     # Store the document
     document = document_factory()
@@ -118,8 +118,11 @@ def test_patient_singleton_get(
     )
     assert response.ok
 
-    # Confirm it matches expected document, with addition of an "_id" and a "_rev"
+    # Obtain the document
+    assert config.flask_document_key in response.json()
     document_retrieved = response.json()[config.flask_document_key]
+
+    # Confirm it matches expected document, with addition of an "_id" and a "_rev"
     assert "_id" in document_retrieved
     del document_retrieved["_id"]
     assert "_rev" in document_retrieved
@@ -212,7 +215,7 @@ def test_patient_singleton_post_not_allowed(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     # Generate a document via Flask
     query = QUERY_SINGLETON.format(
@@ -253,7 +256,7 @@ def test_patient_singleton_put(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     # Store a document via Flask
     query = QUERY_SINGLETON.format(
@@ -319,23 +322,12 @@ def test_patient_singleton_put_invalid(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
-
-    # Invalid document that is not nested under the document key
-    document = document_factory()
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json=document,
-    )
-    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that does not match any schema
     response = session.put(
@@ -345,9 +337,20 @@ def test_patient_singleton_put_invalid(
         ),
         json={
             config.flask_document_key: {
-                "_invalid": "invalid",
+                "invalid": "invalid",
             },
         },
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # Invalid document that is not nested under the document key
+    document = document_factory()
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json=document,
     )
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
@@ -387,7 +390,7 @@ def test_patient_singleton_put_update(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
@@ -465,7 +468,7 @@ def test_patient_singleton_put_update_invalid(
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
-    document_factory = request.getfixturevalue(config.document_factory_fixture_name)
+    document_factory = request.getfixturevalue(config.document_factory_fixture)
 
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,

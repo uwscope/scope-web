@@ -1,14 +1,13 @@
-import base64
-import hashlib
 import pymongo.database
 from typing import List
 from typing import Optional
-import uuid
 
 import scope.database.collection_utils
 
-PATIENT_DOCUMENT_TYPE = "patient"
 PATIENTS_COLLECTION = "patients"
+
+DOCUMENT_TYPE = "patient"
+SEMANTIC_SET_ID = "patientId"
 
 
 def _patient_collection_name(*, patient_id: str) -> str:
@@ -50,7 +49,8 @@ def create_patient(
     }
     result = scope.database.collection_utils.put_set_element(
         collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
+        document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
         set_id=patient_id,
         document=patient_document,
     )
@@ -77,7 +77,7 @@ def delete_patient(
     # Confirm the patient exists.
     existing_document = scope.database.collection_utils.get_set_element(
         collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
+        document_type=DOCUMENT_TYPE,
         set_id=patient_id,
     )
     if existing_document is None:
@@ -87,7 +87,7 @@ def delete_patient(
     database.drop_collection(existing_document["collection"])
     scope.database.collection_utils.delete_set_element(
         collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
+        document_type=DOCUMENT_TYPE,
         set_id=patient_id,
         destructive=destructive,
     )
@@ -108,7 +108,7 @@ def get_patient(
 
     return scope.database.collection_utils.get_set_element(
         collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
+        document_type=DOCUMENT_TYPE,
         set_id=patient_id,
     )
 
@@ -125,5 +125,5 @@ def get_patients(
 
     return scope.database.collection_utils.get_set(
         collection=patients_collection,
-        document_type=PATIENT_DOCUMENT_TYPE,
+        document_type=DOCUMENT_TYPE,
     )

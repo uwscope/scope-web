@@ -1,0 +1,32 @@
+{
+	"_type": "session",
+	"sessionId": "1",
+	"_rev": 1,
+	"date": "2019-11-01T00:00:00Z",
+	"sessionType": "Telehealth",
+	"billableMinutes": 45,
+	"medicationChange": "medicationChange",
+	"currentMedications": "currentMedications",
+	"behavioralStrategyChecklist": {
+		"Behavioral Activation": true,
+		"Motivational Interviewing": true,
+		"Problem Solving Therapy": true,
+		"Cognitive Therapy": true,
+		"Mindfulness Strategies": true,
+		"Supportive Therapy": true
+	},
+	"behavioralStrategyOther": "",
+	"behavioralActivationChecklist": {
+		"Review of the BA model": true,
+		"Values and goals assessment": true,
+		"Activity scheduling": true,
+		"Mood and activity monitoring": true,
+		"Relaxation": true,
+		"Positive reinforcement": true,
+		"Managing avoidance behaviors": true,
+		"Problem-solving": true
+	},
+	"referrals": [],
+	"otherRecommendations": "otherRecommendations",
+	"sessionNote": "sessionNote"
+}

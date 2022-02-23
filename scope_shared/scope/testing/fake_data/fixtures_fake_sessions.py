@@ -18,7 +18,7 @@ def fake_sessions_factory(
     def factory() -> List[dict]:
         fake_sessions = [fake_session_factory() for _ in range(random.randint(1, 5))]
 
-        return document_utils.normalize_documents(documents=fake_sessions)
+        return fake_sessions
 
     return factory
 
@@ -28,7 +28,7 @@ def fixture_data_fake_sessions_factory(
     data_fake_session_factory: Callable[[], dict],
 ) -> Callable[[], List[dict]]:
     """
-    Fixture for data_fake_session_factory.
+    Fixture for data_fake_sessions_factory.
     """
 
     unvalidated_factory = fake_sessions_factory(

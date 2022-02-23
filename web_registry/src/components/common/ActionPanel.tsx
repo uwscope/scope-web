@@ -47,10 +47,20 @@ export interface IActionPanelProps {
     id: string;
     loading?: boolean;
     error?: boolean;
+    showSnackbar?: boolean;
 }
 
 export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
-    const { id, actionButtons, title, inlineTitle, children, loading = false, error = false } = props;
+    const {
+        id,
+        actionButtons,
+        title,
+        inlineTitle,
+        children,
+        loading = false,
+        error = false,
+        showSnackbar = true,
+    } = props;
 
     const [openError, setOpenError] = useState(error);
 
@@ -98,12 +108,14 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
                 {loading ? <Loading /> : <Divider variant="middle" />}
                 <CardContent sx={{ padding: 3 }}>{children}</CardContent>
             </Card>
-            <Snackbar
-                open={openError}
-                message={`Sorry, there was an error processing your request. Please try again.`}
-                autoHideDuration={2000}
-                onClose={handleClose}
-            />
+            {showSnackbar && (
+                <Snackbar
+                    open={openError}
+                    message={`Sorry, there was an error processing your request. Please try again.`}
+                    autoHideDuration={2000}
+                    onClose={handleClose}
+                />
+            )}
         </Fragment>
     );
 };

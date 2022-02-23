@@ -10,11 +10,20 @@ import {
 } from 'shared/fake';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
-import { IPatientProfileResponse, IPatientResponse, IValuesInventoryResponse } from 'shared/serviceTypes';
+import {
+    IPatientProfileRequest,
+    IPatientProfileResponse,
+    IPatientResponse,
+    IValuesInventoryResponse,
+    IValuesInventoryRequest,
+    IClinicalHistoryRequest,
+    IClinicalHistoryResponse,
+} from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
     IAssessmentLog,
+    IClinicalHistory,
     IMoodLog,
     IPatient,
     IPatientConfig,
@@ -38,6 +47,9 @@ export interface IPatientService extends IServiceBase {
 
     getSafetyPlan(): Promise<ISafetyPlan>;
     updateSafetyPlan(safetyPlan: ISafetyPlan): Promise<ISafetyPlan>;
+
+    getClinicalHistory(): Promise<IClinicalHistory>;
+    updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory>;
 
     getScheduledActivities(): Promise<IScheduledActivity[]>;
     getActivities(): Promise<IActivity[]>;
@@ -76,13 +88,33 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async updateProfile(profile: IPatientProfile): Promise<IPatientProfile> {
         logger.assert(
-            (profile as any)._type === 'patientProfile',
+            (profile as any)._type === 'profile',
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
-        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, profile);
+        const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, {
+            profile,
+        } as IPatientProfileRequest);
 
         return response.data?.profile;
+    }
+
+    public async getClinicalHistory(): Promise<IClinicalHistory> {
+        const response = await this.axiosInstance.get<IClinicalHistoryResponse>(`/clinicalhistory`);
+        return response.data?.clinicalhistory;
+    }
+
+    public async updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory> {
+        logger.assert(
+            (history as any)._type === 'clinicalHistory',
+            `invalid _type for patient clinical history: ${(history as any)._type}`,
+        );
+
+        const response = await this.axiosInstance.put<IClinicalHistoryResponse>(`/clinicalhistory`, {
+            clinicalhistory: history,
+        } as IClinicalHistoryRequest);
+
+        return response.data?.clinicalhistory;
     }
 
     public async getValuesInventory(): Promise<IValuesInventory> {
@@ -97,7 +129,9 @@ class PatientService extends ServiceBase implements IPatientService {
             (inventory as any)._type === 'valuesInventory',
             `invalid _type for values inventory: ${(inventory as any)._type}`,
         );
-        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, inventory);
+        const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, {
+            valuesinventory: inventory,
+        } as IValuesInventoryRequest);
         const updatedInventory = response.data?.valuesinventory;
         updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
         return updatedInventory;

@@ -9,7 +9,7 @@
             "type": "string"
         },
         "_type": {
-            "const": "patientProfile"
+            "const": "profile"
         },
         "_rev": {
             "type": "number"

@@ -1,6 +1,6 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, toJS, when } from 'mobx';
-import { discussionFlagValues, patientRaceValues } from 'shared/enums';
+import { cancerTreatmentRegimenValues, discussionFlagValues, patientRaceValues } from 'shared/enums';
 import { getLogger } from 'shared/logger';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
 import { IPromiseQueryState, PromiseQuery, PromiseState } from 'shared/promiseQuery';
@@ -33,6 +33,7 @@ export interface IPatientStore extends IPatient {
 
     readonly loadValuesInventoryState: IPromiseQueryState;
     readonly loadProfileState: IPromiseQueryState;
+    readonly loadClinicalHistoryState: IPromiseQueryState;
 
     readonly latestSession: ISession | undefined;
 
@@ -59,8 +60,6 @@ export interface IPatientStore extends IPatient {
 
 export class PatientStore implements IPatientStore {
     public identity: IIdentity;
-
-    public clinicalHistory: IClinicalHistory = {};
 
     public safetyPlan: ISafetyPlan = {
         assigned: false,
@@ -89,6 +88,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
+    private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
 
     constructor(patient: IPatient) {
         console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
@@ -98,9 +98,6 @@ export class PatientStore implements IPatientStore {
         this.patientService = getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, patient.identity.identityId);
 
         this.identity = patient.identity;
-
-        // Patient info
-        this.clinicalHistory = patient.clinicalHistory || this.clinicalHistory;
 
         // Safety plan
         this.safetyPlan = patient.safetyPlan || this.safetyPlan;
@@ -128,6 +125,11 @@ export class PatientStore implements IPatientStore {
             'valuesinventory',
         );
         this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile', 'profile');
+        this.loadClinicalHistoryQuery = new PromiseQuery<IClinicalHistory>(
+            patient.clinicalHistory,
+            'loadClinicalHistory',
+            'clinicalhistory',
+        );
 
         makeAutoObservable(this);
     }
@@ -156,6 +158,10 @@ export class PatientStore implements IPatientStore {
         return this.loadProfileQuery;
     }
 
+    @computed get loadClinicalHistoryState() {
+        return this.loadClinicalHistoryQuery;
+    }
+
     @computed get latestSession() {
         if (this.sessions.length > 0) {
             return this.sessions[this.sessions.length - 1];
@@ -181,10 +187,18 @@ export class PatientStore implements IPatientStore {
         );
     }
 
+    @computed get clinicalHistory() {
+        return this.loadClinicalHistoryQuery.value || {};
+    }
+
     @action.bound
     public async load() {
         await this.loadAndLogQuery<IPatient>(this.patientService.getPatient, this.loadPatientDataQuery);
         await this.loadAndLogQuery<IPatientProfile>(this.patientService.getProfile, this.loadProfileQuery);
+        await this.loadAndLogQuery<IClinicalHistory>(
+            this.patientService.getClinicalHistory,
+            this.loadClinicalHistoryQuery,
+        );
         await this.loadAndLogQuery<IValuesInventory>(
             this.patientService.getValuesInventory,
             this.loadValuesInventoryQuery,
@@ -208,10 +222,16 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async updateClinicalHistory(clinicalHistory: Partial<IClinicalHistory>) {
-        const { registryService } = useServices();
-        const promise = registryService.updatePatientClinicalHistory(this.recordId, clinicalHistory);
+        const promise = this.patientService.updateClinicalHistory({
+            ...toJS(this.clinicalHistory),
+            ...toJS(clinicalHistory),
+            currentTreatmentRegimen: Object.assign(
+                {},
+                ...cancerTreatmentRegimenValues.map((x) => ({ [x]: !!clinicalHistory.currentTreatmentRegimen?.[x] })),
+            ),
+        });
 
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<IClinicalHistory>(() => promise, this.loadClinicalHistoryQuery);
     }
 
     @action.bound

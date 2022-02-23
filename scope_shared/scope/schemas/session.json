@@ -49,7 +49,7 @@
 			"items": {
 				"$ref": "/schemas/referral-status"
 			},
-			"minItems": 1
+			"minItems": 0
 		},
 		"otherRecommendations": {
 			"type": "string"
@@ -61,7 +61,6 @@
 	"additionalProperties": false,
 	"required": [
 		"_type",
-		"sessionId",
 		"date",
 		"sessionType",
 		"billableMinutes",
