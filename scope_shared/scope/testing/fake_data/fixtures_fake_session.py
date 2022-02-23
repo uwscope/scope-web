@@ -22,13 +22,6 @@ def fake_session_factory(
 
     def factory() -> dict:
 
-        referrals = random.choice(
-            [
-                [fake_referral_status_factory() for _ in range(random.randint(0, 5))],
-                None,
-            ]
-        )
-
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
             "date": format_utils.format_date(
@@ -49,7 +42,9 @@ def fake_session_factory(
             "behavioralActivationChecklist": fake_utils.fake_enum_flag_values(
                 scope.testing.fake_data.enums.BehavioralActivationChecklist
             ),
-            "referrals": referrals,
+            "referrals": [
+                fake_referral_status_factory() for _ in range(random.randint(0, 5))
+            ],
             "otherRecommendations": faker_factory.text(),
             "sessionNote": faker_factory.text(),
         }
