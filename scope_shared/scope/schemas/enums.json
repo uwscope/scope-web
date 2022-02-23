@@ -161,6 +161,34 @@
 			"description": "DayOfWeek Type",
 			"enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 		},
+		"dayOfWeekFlags": {
+			"type": "object",
+			"description": "DayOfWeekFlags enum",
+			"properties": {
+				"Monday": {
+					"type": "boolean"
+				},
+				"Tuesday": {
+					"type": "boolean"
+				},
+				"Wednesday": {
+					"type": "boolean"
+				},
+				"Thursday": {
+					"type": "boolean"
+				},
+				"Friday": {
+					"type": "boolean"
+				},
+				"Saturday": {
+					"type": "boolean"
+				},
+				"Sunday": {
+					"type": "boolean"
+				}
+			},
+			"required": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		},
 		"depressionTreatmentStatus": {
 			"type": "string",
 			"description": "DepressionTreatmentStatus Type",
@@ -248,7 +276,7 @@
 			"enum": [
 				"Psychiatry",
 				"Psychology",
-				"Pt Navigation",
+				"Patient Navigation",
 				"Integrative Medicine",
 				"Spiritual Care",
 				"Palliative Care",
