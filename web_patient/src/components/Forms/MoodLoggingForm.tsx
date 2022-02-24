@@ -24,7 +24,6 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
 
     const dataState = useLocalObservable<IMoodLog>(() => ({
         recordedDate: new Date(),
-        logId: '',
         mood: 5,
         comment: undefined,
     }));
@@ -98,8 +97,9 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
         ];
     };
 
-    const handleSubmit = action(() => {
-        return patientStore.saveMoodLog({ ...dataState });
+    const handleSubmit = action(async () => {
+        await patientStore.saveMoodLog({ ...dataState });
+        return !patientStore.loadMoodLogsState.error;
     });
 
     return (

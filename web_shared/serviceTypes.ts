@@ -1,4 +1,13 @@
-import { ICaseReview, IClinicalHistory, IPatient, IPatientProfile, ISession, IValuesInventory } from 'shared/types';
+import {
+    IActivity,
+    ICaseReview,
+    IClinicalHistory,
+    IMoodLog,
+    IPatient,
+    IPatientProfile,
+    ISession,
+    IValuesInventory,
+} from 'shared/types';
 
 interface IServiceResponse {
     status: number;
@@ -63,4 +72,28 @@ export interface ICaseReviewResponse extends IServiceResponse {
 
 export interface ICaseReviewRequest extends IServiceResponse {
     casereview: ICaseReview;
+}
+
+export interface IMoodLogListResponse extends IServiceResponse {
+    moodlogs: IMoodLog[];
+}
+
+export interface IMoodLogResponse extends IServiceResponse {
+    moodlog: IMoodLog;
+}
+
+export interface IMoodLogRequest extends IServiceResponse {
+    moodlog: IMoodLog;
+}
+
+export interface IActivityListResponse extends IServiceResponse {
+    activities: IActivity[];
+}
+
+export interface IActivityResponse extends IServiceResponse {
+    activity: IActivity;
+}
+
+export interface IActivityRequest extends IServiceResponse {
+    activity: IActivity;
 }

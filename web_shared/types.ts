@@ -86,7 +86,7 @@ export interface IAssessment {
 }
 
 export interface IActivity {
-    activityId: string;
+    activityId?: string;
     name: string;
     value: string;
     lifeareaId: string;
@@ -152,6 +152,7 @@ export interface IAssessmentLog extends ILog {
 }
 
 export interface IMoodLog extends ILog {
+    moodLogId?: string;
     mood: number;
 }
 

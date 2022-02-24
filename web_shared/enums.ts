@@ -164,28 +164,7 @@ export type EntryType = SessionEntryType | CaseReviewEntryType;
 export const daysOfWeekValues = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
 export type DayOfWeek = typeof daysOfWeekValues[number];
-
-export enum DayOfWeekFlags {
-    None = 0,
-    Sunday = 1 << 0,
-    Monday = 1 << 1,
-    Tuesday = 1 << 2,
-    Wednesday = 1 << 3,
-    Thursday = 1 << 4,
-    Friday = 1 << 5,
-    Saturday = 1 << 6,
-    All = ~(~0 << 7),
-}
-
-export const daysOfWeekFlagValues = [
-    DayOfWeekFlags.Monday,
-    DayOfWeekFlags.Tuesday,
-    DayOfWeekFlags.Wednesday,
-    DayOfWeekFlags.Thursday,
-    DayOfWeekFlags.Friday,
-    DayOfWeekFlags.Saturday,
-    DayOfWeekFlags.Sunday,
-] as const;
+export type DayOfWeekFlags = { [item in DayOfWeek]: boolean };
 
 export const activitySuccessTypeValues = ['Yes', 'SomethingElse', 'No'];
 export type ActivitySuccessType = typeof activitySuccessTypeValues[number];

@@ -85,7 +85,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                         </TableCell>
                                         <TableCell>{`${
                                             viewState.selectedLog?.recordedDate &&
-                                            format(viewState.selectedLog.recordedDate, 'MM/dd')
+                                            format(viewState.selectedLog.recordedDate, 'MM/dd/yyyy h:mm aaa')
                                         }`}</TableCell>
                                     </TableRow>
                                     <TableRow>

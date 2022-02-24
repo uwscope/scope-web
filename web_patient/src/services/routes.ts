@@ -10,6 +10,7 @@ export const Routes = {
     phqProgress: 'phq',
     gadProgress: 'gad',
     activityProgress: 'activities',
+    moodProgress: 'mood',
 };
 
 export const Parameters = {
