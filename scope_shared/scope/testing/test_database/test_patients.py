@@ -1,8 +1,13 @@
+import copy
+
 import pymongo.database
+import scope.database.patient.patient_profile
 import scope.database.patients
+import scope.schema
+import scope.testing.schema
 
 
-def test_create_get_delete(
+def test_patient_create_get_delete(
     database_client: pymongo.database.Database,
 ):
     """
@@ -10,40 +15,63 @@ def test_create_get_delete(
     """
 
     # Create patient
-    patient_document = scope.database.patients.create_patient(database=database_client)
-
-    # Confirm get patient
-    document = scope.database.patients.get_patient(
+    created_patient_identity = scope.database.patients.create_patient(
         database=database_client,
-        patient_id=patient_document["_set_id"],
+        name="TEST NAME",
+        MRN="TEST MRN"
     )
-    assert document == patient_document
+    scope.testing.schema.assert_schema(
+        data=created_patient_identity,
+        schema=scope.schema.patient_identity_schema,
+        expected_valid=True,
+    )
 
-    # Confirm patient in list of patients
-    patients = scope.database.patients.get_patients(database=database_client)
-    assert patient_document in patients
+    # Confirm get patient identity via _set_id
+    retrieved_identity_document = scope.database.patients.get_patient_identity(
+        database=database_client,
+        patient_id=created_patient_identity["_set_id"],
+    )
+    assert retrieved_identity_document == created_patient_identity
+
+    # Confirm get patient identity via semantic set id
+    retrieved_identity_document = scope.database.patients.get_patient_identity(
+        database=database_client,
+        patient_id=created_patient_identity[scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID],
+    )
+    assert retrieved_identity_document == created_patient_identity
+
+    # Confirm patient identity in list of patient identities
+    patients = scope.database.patients.get_patient_identities(database=database_client)
+    assert created_patient_identity in patients
+
+    # Confirm patient profile document now exists
+    retrieved_profile = scope.database.patient.patient_profile.get_patient_profile(
+        collection=database_client.get_collection(created_patient_identity["collection"])
+    )
+    assert retrieved_profile is not None
 
     # Delete patient
     result = scope.database.patients.delete_patient(
         database=database_client,
-        patient_id=patient_document["_set_id"],
+        patient_id=created_patient_identity["_set_id"],
         destructive=True,
     )
     assert result
 
-    # Confirm get patient fails
-    document = scope.database.patients.get_patient(
+    # Confirm get patient identity now fails
+    retrieved_identity_document = scope.database.patients.get_patient_identity(
         database=database_client,
-        patient_id=patient_document["_set_id"],
+        patient_id=created_patient_identity["_set_id"],
     )
-    assert document is None
+    assert retrieved_identity_document is None
 
-    # Confirm patient not in list of patients
-    patients = scope.database.patients.get_patients(database=database_client)
-    assert patient_document not in patients
+    # Confirm patient identity not in list of patient identities
+    patients = scope.database.patients.get_patient_identities(database=database_client)
+    if patients:
+        assert created_patient_identity not in patients
 
 
-def test_delete_nonexistent(
+def test_patient_delete_nonexistent(
     database_client: pymongo.database.Database,
 ):
     """
@@ -57,3 +85,38 @@ def test_delete_nonexistent(
         destructive=True,
     )
     assert not result
+
+
+def test_patient_identity_update(
+    database_client: pymongo.database.Database,
+):
+    """
+    Test updating a patient identity.
+    """
+
+    # Create patient
+    created_patient_identity = scope.database.patients.create_patient(
+        database=database_client,
+        name="TEST NAME",
+        MRN="TEST MRN"
+    )
+    scope.testing.schema.assert_schema(
+        data=created_patient_identity,
+        schema=scope.schema.patient_identity_schema,
+        expected_valid=True,
+    )
+
+    # Modify the identity
+    modified_patient_identity = copy.deepcopy(created_patient_identity)
+    modified_patient_identity["name"] = "MODIFIED NAME"
+    modified_patient_identity["MRN"] = "MODIFIED MRN"
+    del modified_patient_identity["_id"]
+
+    result = scope.database.patients.put_patient_identity(
+        database=database_client,
+        patient_id=created_patient_identity["_set_id"],
+        patient_identity=modified_patient_identity
+    )
+
+    assert result.inserted_count == 1
+    assert result.document["_rev"] == 2
