@@ -1,12 +1,10 @@
-import base64
-import hashlib
-import uuid
-from typing import List, Optional
-
 import pymongo.database
 import scope.database.collection_utils as collection_utils
 
-PROVIDERS_COLLECTION = "providers"
+PROVIDER_IDENTITY_COLLECTION = "providers"
+
+PROVIDER_IDENTITY_DOCUMENT_TYPE = "providerIdentity"
+PROVIDER_IDENTITY_SEMANTIC_SET_ID = "providerId"
 
 
 def create_provider(
@@ -22,6 +20,7 @@ def create_provider(
     result = collection_utils.put_set_element(
         collection=collection,
         document_type=provider["_type"],
+        semantic_set_id=PROVIDER_IDENTITY_SEMANTIC_SET_ID,
         set_id=collection_utils.generate_set_id(),
         document=provider,
     )
