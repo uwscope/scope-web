@@ -8,6 +8,7 @@ from flask_json import FlaskJSON, as_json
 import blueprints.app.config
 import blueprints.registry.activities
 import blueprints.registry.assessments
+import blueprints.registry.assessment_logs
 import blueprints.registry.case_reviews
 import blueprints.registry.clinical_history
 import blueprints.registry.mood_logs
@@ -19,9 +20,6 @@ import blueprints.registry.sessions
 import blueprints.registry.scheduled_assessments
 import blueprints.registry.values_inventory
 import database
-
-# Import patient & registry blueprints.
-from blueprints.registry.assessment_logs import registry_assessment_logs_blueprint
 
 
 def create_app():
@@ -119,9 +117,10 @@ def create_app():
         blueprints.registry.scheduled_assessments.scheduled_assessments_blueprint,
         url_prefix="/patient/",
     )
-    # app.register_blueprint(
-    #     registry_assessment_logs_blueprint
-    # )  # url_prefix="/patients/<patient_collection>/assessmentlogs"
+    app.register_blueprint(
+        blueprints.registry.assessment_logs.assessment_logs_blueprint,
+        url_prefix="/patient/",
+    )
 
     # # Register all the `patient` blueprints, i.e. blueprints for web_patient
     # patient = Blueprint("patient", __name__, url_prefix="/patient")

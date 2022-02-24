@@ -85,7 +85,7 @@ def fixture_data_fake_activity_factory(
     """
 
     # A values inventory may randomly not include any values.
-    # Activites are not defined in such a scenario.
+    # Activities are not defined in such a scenario.
     # Generate a new values inventory that includes at least one value.
     values_inventory = data_fake_values_inventory_factory()
     while not len(values_inventory.get("values", [])) > 0:

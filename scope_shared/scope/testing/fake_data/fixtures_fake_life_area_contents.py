@@ -48,7 +48,7 @@ def fixture_data_fake_life_area_contents_factory() -> Callable[[], List[dict]]:
         fake_life_areas = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
-            schema=scope.schema.life_areas_schema,
+            schema=scope.schema.life_area_contents_schema,
             document=fake_life_areas,
         )
 

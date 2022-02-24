@@ -4,6 +4,7 @@ import pytest
 import random
 from typing import Callable, List
 
+import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.database.patient.scheduled_assessments
@@ -19,6 +20,8 @@ def _fake_scheduled_assessment(
 ) -> List[dict]:
     return [
         {
+            # TODO: SET semantic set id because assessment log needs it
+            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: collection_utils.generate_set_id(),
             "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
             "dueDate": format_utils.format_date(
                 faker_factory.date_between_dates(
@@ -149,3 +152,15 @@ def fixture_data_fake_scheduled_assessments_factory(
         return fake_scheduled_assessments
 
     return factory
+
+
+@pytest.fixture(name="data_fake_scheduled_assessments")
+def fixture_data_fake_assessments(
+    *,
+    data_fake_scheduled_assessments_factory: Callable[[], List[dict]],
+) -> dict:
+    """
+    Fixture for data_fake_scheduled_assessments.
+    """
+
+    return data_fake_scheduled_assessments_factory()

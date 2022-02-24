@@ -5,6 +5,8 @@ PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_activity",
     "scope.testing.fake_data.fixtures_fake_activities",
     "scope.testing.fake_data.fixtures_fake_assessments",
+    "scope.testing.fake_data.fixtures_fake_assessment_contents",
+    "scope.testing.fake_data.fixtures_fake_assessment_logs",
     "scope.testing.fake_data.fixtures_fake_case_review",
     "scope.testing.fake_data.fixtures_fake_case_reviews",
     "scope.testing.fake_data.fixtures_fake_clinical_history",
