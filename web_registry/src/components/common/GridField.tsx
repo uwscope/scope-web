@@ -26,15 +26,11 @@ import React, { FunctionComponent, useState } from 'react';
 import { KeyedMap } from 'shared/types';
 import styled, { CSSObject, ThemedStyledProps } from 'styled-components';
 import CloseIcon from '@mui/icons-material/Close';
+import { clearTime } from 'shared/time';
 
 const EditableFormControl = withTheme(
     styled(FormControl)(
-        (
-            props: ThemedStyledProps<
-                FormControlProps & { $editable: boolean },
-                any
-            >
-        ) =>
+        (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
             ({
                 minWidth: 160,
                 '>.MuiInput-underline:before': {
@@ -56,8 +52,8 @@ const EditableFormControl = withTheme(
                 '>.MuiInput-root': {
                     margin: 0,
                 },
-            } as CSSObject)
-    )
+            } as CSSObject),
+    ),
 );
 
 const SelectField = withTheme(
@@ -67,8 +63,8 @@ const SelectField = withTheme(
                 '>.MuiSelect-icon': {
                     display: props.$editable ? undefined : 'none',
                 },
-            } as CSSObject)
-    )
+            } as CSSObject),
+    ),
 );
 
 const OtherGrid = styled(Grid)({
@@ -84,6 +80,7 @@ const RadioLabel = styled(Typography)({
 
 interface IGridFieldBaseProps {
     editable?: boolean;
+    required?: boolean;
     label: string;
     xs?: GridSize;
     sm?: GridSize;
@@ -101,12 +98,9 @@ export interface IGridTextFieldProps extends IGridFieldProps {
     maxLine?: number;
     minLine?: number;
     type?: string;
-    required?: boolean;
 }
 
-export const GridTextField: FunctionComponent<IGridTextFieldProps> = (
-    props
-) => {
+export const GridTextField: FunctionComponent<IGridTextFieldProps> = (props) => {
     const {
         editable,
         label,
@@ -123,18 +117,16 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (
         required,
     } = props;
 
-    const handleChange = action(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (!!onChange) {
-                onChange(event.target.value);
-            }
+    const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!onChange) {
+            onChange(event.target.value);
         }
-    );
+    });
 
     return (
         <Grid item xs={xs || 12} sm={sm || 6}>
             <EditableFormControl fullWidth $editable={editable}>
-                <InputLabel shrink>{label}</InputLabel>
+                <InputLabel shrink>{`${label}${editable && required ? '*' : ''}`}</InputLabel>
                 <Input
                     required={required}
                     type={type}
@@ -147,9 +139,7 @@ export const GridTextField: FunctionComponent<IGridTextFieldProps> = (
                     fullWidth
                     placeholder={placeholder}
                 />
-                {!!helperText ? (
-                    <FormHelperText>{helperText}</FormHelperText>
-                ) : null}
+                {!!helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
             </EditableFormControl>
         </Grid>
     );
@@ -159,31 +149,26 @@ export interface IGridDropdownFieldProps extends IGridFieldProps {
     options: ReadonlyArray<string>;
 }
 
-export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (
-    props
-) => {
-    const { editable, label, value, options, onChange, xs, sm } = props;
+export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (props) => {
+    const { editable, label, value, options, onChange, xs, sm, required } = props;
 
-    const handleChange = action(
-        (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-            if (!!onChange) {
-                onChange(event.target.value as string);
-            }
+    const handleChange = action((event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+        if (!!onChange) {
+            onChange(event.target.value as string);
         }
-    );
+    });
 
     return (
         <Grid item xs={xs || 12} sm={sm || 6}>
             <EditableFormControl fullWidth $editable={editable}>
-                <InputLabel shrink>{label}</InputLabel>
+                <InputLabel shrink>{`${label}${editable && required ? '*' : ''}`}</InputLabel>
                 {editable ? (
                     <SelectField
                         $editable={editable}
                         value={value}
                         label={label}
                         onChange={handleChange}
-                        inputProps={{ readOnly: !editable }}
-                    >
+                        inputProps={{ readOnly: !editable }}>
                         {!!options
                             ? options.map((o) => (
                                   <MenuItem key={o} value={o}>
@@ -202,14 +187,12 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (
 
 export interface IGridDateFieldProps extends IGridFieldProps {}
 
-export const GridDateField: FunctionComponent<IGridDateFieldProps> = (
-    props
-) => {
-    const { editable, label, value, onChange, xs, sm } = props;
+export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => {
+    const { editable, label, value, onChange, xs, sm, required } = props;
 
     const handleChange = action((date: Date | null) => {
-        if (!!onChange && !!date) {
-            onChange(date);
+        if (!!onChange) {
+            onChange(!!date ? clearTime(date) : '');
         }
     });
 
@@ -217,7 +200,7 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (
         return (
             <Grid item xs={xs || 12} sm={sm || 6}>
                 <DatePicker
-                    label={label}
+                    label={`${label}${required ? '*' : ''}`}
                     value={value}
                     onChange={handleChange}
                     renderInput={(params) => (
@@ -241,9 +224,7 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (
                 sm={sm}
                 editable={false}
                 label={label}
-                value={
-                    !!value ? format(value as Date, 'MM/dd/yyyy') : 'unknown'
-                }
+                value={!!value ? format(value as Date, 'MM/dd/yyyy') : 'unknown'}
                 onChange={onChange}
             />
         );
@@ -260,22 +241,9 @@ export interface IGridMultiSelectFieldProps extends IGridFieldBaseProps {
     flagOrder?: string[];
 }
 
-export const GridMultiSelectField: FunctionComponent<
-    IGridMultiSelectFieldProps
-> = (props) => {
-    const {
-        editable,
-        label,
-        flags,
-        flagOrder,
-        other,
-        onChange,
-        onOtherChange,
-        xs,
-        sm,
-        maxLine,
-        disabled,
-    } = props;
+export const GridMultiSelectField: FunctionComponent<IGridMultiSelectFieldProps> = (props) => {
+    const { editable, label, flags, flagOrder, other, onChange, onOtherChange, xs, sm, maxLine, disabled, required } =
+        props;
 
     const handleChange = (flag: string) =>
         action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,27 +255,20 @@ export const GridMultiSelectField: FunctionComponent<
             }
         });
 
-    const handleOtherChange = action(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (!!onOtherChange) {
-                onOtherChange(event.target.value);
-            }
+    const handleOtherChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!onOtherChange) {
+            onOtherChange(event.target.value);
         }
-    );
+    });
 
     if (!!flags) {
-        const showOther =
-            Object.keys(flags).filter((f) => f == 'Other').length > 0;
+        const showOther = Object.keys(flags).filter((f) => f == 'Other').length > 0;
 
         if (editable) {
             return (
                 <Grid item xs={xs || 12} sm={sm || 6}>
-                    <EditableFormControl
-                        disabled={disabled}
-                        fullWidth
-                        $editable={true}
-                    >
-                        <InputLabel shrink>{label}</InputLabel>
+                    <EditableFormControl disabled={disabled} fullWidth $editable={true}>
+                        <InputLabel shrink>{`${label}${required ? '*' : ''}`}</InputLabel>
                         <Grid container>
                             {(flagOrder || Object.keys(flags))
                                 .filter((f) => f != 'Other')
@@ -319,9 +280,7 @@ export const GridMultiSelectField: FunctionComponent<
                                                 control={
                                                     <Checkbox
                                                         checked={flags[key]}
-                                                        onChange={handleChange(
-                                                            key
-                                                        )}
+                                                        onChange={handleChange(key)}
                                                         name={key}
                                                     />
                                                 }
@@ -388,6 +347,7 @@ export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
     otherFlags?: KeyedMap<string> | undefined;
     options: readonly string[];
     notOption: string;
+    defaultOption: string;
     onChange?: (flags: KeyedMap<string>) => void;
     onOtherChange?: (flags: KeyedMap<string>) => void;
     maxLine?: number;
@@ -395,9 +355,7 @@ export interface IGridMultiOptionsFieldProps extends IGridFieldBaseProps {
     flagOrder?: string[];
 }
 
-export const GridMultiOptionsField: FunctionComponent<
-    IGridMultiOptionsFieldProps
-> = (props) => {
+export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProps> = (props) => {
     const {
         editable,
         label,
@@ -406,21 +364,19 @@ export const GridMultiOptionsField: FunctionComponent<
         options,
         otherFlags = {},
         notOption,
+        defaultOption,
         onChange,
         onOtherChange,
         xs,
         sm,
         maxLine,
         disabled,
+        required,
     } = props;
 
     const [other, setOther] = useState<string>('');
 
-    const _handleFlagsChange = (
-        flag: string,
-        flags?: KeyedMap<string>,
-        onChange?: (flags: KeyedMap<string>) => void
-    ) =>
+    const _handleFlagsChange = (flag: string, flags?: KeyedMap<string>, onChange?: (flags: KeyedMap<string>) => void) =>
         action((event: React.MouseEvent<HTMLButtonElement>) => {
             if (!!onChange && !!flags) {
                 const newValue = (event.target as HTMLButtonElement).value;
@@ -435,11 +391,9 @@ export const GridMultiOptionsField: FunctionComponent<
             }
         });
 
-    const handleFlagsChange = (flag: string) =>
-        _handleFlagsChange(flag, flags, onChange);
+    const handleFlagsChange = (flag: string) => _handleFlagsChange(flag, flags, onChange);
 
-    const handleOtherFlagsChange = (flag: string) =>
-        _handleFlagsChange(flag, otherFlags, onOtherChange);
+    const handleOtherFlagsChange = (flag: string) => _handleFlagsChange(flag, otherFlags, onOtherChange);
 
     const handleOtherChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setOther(event.target.value);
@@ -451,7 +405,7 @@ export const GridMultiOptionsField: FunctionComponent<
             if (!!onOtherChange && !!trimOther && !(trimOther in otherFlags)) {
                 const newFlags: KeyedMap<string> = {};
                 Object.assign(newFlags, otherFlags);
-                newFlags[trimOther] = notOption;
+                newFlags[trimOther] = defaultOption;
                 setOther('');
                 onOtherChange(newFlags);
             }
@@ -475,12 +429,8 @@ export const GridMultiOptionsField: FunctionComponent<
         if (editable) {
             return (
                 <Grid item xs={xs || 12} sm={sm || 6}>
-                    <EditableFormControl
-                        disabled={disabled}
-                        fullWidth
-                        $editable={true}
-                    >
-                        <InputLabel shrink>{label}</InputLabel>
+                    <EditableFormControl disabled={disabled} fullWidth $editable={true}>
+                        <InputLabel shrink>{`${label}${required ? '*' : ''}`}</InputLabel>
                         {(flagOrder || Object.keys(flags)).map((key) => (
                             <Grid container key={key} alignItems="center">
                                 <Grid item xs={4}>
@@ -488,23 +438,12 @@ export const GridMultiOptionsField: FunctionComponent<
                                 </Grid>
 
                                 <Grid item xs={8}>
-                                    <RadioGroup
-                                        row
-                                        aria-label="gender"
-                                        name="gender1"
-                                        value={flags[key]}
-                                    >
+                                    <RadioGroup row aria-label="gender" name="gender1" value={flags[key]}>
                                         {visibleOptions.map((option) => (
                                             <FormControlLabel
                                                 key={option}
                                                 value={option}
-                                                control={
-                                                    <Radio
-                                                        onClick={handleFlagsChange(
-                                                            key
-                                                        )}
-                                                    />
-                                                }
+                                                control={<Radio onClick={handleFlagsChange(key)} />}
                                                 label={option}
                                             />
                                         ))}
@@ -520,23 +459,20 @@ export const GridMultiOptionsField: FunctionComponent<
                                     container
                                     direction="row"
                                     justifyContent="flex-start"
-                                    flexWrap="nowrap"
-                                >
+                                    flexWrap="nowrap">
                                     <RadioLabel
                                         sx={{
                                             textOverflow: 'ellipsis',
                                             overflow: 'hidden',
                                             whiteSpace: 'nowrap',
-                                        }}
-                                    >
+                                        }}>
                                         {key}
                                     </RadioLabel>
                                     <IconButton
                                         sx={{ padding: 0, paddingLeft: 2 }}
                                         size="small"
                                         aria-label="delete"
-                                        onClick={handleOtherDelete(key)}
-                                    >
+                                        onClick={handleOtherDelete(key)}>
                                         <CloseIcon fontSize="small" />
                                     </IconButton>
                                 </Grid>
@@ -547,19 +483,12 @@ export const GridMultiOptionsField: FunctionComponent<
                                         row
                                         aria-label="gender"
                                         name="gender1"
-                                        value={otherFlags[key]}
-                                    >
+                                        value={otherFlags[key]}>
                                         {visibleOptions.map((option) => (
                                             <FormControlLabel
                                                 key={option}
                                                 value={option}
-                                                control={
-                                                    <Radio
-                                                        onClick={handleOtherFlagsChange(
-                                                            key
-                                                        )}
-                                                    />
-                                                }
+                                                control={<Radio onClick={handleOtherFlagsChange(key)} />}
                                                 label={option}
                                             />
                                         ))}
@@ -587,10 +516,7 @@ export const GridMultiOptionsField: FunctionComponent<
                 .map((k) => `${k}-${flags[k]}`)
                 .join('\n');
             if (flags['Other'] != notOption) {
-                concatValues = [
-                    concatValues,
-                    `${other}-${flags['Other']}`,
-                ].join('\n');
+                concatValues = [concatValues, `${other}-${flags['Other']}`].join('\n');
             }
 
             return (
@@ -615,33 +541,22 @@ export interface IGridSwitchFieldProps extends IGridFieldBaseProps {
     onChange?: (on: boolean) => void;
 }
 
-export const GridSwitchField: FunctionComponent<IGridSwitchFieldProps> = (
-    props
-) => {
-    const { editable, label, on, onChange, xs, sm } = props;
+export const GridSwitchField: FunctionComponent<IGridSwitchFieldProps> = (props) => {
+    const { editable, label, on, onChange, xs, sm, required } = props;
 
-    const handleChange = action(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (!!onChange) {
-                const on = (event.target as HTMLInputElement).checked;
-                onChange(on);
-            }
+    const handleChange = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!onChange) {
+            const on = (event.target as HTMLInputElement).checked;
+            onChange(on);
         }
-    );
+    });
 
     return (
         <Grid item xs={xs || 12} sm={sm || 6}>
             <FormControlLabel
                 sx={{ marginLeft: 0 }}
-                control={
-                    <Switch
-                        checked={on}
-                        onChange={handleChange}
-                        name={label}
-                        disabled={!editable}
-                    />
-                }
-                label={label}
+                control={<Switch checked={on} onChange={handleChange} name={label} disabled={!editable} />}
+                label={`${label}${editable && required ? '*' : ''}`}
             />
         </Grid>
     );

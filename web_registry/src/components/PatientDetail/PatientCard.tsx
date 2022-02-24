@@ -1,10 +1,10 @@
 import EditIcon from '@mui/icons-material/Edit';
 import { Button, Divider, Grid, LinearProgress, Snackbar, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { format } from 'date-fns';
 import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent, useEffect, useState } from 'react';
+import { formatDateOnly } from 'shared/time';
 import { IPatientProfile, KeyedMap } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
@@ -118,7 +118,7 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                 <Grid item>
                     <LabeledField
                         label="dob"
-                        value={!!profile.birthdate ? format(profile.birthdate, 'MM/dd/yyyy') : '--'}
+                        value={!!profile.birthdate ? formatDateOnly(profile.birthdate, 'MM/dd/yyyy') : '--'}
                     />
                     <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
                     <LabeledField label="sex" value={profile.sex} />
