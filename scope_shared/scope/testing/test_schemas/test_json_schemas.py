@@ -26,18 +26,25 @@ TEST_CONFIGS = [
         document_path="clinical-history.json",
         expected_valid=True,
     ),
-    # identity
-    ConfigTestJSONSchema(
-        name="identity",
-        schema=scope.schema.identity_schema,
-        document_path="identity.json",
-        expected_valid=True,
-    ),
     # patient
     ConfigTestJSONSchema(
         name="patient",
         schema=scope.schema.patient_schema,
         document_path="patient.json",
+        expected_valid=True,
+    ),
+    # patient-identity
+    ConfigTestJSONSchema(
+        name="patient-identity",
+        schema=scope.schema.patient_identity_schema,
+        document_path="patient-identity.json",
+        expected_valid=True,
+    ),
+    # provider-identity
+    ConfigTestJSONSchema(
+        name="provider-identity",
+        schema=scope.schema.provider_identity_schema,
+        document_path="provider-identity.json",
         expected_valid=True,
     ),
     # profile
