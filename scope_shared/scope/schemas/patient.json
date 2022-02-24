@@ -8,8 +8,8 @@
 		"_type": { "const": "patient" },
 		"identity": {
 			"type": "object",
-			"description": "IIdentity schema",
-			"$ref": "/schemas/identity"
+			"description": "IPatientIdentity schema",
+			"$ref": "/schemas/patient-identity"
 		},
 		"profile": {
 			"type": "object",

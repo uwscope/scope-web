@@ -25,8 +25,8 @@
 		},
 		"consultingPsychiatrist": {
 			"type": "object",
-			"description": "IIdentity schema",
-			"$ref": "/schemas/identity"
+			"description": "IProviderIdentity schema",
+			"$ref": "/schemas/provider-identity"
 		},
 		"medicationChange": {
 			"type": "string"

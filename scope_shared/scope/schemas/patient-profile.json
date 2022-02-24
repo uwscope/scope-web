@@ -43,13 +43,13 @@
         },
         "primaryOncologyProvider": {
             "type": "object",
-            "description": "IIdentity schema",
-            "$ref": "/schemas/identity"
+            "description": "IProviderIdentity schema",
+            "$ref": "/schemas/provider-identity"
         },
         "primaryCareManager": {
             "type": "object",
-            "description": "IIdentity schema",
-            "$ref": "/schemas/identity"
+            "description": "IProviderIdentity schema",
+            "$ref": "/schemas/provider-identity"
         },
         "discussionFlag": {
             "$ref": "/schemas/enums#/properties/discussionFlags"
