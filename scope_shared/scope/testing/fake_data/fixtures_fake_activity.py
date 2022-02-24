@@ -29,6 +29,11 @@ def fake_activity_factory(
     """
 
     def factory() -> dict:
+
+        # TODO: Putting this here for activities flask tests to xfail.
+        if fake_values_inventory.get("values") in [[], None]:
+            return
+
         names = []
         for value in fake_values_inventory["values"]:
             for activity in value["activities"]:
