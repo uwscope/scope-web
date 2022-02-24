@@ -17,16 +17,16 @@ class RequestContext:
         # Use patient ID to confirm validity and obtain collection
         # TODO: As part of authentication, determine if we can cache this.
         #       Otherwise, maybe an annotation or enhance context to reduce code repetition.
-        patient_document = scope.database.patients.get_patient(
+        patient_identity_document = scope.database.patients.get_patient_identity(
             database=self.database,
             patient_id=patient_id,
         )
-        if patient_document is None:
+        if patient_identity_document is None:
             request_utils.abort_patient_not_found()
 
         # Obtain patient collection
         patient_collection = self.database.get_collection(
-            patient_document["collection"]
+            patient_identity_document["collection"]
         )
 
         return patient_collection
