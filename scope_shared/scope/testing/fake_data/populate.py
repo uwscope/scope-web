@@ -4,6 +4,7 @@ import pymongo.database
 
 import scope.database.patient.activities
 import scope.database.patient.assessments
+import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
@@ -17,6 +18,8 @@ import scope.database.providers
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_assessments
+import scope.testing.fake_data.fixtures_fake_assessment_contents
+import scope.testing.fake_data.fixtures_fake_assessment_logs
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
@@ -353,3 +356,56 @@ def _populate_patient(
                 )
 
     _values_inventory_and_activities()
+
+
+
+# =======
+#     fake_assessment_contents_factory = (
+#         scope.testing.fake_data.fixtures_fake_assessment_contents.fake_assessment_contents_factory()
+#     )
+#
+#     # Obtain fixed documents
+#     fake_life_areas = fake_life_areas_factory()
+#     fake_assessment_contents = fake_assessment_contents_factory()
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     fake_assessments_factory = (
+#         scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+#             faker_factory=faker_factory,
+#             fake_assessment_contents=fake_assessment_contents,
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+#         faker_factory=faker_factory,
+#         fake_assessments=fake_assessments,
+#     )
+#     fake_scheduled_assessments = fake_scheduled_assessments_factory()
+#
+#     fake_assessment_logs_factory = scope.testing.fake_data.fixtures_fake_assessment_logs.fake_assessment_logs_factory(
+#         faker_factory=faker_factory,
+#         fake_scheduled_assessments=fake_scheduled_assessments,
+#         fake_assessment_contents=fake_assessment_contents,
+#     )
+#     fake_assessment_logs = fake_assessment_logs_factory()
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     for scheduled_assessment in fake_scheduled_assessments:
+#         scope.database.patient.scheduled_assessments.put_scheduled_assessment(
+#             collection=patient_collection,
+#             scheduled_assessment=scheduled_assessment,
+#             set_id=scheduled_assessment[
+#                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+#             ],
+#         )
+#
+#     for assessment_log in fake_assessment_logs:
+#         scope.database.patient.assessment_logs.post_assessment_log(
+#             collection=patient_collection,
+#             assessment_log=assessment_log,
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)

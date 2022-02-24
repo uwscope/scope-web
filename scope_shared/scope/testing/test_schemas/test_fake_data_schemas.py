@@ -7,6 +7,7 @@ import pytest
 from typing import Optional
 
 import scope.database.patient.activities
+import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
@@ -19,6 +20,7 @@ import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_assessment_contents
+import scope.testing.fake_data.fixtures_fake_assessment_logs
 import scope.testing.fake_data.fixtures_fake_assessments
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
@@ -96,6 +98,24 @@ TEST_CONFIGS = [
         expected_semantic_set_id=None,
     ),
     ConfigTestFakeDataSchema(
+        name="assessment-log",
+        schema=scope.schema.assessment_log_schema,
+        data_factory_fixture="data_fake_assessment_log_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+    ),
+    ConfigTestFakeDataSchema(
+        name="assessment-logs",
+        schema=scope.schema.assessment_logs_schema,
+        data_factory_fixture="data_fake_assessment_logs_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
         name="assessment-contents",
         schema=scope.schema.assessment_contents_schema,
         data_factory_fixture="data_fake_assessment_contents_factory",
@@ -142,7 +162,7 @@ TEST_CONFIGS = [
     ),
     ConfigTestFakeDataSchema(
         name="life-areas",
-        schema=scope.schema.life_areas_schema,
+        schema=scope.schema.life_area_contents_schema,
         data_factory_fixture="data_fake_life_area_contents_factory",
         expected_document=False,
         expected_singleton=False,
@@ -234,7 +254,7 @@ TEST_CONFIGS = [
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
+        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessments",

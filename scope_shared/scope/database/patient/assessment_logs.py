@@ -1,107 +1,73 @@
-import hashlib
-import re
 from typing import List, Optional
 
-import bson
-import pymongo
-import pymongo.database
-import pymongo.errors
-import pymongo.results
+import pymongo.collection
+import scope.database.collection_utils
 
-TYPE = "assessmentLog"
+DOCUMENT_TYPE = "assessmentLog"
+SEMANTIC_SET_ID = "assessmentLogId"
 
 
 def get_assessment_logs(
-    *, database: pymongo.database.Database, collection_name: str
-) -> Optional[list]:
+    *,
+    collection: pymongo.collection.Collection,
+) -> Optional[List[dict]]:
     """
-    Retrieve list of "assessmentLog" document.
+    Get list of "assessmentLog" documents.
     """
 
-    collection = database.get_collection(name=collection_name)
-
-    # NOTE: James.
-    # Find unique log ids and assessment names and then get document with latest _rev from them.
-    pipeline = [
-        {"$match": {"_type": TYPE}},
-        {"$sort": {"_rev": pymongo.DESCENDING}},
-        {
-            "$group": {
-                "_id": {
-                    "_log_id": "$_log_id",
-                    "assessmentName": "$assessmentName",
-                },
-                "latest_assessment_log_document": {"$first": "$$ROOT"},
-            }
-        },
-        {"$replaceRoot": {"newRoot": "$latest_assessment_log_document"}},
-    ]
-
-    found_assessment_logs = list(collection.aggregate(pipeline))
-    if found_assessment_logs is not None:
-        for fal in found_assessment_logs:
-            if "_id" in fal:
-                fal["_id"] = str(fal["_id"])
-
-    return found_assessment_logs
+    return scope.database.collection_utils.get_set(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+    )
 
 
 def get_assessment_log(
-    *, database: pymongo.database.Database, collection_name: str, log_id: str
-) -> Optional[list]:
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+) -> Optional[dict]:
     """
-    Retrieve "assessmentLog" document.
+    Get "assessmentLog" document.
     """
 
-    collection = database.get_collection(name=collection_name)
-
-    # NOTE: This is wrong. There are multiple assessment log documents because uniquness is on (log_id, assessmentName).
-    query = {"_type": TYPE, "_log_id": log_id}
-
-    # Find the document with highest `_rev`.
-    assessment_log = collection.find_one(
-        filter=query, sort=[("_rev", pymongo.DESCENDING)]
+    return scope.database.collection_utils.get_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
     )
 
-    if "_id" in assessment_log:
-        assessment_log["_id"] = str(assessment_log["_id"])
-    # TODO: Verify schema against assessment log json.
 
-    return assessment_log
-
-
-def create_assessment_log(
-    *, database: pymongo.database.Database, collection_name: str, assessment_log: dict
-):
+def post_assessment_log(
+    *,
+    collection: pymongo.collection.Collection,
+    assessment_log: dict,
+) -> scope.database.collection_utils.SetPostResult:
     """
-    Create the "assessmentLog" document.
+    Post "assessmentLog" document.
     """
 
-    collection = database.get_collection(name=collection_name)
-
-    # Make sure _log_id does not already exist. NOTE: needs to have assessmentName as well.
-    query = {"_type": TYPE, "_log_id": assessment_log["_log_id"]}
-    if collection.find_one(filter=query) is None:
-        try:
-            result = collection.insert_one(document=assessment_log)
-            return result
-        except pymongo.errors.DuplicateKeyError:
-            return None
-    else:
-        return None
+    return scope.database.collection_utils.post_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
+        document=assessment_log,
+    )
 
 
-def update_assessment_log(
-    *, database: pymongo.database.Database, collection_name: str, assessment_log: dict
-):
+def put_assessment_log(
+    *,
+    collection: pymongo.collection.Collection,
+    assessment_log: dict,
+    set_id: str,
+) -> scope.database.collection_utils.SetPutResult:
     """
-    Update (insert) the "assessmentLog" document.
+    Put "assessmentLog" document.
     """
 
-    collection = database.get_collection(name=collection_name)
-
-    try:
-        result = collection.insert_one(document=assessment_log)
-        return result
-    except pymongo.errors.DuplicateKeyError:
-        return None
+    return scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
+        set_id=set_id,
+        document=assessment_log,
+    )
