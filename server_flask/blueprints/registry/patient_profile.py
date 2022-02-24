@@ -67,7 +67,9 @@ def put_patient_profile(patient_id):
     # Store the document
     try:
         result = scope.database.patient.patient_profile.put_patient_profile(
+            database=request_context().database,
             collection=patient_collection,
+            patient_id=patient_id,
             patient_profile=document,
         )
     except pymongo.errors.DuplicateKeyError:
