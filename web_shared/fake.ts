@@ -1,7 +1,7 @@
 import { addDays, format } from 'date-fns';
 import { flatten, random, sample } from 'lodash';
 import { LoremIpsum } from 'lorem-ipsum';
-import { DayOfWeekFlags, dueTypeValues } from 'shared/enums';
+import { dueTypeValues } from 'shared/enums';
 import {
     IActivity,
     IAssessmentLog,
@@ -68,7 +68,7 @@ export const getFakeActivities = (): IActivity[] => {
             hasReminder: false,
             reminderTimeOfDay: 9,
             hasRepetition: true,
-            repeatDayFlags: DayOfWeekFlags.Monday | DayOfWeekFlags.Wednesday,
+            repeatDayFlags: {},
             isActive: true,
             isDeleted: false,
         } as IActivity,
@@ -82,7 +82,7 @@ export const getFakeActivities = (): IActivity[] => {
             hasReminder: true,
             reminderTimeOfDay: 12,
             hasRepetition: false,
-            repeatDayFlags: DayOfWeekFlags.None,
+            repeatDayFlags: {},
             isActive: true,
             isDeleted: false,
         } as IActivity,
@@ -96,7 +96,7 @@ export const getFakeActivities = (): IActivity[] => {
             hasReminder: false,
             reminderTimeOfDay: 12,
             hasRepetition: true,
-            repeatDayFlags: DayOfWeekFlags.Friday,
+            repeatDayFlags: {},
             isActive: false,
             isDeleted: false,
         } as IActivity,

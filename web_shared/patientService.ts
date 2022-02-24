@@ -1,7 +1,6 @@
 import { compareAsc } from 'date-fns';
 import _, { random } from 'lodash';
 import {
-    getFakeActivities,
     getFakeAssessmentLog,
     getFakePatientConfig,
     getFakeSafetyPlan,
@@ -41,6 +40,14 @@ import {
     ISession,
     IValuesInventory,
 } from 'shared/types';
+import {
+    IActivityListResponse,
+    IActivityRequest,
+    IActivityResponse,
+    IMoodLogListResponse,
+    IMoodLogRequest,
+    IMoodLogResponse,
+} from './serviceTypes';
 
 export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
@@ -72,6 +79,7 @@ export interface IPatientService extends IServiceBase {
     updateCaseReview(caseReview: ICaseReview): Promise<ICaseReview>;
 
     getScheduledActivities(): Promise<IScheduledActivity[]>;
+
     getActivities(): Promise<IActivity[]>;
     addActivity(activity: IActivity): Promise<IActivity>;
     updateActivity(activity: IActivity): Promise<IActivity>;
@@ -249,34 +257,26 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getActivities(): Promise<IActivity[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IActivity[]>(`/activities`);
-            return response.data;
-        } catch (error) {
-            const activities = getFakeActivities();
-            return await new Promise((resolve) => setTimeout(() => resolve(activities), 500));
-        }
+        const response = await this.axiosInstance.get<IActivityListResponse>(`/activities`);
+        return response.data?.activities;
     }
 
     public async addActivity(activity: IActivity): Promise<IActivity> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<IActivity>(`/activities`, activity);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(activity), 500));
-        }
+        (activity as any)._type = 'activity';
+
+        const response = await this.axiosInstance.post<IActivityResponse>(`/activities`, {
+            activity,
+        } as IActivityRequest);
+        return response.data?.activity;
     }
 
     public async updateActivity(activity: IActivity): Promise<IActivity> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<IActivity>(`/activity/${activity.activityId}`, activity);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(activity), 500));
-        }
+        logger.assert((activity as any)._type === 'activity', `invalid _type for activity: ${(activity as any)._type}`);
+
+        const response = await this.axiosInstance.put<IActivityResponse>(`/activity/${activity.activityId}`, {
+            activity,
+        } as IActivityRequest);
+        return response.data?.activity;
     }
 
     public async getPatientConfig(): Promise<IPatientConfig> {
@@ -346,25 +346,17 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getMoodLogs(): Promise<IMoodLog[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IMoodLog[]>(`/moodlogs`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve([]), 500));
-        }
+        const response = await this.axiosInstance.get<IMoodLogListResponse>(`/moodlogs`);
+        return response.data?.moodlogs;
     }
 
     public async addMoodLog(moodLog: IMoodLog): Promise<IMoodLog> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<IMoodLog>(`/moodlogs`, moodLog);
-            return response.data;
-        } catch (error) {
-            moodLog.logId = random(100000).toString();
-            moodLog.recordedDate = new Date();
-            return await new Promise((resolve) => setTimeout(() => resolve(moodLog), 500));
-        }
+        (moodLog as any)._type = 'moodLog';
+
+        const response = await this.axiosInstance.post<IMoodLogResponse>(`/moodlogs`, {
+            moodlog: moodLog,
+        } as IMoodLogRequest);
+        return response.data?.moodlog;
     }
 }
 

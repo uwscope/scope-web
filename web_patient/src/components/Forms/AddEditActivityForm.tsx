@@ -20,10 +20,10 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { action } from 'mobx';
+import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-import { DayOfWeekFlags, daysOfWeekFlagValues } from 'shared/enums';
+import { DayOfWeek, daysOfWeekValues } from 'shared/enums';
 import { IActivity, KeyedMap } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
@@ -33,29 +33,6 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
-
-const isFlagSet = (value: DayOfWeekFlags, flag: DayOfWeekFlags) => {
-    return (value & flag) == flag;
-};
-
-const getDayString = (day: DayOfWeekFlags) => {
-    if (day == DayOfWeekFlags.Monday) {
-        return 'Monday';
-    } else if (day == DayOfWeekFlags.Tuesday) {
-        return 'Tuesday';
-    } else if (day == DayOfWeekFlags.Wednesday) {
-        return 'Wednesday';
-    } else if (day == DayOfWeekFlags.Thursday) {
-        return 'Thursday';
-    } else if (day == DayOfWeekFlags.Friday) {
-        return 'Friday';
-    } else if (day == DayOfWeekFlags.Saturday) {
-        return 'Saturday';
-    } else if (day == DayOfWeekFlags.Sunday) {
-        return 'Sunday';
-    }
-    return 'Unknown';
-};
 
 interface ImportableActivity {
     activity: string;
@@ -85,7 +62,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivity>(() => ({
-        activityId: activityId || '',
+        ...activity,
         name: activity?.name || '',
         value: activity?.value || '',
         lifeareaId: activity?.lifeareaId || '',
@@ -94,9 +71,14 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         hasReminder: activity?.hasReminder || false,
         reminderTimeOfDay: activity?.reminderTimeOfDay || 9,
         hasRepetition: activity?.hasRepetition || false,
-        repeatDayFlags: activity?.repeatDayFlags || DayOfWeekFlags.None,
+        repeatDayFlags: Object.assign(
+            {},
+            ...daysOfWeekValues.map((x) => ({
+                [x]: !!activity?.repeatDayFlags?.[x],
+            })),
+        ),
         isActive: activity?.isActive || true,
-        isDeleted: activity?.isDeleted || true,
+        isDeleted: activity?.isDeleted || false,
     }));
 
     const values = valuesInventory?.values || [];
@@ -120,8 +102,16 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         });
     });
 
-    const handleSubmit = action(() => {
-        return patientStore.updateActivity(dataState);
+    const handleSubmit = action(async () => {
+        const activity = toJS(dataState);
+
+        if (!!activity.activityId) {
+            await patientStore.updateActivity(dataState);
+        } else {
+            await patientStore.addActivity(dataState);
+        }
+
+        return !patientStore.loadActivitiesState.error;
     });
 
     const handleOpenImportActivity = action(() => {
@@ -146,12 +136,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         dataState.lifeareaId = event.target.value as string;
     });
 
-    const handleRepeatChange = action((checked: boolean, day: DayOfWeekFlags) => {
-        if (checked) {
-            dataState.repeatDayFlags = dataState.repeatDayFlags | day;
-        } else {
-            dataState.repeatDayFlags &= ~day;
-        }
+    const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
+        dataState.repeatDayFlags[day] = checked;
     });
 
     const handleValueChange = action((key: string, value: any) => {
@@ -194,20 +180,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
                                     <DialogContent dividers>
                                         <List disablePadding>
-                                            {Object.keys(groupedActivities).map((lifearea) => (
-                                                <Fragment key={lifearea}>
-                                                    <ListSubheader disableGutters>{lifearea}</ListSubheader>
-                                                    {groupedActivities[lifearea].map((activity, idx) => (
-                                                        <ListItem
-                                                            disableGutters
-                                                            button
-                                                            onClick={() => handleImportActivityItemClick(activity)}
-                                                            key={idx}>
-                                                            <ListItemText primary={activity.activity} />
-                                                        </ListItem>
-                                                    ))}
-                                                </Fragment>
-                                            ))}
+                                            {Object.keys(groupedActivities).map((lifearea) => {
+                                                const lifeareaName =
+                                                    lifeAreas.find((l) => l.id == lifearea)?.name || lifearea;
+                                                return (
+                                                    <Fragment key={lifearea}>
+                                                        <ListSubheader disableGutters>{lifeareaName}</ListSubheader>
+                                                        {groupedActivities[lifearea].map((activity, idx) => (
+                                                            <ListItem
+                                                                disableGutters
+                                                                button
+                                                                onClick={() => handleImportActivityItemClick(activity)}
+                                                                key={idx}>
+                                                                <ListItemText primary={activity.activity} />
+                                                            </ListItem>
+                                                        ))}
+                                                    </Fragment>
+                                                );
+                                            })}
                                         </List>
                                     </DialogContent>
                                 </Dialog>
@@ -364,7 +354,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 <FormSection
                     addPaddingTop
                     prompt={getString(
-                        !!activity ? 'Form_add_activity_reminder_time_label' : 'Form_add_activity_reminder_time'
+                        !!activity ? 'Form_add_activity_reminder_time_label' : 'Form_add_activity_reminder_time',
                     )}
                     content={
                         <TimePicker
@@ -421,24 +411,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 <FormSection
                     addPaddingTop
                     prompt={getString(
-                        !!activity ? 'Form_add_activity_repetition_days_label' : 'Form_add_activity_repetition_days'
+                        !!activity ? 'Form_add_activity_repetition_days_label' : 'Form_add_activity_repetition_days',
                     )}
                     content={
                         <FormGroup row>
-                            {daysOfWeekFlagValues.map((day) => {
+                            {daysOfWeekValues.map((day) => {
                                 return (
                                     <FormControlLabel
                                         key={day}
                                         control={
                                             <Checkbox
-                                                checked={isFlagSet(dataState.repeatDayFlags, day)}
+                                                checked={dataState.repeatDayFlags[day]}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                     handleRepeatChange((e.target as HTMLInputElement).checked, day)
                                                 }
-                                                value={DayOfWeekFlags.Sunday}
+                                                value={day}
                                             />
                                         }
-                                        label={getDayString(day)}
+                                        label={day}
                                     />
                                 );
                             })}
@@ -460,7 +450,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         },
         {
             content: repetitionPage,
-            canGoNext: !dataState.hasRepetition || dataState.repeatDayFlags != DayOfWeekFlags.None,
+            canGoNext: !dataState.hasRepetition || Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0,
         },
     ];
 

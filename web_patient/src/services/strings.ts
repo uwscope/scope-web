@@ -123,6 +123,7 @@ const _strings = {
     Progress_phq_assessment_title: 'PHQ-9 Assessments',
     Progress_gad_assessment_title: 'GAD-7 Assessments',
     Progress_activity_tracking_title: 'Activity Tracking',
+    Progress_mood_tracking_title: 'Mood Tracking',
 
     Activity_tracking_column_date: 'Date',
     Activity_tracking_column_name: 'Activity Name',
@@ -140,6 +141,12 @@ const _strings = {
     Activity_tracking_log_lifearea_none: 'Uncategorized',
     Activity_tracking_log_value_none: 'Unspecified',
     Activity_tracking_no_data: 'There are no submitted activity data.',
+
+    Mood_tracking_column_date: 'Date',
+    Mood_tracking_column_mood: 'Mood',
+    Mood_tracking_column_comment: 'Note',
+    Mood_tracking_detail_title: 'Mood Entry',
+    Mood_tracking_no_data: 'There are no submitted mood data.',
 
     Assessment_progress_column_date: 'Date',
     Assessment_progress_column_total: 'Total',
@@ -163,6 +170,8 @@ const _strings = {
     Careplan_activity_item_deactivate: 'Deativate',
 
     Careplan_add_activity: 'Add activity',
+
+    Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
     Form_add_activity_title: 'Add activity',
     Form_edit_activity_title: 'Edit activity',

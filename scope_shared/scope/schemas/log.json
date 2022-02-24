@@ -9,8 +9,8 @@
 			"type": "string"
 		},
 		"recordedDate": {
-			"$ref": "/schemas/datetime#/properties/date"
-		},
+            "$ref": "/schemas/datetime#/properties/datetime"
+        },
 		"comment": {
 			"type": "string"
 		}

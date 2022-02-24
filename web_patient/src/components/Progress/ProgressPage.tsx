@@ -16,14 +16,14 @@ export const ProgressPage: FunctionComponent = () => {
                     <ListItem disableGutters={true} component={Link} to={Routes.phqProgress}>
                         <ListCard
                             title={getString('Progress_phq_assessment_title')}
-                            imageSrc={getImage('Resources_values_button_image')}
+                            imageSrc={getImage('Progress_assessment_phq_button_image')}
                         />
                     </ListItem>
                     <Divider />
                     <ListItem disableGutters={true} component={Link} to={Routes.gadProgress}>
                         <ListCard
                             title={getString('Progress_gad_assessment_title')}
-                            imageSrc={getImage('Resources_values_button_image')}
+                            imageSrc={getImage('Progress_assessment_gad_button_image')}
                         />
                     </ListItem>
                     <Divider />
@@ -31,6 +31,13 @@ export const ProgressPage: FunctionComponent = () => {
                         <ListCard
                             title={getString('Progress_activity_tracking_title')}
                             imageSrc={getImage('Progress_activity_button_image')}
+                        />
+                    </ListItem>
+                    <Divider />
+                    <ListItem disableGutters={true} component={Link} to={Routes.moodProgress}>
+                        <ListCard
+                            title={getString('Progress_mood_tracking_title')}
+                            imageSrc={getImage('Progress_mood_button_image')}
                         />
                     </ListItem>
                 </List>

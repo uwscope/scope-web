@@ -64,6 +64,7 @@ export const HomePage: FunctionComponent = observer(() => {
                         <ListItem button onClick={onValuesInventoryClick}>
                             <ListItemAvatar>
                                 <Avatar
+                                    variant="square"
                                     alt={getString('Home_values_button_text')}
                                     src={getImage('Home_values_button_image')}
                                 />
@@ -76,6 +77,7 @@ export const HomePage: FunctionComponent = observer(() => {
                         <ListItem button onClick={onSafetyPlanClick}>
                             <ListItemAvatar>
                                 <Avatar
+                                    variant="square"
                                     alt={getString('Home_safety_button_text')}
                                     src={getImage('Home_safety_button_image')}
                                 />
@@ -97,9 +99,10 @@ export const HomePage: FunctionComponent = observer(() => {
                                     })}>
                                     <ListItemAvatar>
                                         <Avatar
+                                            variant="square"
                                             alt={getString('Home_assessment_button_text').replace(
                                                 '${assessment}',
-                                                assessment.assessmentName
+                                                assessment.assessmentName,
                                             )}
                                             src={getImage('Home_safety_button_image')}
                                         />
@@ -107,7 +110,7 @@ export const HomePage: FunctionComponent = observer(() => {
                                     <ListItemText
                                         primary={getString('Home_assessment_button_text').replace(
                                             '${assessment}',
-                                            assessment.assessmentName
+                                            assessment.assessmentName,
                                         )}
                                     />
                                 </ListItem>
@@ -116,25 +119,29 @@ export const HomePage: FunctionComponent = observer(() => {
                         ))}
                     <ListItem button component={Link} to={getFormLink(ParameterValues.form.moodLog)}>
                         <ListItemAvatar>
-                            <Avatar alt={getString('Home_mood_button_text')} src={getImage('Home_mood_button_image')} />
+                            <Avatar
+                                variant="square"
+                                alt={getString('Home_mood_button_text')}
+                                src={getImage('Home_mood_button_image')}
+                            />
                         </ListItemAvatar>
                         <ListItemText primary={getString('Home_mood_button_text')} />
                     </ListItem>
                 </CompactList>
             </Section>
             <Section title={getString('Home_plan_title')}>
-                <CompactList>
-                    {!!todayItems && todayItems.length > 0 ? (
-                        todayItems.map((item, idx) => (
+                {!!todayItems && todayItems.length > 0 ? (
+                    <CompactList>
+                        {todayItems.map((item, idx) => (
                             <Fragment key={item.scheduleId}>
                                 <ScheduledListItem item={item} onClick={onTaskClick(item)} />
                                 {idx < todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
-                        ))
-                    ) : (
-                        <Typography variant="body2">{getString('Home_plan_done')}</Typography>
-                    )}
-                </CompactList>
+                        ))}
+                    </CompactList>
+                ) : (
+                    <Typography variant="body2">{getString('Home_plan_done')}</Typography>
+                )}
             </Section>
         </MainPage>
     );
