@@ -228,14 +228,14 @@
 			"type": "string",
 			"description": "Referral Type",
 			"enum": [
-				"Psychiatry",
-				"Psychology",
-				"Pt Navigation",
-				"Integrative Medicine",
-				"Spiritual Care",
-				"Palliative Care",
-				"Other"
-			]
+                "Psychiatry",
+                "Psychology",
+                "Patient Navigation",
+                "Integrative Medicine",
+                "Spiritual Care",
+                "Palliative Care",
+                "Other"
+            ]
 		},
 		"referralStatus": {
 			"type": "string",

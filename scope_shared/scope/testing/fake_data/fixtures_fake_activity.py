@@ -15,6 +15,9 @@ import scope.testing.fake_data.fake_utils as fake_utils
 
 # TODO: James Comment 2/22:  I am not sure this is all correct / consistent
 
+# TODO: This will create invalid activities if fake_values_inventory["values"] == []
+
+
 def fake_activity_factory(
     *,
     faker_factory: faker.Faker,
@@ -42,7 +45,9 @@ def fake_activity_factory(
             "_type": "activity",
             "name": name,
             "value": random.choice(
-                [value["name"] for value in fake_values_inventory["values"]]
+                [
+                    value["name"] for value in fake_values_inventory["values"]
+                ]  # TODO: This will be empty if "values" is an empty list
             ),
             "lifeareaId": random.choice(
                 [fake_life_area["id"] for fake_life_area in fake_life_areas]
