@@ -3,6 +3,12 @@
 from enum import Enum
 
 
+class ActivitySuccessType(Enum):
+    Yes = "Yes"
+    SomethingElse = "SomethingElse"
+    No = "No"
+
+
 class ClinicCode(Enum):
     Breast = "Breast"
     Endocrine = "Endocrine"

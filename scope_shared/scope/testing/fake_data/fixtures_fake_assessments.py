@@ -156,7 +156,7 @@ def fixture_data_fake_assessments_factory(
 def fixture_data_fake_assessments(
     *,
     data_fake_assessments_factory: Callable[[], List[dict]],
-) -> dict:
+) -> List[dict]:
     """
     Fixture for data_fake_assessments.
     """

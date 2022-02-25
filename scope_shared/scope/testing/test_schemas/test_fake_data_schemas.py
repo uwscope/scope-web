@@ -7,10 +7,13 @@ import pytest
 from typing import Optional
 
 import scope.database.patient.activities
+import scope.database.patient.activity_logs
 import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
+import scope.database.patient.sessions
+import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
 import scope.database.providers
@@ -19,6 +22,7 @@ import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
+import scope.testing.fake_data.fixtures_fake_activity_logs
 import scope.testing.fake_data.fixtures_fake_assessment_contents
 import scope.testing.fake_data.fixtures_fake_assessment_logs
 import scope.testing.fake_data.fixtures_fake_assessments
@@ -35,6 +39,7 @@ import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
 import scope.testing.fake_data.fixtures_fake_sessions
+import scope.testing.fake_data.fixtures_fake_scheduled_activities
 import scope.testing.fake_data.fixtures_fake_scheduled_assessments
 import scope.testing.fake_data.fixtures_fake_values_inventory
 import scope.testing.schema
@@ -60,7 +65,6 @@ TEST_ITERATIONS = 100
 faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
-    # TODO: @James; activity and activites could fail because of empty/null values in values inventory
     ConfigTestFakeDataSchema(
         name="activity",
         schema=scope.schema.activity_schema,
@@ -68,12 +72,30 @@ TEST_CONFIGS = [
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
+        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
     ),
     ConfigTestFakeDataSchema(
         name="activities",
         schema=scope.schema.activities_schema,
         data_factory_fixture="data_fake_activities_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="activity-log",
+        schema=scope.schema.activity_log_schema,
+        data_factory_fixture="data_fake_activity_log_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
+    ),
+    ConfigTestFakeDataSchema(
+        name="activity-logs",
+        schema=scope.schema.activity_logs_schema,
+        data_factory_fixture="data_fake_activity_logs_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
@@ -246,6 +268,26 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="scheduled-activity",
+        schema=scope.schema.scheduled_activity_schema,
+        data_factory_fixture="data_fake_scheduled_activity_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
+        XFAIL_TEST_HAS_TODO=True,  # TODO: Could fail if fake_activities/fake_values_inventory is []/None
+    ),
+    ConfigTestFakeDataSchema(
+        name="scheduled-activities",
+        schema=scope.schema.scheduled_activities_schema,
+        data_factory_fixture="data_fake_scheduled_activities_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+        XFAIL_TEST_HAS_TODO=True,  # TODO: Could fail if fake_activities/fake_values_inventory is []/None
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessment",

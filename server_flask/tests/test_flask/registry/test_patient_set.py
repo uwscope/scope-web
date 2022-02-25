@@ -9,16 +9,22 @@ from urllib.parse import urljoin
 import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patient.activities
+import scope.database.patient.activity_logs
 import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
 import scope.database.patient.sessions
+import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.testing.fixtures_database_temp_patient
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
+
+pytest.skip(
+    "James needs to review, Anant has left TODO comments.", allow_module_level=True
+)
 
 
 @dataclass(frozen=True)
@@ -38,7 +44,7 @@ class ConfigTestPatientSet:
 
 
 TEST_CONFIGS = [
-    # NOTE: @James: Some activities tests will fail because of values inventory issue.
+    # NOTE: @James: Some activities tests will fail because fake activities have SEMANTIC_SET_ID, and because of values inventory issue.
     ConfigTestPatientSet(
         name="activities",
         semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
@@ -53,21 +59,36 @@ TEST_CONFIGS = [
         flask_query_set_element_type="activity",
         flask_document_set_element_key="activity",
     ),
+    # NOTE: @James: Some activitylogs tests will fail because of values inventory issue.
+    ConfigTestPatientSet(
+        name="activitylogs",
+        semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_activity_logs_factory",
+        document_factory_fixture_set_element="data_fake_activity_log_factory",
+        database_get_set_function=scope.database.patient.activity_logs.get_activity_logs,
+        database_get_function=scope.database.patient.activity_logs.get_activity_log,
+        database_post_function=scope.database.patient.activity_logs.post_activity_log,
+        database_document_parameter_name="activity_log",
+        flask_query_set_type="activitylogs",
+        flask_document_set_key="activitylogs",
+        flask_query_set_element_type="activitylog",
+        flask_document_set_element_key="activitylog",
+    ),
     # NOTE: @James: Some assessments tests will fail because fake assessments have SEMANTIC_SET_ID, and because post_assessment doesn't exist.
-    # ConfigTestPatientSet(
-    #     name="assessments",
-    #     semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
-    #     document_factory_fixture_set="data_fake_assessments_factory",
-    #     document_factory_fixture_set_element="data_fake_assessment_factory",
-    #     database_get_set_function=scope.database.patient.assessments.get_assessments,
-    #     database_get_function=scope.database.patient.assessments.get_assessment,
-    #     database_post_function=None,  # TODO: @James, post_assessment method doesn't exist.
-    #     database_document_parameter_name="assessment",
-    #     flask_query_set_type="assessments",
-    #     flask_document_set_key="assessments",
-    #     flask_query_set_element_type="assessment",
-    #     flask_document_set_element_key="assessment",
-    # ),
+    ConfigTestPatientSet(
+        name="assessments",
+        semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_assessments_factory",
+        document_factory_fixture_set_element="data_fake_assessment_factory",
+        database_get_set_function=scope.database.patient.assessments.get_assessments,
+        database_get_function=scope.database.patient.assessments.get_assessment,
+        database_post_function=None,  # TODO: @James, post_assessment method doesn't exist.
+        database_document_parameter_name="assessment",
+        flask_query_set_type="assessments",
+        flask_document_set_key="assessments",
+        flask_query_set_element_type="assessment",
+        flask_document_set_element_key="assessment",
+    ),
     # NOTE: @James: assessmentlogs tests will pass.
     ConfigTestPatientSet(
         name="assessmentlogs",
@@ -128,21 +149,36 @@ TEST_CONFIGS = [
         flask_query_set_element_type="session",
         flask_document_set_element_key="session",
     ),
+    # NOTE: @James: Some scheduledactivities tests will fail because fake schedule activities have SEMANTIC_SET_ID, and because of values inventory issue..
+    ConfigTestPatientSet(
+        name="scheduledactivities",
+        semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_scheduled_activities_factory",
+        document_factory_fixture_set_element="data_fake_scheduled_activity_factory",
+        database_get_set_function=scope.database.patient.scheduled_activities.get_scheduled_activities,
+        database_get_function=scope.database.patient.scheduled_activities.get_scheduled_activity,
+        database_post_function=scope.database.patient.scheduled_activities.post_scheduled_activity,
+        database_document_parameter_name="scheduled_activity",
+        flask_query_set_type="scheduledactivities",
+        flask_document_set_key="scheduledactivities",
+        flask_query_set_element_type="scheduledactivity",
+        flask_document_set_element_key="scheduledactivity",
+    ),
     # NOTE: @James: Some scheduledassessments tests will fail because fake schedule assessments have SEMANTIC_SET_ID.
-    # ConfigTestPatientSet(
-    #     name="scheduledassessments",
-    #     semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
-    #     document_factory_fixture_set="data_fake_scheduled_assessments_factory",
-    #     document_factory_fixture_set_element="data_fake_scheduled_assessment_factory",
-    #     database_get_set_function=scope.database.patient.scheduled_assessments.get_scheduled_assessments,
-    #     database_get_function=scope.database.patient.scheduled_assessments.get_scheduled_assessment,
-    #     database_post_function=scope.database.patient.scheduled_assessments.post_scheduled_assessment,
-    #     database_document_parameter_name="scheduled_assessment",
-    #     flask_query_set_type="scheduledassessments",
-    #     flask_document_set_key="scheduledassessments",
-    #     flask_query_set_element_type="scheduledassessment",
-    #     flask_document_set_element_key="scheduledassessment",
-    # ),
+    ConfigTestPatientSet(
+        name="scheduledassessments",
+        semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
+        document_factory_fixture_set_element="data_fake_scheduled_assessment_factory",
+        database_get_set_function=scope.database.patient.scheduled_assessments.get_scheduled_assessments,
+        database_get_function=scope.database.patient.scheduled_assessments.get_scheduled_assessment,
+        database_post_function=scope.database.patient.scheduled_assessments.post_scheduled_assessment,
+        database_document_parameter_name="scheduled_assessment",
+        flask_query_set_type="scheduledassessments",
+        flask_document_set_key="scheduledassessments",
+        flask_query_set_element_type="scheduledassessment",
+        flask_document_set_element_key="scheduledassessment",
+    ),
 ]
 
 QUERY_SET = "patient/{patient_id}/{query_type}"

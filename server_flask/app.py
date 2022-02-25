@@ -7,6 +7,7 @@ from flask_json import FlaskJSON, as_json
 
 import blueprints.app.config
 import blueprints.registry.activities
+import blueprints.registry.activity_logs
 import blueprints.registry.assessments
 import blueprints.registry.assessment_logs
 import blueprints.registry.case_reviews
@@ -17,6 +18,7 @@ import blueprints.registry.patients
 import blueprints.registry.providers
 import blueprints.registry.safety_plan
 import blueprints.registry.sessions
+import blueprints.registry.scheduled_activities
 import blueprints.registry.scheduled_assessments
 import blueprints.registry.values_inventory
 import database
@@ -103,6 +105,14 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.activities.activities_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.scheduled_activities.scheduled_activities_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.activity_logs.activity_logs_blueprint,
         url_prefix="/patient/",
     )
     app.register_blueprint(
