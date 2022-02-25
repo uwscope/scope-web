@@ -2,7 +2,7 @@ import pymongo.database
 import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patients
-import scope.database.provider_identities
+import scope.database.providers
 
 
 def ensure_database_exists(
@@ -60,61 +60,61 @@ def ensure_database_initialized(
     Initialization should be idempotent.
     """
 
-    _initialize_patients_collection(database=database)
-    _initialize_providers_collection(database=database)
+    _initialize_patient_identity_collection(database=database)
+    _initialize_provider_identity_collection(database=database)
 
 
-def _initialize_patients_collection(*, database: pymongo.database.Database):
+def _initialize_patient_identity_collection(*, database: pymongo.database.Database):
     """
     Initialize a patients collection.
 
     Initialization should be idempotent.
     """
 
-    # Ensure a patients collection
-    patients_collection = database.get_collection(
-        scope.database.patients.PATIENTS_COLLECTION
+    # Ensure a patient identity collection
+    patient_identity_collection = database.get_collection(
+        scope.database.patients.PATIENT_IDENTITY_COLLECTION
     )
 
     # Ensure the expected index
-    collection_utils.ensure_index(collection=patients_collection)
+    collection_utils.ensure_index(collection=patient_identity_collection)
 
     # Ensure a sentinel document in that collection
     result = collection_utils.get_singleton(
-        collection=patients_collection,
+        collection=patient_identity_collection,
         document_type="sentinel",
     )
     if result is None:
         collection_utils.put_singleton(
-            collection=patients_collection,
+            collection=patient_identity_collection,
             document_type="sentinel",
             document={},
         )
 
 
-def _initialize_providers_collection(*, database: pymongo.database.Database):
+def _initialize_provider_identity_collection(*, database: pymongo.database.Database):
     """
     Initialize a providers collection.
 
     Initialization should be idempotent.
     """
 
-    # Ensure a providers collection
-    providers_collection = database.get_collection(
-        scope.database.providers.PROVIDERS_COLLECTION
+    # Ensure a provider identity collection
+    provider_identity_collection = database.get_collection(
+        scope.database.providers.PROVIDER_IDENTITY_COLLECTION
     )
 
     # Ensure the expected index
-    collection_utils.ensure_index(collection=providers_collection)
+    collection_utils.ensure_index(collection=provider_identity_collection)
 
     # Ensure a sentinel document in that collection
     result = collection_utils.get_singleton(
-        collection=providers_collection,
+        collection=provider_identity_collection,
         document_type="sentinel",
     )
     if result is None:
         collection_utils.put_singleton(
-            collection=providers_collection,
+            collection=provider_identity_collection,
             document_type="sentinel",
             document={},
         )

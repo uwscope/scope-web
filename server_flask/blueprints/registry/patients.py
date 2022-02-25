@@ -124,7 +124,7 @@ def get_patients():
     database = context.database
 
     # List of documents from the patient identities collection
-    patient_identities = scope.database.patients.get_patients(
+    patient_identities = scope.database.patients.get_patient_identities(
         database=context.database,
     )
 
@@ -159,7 +159,7 @@ def get_patient(patient_id):
     database = context.database
 
     # List of documents from the patient identities collection
-    patient_identity = scope.database.patients.get_patient(
+    patient_identity = scope.database.patients.get_patient_identity(
         database=context.database,
         patient_id=patient_id,
     )

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import pymongo.collection
 import pymongo.database
 import pytest
 from typing import Callable
@@ -18,6 +17,7 @@ class DatabaseTempPatient:
 @pytest.fixture(name="database_temp_patient_factory")
 def fixture_database_temp_patient_factory(
     database_client: pymongo.database.Database,
+    data_fake_patient_profile_factory: Callable[[], dict],
 ) -> Callable[[], DatabaseTempPatient]:
     """
     Fixture for temp_patient_factory.
@@ -31,14 +31,17 @@ def fixture_database_temp_patient_factory(
 
     # Actual factory for obtaining a client for a temporary Collection.
     def factory() -> DatabaseTempPatient:
-        temp_patient_document_create = scope.database.patients.create_patient(
-            database=database_client
+        temp_patient_profile = data_fake_patient_profile_factory()
+        temp_patient_identity_document = scope.database.patients.create_patient(
+            database=database_client,
+            name=temp_patient_profile["name"],
+            MRN=temp_patient_profile["MRN"],
         )
         temp_patient = DatabaseTempPatient(
-            patient_id=temp_patient_document_create["_set_id"],
-            patient_document=temp_patient_document_create,
+            patient_id=temp_patient_identity_document["_set_id"],
+            patient_document=temp_patient_identity_document,
             collection=database_client.get_collection(
-                name=temp_patient_document_create["collection"]
+                name=temp_patient_identity_document["collection"]
             ),
         )
 
