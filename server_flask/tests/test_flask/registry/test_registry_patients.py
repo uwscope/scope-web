@@ -1,35 +1,20 @@
 import http
-import jschon
-from pprint import pprint
 import requests
-from typing import Callable, List, Union
+from typing import Callable
 from urllib.parse import urljoin
 
 import scope.config
 import scope.database.collection_utils as collection_utils
+import scope.database.patients
 import scope.schema
 import scope.testing.fixtures_database_temp_patient
+import scope.testing.schema
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 QUERY_PATIENTS = "patients"
 QUERY_PATIENT = "patient/{patient_id}"
-
-
-def _assert_schema(
-    *,
-    data: Union[dict, List[dict]],
-    schema: jschon.JSONSchema,
-    expected_valid: bool,
-):
-    schema_result = schema.evaluate(jschon.JSON(data)).output("detailed")
-    if schema_result["valid"] != expected_valid:
-        pprint(data)
-        print()
-        pprint(schema_result)
-
-    assert schema_result["valid"] == expected_valid
 
 
 def test_patients_get(
@@ -59,24 +44,23 @@ def test_patients_get(
     assert "patients" in response.json()
     patient_documents = response.json()["patients"]
     for patient_document_current in patient_documents:
-        _assert_schema(
+        scope.testing.schema.assert_schema(
             data=patient_document_current,
             schema=scope.schema.patient_schema,
             expected_valid=True,
         )
 
     retrieved_ids = [
-        patient_document_current["identity"]["identityId"]
+        patient_document_current["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
         for patient_document_current in patient_documents
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
 
-    # TODO: There is not currently a patients schema
-    # _assert_schema(
-    #     data=response.json()["patients"],
-    #     schema=scope.schema.patients_schema,
-    #     expected_valid=True,
-    # )
+    scope.testing.schema.assert_schema(
+        data=response.json()["patients"],
+        schema=scope.schema.patients_schema,
+        expected_valid=True,
+    )
 
 
 def test_patient_get(
@@ -105,13 +89,13 @@ def test_patient_get(
 
     assert "patient" in response.json()
     patient_document = response.json()["patient"]
-    _assert_schema(
+    scope.testing.schema.assert_schema(
         data=patient_document,
         schema=scope.schema.patient_schema,
         expected_valid=True,
     )
 
-    assert created_id == patient_document["identity"]["identityId"]
+    assert created_id == patient_document["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
 
 
 def test_patient_get_invalid(

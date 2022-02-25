@@ -1,6 +1,7 @@
 import copy
 from dataclasses import dataclass
 import http
+import pymongo.database
 import pytest
 import requests
 from typing import Callable
@@ -19,14 +20,21 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 
 @dataclass(frozen=True)
+class ConfigTestPatientSingletonOptions:
+    # When a test executes, the document will actually already exist.
+    # This will impact an "initial" put as well as gets that are expected to fail.
+    # Included because profile is created together with the patient.
+    document_will_already_exist: bool = False
+
+
+@dataclass(frozen=True)
 class ConfigTestPatientSingleton:
     name: str
     document_factory_fixture: str
     database_get_function: Callable[[...], dict]
-    database_put_function: Callable[[...], collection_utils.PutResult]
-    database_put_function_document_parameter_name: str
     flask_query_type: str
     flask_document_key: str
+    options: ConfigTestPatientSingletonOptions = ConfigTestPatientSingletonOptions()
 
 
 TEST_CONFIGS = [
@@ -34,8 +42,6 @@ TEST_CONFIGS = [
         name="clinicalhistory",
         document_factory_fixture="data_fake_clinical_history_factory",
         database_get_function=scope.database.patient.clinical_history.get_clinical_history,
-        database_put_function=scope.database.patient.clinical_history.put_clinical_history,
-        database_put_function_document_parameter_name="clinical_history",
         flask_query_type="clinicalhistory",
         flask_document_key="clinicalhistory",
     ),
@@ -43,17 +49,16 @@ TEST_CONFIGS = [
         name="profile",
         document_factory_fixture="data_fake_patient_profile_factory",
         database_get_function=scope.database.patient.patient_profile.get_patient_profile,
-        database_put_function=scope.database.patient.patient_profile.put_patient_profile,
-        database_put_function_document_parameter_name="patient_profile",
         flask_query_type="profile",
         flask_document_key="profile",
+        options=ConfigTestPatientSingletonOptions(
+            document_will_already_exist=True,
+        ),
     ),
     ConfigTestPatientSingleton(
         name="safetyplan",
         document_factory_fixture="data_fake_safety_plan_factory",
         database_get_function=scope.database.patient.safety_plan.get_safety_plan,
-        database_put_function=scope.database.patient.safety_plan.put_safety_plan,
-        database_put_function_document_parameter_name="safety_plan",
         flask_query_type="safetyplan",
         flask_document_key="safetyplan",
     ),
@@ -61,8 +66,6 @@ TEST_CONFIGS = [
         name="valuesinventory",
         document_factory_fixture="data_fake_values_inventory_factory",
         database_get_function=scope.database.patient.values_inventory.get_values_inventory,
-        database_put_function=scope.database.patient.values_inventory.put_values_inventory,
-        database_put_function_document_parameter_name="values_inventory",
         flask_query_type="valuesinventory",
         flask_document_key="valuesinventory",
     ),
@@ -80,6 +83,7 @@ QUERY_SINGLETON = "patient/{patient_id}/{query_type}"
 def test_patient_singleton_get(
     request: pytest.FixtureRequest,
     config: ConfigTestPatientSingleton,
+    database_client: pymongo.database.Database,
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -95,21 +99,36 @@ def test_patient_singleton_get(
     session = flask_session_unauthenticated_factory()
     document_factory = request.getfixturevalue(config.document_factory_fixture)
 
-    # Store the document
-    document = document_factory()
-    result = config.database_put_function(
-        **{
-            "collection": temp_patient.collection,
-            config.database_put_function_document_parameter_name: document,
-        }
-    )
-    assert result.inserted_count == 1
-
-    # Retrieve the document via Flask
     query = QUERY_SINGLETON.format(
         patient_id=temp_patient.patient_id,
         query_type=config.flask_query_type,
     )
+
+    if not config.options.document_will_already_exist:
+        # Store a document via Flask
+        document = document_factory()
+        response = session.put(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+            json={
+                config.flask_document_key: document,
+            },
+        )
+        assert response.ok
+
+        document_stored = response.json()[config.flask_document_key]
+        assert document_stored["_rev"] == 1
+
+    # Retrieve the document
+    document_database = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+        }
+    )
+
+    # Retrieve the document via Flask
     response = session.get(
         url=urljoin(
             flask_client_config.baseurl,
@@ -120,15 +139,10 @@ def test_patient_singleton_get(
 
     # Obtain the document
     assert config.flask_document_key in response.json()
-    document_retrieved = response.json()[config.flask_document_key]
+    document_flask = response.json()[config.flask_document_key]
 
-    # Confirm it matches expected document, with addition of an "_id" and a "_rev"
-    assert "_id" in document_retrieved
-    del document_retrieved["_id"]
-    assert "_rev" in document_retrieved
-    del document_retrieved["_rev"]
-
-    assert document == document_retrieved
+    # Confirm it matches expected document
+    assert document_database == document_flask
 
 
 @pytest.mark.parametrize(
@@ -181,17 +195,18 @@ def test_patient_singleton_get_invalid(
 
     # Retrieve a valid patient and a valid document,
     # but fail because we have not put that document
-    query = QUERY_SINGLETON.format(
-        patient_id=temp_patient.patient_id,
-        query_type=config.flask_query_type,
-    )
-    response = session.get(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-    )
-    assert response.status_code == http.HTTPStatus.NOT_FOUND
+    if not config.options.document_will_already_exist:
+        query = QUERY_SINGLETON.format(
+            patient_id=temp_patient.patient_id,
+            query_type=config.flask_query_type,
+        )
+        response = session.get(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+        )
+        assert response.status_code == http.HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.parametrize(
@@ -253,6 +268,10 @@ def test_patient_singleton_put(
     """
     Test storing a document.
     """
+
+    if config.options.document_will_already_exist:
+        # This test targets a put of a document that does not already exist
+        return
 
     temp_patient = database_temp_patient_factory()
     session = flask_session_unauthenticated_factory()
@@ -397,24 +416,32 @@ def test_patient_singleton_put_update(
         query_type=config.flask_query_type,
     )
 
-    # Store a document via Flask
-    document = document_factory()
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json={
-            config.flask_document_key: document,
-        },
-    )
-    assert response.ok
+    if not config.options.document_will_already_exist:
+        # Store a document via Flask
+        document = document_factory()
+        response = session.put(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+            json={
+                config.flask_document_key: document,
+            },
+        )
+        assert response.ok
 
-    # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored = response.json()[config.flask_document_key]
+        document_stored = response.json()[config.flask_document_key]
+        assert document_stored["_rev"] == 1
+
+    # Obtain the current document
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+        }
+    )
 
     # To store an updated document, remove the "_id"
-    document_update = copy.deepcopy(document_stored)
+    document_update = copy.deepcopy(document_retrieved)
     del document_update["_id"]
 
     # Store an update via Flask
@@ -432,10 +459,10 @@ def test_patient_singleton_put_update(
     # Response body includes the stored document, with addition of an "_id" and a "_rev"
     document_updated = response.json()[config.flask_document_key]
 
-    assert document_stored["_id"] != document_updated["_id"]
-    assert document_stored["_rev"] != document_updated["_rev"]
+    assert document_retrieved["_id"] != document_updated["_id"]
+    assert document_retrieved["_rev"] != document_updated["_rev"]
 
-    # Retrieve the document
+    # Retrieve the document again
     document_retrieved = config.database_get_function(
         **{
             "collection": temp_patient.collection,
@@ -476,23 +503,47 @@ def test_patient_singleton_put_update_invalid(
     )
 
     # Store a document via Flask
-    document = document_factory()
+    if not config.options.document_will_already_exist:
+        document = document_factory()
+        response = session.put(
+            url=urljoin(
+                flask_client_config.baseurl,
+                query,
+            ),
+            json={
+                config.flask_document_key: document,
+            },
+        )
+        assert response.ok
+
+    # Obtain the currently stored document
+    document_existing = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+        }
+    )
+
+    # Attempting to store the same document without any "_rev" should fail,
+    # because it will result in a duplicate on "_rev" == 1
+    document_update = copy.deepcopy(document_existing)
+    del document_update["_id"]
+    del document_update["_rev"]
     response = session.put(
         url=urljoin(
             flask_client_config.baseurl,
             query,
         ),
         json={
-            config.flask_document_key: document,
+            config.flask_document_key: document_update,
         },
     )
-    assert response.ok
+    assert response.status_code == http.HTTPStatus.CONFLICT
 
-    # Response body includes the stored document, with addition of an "_id" and a "_rev"
-    document_stored_rev1 = response.json()[config.flask_document_key]
+    # Contents of the response should indicate the current "_rev"
+    document_conflict = response.json()[config.flask_document_key]
 
-    # Store an update that will be assigned "_rev" == 2
-    document_update = copy.deepcopy(document_stored_rev1)
+    # Store an update that will be assigned an incremented "_rev"
+    document_update = copy.deepcopy(document_conflict)
     del document_update["_id"]
 
     response = session.put(
@@ -506,25 +557,8 @@ def test_patient_singleton_put_update_invalid(
     )
     assert response.ok
 
-    # Attempting to store the original document should fail, result in a duplicate on "_rev" == 1
-    document_update = copy.deepcopy(document)
-    response = session.put(
-        url=urljoin(
-            flask_client_config.baseurl,
-            query,
-        ),
-        json={
-            config.flask_document_key: document_update,
-        },
-    )
-    assert response.status_code == http.HTTPStatus.CONFLICT
-
-    # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_document_key]
-    assert document_conflict["_rev"] == 2
-
-    # Attempting to store the "_rev" == 1 document should fail, result in a duplicate on "_rev" == 2
-    document_update = copy.deepcopy(document_stored_rev1)
+    # Attempting to store the previous document should fail
+    document_update = copy.deepcopy(document_conflict)
     del document_update["_id"]
 
     response = session.put(
@@ -537,7 +571,3 @@ def test_patient_singleton_put_update_invalid(
         },
     )
     assert response.status_code == http.HTTPStatus.CONFLICT
-
-    # Contents of the response should indicate that current "_rev" == 2
-    document_conflict = response.json()[config.flask_document_key]
-    assert document_conflict["_rev"] == 2

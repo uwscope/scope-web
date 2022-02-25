@@ -67,7 +67,7 @@ const getDefaultSession = () =>
 const getDefaultReview = () =>
     ({
         date: clearTime(new Date()),
-        consultingPsychiatrist: { identityId: '', name: '' },
+        consultingPsychiatrist: { providerId: '', name: '' },
         medicationChange: '',
         behavioralStrategyChange: '',
         referralsChange: '',

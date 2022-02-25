@@ -92,6 +92,14 @@ class CancerTreatmentRegimen(Enum):
     Other = "Other"
 
 
+class IdentityType(Enum):
+    Patient = "patient"
+    SocialWorker = "socialWorker"
+    Psychiatrist = "psychiatrist"
+    Oncologist = "oncologist"
+    StudyStaff = "studyStaff"
+
+
 class Referral(Enum):
     Psychiatry = "Psychiatry"
     Psychology = "Psychology"

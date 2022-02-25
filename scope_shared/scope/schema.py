@@ -17,7 +17,6 @@ case_reviews_schema: Optional[jschon.JSONSchema] = None
 clinical_history_schema: Optional[jschon.JSONSchema] = None
 contact_schema: Optional[jschon.JSONSchema] = None
 enums_schema: Optional[jschon.JSONSchema] = None
-identity_schema: Optional[jschon.JSONSchema] = None
 life_area_schema: Optional[jschon.JSONSchema] = None
 life_areas_schema: Optional[jschon.JSONSchema] = None
 life_area_value_schema: Optional[jschon.JSONSchema] = None
@@ -26,7 +25,10 @@ log_schema: Optional[jschon.JSONSchema] = None
 mood_log_schema: Optional[jschon.JSONSchema] = None
 mood_logs_schema: Optional[jschon.JSONSchema] = None
 patient_schema: Optional[jschon.JSONSchema] = None
+patients_schema: Optional[jschon.JSONSchema] = None
+patient_identity_schema: Optional[jschon.JSONSchema] = None
 patient_profile_schema: Optional[jschon.JSONSchema] = None
+provider_identity_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
 regexes: Optional[jschon.JSONSchema] = None
 safety_plan_schema: Optional[jschon.JSONSchema] = None
@@ -67,7 +69,6 @@ SCHEMAS = {
     "clinical_history_schema": "clinical-history.json",
     "contact_schema": "contact.json",
     "enums_schema": "enums.json",
-    "identity_schema": "identity.json",
     "life_area_schema": "life-area.json",
     "life_areas_schema": "life-areas.json",
     "life_area_value_schema": "life-area-value.json",
@@ -76,7 +77,10 @@ SCHEMAS = {
     "mood_log_schema": "mood-log.json",
     "mood_logs_schema": "mood-logs.json",
     "patient_schema": "patient.json",
+    "patients_schema": "patients.json",
+    "patient_identity_schema": "patient-identity.json",
     "patient_profile_schema": "patient-profile.json",
+    "provider_identity_schema": "provider-identity.json",
     "referral_status_schema": "referral-status.json",
     "regexes": "datetime.json",
     "safety_plan_schema": "safety-plan.json",

@@ -37,7 +37,7 @@
 			"type": "boolean"
 		},
 		"submittedBy": {
-			"$ref": "/schemas/identity"
+			"$ref": "/schemas/provider-identity"
 		},
 		"totalScore": {
 			"type": "number"

@@ -24,13 +24,24 @@ import {
 
 export type KeyedMap<T> = { [key: string]: T };
 
-export interface IUser extends IIdentity {
+export interface IIdentity {
+    name: string;
+}
+
+export interface IPatientIdentity extends IIdentity {
+    patientId: string;
+}
+
+export interface IProviderIdentity extends IIdentity {
+    providerId: string;
+}
+
+export interface IPatientUser extends IPatientIdentity {
     authToken: string;
 }
 
-export interface IIdentity {
-    identityId: string;
-    name: string;
+export interface IProviderUser extends IProviderIdentity {
+    authToken: string;
 }
 
 export interface IReferralStatus {
@@ -66,7 +77,7 @@ export interface ISession {
 export interface ICaseReview {
     caseReviewId?: string;
     date: Date;
-    consultingPsychiatrist: IIdentity;
+    consultingPsychiatrist: IProviderIdentity;
 
     medicationChange: string;
     behavioralStrategyChange: string;
@@ -239,7 +250,7 @@ export interface ILifeAreaValueActivity {
 }
 
 export interface IPatient {
-    identity: IIdentity;
+    identity: IPatientIdentity;
 
     // Patient info
     profile: IPatientProfile;

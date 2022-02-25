@@ -1,5 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
-import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IUser } from 'shared/types';
+import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IPatientUser } from 'shared/types';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
 import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -42,7 +42,7 @@ export class RootStore implements IRootStore {
     // UI states
 
     // Promise queries
-    private readonly loginQuery: PromiseQuery<IUser | undefined>;
+    private readonly loginQuery: PromiseQuery<IPatientUser | undefined>;
     private readonly quoteQuery: PromiseQuery<string>;
     private readonly loadQuery: PromiseQuery<PromiseSettledResult<void>[]>;
 

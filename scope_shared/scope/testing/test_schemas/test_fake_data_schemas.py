@@ -1,10 +1,8 @@
-import copy
-
 import bson.objectid
+import copy
 from dataclasses import dataclass
 import faker
 import jschon
-from pprint import pprint
 import pytest
 from typing import Callable, List, Optional, Union
 
@@ -12,26 +10,27 @@ import scope.database.patient.activities
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
 import scope.database.patient.sessions
+import scope.database.providers
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.schema
-
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
-import scope.testing.fake_data.fixtures_fake_identity
 import scope.testing.fake_data.fixtures_fake_life_areas
 import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
+import scope.testing.fake_data.fixtures_fake_provider_identity
 import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
 import scope.testing.fake_data.fixtures_fake_sessions
 import scope.testing.fake_data.fixtures_fake_values_inventory
+import scope.testing.schema
 
 
 @dataclass(frozen=True)
@@ -87,6 +86,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        XFAIL_TEST_HAS_TODO=True
     ),
     ConfigTestFakeDataSchema(
         name="case-review",
@@ -135,19 +135,6 @@ TEST_CONFIGS = [
         expected_semantic_set_id=None,
     ),
     ConfigTestFakeDataSchema(
-        name="identity",
-        schema=scope.schema.identity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_identity.fake_identity_factory(
-            faker_factory=faker_factory,
-        ),
-        expected_document=True,
-        expected_singleton=False,
-        expected_set_element=True,
-        # TODO: Define the semantic IDs
-        XFAIL_TEST_HAS_TODO=True,
-        expected_semantic_set_id=None,
-    ),
-    ConfigTestFakeDataSchema(
         name="life-areas",
         schema=scope.schema.life_areas_schema,
         data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
@@ -180,6 +167,12 @@ TEST_CONFIGS = [
         expected_set_element=False,
         expected_semantic_set_id=None,
     ),
+    # patient-identity is not faked because there would be no patient backing that identity.
+    # Fake patient identities are instead obtained by generating entire fake patients.
+    # ConfigTestFakeDataSchema(
+    #     name="patient-identity",
+    #     schema=scope.schema.patient_identity_schema,
+    # ),
     ConfigTestFakeDataSchema(
         name="patient-profile",
         schema=scope.schema.patient_profile_schema,
@@ -190,6 +183,17 @@ TEST_CONFIGS = [
         expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="provider-identity",
+        schema=scope.schema.provider_identity_schema,
+        data_factory=scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
+            faker_factory=faker_factory,
+        ),
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID,
     ),
     ConfigTestFakeDataSchema(
         name="referral-status",
@@ -261,21 +265,6 @@ TEST_CONFIGS = [
 ]
 
 
-def _assert_schema(
-    *,
-    data: Union[dict, List[dict]],
-    schema: jschon.JSONSchema,
-    expected_valid: bool,
-):
-    schema_result = schema.evaluate(jschon.JSON(data)).output("detailed")
-    if schema_result["valid"] != expected_valid:
-        pprint(data)
-        print()
-        pprint(schema_result)
-
-    assert schema_result["valid"] == expected_valid
-
-
 @pytest.mark.parametrize(
     ["config"],
     [[config] for config in TEST_CONFIGS],
@@ -309,7 +298,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
         data = config.data_factory()
 
         # Test against the schema
-        _assert_schema(
+        scope.testing.schema.assert_schema(
             data=data,
             schema=config.schema,
             expected_valid=True,
@@ -325,7 +314,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
             document_normalized = document_utils.normalize_document(document=data)
 
             # Test against the schema
-            _assert_schema(
+            scope.testing.schema.assert_schema(
                 data=document_normalized,
                 schema=config.schema,
                 expected_valid=True,
@@ -345,7 +334,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
                 document=document_singleton
             )
 
-            _assert_schema(
+            scope.testing.schema.assert_schema(
                 data=document_singleton,
                 schema=config.schema,
                 expected_valid=config.expected_singleton or config.expected_set_element,
@@ -365,7 +354,7 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
                 document=document_set_element
             )
 
-            _assert_schema(
+            scope.testing.schema.assert_schema(
                 data=document_set_element,
                 schema=config.schema,
                 expected_valid=config.expected_set_element,

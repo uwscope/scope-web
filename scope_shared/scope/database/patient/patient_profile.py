@@ -1,7 +1,9 @@
+import copy
 from typing import Optional
 
-import pymongo.collection
+import pymongo.database
 import scope.database.collection_utils
+import scope.database.patients
 
 DOCUMENT_TYPE = "profile"
 
@@ -18,11 +20,38 @@ def get_patient_profile(
 
 def put_patient_profile(
     *,
+    database: pymongo.database.Database,
     collection: pymongo.collection.Collection,
+    patient_id: str,
     patient_profile: dict,
 ) -> scope.database.collection_utils.PutResult:
-    return scope.database.collection_utils.put_singleton(
+    result = scope.database.collection_utils.put_singleton(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         document=patient_profile,
     )
+
+    # Determine whether we need to also maintain the patient identity
+    if result.inserted_count:
+        patient_identity = scope.database.patients.get_patient_identity(
+            database=database,
+            patient_id=patient_id,
+        )
+
+        # If this profile is being put in the midst of patient creation,
+        # then a patient identity will not yet exist to be maintained.
+        if patient_identity:
+            updated_identity = copy.deepcopy(patient_identity)
+            updated_identity["MRN"] = result.document["MRN"]
+            updated_identity["name"] = result.document["name"]
+
+            if patient_identity != updated_identity:
+                del updated_identity["_id"]
+
+                scope.database.patients.put_patient_identity(
+                    database=database,
+                    patient_id=patient_id,
+                    patient_identity=updated_identity,
+                )
+
+    return result

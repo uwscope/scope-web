@@ -3,11 +3,12 @@ from typing import List
 from typing import Optional
 
 import scope.database.collection_utils
+import scope.database.patient.patient_profile
 
-PATIENTS_COLLECTION = "patients"
+PATIENT_IDENTITY_COLLECTION = "patients"
 
-DOCUMENT_TYPE = "patient"
-SEMANTIC_SET_ID = "patientId"
+PATIENT_IDENTITY_DOCUMENT_TYPE = "patientIdentity"
+PATIENT_IDENTITY_SEMANTIC_SET_ID = "patientId"
 
 
 def _patient_collection_name(*, patient_id: str) -> str:
@@ -15,24 +16,42 @@ def _patient_collection_name(*, patient_id: str) -> str:
 
 
 def create_patient(
-    *, database: pymongo.database.Database, patient_id: str = None
+    *,
+    database: pymongo.database.Database,
+    patient_id: str = None,
+    name: str,
+    MRN: str,
 ) -> dict:
     """
-    Create a patient document and collection, return the patient document.
+    Create a patient. This includes:
+    - Generate a patient_id, unless it was provided.
+    - Create a patient collection.
+    - Create a profile document containing the name and MRN.
+    - Finally, create the patient identity document.
     """
 
-    patients_collection = database.get_collection(PATIENTS_COLLECTION)
+    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
-    # Obtain a unique ID and collection name for the patient.
-    # A set element with the generated_patient_id ensures the patient_id is unique.
-    # We can therefore also use it as our collection name.
+    # Obtain a unique ID for the patient, use that to create a collection name.
     if patient_id is None:
         patient_id = scope.database.collection_utils.generate_set_id()
+    generated_patient_collection_name = _patient_collection_name(patient_id=patient_id)
 
-    generated_patient_collection = _patient_collection_name(patient_id=patient_id)
+    # Ensure this patient id and collection do not already exist
+    if (
+        scope.database.patients.get_patient_identity(
+            database=database, patient_id=patient_id
+        )
+        is not None
+    ):
+        raise ValueError('Patient "{}" already exists'.format(patient_id))
+    if generated_patient_collection_name in database.list_collection_names():
+        raise ValueError(
+            'Collection "{}" already exists'.format(generated_patient_collection_name)
+        )
 
     # Create the patient collection with a sentinel document
-    patient_collection = database.get_collection(generated_patient_collection)
+    patient_collection = database.get_collection(generated_patient_collection_name)
     result = scope.database.collection_utils.put_singleton(
         collection=patient_collection,
         document_type="sentinel",
@@ -42,21 +61,36 @@ def create_patient(
     # Create the index on the patient collection
     scope.database.collection_utils.ensure_index(collection=patient_collection)
 
-    # Atomically store the patient document.
+    # Create the initial profile document
+    result = scope.database.patient.patient_profile.put_patient_profile(
+        database=database,
+        collection=patient_collection,
+        patient_id=patient_id,
+        patient_profile={
+            "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
+            "name": name,
+            "MRN": MRN,
+        },
+    )
+
+    # Atomically store the patient identity document.
     # Do this last, because it means all other steps have already succeeded.
-    patient_document = {
-        "collection": generated_patient_collection,
+    patient_identity_document = {
+        "_type": scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE,
+        "name": name,
+        "MRN": MRN,
+        "collection": generated_patient_collection_name,
     }
     result = scope.database.collection_utils.put_set_element(
-        collection=patients_collection,
-        document_type=DOCUMENT_TYPE,
-        semantic_set_id=SEMANTIC_SET_ID,
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
+        semantic_set_id=PATIENT_IDENTITY_SEMANTIC_SET_ID,
         set_id=patient_id,
-        document=patient_document,
+        document=patient_identity_document,
     )
-    patient_document = result.document
+    patient_identity_document = result.document
 
-    return patient_document
+    return patient_identity_document
 
 
 def delete_patient(
@@ -66,64 +100,86 @@ def delete_patient(
     destructive: bool,
 ):
     """
-    Delete a patient document and collection.
+    Delete a patient identity and collection.
     """
 
     if not destructive:
         raise NotImplementedError()
 
-    patients_collection = database.get_collection(PATIENTS_COLLECTION)
+    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
     # Confirm the patient exists.
-    existing_document = scope.database.collection_utils.get_set_element(
-        collection=patients_collection,
-        document_type=DOCUMENT_TYPE,
+    patient_identity_document = scope.database.collection_utils.get_set_element(
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
         set_id=patient_id,
     )
-    if existing_document is None:
+    if patient_identity_document is None:
         return False
 
-    # Delete the document and the database.
-    database.drop_collection(existing_document["collection"])
+    # Atomically delete the identity first, then delete all other traces of the patient.
     scope.database.collection_utils.delete_set_element(
-        collection=patients_collection,
-        document_type=DOCUMENT_TYPE,
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
         set_id=patient_id,
         destructive=destructive,
     )
 
+    database.drop_collection(patient_identity_document["collection"])
+
     return True
 
 
-def get_patient(
+def get_patient_identity(
     *,
     database: pymongo.database.Database,
     patient_id: str,
 ) -> Optional[dict]:
     """
-    Retrieve a patient document from PATIENTS_COLLECTION.
+    Retrieve a patient identity document.
     """
 
-    patients_collection = database.get_collection(PATIENTS_COLLECTION)
+    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
     return scope.database.collection_utils.get_set_element(
-        collection=patients_collection,
-        document_type=DOCUMENT_TYPE,
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
         set_id=patient_id,
     )
 
 
-def get_patients(
+def put_patient_identity(
+    *,
+    database: pymongo.database.Database,
+    patient_id: str,
+    patient_identity: dict,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Put a patient identity document.
+    """
+
+    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
+
+    return scope.database.collection_utils.put_set_element(
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
+        semantic_set_id=PATIENT_IDENTITY_SEMANTIC_SET_ID,
+        set_id=patient_id,
+        document=patient_identity,
+    )
+
+
+def get_patient_identities(
     *,
     database: pymongo.database.Database,
 ) -> Optional[List[dict]]:
     """
-    Retrieve all patient documents from PATIENTS_COLLECTION.
+    Retrieve all patient identity documents.
     """
 
-    patients_collection = database.get_collection(PATIENTS_COLLECTION)
+    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
     return scope.database.collection_utils.get_set(
-        collection=patients_collection,
-        document_type=DOCUMENT_TYPE,
+        collection=patient_identity_collection,
+        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
     )

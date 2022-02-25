@@ -1,16 +1,20 @@
 {
 	"_type": "patient",
 	"identity": {
-		"_type": "identity",
+		"_id": "1",
+		"_type": "patientIdentity",
+		"_set_id": "patientidvalue",
 		"_rev": 1,
-		"name": "Harry Potter",
-		"identityId": "Lily Potter's Son"
+		"patientId": "patientidvalue",
+		"collection": "collection_patientidvalue",
+		"name": "Paul Atreides",
+		"MRN": "11111111"
 	},
 	"profile": {
 		"_type": "profile",
 		"_rev": 1,
-		"name": "patientName",
-		"MRN": "mrn",
+		"name": "Harry Potter",
+		"MRN": "11111111",
 		"clinicCode": "Transplant – Auto",
 		"birthdate": "1991-08-19T00:00:00Z",
 		"sex": "Male",

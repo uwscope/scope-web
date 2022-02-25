@@ -1,15 +1,15 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://uwscope.org/schemas/identity",
-	"title": "IIdentity",
-	"description": "Identity of the user",
+	"$id": "https://uwscope.org/schemas/patient-identity",
+	"title": "IPatientIdentity",
+	"description": "IPatientIdentity Type",
 	"type": "object",
 	"properties": {
 		"_id": {
 			"type": "string"
 		},
 		"_type": {
-			"const": "identity"
+			"const": "patientIdentity"
 		},
 		"_set_id": {
 			"type": "string"
@@ -17,10 +17,13 @@
 		"_rev": {
 			"type": "number"
 		},
-		"identityId": {
+		"patientId": {
 			"type": "string"
 		},
 		"collection": {
+			"type": "string"
+		},
+		"MRN": {
 			"type": "string"
 		},
 		"name": {
@@ -28,5 +31,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "identityId", "name"]
+	"required": ["_type", "collection", "MRN", "name"]
 }
