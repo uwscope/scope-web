@@ -1,3 +1,5 @@
+import copy
+
 import faker
 import random
 import pymongo.collection
@@ -38,43 +40,49 @@ def populate_database(
 ):
     faker_factory = faker.Faker(locale="la")
 
-    # TODO: Remove when patient app includes authentication
+    fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
+        faker_factory=faker_factory,
+    )
 
+    # TODO: Remove when patient app includes authentication
     patient_persistent_identity = scope.database.patients.get_patient_identity(
         database=database, patient_id="persistent"
     )
-
     if patient_persistent_identity is None:
-        name = "{} {}".format(faker_factory.first_name(), faker_factory.last_name())
-        mrn = "{}".format(random.randrange(10000, 1000000))
+        profile = fake_patient_profile_factory()
 
         patient_current = scope.database.patients.create_patient(
             database=database,
             patient_id="persistent",
-            name=name,
-            MRN=mrn,
+            name=profile["name"],
+            MRN=profile["MRN"],
         )
         patient_collection = database.get_collection(patient_current["collection"])
 
         _populate_patient(
             faker_factory=faker_factory,
+            database=database,
             patient_collection=patient_collection,
+            patient_id=patient_current["patientId"],
+            profile=profile,
         )
 
     for patient_count in range(populate_patients - 1):
-        name = "{} {}".format(faker_factory.first_name(), faker_factory.last_name())
-        mrn = "{}".format(random.randrange(10000, 1000000))
+        profile = fake_patient_profile_factory()
 
         patient_current = scope.database.patients.create_patient(
             database=database,
-            name=name,
-            MRN=mrn,
+            name=profile["name"],
+            MRN=profile["MRN"],
         )
         patient_collection = database.get_collection(patient_current["collection"])
 
         _populate_patient(
             faker_factory=faker_factory,
+            database=database,
             patient_collection=patient_collection,
+            patient_id=patient_current["patientId"],
+            profile=profile,
         )
 
     # # TODO: Pass populate_providers integer as argument.
@@ -92,8 +100,22 @@ def populate_database(
 def _populate_patient(
     *,
     faker_factory: faker.Faker,
+    database: pymongo.database.Database,
+    patient_id: str,
     patient_collection: pymongo.collection.Collection,
+    profile: dict,
 ):
+    # Store the profile used to create this patient.
+    # It will need the current "_rev".
+    profile = copy.deepcopy(profile)
+    profile["_rev"] = 1
+    scope.database.patient.patient_profile.put_patient_profile(
+        database=database,
+        collection=patient_collection,
+        patient_id=patient_id,
+        patient_profile=profile,
+    )
+
     # Obtain factories used by other factories
     fake_contact_factory = (
         scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
@@ -108,9 +130,6 @@ def _populate_patient(
     fake_life_areas = fake_life_areas_factory()
 
     # Obtain necessary document factories
-    fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
-        faker_factory=faker_factory,
-    )
     fake_clinical_history_factory = scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
         faker_factory=faker_factory,
     )
@@ -156,10 +175,6 @@ def _populate_patient(
     )
 
     # Put appropriate documents
-    scope.database.patient.patient_profile.put_patient_profile(
-        collection=patient_collection,
-        patient_profile=fake_patient_profile_factory(),
-    )
     scope.database.patient.clinical_history.put_clinical_history(
         collection=patient_collection,
         clinical_history=fake_clinical_history_factory(),
