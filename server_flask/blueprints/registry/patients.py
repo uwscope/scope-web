@@ -52,28 +52,6 @@ def _construct_patient_document(
     if profile:
         patient_document["profile"] = profile
 
-    # TODO: Remove this faking when identities are complete
-    faked_patient_identity = copy.deepcopy(patient_identity)
-    faked_patient_identity["_type"] = "identity"
-    faked_patient_identity["identityId"] = faked_patient_identity["_set_id"]
-    if "patientId" in faked_patient_identity:
-        del faked_patient_identity["patientId"]
-    if profile and "name" in profile:
-        faked_patient_identity["name"] = profile["name"]
-    else:
-        faked_patient_identity["name"] = "MISSING"
-
-    patient_document["identity"] = faked_patient_identity
-
-    # TODO: Remove this faking when identies are complete
-    if not profile:
-        faked_profile = {
-            "_type": "profile",
-            "name": "MISSING",
-            "MRN": "MISSING",
-        }
-        patient_document["profile"] = faked_profile
-
     # # Case reviews
     # case_reviews = scope.database.patient.case_reviews.get_case_reviews(
     #     collection=patient_collection
