@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 import scope.config
 import scope.database.collection_utils as collection_utils
+import scope.database.patients
 import scope.schema
 import scope.testing.fixtures_database_temp_patient
 import scope.testing.schema
@@ -50,7 +51,7 @@ def test_patients_get(
         )
 
     retrieved_ids = [
-        patient_document_current["identity"]["identityId"]
+        patient_document_current["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
         for patient_document_current in patient_documents
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
@@ -94,7 +95,7 @@ def test_patient_get(
         expected_valid=True,
     )
 
-    assert created_id == patient_document["identity"]["identityId"]
+    assert created_id == patient_document["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
 
 
 def test_patient_get_invalid(
