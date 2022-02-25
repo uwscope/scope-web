@@ -98,7 +98,7 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.authToken) {
                 const newPatientService = getPatientServiceInstance(
                     CLIENT_CONFIG.flaskBaseUrl,
-                    state.store?.authStore.currentUserIdentity?.identityId,
+                    state.store?.authStore.currentUserIdentity?.patientId,
                 );
                 state.store?.createPatientStore(newPatientService);
                 state.ready = true;

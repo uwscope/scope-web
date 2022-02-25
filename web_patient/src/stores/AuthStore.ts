@@ -1,6 +1,6 @@
 import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
-import { IUser } from 'shared/types';
+import { IPatientUser } from 'shared/types';
 import { PromiseQuery } from 'shared/promiseQuery';
 
 const poolData = {
@@ -23,7 +23,7 @@ export interface IAuthStore {
     authUser?: CognitoUser;
     authData?: any; // User attribute data
 
-    currentUserIdentity?: IUser;
+    currentUserIdentity?: IPatientUser;
     login(username: string, password: string): Promise<CognitoUserSession>;
     updateTempPassword(newPassword: string): Promise<CognitoUserSession>;
     logout(): void;
@@ -59,19 +59,19 @@ export class AuthStore implements IAuthStore {
 
             if (idToken?.payload['sub'] && idToken?.payload['name'] && idToken?.getJwtToken()) {
                 return {
-                    identityId: idToken?.payload['sub'],
+                    patientId: idToken?.payload['sub'],
                     name: idToken?.payload['name'],
                     authToken: idToken?.getJwtToken(),
-                };
+                } as IPatientUser;
             }
         }
 
         // Pretend authentication worked
         return {
-            identityId: 'persistent',
+            patientId: 'persistent',
             name: 'Fake User',
             authToken: 'fake auth token',
-        };
+        } as IPatientUser;
         // return undefined;
     }
 

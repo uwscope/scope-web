@@ -17,9 +17,9 @@ import {
     IAssessmentLog,
     ICaseReview,
     IClinicalHistory,
-    IIdentity,
     IMoodLog,
     IPatient,
+    IPatientIdentity,
     IPatientProfile,
     ISafetyPlan,
     IScheduledActivity,
@@ -68,7 +68,7 @@ export interface IPatientStore extends IPatient {
 }
 
 export class PatientStore implements IPatientStore {
-    public identity: IIdentity;
+    public identity: IPatientIdentity;
 
     public safetyPlan: ISafetyPlan = {
         assigned: false,
@@ -101,9 +101,9 @@ export class PatientStore implements IPatientStore {
     constructor(patient: IPatient) {
         console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
         console.assert(!!patient.identity.name, 'Attempted to create a patient object without a name');
-        console.assert(!!patient.identity.identityId, 'Attempted to create a patient object without an id');
+        console.assert(!!patient.identity.patientId, 'Attempted to create a patient object without an id');
 
-        this.patientService = getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, patient.identity.identityId);
+        this.patientService = getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, patient.identity.patientId);
 
         this.identity = patient.identity;
 
@@ -140,7 +140,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed get recordId() {
-        return this.identity.identityId;
+        return this.identity.patientId;
     }
 
     @computed get name() {
@@ -367,7 +367,7 @@ export class PatientStore implements IPatientStore {
             .addCaseReview({
                 ...toJS(caseReview),
                 consultingPsychiatrist: {
-                    identityId: caseReview.consultingPsychiatrist.identityId,
+                    providerId: caseReview.consultingPsychiatrist.providerId,
                     name: caseReview.consultingPsychiatrist.name,
                 },
             })
@@ -384,7 +384,7 @@ export class PatientStore implements IPatientStore {
             .updateCaseReview({
                 ...toJS(caseReview),
                 consultingPsychiatrist: {
-                    identityId: caseReview.consultingPsychiatrist.identityId,
+                    providerId: caseReview.consultingPsychiatrist.providerId,
                     name: caseReview.consultingPsychiatrist.name,
                 },
             })

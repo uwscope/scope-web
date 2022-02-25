@@ -1,7 +1,7 @@
 import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
 import { PromiseQuery } from 'shared/promiseQuery';
-import { IAppAuthConfig, IUser } from 'shared/types';
+import { IAppAuthConfig, IProviderUser } from 'shared/types';
 
 const poolData = {
     UserPoolId: 'us-west-1_G5EgsKP1m',
@@ -23,7 +23,7 @@ export interface IAuthStore {
     authUser?: CognitoUser;
     authData?: any; // User attribute data
 
-    currentUserIdentity?: IUser;
+    currentUserIdentity?: IProviderUser;
     login(username: string, password: string): Promise<CognitoUserSession>;
     updateTempPassword(newPassword: string): Promise<CognitoUserSession>;
     logout(): void;
@@ -46,10 +46,7 @@ export class AuthStore implements IAuthStore {
     constructor(authConfig: IAppAuthConfig) {
         this.authConfig = authConfig;
 
-        this.authQuery = new PromiseQuery<CognitoUserSession>(
-            undefined,
-            'authQuery'
-        );
+        this.authQuery = new PromiseQuery<CognitoUserSession>(undefined, 'authQuery');
 
         makeAutoObservable(this);
     }
@@ -64,25 +61,21 @@ export class AuthStore implements IAuthStore {
         if (this.authState == AuthState.Authenticated) {
             var idToken = this.authQuery.value?.getIdToken();
 
-            if (
-                idToken?.payload['sub'] &&
-                idToken?.payload['name'] &&
-                idToken?.getJwtToken()
-            ) {
+            if (idToken?.payload['sub'] && idToken?.payload['name'] && idToken?.getJwtToken()) {
                 return {
-                    identityId: idToken?.payload['sub'],
+                    providerId: idToken?.payload['sub'],
                     name: idToken?.payload['name'],
                     authToken: idToken?.getJwtToken(),
-                };
+                } as IProviderUser;
             }
         }
 
         // Pretend authentication worked
         return {
-            identityId: 'fakeid',
+            providerId: 'fakeid',
             name: 'Fake User',
             authToken: 'fake auth token',
-        };
+        } as IProviderUser;
         // return undefined;
     }
 
@@ -139,30 +132,26 @@ export class AuthStore implements IAuthStore {
     @action.bound
     public async updateTempPassword(password: string) {
         const promise = new Promise<CognitoUserSession>((resolve, reject) => {
-            this.authUser?.completeNewPasswordChallenge(
-                password,
-                this.authData,
-                {
-                    onSuccess: action((data) => {
-                        console.log('onUpdateSuccess: ', data);
-                        runInAction(() => {
-                            this.authData = undefined;
-                            this.authState = AuthState.Authenticated;
-                        });
-                        console.log('authdata', this.authData);
-                        resolve(data);
-                    }),
-                    onFailure: action((err) => {
-                        console.error('onUpdateFailure: ', err);
-                        runInAction(() => {
-                            this.authUser = undefined;
-                            this.authData = undefined;
-                            this.authState = AuthState.AuthenticationFailed;
-                        });
-                        reject(err);
-                    }),
-                }
-            );
+            this.authUser?.completeNewPasswordChallenge(password, this.authData, {
+                onSuccess: action((data) => {
+                    console.log('onUpdateSuccess: ', data);
+                    runInAction(() => {
+                        this.authData = undefined;
+                        this.authState = AuthState.Authenticated;
+                    });
+                    console.log('authdata', this.authData);
+                    resolve(data);
+                }),
+                onFailure: action((err) => {
+                    console.error('onUpdateFailure: ', err);
+                    runInAction(() => {
+                        this.authUser = undefined;
+                        this.authData = undefined;
+                        this.authState = AuthState.AuthenticationFailed;
+                    });
+                    reject(err);
+                }),
+            });
         });
 
         return await this.authQuery.fromPromise(promise);
