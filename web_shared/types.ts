@@ -42,7 +42,7 @@ export interface IReferralStatus {
 export type ISessionOrCaseReview = ISession | ICaseReview;
 
 export interface ISession {
-    sessionId: string;
+    sessionId?: string;
     date: Date;
     sessionType: SessionType;
     billableMinutes: number;
@@ -64,7 +64,7 @@ export interface ISession {
 }
 
 export interface ICaseReview {
-    reviewId: string;
+    caseReviewId?: string;
     date: Date;
     consultingPsychiatrist: IIdentity;
 
@@ -86,7 +86,7 @@ export interface IAssessment {
 }
 
 export interface IActivity {
-    activityId: string;
+    activityId?: string;
     name: string;
     value: string;
     lifeareaId: string;
@@ -152,6 +152,7 @@ export interface IAssessmentLog extends ILog {
 }
 
 export interface IMoodLog extends ILog {
+    moodLogId?: string;
     mood: number;
 }
 

@@ -1,6 +1,12 @@
 import { differenceInYears } from 'date-fns';
 import { action, computed, makeAutoObservable, toJS, when } from 'mobx';
-import { cancerTreatmentRegimenValues, discussionFlagValues, patientRaceValues } from 'shared/enums';
+import {
+    behavioralActivationChecklistValues,
+    behavioralStrategyChecklistValues,
+    cancerTreatmentRegimenValues,
+    discussionFlagValues,
+    patientRaceValues,
+} from 'shared/enums';
 import { getLogger } from 'shared/logger';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
 import { IPromiseQueryState, PromiseQuery, PromiseState } from 'shared/promiseQuery';
@@ -35,22 +41,25 @@ export interface IPatientStore extends IPatient {
     readonly loadProfileState: IPromiseQueryState;
     readonly loadClinicalHistoryState: IPromiseQueryState;
 
+    readonly loadSessionsState: IPromiseQueryState;
+    readonly loadCaseReviewsState: IPromiseQueryState;
+
     readonly latestSession: ISession | undefined;
 
     load(): void;
 
     updateProfile(profile: IPatientProfile): Promise<void>;
-    updateClinicalHistory(history: Partial<IClinicalHistory>): Promise<void>;
+    updateClinicalHistory(history: IClinicalHistory): Promise<void>;
 
     assignValuesInventory(): void;
     assignSafetyPlan(): void;
     assignAssessment(assessmentId: string): void;
 
-    addSession(session: Partial<ISession>): void;
-    updateSession(session: Partial<ISession>): void;
+    addSession(session: ISession): void;
+    updateSession(session: ISession): void;
 
-    addCaseReview(caseReview: Partial<ICaseReview>): void;
-    updateCaseReview(caseReview: Partial<ICaseReview>): void;
+    addCaseReview(caseReview: ICaseReview): void;
+    updateCaseReview(caseReview: ICaseReview): void;
 
     updateAssessment(assessment: Partial<IAssessment>): void;
 
@@ -65,10 +74,6 @@ export class PatientStore implements IPatientStore {
         assigned: false,
         assignedDate: new Date(),
     };
-
-    // Sessions
-    public sessions: ISession[] = [];
-    public caseReviews: ICaseReview[] = [];
 
     // Assessments
     public assessments: IAssessment[] = [];
@@ -90,6 +95,9 @@ export class PatientStore implements IPatientStore {
     private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
     private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
 
+    private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
+    private readonly loadCaseReviewsQuery: PromiseQuery<ICaseReview[]>;
+
     constructor(patient: IPatient) {
         console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
         console.assert(!!patient.identity.name, 'Attempted to create a patient object without a name');
@@ -101,10 +109,6 @@ export class PatientStore implements IPatientStore {
 
         // Safety plan
         this.safetyPlan = patient.safetyPlan || this.safetyPlan;
-
-        // Sessions
-        this.sessions = patient.sessions || this.sessions;
-        this.caseReviews = patient.caseReviews || this.caseReviews;
 
         // Assessments
         this.assessments = patient.assessments || this.assessments;
@@ -118,18 +122,19 @@ export class PatientStore implements IPatientStore {
 
         this.moodLogs = patient.moodLogs || this.moodLogs;
 
-        this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData', 'patient');
+        this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData');
         this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(
             patient.valuesInventory,
             'loadValuesInventory',
-            'valuesinventory',
         );
-        this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile', 'profile');
+        this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile');
         this.loadClinicalHistoryQuery = new PromiseQuery<IClinicalHistory>(
             patient.clinicalHistory,
             'loadClinicalHistory',
-            'clinicalhistory',
         );
+
+        this.loadSessionsQuery = new PromiseQuery<ISession[]>(patient.sessions, 'loadSessions');
+        this.loadCaseReviewsQuery = new PromiseQuery<ICaseReview[]>(patient.caseReviews, 'loadCaseReviews');
 
         makeAutoObservable(this);
     }
@@ -162,6 +167,14 @@ export class PatientStore implements IPatientStore {
         return this.loadClinicalHistoryQuery;
     }
 
+    @computed get loadSessionsState() {
+        return this.loadSessionsQuery;
+    }
+
+    @computed get loadCaseReviewsState() {
+        return this.loadCaseReviewsQuery;
+    }
+
     @computed get latestSession() {
         if (this.sessions.length > 0) {
             return this.sessions[this.sessions.length - 1];
@@ -191,6 +204,14 @@ export class PatientStore implements IPatientStore {
         return this.loadClinicalHistoryQuery.value || {};
     }
 
+    @computed get sessions() {
+        return this.loadSessionsQuery.value || [];
+    }
+
+    @computed get caseReviews() {
+        return this.loadCaseReviewsQuery.value || [];
+    }
+
     @action.bound
     public async load() {
         await this.loadAndLogQuery<IPatient>(this.patientService.getPatient, this.loadPatientDataQuery);
@@ -203,6 +224,8 @@ export class PatientStore implements IPatientStore {
             this.patientService.getValuesInventory,
             this.loadValuesInventoryQuery,
         );
+        await this.loadAndLogQuery<ISession[]>(this.patientService.getSessions, this.loadSessionsQuery);
+        await this.loadAndLogQuery<ICaseReview[]>(this.patientService.getCaseReviews, this.loadCaseReviewsQuery);
     }
 
     @action.bound
@@ -217,11 +240,15 @@ export class PatientStore implements IPatientStore {
             ),
         });
 
-        await this.loadAndLogQuery<IPatientProfile>(() => promise, this.loadProfileQuery);
+        await this.loadAndLogQuery<IPatientProfile>(
+            () => promise,
+            this.loadProfileQuery,
+            this.onSingletonConflict('profile'),
+        );
     }
 
     @action.bound
-    public async updateClinicalHistory(clinicalHistory: Partial<IClinicalHistory>) {
+    public async updateClinicalHistory(clinicalHistory: IClinicalHistory) {
         const promise = this.patientService.updateClinicalHistory({
             ...toJS(this.clinicalHistory),
             ...toJS(clinicalHistory),
@@ -231,7 +258,11 @@ export class PatientStore implements IPatientStore {
             ),
         });
 
-        await this.loadAndLogQuery<IClinicalHistory>(() => promise, this.loadClinicalHistoryQuery);
+        await this.loadAndLogQuery<IClinicalHistory>(
+            () => promise,
+            this.loadClinicalHistoryQuery,
+            this.onSingletonConflict('clinicalhistory'),
+        );
     }
 
     @action.bound
@@ -242,7 +273,11 @@ export class PatientStore implements IPatientStore {
             assignedDateTime: new Date(),
         });
 
-        await this.loadAndLogQuery<IValuesInventory>(() => promise, this.loadValuesInventoryQuery);
+        await this.loadAndLogQuery<IValuesInventory>(
+            () => promise,
+            this.loadValuesInventoryQuery,
+            this.onSingletonConflict('valuesinventory'),
+        );
     }
 
     @action.bound
@@ -285,73 +320,87 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async addSession(session: Partial<ISession>) {
-        const { registryService } = useServices();
-        const promise = registryService.addPatientSession(this.recordId, session).then((session) => {
-            // TODO: server should return appropriate id
-            const addedSession = {
-                ...session,
-                sessionId: `session-${this.sessions.length}`,
-            };
-
-            this.sessions.push(addedSession);
-            return this;
+    public async addSession(session: ISession) {
+        const promise = this.patientService.addSession(toJS(session)).then((addedSession) => {
+            return this.sessions.slice().concat([addedSession]);
         });
 
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<ISession[]>(() => promise, this.loadSessionsQuery, this.onSessionConflict);
     }
 
     @action.bound
-    public async updateSession(session: Partial<ISession>) {
-        const { registryService } = useServices();
-        const promise = registryService.updatePatientSession(this.recordId, session).then((session) => {
-            const existing = this.sessions.find((s) => s.sessionId == session.sessionId);
-            console.assert(!!existing, 'Session not found when expected');
+    public async updateSession(session: ISession) {
+        const promise = this.patientService
+            .updateSession({
+                ...toJS(session),
+                behavioralStrategyChecklist: Object.assign(
+                    {},
+                    ...behavioralStrategyChecklistValues.map((x) => ({
+                        [x]: !!session.behavioralStrategyChecklist?.[x],
+                    })),
+                ),
+                behavioralActivationChecklist: Object.assign(
+                    {},
+                    ...behavioralActivationChecklistValues.map((x) => ({
+                        [x]: !!session.behavioralActivationChecklist?.[x],
+                    })),
+                ),
+            })
+            .then((updatedSession) => {
+                const existing = this.sessions.find((s) => s.sessionId == updatedSession.sessionId);
+                logger.assert(!!existing, 'Session not found when expected');
 
-            if (!!existing) {
-                Object.assign(existing, session);
-                return this;
-            }
+                if (!!existing) {
+                    Object.assign(existing, updatedSession);
+                    return this.sessions;
+                } else {
+                    return this.sessions.slice().concat([updatedSession]);
+                }
+            });
 
-            return this;
-        });
-
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<ISession[]>(() => promise, this.loadSessionsQuery, this.onSessionConflict);
     }
 
     @action.bound
-    public async addCaseReview(caseReview: Partial<ICaseReview>) {
-        const { registryService } = useServices();
-        const promise = registryService.addPatientCaseReview(this.recordId, caseReview).then((caseReview) => {
-            // TODO: server should return appropriate id
-            const addedReview = {
-                ...caseReview,
-                reviewId: `caseReview-${this.caseReviews.length}`,
-            };
+    public async addCaseReview(caseReview: ICaseReview) {
+        const promise = this.patientService
+            .addCaseReview({
+                ...toJS(caseReview),
+                consultingPsychiatrist: {
+                    identityId: caseReview.consultingPsychiatrist.identityId,
+                    name: caseReview.consultingPsychiatrist.name,
+                },
+            })
+            .then((addedReview) => {
+                return this.caseReviews.slice().concat([addedReview]);
+            });
 
-            this.caseReviews.push(addedReview);
-            return this;
-        });
-
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<ICaseReview[]>(() => promise, this.loadCaseReviewsQuery, this.onCaseReviewConflict);
     }
 
     @action.bound
-    public async updateCaseReview(caseReview: Partial<ICaseReview>) {
-        const { registryService } = useServices();
-        const promise = registryService.updatePatientCaseReview(this.recordId, caseReview).then((caseReview) => {
-            const existing = this.caseReviews.find((c) => c.reviewId == caseReview.reviewId);
-            console.assert(!!existing, 'Case review not found when expected');
+    public async updateCaseReview(caseReview: ICaseReview) {
+        const promise = this.patientService
+            .updateCaseReview({
+                ...toJS(caseReview),
+                consultingPsychiatrist: {
+                    identityId: caseReview.consultingPsychiatrist.identityId,
+                    name: caseReview.consultingPsychiatrist.name,
+                },
+            })
+            .then((updatedReview) => {
+                const existing = this.caseReviews.find((r) => r.caseReviewId == updatedReview.caseReviewId);
+                logger.assert(!!existing, 'Case review not found when expected');
 
-            if (!!existing) {
-                Object.assign(existing, caseReview);
-                return this;
-            }
+                if (!!existing) {
+                    Object.assign(existing, updatedReview);
+                    return this.caseReviews;
+                } else {
+                    return this.caseReviews.slice().concat([updatedReview]);
+                }
+            });
 
-            return this;
-        });
-
-        this.runPromiseAfterLoad(promise);
+        await this.loadAndLogQuery<ICaseReview[]>(() => promise, this.loadCaseReviewsQuery, this.onCaseReviewConflict);
     }
 
     @action.bound
@@ -435,12 +484,16 @@ export class PatientStore implements IPatientStore {
         this.runAfterLoad(effect);
     }
 
-    private async loadAndLogQuery<T>(queryCall: () => Promise<T>, promiseQuery: PromiseQuery<T>) {
+    private async loadAndLogQuery<T>(
+        queryCall: () => Promise<T>,
+        promiseQuery: PromiseQuery<T>,
+        onConflict?: (responseData?: any) => T,
+    ) {
         const effect = async () => {
             const loggedCall = logger.logFunction<T>({ eventName: promiseQuery.name })(
                 queryCall.bind(this.patientService),
             );
-            await promiseQuery.fromPromise(loggedCall);
+            await promiseQuery.fromPromise(loggedCall, onConflict);
         };
 
         if (promiseQuery.state == 'Pending') {
@@ -456,4 +509,44 @@ export class PatientStore implements IPatientStore {
             await effect();
         }
     }
+
+    private onSingletonConflict =
+        (fieldName: string) =>
+        <T>(responseData?: any) => {
+            return responseData?.[fieldName] as T;
+        };
+
+    private onSessionConflict = (responseData?: any) => {
+        const updatedSession = responseData?.session;
+        if (!!updatedSession) {
+            const existing = this.sessions.find((s) => s.sessionId == updatedSession.sessionId);
+            logger.assert(!!existing, 'Session not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, updatedSession);
+                return this.sessions;
+            } else {
+                return this.sessions.slice().concat([updatedSession]);
+            }
+        }
+
+        return this.sessions;
+    };
+
+    private onCaseReviewConflict = (responseData?: any) => {
+        const updatedReview = responseData?.casereview;
+        if (!!updatedReview) {
+            const existing = this.caseReviews.find((r) => r.caseReviewId == updatedReview.caseReviewId);
+            logger.assert(!!existing, 'Case review not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, updatedReview);
+                return this.caseReviews;
+            } else {
+                return this.caseReviews.slice().concat([updatedReview]);
+            }
+        }
+
+        return this.caseReviews;
+    };
 }

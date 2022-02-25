@@ -1,9 +1,11 @@
-import ActivityProgressImageSrc from 'src/assets/activity_icon.png';
+import ActivityProgressImageSrc from 'src/assets/activity_pencil.png';
 import MissingImageSrc from 'src/assets/missingimage.png';
-import MoodLoggingImageSrc from 'src/assets/mood_logging_icon.png';
+import MoodLoggingImageSrc from 'src/assets/mood_smiley.png';
 import MySafetyPlanImageSrc from 'src/assets/safety_plan_icon.png';
-import MyValuesInventoryImageSrc from 'src/assets/values_inventory_icon.png';
-import MyWorksheetsImageSrc from 'src/assets/worksheets_icon.png';
+import MyValuesInventoryImageSrc from 'src/assets/value_diamond.png';
+import MyWorksheetsImageSrc from 'src/assets/resources_folder.png';
+import PhqAssessmentImageSrc from 'src/assets/assessment_phq9_depression.png';
+import GadAssessmentImageSrc from 'src/assets/assessment_gad7_anxiety.png';
 
 const _images = {
     Home_values_button_image: MyValuesInventoryImageSrc,
@@ -13,6 +15,9 @@ const _images = {
     Resources_safety_button_image: MySafetyPlanImageSrc,
     Resources_worksheets_button_image: MyWorksheetsImageSrc,
     Progress_activity_button_image: ActivityProgressImageSrc,
+    Progress_assessment_phq_button_image: PhqAssessmentImageSrc,
+    Progress_assessment_gad_button_image: GadAssessmentImageSrc,
+    Progress_mood_button_image: MoodLoggingImageSrc,
 };
 
 type Images = typeof _images;

@@ -55,7 +55,9 @@ export class ServiceBase implements IServiceBase {
                 // Get the name of the document. Assume that it is the only field in the data
                 const docName = Object.keys(request.data)[0];
                 if (!!docName && request.data[docName] && request.data[docName]._id) {
-                    request.data[docName]._rev = this.revIds[request.data[docName]._id];
+                    if (this.revIds[request.data[docName]._id] != undefined) {
+                        request.data[docName]._rev = this.revIds[request.data[docName]._id];
+                    }
                     delete request.data[docName]._id;
                 }
             }

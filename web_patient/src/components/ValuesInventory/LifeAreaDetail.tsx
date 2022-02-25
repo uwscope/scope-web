@@ -395,11 +395,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleCancelValue = action(() => {
         viewState.openAddValue = false;
-        patientStore.resetLoadValuesInventoryState();
+        patientStore.loadValuesInventoryState.resetState();
     });
 
     const handleCancelEditActivity = action(() => {
-        patientStore.resetLoadValuesInventoryState();
+        patientStore.loadValuesInventoryState.resetState();
     });
 
     const handleChangeValue = action((change: string) => {
