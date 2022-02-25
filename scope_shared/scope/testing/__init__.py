@@ -4,6 +4,7 @@ from scope.testing.testing_config import TestingConfig
 PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_activity",
     "scope.testing.fake_data.fixtures_fake_activities",
+    "scope.testing.fake_data.fixtures_fake_activity_logs",
     "scope.testing.fake_data.fixtures_fake_assessments",
     "scope.testing.fake_data.fixtures_fake_assessment_contents",
     "scope.testing.fake_data.fixtures_fake_assessment_logs",
@@ -20,6 +21,7 @@ PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_safety_plan",
     "scope.testing.fake_data.fixtures_fake_session",
     "scope.testing.fake_data.fixtures_fake_sessions",
+    "scope.testing.fake_data.fixtures_fake_scheduled_activities",
     "scope.testing.fake_data.fixtures_fake_scheduled_assessments",
     "scope.testing.fake_data.fixtures_fake_values_inventory",
     "scope.testing.fixtures_config",

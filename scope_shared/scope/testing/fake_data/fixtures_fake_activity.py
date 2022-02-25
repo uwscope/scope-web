@@ -4,6 +4,7 @@ import pytest
 import random
 from typing import Callable, List
 
+import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
 import scope.database.patient.activities
