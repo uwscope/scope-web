@@ -1,7 +1,6 @@
 import copy
 from typing import Optional
 
-import pymongo.collection
 import pymongo.database
 import scope.database.collection_utils
 import scope.database.patients

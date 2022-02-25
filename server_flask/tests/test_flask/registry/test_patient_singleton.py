@@ -34,8 +34,7 @@ class ConfigTestPatientSingleton:
     database_get_function: Callable[[...], dict]
     flask_query_type: str
     flask_document_key: str
-    options: ConfigTestPatientSingletonOptions = ConfigTestPatientSingletonOptions(
-    )
+    options: ConfigTestPatientSingletonOptions = ConfigTestPatientSingletonOptions()
 
 
 TEST_CONFIGS = [
@@ -54,7 +53,7 @@ TEST_CONFIGS = [
         flask_document_key="profile",
         options=ConfigTestPatientSingletonOptions(
             document_will_already_exist=True,
-        )
+        ),
     ),
     ConfigTestPatientSingleton(
         name="safetyplan",

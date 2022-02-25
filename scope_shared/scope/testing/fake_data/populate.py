@@ -41,8 +41,7 @@ def populate_database(
     # TODO: Remove when patient app includes authentication
 
     patient_persistent_identity = scope.database.patients.get_patient_identity(
-        database=database,
-        patient_id="persistent"
+        database=database, patient_id="persistent"
     )
 
     if patient_persistent_identity is None:

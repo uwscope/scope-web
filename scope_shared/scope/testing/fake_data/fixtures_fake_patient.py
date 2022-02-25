@@ -226,7 +226,6 @@ def data_fake_assessment_logs_factory() -> List[dict]:
     return assessment_logs
 
 
-
 def get_fake_assessments():
     return [
         {

@@ -25,8 +25,10 @@ def test_patient_profile_maintains_identity(
     patient_collection = temp_patient.collection
 
     # Obtain and modify a patient profile
-    existing_profile_document = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection,
+    existing_profile_document = (
+        scope.database.patient.patient_profile.get_patient_profile(
+            collection=patient_collection,
+        )
     )
 
     assert existing_profile_document["name"] != "modified name"

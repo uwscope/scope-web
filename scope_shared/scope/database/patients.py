@@ -38,10 +38,17 @@ def create_patient(
     generated_patient_collection_name = _patient_collection_name(patient_id=patient_id)
 
     # Ensure this patient id and collection do not already exist
-    if scope.database.patients.get_patient_identity(database=database, patient_id=patient_id) is not None:
+    if (
+        scope.database.patients.get_patient_identity(
+            database=database, patient_id=patient_id
+        )
+        is not None
+    ):
         raise ValueError('Patient "{}" already exists'.format(patient_id))
     if generated_patient_collection_name in database.list_collection_names():
-        raise ValueError('Collection "{}" already exists'.format(generated_patient_collection_name))
+        raise ValueError(
+            'Collection "{}" already exists'.format(generated_patient_collection_name)
+        )
 
     # Create the patient collection with a sentinel document
     patient_collection = database.get_collection(generated_patient_collection_name)
@@ -63,7 +70,7 @@ def create_patient(
             "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
             "name": name,
             "MRN": MRN,
-        }
+        },
     )
 
     # Atomically store the patient identity document.
@@ -158,7 +165,7 @@ def put_patient_identity(
         document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
         semantic_set_id=PATIENT_IDENTITY_SEMANTIC_SET_ID,
         set_id=patient_id,
-        document=patient_identity
+        document=patient_identity,
     )
 
 

@@ -18,7 +18,7 @@ def test_patient_create_get_delete(
     created_patient_identity = scope.database.patients.create_patient(
         database=database_client,
         name="TEST NAME",
-        MRN="TEST MRN"
+        MRN="TEST MRN",
     )
     scope.testing.schema.assert_schema(
         data=created_patient_identity,
@@ -36,7 +36,9 @@ def test_patient_create_get_delete(
     # Confirm get patient identity via semantic set id
     retrieved_identity_document = scope.database.patients.get_patient_identity(
         database=database_client,
-        patient_id=created_patient_identity[scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID],
+        patient_id=created_patient_identity[
+            scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+        ],
     )
     assert retrieved_identity_document == created_patient_identity
 
@@ -46,7 +48,9 @@ def test_patient_create_get_delete(
 
     # Confirm patient profile document now exists
     retrieved_profile = scope.database.patient.patient_profile.get_patient_profile(
-        collection=database_client.get_collection(created_patient_identity["collection"])
+        collection=database_client.get_collection(
+            created_patient_identity["collection"]
+        )
     )
     assert retrieved_profile is not None
 
@@ -98,7 +102,7 @@ def test_patient_identity_update(
     created_patient_identity = scope.database.patients.create_patient(
         database=database_client,
         name="TEST NAME",
-        MRN="TEST MRN"
+        MRN="TEST MRN",
     )
     scope.testing.schema.assert_schema(
         data=created_patient_identity,
@@ -115,7 +119,7 @@ def test_patient_identity_update(
     result = scope.database.patients.put_patient_identity(
         database=database_client,
         patient_id=created_patient_identity["_set_id"],
-        patient_identity=modified_patient_identity
+        patient_identity=modified_patient_identity,
     )
 
     assert result.inserted_count == 1
