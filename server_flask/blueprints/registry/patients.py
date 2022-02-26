@@ -19,20 +19,6 @@ patients_blueprint = flask.Blueprint(
 )
 
 
-# # Transition code to establish a "sparse" representation
-# patient_documents_sparse = [
-#     {
-#         "identity": {
-#             "_type": "identity",
-#             "identityId": patient_document_current["identity"]["identityId"],
-#             "name": patient_document_current["profile"]["name"],
-#             "MRN": patient_document_current["profile"]["MRN"],
-#         },
-#     }
-#     for patient_document_current in patient_documents
-# ]
-
-
 def _construct_patient_document(
     *,
     patient_identity: dict,
@@ -103,7 +89,7 @@ def get_patients():
 
     # List of documents from the patient identities collection
     patient_identities = scope.database.patients.get_patient_identities(
-        database=context.database,
+        database=database,
     )
 
     # Construct a full patient document for each
@@ -136,7 +122,7 @@ def get_patient(patient_id):
     context = request_context()
     database = context.database
 
-    # List of documents from the patient identities collection
+    # Document from the patient identities collection
     patient_identity = scope.database.patients.get_patient_identity(
         database=context.database,
         patient_id=patient_id,

@@ -72,7 +72,7 @@ def test_patient_get(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test retrieving a patients
+    Test retrieving a patient.
     """
 
     session = flask_session_unauthenticated_factory()
