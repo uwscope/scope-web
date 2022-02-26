@@ -4,5 +4,6 @@
 	"_set_id": "1",
 	"_rev": 1,
 	"providerId": "1",
-	"name": "Paul Atreides"
+	"name": "Paul Atreides",
+	"role": "studyStaff"
 }

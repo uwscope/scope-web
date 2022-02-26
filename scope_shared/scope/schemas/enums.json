@@ -228,15 +228,15 @@
 			"description": "PatientGender Type",
 			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
 		},
-		"identityType": {
-			"type": "string",
-			"description": "Identity Types",
-			"enum": ["patient", "socialWorker", "psychiatrist", "oncologist", "studyStaff"]
-		},
 		"pronoun": {
 			"type": "string",
 			"description": "PatientPronoun Type",
 			"enum": ["He/Him", "She/Her", "They/Them"]
+		},
+		"providerRole": {
+			"type": "string",
+			"description": "ProviderRole Type",
+			"enum": ["socialWorker", "psychiatrist", "oncologist", "studyStaff"]
 		},
 		"race": {
 			"type": "object",

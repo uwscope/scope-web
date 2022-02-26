@@ -92,8 +92,7 @@ class CancerTreatmentRegimen(Enum):
     Other = "Other"
 
 
-class IdentityType(Enum):
-    Patient = "patient"
+class ProviderRole(Enum):
     SocialWorker = "socialWorker"
     Psychiatrist = "psychiatrist"
     Oncologist = "oncologist"
