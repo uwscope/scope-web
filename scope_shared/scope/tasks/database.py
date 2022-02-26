@@ -130,7 +130,7 @@ def task_populate(
     database_config = scope.config.DatabaseConfig.load(database_config_path)
 
     @task
-    def populate(context, patients=10):
+    def populate(context):
         """
         Populate the {} database with fake data.
         """
@@ -150,7 +150,6 @@ def task_populate(
 
             scope.testing.fake_data.populate.populate_database(
                 database=database,
-                populate_patients=patients,
             )
 
     populate.__doc__ = populate.__doc__.format(database_config.name)

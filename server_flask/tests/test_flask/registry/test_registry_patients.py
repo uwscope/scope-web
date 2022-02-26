@@ -51,7 +51,9 @@ def test_patients_get(
         )
 
     retrieved_ids = [
-        patient_document_current["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
+        patient_document_current["identity"][
+            scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+        ]
         for patient_document_current in patient_documents
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
@@ -72,7 +74,7 @@ def test_patient_get(
     flask_session_unauthenticated_factory: Callable[[], requests.Session],
 ):
     """
-    Test retrieving a patients
+    Test retrieving a patient.
     """
 
     session = flask_session_unauthenticated_factory()
@@ -95,7 +97,11 @@ def test_patient_get(
         expected_valid=True,
     )
 
-    assert created_id == patient_document["identity"][scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID]
+    patient_identity = patient_document["identity"]
+    patient_id = patient_identity[
+        scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+    ]
+    assert patient_id == created_id
 
 
 def test_patient_get_invalid(

@@ -1,0 +1,11 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/provider-identities",
+	"title": "IProviderIdentity[]",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/provider-identity"
+	},
+	"additionalProperties": false,
+	"required": []
+}

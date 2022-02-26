@@ -29,6 +29,7 @@ patients_schema: Optional[jschon.JSONSchema] = None
 patient_identity_schema: Optional[jschon.JSONSchema] = None
 patient_profile_schema: Optional[jschon.JSONSchema] = None
 provider_identity_schema: Optional[jschon.JSONSchema] = None
+provider_identities_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
 regexes: Optional[jschon.JSONSchema] = None
 safety_plan_schema: Optional[jschon.JSONSchema] = None
@@ -81,6 +82,7 @@ SCHEMAS = {
     "patient_identity_schema": "patient-identity.json",
     "patient_profile_schema": "patient-profile.json",
     "provider_identity_schema": "provider-identity.json",
+    "provider_identities_schema": "provider-identities.json",
     "referral_status_schema": "referral-status.json",
     "regexes": "datetime.json",
     "safety_plan_schema": "safety-plan.json",

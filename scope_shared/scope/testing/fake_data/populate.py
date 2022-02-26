@@ -1,8 +1,5 @@
 import copy
-
 import faker
-import random
-import pymongo.collection
 import pymongo.database
 
 import scope.database.patient.activities
@@ -15,6 +12,7 @@ import scope.database.patient.sessions
 import scope.database.patient.values_inventory
 import scope.database.patients
 import scope.database.providers
+import scope.testing.fake_data.enums
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
@@ -36,10 +34,13 @@ import scope.testing.fake_data.fixtures_fake_values_inventory
 def populate_database(
     *,
     database: pymongo.database.Database,
-    populate_patients: int,
 ):
+    # Faker instance
     faker_factory = faker.Faker(locale="la")
 
+    #
+    # Patient profile factory
+    #
     fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
         faker_factory=faker_factory,
     )
@@ -51,50 +52,79 @@ def populate_database(
     if patient_persistent_identity is None:
         profile = fake_patient_profile_factory()
 
-        patient_current = scope.database.patients.create_patient(
+        patient_identity_current = scope.database.patients.create_patient(
             database=database,
             patient_id="persistent",
             name=profile["name"],
             MRN=profile["MRN"],
         )
-        patient_collection = database.get_collection(patient_current["collection"])
+        patient_collection = database.get_collection(
+            patient_identity_current["collection"]
+        )
 
         _populate_patient(
             faker_factory=faker_factory,
             database=database,
             patient_collection=patient_collection,
-            patient_id=patient_current["patientId"],
+            patient_id=patient_identity_current["patientId"],
             profile=profile,
         )
 
-    for patient_count in range(populate_patients - 1):
+    for patient_count in range(10):
         profile = fake_patient_profile_factory()
 
-        patient_current = scope.database.patients.create_patient(
+        patient_identity_current = scope.database.patients.create_patient(
             database=database,
             name=profile["name"],
             MRN=profile["MRN"],
         )
-        patient_collection = database.get_collection(patient_current["collection"])
+        patient_collection = database.get_collection(
+            patient_identity_current["collection"]
+        )
 
         _populate_patient(
             faker_factory=faker_factory,
             database=database,
             patient_collection=patient_collection,
-            patient_id=patient_current["patientId"],
+            patient_id=patient_identity_current["patientId"],
             profile=profile,
         )
 
-    # # TODO: Pass populate_providers integer as argument.
-    # populate_providers = 10
-    # providers_collection = database.get_collection(
-    #     scope.database.providers.PROVIDERS_COLLECTION
-    # )
-    # for _ in range(populate_providers):
-    #     _populate_providers(
-    #         faker_factory=faker_factory,
-    #         providers_collection=providers_collection,
-    #     )
+    #
+    # Provider identity factory
+    #
+
+    fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
+        faker_factory=faker_factory,
+    )
+
+    generate_roles = [
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
+            "number_to_generate": 5,
+        },
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.Oncologist.value,
+            "number_to_generate": 2,
+        },
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.Psychiatrist.value,
+            "number_to_generate": 2,
+        },
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.SocialWorker.value,
+            "number_to_generate": 8,
+        },
+    ]
+    for generate_current in generate_roles:
+        for _ in range(generate_current["number_to_generate"]):
+            provider_identity_current = fake_provider_identity_factory()
+
+            provider_identity_current = scope.database.providers.create_provider(
+                database=database,
+                name=provider_identity_current["name"],
+                role=generate_current["role_value"],
+            )
 
 
 def _populate_patient(
@@ -108,7 +138,9 @@ def _populate_patient(
     # Store the profile used to create this patient.
     # It will need the current "_rev".
     profile = copy.deepcopy(profile)
-    profile["_rev"] = 1
+    profile["_rev"] = scope.database.patient.patient_profile.get_patient_profile(
+        collection=patient_collection,
+    )["_rev"]
     scope.database.patient.patient_profile.put_patient_profile(
         database=database,
         collection=patient_collection,
@@ -210,23 +242,3 @@ def _populate_patient(
                 collection=patient_collection,
                 activity=activity,
             )
-
-
-# def _populate_providers(
-#     *,
-#     faker_factory: faker.Faker,
-#     providers_collection: pymongo.collection.Collection,
-# ):
-#
-#     # Obtain necessary document factory
-#     fake_provider_factory = (
-#         scope.testing.fake_data.fixtures_fake_provider.fake_provider_factory(
-#             faker_factory=faker_factory,
-#         )
-#     )
-#
-#     # Put appropriate document
-#     scope.database.provider_identities.create_provider(
-#         collection=providers_collection,
-#         provider=fake_provider_factory(),
-#     )

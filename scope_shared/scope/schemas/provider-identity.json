@@ -22,8 +22,11 @@
 		},
 		"name": {
 			"type": "string"
+		},
+		"role": {
+			"$ref": "/schemas/enums#/properties/providerRole"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "name"]
+	"required": ["_type", "name", "role"]
 }

@@ -1,6 +1,5 @@
 import pymongo.database
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.patient.patient_profile

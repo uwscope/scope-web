@@ -21,6 +21,9 @@ def fake_provider_identity_factory(
         fake_identity = {
             "_type": scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE,
             "name": faker_factory.name(),
+            "role": fake_utils.fake_enum_value(
+                scope.testing.fake_data.enums.ProviderRole
+            ),
         }
 
         return fake_identity

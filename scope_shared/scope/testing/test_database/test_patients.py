@@ -45,8 +45,10 @@ def test_patient_create_get_delete(
         assert retrieved_identity_document == created_patient_identity
 
         # Confirm patient identity in list of patient identities
-        patients = scope.database.patients.get_patient_identities(database=database_client)
-        assert created_patient_identity in patients
+        patient_identities = scope.database.patients.get_patient_identities(
+            database=database_client
+        )
+        assert created_patient_identity in patient_identities
 
         # Confirm patient profile document now exists
         retrieved_profile = scope.database.patient.patient_profile.get_patient_profile(
@@ -72,9 +74,11 @@ def test_patient_create_get_delete(
     assert retrieved_identity_document is None
 
     # Confirm patient identity not in list of patient identities
-    patients = scope.database.patients.get_patient_identities(database=database_client)
-    if patients:
-        assert created_patient_identity not in patients
+    patient_identities = scope.database.patients.get_patient_identities(
+        database=database_client
+    )
+    if patient_identities:
+        assert created_patient_identity not in patient_identities
 
 
 def test_patient_delete_nonexistent(
@@ -132,5 +136,5 @@ def test_patient_identity_update(
         scope.database.patients.delete_patient(
             database=database_client,
             patient_id=created_patient_identity["patientId"],
-            destructive=True
+            destructive=True,
         )
