@@ -68,6 +68,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
+        XFAIL_TEST_HAS_TODO=True,
     ),
     ConfigTestFakeDataSchema(
         name="activities",
@@ -86,7 +87,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
-        XFAIL_TEST_HAS_TODO=True
+        XFAIL_TEST_HAS_TODO=True,
     ),
     ConfigTestFakeDataSchema(
         name="case-review",

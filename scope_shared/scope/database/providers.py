@@ -27,10 +27,12 @@ def create_provider(
     provider_id = scope.database.collection_utils.generate_set_id()
 
     # Ensure this provider id does not already exist
-    if scope.database.providers.get_provider_identity(
-        database=database,
-        provider_id=provider_id
-    ) is not None:
+    if (
+        scope.database.providers.get_provider_identity(
+            database=database, provider_id=provider_id
+        )
+        is not None
+    ):
         raise ValueError('Provider "{}" already exists'.format(provider_id))
 
     # Atomically store the provider identity document.

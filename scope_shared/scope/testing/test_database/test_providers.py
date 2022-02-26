@@ -48,7 +48,9 @@ def test_provider_create_get_delete(
         assert retrieved_identity_document == created_provider_identity
 
         # Confirm provider identity in list of provider identities
-        provider_identities = scope.database.providers.get_provider_identities(database=database_client)
+        provider_identities = scope.database.providers.get_provider_identities(
+            database=database_client
+        )
         assert created_provider_identity in provider_identities
 
     finally:
@@ -68,7 +70,9 @@ def test_provider_create_get_delete(
     assert retrieved_identity_document is None
 
     # Confirm provider identity not in list of provider identities
-    provider_identities = scope.database.providers.get_provider_identities(database=database_client)
+    provider_identities = scope.database.providers.get_provider_identities(
+        database=database_client
+    )
     if provider_identities:
         assert created_provider_identity not in provider_identities
 
@@ -101,11 +105,13 @@ def test_provider_identity_update(
 
     # Create provider
     created_provider_identity = scope.database.providers.create_provider(
-        database = database_client,
-        name = data_fake_provider["name"],
-        role = data_fake_provider["role"],
+        database=database_client,
+        name=data_fake_provider["name"],
+        role=data_fake_provider["role"],
     )
-    created_provider_id = created_provider_identity[scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID]
+    created_provider_id = created_provider_identity[
+        scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
+    ]
 
     try:
         scope.testing.schema.assert_schema(
@@ -131,5 +137,5 @@ def test_provider_identity_update(
         scope.database.providers.delete_provider(
             database=database_client,
             provider_id=created_provider_id,
-            destructive=True
+            destructive=True,
         )

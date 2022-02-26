@@ -51,7 +51,9 @@ def test_provider_identities_get(
         )
 
     retrieved_ids = [
-        provider_identity_current[scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID]
+        provider_identity_current[
+            scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
+        ]
         for provider_identity_current in provider_identities
     ]
     assert all(provider_id in retrieved_ids for provider_id in created_ids)
@@ -95,7 +97,10 @@ def test_provider_identity_get(
         expected_valid=True,
     )
 
-    assert created_id == provider_identity[scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID]
+    provider_id = provider_identity[
+        scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
+    ]
+    assert provider_id == created_id
 
 
 def test_provider_identity_get_invalid(
