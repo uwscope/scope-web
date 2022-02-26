@@ -12,6 +12,7 @@ import blueprints.registry.clinical_history
 import blueprints.registry.mood_logs
 import blueprints.registry.patient_profile
 import blueprints.registry.patients
+import blueprints.registry.providers
 import blueprints.registry.safety_plan
 import blueprints.registry.sessions
 import blueprints.registry.values_inventory
@@ -69,6 +70,10 @@ def create_app():
     # # Register all the `registry` blueprints, i.e. blueprints for web_registry
     app.register_blueprint(
         blueprints.registry.patients.patients_blueprint,
+        url_prefix="/",
+    )
+    app.register_blueprint(
+        blueprints.registry.providers.providers_blueprint,
         url_prefix="/",
     )
     app.register_blueprint(

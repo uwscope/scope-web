@@ -22,6 +22,7 @@ PYTEST_PLUGINS = [
     "scope.testing.fixtures_database",
     "scope.testing.fixtures_database_temp_collection",
     "scope.testing.fixtures_database_temp_patient",
+    "scope.testing.fixtures_database_temp_provider",
     "scope.testing.fixtures_documentdb",
     "scope.testing.fixtures_faker",
     "scope.testing.fixtures_flask",
