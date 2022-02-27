@@ -72,7 +72,7 @@ TEST_CONFIGS = [
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
+        expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
     ),
     ConfigTestFakeDataSchema(
         name="activities",
@@ -105,16 +105,16 @@ TEST_CONFIGS = [
         name="assessment",
         schema=scope.schema.assessment_schema,
         data_factory_fixture="data_fake_assessment_factory",
-        expected_document=True,  # TODO: @James, are these boolean configurations correct? Tests are passing.
+        expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
+        expected_semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
     ),
     ConfigTestFakeDataSchema(
         name="assessments",
         schema=scope.schema.assessments_schema,
         data_factory_fixture="data_fake_assessments_factory",
-        expected_document=False,  # TODO: @James, are these boolean configurations correct? Tests are passing.
+        expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
@@ -276,8 +276,7 @@ TEST_CONFIGS = [
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
-        XFAIL_TEST_HAS_TODO=True,  # TODO: Could fail if fake_activities/fake_values_inventory is []/None
+        expected_semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-activities",
@@ -287,7 +286,6 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
-        XFAIL_TEST_HAS_TODO=True,  # TODO: Could fail if fake_activities/fake_values_inventory is []/None
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessment",
@@ -296,7 +294,7 @@ TEST_CONFIGS = [
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
-        expected_semantic_set_id=None,  # TODO: @James, assert config.expected_semantic_set_id not in document_singleton will fail if we send semantic_set_id here
+        expected_semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessments",
@@ -402,9 +400,9 @@ def test_fake_data_schema(
             # Ensure they were not already present, as that's a fake_data error
             document_set_element = copy.deepcopy(document_singleton)
             document_set_element["_set_id"] = collection_utils.generate_set_id()
-            assert "_set_id" not in document_singleton
+            assert "_set_id" not in document_set_element
             if config.expected_semantic_set_id:
-                assert config.expected_semantic_set_id not in document_singleton
+                assert config.expected_semantic_set_id not in document_set_element
                 document_set_element[
                     config.expected_semantic_set_id
                 ] = document_set_element["_set_id"]
