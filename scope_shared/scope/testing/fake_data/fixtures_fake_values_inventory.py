@@ -38,13 +38,13 @@ def _fake_activity(
 def _fake_value(
     *,
     faker_factory: faker.Faker,
-    fake_life_area: dict,  # lifeareaId will be taken from this
+    life_area: dict,
 ) -> dict:
     """
     This is currently tested by inclusion in the values inventory schema.
     If moved out on its own, it should probably get its own tests.
 
-    Although patients may be asked to populate these,
+    Although patients will be asked to populate these,
     ensure functionality even if they are not yet populated.
     """
 
@@ -52,12 +52,12 @@ def _fake_value(
         "name": faker_factory.text(),
         "createdDateTime": format_utils.format_date(faker_factory.date_time()),
         "editedDateTime": format_utils.format_date(faker_factory.date_time()),
-        "lifeareaId": fake_life_area["id"],
+        "lifeareaId": life_area["id"],
         "activities": [
             _fake_activity(
                 faker_factory=faker_factory,
             )
-            for _ in range(0, 5)
+            for _ in range(random.randint(0, 5))
         ],
     }
 
@@ -65,12 +65,12 @@ def _fake_value(
 def fake_values_inventory_factory(
     *,
     faker_factory: faker.Faker,
-    fake_life_areas: List[dict],
+    life_areas: List[dict],
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake value inventory documents.
 
-    Although patients may be asked to populate these,
+    Although patients will be asked to populate these,
     ensure functionality even if they are not yet populated.
     """
 
@@ -80,15 +80,19 @@ def fake_values_inventory_factory(
             "assigned": random.choice([True, False]),
             "assignedDateTime": format_utils.format_date(faker_factory.date_time()),
             "lastUpdatedDateTime": format_utils.format_date(faker_factory.date_time()),
-            "values": [
-                _fake_value(
-                    faker_factory=faker_factory,
-                    fake_life_area=fake_life_area,
-                )
-                for fake_life_area in fake_life_areas
-                for _ in range(random.randint(0, 5))
-            ],
         }
+
+        values = []
+        for life_area_current in life_areas:
+            for _ in range(random.randint(0, 5)):
+                values.append(
+                    _fake_value(
+                        faker_factory=faker_factory,
+                        life_area=life_area_current,
+                    )
+                )
+        if values:
+            fake_values_inventory["values"] = values
 
         # Remove a randomly sampled subset of optional parameters.
         fake_values_inventory = fake_utils.fake_optional(
@@ -105,15 +109,17 @@ def fake_values_inventory_factory(
 def fixture_data_fake_values_inventory_factory(
     *,
     faker: faker.Faker,
-    data_fake_life_areas: List[dict],
+    data_fake_life_areas_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_values_inventory_factory.
     """
 
+    life_areas = data_fake_life_areas_factory()
+
     unvalidated_factory = fake_values_inventory_factory(
         faker_factory=faker,
-        fake_life_areas=data_fake_life_areas,
+        life_areas=life_areas,
     )
 
     def factory() -> dict:
@@ -127,15 +133,3 @@ def fixture_data_fake_values_inventory_factory(
         return fake_values_inventory
 
     return factory
-
-
-@pytest.fixture(name="data_fake_values_inventory")
-def fixture_data_fake_values_inventory(
-    *,
-    data_fake_values_inventory_factory: Callable[[], dict],
-) -> dict:
-    """
-    Fixture for data_fake_values_inventory.
-    """
-
-    return data_fake_values_inventory_factory()
