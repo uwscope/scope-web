@@ -20,6 +20,7 @@ def _fake_assessment(
 ) -> dict:
     return {
         # Assessments have a fixed set of allowable IDs
+        "_set_id": assessment_content["id"],
         scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
 
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
