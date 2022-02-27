@@ -399,8 +399,8 @@ def test_fake_data_schema(
             # These fields are expected by only set elements
             # Ensure they were not already present, as that's a fake_data error
             document_set_element = copy.deepcopy(document_singleton)
-            document_set_element["_set_id"] = collection_utils.generate_set_id()
             assert "_set_id" not in document_set_element
+            document_set_element["_set_id"] = collection_utils.generate_set_id()
             if config.expected_semantic_set_id:
                 assert config.expected_semantic_set_id not in document_set_element
                 document_set_element[
