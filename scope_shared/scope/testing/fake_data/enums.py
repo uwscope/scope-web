@@ -101,7 +101,6 @@ class CancerTreatmentRegimen(Enum):
 class ProviderRole(Enum):
     SocialWorker = "socialWorker"
     Psychiatrist = "psychiatrist"
-    Oncologist = "oncologist"
     StudyStaff = "studyStaff"
 
 

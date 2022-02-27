@@ -145,20 +145,16 @@ def populate_database(
 
     generate_roles = [
         {
-            "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
-            "number_to_generate": 5,
-        },
-        {
-            "role_value": scope.testing.fake_data.enums.ProviderRole.Oncologist.value,
-            "number_to_generate": 8,
-        },
-        {
             "role_value": scope.testing.fake_data.enums.ProviderRole.Psychiatrist.value,
             "number_to_generate": 2,
         },
         {
             "role_value": scope.testing.fake_data.enums.ProviderRole.SocialWorker.value,
             "number_to_generate": 8,
+        },
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
+            "number_to_generate": 5,
         },
     ]
     for generate_current in generate_roles:
