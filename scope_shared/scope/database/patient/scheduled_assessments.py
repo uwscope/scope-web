@@ -4,7 +4,7 @@ import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "scheduledAssessment"
-SEMANTIC_SET_ID = "scheduleAssessmentId"
+SEMANTIC_SET_ID = "scheduledAssessmentId"
 
 
 def get_scheduled_assessments(

@@ -17,7 +17,7 @@
 		"_rev": {
 			"type": "number"
 		},
-		"scheduleActivityId": {
+		"scheduledActivityId": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
 		"dueDate": {
