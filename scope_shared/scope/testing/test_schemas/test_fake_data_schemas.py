@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import faker
 import jschon
 import pytest
-from typing import Optional
+import random
+from typing import List, Optional
 
 import scope.database.patient.activities
 import scope.database.patient.activity_logs
@@ -55,6 +56,7 @@ class ConfigTestFakeDataSchema:
     expected_singleton: bool
     expected_set_element: bool
     expected_semantic_set_id: Optional[str]
+    expected_set_ids: Optional[List[str]]
 
     # Used to indicate test is not resolved
     # because it has an issue in data or schema
@@ -73,6 +75,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="activities",
@@ -82,6 +85,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="activity-log",
@@ -91,6 +95,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="activity-logs",
@@ -100,6 +105,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="assessment",
@@ -109,6 +115,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
+        expected_set_ids=["gad-7", "medication", "mood", "phq-9"],
     ),
     ConfigTestFakeDataSchema(
         name="assessments",
@@ -118,6 +125,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="assessment-log",
@@ -127,6 +135,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="assessment-logs",
@@ -136,6 +145,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="assessment-contents",
@@ -145,6 +155,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="case-review",
@@ -154,6 +165,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="case-reviews",
@@ -163,6 +175,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="clinical-history",
@@ -172,6 +185,7 @@ TEST_CONFIGS = [
         expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="contact",
@@ -181,6 +195,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="life-areas",
@@ -190,6 +205,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="mood-log",
@@ -199,6 +215,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="mood-logs",
@@ -208,6 +225,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     # patient-identity is not faked because there would be no patient backing that identity.
     # Fake patient identities are instead obtained by generating entire fake patients.
@@ -223,6 +241,7 @@ TEST_CONFIGS = [
         expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="provider-identity",
@@ -232,6 +251,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="referral-status",
@@ -241,6 +261,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="safety-plan",
@@ -250,6 +271,7 @@ TEST_CONFIGS = [
         expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="session",
@@ -259,6 +281,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="sessions",
@@ -268,6 +291,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-activity",
@@ -277,6 +301,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-activities",
@@ -286,6 +311,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessment",
@@ -295,6 +321,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="scheduled-assessments",
@@ -304,6 +331,7 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
         name="values-inventory",
@@ -313,6 +341,7 @@ TEST_CONFIGS = [
         expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
     ),
 ]
 
@@ -342,11 +371,12 @@ def test_fake_data_schema(
         if not config.expected_set_element:
             assert config.expected_semantic_set_id is None
     else:
-        # Fake data is expected to be a List[dict]
-        # Assume those documents will be tested elsewhere
+        # Fake data which is not a document is expected to be a List[dict]
+        # Assume non-schema aspects of those list elements will be tested elsewhere
         assert not config.expected_singleton
         assert not config.expected_set_element
         assert config.expected_semantic_set_id is None
+        assert config.expected_set_ids is None
 
     for count in range(TEST_ITERATIONS):
         # Obtain fake data
@@ -381,37 +411,60 @@ def test_fake_data_schema(
 
             # These fields are expected by both singletons and set elements
             # Ensure they were not already present, as that's a fake_data error
-            document_singleton = copy.deepcopy(document_normalized)
-            assert "_id" not in document_singleton
-            document_singleton["_id"] = str(bson.objectid.ObjectId())
-            assert "_rev" not in document_singleton
-            document_singleton["_rev"] = 1
-            document_singleton = document_utils.normalize_document(
-                document=document_singleton
-            )
+            if config.expected_singleton or config.expected_set_element:
+                document_singleton = copy.deepcopy(document_normalized)
+                assert "_id" not in document_singleton
+                document_singleton["_id"] = str(bson.objectid.ObjectId())
+                assert "_rev" not in document_singleton
+                document_singleton["_rev"] = 1
 
-            scope.testing.schema.assert_schema(
-                data=document_singleton,
-                schema=config.schema,
-                expected_valid=config.expected_singleton or config.expected_set_element,
-            )
+                document_singleton = document_utils.normalize_document(
+                    document=document_singleton
+                )
+                scope.testing.schema.assert_schema(
+                    data=document_singleton,
+                    schema=config.schema,
+                    expected_valid=config.expected_singleton or config.expected_set_element,
+                )
 
-            # These fields are expected by only set elements
-            # Ensure they were not already present, as that's a fake_data error
-            document_set_element = copy.deepcopy(document_singleton)
-            assert "_set_id" not in document_set_element
-            document_set_element["_set_id"] = collection_utils.generate_set_id()
-            if config.expected_semantic_set_id:
-                assert config.expected_semantic_set_id not in document_set_element
-                document_set_element[
-                    config.expected_semantic_set_id
-                ] = document_set_element["_set_id"]
-            document_set_element = document_utils.normalize_document(
-                document=document_set_element
-            )
+            if config.expected_set_element:
+                document_set_element = copy.deepcopy(document_normalized)
 
-            scope.testing.schema.assert_schema(
-                data=document_set_element,
-                schema=config.schema,
-                expected_valid=config.expected_set_element,
-            )
+                # These fields were already tested above
+                document_set_element["_id"] = str(bson.objectid.ObjectId())
+                document_set_element["_rev"] = 1
+
+                # If a set is limited to a known set of ids,
+                # then those ids may already exist on a fake document.
+                # Otherwise set ids must not already be present, as that's a fake_data error.
+                if config.expected_set_ids is not None:
+                    if "_set_id" in document_set_element:
+                        # Verify the existing set id is allowable
+                        assert document_set_element["_set_id"] in config.expected_set_ids
+                    else:
+                        # Assign an allowable set id
+                        document_set_element["_set_id"] = random.choice(config.expected_set_ids)
+
+                    if config.expected_semantic_set_id:
+                        if config.expected_semantic_set_id in document_set_element:
+                            assert document_set_element[config.expected_semantic_set_id] == document_set_element["_set_id"]
+                        else:
+                            document_set_element[config.expected_semantic_set_id] = document_set_element["_set_id"]
+                else:
+                    assert "_set_id" not in document_set_element
+                    document_set_element["_set_id"] = collection_utils.generate_set_id()
+
+                    if config.expected_semantic_set_id:
+                        assert config.expected_semantic_set_id not in document_set_element
+                        document_set_element[
+                            config.expected_semantic_set_id
+                        ] = document_set_element["_set_id"]
+
+                document_set_element = document_utils.normalize_document(
+                    document=document_set_element
+                )
+                scope.testing.schema.assert_schema(
+                    data=document_set_element,
+                    schema=config.schema,
+                    expected_valid=config.expected_set_element,
+                )
