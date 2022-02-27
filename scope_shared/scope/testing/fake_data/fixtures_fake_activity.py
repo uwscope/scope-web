@@ -22,14 +22,12 @@ def fake_activity_factory(
     """
 
     if not len(values_inventory.get("values", [])) > 0:
-        raise ValueError('values_inventory must include at least one value.')
+        raise ValueError("values_inventory must include at least one value.")
 
     def factory() -> dict:
         combined_activities = []
         for value_current in values_inventory["values"]:
-            combined_activities.extend(
-                value_current.get("activities", [])
-            )
+            combined_activities.extend(value_current.get("activities", []))
 
         if len(combined_activities) > 0 and random.choice([True, False]):
             # Sample a value with at least one activity

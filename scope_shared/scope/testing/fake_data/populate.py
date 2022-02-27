@@ -175,16 +175,20 @@ def _populate_patient(
     # - It will need the current "_rev", because the profile will already exist.
     ################################################################################
     def _profile():
-        copy_profile = copy.deepcopy(profile)
-        copy_profile["_rev"] = scope.database.patient.patient_profile.get_patient_profile(
+        rev_existing = scope.database.patient.patient_profile.get_patient_profile(
             collection=patient_collection,
         )["_rev"]
+
+        copy_profile = copy.deepcopy(profile)
+        copy_profile["_rev"] = rev_existing
+
         scope.database.patient.patient_profile.put_patient_profile(
             database=database,
             collection=patient_collection,
             patient_id=patient_id,
             patient_profile=copy_profile,
         )
+
     _profile()
 
     ################################################################################
@@ -202,6 +206,7 @@ def _populate_patient(
                 collection=patient_collection,
                 case_review=case_review_current,
             )
+
     _case_reviews()
 
     def _clinical_history():
@@ -213,6 +218,7 @@ def _populate_patient(
             collection=patient_collection,
             clinical_history=clinical_history,
         )
+
     _clinical_history()
 
     def _mood_logs():
@@ -227,6 +233,7 @@ def _populate_patient(
                 collection=patient_collection,
                 mood_log=mood_log_current,
             )
+
     _mood_logs()
 
     ################################################################################
@@ -248,6 +255,7 @@ def _populate_patient(
             collection=patient_collection,
             safety_plan=fake_safety_plan_factory(),
         )
+
     _safety_plan()
 
     ################################################################################
@@ -268,6 +276,7 @@ def _populate_patient(
                 collection=patient_collection,
                 session=session,
             )
+
     _sessions()
 
     ################################################################################
@@ -308,11 +317,5 @@ def _populate_patient(
                     collection=patient_collection,
                     activity=activity_current,
                 )
+
     _values_inventory_and_activities()
-
-
-
-
-
-
-
