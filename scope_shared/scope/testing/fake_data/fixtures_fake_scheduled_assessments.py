@@ -5,8 +5,8 @@ import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
+import scope.database.patient.assessments
 import scope.database.patient.scheduled_assessments
 import scope.schema
 import scope.testing.fake_data.enums
@@ -16,65 +16,48 @@ import scope.testing.fake_data.fake_utils as fake_utils
 def _fake_scheduled_assessment(
     *,
     faker_factory: faker.Faker,
-    fake_assessment: dict,
-) -> List[dict]:
-    return [
-        {
-            # TODO: SET semantic set id because assessment log needs it
-            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: collection_utils.generate_set_id(),
-            "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
-            "dueDate": format_utils.format_date(
-                faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(days=10),
-                    date_end=datetime.datetime.now() + datetime.timedelta(days=10),
-                )
-            ),
-            "dueType": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.DueType
-            ),
-            "assessmentId": fake_assessment["assessmentId"],
-            "completed": random.choice([True, False]),
-        }
-        for _ in range(random.randint(1, 10))
-    ]
-
-
-def _fake_scheduled_assessments(
-    *,
-    faker_factory: faker.Faker,
-    fake_assessments: List[dict],
-) -> List[dict]:
-    fake_scheduled_assessments = []
-    for fake_assessment in fake_assessments:
-        if fake_assessment["assessmentId"] != "mood":
-            fake_scheduled_assessments.extend(
-                _fake_scheduled_assessment(
-                    faker_factory=faker_factory,
-                    fake_assessment=fake_assessment,
-                )
+    assessment: dict,
+) -> dict:
+    return {
+        "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
+        "dueDate": format_utils.format_date(
+            faker_factory.date_between_dates(
+                date_start=datetime.datetime.now() - datetime.timedelta(days=10),
+                date_end=datetime.datetime.now() + datetime.timedelta(days=10),
             )
-    return fake_scheduled_assessments
+        ),
+        "dueType": fake_utils.fake_enum_value(
+            scope.testing.fake_data.enums.DueType
+        ),
+        scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[scope.database.patient.assessments.SEMANTIC_SET_ID],
+        "completed": random.choice([True, False]),
+    }
 
 
 def fake_scheduled_assessment_factory(
     *,
     faker_factory: faker.Faker,
-    fake_assessments: List[dict],
+    assessment: dict,
 ) -> Callable[[], dict]:
     """
-    Obtain a factory that will generate fake scheduled assessment document.
+    Obtain a factory that will generate a fake scheduled assessment document.
     """
 
+    if scope.database.patient.assessments.SEMANTIC_SET_ID not in assessment:
+        raise ValueError('assessment must include "{}".'.format(
+            scope.database.patient.assessments.SEMANTIC_SET_ID
+        ))
+    if assessment[scope.database.patient.assessments.SEMANTIC_SET_ID] == "mood":
+        raise ValueError('"{}" must not be "{}".'.format(
+            scope.database.patient.assessments.SEMANTIC_SET_ID,
+            "mood"
+        ))
+
     def factory() -> dict:
-
-        fake_scheduled_assessment = random.choice(
-            _fake_scheduled_assessments(
-                faker_factory=faker_factory,
-                fake_assessments=fake_assessments,
-            )
+        return _fake_scheduled_assessment(
+            faker_factory=faker_factory,
+            assessment=assessment,
         )
-
-        return document_utils.normalize_document(document=fake_scheduled_assessment)
 
     return factory
 
@@ -82,20 +65,23 @@ def fake_scheduled_assessment_factory(
 def fake_scheduled_assessments_factory(
     *,
     faker_factory: faker.Faker,
-    fake_assessments: List[dict],
+    assessment: dict,
 ) -> Callable[[], List[dict]]:
     """
     Obtain a factory that will generate a list of fake scheduled assessment documents.
     """
 
-    def factory() -> dict:
-
-        fake_scheduled_assessments = _fake_scheduled_assessments(
+    def factory() -> List[dict]:
+        factory = fake_scheduled_assessment_factory(
             faker_factory=faker_factory,
-            fake_assessments=fake_assessments,
+            assessment=assessment,
         )
 
-        return document_utils.normalize_documents(documents=fake_scheduled_assessments)
+        fake_scheduled_assessments = []
+        for _ in range(random.randint(1, 10)):
+            fake_scheduled_assessments.append(factory())
+
+        return fake_scheduled_assessments
 
     return factory
 
@@ -103,18 +89,27 @@ def fake_scheduled_assessments_factory(
 @pytest.fixture(name="data_fake_scheduled_assessment_factory")
 def fixture_data_fake_scheduled_assessment_factory(
     faker: faker.Faker,
-    data_fake_assessments: List[dict],
+    data_fake_assessments_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_scheduled_assessment_factory.
     """
 
-    unvalidated_factory = fake_scheduled_assessment_factory(
-        faker_factory=faker,
-        fake_assessments=data_fake_assessments,
-    )
-
     def factory() -> dict:
+        assessments = data_fake_assessments_factory()
+        assessments = [
+            assessment_current
+            for assessment_current in assessments
+            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] != "mood"
+        ]
+
+        assessment = random.choice(assessments)
+
+        unvalidated_factory = fake_scheduled_assessment_factory(
+            faker_factory=faker,
+            assessment=assessment,
+        )
+
         fake_scheduled_assessment = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
@@ -130,19 +125,28 @@ def fixture_data_fake_scheduled_assessment_factory(
 @pytest.fixture(name="data_fake_scheduled_assessments_factory")
 def fixture_data_fake_scheduled_assessments_factory(
     faker: faker.Faker,
-    data_fake_assessments: List[dict],
+    data_fake_assessments_factory: Callable[[], List[dict]],
 ) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_scheduled_assessment_factory.
     """
 
-    unvalidated_factory = fake_scheduled_assessments_factory(
-        faker_factory=faker,
-        fake_assessments=data_fake_assessments,
-    )
+    def factory() -> List[dict]:
+        assessments = data_fake_assessments_factory()
+        assessments = [
+            assessment_current
+            for assessment_current in assessments
+            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] != "mood"
+        ]
 
-    def factory() -> dict:
-        fake_scheduled_assessments = unvalidated_factory()
+        fake_scheduled_assessments = []
+        for assessment_current in assessments:
+            unvalidated_factory = fake_scheduled_assessments_factory(
+                faker_factory=faker,
+                assessment=assessment_current,
+            )
+
+            fake_scheduled_assessments.extend(unvalidated_factory())
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.scheduled_assessments_schema,
@@ -152,15 +156,3 @@ def fixture_data_fake_scheduled_assessments_factory(
         return fake_scheduled_assessments
 
     return factory
-
-
-@pytest.fixture(name="data_fake_scheduled_assessments")
-def fixture_data_fake_assessments(
-    *,
-    data_fake_scheduled_assessments_factory: Callable[[], List[dict]],
-) -> dict:
-    """
-    Fixture for data_fake_scheduled_assessments.
-    """
-
-    return data_fake_scheduled_assessments_factory()

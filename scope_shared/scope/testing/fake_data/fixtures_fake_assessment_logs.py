@@ -4,8 +4,10 @@ import pytest
 import random
 from typing import Callable, List
 
+import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
+import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.scheduled_assessments
 import scope.schema
@@ -15,105 +17,123 @@ import scope.testing.fake_data.fake_utils as fake_utils
 
 def _fake_assessment_point_values(
     *,
-    fake_assessment_contents: List[dict],
-    assessment_id: str,
+    assessment_content: dict,
 ) -> dict:
     point_values = dict()
-    for fake_assessment_content in fake_assessment_contents:
-        if fake_assessment_content["id"] == assessment_id:
-            if fake_assessment_content["id"] == "gad-7":
-                for question in fake_assessment_content.get("questions", []):
-                    point_values[question["id"]] = random.randint(0, 3)
-            elif fake_assessment_content["id"] == "medication":
-                for question in fake_assessment_content.get("questions", []):
-                    point_values[question["id"]] = random.randint(0, 1)
-            elif fake_assessment_content["id"] == "mood":
-                for question in fake_assessment_content.get("questions", []):
-                    point_values[question["id"]] = random.randint(1, 10)
-            elif fake_assessment_content["id"] == "phq-9":
-                for question in fake_assessment_content.get("questions", []):
-                    point_values[question["id"]] = random.randint(0, 3)
-            break
+
+    if assessment_content["id"] == "gad-7":
+        for question in assessment_content.get("questions", []):
+            point_values[question["id"]] = random.randint(0, 3)
+    elif assessment_content["id"] == "medication":
+        for question in assessment_content.get("questions", []):
+            point_values[question["id"]] = random.randint(0, 1)
+    elif assessment_content["id"] == "mood":
+        for question in assessment_content.get("questions", []):
+            point_values[question["id"]] = random.randint(1, 10)
+    elif assessment_content["id"] == "phq-9":
+        for question in assessment_content.get("questions", []):
+            point_values[question["id"]] = random.randint(0, 3)
+    else:
+        raise ValueError("Unknown assessment_content.")
+
     return point_values
 
 
 def _fake_assessment_logs(
     *,
     faker_factory: faker.Faker,
-    fake_scheduled_assessments: List[dict],
-    fake_assessment_contents: List[dict],
+    scheduled_assessments: List[dict],
+    assessment_contents: List[dict],
 ) -> List[dict]:
+    # A utility dictionary for "id" lookups
+    assessment_content_by_id = {
+        assessment_content["id"]: assessment_content for assessment_content in assessment_contents
+    }
 
-    n = random.randint(1, len(fake_scheduled_assessments))
+    fake_assessment_logs = []
+    for scheduled_assessment_current in scheduled_assessments:
+        fake_point_values = _fake_assessment_point_values(
+            assessment_content=assessment_content_by_id[scheduled_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID]]
+        )
 
-    fake_assessment_logs = [
-        {
+        fake_assessment_log = {
             "_type": scope.database.patient.assessment_logs.DOCUMENT_TYPE,
-            "recordedDate": fake_scheduled_assessment["dueDate"],
+            "recordedDate": scheduled_assessment_current["dueDate"],
             "comment": faker_factory.text(),
-            "scheduleId": fake_scheduled_assessment[
+            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: scheduled_assessment_current[
                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
             ],
-            "assessmentId": fake_scheduled_assessment["assessmentId"],
+            scope.database.patient.assessments.SEMANTIC_SET_ID: scheduled_assessment_current[
+                scope.database.patient.assessments.SEMANTIC_SET_ID
+            ],
             "completed": random.choice([True, False]),
             "patientSubmitted": random.choice([True, False]),
             # "submittedBy": data_fake_identity_factory(), # TODO: identity information
-            "pointValues": _fake_assessment_point_values(
-                fake_assessment_contents=fake_assessment_contents,
-                assessment_id=fake_scheduled_assessment["assessmentId"],
-            ),
+            "pointValues": fake_point_values,
             "totalScore": random.randint(0, 27),
         }
-        for fake_scheduled_assessment in random.sample(fake_scheduled_assessments, n)
-    ]
+
+        fake_assessment_logs.append(fake_assessment_log)
 
     return fake_assessment_logs
 
 
-def fake_assessment_log_factory(
-    *,
-    faker_factory: faker.Faker,
-    fake_scheduled_assessments: List[dict],
-    fake_assessment_contents: List[dict],
-) -> Callable[[], dict]:
-    """
-    Obtain a factory that will generate fake assessment log document.
-    """
-
-    def factory() -> dict:
-
-        fake_assessment_log = random.choice(
-            _fake_assessment_logs(
-                faker_factory=faker_factory,
-                fake_scheduled_assessments=fake_scheduled_assessments,
-                fake_assessment_contents=fake_assessment_contents,
-            )
-        )
-
-        return document_utils.normalize_document(document=fake_assessment_log)
-
-    return factory
+# def fake_assessment_log_factory(
+#     *,
+#     faker_factory: faker.Faker,
+#     scheduled_assessments: List[dict],
+#     assessment_contents: List[dict],
+# ) -> Callable[[], dict]:
+#     """
+#     Obtain a factory that will generate fake assessment log document.
+#     """
+#
+#
+#
+#     def factory() -> dict:
+#         fake_assessment_log = random.choice(
+#             _fake_assessment_logs(
+#                 faker_factory=faker_factory,
+#                 scheduled_assessments=scheduled_assessments,
+#                 assessment_contents=assessment_contents,
+#             )
+#         )
+#
+#         return document_utils.normalize_document(document=fake_assessment_log)
+#
+#     return factory
 
 
 def fake_assessment_logs_factory(
     *,
     faker_factory: faker.Faker,
-    fake_scheduled_assessments: List[dict],
-    fake_assessment_contents: List[dict],
+    scheduled_assessments: List[dict],
+    assessment_contents: List[dict],
 ) -> Callable[[], List[dict]]:
     """
     Obtain a factory that will generate a list of fake assessment log documents.
     """
 
-    def factory() -> dict:
+    if len(scheduled_assessments) < 1:
+        raise ValueError("scheduled_assessments must include at least one element.")
 
+    for scheduled_assessment_current in scheduled_assessments:
+        if scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID not in scheduled_assessment_current:
+            raise ValueError('scheduled_assessments must include "{}".'.format(scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID))
+
+    def factory() -> List[dict]:
         fake_assessment_logs = _fake_assessment_logs(
             faker_factory=faker_factory,
-            fake_scheduled_assessments=fake_scheduled_assessments,
-            fake_assessment_contents=fake_assessment_contents,
+            scheduled_assessments=scheduled_assessments,
+            assessment_contents=assessment_contents,
         )
 
-        return document_utils.normalize_documents(documents=fake_assessment_logs)
+        sampled_fake_assessment_logs = random.sample(
+            fake_assessment_logs,
+            random.randint(1, len(fake_assessment_logs))
+        )
+
+        return sampled_fake_assessment_logs
 
     return factory
 
@@ -121,21 +141,14 @@ def fake_assessment_logs_factory(
 @pytest.fixture(name="data_fake_assessment_log_factory")
 def fixture_data_fake_assessment_log_factory(
     faker: faker.Faker,
-    data_fake_scheduled_assessments: List[dict],
-    data_fake_assessment_contents: List[dict],
+    data_fake_assessment_logs_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_assessment_log_factory.
     """
 
-    unvalidated_factory = fake_assessment_log_factory(
-        faker_factory=faker,
-        fake_scheduled_assessments=data_fake_scheduled_assessments,
-        fake_assessment_contents=data_fake_assessment_contents,
-    )
-
     def factory() -> dict:
-        fake_assessment_log = unvalidated_factory()
+        fake_assessment_log = random.choice(data_fake_assessment_logs_factory())
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.assessment_log_schema,
@@ -150,20 +163,29 @@ def fixture_data_fake_assessment_log_factory(
 @pytest.fixture(name="data_fake_assessment_logs_factory")
 def fixture_data_fake_assessment_logs_factory(
     faker: faker.Faker,
-    data_fake_scheduled_assessments: List[dict],
-    data_fake_assessment_contents: List[dict],
+    data_fake_scheduled_assessments_factory: Callable[[], List[dict]],
+    data_fake_assessment_contents_factory: Callable[[], List[dict]],
 ) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_assessment_logs_factory.
     """
 
+    scheduled_assessments = data_fake_scheduled_assessments_factory()
+    assessment_contents = data_fake_assessment_contents_factory()
+
+    # Simulate IDs that can be referenced in fake assessment logs
+    for scheduled_assessment_current in scheduled_assessments:
+        generated_set_id = collection_utils.generate_set_id()
+        scheduled_assessment_current["_set_id"] = generated_set_id
+        scheduled_assessment_current[scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID] = generated_set_id
+
     unvalidated_factory = fake_assessment_logs_factory(
         faker_factory=faker,
-        fake_scheduled_assessments=data_fake_scheduled_assessments,
-        fake_assessment_contents=data_fake_assessment_contents,
+        scheduled_assessments=scheduled_assessments,
+        assessment_contents=assessment_contents,
     )
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
         fake_assessment_logs = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(

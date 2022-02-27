@@ -85,19 +85,19 @@ def fixture_data_fake_activity_factory(
     Fixture for data_fake_activity_factory.
     """
 
-    # A values inventory may randomly not include any values.
-    # Activities are not defined in such a scenario.
-    # Generate a new values inventory that includes at least one value.
-    values_inventory = data_fake_values_inventory_factory()
-    while not len(values_inventory.get("values", [])) > 0:
-        values_inventory = data_fake_values_inventory_factory()
-
-    unvalidated_factory = fake_activity_factory(
-        faker_factory=faker,
-        values_inventory=values_inventory,
-    )
-
     def factory() -> dict:
+        # A values inventory may randomly not include any values.
+        # Activities are not defined in such a scenario.
+        # Generate a new values inventory that includes at least one value.
+        values_inventory = data_fake_values_inventory_factory()
+        while not len(values_inventory.get("values", [])) > 0:
+            values_inventory = data_fake_values_inventory_factory()
+
+        unvalidated_factory = fake_activity_factory(
+            faker_factory=faker,
+            values_inventory=values_inventory,
+        )
+
         fake_activity = unvalidated_factory()
 
         scope.testing.schema.assert_schema(

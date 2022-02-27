@@ -7,6 +7,7 @@ from typing import Callable, List
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
+import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
 import scope.schema
 import scope.testing.fake_data.enums
@@ -16,11 +17,9 @@ import scope.testing.fake_data.fake_utils as fake_utils
 def _fake_scheduled_activity(
     *,
     faker_factory: faker.Faker,
-    fake_activity: dict,
+    activity: dict,
 ) -> dict:
     return {
-        # TODO: SET semantic set id because activity log needs it
-        scope.database.patient.scheduled_activities.SEMANTIC_SET_ID: collection_utils.generate_set_id(),
         "_type": scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
         "dueDate": format_utils.format_date(
             faker_factory.date_between_dates(
@@ -29,8 +28,8 @@ def _fake_scheduled_activity(
             )
         ),
         "dueType": fake_utils.fake_enum_value(scope.testing.fake_data.enums.DueType),
-        "activityId": fake_activity["activityId"],
-        "activityName": fake_activity["name"],
+        scope.database.patient.activities.SEMANTIC_SET_ID: activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+        "activityName": activity["name"],
         "reminder": format_utils.format_date(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now(),
@@ -44,43 +43,37 @@ def _fake_scheduled_activity(
 def _fake_scheduled_activities(
     *,
     faker_factory: faker.Faker,
-    fake_activities: List[dict],
+    activities: List[dict],
 ) -> List[dict]:
     fake_scheduled_activities = []
-    for fake_activity in fake_activities:
-        # TODO: fake_activity will be {} if "values" is None or [] in fake values inventory
-        if fake_activity != {}:
-            fake_scheduled_activities.append(
-                _fake_scheduled_activity(
-                    faker_factory=faker_factory,
-                    fake_activity=fake_activity,
-                )
+    for fake_activity in activities:
+        fake_scheduled_activities.append(
+            _fake_scheduled_activity(
+                faker_factory=faker_factory,
+                activity=fake_activity,
             )
+        )
     return fake_scheduled_activities
 
 
 def fake_scheduled_activity_factory(
     *,
     faker_factory: faker.Faker,
-    fake_activities: List[dict],
+    activities: List[dict],
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake scheduled activity document.
     """
 
     def factory() -> dict:
-
-        fake_scheduled_activities = _fake_scheduled_activities(
+        fake_scheduled_activities = fake_scheduled_activities_factory(
             faker_factory=faker_factory,
-            fake_activities=fake_activities,
-        )
+            activities=activities,
+        )()
 
-        if fake_scheduled_activities != []:
-            fake_scheduled_activity = random.choice(fake_scheduled_activities)
+        fake_scheduled_activity = random.choice(fake_scheduled_activities)
 
-            return document_utils.normalize_document(document=fake_scheduled_activity)
-        else:
-            return {}
+        return fake_scheduled_activity
 
     return factory
 
@@ -88,20 +81,26 @@ def fake_scheduled_activity_factory(
 def fake_scheduled_activities_factory(
     *,
     faker_factory: faker.Faker,
-    fake_activities: List[dict],
+    activities: List[dict],
 ) -> Callable[[], List[dict]]:
     """
     Obtain a factory that will generate a list of fake scheduled activity documents.
     """
 
-    def factory() -> dict:
+    if len(activities) < 1:
+        raise ValueError("activities must include at least one element.")
 
+    for activity_current in activities:
+        if scope.database.patient.activities.SEMANTIC_SET_ID not in activity_current:
+            raise ValueError('activities must include "{}".'.format(scope.database.patient.activities.SEMANTIC_SET_ID))
+
+    def factory() -> List[dict]:
         fake_scheduled_activities = _fake_scheduled_activities(
             faker_factory=faker_factory,
-            fake_activities=fake_activities,
+            activities=activities,
         )
 
-        return document_utils.normalize_documents(documents=fake_scheduled_activities)
+        return fake_scheduled_activities
 
     return factory
 
@@ -109,19 +108,14 @@ def fake_scheduled_activities_factory(
 @pytest.fixture(name="data_fake_scheduled_activity_factory")
 def fixture_data_fake_scheduled_activity_factory(
     faker: faker.Faker,
-    data_fake_activities: List[dict],
+    data_fake_scheduled_activities_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_scheduled_activity_factory.
     """
 
-    unvalidated_factory = fake_scheduled_activity_factory(
-        faker_factory=faker,
-        fake_activities=data_fake_activities,
-    )
-
     def factory() -> dict:
-        fake_scheduled_activity = unvalidated_factory()
+        fake_scheduled_activity = random.choice(data_fake_scheduled_activities_factory())
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.scheduled_activity_schema,
@@ -136,18 +130,31 @@ def fixture_data_fake_scheduled_activity_factory(
 @pytest.fixture(name="data_fake_scheduled_activities_factory")
 def fixture_data_fake_scheduled_activities_factory(
     faker: faker.Faker,
-    data_fake_activities: List[dict],
+    data_fake_activities_factory: Callable[[], List[dict]],
 ) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_scheduled_activity_factory.
     """
 
+    # activities may randomly not include any elements.
+    # Scheduled activities are not defined in such a scenario.
+    # Generate a new activities that includes at least one element.
+    activities = data_fake_activities_factory()
+    while not len(activities) > 0:
+        activities = data_fake_activities_factory()
+
+    # Simulate IDs that can be referenced in fake scheduled activities
+    for activity_current in activities:
+        generated_set_id = collection_utils.generate_set_id()
+        activity_current["_set_id"] = generated_set_id
+        activity_current[scope.database.patient.activities.SEMANTIC_SET_ID] = generated_set_id
+
     unvalidated_factory = fake_scheduled_activities_factory(
         faker_factory=faker,
-        fake_activities=data_fake_activities,
+        activities=activities,
     )
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
         fake_scheduled_activities = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
@@ -158,15 +165,3 @@ def fixture_data_fake_scheduled_activities_factory(
         return fake_scheduled_activities
 
     return factory
-
-
-@pytest.fixture(name="data_fake_scheduled_activities")
-def fixture_data_fake_activities(
-    *,
-    data_fake_scheduled_activities_factory: Callable[[], List[dict]],
-) -> dict:
-    """
-    Fixture for data_fake_scheduled_activities.
-    """
-
-    return data_fake_scheduled_activities_factory()
