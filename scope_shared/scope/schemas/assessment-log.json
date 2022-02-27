@@ -27,7 +27,7 @@
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
 		},
-		"scheduleId": {
+		"scheduledAssessmentId": {
 			"type": "string"
 		},
 		"assessmentId": {
@@ -48,5 +48,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduleId", "assessmentId", "completed", "pointValues"]
+	"required": ["_type", "recordedDate", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
 }
