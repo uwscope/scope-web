@@ -13,11 +13,13 @@ import {
     patientSexValues,
 } from 'shared/enums';
 import { toLocalDateOnly, toUTCDateOnly } from 'shared/time';
-import { IPatientProfile } from 'shared/types';
+import { IPatientProfile, IProviderIdentity } from 'shared/types';
 import { GridDateField, GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 
 interface IEditPatientProfileContentProps extends Partial<IPatientProfile> {
+    availableCareManagerNames: string[];
+    onCareManagerChange: (providerName: string) => void;
     onValueChange: (key: string, value: any) => void;
 }
 
@@ -36,7 +38,9 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         pronoun,
         primaryOncologyProvider,
         primaryCareManager,
+        availableCareManagerNames,
         onValueChange,
+        onCareManagerChange,
     } = props;
 
     const getTextField = (label: string, value: any, propName: string, required?: boolean) => (
@@ -83,7 +87,13 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
             {getDropdownField('Gender', gender || '', patientGenderValues, 'gender')}
             {getDropdownField('Pronouns', pronoun || '', patientPronounValues, 'pronoun')}
             {getTextField('Primary Oncology Provider', primaryOncologyProvider, 'primaryOncologyProvider')}
-            {getTextField('Primary Care Manager', primaryCareManager, 'primaryCareManager')}
+            <GridDropdownField
+                editable
+                label={'Primary Care Manager'}
+                value={primaryCareManager?.name || ''}
+                options={availableCareManagerNames}
+                onChange={(text) => onCareManagerChange(text as string)}
+            />
             {getDropdownField(
                 'Treatment Status',
                 depressionTreatmentStatus || '',
@@ -119,16 +129,18 @@ interface IDialogProps {
 }
 
 interface IEditPatientProfileDialogProps extends IDialogProps {
+    careManagers: IProviderIdentity[];
     profile: IPatientProfile;
     onSavePatient: (patient: IPatientProfile) => void;
 }
 
 export interface IAddPatientProfileDialogProps extends IDialogProps {
+    careManagers: IProviderIdentity[];
     onAddPatient: (patient: IPatientProfile) => void;
 }
 
 export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialogProps> = observer((props) => {
-    const { onAddPatient, open, error, loading, onClose } = props;
+    const { onAddPatient, open, error, loading, onClose, careManagers } = props;
 
     const state = useLocalObservable<IPatientProfile>(() => emptyProfile);
 
@@ -136,9 +148,20 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
         (state as any)[key] = value;
     });
 
+    const onCareManagerChange = action((name: string) => {
+        const found = careManagers.find((c) => c.name == name);
+        if (!!name && found) {
+            state.primaryCareManager = found;
+        } else {
+            state.primaryCareManager = undefined;
+        }
+    });
+
     const onSave = action(() => {
         onAddPatient(state);
     });
+
+    const availableCareManagerNames = careManagers.map((c) => c.name);
 
     return (
         <StatefulDialog
@@ -146,7 +169,14 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
             error={error}
             loading={loading}
             title="Add Patient"
-            content={<EditPatientProfileContent {...state} onValueChange={onValueChange} />}
+            content={
+                <EditPatientProfileContent
+                    {...state}
+                    availableCareManagerNames={availableCareManagerNames}
+                    onValueChange={onValueChange}
+                    onCareManagerChange={onCareManagerChange}
+                />
+            }
             handleCancel={onClose}
             handleSave={onSave}
             disableSave={!state.name || !state.MRN}
@@ -155,7 +185,7 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
 });
 
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> = observer((props) => {
-    const { profile, open, error, loading, onClose, onSavePatient } = props;
+    const { profile, open, error, loading, onClose, onSavePatient, careManagers } = props;
 
     const state = useLocalObservable<IPatientProfile>(() => {
         const existingProfile = { ...profile };
@@ -181,13 +211,31 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
         onSavePatient(updatedProfile);
     });
 
+    const onCareManagerChange = action((name: string) => {
+        const found = careManagers.find((c) => c.name == name);
+        if (!!name && found) {
+            state.primaryCareManager = found;
+        } else {
+            state.primaryCareManager = undefined;
+        }
+    });
+
+    const availableCareManagerNames = careManagers.map((c) => c.name);
+
     return (
         <StatefulDialog
             open={open}
             error={error}
             loading={loading}
             title="Edit Patient Information"
-            content={<EditPatientProfileContent {...state} onValueChange={onValueChange} />}
+            content={
+                <EditPatientProfileContent
+                    {...state}
+                    availableCareManagerNames={availableCareManagerNames}
+                    onValueChange={onValueChange}
+                    onCareManagerChange={onCareManagerChange}
+                />
+            }
             handleCancel={onClose}
             handleSave={onSave}
             disableSave={!state.name || !state.MRN}

@@ -1,85 +1,123 @@
-import { action, computed, IObservableArray, makeAutoObservable, observable } from 'mobx';
-import { AllClinicCode, ClinicCode } from 'shared/enums';
-import { IPatient } from 'shared/types';
-import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { AllClinicCode, ClinicCode, clinicCodeValues } from 'shared/enums';
+import { IPatient, IProviderIdentity } from 'shared/types';
+import { IPromiseQueryState, PromiseQuery } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
-import { contains, unique } from 'src/utils/array';
+import { contains } from 'src/utils/array';
+import { getLogger } from 'shared/logger';
+import { getLoadAndLogQuery } from 'shared/stores';
+
+const logger = getLogger('RegistryStore');
 
 export interface IPatientsStore {
     readonly patients: ReadonlyArray<IPatientStore>;
-    readonly careManagers: ReadonlyArray<string>;
-    readonly clinics: ReadonlyArray<ClinicCode>;
+
+    readonly careManagers: IProviderIdentity[];
+    readonly psychiatrists: IProviderIdentity[];
+
+    readonly filterableCareManagers: ReadonlyArray<string>;
+    readonly filterableClinics: ReadonlyArray<string>;
+
     readonly filteredCareManager: string;
     readonly filteredClinic: ClinicCode | AllClinicCode;
     readonly filteredPatients: ReadonlyArray<IPatientStore>;
-    readonly state: PromiseState;
 
-    getPatients: () => void;
+    readonly state: IPromiseQueryState;
+
+    load: () => Promise<void>;
+
     addPatient: (patient: Partial<IPatient>) => void;
+    getPatientByRecordId: (recordId: string | undefined) => IPatientStore | undefined;
 
     filterCareManager: (careManager: string) => void;
     filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
 }
 
+export const AllCareManagers = 'All Social Workers';
+export const AllClinics = 'All Clinics';
+
 export class PatientsStore implements IPatientsStore {
-    @observable public patients: IObservableArray<IPatientStore>;
     @observable public filteredCareManager: string;
     @observable public filteredClinic: ClinicCode | AllClinicCode;
 
-    private readonly loadPatientsQuery: PromiseQuery<IPatient[]>;
+    private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
+    private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
     private readonly addPatientQuery: PromiseQuery<IPatient>;
 
-    private readonly AllCareManagers = 'All Care Managers';
+    private loadAndLogQuery: <T>(
+        queryCall: () => Promise<T>,
+        promiseQuery: PromiseQuery<T>,
+        onConflict?: (responseData?: any) => T,
+    ) => Promise<void>;
 
     constructor() {
-        this.patients = observable.array([]);
-        this.filteredCareManager = this.AllCareManagers;
-        this.filteredClinic = 'All Clinics';
+        this.filteredCareManager = AllCareManagers;
+        this.filteredClinic = AllClinics;
+
+        const { registryService } = useServices();
+        this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
 
         this.loadPatientsQuery = new PromiseQuery([], 'loadPatients');
+        this.loadProvidersQuery = new PromiseQuery([], 'loadProviders');
         this.addPatientQuery = new PromiseQuery<IPatient>(undefined, 'addPatient');
 
         makeAutoObservable(this);
     }
 
     @computed
+    public get patients() {
+        return this.loadPatientsQuery.value || [];
+    }
+
+    @computed
     public get careManagers() {
-        const cm = unique(
-            this.patients
-                .filter((p) => !!p.profile && !!p.profile.primaryCareManager && !!p.profile.primaryCareManager.name)
-                .map((p) => p.profile?.primaryCareManager?.name as string)
-        ).sort();
-        cm.push(this.AllCareManagers);
-        return cm;
+        return (this.loadProvidersQuery.value || []).filter((p) => p.role == 'socialWorker').map((p) => ({ ...p }));
+    }
+
+    @computed
+    public get filterableCareManagers() {
+        return this.careManagers.map((c) => c.name).concat([AllCareManagers]);
+    }
+
+    @computed
+    public get psychiatrists() {
+        return (this.loadProvidersQuery.value || []).filter((p) => p.role == 'psychiatrist').map((p) => ({ ...p }));
+    }
+
+    public get filterableClinics() {
+        return [...clinicCodeValues, AllClinics];
     }
 
     @computed
     public get state() {
-        return this.loadPatientsQuery.state;
-    }
+        const error = this.loadPatientsQuery.error || this.loadProvidersQuery.error;
+        const pending = this.loadPatientsQuery.pending || this.loadProvidersQuery.pending;
+        const fulfilled = this.loadPatientsQuery.state == 'Fulfilled' && this.loadProvidersQuery.state == 'Fulfilled';
 
-    @computed
-    public get clinics() {
-        const cc = unique(
-            this.patients
-                .filter((p) => !!p.profile && !!p.profile.clinicCode)
-                .map((p) => p.profile.clinicCode as ClinicCode)
-        ).sort();
-        return cc;
+        return {
+            state: pending ? 'Pending' : error ? 'Rejected' : fulfilled ? 'Fulfilled' : 'Unknown',
+            error: error,
+            pending: pending,
+            done: fulfilled || error,
+            resetState: () => {
+                this.loadPatientsQuery.resetState();
+                this.loadProvidersQuery.resetState();
+            },
+        } as IPromiseQueryState;
     }
 
     @action.bound
-    public async getPatients() {
-        if (this.state != 'Pending') {
-            const { registryService } = useServices();
-            const promise = registryService.getPatients();
-            const patients = await this.loadPatientsQuery.fromPromise(promise);
-            action(() => {
-                this.patients.replace(patients.map((p) => new PatientStore(p)));
-                this.filterCareManager(this.filteredCareManager);
-            })();
-        }
+    public async load() {
+        const { registryService } = useServices();
+
+        const getPatientsPromise = () =>
+            registryService.getPatients().then((patients) => patients.map((p) => new PatientStore(p)));
+
+        await Promise.all([
+            this.loadAndLogQuery<IPatientStore[]>(getPatientsPromise, this.loadPatientsQuery),
+            this.loadAndLogQuery<IProviderIdentity[]>(registryService.getProviders, this.loadProvidersQuery),
+        ]);
     }
 
     @action.bound
@@ -95,16 +133,16 @@ export class PatientsStore implements IPatientsStore {
 
     @action.bound
     public filterCareManager(careManager: string) {
-        if (contains(this.careManagers, careManager)) {
+        if (!!this.careManagers.find((c) => c.name == careManager)) {
             this.filteredCareManager = careManager;
         } else {
-            this.filteredCareManager = this.AllCareManagers;
+            this.filteredCareManager = AllCareManagers;
         }
     }
 
     @action.bound
     public filterClinic(clinicCode: ClinicCode | AllClinicCode) {
-        if (contains(this.clinics, clinicCode)) {
+        if (contains([...clinicCodeValues], clinicCode)) {
             this.filteredClinic = clinicCode;
         } else {
             this.filteredClinic = 'All Clinics';
@@ -114,9 +152,9 @@ export class PatientsStore implements IPatientsStore {
     @computed
     public get filteredPatients() {
         var filteredPatients = this.patients.map((p) => p);
-        if (this.filteredCareManager != this.AllCareManagers) {
+        if (this.filteredCareManager != AllCareManagers) {
             filteredPatients = filteredPatients.filter(
-                (p) => p.profile?.primaryCareManager?.name == this.filteredCareManager
+                (p) => p.profile?.primaryCareManager?.name == this.filteredCareManager,
             );
         }
 
@@ -125,5 +163,15 @@ export class PatientsStore implements IPatientsStore {
         }
 
         return filteredPatients;
+    }
+
+    public getPatientByRecordId(recordId: string | undefined) {
+        if (!!recordId) {
+            const patient = this.patients.filter((p) => p.recordId == recordId)[0];
+
+            return patient;
+        }
+
+        return undefined;
     }
 }

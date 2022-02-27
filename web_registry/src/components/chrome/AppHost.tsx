@@ -108,7 +108,6 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 runInAction(() => {
                     state.store = newStore;
                 });
-                newStore.load();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);

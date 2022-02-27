@@ -10,6 +10,7 @@ import {
 import { getLogger } from 'shared/logger';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
 import { IPromiseQueryState, PromiseQuery, PromiseState } from 'shared/promiseQuery';
+import { getLoadAndLogQuery } from 'shared/stores';
 import {
     IActivity,
     IActivityLog,
@@ -98,12 +99,19 @@ export class PatientStore implements IPatientStore {
     private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
     private readonly loadCaseReviewsQuery: PromiseQuery<ICaseReview[]>;
 
+    private loadAndLogQuery: <T>(
+        queryCall: () => Promise<T>,
+        promiseQuery: PromiseQuery<T>,
+        onConflict?: (responseData?: any) => T,
+    ) => Promise<void>;
+
     constructor(patient: IPatient) {
         console.assert(!!patient.identity, 'Attempted to create a patient object without identity');
         console.assert(!!patient.identity.name, 'Attempted to create a patient object without a name');
         console.assert(!!patient.identity.patientId, 'Attempted to create a patient object without an id');
 
         this.patientService = getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, patient.identity.patientId);
+        this.loadAndLogQuery = getLoadAndLogQuery(logger, this.patientService);
 
         this.identity = patient.identity;
 
@@ -369,6 +377,7 @@ export class PatientStore implements IPatientStore {
                 consultingPsychiatrist: {
                     providerId: caseReview.consultingPsychiatrist.providerId,
                     name: caseReview.consultingPsychiatrist.name,
+                    role: 'psychiatrist',
                 },
             })
             .then((addedReview) => {
@@ -386,6 +395,7 @@ export class PatientStore implements IPatientStore {
                 consultingPsychiatrist: {
                     providerId: caseReview.consultingPsychiatrist.providerId,
                     name: caseReview.consultingPsychiatrist.name,
+                    role: 'psychiatrist',
                 },
             })
             .then((updatedReview) => {
@@ -482,32 +492,6 @@ export class PatientStore implements IPatientStore {
         };
 
         this.runAfterLoad(effect);
-    }
-
-    private async loadAndLogQuery<T>(
-        queryCall: () => Promise<T>,
-        promiseQuery: PromiseQuery<T>,
-        onConflict?: (responseData?: any) => T,
-    ) {
-        const effect = async () => {
-            const loggedCall = logger.logFunction<T>({ eventName: promiseQuery.name })(
-                queryCall.bind(this.patientService),
-            );
-            await promiseQuery.fromPromise(loggedCall, onConflict);
-        };
-
-        if (promiseQuery.state == 'Pending') {
-            when(
-                () => {
-                    return promiseQuery.state != 'Pending';
-                },
-                async () => {
-                    await effect();
-                },
-            );
-        } else {
-            await effect();
-        }
     }
 
     private onSingletonConflict =

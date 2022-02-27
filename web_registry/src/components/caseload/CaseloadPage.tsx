@@ -8,6 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { AllClinicCode, ClinicCode } from 'shared/enums';
 import { IPatientProfile } from 'shared/types';
 import CaseloadTable from 'src/components/caseload/CaseloadTable';
+import PageLoader from 'src/components/chrome/PageLoader';
 import { Page, PageHeaderContainer, PageHeaderTitle } from 'src/components/common/Page';
 import { AddPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
 import { useStores } from 'src/stores/stores';
@@ -20,14 +21,14 @@ const TitleSelectContainer = withTheme(
         alignItems: 'center',
         flexWrap: 'wrap',
         height: 48,
-    })
+    }),
 );
 
 const SelectForm = withTheme(
     styled(FormControl)((props) => ({
         margin: props.theme.spacing(0, 2),
         minWidth: 240,
-    }))
+    })),
 );
 
 const SelectInput = withTheme(
@@ -36,7 +37,7 @@ const SelectInput = withTheme(
         '>.MuiSelect-select': {
             minHeight: 'auto',
         },
-    }))
+    })),
 );
 
 const ActionButtonContainer = styled.div({
@@ -67,8 +68,6 @@ export const CaseloadPage: FunctionComponent = observer(() => {
         }
     });
 
-    const clinicFilters = [...rootStore.patientsStore.clinics, 'All Clinics'];
-
     const onPatientClick = (recordId: string) => {
         history.push(`/patient/${recordId}`);
     };
@@ -87,60 +86,67 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     });
 
     React.useEffect(() => {
-        rootStore.patientsStore.getPatients();
+        rootStore.patientsStore.load();
     }, []);
 
     return (
         <Page>
-            <PageHeaderContainer loading={rootStore.patientsStore.state == 'Pending'}>
-                <TitleSelectContainer>
-                    <PageHeaderTitle>Caseload for</PageHeaderTitle>
-                    <SelectForm>
-                        <SelectInput
-                            value={rootStore.patientsStore.filteredCareManager}
-                            onChange={onCareManagerSelect}
-                            inputProps={{
-                                name: 'caremanager',
-                                id: 'caremanager',
-                            }}>
-                            {rootStore.patientsStore.careManagers.map((cm) => (
-                                <MenuItem key={cm} value={cm}>
-                                    {cm}
-                                </MenuItem>
-                            ))}
-                        </SelectInput>
-                    </SelectForm>
-                    <PageHeaderTitle>in</PageHeaderTitle>
-                    <SelectForm>
-                        <SelectInput
-                            value={rootStore.patientsStore.filteredClinic}
-                            onChange={onClinicSelect}
-                            inputProps={{
-                                name: 'clinic',
-                                id: 'clinic',
-                            }}>
-                            {clinicFilters.map((c) => (
-                                <MenuItem key={c} value={c}>
-                                    {c}
-                                </MenuItem>
-                            ))}
-                        </SelectInput>
-                    </SelectForm>
-                    <ActionButtonContainer>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            key="Add patient"
-                            onClick={handleOpen}>
-                            Add patient
-                        </Button>
-                    </ActionButtonContainer>
-                </TitleSelectContainer>
-            </PageHeaderContainer>
-            <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
-            <AddPatientProfileDialog open={state.open} onClose={handleClose} onAddPatient={onSave} />
+            <PageLoader state={rootStore.patientsStore.state} name="the registry">
+                <PageHeaderContainer>
+                    <TitleSelectContainer>
+                        <PageHeaderTitle>Caseload for</PageHeaderTitle>
+                        <SelectForm>
+                            <SelectInput
+                                value={rootStore.patientsStore.filteredCareManager}
+                                onChange={onCareManagerSelect}
+                                inputProps={{
+                                    name: 'caremanager',
+                                    id: 'caremanager',
+                                }}>
+                                {rootStore.patientsStore.filterableCareManagers.map((cm) => (
+                                    <MenuItem key={cm} value={cm}>
+                                        {cm}
+                                    </MenuItem>
+                                ))}
+                            </SelectInput>
+                        </SelectForm>
+                        <PageHeaderTitle>in</PageHeaderTitle>
+                        <SelectForm>
+                            <SelectInput
+                                value={rootStore.patientsStore.filteredClinic}
+                                onChange={onClinicSelect}
+                                inputProps={{
+                                    name: 'clinic',
+                                    id: 'clinic',
+                                }}>
+                                {rootStore.patientsStore.filterableClinics.map((c) => (
+                                    <MenuItem key={c} value={c}>
+                                        {c}
+                                    </MenuItem>
+                                ))}
+                            </SelectInput>
+                        </SelectForm>
+                        <ActionButtonContainer>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                color="primary"
+                                startIcon={<AddIcon />}
+                                key="Add patient"
+                                onClick={handleOpen}>
+                                Add patient
+                            </Button>
+                        </ActionButtonContainer>
+                    </TitleSelectContainer>
+                </PageHeaderContainer>
+                <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
+                <AddPatientProfileDialog
+                    open={state.open}
+                    onClose={handleClose}
+                    onAddPatient={onSave}
+                    careManagers={rootStore.patientsStore.careManagers}
+                />
+            </PageLoader>
         </Page>
     );
 });

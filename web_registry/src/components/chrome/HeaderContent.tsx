@@ -22,7 +22,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
     if (!!match && !!match.params) {
         const { recordId } = match?.params as any;
         if (!!recordId) {
-            const currentPatient = rootStore.getPatientByRecordId(recordId);
+            const currentPatient = rootStore.patientsStore.getPatientByRecordId(recordId);
             if (!!currentPatient) {
                 patientName = currentPatient.name;
             }

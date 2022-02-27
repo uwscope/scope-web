@@ -1,8 +1,7 @@
-import { action, makeAutoObservable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { IAppConfig, IAppContentConfig } from 'shared/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
-import { IPatientStore } from 'src/stores/PatientStore';
 
 export interface IRootStore {
     // Stores
@@ -12,15 +11,6 @@ export interface IRootStore {
     // App metadata
     appTitle: string;
     appContentConfig: IAppContentConfig;
-
-    // UI states
-
-    // Methods
-    load: () => void;
-
-    getPatientByRecordId: (
-        recordId: string | undefined
-    ) => IPatientStore | undefined;
 }
 
 export class RootStore implements IRootStore {
@@ -40,22 +30,5 @@ export class RootStore implements IRootStore {
         this.authStore = new AuthStore(serverConfig.auth);
 
         makeAutoObservable(this);
-    }
-
-    @action.bound
-    public async load() {
-        await this.patientsStore.getPatients();
-    }
-
-    public getPatientByRecordId(recordId: string | undefined) {
-        if (!!recordId) {
-            const patient = this.patientsStore.patients.filter(
-                (p) => p.recordId == recordId
-            )[0];
-
-            return patient;
-        }
-
-        return undefined;
     }
 }

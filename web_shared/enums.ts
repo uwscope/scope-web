@@ -178,3 +178,6 @@ export type DiscussionFlags = { [item in DiscussionFlag]: boolean };
 
 export const dueTypeValues = ['Exact', 'ChunkOfDay', 'Day', 'Week'];
 export type DueType = typeof dueTypeValues[number];
+
+export const providerRoleValues = ['studyStaff', 'oncologist', 'psychiatrist', 'socialWorker'];
+export type ProviderRole = typeof providerRoleValues[number];
