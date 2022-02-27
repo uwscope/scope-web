@@ -81,9 +81,8 @@ def get_app_quote():
     quotes_path = Path(APP_QUOTES_PATH)
 
     # Load quotes configurations
-    if quotes_path.match("*.json"):
-        with open(quotes_path) as quotes_file:
-            quotes_json = json.load(quotes_file)
+    with open(quotes_path) as quotes_file:
+        quotes_json = json.load(quotes_file)
 
     return {
         "quote": random.choice(quotes_json),

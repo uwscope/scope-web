@@ -2,7 +2,6 @@ import pytest
 import random
 from typing import Callable, List
 
-import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -16,7 +15,7 @@ def fake_activities_factory(
     """
 
     def factory() -> List[dict]:
-        fake_activities = [fake_activity_factory() for _ in range(random.randint(1, 5))]
+        fake_activities = [fake_activity_factory() for _ in range(random.randint(0, 5))]
 
         return fake_activities
 

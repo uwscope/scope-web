@@ -9,54 +9,48 @@ import scope.database.format_utils as format_utils
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
-
-
-# TODO: Get the generation verified.
-
-# TODO: James Comment 2/22:  I am not sure this is all correct / consistent
-
-# TODO: This will create invalid activities if fake_values_inventory["values"] == []
+import scope.testing.schema
 
 
 def fake_activity_factory(
     *,
     faker_factory: faker.Faker,
-    fake_life_areas: List[dict],  # lifeareaId will be taken from this
-    fake_values_inventory: dict,
+    values_inventory: dict,
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake activity documents.
     """
 
+    if not len(values_inventory.get("values", [])) > 0:
+        raise ValueError("values_inventory must include at least one value.")
+
     def factory() -> dict:
+        combined_activities = []
+        for value_current in values_inventory["values"]:
+            combined_activities.extend(value_current.get("activities", []))
 
-        # TODO: Putting this here for activities flask tests to xfail.
-        if fake_values_inventory.get("values") in [[], None]:
-            return
+        if len(combined_activities) > 0 and random.choice([True, False]):
+            # Sample a value with at least one activity
+            values_valid = []
+            for value_current in values_inventory["values"]:
+                if value_current.get("activities", []):
+                    values_valid.append(value_current)
+            activity_value = random.choice(values_valid)
 
-        names = []
-        for value in fake_values_inventory["values"]:
-            for activity in value["activities"]:
-                names.append(activity["name"])
+            # Sample an activity
+            activity_name = random.choice(activity_value["activities"])["name"]
+        else:
+            # Sample any value
+            activity_value = random.choice(values_inventory["values"])
 
-        name = random.choice(
-            [
-                faker_factory.text(),
-                random.choice(names),
-            ]
-        )
+            # Generate a text-based activity
+            activity_name = faker_factory.text()
 
         fake_activity = {
             "_type": "activity",
-            "name": name,
-            "value": random.choice(
-                [
-                    value["name"] for value in fake_values_inventory["values"]
-                ]  # TODO: This will be empty if "values" is an empty list
-            ),
-            "lifeareaId": random.choice(
-                [fake_life_area["id"] for fake_life_area in fake_life_areas]
-            ),
+            "name": activity_name,
+            "value": activity_value["name"],
+            "lifeareaId": activity_value["lifeareaId"],
             "startDate": format_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now(),
@@ -82,21 +76,32 @@ def fake_activity_factory(
 @pytest.fixture(name="data_fake_activity_factory")
 def fixture_data_fake_activity_factory(
     faker: faker.Faker,
-    data_fake_life_areas: List[dict],
-    data_fake_values_inventory: dict,
+    data_fake_values_inventory_factory: Callable[[], dict],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_activity_factory.
     """
 
+    # A values inventory may randomly not include any values.
+    # Activites are not defined in such a scenario.
+    # Generate a new values inventory that includes at least one value.
+    values_inventory = data_fake_values_inventory_factory()
+    while not len(values_inventory.get("values", [])) > 0:
+        values_inventory = data_fake_values_inventory_factory()
+
     unvalidated_factory = fake_activity_factory(
         faker_factory=faker,
-        fake_life_areas=data_fake_life_areas,
-        fake_values_inventory=data_fake_values_inventory,
+        values_inventory=values_inventory,
     )
 
     def factory() -> dict:
         fake_activity = unvalidated_factory()
+
+        scope.testing.schema.assert_schema(
+            data=fake_activity,
+            schema=scope.schema.activity_schema,
+            expected_valid=True,
+        )
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.activity_schema,

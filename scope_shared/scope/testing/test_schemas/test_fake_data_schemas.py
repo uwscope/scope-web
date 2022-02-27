@@ -37,7 +37,8 @@ import scope.testing.schema
 class ConfigTestFakeDataSchema:
     name: str
     schema: jschon.JSONSchema
-    data_factory: Callable[[], Union[dict, List[dict]]]
+    data_factory_fixture: str
+    # data_factory: Callable[[], Union[dict, List[dict]]]
 
     expected_document: bool
     expected_singleton: bool
@@ -56,45 +57,25 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="activity",
         schema=scope.schema.activity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
-            faker_factory=faker_factory,
-            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
-            fake_values_inventory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
-                faker_factory=faker_factory,
-                fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
-            )(),
-        ),
+        data_factory_fixture="data_fake_activity_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
-        XFAIL_TEST_HAS_TODO=True,
     ),
     ConfigTestFakeDataSchema(
         name="activities",
         schema=scope.schema.activities_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_activities.fake_activities_factory(
-            fake_activity_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
-                faker_factory=faker_factory,
-                fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
-                fake_values_inventory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
-                    faker_factory=faker_factory,
-                    fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
-                )(),
-            )
-        ),
+        data_factory_fixture="data_fake_activities_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
-        XFAIL_TEST_HAS_TODO=True,
     ),
     ConfigTestFakeDataSchema(
         name="case-review",
         schema=scope.schema.case_review_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_case_review_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
@@ -103,11 +84,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="case-reviews",
         schema=scope.schema.case_reviews_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
-            fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
-                faker_factory=faker_factory,
-            ),
-        ),
+        data_factory_fixture="data_fake_case_reviews_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
@@ -116,9 +93,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="clinical-history",
         schema=scope.schema.clinical_history_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_clinical_history_factory",
         expected_document=True,
         expected_singleton=True,
         expected_set_element=False,
@@ -127,9 +102,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="contact",
         schema=scope.schema.contact_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_contact_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=False,
@@ -138,7 +111,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="life-areas",
         schema=scope.schema.life_areas_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory(),
+        data_factory_fixture="data_fake_life_areas_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
@@ -147,9 +120,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="mood-log",
         schema=scope.schema.mood_log_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_mood_log.fake_mood_log_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_mood_log_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
@@ -158,11 +129,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="mood-logs",
         schema=scope.schema.mood_logs_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_mood_logs.fake_mood_logs_factory(
-            fake_mood_log_factory=scope.testing.fake_data.fixtures_fake_mood_log.fake_mood_log_factory(
-                faker_factory=faker_factory,
-            ),
-        ),
+        data_factory_fixture="data_fake_mood_logs_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
@@ -177,9 +144,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="patient-profile",
         schema=scope.schema.patient_profile_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_patient_profile_factory",
         expected_document=True,
         expected_singleton=True,
         expected_set_element=False,
@@ -188,9 +153,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="provider-identity",
         schema=scope.schema.provider_identity_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_provider_identity_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
@@ -199,9 +162,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="referral-status",
         schema=scope.schema.referral_status_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
-            faker_factory=faker_factory,
-        ),
+        data_factory_fixture="data_fake_referral_status_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=False,
@@ -210,12 +171,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="safety-plan",
         schema=scope.schema.safety_plan_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_safety_plan.fake_safety_plan_factory(
-            faker_factory=faker_factory,
-            fake_contact_factory=scope.testing.fake_data.fixtures_fake_contact.fake_contact_factory(
-                faker_factory=faker_factory,
-            ),
-        ),
+        data_factory_fixture="data_fake_safety_plan_factory",
         expected_document=True,
         expected_singleton=True,
         expected_set_element=False,
@@ -224,12 +180,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="session",
         schema=scope.schema.session_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_session.fake_session_factory(
-            faker_factory=faker_factory,
-            fake_referral_status_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
-                faker_factory=faker_factory,
-            ),
-        ),
+        data_factory_fixture="data_fake_session_factory",
         expected_document=True,
         expected_singleton=False,
         expected_set_element=True,
@@ -238,14 +189,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="sessions",
         schema=scope.schema.sessions_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_sessions.fake_sessions_factory(
-            fake_session_factory=scope.testing.fake_data.fixtures_fake_session.fake_session_factory(
-                faker_factory=faker_factory,
-                fake_referral_status_factory=scope.testing.fake_data.fixtures_fake_referral_status.fake_referral_status_factory(
-                    faker_factory=faker_factory,
-                ),
-            ),
-        ),
+        data_factory_fixture="data_fake_sessions_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,
@@ -254,10 +198,7 @@ TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
         name="values-inventory",
         schema=scope.schema.values_inventory_schema,
-        data_factory=scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
-            faker_factory=faker_factory,
-            fake_life_areas=scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()(),
-        ),
+        data_factory_fixture="data_fake_values_inventory_factory",
         expected_document=True,
         expected_singleton=True,
         expected_set_element=False,
@@ -271,7 +212,10 @@ TEST_CONFIGS = [
     [[config] for config in TEST_CONFIGS],
     ids=[config.name for config in TEST_CONFIGS],
 )
-def test_fake_data_schema(config: ConfigTestFakeDataSchema):
+def test_fake_data_schema(
+    request: pytest.FixtureRequest,
+    config: ConfigTestFakeDataSchema,
+):
     if config.XFAIL_TEST_HAS_TODO:
         pytest.xfail("Test has TODO in data or schema.")
 
@@ -296,7 +240,8 @@ def test_fake_data_schema(config: ConfigTestFakeDataSchema):
 
     for count in range(TEST_ITERATIONS):
         # Obtain fake data
-        data = config.data_factory()
+        data_factory = request.getfixturevalue(config.data_factory_fixture)
+        data = data_factory()
 
         # Test against the schema
         scope.testing.schema.assert_schema(
