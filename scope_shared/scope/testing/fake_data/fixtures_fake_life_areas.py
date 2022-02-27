@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 from typing import Callable, List
 
-import scope.database.document_utils as document_utils
 import scope.schema
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -56,15 +55,3 @@ def fixture_data_fake_life_areas_factory() -> Callable[[], List[dict]]:
         return fake_life_areas
 
     return factory
-
-
-@pytest.fixture(name="data_fake_life_areas")
-def fixture_data_fake_life_areas(
-    *,
-    data_fake_life_areas_factory: Callable[[], List[dict]],
-) -> List[dict]:
-    """
-    Fixture for data_fake_life_areas.
-    """
-
-    return data_fake_life_areas_factory()
