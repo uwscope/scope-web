@@ -57,4 +57,4 @@ def xfail_for_invalid(*, schema: jschon.JSONSchema, document) -> None:
         print()
         pprint.pprint(schema_output)
 
-        pytest.xfail("Fake data schema invalid.")
+        pytest.fail("Fake data schema invalid.")
