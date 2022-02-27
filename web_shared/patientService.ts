@@ -120,6 +120,10 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
+        if (!!profile.primaryCareManager) {
+            (profile.primaryCareManager as any)._type = 'providerIdentity';
+        }
+
         const response = await this.axiosInstance.put<IPatientProfileResponse>(`/profile`, {
             profile,
         } as IPatientProfileRequest);
@@ -218,7 +222,7 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async addCaseReview(review: ICaseReview): Promise<ICaseReview> {
         (review as any)._type = 'caseReview';
-        (review.consultingPsychiatrist as any)._type = 'identity';
+        (review.consultingPsychiatrist as any)._type = 'providerIdentity';
 
         logger.assert((review as any)._rev == undefined, '_rev should not be in the request data');
         logger.assert((review as any)._set_id == undefined, '_set_id should not be in the request data');
@@ -230,7 +234,7 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async updateCaseReview(review: ICaseReview): Promise<ICaseReview> {
-        (review.consultingPsychiatrist as any)._type = 'identity';
+        (review.consultingPsychiatrist as any)._type = 'providerIdentity';
 
         logger.assert(
             (review as any)._type === 'caseReview',

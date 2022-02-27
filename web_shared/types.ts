@@ -17,6 +17,7 @@ import {
     PatientPronoun,
     PatientRaceFlags,
     PatientSex,
+    ProviderRole,
     Referral,
     ReferralStatus,
     SessionType,
@@ -34,6 +35,7 @@ export interface IPatientIdentity extends IIdentity {
 
 export interface IProviderIdentity extends IIdentity {
     providerId: string;
+    role: ProviderRole;
 }
 
 export interface IPatientUser extends IPatientIdentity {
@@ -177,8 +179,8 @@ export interface IPatientProfile {
     pronoun?: PatientPronoun;
     race?: PatientRaceFlags;
     ethnicity?: PatientEthnicity;
-    primaryOncologyProvider?: IIdentity;
-    primaryCareManager?: IIdentity;
+    primaryOncologyProvider?: string;
+    primaryCareManager?: IProviderIdentity;
     discussionFlag?: DiscussionFlags;
     followupSchedule?: FollowupSchedule;
     depressionTreatmentStatus?: DepressionTreatmentStatus;

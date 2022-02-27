@@ -5,6 +5,7 @@ import {
     IMoodLog,
     IPatient,
     IPatientProfile,
+    IProviderIdentity,
     ISession,
     IValuesInventory,
 } from 'shared/types';
@@ -96,4 +97,8 @@ export interface IActivityResponse extends IServiceResponse {
 
 export interface IActivityRequest extends IServiceResponse {
     activity: IActivity;
+}
+
+export interface IProviderIdentityListResponse extends IServiceResponse {
+    providers: IProviderIdentity[];
 }

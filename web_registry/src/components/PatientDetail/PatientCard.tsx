@@ -8,7 +8,7 @@ import { formatDateOnly } from 'shared/time';
 import { IPatientProfile, KeyedMap } from 'shared/types';
 import LabeledField from 'src/components/common/LabeledField';
 import { EditPatientProfileDialog } from 'src/components/PatientDetail/PatientProfileDialog';
-import { usePatient } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
 const Container = withTheme(
@@ -50,6 +50,7 @@ export interface IPatientCardProps {
 export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props) => {
     const { loading, error } = props;
     const patient = usePatient();
+    const { patientsStore } = useStores();
     const { profile } = patient;
 
     const [openError, setOpenError] = useState(error);
@@ -132,16 +133,14 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                 </Grid>
 
                 <Grid item>
-                    <LabeledField
-                        label="primary oncology provider"
-                        value={profile.primaryOncologyProvider?.name || '--'}
-                    />
+                    <LabeledField label="primary oncology provider" value={profile.primaryOncologyProvider || '--'} />
                     <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
                     <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
                     <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
                 </Grid>
                 {state.open && (
                     <EditPatientProfileDialog
+                        careManagers={patientsStore.careManagers}
                         profile={profile}
                         open={state.open}
                         onClose={handleClose}

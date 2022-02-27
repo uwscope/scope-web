@@ -1,4 +1,4 @@
-import { CircularProgress, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
@@ -11,7 +11,7 @@ export const Page = withTheme(
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-    }))
+    })),
 );
 
 export const PageHeaderTitle: FunctionComponent = (props) => {
@@ -28,21 +28,17 @@ const HeaderContainer = withTheme(
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'stretch',
-    }))
+    })),
 );
 
 const HeaderContent = styled.div({
     flexGrow: 1,
 });
-export interface IPageHeaderContainerProps {
-    loading?: boolean;
-}
 
-export const PageHeaderContainer: FunctionComponent<IPageHeaderContainerProps> = (props) => {
+export const PageHeaderContainer: FunctionComponent = (props) => {
     return (
         <HeaderContainer>
             <HeaderContent>{props.children}</HeaderContent>
-            {props.loading ? <CircularProgress /> : null}
         </HeaderContainer>
     );
 };

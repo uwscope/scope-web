@@ -1,21 +1,15 @@
 import { AxiosResponse } from 'axios';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
-import { IPatientListResponse } from 'shared/serviceTypes';
-import { IAssessment, IAssessmentLog, ICaseReview, IPatient, ISafetyPlan, ISession } from 'shared/types';
+import { IPatientListResponse, IProviderIdentityListResponse } from 'shared/serviceTypes';
+import { IAssessment, IAssessmentLog, IPatient, IProviderIdentity, ISafetyPlan } from 'shared/types';
 
 export interface IRegistryService extends IServiceBase {
     getPatients(): Promise<IPatient[]>;
     addPatient(patient: Partial<IPatient>): Promise<IPatient>;
 
+    getProviders(): Promise<IProviderIdentity[]>;
+
     updatePatientSafetyPlan(recordId: string, safetyPlan: Partial<ISafetyPlan>): Promise<IPatient>;
-
-    getPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
-    updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession>;
-
-    addPatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview>;
-    getPatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview>;
-    updatePatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview>;
-
     updatePatientAssessment(recordId: string, assessment: Partial<IAssessment>): Promise<IAssessment>;
 
     addPatientAssessmentLog(recordId: string, assessmentLog: IAssessmentLog): Promise<IAssessmentLog>;
@@ -45,7 +39,7 @@ class RegistryService extends ServiceBase implements IRegistryService {
 
     public async getPatients(): Promise<IPatient[]> {
         const response = await this.axiosInstance.get<IPatientListResponse>('/patients');
-        return response.data && response.data.patients;
+        return response.data?.patients;
     }
 
     public async addPatient(patient: Partial<IPatient>): Promise<IPatient> {
@@ -59,6 +53,11 @@ class RegistryService extends ServiceBase implements IRegistryService {
         }
     }
 
+    public async getProviders(): Promise<IProviderIdentity[]> {
+        const response = await this.axiosInstance.get<IProviderIdentityListResponse>('/providers');
+        return response.data?.providers;
+    }
+
     public async updatePatientSafetyPlan(recordId: string, safetyPlan: Partial<ISafetyPlan>): Promise<IPatient> {
         // Work around since backend doesn't exist
         try {
@@ -69,71 +68,6 @@ class RegistryService extends ServiceBase implements IRegistryService {
         } catch (error) {
             await new Promise((resolve) => setTimeout(() => resolve(null), 500));
             return { safetyPlan } as IPatient;
-        }
-    }
-
-    public async getPatientSession(recordId: string, session: Partial<ISession>): Promise<ISession> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<ISession>(
-                `/patient/${recordId}/session/${session.sessionId}`,
-            );
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return session as ISession;
-        }
-    }
-
-    public async updatePatientSession(recordId: string, session: Partial<ISession>): Promise<ISession> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<ISession>(
-                `/patient/${recordId}/session/${session.sessionId}`,
-                session,
-            );
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return session as ISession;
-        }
-    }
-
-    public async addPatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<ICaseReview>(`/patient/${recordId}/casereviews`, caseReview);
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return caseReview as ICaseReview;
-        }
-    }
-
-    public async getPatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<ICaseReview>(
-                `/patient/${recordId}/casereview/${caseReview.caseReviewId}`,
-            );
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return caseReview as ICaseReview;
-        }
-    }
-
-    public async updatePatientCaseReview(recordId: string, caseReview: Partial<ICaseReview>): Promise<ICaseReview> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<ICaseReview>(
-                `/patient/${recordId}/casereview/${caseReview.caseReviewId}`,
-                caseReview,
-            );
-            return response.data;
-        } catch (error) {
-            await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-            return caseReview as ICaseReview;
         }
     }
 

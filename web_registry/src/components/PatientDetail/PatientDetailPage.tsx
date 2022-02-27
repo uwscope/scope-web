@@ -67,7 +67,7 @@ type IContent = IContentItem & { content?: React.ReactNode };
 export const PatientDetailPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { recordId } = useParams<{ recordId: string | undefined }>();
-    const currentPatient = rootStore.getPatientByRecordId(recordId);
+    const currentPatient = rootStore.patientsStore.getPatientByRecordId(recordId);
     const validAssessments = rootStore.appContentConfig.assessments;
 
     React.useEffect(
