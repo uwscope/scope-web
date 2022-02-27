@@ -45,13 +45,13 @@ def fixture_data_fake_assessment_contents_factory() -> Callable[[], List[dict]]:
     unvalidated_factory = fake_assessment_contents_factory()
 
     def factory() -> List[dict]:
-        fake_assessments = unvalidated_factory()
+        fake_assessment_contents = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.assessment_contents_schema,
-            document=fake_assessments,
+            document=fake_assessment_contents,
         )
 
-        return fake_assessments
+        return fake_assessment_contents
 
     return factory
