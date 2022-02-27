@@ -45,15 +45,3 @@ def fixture_data_fake_activities_factory(
         return fake_activities
 
     return factory
-
-
-@pytest.fixture(name="data_fake_activities")
-def fixture_data_fake_activities(
-    *,
-    data_fake_activities_factory: Callable[[], List[dict]],
-) -> List[dict]:
-    """
-    Fixture for data_fake_activities.
-    """
-
-    return data_fake_activities_factory()
