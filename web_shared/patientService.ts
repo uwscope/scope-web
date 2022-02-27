@@ -234,7 +234,7 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async updateCaseReview(review: ICaseReview): Promise<ICaseReview> {
-        (review.consultingPsychiatrist as any)._type = 'identity';
+        (review.consultingPsychiatrist as any)._type = 'providerIdentity';
 
         logger.assert(
             (review as any)._type === 'caseReview',

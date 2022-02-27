@@ -27,7 +27,7 @@ import {
 import { SessionProgressVis } from 'src/components/common/SessionProgressVis';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
-import { usePatient } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 
 const getDefaultSession = () =>
@@ -236,13 +236,14 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
 });
 
 interface IReviewEditProps {
+    availablePsychiatristNames: string[];
     review: ICaseReview;
     onReviewValueChange: (key: string, value: any) => void;
     onConsultingPsychiatristChange: (name: string) => void;
 }
 
 const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
-    const { review, onReviewValueChange, onConsultingPsychiatristChange } = props;
+    const { review, availablePsychiatristNames, onReviewValueChange, onConsultingPsychiatristChange } = props;
 
     return (
         <Grid container spacing={2} alignItems="stretch">
@@ -253,11 +254,12 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 value={review.date}
                 onChange={(text) => onReviewValueChange('date', text)}
             />
-            <GridTextField
+            <GridDropdownField
                 editable={true}
                 required={true}
                 label="Consulting Psychiatrist"
                 value={review.consultingPsychiatrist.name}
+                options={availablePsychiatristNames}
                 onChange={(text) => onConsultingPsychiatristChange(`${text}`)}
             />
             <GridTextField
@@ -320,6 +322,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
 
 export const SessionInfo: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
+    const { patientsStore } = useStores();
 
     const state = useLocalObservable<IState>(getDefaultState);
 
@@ -332,7 +335,10 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
 
     const onReviewConsultingPsychiatristChange = action((name: string) => {
-        state.review.consultingPsychiatrist.name = name;
+        const found = patientsStore.psychiatrists.find((p) => p.name == name);
+        if (!!name && found) {
+            state.review.consultingPsychiatrist = found;
+        }
     });
 
     const onValueChange = action((key: string, value: any) => {
@@ -507,6 +513,8 @@ export const SessionInfo: FunctionComponent = observer(() => {
     const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadCaseReviewsState.pending;
     const error = currentPatient?.loadSessionsState.error || currentPatient?.loadCaseReviewsState.error;
 
+    const availablePsychiatristNames = patientsStore.psychiatrists.map((p) => p.name);
+
     return (
         <ActionPanel
             id="sessions"
@@ -565,6 +573,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
                     ) : (
                         <ReviewEdit
                             review={state.review}
+                            availablePsychiatristNames={availablePsychiatristNames}
                             onReviewValueChange={onReviewValueChange}
                             onConsultingPsychiatristChange={onReviewConsultingPsychiatristChange}
                         />
