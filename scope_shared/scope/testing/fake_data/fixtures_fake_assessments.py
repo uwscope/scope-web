@@ -16,14 +16,13 @@ import scope.testing.fake_data.fake_utils as fake_utils
 def _fake_assessment(
     *,
     faker_factory: faker.Faker,
-    fake_assessment_content: dict,
+    assessment_content: dict,
 ) -> dict:
     return {
+        # Assessments have a fixed set of allowable IDs
+        scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
+
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
-        # TODO: SET semantic set id because scheduled assessment and assessment log needs it
-        scope.database.patient.assessments.SEMANTIC_SET_ID: fake_assessment_content[
-            "id"
-        ],
         "assigned": random.choice([True, False]),
         "assignedDate": format_utils.format_date(
             faker_factory.date_between_dates(
@@ -40,39 +39,22 @@ def _fake_assessment(
     }
 
 
-def _fake_assessments(
-    *,
-    faker_factory: faker.Faker,
-    fake_assessment_contents: List[dict],
-):
-    return [
-        _fake_assessment(
-            faker_factory=faker_factory,
-            fake_assessment_content=fake_assessment_content,
-        )
-        for fake_assessment_content in fake_assessment_contents
-    ]
-
-
 def fake_assessment_factory(
     *,
     faker_factory: faker.Faker,
-    fake_assessment_contents: List[dict],
+    assessment_content: dict,
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake assessment document.
     """
 
     def factory() -> dict:
-
-        fake_assessment = random.choice(
-            _fake_assessments(
-                faker_factory=faker_factory,
-                fake_assessment_contents=fake_assessment_contents,
-            )
+        fake_assessment = _fake_assessment(
+            faker_factory=faker_factory,
+            assessment_content=assessment_content,
         )
 
-        return document_utils.normalize_document(document=fake_assessment)
+        return fake_assessment
 
     return factory
 
@@ -80,20 +62,24 @@ def fake_assessment_factory(
 def fake_assessments_factory(
     *,
     faker_factory: faker.Faker,
-    fake_assessment_contents: List[dict],
+    assessment_contents: List[dict],
 ) -> Callable[[], List[dict]]:
     """
     Obtain a factory that will generate a list of fake assessment documents.
     """
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
+        # TODO: Should assessment_contents be sampled down
 
-        fake_assessments = _fake_assessments(
-            faker_factory=faker_factory,
-            fake_assessment_contents=fake_assessment_contents,
-        )
+        fake_assessments = []
+        for assessment_content_current in assessment_contents:
+            fake_assessment = _fake_assessment(
+                faker_factory=faker_factory,
+                assessment_content=assessment_content_current,
+            )
+            fake_assessments.append(fake_assessment)
 
-        return document_utils.normalize_documents(documents=fake_assessments)
+        return fake_assessments
 
     return factory
 
@@ -101,19 +87,16 @@ def fake_assessments_factory(
 @pytest.fixture(name="data_fake_assessment_factory")
 def fixture_data_fake_assessment_factory(
     faker: faker.Faker,
-    data_fake_assessment_contents: List[dict],
+    data_fake_assessments_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_assessment_factory.
     """
 
-    unvalidated_factory = fake_assessment_factory(
-        faker_factory=faker,
-        fake_assessment_contents=data_fake_assessment_contents,
-    )
-
     def factory() -> dict:
-        fake_assessment = unvalidated_factory()
+        fake_assessments = data_fake_assessments_factory()
+
+        fake_assessment = random.choice(fake_assessments)
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.assessment_schema,
@@ -128,18 +111,20 @@ def fixture_data_fake_assessment_factory(
 @pytest.fixture(name="data_fake_assessments_factory")
 def fixture_data_fake_assessments_factory(
     faker: faker.Faker,
-    data_fake_assessment_contents: List[dict],
+    data_fake_assessment_contents_factory: Callable[[], List[dict]],
 ) -> Callable[[], List[dict]]:
     """
     Fixture for data_fake_assessments_factory.
     """
 
+    assessment_contents = data_fake_assessment_contents_factory()
+
     unvalidated_factory = fake_assessments_factory(
         faker_factory=faker,
-        fake_assessment_contents=data_fake_assessment_contents,
+        assessment_contents=assessment_contents,
     )
 
-    def factory() -> dict:
+    def factory() -> List[dict]:
         fake_assessments = unvalidated_factory()
 
         fake_utils.xfail_for_invalid(
@@ -150,15 +135,3 @@ def fixture_data_fake_assessments_factory(
         return fake_assessments
 
     return factory
-
-
-@pytest.fixture(name="data_fake_assessments")
-def fixture_data_fake_assessments(
-    *,
-    data_fake_assessments_factory: Callable[[], List[dict]],
-) -> List[dict]:
-    """
-    Fixture for data_fake_assessments.
-    """
-
-    return data_fake_assessments_factory()
