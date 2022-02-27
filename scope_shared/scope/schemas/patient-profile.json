@@ -42,9 +42,7 @@
             "$ref": "/schemas/enums#/properties/ethnicity"
         },
         "primaryOncologyProvider": {
-            "type": "object",
-            "description": "IProviderIdentity schema",
-            "$ref": "/schemas/provider-identity"
+            "type": "string"
         },
         "primaryCareManager": {
             "type": "object",

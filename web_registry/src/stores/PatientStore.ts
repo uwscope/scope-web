@@ -246,6 +246,13 @@ export class PatientStore implements IPatientStore {
                 {},
                 ...discussionFlagValues.map((x) => ({ [x]: !!patientProfile.discussionFlag?.[x] })),
             ),
+            primaryCareManager: patientProfile.primaryCareManager
+                ? {
+                      name: patientProfile.primaryCareManager?.name,
+                      providerId: patientProfile.primaryCareManager?.providerId,
+                      role: patientProfile.primaryCareManager?.role,
+                  }
+                : undefined,
         });
 
         await this.loadAndLogQuery<IPatientProfile>(

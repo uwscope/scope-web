@@ -133,10 +133,7 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                 </Grid>
 
                 <Grid item>
-                    <LabeledField
-                        label="primary oncology provider"
-                        value={profile.primaryOncologyProvider?.name || '--'}
-                    />
+                    <LabeledField label="primary oncology provider" value={profile.primaryOncologyProvider || '--'} />
                     <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
                     <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
                     <LabeledField label="follow-up schedule" value={profile.followupSchedule} />

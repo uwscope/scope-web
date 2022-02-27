@@ -179,8 +179,8 @@ export interface IPatientProfile {
     pronoun?: PatientPronoun;
     race?: PatientRaceFlags;
     ethnicity?: PatientEthnicity;
-    primaryOncologyProvider?: IIdentity;
-    primaryCareManager?: IIdentity;
+    primaryOncologyProvider?: string;
+    primaryCareManager?: IProviderIdentity;
     discussionFlag?: DiscussionFlags;
     followupSchedule?: FollowupSchedule;
     depressionTreatmentStatus?: DepressionTreatmentStatus;
