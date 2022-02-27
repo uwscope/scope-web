@@ -289,32 +289,32 @@ def _populate_patient(
     ################################################################################
     # Assessments required to create scheduled assessments.
     ################################################################################
-    def _assessments_and_scheduled_assessments():
-        fake_assessments_factory = scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
-            faker_factory=faker_factory,
-        )
-        assessments = fake_assessments_factory()
-
-        for assessment_current in assessments:
-            scope.database.patient.assessments.put_assessment(
-                collection=patient_collection,
-                assessment=assessment_current,
-                set_id=assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
-            )
-
-        fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
-            faker_factory=faker_factory,
-            fake_assessments=assessments,
-        )
-        scheduled_assessments = fake_scheduled_assessments_factory()
-
-        for scheduled_assessment_current in scheduled_assessments:
-            scope.database.patient.scheduled_assessments.post_scheduled_assessment(
-                collection=patient_collection,
-                scheduled_assessment=scheduled_assessment_current,
-            )
-
-    _assessments_and_scheduled_assessments()
+    # def _assessments_and_scheduled_assessments():
+    #     fake_assessments_factory = scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+    #         faker_factory=faker_factory,
+    #     )
+    #     assessments = fake_assessments_factory()
+    #
+    #     for assessment_current in assessments:
+    #         scope.database.patient.assessments.put_assessment(
+    #             collection=patient_collection,
+    #             assessment=assessment_current,
+    #             set_id=assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
+    #         )
+    #
+    #     fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+    #         faker_factory=faker_factory,
+    #         fake_assessments=assessments,
+    #     )
+    #     scheduled_assessments = fake_scheduled_assessments_factory()
+    #
+    #     for scheduled_assessment_current in scheduled_assessments:
+    #         scope.database.patient.scheduled_assessments.post_scheduled_assessment(
+    #             collection=patient_collection,
+    #             scheduled_assessment=scheduled_assessment_current,
+    #         )
+    #
+    # _assessments_and_scheduled_assessments()
 
     ################################################################################
     # Life area contents is required to create a values inventory.
