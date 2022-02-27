@@ -26,7 +26,7 @@
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
 		},
-		"scheduleId": {
+		"scheduledActivityId": {
 			"type": "string"
 		},
 		"activityName": {
@@ -49,5 +49,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduleId", "activityName"]
+	"required": ["_type", "recordedDate", "scheduledActivityId", "activityName"]
 }
