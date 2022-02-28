@@ -64,7 +64,6 @@ class ConfigTestFakeDataSchema:
 
 
 TEST_ITERATIONS = 100
-faker_factory = faker.Faker()
 
 TEST_CONFIGS = [
     ConfigTestFakeDataSchema(
