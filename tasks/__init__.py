@@ -17,7 +17,7 @@ aws_infrastructure.tasks.library.color.enable_color()
 # Build our task collection
 ns = Collection()
 
-# Compose from database.py
+# Compose from database_populate.py
 compose_collection(ns, tasks.database.ns, name="database")
 
 # Compose from documentdb.py
