@@ -6,12 +6,11 @@ from typing import Callable, List
 from urllib.parse import urljoin
 
 import scope.config
-import scope.database.format_utils as format_utils
-
+import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
-from scope.schema import patient_config_schema
+from scope.schema import patient_summary_schema
 
 import scope.testing.fixtures_database_temp_patient
 
@@ -19,34 +18,27 @@ import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
-QUERY = "patient/{patient_id}/config"
+QUERY = "patient/{patient_id}/summary"
 
 
-# TODO: Copied from patient config blueprint. Move to utils.py later.
-DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
-
-def _patient_config_assertions(config: dict) -> None:
+def _patient_summary_assertions(summary: dict) -> None:
     # Remove "status" for schema validation
-    assert "status" in config
-    del config["status"]
+    assert "status" in summary
+    del summary["status"]
 
-    # TODO: Anant: Define and check a schema
-    schema_result = patient_config_schema.evaluate(jschon.JSON(config))
+    schema_result = patient_summary_schema.evaluate(jschon.JSON(summary))
     assert schema_result.valid
 
-    assigned_scheduled_assessments = config["assignedScheduledAssessments"]
+    assigned_scheduled_assessments = summary["assignedScheduledAssessments"]
     for assigned_scheduled_assessment_current in assigned_scheduled_assessments:
         assert assigned_scheduled_assessment_current["completed"] == False
         assert (
-            datetime.datetime.strptime(
-                assigned_scheduled_assessment_current["dueDate"], DATE_TIME_FORMAT
-            )
+            date_utils.format_string(assigned_scheduled_assessment_current["dueDate"])
             <= datetime.datetime.today()
         )
 
 
-def test_patient_config(
+def test_patient_summary(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -90,11 +82,11 @@ def test_patient_config(
 
     assert response.ok
 
-    config = response.json()
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    _patient_summary_assertions(summary=summary)
 
 
-def test_patient_config_values_inventory(
+def test_patient_summary_values_inventory(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -141,9 +133,9 @@ def test_patient_config_values_inventory(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedValuesInventory"] == False
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedValuesInventory"] == False
+    _patient_summary_assertions(summary=summary)
 
     # Option 2 - values inventory, assigned is True and acivity exists in values
     values_inventory = data_fake_values_inventory_factory()
@@ -164,9 +156,9 @@ def test_patient_config_values_inventory(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedValuesInventory"] == False
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedValuesInventory"] == False
+    _patient_summary_assertions(summary=summary)
 
     # Option 3 - values inventory, assigned is True and no acivity exists in values
     values_inventory = data_fake_values_inventory_factory()
@@ -187,12 +179,12 @@ def test_patient_config_values_inventory(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedValuesInventory"] == True
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedValuesInventory"] == True
+    _patient_summary_assertions(summary=summary)
 
 
-def test_patient_config_safety_plan(
+def test_patient_summary_safety_plan(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -238,9 +230,9 @@ def test_patient_config_safety_plan(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedSafetyPlan"] == False
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedSafetyPlan"] == False
+    _patient_summary_assertions(summary=summary)
 
     # Option 2 - safety plan, assigned is True but lastUpdatedDate = assignedDate
     safety_plan["_rev"] = 1
@@ -258,15 +250,15 @@ def test_patient_config_safety_plan(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedSafetyPlan"] == False
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedSafetyPlan"] == False
+    _patient_summary_assertions(summary=summary)
 
     # Option 3 - safety plan, assigned is True but lastUpdatedDate > assignedDate
     safety_plan["_rev"] = 2
     safety_plan["assigned"] = True
-    safety_plan["lastUpdatedDate"] = format_utils.format_date(
-        datetime.datetime.strptime(safety_plan["assignedDate"], DATE_TIME_FORMAT)
+    safety_plan["lastUpdatedDate"] = date_utils.format_date(
+        date_utils.format_string(safety_plan["assignedDate"])
         + datetime.timedelta(days=2)
     )
     scope.database.patient.safety_plan.put_safety_plan(
@@ -281,15 +273,15 @@ def test_patient_config_safety_plan(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedSafetyPlan"] == False
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedSafetyPlan"] == False
+    _patient_summary_assertions(summary=summary)
 
     # Option 4 - safety plan, assigned is True and lastUpdatedDate < assignedDate
     safety_plan["_rev"] = 3
     safety_plan["assigned"] = True
-    safety_plan["lastUpdatedDate"] = format_utils.format_date(
-        datetime.datetime.strptime(safety_plan["assignedDate"], DATE_TIME_FORMAT)
+    safety_plan["lastUpdatedDate"] = date_utils.format_date(
+        date_utils.format_string(safety_plan["assignedDate"])
         - datetime.timedelta(days=2)
     )
     scope.database.patient.safety_plan.put_safety_plan(
@@ -304,12 +296,12 @@ def test_patient_config_safety_plan(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedSafetyPlan"] == True
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedSafetyPlan"] == True
+    _patient_summary_assertions(summary=summary)
 
 
-def test_patient_config_scheduled_assessments(
+def test_patient_summary_scheduled_assessments(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -356,14 +348,14 @@ def test_patient_config_scheduled_assessments(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedScheduledAssessments"] == []
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedScheduledAssessments"] == []
+    _patient_summary_assertions(summary=summary)
 
     # Option 2 - scheduled assessments, completed is False but dueDate > today.
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
-        scheduled_assessment_current["dueDate"] = format_utils.format_date(
+        scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.datetime.today() + datetime.timedelta(days=2)
         )
 
@@ -383,14 +375,14 @@ def test_patient_config_scheduled_assessments(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedScheduledAssessments"] == []
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedScheduledAssessments"] == []
+    _patient_summary_assertions(summary=summary)
 
     # Option 3 - scheduled assessments, completed is False and dueDate = today.
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
-        scheduled_assessment_current["dueDate"] = format_utils.format_date(
+        scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.datetime.today()
         )
 
@@ -410,14 +402,14 @@ def test_patient_config_scheduled_assessments(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedScheduledAssessments"] != []
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedScheduledAssessments"] != []
+    _patient_summary_assertions(summary=summary)
 
     # Option 4 - scheduled assessments, completed is False and dueDate < today.
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
-        scheduled_assessment_current["dueDate"] = format_utils.format_date(
+        scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.datetime.today() - datetime.timedelta(days=1)
         )
 
@@ -437,6 +429,6 @@ def test_patient_config_scheduled_assessments(
         ),
     )
     assert response.ok
-    config = response.json()
-    assert config["assignedScheduledAssessments"] != []
-    _patient_config_assertions(config=config)
+    summary = response.json()
+    assert summary["assignedScheduledAssessments"] != []
+    _patient_summary_assertions(summary=summary)

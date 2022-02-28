@@ -3,8 +3,8 @@ from typing import Callable
 
 import faker
 import pytest
+import scope.database.date_utils as date_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
 import scope.database.patient.safety_plan
 import scope.schema
 import scope.testing.fake_data.enums
@@ -37,8 +37,8 @@ def fake_safety_plan_factory(
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDate": format_utils.format_date(faker_factory.date_object()),
-            "lastUpdatedDate": format_utils.format_date(faker_factory.date_object()),
+            "assignedDate": date_utils.format_date(faker_factory.date_object()),
+            "lastUpdatedDate": date_utils.format_date(faker_factory.date_object()),
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),

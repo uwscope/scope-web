@@ -3,7 +3,7 @@ from typing import Callable
 
 import faker
 import pytest
-import scope.database.format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.patient_profile
 import scope.schema
 import scope.testing.fake_data.enums
@@ -43,7 +43,7 @@ def fake_patient_profile_factory(
             "clinicCode": fake_utils.fake_enum_value(
                 scope.testing.fake_data.enums.ClinicCode
             ),
-            "birthdate": scope.database.format_utils.format_date(
+            "birthdate": date_utils.format_date(
                 faker_factory.date_of_birth(),
             ),
             "sex": fake_utils.fake_enum_value(scope.testing.fake_data.enums.PatientSex),

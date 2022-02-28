@@ -5,7 +5,7 @@ import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
-import scope.database.format_utils as format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.assessments
 import scope.database.patient.scheduled_assessments
 import scope.schema
@@ -20,16 +20,16 @@ def _fake_scheduled_assessment(
 ) -> dict:
     return {
         "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
-        "dueDate": format_utils.format_date(
+        "dueDate": date_utils.format_date(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now() - datetime.timedelta(days=10),
                 date_end=datetime.datetime.now() + datetime.timedelta(days=10),
             )
         ),
-        "dueType": fake_utils.fake_enum_value(
-            scope.testing.fake_data.enums.DueType
-        ),
-        scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[scope.database.patient.assessments.SEMANTIC_SET_ID],
+        "dueType": fake_utils.fake_enum_value(scope.testing.fake_data.enums.DueType),
+        scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[
+            scope.database.patient.assessments.SEMANTIC_SET_ID
+        ],
         "completed": random.choice([True, False]),
     }
 
@@ -44,14 +44,17 @@ def fake_scheduled_assessment_factory(
     """
 
     if scope.database.patient.assessments.SEMANTIC_SET_ID not in assessment:
-        raise ValueError('assessment must include "{}".'.format(
-            scope.database.patient.assessments.SEMANTIC_SET_ID
-        ))
+        raise ValueError(
+            'assessment must include "{}".'.format(
+                scope.database.patient.assessments.SEMANTIC_SET_ID
+            )
+        )
     if assessment[scope.database.patient.assessments.SEMANTIC_SET_ID] == "mood":
-        raise ValueError('"{}" must not be "{}".'.format(
-            scope.database.patient.assessments.SEMANTIC_SET_ID,
-            "mood"
-        ))
+        raise ValueError(
+            '"{}" must not be "{}".'.format(
+                scope.database.patient.assessments.SEMANTIC_SET_ID, "mood"
+            )
+        )
 
     def factory() -> dict:
         return _fake_scheduled_assessment(
@@ -100,7 +103,8 @@ def fixture_data_fake_scheduled_assessment_factory(
         assessments = [
             assessment_current
             for assessment_current in assessments
-            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] != "mood"
+            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID]
+            != "mood"
         ]
 
         assessment = random.choice(assessments)
@@ -136,7 +140,8 @@ def fixture_data_fake_scheduled_assessments_factory(
         assessments = [
             assessment_current
             for assessment_current in assessments
-            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] != "mood"
+            if assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID]
+            != "mood"
         ]
 
         fake_scheduled_assessments = []

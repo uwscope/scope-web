@@ -4,7 +4,7 @@ import pytest
 import random
 from typing import Callable
 
-import scope.database.format_utils as format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.mood_logs
 import scope.schema
 import scope.testing.fake_data.enums
@@ -26,7 +26,7 @@ def fake_mood_log_factory(
     def factory() -> dict:
         fake_mood_log = {
             "_type": scope.database.patient.mood_logs.DOCUMENT_TYPE,
-            "recordedDate": format_utils.format_date(
+            "recordedDate": date_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )

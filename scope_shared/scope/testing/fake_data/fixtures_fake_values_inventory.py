@@ -3,7 +3,7 @@ import pytest
 import random
 from typing import Callable, List
 
-import scope.database.format_utils as format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.patient_profile
 import scope.schema
 import scope.testing.fake_data.enums
@@ -26,8 +26,8 @@ def _fake_activity(
 
     fake_activity = {
         "name": faker_factory.text(),
-        "createdDateTime": format_utils.format_date(faker_factory.date_time()),
-        "editedDateTime": format_utils.format_date(faker_factory.date_time()),
+        "createdDateTime": date_utils.format_date(faker_factory.date_time()),
+        "editedDateTime": date_utils.format_date(faker_factory.date_time()),
         "enjoyment": random.randint(1, 10),
         "importance": random.randint(1, 10),
     }
@@ -50,8 +50,8 @@ def _fake_value(
 
     return {
         "name": faker_factory.text(),
-        "createdDateTime": format_utils.format_date(faker_factory.date_time()),
-        "editedDateTime": format_utils.format_date(faker_factory.date_time()),
+        "createdDateTime": date_utils.format_date(faker_factory.date_time()),
+        "editedDateTime": date_utils.format_date(faker_factory.date_time()),
         "lifeareaId": life_area["id"],
         "activities": [
             _fake_activity(
@@ -78,8 +78,8 @@ def fake_values_inventory_factory(
         fake_values_inventory = {
             "_type": "valuesInventory",
             "assigned": random.choice([True, False]),
-            "assignedDateTime": format_utils.format_date(faker_factory.date_time()),
-            "lastUpdatedDateTime": format_utils.format_date(faker_factory.date_time()),
+            "assignedDateTime": date_utils.format_date(faker_factory.date_time()),
+            "lastUpdatedDateTime": date_utils.format_date(faker_factory.date_time()),
         }
 
         values = []

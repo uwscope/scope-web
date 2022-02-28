@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 
 import blueprints.app.config
-import blueprints.patient.config
+import blueprints.patient.summary
 import blueprints.registry.activities
 import blueprints.registry.activity_logs
 import blueprints.registry.assessments
@@ -71,7 +71,7 @@ def create_app():
     )
 
     app.register_blueprint(
-        blueprints.patient.config.patient_config_blueprint,
+        blueprints.patient.summary.patient_summary_blueprint,
         url_prefix="/patient",
     )
 

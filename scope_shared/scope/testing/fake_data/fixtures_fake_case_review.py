@@ -3,8 +3,7 @@ import faker
 import pytest
 from typing import Callable
 
-import scope.database.format_utils as format_utils
-import scope.database.format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.case_reviews
 import scope.schema
 import scope.testing.fake_data.enums
@@ -23,7 +22,7 @@ def fake_case_review_factory(
 
         fake_case_review = {
             "_type": scope.database.patient.case_reviews.DOCUMENT_TYPE,
-            "date": format_utils.format_date(
+            "date": date_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )

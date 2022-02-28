@@ -2,27 +2,26 @@ import datetime
 import flask
 import flask_json
 from request_context import request_context
+import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
 
-DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
-
-patient_config_blueprint = flask.Blueprint(
-    "patient_config_blueprint",
+patient_summary_blueprint = flask.Blueprint(
+    "patient_summary_blueprint",
     __name__,
 )
 
 
-@patient_config_blueprint.route(
-    "/<string:patient_id>/config",
+@patient_summary_blueprint.route(
+    "/<string:patient_id>/summary",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_patient_config(patient_id):
+def get_patient_summary(patient_id):
     """
-    Obtain patient configuration to be used by patient app.
+    Obtain patient summary to be used by patient app.
     {
         # assignedValuesInventory <- True, if assigned is True, and not a single activity exists in values inventory singleton
         assignedValuesInventory: boolean;
@@ -70,12 +69,10 @@ def get_patient_config(patient_id):
         if safety_plan.get("assignedDate", []) and safety_plan.get(
             "lastUpdatedDate", []
         ):
-            # TODO: Talk w/ James about dates because y22k
-            assigned_date = datetime.datetime.strptime(
-                safety_plan.get("assignedDate"), DATE_TIME_FORMAT
-            )
-            last_updated_date = datetime.datetime.strptime(
-                safety_plan.get("lastUpdatedDate"), DATE_TIME_FORMAT
+
+            assigned_date = date_utils.format_string(safety_plan.get("assignedDate"))
+            last_updated_date = date_utils.format_string(
+                safety_plan.get("lastUpdatedDate")
             )
             if last_updated_date >= assigned_date:
                 assigned_safety_plan = False
@@ -95,9 +92,7 @@ def get_patient_config(patient_id):
             lambda scheduled_assessment_current: (
                 (scheduled_assessment_current["completed"] == False)
                 and (
-                    datetime.datetime.strptime(
-                        scheduled_assessment_current["dueDate"], DATE_TIME_FORMAT
-                    )
+                    date_utils.format_string(scheduled_assessment_current["dueDate"])
                     <= datetime.datetime.today()
                 )
             ),
@@ -105,7 +100,6 @@ def get_patient_config(patient_id):
         )
     )
 
-    # TODO: This should be a "config" object containing these fields
     result = {
         "assignedValuesInventory": assigned_values_inventory,
         "assignedSafetyPlan": assigned_safety_plan,
