@@ -6,14 +6,20 @@
 	"type": "object",
 	"$comment": "property pointValues not clear : { \"$ref\": \"\"}",
 	"properties": {
-		"_log_id": {
-			"$ref": "/schemas/log#/properties/logId"
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "assessmentLog"
+		},
+		"_set_id": {
+			"type": "string"
 		},
 		"_rev": {
 			"type": "number"
 		},
-		"_type": {
-			"const": "assessmentLog"
+		"assessmentLogId": {
+			"$ref": "/schemas/log#/properties/logId"
 		},
 		"recordedDate": {
 			"$ref": "/schemas/log#/properties/recordedDate"
@@ -21,13 +27,10 @@
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
 		},
-		"scheduleId": {
+		"scheduledAssessmentId": {
 			"type": "string"
 		},
 		"assessmentId": {
-			"type": "string"
-		},
-		"assessmentName": {
 			"type": "string"
 		},
 		"completed": {
@@ -39,19 +42,11 @@
 		"submittedBy": {
 			"$ref": "/schemas/provider-identity"
 		},
+		"pointValues": { "type": "object", "$comment": "TODO" },
 		"totalScore": {
 			"type": "number"
 		}
 	},
 	"additionalProperties": false,
-	"required": [
-		"_log_id",
-		"_type",
-		"_rev",
-		"recordedDate",
-		"scheduleId",
-		"assessmentId",
-		"assessmentName",
-		"completed"
-	]
+	"required": ["_type", "recordedDate", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
 }

@@ -1,10 +1,10 @@
 import copy
+import jschon
 import math
+import pprint
+import pytest
 import random
 from typing import List
-
-import jschon
-import pytest
 
 
 def fake_enum_value(enum):
@@ -49,7 +49,15 @@ def xfail_for_invalid(*, schema: jschon.JSONSchema, document) -> None:
     Verify a document matches a schema, xfail if it does not.
     """
 
-    result = schema.evaluate(jschon.JSON(document))
+    schema_result = schema.evaluate(jschon.JSON(document))
+    if not schema_result.valid:
+        schema_output = schema_result.output("detailed")
 
-    if not result.valid:
-        pytest.xfail("Fake data schema invalid.")
+        pprint.pprint(document)
+        print()
+        pprint.pprint(schema_output)
+
+        # Use xfail when reduced verbosity is preferred
+        # pytest.xfail("Fake data schema invalid.")
+
+        assert schema_result.valid

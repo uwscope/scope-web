@@ -2,29 +2,29 @@ import flask
 import flask_json
 import pymongo.errors
 import scope.database
-import scope.database.patient.assessment_logs
+import scope.database.patient.activity_logs
 from request_context import request_context
 import request_utils
-from scope.schema import assessment_log_schema
+from scope.schema import activity_log_schema
 
-assessment_logs_blueprint = flask.Blueprint(
-    "assessment_logs_blueprint",
+activity_logs_blueprint = flask.Blueprint(
+    "activity_logs_blueprint",
     __name__,
 )
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlogs",
+@activity_logs_blueprint.route(
+    "/<string:patient_id>/activitylogs",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_assessment_logs(patient_id):
+def get_activity_logs(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
-    documents = scope.database.patient.assessment_logs.get_assessment_logs(
+    documents = scope.database.patient.activity_logs.get_activity_logs(
         collection=patient_collection,
     )
 
@@ -34,38 +34,38 @@ def get_assessment_logs(patient_id):
     )
 
     return {
-        "assessmentlogs": documents,
+        "activitylogs": documents,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlogs",
+@activity_logs_blueprint.route(
+    "/<string:patient_id>/activitylogs",
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
-    key="assessmentlog",
+    schema=activity_log_schema,
+    key="activitylog",
 )
 @flask_json.as_json
-def post_assessment_logs(patient_id):
+def post_activity_logs(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["assessmentlog"]
+    document = flask.request.json["activitylog"]
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
-        semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
         document=document,
     )
 
     # Store the document
-    result = scope.database.patient.assessment_logs.post_assessment_log(
+    result = scope.database.patient.activity_logs.post_activity_log(
         collection=patient_collection,
-        assessment_log=document,
+        activity_log=document,
     )
 
     # Validate and normalize the response
@@ -74,25 +74,25 @@ def post_assessment_logs(patient_id):
     )
 
     return {
-        "assessmentlog": document_response,
+        "activitylog": document_response,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlog/<string:assessmentlog_id>",
+@activity_logs_blueprint.route(
+    "/<string:patient_id>/activitylog/<string:activitylog_id>",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_assessment_log(patient_id, assessmentlog_id):
+def get_activity_log(patient_id, activitylog_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
-    document = scope.database.patient.assessment_logs.get_assessment_log(
+    document = scope.database.patient.activity_logs.get_activity_log(
         collection=patient_collection,
-        set_id=assessmentlog_id,
+        set_id=activitylog_id,
     )
 
     # Validate and normalize the response
@@ -101,46 +101,46 @@ def get_assessment_log(patient_id, assessmentlog_id):
     )
 
     return {
-        "assessmentlog": document,
+        "activitylog": document,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlog/<string:assessmentlog_id>",
+@activity_logs_blueprint.route(
+    "/<string:patient_id>/activitylog/<string:activitylog_id>",
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
-    key="assessmentlog",
+    schema=activity_log_schema,
+    key="activitylog",
 )
 @flask_json.as_json
-def put_assessment_log(patient_id, assessmentlog_id):
+def put_activity_log(patient_id, activitylog_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["assessmentlog"]
+    document = flask.request.json["activitylog"]
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
-        semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
         document=document,
-        set_id=assessmentlog_id,
+        set_id=activitylog_id,
     )
 
     # Store the document
     try:
-        result = scope.database.patient.assessment_logs.put_assessment_log(
+        result = scope.database.patient.activity_logs.put_activity_log(
             collection=patient_collection,
-            assessment_log=document,
-            set_id=assessmentlog_id,
+            activity_log=document,
+            set_id=activitylog_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.assessment_logs.get_assessment_log(
-            collection=patient_collection, set_id=assessmentlog_id
+        document_conflict = scope.database.patient.activity_logs.get_activity_log(
+            collection=patient_collection, set_id=activitylog_id
         )
         # Validate and normalize the response
         document_conflict = request_utils.singleton_put_response_validate(
@@ -149,7 +149,7 @@ def put_assessment_log(patient_id, assessmentlog_id):
 
         request_utils.abort_revision_conflict(
             document={
-                "assessmentlog": document_conflict,
+                "activitylog": document_conflict,
             }
         )
     else:
@@ -159,5 +159,5 @@ def put_assessment_log(patient_id, assessmentlog_id):
         )
 
         return {
-            "assessmentlog": document_response,
+            "activitylog": document_response,
         }

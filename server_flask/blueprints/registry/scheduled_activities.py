@@ -2,29 +2,29 @@ import flask
 import flask_json
 import pymongo.errors
 import scope.database
-import scope.database.patient.assessment_logs
+import scope.database.patient.scheduled_activities
 from request_context import request_context
 import request_utils
-from scope.schema import assessment_log_schema
+from scope.schema import scheduled_activity_schema
 
-assessment_logs_blueprint = flask.Blueprint(
-    "assessment_logs_blueprint",
+scheduled_activities_blueprint = flask.Blueprint(
+    "scheduled_activities_blueprint",
     __name__,
 )
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlogs",
+@scheduled_activities_blueprint.route(
+    "/<string:patient_id>/scheduledactivities",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_assessment_logs(patient_id):
+def get_scheduled_activities(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
-    documents = scope.database.patient.assessment_logs.get_assessment_logs(
+    documents = scope.database.patient.scheduled_activities.get_scheduled_activities(
         collection=patient_collection,
     )
 
@@ -34,38 +34,38 @@ def get_assessment_logs(patient_id):
     )
 
     return {
-        "assessmentlogs": documents,
+        "scheduledactivities": documents,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlogs",
+@scheduled_activities_blueprint.route(
+    "/<string:patient_id>/scheduledactivities",
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
-    key="assessmentlog",
+    schema=scheduled_activity_schema,
+    key="scheduledactivity",
 )
 @flask_json.as_json
-def post_assessment_logs(patient_id):
+def post_scheduled_activities(patient_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["assessmentlog"]
+    document = flask.request.json["scheduledactivity"]
 
     # Validate and normalize the request
     document = request_utils.set_post_request_validate(
-        semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
         document=document,
     )
 
     # Store the document
-    result = scope.database.patient.assessment_logs.post_assessment_log(
+    result = scope.database.patient.scheduled_activities.post_scheduled_activity(
         collection=patient_collection,
-        assessment_log=document,
+        scheduled_activity=document,
     )
 
     # Validate and normalize the response
@@ -74,25 +74,25 @@ def post_assessment_logs(patient_id):
     )
 
     return {
-        "assessmentlog": document_response,
+        "scheduledactivity": document_response,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlog/<string:assessmentlog_id>",
+@scheduled_activities_blueprint.route(
+    "/<string:patient_id>/scheduledactivity/<string:scheduleactivity_id>",
     methods=["GET"],
 )
 @flask_json.as_json
-def get_assessment_log(patient_id, assessmentlog_id):
+def get_scheduled_activity(patient_id, scheduleactivity_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
-    document = scope.database.patient.assessment_logs.get_assessment_log(
+    document = scope.database.patient.scheduled_activities.get_scheduled_activity(
         collection=patient_collection,
-        set_id=assessmentlog_id,
+        set_id=scheduleactivity_id,
     )
 
     # Validate and normalize the response
@@ -101,46 +101,48 @@ def get_assessment_log(patient_id, assessmentlog_id):
     )
 
     return {
-        "assessmentlog": document,
+        "scheduledactivity": document,
     }
 
 
-@assessment_logs_blueprint.route(
-    "/<string:patient_id>/assessmentlog/<string:assessmentlog_id>",
+@scheduled_activities_blueprint.route(
+    "/<string:patient_id>/scheduledactivity/<string:scheduleactivity_id>",
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
-    key="assessmentlog",
+    schema=scheduled_activity_schema,
+    key="scheduledactivity",
 )
 @flask_json.as_json
-def put_assessment_log(patient_id, assessmentlog_id):
+def put_scheduled_activity(patient_id, scheduleactivity_id):
     # TODO: Require authentication
 
     context = request_context()
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
-    document = flask.request.json["assessmentlog"]
+    document = flask.request.json["scheduledactivity"]
 
     # Validate and normalize the request
     document = request_utils.set_element_put_request_validate(
-        semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
+        semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
         document=document,
-        set_id=assessmentlog_id,
+        set_id=scheduleactivity_id,
     )
 
     # Store the document
     try:
-        result = scope.database.patient.assessment_logs.put_assessment_log(
+        result = scope.database.patient.scheduled_activities.put_scheduled_activity(
             collection=patient_collection,
-            assessment_log=document,
-            set_id=assessmentlog_id,
+            scheduled_activity=document,
+            set_id=scheduleactivity_id,
         )
     except pymongo.errors.DuplicateKeyError:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.assessment_logs.get_assessment_log(
-            collection=patient_collection, set_id=assessmentlog_id
+        document_conflict = (
+            scope.database.patient.scheduled_activities.get_scheduled_activity(
+                collection=patient_collection, set_id=scheduleactivity_id
+            )
         )
         # Validate and normalize the response
         document_conflict = request_utils.singleton_put_response_validate(
@@ -149,7 +151,7 @@ def put_assessment_log(patient_id, assessmentlog_id):
 
         request_utils.abort_revision_conflict(
             document={
-                "assessmentlog": document_conflict,
+                "scheduledactivity": document_conflict,
             }
         )
     else:
@@ -159,5 +161,5 @@ def put_assessment_log(patient_id, assessmentlog_id):
         )
 
         return {
-            "assessmentlog": document_response,
+            "scheduledactivity": document_response,
         }

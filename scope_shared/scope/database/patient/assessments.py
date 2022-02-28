@@ -3,16 +3,16 @@ from typing import List, Optional
 import pymongo.collection
 import scope.database.collection_utils
 
-DOCUMENT_TYPE = "assessmentLog"
-SEMANTIC_SET_ID = "assessmentLogId"
+DOCUMENT_TYPE = "assessment"
+SEMANTIC_SET_ID = "assessmentId"
 
 
-def get_assessment_logs(
+def get_assessments(
     *,
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "assessmentLog" documents.
+    Get list of "assessment" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -21,13 +21,13 @@ def get_assessment_logs(
     )
 
 
-def get_assessment_log(
+def get_assessment(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
 ) -> Optional[dict]:
     """
-    Get "assessmentLog" document.
+    Get "assessment" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -37,31 +37,14 @@ def get_assessment_log(
     )
 
 
-def post_assessment_log(
+def put_assessment(
     *,
     collection: pymongo.collection.Collection,
-    assessment_log: dict,
-) -> scope.database.collection_utils.SetPostResult:
-    """
-    Post "assessmentLog" document.
-    """
-
-    return scope.database.collection_utils.post_set_element(
-        collection=collection,
-        document_type=DOCUMENT_TYPE,
-        semantic_set_id=SEMANTIC_SET_ID,
-        document=assessment_log,
-    )
-
-
-def put_assessment_log(
-    *,
-    collection: pymongo.collection.Collection,
-    assessment_log: dict,
+    assessment: dict,
     set_id: str,
 ) -> scope.database.collection_utils.SetPutResult:
     """
-    Put "assessmentLog" document.
+    Put "assessment" document.
     """
 
     return scope.database.collection_utils.put_set_element(
@@ -69,5 +52,5 @@ def put_assessment_log(
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
-        document=assessment_log,
+        document=assessment,
     )

@@ -9,10 +9,12 @@ def assert_schema(
     schema: jschon.JSONSchema,
     expected_valid: bool,
 ):
-    schema_result = schema.evaluate(jschon.JSON(data)).output("detailed")
-    if schema_result["valid"] != expected_valid:
+    schema_result = schema.evaluate(jschon.JSON(data))
+    if schema_result.valid != expected_valid:
+        schema_output = schema_result.output("detailed")
+
         pprint.pprint(data)
         print()
-        pprint.pprint(schema_result)
+        pprint.pprint(schema_output)
 
-    assert schema_result["valid"] == expected_valid
+    assert schema_result.valid == expected_valid

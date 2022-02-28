@@ -236,7 +236,7 @@
 		"providerRole": {
 			"type": "string",
 			"description": "ProviderRole Type",
-			"enum": ["socialWorker", "psychiatrist", "oncologist", "studyStaff"]
+			"enum": ["psychiatrist", "socialWorker", "studyStaff"]
 		},
 		"race": {
 			"type": "object",

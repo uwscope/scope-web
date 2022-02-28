@@ -3,23 +3,32 @@ import faker
 import pymongo.database
 
 import scope.database.patient.activities
+import scope.database.patient.activity_logs
+import scope.database.patient.assessments
+import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.sessions
+import scope.database.patient.scheduled_activities
+import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
 import scope.database.patients
 import scope.database.providers
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fixtures_fake_activity
+import scope.testing.fake_data.fixtures_fake_activity_logs
+import scope.testing.fake_data.fixtures_fake_assessments
+import scope.testing.fake_data.fixtures_fake_assessment_contents
+import scope.testing.fake_data.fixtures_fake_assessment_logs
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_case_review
 import scope.testing.fake_data.fixtures_fake_case_reviews
 import scope.testing.fake_data.fixtures_fake_clinical_history
 import scope.testing.fake_data.fixtures_fake_contact
-import scope.testing.fake_data.fixtures_fake_life_areas
+import scope.testing.fake_data.fixtures_fake_life_area_contents
 import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
@@ -28,6 +37,8 @@ import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
 import scope.testing.fake_data.fixtures_fake_sessions
+import scope.testing.fake_data.fixtures_fake_scheduled_activities
+import scope.testing.fake_data.fixtures_fake_scheduled_assessments
 import scope.testing.fake_data.fixtures_fake_values_inventory
 
 
@@ -128,20 +139,11 @@ def populate_database(
     #
     # Provider identity factory
     #
-
     fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
         faker_factory=faker_factory,
     )
 
     generate_roles = [
-        {
-            "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
-            "number_to_generate": 5,
-        },
-        {
-            "role_value": scope.testing.fake_data.enums.ProviderRole.Oncologist.value,
-            "number_to_generate": 8,
-        },
         {
             "role_value": scope.testing.fake_data.enums.ProviderRole.Psychiatrist.value,
             "number_to_generate": 2,
@@ -149,6 +151,10 @@ def populate_database(
         {
             "role_value": scope.testing.fake_data.enums.ProviderRole.SocialWorker.value,
             "number_to_generate": 8,
+        },
+        {
+            "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
+            "number_to_generate": 5,
         },
     ]
     for generate_current in generate_roles:
@@ -194,6 +200,7 @@ def _populate_patient(
     ################################################################################
     # These documents are simple and do not have any cross dependencies.
     ################################################################################
+
     def _case_reviews():
         fake_case_reviews_factory = scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
             fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
@@ -280,22 +287,52 @@ def _populate_patient(
     _sessions()
 
     ################################################################################
-    # Life areas is required to create a values inventory.
+    # Assessments required to create scheduled assessments.
+    ################################################################################
+    # def _assessments_and_scheduled_assessments():
+    #     fake_assessments_factory = scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+    #         faker_factory=faker_factory,
+    #     )
+    #     assessments = fake_assessments_factory()
+    #
+    #     for assessment_current in assessments:
+    #         scope.database.patient.assessments.put_assessment(
+    #             collection=patient_collection,
+    #             assessment=assessment_current,
+    #             set_id=assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
+    #         )
+    #
+    #     fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+    #         faker_factory=faker_factory,
+    #         fake_assessments=assessments,
+    #     )
+    #     scheduled_assessments = fake_scheduled_assessments_factory()
+    #
+    #     for scheduled_assessment_current in scheduled_assessments:
+    #         scope.database.patient.scheduled_assessments.post_scheduled_assessment(
+    #             collection=patient_collection,
+    #             scheduled_assessment=scheduled_assessment_current,
+    #         )
+    #
+    # _assessments_and_scheduled_assessments()
+
+    ################################################################################
+    # Life area contents is required to create a values inventory.
     # Values inventory is required to create activities.
     # - If a value inventory does not include include at least one value,
     #   then we cannot generate any associated activities.
     ################################################################################
     def _values_inventory_and_activities():
         # Create life areas
-        fake_life_areas_factory = (
-            scope.testing.fake_data.fixtures_fake_life_areas.fake_life_areas_factory()
+        fake_life_area_contents_factory = (
+            scope.testing.fake_data.fixtures_fake_life_area_contents.fake_life_area_contents_factory()
         )
-        life_areas = fake_life_areas_factory()
+        life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
-            life_areas=life_areas,
+            life_areas=life_area_contents,
         )
         values_inventory = fake_values_inventory_factory()
         scope.database.patient.values_inventory.put_values_inventory(
@@ -319,3 +356,152 @@ def _populate_patient(
                 )
 
     _values_inventory_and_activities()
+
+
+
+# =======
+#     fake_assessment_contents_factory = (
+#         scope.testing.fake_data.fixtures_fake_assessment_contents.fake_assessment_contents_factory()
+#     )
+#
+#     # Obtain fixed documents
+#     fake_life_areas = fake_life_areas_factory()
+#     fake_assessment_contents = fake_assessment_contents_factory()
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     fake_assessments_factory = (
+#         scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+#             faker_factory=faker_factory,
+#             fake_assessment_contents=fake_assessment_contents,
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+#         faker_factory=faker_factory,
+#         fake_assessments=fake_assessments,
+#     )
+#     fake_scheduled_assessments = fake_scheduled_assessments_factory()
+#
+#     fake_assessment_logs_factory = scope.testing.fake_data.fixtures_fake_assessment_logs.fake_assessment_logs_factory(
+#         faker_factory=faker_factory,
+#         fake_scheduled_assessments=fake_scheduled_assessments,
+#         fake_assessment_contents=fake_assessment_contents,
+#     )
+#     fake_assessment_logs = fake_assessment_logs_factory()
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+#
+#
+# =======
+#     for scheduled_assessment in fake_scheduled_assessments:
+#         scope.database.patient.scheduled_assessments.put_scheduled_assessment(
+#             collection=patient_collection,
+#             scheduled_assessment=scheduled_assessment,
+#             set_id=scheduled_assessment[
+#                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+#             ],
+#         )
+#
+#     for assessment_log in fake_assessment_logs:
+#         scope.database.patient.assessment_logs.post_assessment_log(
+#             collection=patient_collection,
+#             assessment_log=assessment_log,
+# >>>>>>> 51479a0 (Added scheduled assessment and assessment log API)
+
+
+# =======
+#
+#
+#     # activities, scheduledActivities
+#     fake_activities_factory = scope.testing.fake_data.fixtures_fake_activities.fake_activities_factory(
+#         fake_activity_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
+# >>>>>>> fe17f3e (Updated all activity/assessment APIs)
+#
+#
+#
+#
+# =======
+#     )
+#     fake_activities = fake_activities_factory()
+#
+#     fake_scheduled_activities_factory = scope.testing.fake_data.fixtures_fake_scheduled_activities.fake_scheduled_activities_factory(
+#         faker_factory=faker_factory,
+#         fake_activities=fake_activities,
+#     )
+#     fake_scheduled_activities = fake_scheduled_activities_factory()
+#
+#     fake_activity_logs_factory = (
+#         scope.testing.fake_data.fixtures_fake_activity_logs.fake_activity_logs_factory(
+#             faker_factory=faker_factory,
+#             fake_scheduled_activities=fake_scheduled_activities,
+#         )
+#     )
+#     fake_activity_logs = fake_activity_logs_factory()
+#
+#     if fake_values_inventory.get("values") not in [[], None]:
+#         for activity in fake_activities:
+#             # TODO: use `put` because semantic set id is present in the document
+#             scope.database.patient.activities.put_activity(
+#                 collection=patient_collection,
+#                 activity=activity,
+#                 set_id=activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+#             )
+#         for scheduled_activity in fake_scheduled_activities:
+#             # TODO: use `put` because semantic set id is present in the document
+#             scope.database.patient.scheduled_activities.put_scheduled_activity(
+#                 collection=patient_collection,
+#                 scheduled_activity=scheduled_activity,
+#                 set_id=scheduled_activity[
+#                     scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+#                 ],
+#             )
+#         for activity_log in fake_activity_logs:
+#             scope.database.patient.activity_logs.post_activity_log(
+#                 collection=patient_collection,
+#                 activity_log=activity_log,
+#             )
+#
+#     # assessments, scheduledAssessment, and assessmentLogs
+#     fake_assessments_factory = (
+#         scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+#             faker_factory=faker_factory,
+#             fake_assessment_contents=fake_assessment_contents,
+# >>>>>>> fe17f3e (Updated all activity/assessment APIs)
+#
+#
+#
+# =======
+#     fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+#         faker_factory=faker_factory,
+#         fake_assessments=fake_assessments,
+#     )
+#     # Obtain fake scheduled assessments to pass it in fake_assessment_logs_factory
+#     fake_scheduled_assessments = fake_scheduled_assessments_factory()
+# >>>>>>> fe17f3e (Updated all activity/assessment APIs)
+#
+#
+# =======
+#     # assessments
+#     for assessment in fake_assessments:
+#         # TODO: use `put` because semantic set id is present in the document
+#         scope.database.patient.assessments.put_assessment(
+#             collection=patient_collection,
+#             assessment=assessment,
+#             set_id=assessment[scope.database.patient.assessments.SEMANTIC_SET_ID],
+#         )
+#     # scheduledAssessments
+#     for scheduled_assessment in fake_scheduled_assessments:
+#         # TODO: use `put` because semantic set id is present in the document
+#         scope.database.patient.scheduled_assessments.put_scheduled_assessment(
+#             collection=patient_collection,
+#             scheduled_assessment=scheduled_assessment,
+#             set_id=scheduled_assessment[
+#                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+#             ],
+#         )
+#     # assessmentLogs
+#     for assessment_log in fake_assessment_logs:
+#         scope.database.patient.assessment_logs.post_assessment_log(
+# >>>>>>> fe17f3e (Updated all activity/assessment APIs)

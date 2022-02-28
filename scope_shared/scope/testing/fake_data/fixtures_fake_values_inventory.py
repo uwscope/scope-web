@@ -109,23 +109,23 @@ def fake_values_inventory_factory(
 def fixture_data_fake_values_inventory_factory(
     *,
     faker: faker.Faker,
-    data_fake_life_areas_factory: Callable[[], List[dict]],
+    data_fake_life_area_contents_factory: Callable[[], List[dict]],
 ) -> Callable[[], dict]:
     """
     Fixture for data_fake_values_inventory_factory.
     """
 
-    life_areas = data_fake_life_areas_factory()
+    life_area_contents = data_fake_life_area_contents_factory()
 
     unvalidated_factory = fake_values_inventory_factory(
         faker_factory=faker,
-        life_areas=life_areas,
+        life_areas=life_area_contents,
     )
 
     def factory() -> dict:
         fake_values_inventory = unvalidated_factory()
 
-        scope.testing.fake_data.fake_utils.xfail_for_invalid(
+        fake_utils.xfail_for_invalid(
             schema=scope.schema.values_inventory_schema,
             document=fake_values_inventory,
         )

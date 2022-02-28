@@ -4,8 +4,11 @@ import pytest
 import random
 from typing import Callable, List
 
+import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.format_utils as format_utils
+import scope.database.patient.activities
+
 import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
@@ -47,7 +50,7 @@ def fake_activity_factory(
             activity_name = faker_factory.text()
 
         fake_activity = {
-            "_type": "activity",
+            "_type": scope.database.patient.activities.DOCUMENT_TYPE,
             "name": activity_name,
             "value": activity_value["name"],
             "lifeareaId": activity_value["lifeareaId"],
@@ -82,19 +85,19 @@ def fixture_data_fake_activity_factory(
     Fixture for data_fake_activity_factory.
     """
 
-    # A values inventory may randomly not include any values.
-    # Activites are not defined in such a scenario.
-    # Generate a new values inventory that includes at least one value.
-    values_inventory = data_fake_values_inventory_factory()
-    while not len(values_inventory.get("values", [])) > 0:
-        values_inventory = data_fake_values_inventory_factory()
-
-    unvalidated_factory = fake_activity_factory(
-        faker_factory=faker,
-        values_inventory=values_inventory,
-    )
-
     def factory() -> dict:
+        # A values inventory may randomly not include any values.
+        # Activities are not defined in such a scenario.
+        # Generate a new values inventory that includes at least one value.
+        values_inventory = data_fake_values_inventory_factory()
+        while not len(values_inventory.get("values", [])) > 0:
+            values_inventory = data_fake_values_inventory_factory()
+
+        unvalidated_factory = fake_activity_factory(
+            faker_factory=faker,
+            values_inventory=values_inventory,
+        )
+
         fake_activity = unvalidated_factory()
 
         scope.testing.schema.assert_schema(

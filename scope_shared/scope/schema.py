@@ -10,6 +10,8 @@ activity_log_schema: Optional[jschon.JSONSchema] = None
 activity_logs_schema: Optional[jschon.JSONSchema] = None
 assessment_schema: Optional[jschon.JSONSchema] = None
 assessments_schema: Optional[jschon.JSONSchema] = None
+assessment_content_schema: Optional[jschon.JSONSchema] = None
+assessment_contents_schema: Optional[jschon.JSONSchema] = None
 assessment_log_schema: Optional[jschon.JSONSchema] = None
 assessment_logs_schema: Optional[jschon.JSONSchema] = None
 case_review_schema: Optional[jschon.JSONSchema] = None
@@ -17,8 +19,8 @@ case_reviews_schema: Optional[jschon.JSONSchema] = None
 clinical_history_schema: Optional[jschon.JSONSchema] = None
 contact_schema: Optional[jschon.JSONSchema] = None
 enums_schema: Optional[jschon.JSONSchema] = None
-life_area_schema: Optional[jschon.JSONSchema] = None
-life_areas_schema: Optional[jschon.JSONSchema] = None
+life_area_content_schema: Optional[jschon.JSONSchema] = None
+life_area_contents_schema: Optional[jschon.JSONSchema] = None
 life_area_value_schema: Optional[jschon.JSONSchema] = None
 life_area_value_activity_schema: Optional[jschon.JSONSchema] = None
 log_schema: Optional[jschon.JSONSchema] = None
@@ -63,6 +65,8 @@ SCHEMAS = {
     "activity_logs_schema": "activity-logs.json",
     "assessment_schema": "assessment.json",
     "assessments_schema": "assessments.json",
+    "assessment_content_schema": "assessment-content.json",
+    "assessment_contents_schema": "assessment-contents.json",
     "assessment_log_schema": "assessment-log.json",
     "assessment_logs_schema": "assessment-logs.json",
     "case_review_schema": "case-review.json",
@@ -70,8 +74,8 @@ SCHEMAS = {
     "clinical_history_schema": "clinical-history.json",
     "contact_schema": "contact.json",
     "enums_schema": "enums.json",
-    "life_area_schema": "life-area.json",
-    "life_areas_schema": "life-areas.json",
+    "life_area_content_schema": "life-area-content.json",
+    "life_area_contents_schema": "life-area-contents.json",
     "life_area_value_schema": "life-area-value.json",
     "life_area_value_activity_schema": "life-area-value-activity.json",
     "log_schema": "log.json",
