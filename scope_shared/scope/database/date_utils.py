@@ -2,6 +2,16 @@ import datetime
 from typing import Union
 
 
+DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+def format_string(date: str) -> Union[datetime.date, datetime.datetime]:
+    """
+    Format date string into our datetime format.
+    """
+    return datetime.datetime.strptime(date, DATE_TIME_FORMAT)
+
+
 def format_date(date: Union[datetime.date, datetime.datetime]) -> str:
     """
     Format the date portion of a datetime into our standard format.
