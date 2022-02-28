@@ -19,7 +19,7 @@ export const toLocalDateOnly = (date: Date) => {
 // Takes the local date only object and converts to service's "date" type
 export const toUTCDateOnly = (date: Date) => {
     // TODO: Investigate new Intl APIs for extracting current timezones
-    return new Date(`${format(date, 'yyyy-MM-dd')} UTC`);
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
 };
 
 // TODO: Remove after migration is complete
