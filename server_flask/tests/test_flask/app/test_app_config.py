@@ -1,8 +1,10 @@
+import jschon
 import requests
 from typing import Callable
 from urllib.parse import urljoin
 
 import scope.config
+from scope.schema import app_config_schema
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -26,13 +28,13 @@ def test_app_config(
 
     config = response.json()
 
-    # TODO: Anant: Define and check a schema
+    # Remove "status" for schema validation
+    assert "status" in config
+    del config["status"]
 
-    assert "auth" in config
-    assert "content" in config
-    assert "assessments" in config["content"]
-    assert "lifeAreas" in config["content"]
-    assert "resources" in config["content"]
+    # TODO: Anant: Define and check a schema
+    schema_result = app_config_schema.evaluate(jschon.JSON(config))
+    assert schema_result.valid
 
 
 def test_app_quote(
