@@ -59,7 +59,7 @@ def test_parse_datetime_failure(test_input, expected):
         (datetime.datetime(2019, 11, 1, 12, 59, 0), "2019-11-01T00:00:00Z"),
         (datetime.datetime(2019, 11, 1, 12, 59, 58), "2019-11-01T00:00:00Z"),
         (datetime.datetime(2019, 11, 1, 0, 0, 0), "2019-11-01T00:00:00Z"),
-        (datetime.datetime(2019, 11, 1, 12, 0), "2019-11-1T00:00:00Z"),
+        (datetime.datetime(2019, 11, 1, 12, 0), "2019-11-01T00:00:00Z"),
     ],
 )
 def test_format_date(test_input, expected):
