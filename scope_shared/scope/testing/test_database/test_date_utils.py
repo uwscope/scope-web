@@ -26,6 +26,12 @@ def test_format_datetime(test_input, expected):
         ("2019-11-01T12:59:58Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
         ("2019-11-01T00:00:00Z", datetime.datetime(2019, 11, 1, 0, 0, 0)),
         ("2019-11-1T12:00:00Z", datetime.datetime(2019, 11, 1, 12, 0)),
+        ("2019-11-01T12:59:58.0Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
+        ("2019-11-01T12:59:58.00Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
+        ("2019-11-01T12:59:58.000Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
+        ("2019-11-01T12:59:58.0000Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
+        ("2019-11-01T12:59:58.00000Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
+        ("2019-11-01T12:59:58.000000Z", datetime.datetime(2019, 11, 1, 12, 59, 58)),
     ],
 )
 def test_parse_datetime(test_input, expected):
