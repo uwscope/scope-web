@@ -1,4 +1,4 @@
-import { Avatar, Button, Checkbox, FormControlLabel, TextField } from '@mui/material';
+import { Avatar, Button, TextField } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import Logo from 'src/assets/scope-logo.png';
