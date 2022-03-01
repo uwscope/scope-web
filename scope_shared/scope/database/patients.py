@@ -1,8 +1,15 @@
+import datetime
+
 import pymongo.database
 from typing import List, Optional
 
+import scope.database.date_utils
 import scope.database.collection_utils
+import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
+import scope.database.patient.safety_plan
+import scope.database.patient.values_inventory
+import scope.schema
 
 PATIENT_IDENTITY_COLLECTION = "patients"
 
@@ -18,14 +25,17 @@ def create_patient(
     *,
     database: pymongo.database.Database,
     patient_id: str = None,
-    name: str,
-    MRN: str,
+    patient_name: str,
+    patient_mrn: str,
 ) -> dict:
     """
     Create a patient. This includes:
     - Generate a patient_id, unless it was provided.
     - Create a patient collection.
     - Create a profile document containing the name and MRN.
+    - Create an initial empty clinical history.
+    - Create an initial safety plan, assigned at the current time.
+    - Create an initial values inventory, assigned at the current time.
     - Finally, create the patient identity document.
     """
 
@@ -56,25 +66,81 @@ def create_patient(
     scope.database.collection_utils.ensure_index(collection=patient_collection)
 
     # Create the initial profile document
+    patient_profile_document = {
+        "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
+        "name": patient_name,
+        "MRN": patient_mrn,
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.patient_profile_schema,
+        document=patient_profile_document,
+    )
     result = scope.database.patient.patient_profile.put_patient_profile(
         database=database,
         collection=patient_collection,
         patient_id=patient_id,
-        patient_profile={
-            "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
-            "name": name,
-            "MRN": MRN,
-        },
+        patient_profile=patient_profile_document,
+    )
+
+    # Create the initial clinical history document
+    clinical_history_document = {
+        "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.clinical_history_schema,
+        document=clinical_history_document,
+    )
+    result = scope.database.patient.clinical_history.put_clinical_history(
+        collection=patient_collection,
+        clinical_history=clinical_history_document,
+    )
+
+    # Create the initial safety plan document
+    safety_plan_document = {
+        "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
+        "assigned": True,
+        "assignedDateTime": scope.database.date_utils.format_datetime(
+            datetime.datetime.utcnow()
+        ),
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.safety_plan_schema,
+        document=safety_plan_document,
+    )
+    result = scope.database.patient.safety_plan.put_safety_plan(
+        collection=patient_collection,
+        safety_plan=safety_plan_document,
+    )
+
+    # Create the initial values inventory document
+    values_inventory_document = {
+        "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
+        "assigned": True,
+        "assignedDateTime": scope.database.date_utils.format_datetime(
+            datetime.datetime.utcnow()
+        ),
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.values_inventory_schema,
+        document=values_inventory_document,
+    )
+    result = scope.database.patient.values_inventory.put_values_inventory(
+        collection=patient_collection,
+        values_inventory=values_inventory_document,
     )
 
     # Atomically store the patient identity document.
     # Do this last, because it means all other steps have already succeeded.
     patient_identity_document = {
         "_type": PATIENT_IDENTITY_DOCUMENT_TYPE,
-        "name": name,
-        "MRN": MRN,
+        "name": patient_name,
+        "MRN": patient_mrn,
         "collection": generated_patient_collection_name,
     }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.patient_identity_schema,
+        document=patient_identity_document,
+    )
     result = scope.database.collection_utils.put_set_element(
         collection=patient_identity_collection,
         document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,

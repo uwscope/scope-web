@@ -32,9 +32,7 @@ def test_app_config(
     del config["status"]
 
     scope.testing.schema.assert_schema(
-        data=config,
-        schema=scope.schema.app_config_schema,
-        expected_valid=True
+        data=config, schema=scope.schema.app_config_schema, expected_valid=True
     )
 
 
