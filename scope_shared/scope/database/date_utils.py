@@ -5,7 +5,7 @@ from typing import Union
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def parse_date(date: str) -> Union[_datetime.date, _datetime.datetime]:
+def parse_date(date: str) -> _datetime.date:
     """
     Parse date string from our date format.
     """
@@ -19,7 +19,7 @@ def parse_date(date: str) -> Union[_datetime.date, _datetime.datetime]:
     return parsed_date
 
 
-def parse_datetime(datetime: str) -> Union[_datetime.date, _datetime.datetime]:
+def parse_datetime(datetime: str) -> _datetime.datetime:
     """
     Parse date string from our datetime format.
     """
