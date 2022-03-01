@@ -191,7 +191,7 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async updateSafetyPlan(safetyPlan: ISafetyPlan): Promise<ISafetyPlan> {
         logger.assert(
-            (safetyPlan as any)._type === 'safetyplan',
+            (safetyPlan as any)._type === 'safetyPlan',
             `invalid _type for values safety plan: ${(safetyPlan as any)._type}`,
         );
 
