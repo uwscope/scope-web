@@ -202,8 +202,10 @@ def _populate_patient(
     ################################################################################
 
     def _clinical_history():
-        existing_clinical_history = scope.database.patient.clinical_history.get_clinical_history(
-            collection=patient_collection
+        existing_clinical_history = (
+            scope.database.patient.clinical_history.get_clinical_history(
+                collection=patient_collection
+            )
         )
 
         fake_clinical_history_factory = scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
@@ -348,8 +350,10 @@ def _populate_patient(
         life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
-        existing_values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-            collection=patient_collection
+        existing_values_inventory = (
+            scope.database.patient.values_inventory.get_values_inventory(
+                collection=patient_collection
+            )
         )
 
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
@@ -382,7 +386,6 @@ def _populate_patient(
                 )
 
     _values_inventory_and_activities()
-
 
 
 # =======

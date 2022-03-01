@@ -99,7 +99,9 @@ def create_patient(
     safety_plan_document = {
         "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
         "assigned": True,
-        "assignedDateTime": scope.database.date_utils.format_datetime(datetime.datetime.utcnow())
+        "assignedDateTime": scope.database.date_utils.format_datetime(
+            datetime.datetime.utcnow()
+        ),
     }
     scope.schema.raise_for_invalid(
         schema=scope.schema.safety_plan_schema,
@@ -114,7 +116,9 @@ def create_patient(
     values_inventory_document = {
         "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
         "assigned": True,
-        "assignedDateTime": scope.database.date_utils.format_datetime(datetime.datetime.utcnow())
+        "assignedDateTime": scope.database.date_utils.format_datetime(
+            datetime.datetime.utcnow()
+        ),
     }
     scope.schema.raise_for_invalid(
         schema=scope.schema.values_inventory_schema,

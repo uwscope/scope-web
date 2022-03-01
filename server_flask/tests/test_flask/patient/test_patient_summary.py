@@ -28,9 +28,7 @@ def _patient_summary_assertions(summary: dict) -> None:
         del summary["status"]
 
     scope.testing.schema.assert_schema(
-        data=summary,
-        schema=patient_summary_schema,
-        expected_valid=True
+        data=summary, schema=patient_summary_schema, expected_valid=True
     )
 
     assigned_scheduled_assessments = summary["assignedScheduledAssessments"]
@@ -57,8 +55,10 @@ def test_patient_summary_get(
     temp_patient = database_temp_patient_factory()
 
     # Insert values inventory, safety plan, and scheduled assessments
-    existing_values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-        collection=temp_patient.collection
+    existing_values_inventory = (
+        scope.database.patient.values_inventory.get_values_inventory(
+            collection=temp_patient.collection
+        )
     )
 
     fake_values_inventory = data_fake_values_inventory_factory()
@@ -123,7 +123,7 @@ def test_compute_patient_summary_values_inventory(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -136,7 +136,7 @@ def test_compute_patient_summary_values_inventory(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -149,7 +149,7 @@ def test_compute_patient_summary_values_inventory(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -171,7 +171,7 @@ def test_compute_patient_summary_safety_plan(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -182,31 +182,33 @@ def test_compute_patient_summary_safety_plan(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
 
     # OPTION 3 - assigned is True but lastUpdatedDate > assignedDate
     safety_plan["lastUpdatedDateTime"] = date_utils.format_datetime(
-        date_utils.parse_datetime(safety_plan["assignedDateTime"]) + datetime.timedelta(days=2)
+        date_utils.parse_datetime(safety_plan["assignedDateTime"])
+        + datetime.timedelta(days=2)
     )
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
 
     # OPTION 4 - assigned is True and lastUpdatedDate < assignedDate
     safety_plan["lastUpdatedDateTime"] = date_utils.format_datetime(
-        date_utils.parse_datetime(safety_plan["assignedDateTime"]) - datetime.timedelta(days=2)
+        date_utils.parse_datetime(safety_plan["assignedDateTime"])
+        - datetime.timedelta(days=2)
     )
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -228,7 +230,7 @@ def test_compute_patient_summary_scheduled_assessments(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -242,7 +244,7 @@ def test_compute_patient_summary_scheduled_assessments(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -256,7 +258,7 @@ def test_compute_patient_summary_scheduled_assessments(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
@@ -270,7 +272,7 @@ def test_compute_patient_summary_scheduled_assessments(
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        values_inventory_document=values_inventory
+        values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)

@@ -39,7 +39,10 @@ def compute_patient_summary(
     if assigned_values_inventory:
         for value_current in values_inventory_document.get("values", []):
             # If any activity is defined, then assignedValuesInventory becomes False
-            assigned_values_inventory = assigned_values_inventory and len(value_current.get("activities", [])) == 0
+            assigned_values_inventory = (
+                assigned_values_inventory
+                and len(value_current.get("activities", [])) == 0
+            )
             if not assigned_values_inventory:
                 break
 
@@ -47,10 +50,9 @@ def compute_patient_summary(
     assigned_safety_plan: bool = safety_plan_document["assigned"]
     if assigned_safety_plan:
         if "lastUpdatedDateTime" in safety_plan_document:
-            assigned_safety_plan = (
-                date_utils.parse_datetime(safety_plan_document["lastUpdatedDateTime"]) <
-                date_utils.parse_datetime(safety_plan_document["assignedDateTime"])
-            )
+            assigned_safety_plan = date_utils.parse_datetime(
+                safety_plan_document["lastUpdatedDateTime"]
+            ) < date_utils.parse_datetime(safety_plan_document["assignedDateTime"])
 
     # assignedScheduledAssessments
     assigned_scheduled_assessments = list(
@@ -89,20 +91,30 @@ def get_patient_summary(patient_id):
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     safety_plan_document = scope.database.patient.safety_plan.get_safety_plan(
+        collection=patient_collection,
+    )
+    scheduled_assessment_documents = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
             collection=patient_collection,
+        )
     )
-    scheduled_assessment_documents = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection,
-    )
-    values_inventory_document = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection,
+    values_inventory_document = (
+        scope.database.patient.values_inventory.get_values_inventory(
+            collection=patient_collection,
+        )
     )
 
-    if not all([safety_plan_document, scheduled_assessment_documents, values_inventory_document]):
+    if not all(
+        [
+            safety_plan_document,
+            scheduled_assessment_documents,
+            values_inventory_document,
+        ]
+    ):
         request_utils.abort_document_not_found()
 
     return compute_patient_summary(
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
-        values_inventory_document=values_inventory_document
+        values_inventory_document=values_inventory_document,
     )
