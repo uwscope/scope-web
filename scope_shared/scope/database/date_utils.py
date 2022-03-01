@@ -1,22 +1,15 @@
-import datetime
+import datetime as _datetime
 from typing import Union
 
 
-DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def parse_datetime(date: str) -> Union[datetime.date, datetime.datetime]:
+def parse_date(date: str) -> Union[_datetime.date, _datetime.datetime]:
     """
-    Parse date string into our datetime format.
+    Parse date string from our date format.
     """
-    return datetime.datetime.strptime(date, DATE_TIME_FORMAT)
-
-
-def parse_date(date: str) -> Union[datetime.date, datetime.datetime]:
-    """
-    Parse date string into our date format.
-    """
-    parsed_date = datetime.datetime.strptime(date, DATE_TIME_FORMAT)
+    parsed_date = _datetime.datetime.strptime(date, DATETIME_FORMAT)
 
     if (parsed_date.hour, parsed_date.minute, parsed_date.second) != (0, 0, 0):
         raise ValueError(
@@ -26,26 +19,33 @@ def parse_date(date: str) -> Union[datetime.date, datetime.datetime]:
     return parsed_date
 
 
-def format_date(date: Union[datetime.date, datetime.datetime]) -> str:
+def parse_datetime(datetime: str) -> Union[_datetime.date, _datetime.datetime]:
     """
-    Format the date portion of a datetime into our standard format.
+    Parse date string from our datetime format.
+    """
+    return _datetime.datetime.strptime(datetime, DATETIME_FORMAT)
+
+
+def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
+    """
+    Format the date portion of a datetime into our format.
     """
 
     # Ensure a datetime.date object
-    if isinstance(date, datetime.datetime):
+    if isinstance(date, _datetime.datetime):
         date = date.date()
 
-    date = datetime.datetime.combine(
+    date = _datetime.datetime.combine(
         date,
-        datetime.datetime.min.time(),  # 00:00.00.00
+        _datetime.datetime.min.time(),  # 00:00.00.00
     )
 
     return "{}Z".format(date.isoformat())
 
 
-def format_datetime(date: datetime.datetime) -> str:
+def format_datetime(datetime: _datetime.datetime) -> str:
     """
-    Format a datetime into our standard format.
+    Format a datetime into our format.
     """
 
-    return "{}Z".format(date.isoformat())
+    return "{}Z".format(datetime.isoformat())
