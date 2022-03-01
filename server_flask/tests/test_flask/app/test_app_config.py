@@ -32,7 +32,6 @@ def test_app_config(
     assert "status" in config
     del config["status"]
 
-    # TODO: Anant: Define and check a schema
     schema_result = app_config_schema.evaluate(jschon.JSON(config))
     assert schema_result.valid
 
