@@ -19,7 +19,9 @@ def parse_date(date: str) -> Union[datetime.date, datetime.datetime]:
     parsed_date = datetime.datetime.strptime(date, DATE_TIME_FORMAT)
 
     if (parsed_date.hour, parsed_date.minute, parsed_date.second) != (0, 0, 0):
-        raise ValueError("%H:%M:%S must be 00:00:00")
+        raise ValueError(
+            "time data {} does not match format '%Y-%m-%dT%00:%00:%00Z".format(date)
+        )
 
     return parsed_date
 
