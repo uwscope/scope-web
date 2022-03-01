@@ -141,3 +141,27 @@ def get_patient(patient_id):
     return {
         "patient": patient_document,
     }
+
+
+@patients_blueprint.route(
+    "/patientidentities",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_patient_identities():
+    # TODO require authentication
+
+    context = request_context()
+    database = context.database
+
+    # List of documents from the patient identities collection
+    patient_identities = scope.database.patients.get_patient_identities(
+        database=database,
+    )
+
+    # Validate and normalize the response
+    patient_identities = request_utils.set_get_response_validate(
+       documents=patient_identities,
+    )
+
+    return {"patientidentities": patient_identities}

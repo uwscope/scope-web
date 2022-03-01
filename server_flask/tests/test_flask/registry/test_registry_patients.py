@@ -15,6 +15,7 @@ TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
 
 QUERY_PATIENTS = "patients"
 QUERY_PATIENT = "patient/{patient_id}"
+QUERY_PATIENTIDENTITIES = "patientidentities"
 
 
 def test_patients_get(
@@ -63,6 +64,48 @@ def test_patients_get(
         schema=scope.schema.patients_schema,
         expected_valid=True,
     )
+
+
+def test_patientidentities_get(
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test retrieving patient identities.
+    """
+
+    session = flask_session_unauthenticated_factory()
+
+    created_ids = [database_temp_patient_factory().patient_id for _ in range(5)]
+
+    response = session.get(
+        url=urljoin(
+            flask_client_config.baseurl,
+            QUERY_PATIENTIDENTITIES,
+        ),
+    )
+    assert response.ok
+
+    assert "patientidentities" in response.json()
+    patient_identity_documents = response.json()["patientidentities"]
+    scope.testing.schema.assert_schema(
+        data=patient_identity_documents,
+        schema=scope.schema.patient_identities_schema,
+        expected_valid=True,
+    )
+
+    retrieved_ids = [
+        patient_identity_document_current[
+            scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+        ]
+        for patient_identity_document_current in patient_identity_documents
+    ]
+    assert all(patient_id in retrieved_ids for patient_id in created_ids)
+
 
 
 def test_patient_get(
