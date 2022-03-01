@@ -2,19 +2,22 @@ import datetime as _datetime
 from typing import Union
 
 
-DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+DATETIME_FORMAT_COMPLETE = "%Y-%m-%dT%H:%M:%S.%fZ"
+DATETIME_FORMAT_NO_MICROSECONDS = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def parse_date(date: str) -> _datetime.date:
     """
     Parse date string from our date format.
     """
-    parsed_date = _datetime.datetime.strptime(date, DATETIME_FORMAT)
+    parsed_datetime = parse_datetime(date)
 
-    if (parsed_date.hour, parsed_date.minute, parsed_date.second) != (0, 0, 0):
+    if (parsed_datetime.hour, parsed_datetime.minute, parsed_datetime.second) != (0, 0, 0):
         raise ValueError(
             "time data {} does not match format '%Y-%m-%dT00:00:00Z".format(date)
         )
+
+    parsed_date = parsed_datetime
 
     return parsed_date
 
@@ -23,7 +26,13 @@ def parse_datetime(datetime: str) -> _datetime.datetime:
     """
     Parse date string from our datetime format.
     """
-    return _datetime.datetime.strptime(datetime, DATETIME_FORMAT)
+
+    try:
+        return _datetime.datetime.strptime(datetime, DATETIME_FORMAT_NO_MICROSECONDS)
+    except ValueError:
+        pass
+
+    return _datetime.datetime.strptime(datetime, DATETIME_FORMAT_COMPLETE)
 
 
 def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
