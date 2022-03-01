@@ -266,9 +266,19 @@ def _populate_patient(
                 fake_contact_factory=fake_contact_factory,
             )
         )
+
+        existing_safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+            collection=patient_collection
+        )
+
+        fake_safety_plan = fake_safety_plan_factory()
+
+        safety_plan = copy.deepcopy(existing_safety_plan)
+        del safety_plan["_id"]
+        safety_plan.update(fake_safety_plan)
         scope.database.patient.safety_plan.put_safety_plan(
             collection=patient_collection,
-            safety_plan=fake_safety_plan_factory(),
+            safety_plan=safety_plan,
         )
 
     _safety_plan()
@@ -338,11 +348,19 @@ def _populate_patient(
         life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
+        existing_values_inventory = scope.database.patient.values_inventory.get_values_inventory(
+            collection=patient_collection
+        )
+
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
             life_areas=life_area_contents,
         )
-        values_inventory = fake_values_inventory_factory()
+        fake_values_inventory = fake_values_inventory_factory()
+
+        values_inventory = copy.deepcopy(existing_values_inventory)
+        del values_inventory["_id"]
+        values_inventory.update(fake_values_inventory)
         scope.database.patient.values_inventory.put_values_inventory(
             collection=patient_collection,
             values_inventory=values_inventory,

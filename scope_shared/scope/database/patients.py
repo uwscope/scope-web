@@ -1,9 +1,14 @@
+import datetime
+
 import pymongo.database
 from typing import List, Optional
 
+import scope.database.date_utils
 import scope.database.collection_utils
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
+import scope.database.patient.safety_plan
+import scope.database.patient.values_inventory
 import scope.schema
 
 PATIENT_IDENTITY_COLLECTION = "patients"
@@ -28,6 +33,9 @@ def create_patient(
     - Generate a patient_id, unless it was provided.
     - Create a patient collection.
     - Create a profile document containing the name and MRN.
+    - Create an initial empty clinical history.
+    - Create an initial safety plan, assigned at the current time.
+    - Create an initial values inventory, assigned at the current time.
     - Finally, create the patient identity document.
     """
 
@@ -85,6 +93,36 @@ def create_patient(
     result = scope.database.patient.clinical_history.put_clinical_history(
         collection=patient_collection,
         clinical_history=clinical_history_document,
+    )
+
+    # Create the initial safety plan document
+    safety_plan_document = {
+        "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
+        "assigned": True,
+        "assignedDateTime": scope.database.date_utils.format_datetime(datetime.datetime.utcnow())
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.safety_plan_schema,
+        document=safety_plan_document,
+    )
+    result = scope.database.patient.safety_plan.put_safety_plan(
+        collection=patient_collection,
+        safety_plan=safety_plan_document,
+    )
+
+    # Create the initial values inventory document
+    values_inventory_document = {
+        "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
+        "assigned": True,
+        "assignedDateTime": scope.database.date_utils.format_datetime(datetime.datetime.utcnow())
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.values_inventory_schema,
+        document=values_inventory_document,
+    )
+    result = scope.database.patient.values_inventory.put_values_inventory(
+        collection=patient_collection,
+        values_inventory=values_inventory_document,
     )
 
     # Atomically store the patient identity document.

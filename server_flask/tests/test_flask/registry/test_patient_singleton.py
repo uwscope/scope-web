@@ -64,6 +64,9 @@ TEST_CONFIGS = [
         database_get_function=scope.database.patient.safety_plan.get_safety_plan,
         flask_query_type="safetyplan",
         flask_document_key="safetyplan",
+        options=ConfigTestPatientSingletonOptions(
+            document_will_already_exist=True,
+        ),
     ),
     ConfigTestPatientSingleton(
         name="valuesinventory",
@@ -71,6 +74,9 @@ TEST_CONFIGS = [
         database_get_function=scope.database.patient.values_inventory.get_values_inventory,
         flask_query_type="valuesinventory",
         flask_document_key="valuesinventory",
+        options=ConfigTestPatientSingletonOptions(
+            document_will_already_exist=True,
+        ),
     ),
 ]
 

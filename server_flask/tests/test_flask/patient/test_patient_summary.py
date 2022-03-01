@@ -1,3 +1,4 @@
+import copy
 import datetime
 import requests
 from typing import Callable, List
@@ -56,16 +57,34 @@ def test_patient_summary_get(
     temp_patient = database_temp_patient_factory()
 
     # Insert values inventory, safety plan, and scheduled assessments
-    values_inventory = data_fake_values_inventory_factory()
+    existing_values_inventory = scope.database.patient.values_inventory.get_values_inventory(
+        collection=temp_patient.collection
+    )
+
+    fake_values_inventory = data_fake_values_inventory_factory()
+
+    values_inventory = copy.deepcopy(existing_values_inventory)
+    del values_inventory["_id"]
+    values_inventory.update(fake_values_inventory)
     scope.database.patient.values_inventory.put_values_inventory(
         collection=temp_patient.collection,
         values_inventory=values_inventory,
     )
-    safety_plan = data_fake_safety_plan_factory()
+
+    existing_safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+        collection=temp_patient.collection
+    )
+
+    fake_safety_plan = data_fake_safety_plan_factory()
+
+    safety_plan = copy.deepcopy(existing_safety_plan)
+    del safety_plan["_id"]
+    safety_plan.update(fake_safety_plan)
     scope.database.patient.safety_plan.put_safety_plan(
         collection=temp_patient.collection,
         safety_plan=safety_plan,
     )
+
     scheduled_assessments = data_fake_scheduled_assessments_factory()
     for scheduled_assessment_current in scheduled_assessments:
         scope.database.patient.scheduled_assessments.post_scheduled_assessment(
