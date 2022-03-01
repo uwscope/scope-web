@@ -21,6 +21,7 @@ import scope.database.providers
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.schema
+import scope.schema_utils as schema_utils
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activities
 import scope.testing.fake_data.fixtures_fake_activity_logs
@@ -43,7 +44,6 @@ import scope.testing.fake_data.fixtures_fake_sessions
 import scope.testing.fake_data.fixtures_fake_scheduled_activities
 import scope.testing.fake_data.fixtures_fake_scheduled_assessments
 import scope.testing.fake_data.fixtures_fake_values_inventory
-import scope.testing.schema
 
 
 @dataclass(frozen=True)
@@ -383,10 +383,9 @@ def test_fake_data_schema(
         data = data_factory()
 
         # Test against the schema
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=data,
             schema=config.schema,
-            expected_valid=True,
         )
 
         # Fake data factories generate data with fields corresponding to
@@ -399,10 +398,9 @@ def test_fake_data_schema(
             document_normalized = document_utils.normalize_document(document=data)
 
             # Test against the schema
-            scope.testing.schema.assert_schema(
+            schema_utils.assert_schema(
                 data=document_normalized,
                 schema=config.schema,
-                expected_valid=True,
             )
 
             # A document can have schema fields added or removed.
@@ -420,11 +418,12 @@ def test_fake_data_schema(
                 document_singleton = document_utils.normalize_document(
                     document=document_singleton
                 )
-                scope.testing.schema.assert_schema(
+                schema_utils.assert_schema(
                     data=document_singleton,
                     schema=config.schema,
-                    expected_valid=config.expected_singleton
-                    or config.expected_set_element,
+                    expected_valid=(
+                        config.expected_singleton or config.expected_set_element
+                    ),
                 )
 
             if config.expected_set_element:
@@ -474,7 +473,7 @@ def test_fake_data_schema(
                 document_set_element = document_utils.normalize_document(
                     document=document_set_element
                 )
-                scope.testing.schema.assert_schema(
+                schema_utils.assert_schema(
                     data=document_set_element,
                     schema=config.schema,
                     expected_valid=config.expected_set_element,

@@ -2,17 +2,15 @@ import datetime
 import faker
 import pytest
 import random
-from typing import Callable, List
+from typing import Callable
 
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.activities
-
 import scope.schema
+import scope.schema_utils as schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
-import scope.testing.schema
 
 
 def fake_activity_factory(
@@ -98,10 +96,9 @@ def fixture_data_fake_activity_factory(
 
         fake_activity = unvalidated_factory()
 
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=fake_activity,
             schema=scope.schema.activity_schema,
-            expected_valid=True,
         )
 
         fake_utils.xfail_for_invalid(

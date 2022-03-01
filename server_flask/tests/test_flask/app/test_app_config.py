@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 import scope.config
 import scope.schema
-import scope.testing.schema
+import scope.schema_utils as schema_utils
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -31,8 +31,9 @@ def test_app_config(
     assert "status" in config
     del config["status"]
 
-    scope.testing.schema.assert_schema(
-        data=config, schema=scope.schema.app_config_schema, expected_valid=True
+    schema_utils.assert_schema(
+        data=config,
+        schema=scope.schema.app_config_schema,
     )
 
 

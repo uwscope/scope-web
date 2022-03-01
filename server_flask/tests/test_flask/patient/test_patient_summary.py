@@ -10,9 +10,9 @@ import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
-from scope.schema import patient_summary_schema
+import scope.schema
+import scope.schema_utils as schema_utils
 import scope.testing.fixtures_database_temp_patient
-import scope.testing.schema
 
 
 import tests.testing_config
@@ -27,8 +27,9 @@ def _patient_summary_assertions(summary: dict) -> None:
     if "status" in summary:
         del summary["status"]
 
-    scope.testing.schema.assert_schema(
-        data=summary, schema=patient_summary_schema, expected_valid=True
+    schema_utils.assert_schema(
+        data=summary,
+        schema=scope.schema.patient_summary_schema,
     )
 
     assigned_scheduled_assessments = summary["assignedScheduledAssessments"]

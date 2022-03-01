@@ -4,7 +4,7 @@ from typing import Callable
 import pymongo.database
 import scope.database.providers
 import scope.schema
-import scope.testing.schema
+import scope.schema_utils as schema_utils
 
 
 def test_provider_create_get_delete(
@@ -25,10 +25,9 @@ def test_provider_create_get_delete(
     )
 
     try:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=created_provider_identity,
             schema=scope.schema.provider_identity_schema,
-            expected_valid=True,
         )
 
         # Confirm get provider identity via _set_id
@@ -114,10 +113,9 @@ def test_provider_identity_update(
     ]
 
     try:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=created_provider_identity,
             schema=scope.schema.provider_identity_schema,
-            expected_valid=True,
         )
 
         # Modify the identity
