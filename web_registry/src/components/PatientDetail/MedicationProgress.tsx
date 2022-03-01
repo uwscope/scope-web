@@ -48,9 +48,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = state;
-        var newAssessment = { ...assessment } as Partial<IAssessment>;
-        newAssessment.frequency = frequency;
-        newAssessment.dayOfWeek = dayOfWeek;
+        var newAssessment = { ...assessment, frequency, dayOfWeek };
         currentPatient.updateAssessment(newAssessment);
         state.openConfigure = false;
     });
@@ -72,7 +70,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                 a.pointValues['Adherence'] == 1
                     ? getString('patient_progress_medication_adherence_yes')
                     : getString('patient_progress_medication_adherence_no'),
-            id: a.logId,
+            id: a.assessmentLogId,
             comment: a.comment,
         };
     });
@@ -104,19 +102,21 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         },
     ];
 
-    const recurrence = assessment.assigned
-        ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-              assessment.assignedDate,
-              'MM/dd/yyyy'
-          )}`
-        : 'Not assigned';
+    const recurrence =
+        assessment.assigned && assessment.assignedDate
+            ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
+                  assessment.assignedDate,
+                  'MM/dd/yyyy',
+              )}`
+            : 'Not assigned';
 
     return (
         <ActionPanel
             id={assessment.assessmentId}
             title={assessment.assessmentName}
             inlineTitle={recurrence}
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient?.loadAssessmentLogsState.pending}
+            error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {
                     icon: assessment.assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
@@ -136,7 +136,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                               onClick: handleConfigure,
                           } as IActionButton,
                       ]
-                    : []
+                    : [],
             )}>
             <Grid container alignItems="stretch">
                 {!!sortedLogs && sortedLogs.length > 0 && (

@@ -1,12 +1,5 @@
 import { compareAsc } from 'date-fns';
-import _, { random } from 'lodash';
-import {
-    getFakeAssessmentLog,
-    getFakePatientConfig,
-    getFakeSafetyPlan,
-    getFakeScheduledActivities,
-    getFakeScheduledAssessments,
-} from 'shared/fake';
+import _ from 'lodash';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
 import {
@@ -23,10 +16,24 @@ import {
     ISessionRequest,
     ICaseReviewResponse,
     ICaseReviewRequest,
+    IAssessmentLogListResponse,
+    IAssessmentListResponse,
+    IAssessmentLogRequest,
+    IAssessmentLogResponse,
+    IAssessmentResponse,
+    IAssessmentRequest,
+    ISafetyPlanResponse,
+    ISafetyPlanRequest,
+    IScheduledActivityListResponse,
+    IActivityLogListResponse,
+    IActivityLogResponse,
+    IActivityLogRequest,
+    IScheduledAssessmentListResponse,
 } from 'shared/serviceTypes';
 import {
     IActivity,
     IActivityLog,
+    IAssessment,
     IAssessmentLog,
     ICaseReview,
     IClinicalHistory,
@@ -52,6 +59,9 @@ import {
 export interface IPatientService extends IServiceBase {
     applyAuth(authToken: string): void;
 
+    // Dynamic
+    getPatientConfig(): Promise<IPatientConfig>;
+
     // Singletons
     getPatient(): Promise<IPatient>;
 
@@ -66,8 +76,6 @@ export interface IPatientService extends IServiceBase {
 
     getClinicalHistory(): Promise<IClinicalHistory>;
     updateClinicalHistory(history: IClinicalHistory): Promise<IClinicalHistory>;
-
-    // TODO: Move get/update safety plan from registryService
 
     // Arrays/sets
     getSessions(): Promise<ISession[]>;
@@ -84,14 +92,17 @@ export interface IPatientService extends IServiceBase {
     addActivity(activity: IActivity): Promise<IActivity>;
     updateActivity(activity: IActivity): Promise<IActivity>;
 
-    getPatientConfig(): Promise<IPatientConfig>;
-
     getActivityLogs(): Promise<IActivityLog[]>;
     addActivityLog(activityLog: IActivityLog): Promise<IActivityLog>;
 
     getScheduledAssessments(): Promise<IScheduledAssessment[]>;
+
+    getAssessments(): Promise<IAssessment[]>;
+    updateAssessment(assessment: IAssessment): Promise<IAssessment>;
+
     getAssessmentLogs(): Promise<IAssessmentLog[]>;
     addAssessmentLog(assessmentLog: IAssessmentLog): Promise<IAssessmentLog>;
+    updateAssessmentLog(assessmentLog: IAssessmentLog): Promise<IAssessmentLog>;
 
     getMoodLogs(): Promise<IMoodLog[]>;
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
@@ -120,6 +131,7 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for patient profile: ${(profile as any)._type}`,
         );
 
+        (profile as any)._type = 'profile';
         if (!!profile.primaryCareManager) {
             (profile.primaryCareManager as any)._type = 'providerIdentity';
         }
@@ -142,6 +154,7 @@ class PatientService extends ServiceBase implements IPatientService {
             `invalid _type for patient clinical history: ${(history as any)._type}`,
         );
 
+        (history as any)._type = 'clinicalHistory';
         const response = await this.axiosInstance.put<IClinicalHistoryResponse>(`/clinicalhistory`, {
             clinicalhistory: history,
         } as IClinicalHistoryRequest);
@@ -161,6 +174,8 @@ class PatientService extends ServiceBase implements IPatientService {
             (inventory as any)._type === 'valuesInventory',
             `invalid _type for values inventory: ${(inventory as any)._type}`,
         );
+
+        (inventory as any)._type = 'valuesInventory';
         const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, {
             valuesinventory: inventory,
         } as IValuesInventoryRequest);
@@ -170,23 +185,21 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<ISafetyPlan>(`/safety`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(getFakeSafetyPlan()), 500));
-        }
+        const response = await this.axiosInstance.get<ISafetyPlanResponse>(`/safetyplan`);
+        return response.data?.safetyplan;
     }
 
     public async updateSafetyPlan(safetyPlan: ISafetyPlan): Promise<ISafetyPlan> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.put<ISafetyPlan>(`/safety`, safetyPlan);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve(safetyPlan), 500));
-        }
+        logger.assert(
+            (safetyPlan as any)._type === 'safetyPlan',
+            `invalid _type for values safety plan: ${(safetyPlan as any)._type}`,
+        );
+
+        (safetyPlan as any)._type = 'safetyPlan';
+        const response = await this.axiosInstance.put<ISafetyPlanResponse>(`/safetyplan`, {
+            safetyplan: safetyPlan,
+        } as ISafetyPlanRequest);
+        return response.data?.safetyplan;
     }
 
     public async getSessions(): Promise<ISession[]> {
@@ -209,6 +222,7 @@ class PatientService extends ServiceBase implements IPatientService {
         logger.assert((session as any)._rev != undefined, '_rev should be in the request data');
         logger.assert((session as any)._set_id != undefined, '_set_id should be in the request data');
 
+        (session as any)._type = 'session';
         const response = await this.axiosInstance.put<ISessionResponse>(`/session/${session.sessionId}`, {
             session,
         } as ISessionRequest);
@@ -243,6 +257,7 @@ class PatientService extends ServiceBase implements IPatientService {
         logger.assert((review as any)._rev != undefined, '_rev should be in the request data');
         logger.assert((review as any)._set_id != undefined, '_set_id should be in the request data');
 
+        (review as any)._type = 'caseReview';
         const response = await this.axiosInstance.put<ICaseReviewResponse>(`/casereview/${review.caseReviewId}`, {
             casereview: review,
         } as ICaseReviewRequest);
@@ -250,14 +265,8 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getScheduledActivities(): Promise<IScheduledActivity[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IScheduledActivity[]>(`/activities/schedule`);
-            return response.data;
-        } catch (error) {
-            const taskItems = getFakeScheduledActivities(5, 7);
-            return await new Promise((resolve) => setTimeout(() => resolve(taskItems), 500));
-        }
+        const response = await this.axiosInstance.get<IScheduledActivityListResponse>(`/scheduledactivities`);
+        return response.data?.scheduledactivities;
     }
 
     public async getActivities(): Promise<IActivity[]> {
@@ -277,6 +286,7 @@ class PatientService extends ServiceBase implements IPatientService {
     public async updateActivity(activity: IActivity): Promise<IActivity> {
         logger.assert((activity as any)._type === 'activity', `invalid _type for activity: ${(activity as any)._type}`);
 
+        (activity as any)._type = 'activity';
         const response = await this.axiosInstance.put<IActivityResponse>(`/activity/${activity.activityId}`, {
             activity,
         } as IActivityRequest);
@@ -289,64 +299,79 @@ class PatientService extends ServiceBase implements IPatientService {
             const response = await this.axiosInstance.get<IPatientConfig>(`/config`);
             return response.data;
         } catch (error) {
-            const config = getFakePatientConfig();
+            const config = {
+                assignedValuesInventory: true,
+                assignedSafetyPlan: true,
+                assignedAssessmentIds: ['phq-9', 'gad-7', 'medication'],
+            } as IPatientConfig;
             return await new Promise((resolve) => setTimeout(() => resolve(config), 500));
         }
     }
 
     public async getActivityLogs(): Promise<IActivityLog[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IActivityLog[]>(`/activitylogs`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve([]), 500));
-        }
+        const response = await this.axiosInstance.get<IActivityLogListResponse>(`/activitylogs`);
+        return response.data?.activitylogs;
     }
 
     public async addActivityLog(activityLog: IActivityLog): Promise<IActivityLog> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<IActivityLog>(`/activitylogs`, activityLog);
-            return response.data;
-        } catch (error) {
-            activityLog.logId = random(100000).toString();
-            activityLog.recordedDate = new Date();
-            return await new Promise((resolve) => setTimeout(() => resolve(activityLog), 500));
-        }
+        (activityLog as any)._type = 'activityLog';
+
+        const response = await this.axiosInstance.post<IActivityLogResponse>(`/activitylogs`, {
+            activitylog: activityLog,
+        } as IActivityLogRequest);
+        return response.data?.activitylog;
     }
 
     public async getScheduledAssessments(): Promise<IScheduledAssessment[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IScheduledAssessment[]>(`/assessments/schedule`);
-            return response.data;
-        } catch (error) {
-            const taskItems = getFakeScheduledAssessments();
-            return await new Promise((resolve) => setTimeout(() => resolve(taskItems), 500));
-        }
+        const response = await this.axiosInstance.get<IScheduledAssessmentListResponse>(`/scheduledassessments`);
+        return response.data?.scheduledassessments;
+    }
+
+    public async getAssessments(): Promise<IAssessment[]> {
+        const response = await this.axiosInstance.get<IAssessmentListResponse>(`/assessments`);
+        return response.data?.assessments;
+    }
+
+    public async updateAssessment(assessment: IAssessment): Promise<IAssessment> {
+        logger.assert(
+            (assessment as any)._type === 'assessment',
+            `invalid _type for assessment: ${(assessment as any)._type}`,
+        );
+
+        (assessment as any)._type = 'assessment';
+        const response = await this.axiosInstance.put<IAssessmentResponse>(`/assessment/${assessment.assessmentId}`, {
+            assessment,
+        } as IAssessmentRequest);
+        return response.data?.assessment;
     }
 
     public async getAssessmentLogs(): Promise<IAssessmentLog[]> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IAssessmentLog[]>(`/assessmentlogs`);
-            return response.data;
-        } catch (error) {
-            return await new Promise((resolve) => setTimeout(() => resolve([getFakeAssessmentLog()]), 500));
-        }
+        const response = await this.axiosInstance.get<IAssessmentLogListResponse>(`/assessmentlogs`);
+        return response.data?.assessmentlogs;
     }
 
     public async addAssessmentLog(assessmentLog: IAssessmentLog): Promise<IAssessmentLog> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.post<IAssessmentLog>(`/assessmentlogs`, assessmentLog);
-            return response.data;
-        } catch (error) {
-            assessmentLog.logId = random(100000).toString();
-            assessmentLog.recordedDate = new Date();
-            return await new Promise((resolve) => setTimeout(() => resolve(assessmentLog), 500));
-        }
+        (assessmentLog as any)._type = 'assessmentLog';
+
+        const response = await this.axiosInstance.post<IAssessmentLogResponse>(`/assessmentlogs`, {
+            assessmentlog: assessmentLog,
+        } as IAssessmentLogRequest);
+        return response.data?.assessmentlog;
+    }
+
+    public async updateAssessmentLog(assessmentLog: IAssessmentLog): Promise<IAssessmentLog> {
+        (assessmentLog as any)._type = 'assessmentLog';
+        logger.assert((assessmentLog as any)._rev != undefined, '_rev should be in the request data');
+        logger.assert((assessmentLog as any)._set_id != undefined, '_set_id should be in the request data');
+
+        const response = await this.axiosInstance.put<IAssessmentLogResponse>(
+            `/assessmentlog/${assessmentLog.assessmentLogId}`,
+            {
+                assessmentlog: assessmentLog,
+            } as IAssessmentLogRequest,
+        );
+
+        return response.data?.assessmentlog;
     }
 
     public async getMoodLogs(): Promise<IMoodLog[]> {

@@ -57,7 +57,8 @@ export const BAChecklist: FunctionComponent = observer(() => {
         <ActionPanel
             id={getString('patient_detail_subsection_checklist_hash')}
             title={getString('patient_detail_subsection_checklist_title')}
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient?.loadSessionsState.pending}
+            error={currentPatient?.loadSessionsState.error}
             actionButtons={[]}>
             <TableContainer>
                 <Table>
@@ -76,7 +77,7 @@ export const BAChecklist: FunctionComponent = observer(() => {
                                         {component.completedDate ? (
                                             <FormHelperText>{`Last performed on ${format(
                                                 component.completedDate as Date,
-                                                'MM/dd/yyyy'
+                                                'MM/dd/yyyy',
                                             )}`}</FormHelperText>
                                         ) : (
                                             <FormHelperText>

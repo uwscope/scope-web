@@ -110,7 +110,8 @@ export const ActivityProgress: FunctionComponent = observer(() => {
         <ActionPanel
             id={getString('patient_progress_activity_hash')}
             title={getString('patient_progress_activity_name')}
-            loading={currentPatient?.state == 'Pending'}>
+            loading={currentPatient?.loadActivityLogsState.pending}
+            error={currentPatient?.loadActivityLogsState.error}>
             <Grid container alignItems="stretch">
                 {!!logs && logs.length > 0 && (
                     <Table

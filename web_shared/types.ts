@@ -93,9 +93,9 @@ export interface IAssessment {
     assessmentId: string;
     assessmentName: string;
     assigned: boolean;
-    assignedDate: Date;
-    frequency: AssessmentFrequency;
-    dayOfWeek: DayOfWeek;
+    assignedDate?: Date;
+    frequency?: AssessmentFrequency;
+    dayOfWeek?: DayOfWeek;
 }
 
 export interface IActivity {
@@ -142,6 +142,8 @@ export interface ILog {
 }
 
 export interface IActivityLog extends ILog {
+    activityLogId?: string;
+
     scheduleId: string;
     activityName: string;
 
@@ -153,6 +155,8 @@ export interface IActivityLog extends ILog {
 }
 
 export interface IAssessmentLog extends ILog {
+    assessmentLogId?: string;
+
     scheduleId: string;
     assessmentId: string; // NEW
     assessmentName: string;
@@ -166,6 +170,7 @@ export interface IAssessmentLog extends ILog {
 
 export interface IMoodLog extends ILog {
     moodLogId?: string;
+
     mood: number;
 }
 
