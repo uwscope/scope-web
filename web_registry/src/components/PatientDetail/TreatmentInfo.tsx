@@ -53,8 +53,12 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
         .map((ref) => `${ref.referralType} - ${ref.referralStatus}`)
         .join('\n');
 
+
+    const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadAssessmentLogsState.pending;
+    const error = currentPatient?.loadSessionsState.error || currentPatient?.loadAssessmentLogsState.error;
+
     return (
-        <ActionPanel id="treatment" title="Ongoing Treatment Information">
+        <ActionPanel id="treatment" title="Ongoing Treatment Information" loading={loading} error={error}>
             <Grid container spacing={2} alignItems="stretch">
                 <GridTextField
                     sm={6}

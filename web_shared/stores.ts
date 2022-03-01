@@ -23,3 +23,31 @@ export const getLoadAndLogQuery =
             await effect();
         }
     };
+
+
+
+export const onSingletonConflict =
+    (fieldName: string) =>
+    <T>(responseData?: any) => {
+        return responseData?.[fieldName] as T;
+    };
+
+export const onArrayConflict =
+    <T>(itemName: string, idName: string, getArray: () => T[], logger: ILogger) =>
+    (responseData: any | undefined) => {
+        const updatedLog = responseData?.[itemName];
+        if (!!updatedLog) {
+            const array = getArray();
+            const existing = array.find((l) => (l as any)[idName] == updatedLog[idName]);
+            logger.assert(!!existing, 'Log not found when expected');
+
+            if (!!existing) {
+                Object.assign(existing, updatedLog);
+                return array;
+            } else {
+                return array.slice().concat([updatedLog]);
+            }
+        }
+
+        return getArray();
+    };

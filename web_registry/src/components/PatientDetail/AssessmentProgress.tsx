@@ -66,7 +66,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         openEdit: boolean;
         totalOnly: boolean;
         scheduleId: string;
-        logId: string;
+        assessmentLogId?: string;
         recordedDate: Date;
         pointValues: AssessmentData;
         totalScore: number;
@@ -76,7 +76,6 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         openEdit: false,
         totalOnly: false,
         scheduleId: '',
-        logId: '',
         recordedDate: new Date(),
         comment: '',
         pointValues: {},
@@ -94,7 +93,6 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         logState.totalOnly = false;
 
         logState.scheduleId = '';
-        logState.logId = '';
         logState.comment = '';
         logState.pointValues = {};
         logState.totalScore = -1;
@@ -107,11 +105,11 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onSaveEditRecord = action(() => {
-        const { scheduleId, logId, recordedDate, comment, pointValues, totalScore } = logState;
+        const { scheduleId, assessmentLogId, recordedDate, comment, pointValues, totalScore } = logState;
 
-        if (!!logId) {
+        if (!!assessmentLogId) {
             currentPatient.updateAssessmentLog({
-                logId,
+                assessmentLogId,
                 recordedDate,
                 comment,
 
@@ -126,7 +124,6 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             });
         } else {
             currentPatient.addAssessmentLog({
-                logId: '',
                 recordedDate,
                 comment,
 
@@ -145,9 +142,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = configureState;
-        var newAssessment = { ...assessment } as Partial<IAssessment>;
-        newAssessment.frequency = frequency;
-        newAssessment.dayOfWeek = dayOfWeek;
+        var newAssessment = { ...assessment, frequency, dayOfWeek };
         currentPatient.updateAssessment(newAssessment);
         configureState.openConfigure = false;
     });
@@ -194,18 +189,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             return {
                 date: format(a.recordedDate, 'MM/dd/yy'),
                 total: getAssessmentScore(a.pointValues) || a.totalScore,
-                id: a.logId,
+                id: a.assessmentLogId,
                 ...a.pointValues,
                 comment: a.comment,
             };
         });
 
-    const recurrence = assessment.assigned
-        ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-              assessment.assignedDate,
-              'MM/dd/yyyy'
-          )}`
-        : 'Not assigned';
+    const recurrence =
+        assessment.assigned && assessment.assignedDate
+            ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
+                  assessment.assignedDate,
+                  'MM/dd/yyyy',
+              )}`
+            : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
         <ScoreCell score={props.value as number} assessmentId={assessment?.assessmentId}>
@@ -238,7 +234,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     width: 60,
                     align: 'center',
                     headerAlign: 'center',
-                } as GridColDef)
+                } as GridColDef),
         ),
         {
             field: 'comment',
@@ -251,13 +247,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const onRowClick = action((param: GridRowParams) => {
         const id = param.row['id'] as string;
-        const data = assessmentLogs.find((a) => a.logId == id);
+        const data = assessmentLogs.find((a) => a.assessmentLogId == id);
 
         if (!!data) {
             logState.openEdit = true;
             logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
             logState.scheduleId = data.scheduleId;
-            logState.logId = data.logId || '';
+            logState.assessmentLogId = data.assessmentLogId;
             logState.recordedDate = data.recordedDate;
             Object.assign(logState.pointValues, data.pointValues);
             logState.totalScore = data.totalScore || -1;
@@ -270,7 +266,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             id={assessment.assessmentId}
             title={assessment.assessmentName}
             inlineTitle={recurrence}
-            loading={currentPatient?.state == 'Pending'}
+            loading={currentPatient?.loadAssessmentLogsState.pending}
+            error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {
                     icon: assessment.assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
@@ -291,7 +288,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                                   onClick: handleConfigure,
                               } as IActionButton,
                           ]
-                        : []
+                        : [],
                 )
                 .concat(
                     canAdd
@@ -302,7 +299,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                                   onClick: handleAddRecord,
                               } as IActionButton,
                           ]
-                        : []
+                        : [],
                 )}>
             <Grid container alignItems="stretch">
                 {assessment.assessmentId != 'mood' && assessmentLogs.length > 0 && (
@@ -345,7 +342,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 <DialogTitle>
                     {logState.patientSubmitted
                         ? `Patient submitted ${assessment.assessmentName} record`
-                        : !!logState.logId
+                        : !!logState.assessmentLogId
                         ? `Edit ${assessment.assessmentName} record`
                         : `Add ${assessment.assessmentName} record`}
                 </DialogTitle>

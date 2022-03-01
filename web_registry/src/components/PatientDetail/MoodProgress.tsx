@@ -28,7 +28,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
             date: format(a.recordedDate, 'MM/dd/yy'),
             time: format(a.recordedDate, 'hh:mm aa'),
             rating: a.mood,
-            id: a.logId,
+            id: a.moodLogId,
             comment: a.comment,
         };
     });
@@ -73,7 +73,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
         <ActionPanel
             id={assessment.assessmentId}
             title={assessment.assessmentName}
-            loading={currentPatient?.state == 'Pending'}>
+            loading={currentPatient?.loadMoodLogsState.pending}
+            error={currentPatient?.loadMoodLogsState.error}>
             <Grid container alignItems="stretch">
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
                     <Table

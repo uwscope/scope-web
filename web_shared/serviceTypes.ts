@@ -1,11 +1,17 @@
 import {
     IActivity,
+    IActivityLog,
+    IAssessment,
+    IAssessmentLog,
     ICaseReview,
     IClinicalHistory,
     IMoodLog,
     IPatient,
     IPatientProfile,
     IProviderIdentity,
+    ISafetyPlan,
+    IScheduledActivity,
+    IScheduledAssessment,
     ISession,
     IValuesInventory,
 } from 'shared/types';
@@ -101,4 +107,56 @@ export interface IActivityRequest extends IServiceResponse {
 
 export interface IProviderIdentityListResponse extends IServiceResponse {
     providers: IProviderIdentity[];
+}
+
+export interface IAssessmentListResponse extends IServiceResponse {
+    assessments: IAssessment[];
+}
+
+export interface IAssessmentResponse extends IServiceResponse {
+    assessment: IAssessment;
+}
+
+export interface IAssessmentRequest extends IServiceResponse {
+    assessment: IAssessment;
+}
+
+export interface IAssessmentLogListResponse extends IServiceResponse {
+    assessmentlogs: IAssessmentLog[];
+}
+
+export interface IAssessmentLogResponse extends IServiceResponse {
+    assessmentlog: IAssessmentLog;
+}
+
+export interface IAssessmentLogRequest extends IServiceResponse {
+    assessmentlog: IAssessmentLog;
+}
+
+export interface ISafetyPlanRequest {
+    safetyplan: ISafetyPlan;
+}
+
+export interface ISafetyPlanResponse extends IServiceResponse {
+    safetyplan: ISafetyPlan;
+}
+
+export interface IScheduledActivityListResponse extends IServiceResponse {
+    scheduledactivities: IScheduledActivity[];
+}
+
+export interface IScheduledAssessmentListResponse extends IServiceResponse {
+    scheduledassessments: IScheduledAssessment[];
+}
+
+export interface IActivityLogListResponse extends IServiceResponse {
+    activitylogs: IActivityLog[];
+}
+
+export interface IActivityLogResponse extends IServiceResponse {
+    activitylog: IActivityLog;
+}
+
+export interface IActivityLogRequest extends IServiceResponse {
+    activitylog: IActivityLog;
 }
