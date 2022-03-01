@@ -17,8 +17,8 @@ def test_patient_create_get_delete(
     # Create patient
     created_patient_identity = scope.database.patients.create_patient(
         database=database_client,
-        name="TEST NAME",
-        MRN="TEST MRN",
+        patient_name="TEST NAME",
+        patient_mrn="TEST MRN",
     )
 
     try:
@@ -107,8 +107,8 @@ def test_patient_identity_update(
     # Create patient
     created_patient_identity = scope.database.patients.create_patient(
         database=database_client,
-        name="TEST NAME",
-        MRN="TEST MRN",
+        patient_name="TEST NAME",
+        patient_mrn="TEST MRN",
     )
 
     try:

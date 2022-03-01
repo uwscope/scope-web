@@ -2,7 +2,9 @@ import pymongo.database
 from typing import List, Optional
 
 import scope.database.collection_utils
+import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
+import scope.schema
 
 PATIENT_IDENTITY_COLLECTION = "patients"
 
@@ -18,8 +20,8 @@ def create_patient(
     *,
     database: pymongo.database.Database,
     patient_id: str = None,
-    name: str,
-    MRN: str,
+    patient_name: str,
+    patient_mrn: str,
 ) -> dict:
     """
     Create a patient. This includes:
@@ -56,25 +58,47 @@ def create_patient(
     scope.database.collection_utils.ensure_index(collection=patient_collection)
 
     # Create the initial profile document
+    patient_profile_document = {
+        "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
+        "name": patient_name,
+        "MRN": patient_mrn,
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.patient_profile_schema,
+        document=patient_profile_document,
+    )
     result = scope.database.patient.patient_profile.put_patient_profile(
         database=database,
         collection=patient_collection,
         patient_id=patient_id,
-        patient_profile={
-            "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
-            "name": name,
-            "MRN": MRN,
-        },
+        patient_profile=patient_profile_document,
+    )
+
+    # Create the initial clinical history document
+    clinical_history_document = {
+        "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
+    }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.clinical_history_schema,
+        document=clinical_history_document,
+    )
+    result = scope.database.patient.clinical_history.put_clinical_history(
+        collection=patient_collection,
+        clinical_history=clinical_history_document,
     )
 
     # Atomically store the patient identity document.
     # Do this last, because it means all other steps have already succeeded.
     patient_identity_document = {
         "_type": PATIENT_IDENTITY_DOCUMENT_TYPE,
-        "name": name,
-        "MRN": MRN,
+        "name": patient_name,
+        "MRN": patient_mrn,
         "collection": generated_patient_collection_name,
     }
+    scope.schema.raise_for_invalid(
+        schema=scope.schema.patient_identity_schema,
+        document=patient_identity_document,
+    )
     result = scope.database.collection_utils.put_set_element(
         collection=patient_identity_collection,
         document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,

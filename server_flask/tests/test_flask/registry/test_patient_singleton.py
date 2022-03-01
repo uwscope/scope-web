@@ -44,6 +44,9 @@ TEST_CONFIGS = [
         database_get_function=scope.database.patient.clinical_history.get_clinical_history,
         flask_query_type="clinicalhistory",
         flask_document_key="clinicalhistory",
+        options=ConfigTestPatientSingletonOptions(
+            document_will_already_exist=True,
+        ),
     ),
     ConfigTestPatientSingleton(
         name="profile",
