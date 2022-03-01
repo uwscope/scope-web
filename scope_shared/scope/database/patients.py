@@ -1,15 +1,15 @@
 import datetime
-
 import pymongo.database
 from typing import List, Optional
 
-import scope.database.date_utils
-import scope.database.collection_utils
+import scope.database.date_utils as date_utils
+import scope.database.collection_utils as collection_utils
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.values_inventory
 import scope.schema
+import scope.schema_utils as schema_utils
 
 PATIENT_IDENTITY_COLLECTION = "patients"
 
@@ -71,9 +71,9 @@ def create_patient(
         "name": patient_name,
         "MRN": patient_mrn,
     }
-    scope.schema.raise_for_invalid(
+    schema_utils.raise_for_invalid_schema(
         schema=scope.schema.patient_profile_schema,
-        document=patient_profile_document,
+        data=patient_profile_document,
     )
     result = scope.database.patient.patient_profile.put_patient_profile(
         database=database,
@@ -86,9 +86,9 @@ def create_patient(
     clinical_history_document = {
         "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
     }
-    scope.schema.raise_for_invalid(
+    schema_utils.raise_for_invalid_schema(
         schema=scope.schema.clinical_history_schema,
-        document=clinical_history_document,
+        data=clinical_history_document,
     )
     result = scope.database.patient.clinical_history.put_clinical_history(
         collection=patient_collection,
@@ -103,9 +103,9 @@ def create_patient(
             datetime.datetime.utcnow()
         ),
     }
-    scope.schema.raise_for_invalid(
+    schema_utils.raise_for_invalid_schema(
         schema=scope.schema.safety_plan_schema,
-        document=safety_plan_document,
+        data=safety_plan_document,
     )
     result = scope.database.patient.safety_plan.put_safety_plan(
         collection=patient_collection,
@@ -120,9 +120,9 @@ def create_patient(
             datetime.datetime.utcnow()
         ),
     }
-    scope.schema.raise_for_invalid(
+    schema_utils.raise_for_invalid_schema(
         schema=scope.schema.values_inventory_schema,
-        document=values_inventory_document,
+        data=values_inventory_document,
     )
     result = scope.database.patient.values_inventory.put_values_inventory(
         collection=patient_collection,
@@ -137,9 +137,9 @@ def create_patient(
         "MRN": patient_mrn,
         "collection": generated_patient_collection_name,
     }
-    scope.schema.raise_for_invalid(
+    schema_utils.raise_for_invalid_schema(
         schema=scope.schema.patient_identity_schema,
-        document=patient_identity_document,
+        data=patient_identity_document,
     )
     result = scope.database.collection_utils.put_set_element(
         collection=patient_identity_collection,

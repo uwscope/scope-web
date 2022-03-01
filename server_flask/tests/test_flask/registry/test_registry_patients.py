@@ -7,8 +7,8 @@ import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patients
 import scope.schema
+import scope.schema_utils as schema_utils
 import scope.testing.fixtures_database_temp_patient
-import scope.testing.schema
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -45,10 +45,9 @@ def test_patients_get(
     assert "patients" in response.json()
     patient_documents = response.json()["patients"]
     for patient_document_current in patient_documents:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=patient_document_current,
             schema=scope.schema.patient_schema,
-            expected_valid=True,
         )
 
     retrieved_ids = [
@@ -59,10 +58,9 @@ def test_patients_get(
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
 
-    scope.testing.schema.assert_schema(
+    schema_utils.assert_schema(
         data=response.json()["patients"],
         schema=scope.schema.patients_schema,
-        expected_valid=True,
     )
 
 
@@ -92,10 +90,9 @@ def test_patientidentities_get(
 
     assert "patientidentities" in response.json()
     patient_identity_documents = response.json()["patientidentities"]
-    scope.testing.schema.assert_schema(
+    schema_utils.assert_schema(
         data=patient_identity_documents,
         schema=scope.schema.patient_identities_schema,
-        expected_valid=True,
     )
 
     retrieved_ids = [
@@ -134,10 +131,9 @@ def test_patient_get(
 
     assert "patient" in response.json()
     patient_document = response.json()["patient"]
-    scope.testing.schema.assert_schema(
+    schema_utils.assert_schema(
         data=patient_document,
         schema=scope.schema.patient_schema,
-        expected_valid=True,
     )
 
     patient_identity = patient_document["identity"]

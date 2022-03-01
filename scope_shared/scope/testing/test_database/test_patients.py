@@ -1,10 +1,10 @@
 import copy
-
 import pymongo.database
+
 import scope.database.patient.patient_profile
 import scope.database.patients
 import scope.schema
-import scope.testing.schema
+import scope.schema_utils as schema_utils
 
 
 def test_patient_create_get_delete(
@@ -22,10 +22,9 @@ def test_patient_create_get_delete(
     )
 
     try:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=created_patient_identity,
             schema=scope.schema.patient_identity_schema,
-            expected_valid=True,
         )
 
         # Confirm get patient identity via _set_id
@@ -112,10 +111,9 @@ def test_patient_identity_update(
     )
 
     try:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=created_patient_identity,
             schema=scope.schema.patient_identity_schema,
-            expected_valid=True,
         )
 
         # Modify the identity

@@ -7,8 +7,8 @@ import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.providers
 import scope.schema
+import scope.schema_utils as schema_utils
 import scope.testing.fixtures_database_temp_provider
-import scope.testing.schema
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -44,10 +44,9 @@ def test_provider_identities_get(
     assert "providers" in response.json()
     provider_identities = response.json()["providers"]
     for provider_identity_current in provider_identities:
-        scope.testing.schema.assert_schema(
+        schema_utils.assert_schema(
             data=provider_identity_current,
             schema=scope.schema.provider_identity_schema,
-            expected_valid=True,
         )
 
     retrieved_ids = [
@@ -58,10 +57,9 @@ def test_provider_identities_get(
     ]
     assert all(provider_id in retrieved_ids for provider_id in created_ids)
 
-    scope.testing.schema.assert_schema(
+    schema_utils.assert_schema(
         data=response.json()["providers"],
         schema=scope.schema.provider_identities_schema,
-        expected_valid=True,
     )
 
 
@@ -91,10 +89,9 @@ def test_provider_identity_get(
 
     assert "provider" in response.json()
     provider_identity = response.json()["provider"]
-    scope.testing.schema.assert_schema(
+    schema_utils.assert_schema(
         data=provider_identity,
         schema=scope.schema.provider_identity_schema,
-        expected_valid=True,
     )
 
     provider_id = provider_identity[
