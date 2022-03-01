@@ -425,6 +425,8 @@ export class PatientStore implements IPatientStore {
                 ...toJS(found),
                 assessmentId,
                 assigned: true,
+                frequency: found.frequency || 'Every 2 weeks',
+                dayOfWeek: found.dayOfWeek || 'Monday',
             });
         }
     }

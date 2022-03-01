@@ -114,11 +114,8 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     }));
 
     const dataState = useLocalObservable<IAssessmentLog>(() => ({
-        scheduleId: scheduledAssessment.scheduleId,
+        scheduledAssessmentId: scheduledAssessment.scheduledAssessmentId,
         assessmentId: assessmentContent.id,
-        assessmentName: assessmentContent.name,
-
-        completed: false,
 
         recordedDate: new Date(),
         pointValues: {},
@@ -136,7 +133,12 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     });
 
     const handleSubmit = action(async () => {
-        return await patientStore.saveAssessmentLog(dataState);
+        try {
+            await patientStore.saveAssessmentLog(dataState);
+            return !patientStore.loadAssessmentLogsState.error;
+        } catch {
+            return false;
+        }
     });
 
     const getAssessmentPages = () => {

@@ -294,18 +294,8 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getPatientConfig(): Promise<IPatientConfig> {
-        // Work around since backend doesn't exist
-        try {
-            const response = await this.axiosInstance.get<IPatientConfig>(`/config`);
-            return response.data;
-        } catch (error) {
-            const config = {
-                assignedValuesInventory: true,
-                assignedSafetyPlan: true,
-                assignedAssessmentIds: ['phq-9', 'gad-7', 'medication'],
-            } as IPatientConfig;
-            return await new Promise((resolve) => setTimeout(() => resolve(config), 500));
-        }
+        const response = await this.axiosInstance.get<IPatientConfig>(`/summary`);
+        return response.data;
     }
 
     public async getActivityLogs(): Promise<IActivityLog[]> {

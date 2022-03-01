@@ -98,8 +98,12 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
     };
 
     const handleSubmit = action(async () => {
-        await patientStore.saveMoodLog({ ...dataState });
-        return !patientStore.loadMoodLogsState.error;
+        try {
+            await patientStore.saveMoodLog({ ...dataState });
+            return !patientStore.loadMoodLogsState.error;
+        } catch {
+            return false;
+        }
     });
 
     return (

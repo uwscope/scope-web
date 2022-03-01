@@ -85,7 +85,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
                 [Parameters.activityId]: item.activityId,
-                [Parameters.taskId]: item.scheduleId,
+                [Parameters.taskId]: item.scheduledActivityId,
             }),
         );
     });
@@ -280,7 +280,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                         {selectedTaskItems.length > 0 ? (
                             <CompactList subheader={<li />}>
                                 {selectedTaskItems.map((item, idx) => (
-                                    <Fragment key={item.scheduleId}>
+                                    <Fragment key={item.scheduledActivityId}>
                                         <ScheduledListItem item={item} onClick={handleTaskClick(item)} />
                                         {idx < selectedTaskItems.length - 1 && <Divider variant="middle" />}
                                     </Fragment>

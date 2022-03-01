@@ -68,10 +68,20 @@ export class RootStore implements IRootStore {
 
     @computed
     public get loadState() {
-        if (this.loadQuery.state == 'Pending') {
-            return this.loadQuery.state;
+        if (
+            this.loadQuery.pending ||
+            this.patientStore?.loadPatientState.pending ||
+            this.patientStore?.loadConfigState.pending
+        ) {
+            return 'Pending';
+        } else if (
+            this.loadQuery.error ||
+            this.patientStore?.loadPatientState.error ||
+            this.patientStore?.loadConfigState.error
+        ) {
+            return 'Rejected';
         } else {
-            return this.patientStore?.loadState || 'Unknown';
+            return this.patientStore?.loadPatientState.state || 'Unknown';
         }
     }
 
@@ -87,7 +97,7 @@ export class RootStore implements IRootStore {
 
     @action.bound
     public getAssessmentContent(assessmentId: string) {
-        return this.appContentConfig.assessments.find((s) => s.name.toLowerCase() == assessmentId.toLowerCase());
+        return this.appContentConfig.assessments.find((s) => s.id.toLowerCase() == assessmentId.toLowerCase());
     }
 
     @action.bound

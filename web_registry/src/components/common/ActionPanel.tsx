@@ -112,7 +112,7 @@ export const ActionPanel: FunctionComponent<IActionPanelProps> = (props) => {
                 <Snackbar
                     open={openError}
                     message={`Sorry, there was an error processing your request. Please try again.`}
-                    autoHideDuration={2000}
+                    autoHideDuration={6000}
                     onClose={handleClose}
                 />
             )}
