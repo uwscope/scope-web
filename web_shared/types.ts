@@ -214,8 +214,8 @@ export interface IContact {
 
 export interface ISafetyPlan {
     assigned: boolean;
-    assignedDate?: Date;
-    lastUpdatedDate?: Date;
+    assignedDateTime?: Date;
+    lastUpdatedDateTime?: Date;
     reasonsForLiving?: string;
     warningSigns?: string[];
     copingStrategies?: string[];

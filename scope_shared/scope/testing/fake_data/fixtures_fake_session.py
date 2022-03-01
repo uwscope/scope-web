@@ -4,7 +4,7 @@ import pytest
 import random
 from typing import Callable
 
-import scope.database.format_utils as format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.sessions
 import scope.schema
 import scope.testing.fake_data.enums
@@ -24,7 +24,7 @@ def fake_session_factory(
 
         fake_session = {
             "_type": scope.database.patient.sessions.DOCUMENT_TYPE,
-            "date": format_utils.format_date(
+            "date": date_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )

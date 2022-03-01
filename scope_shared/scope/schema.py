@@ -8,6 +8,8 @@ activity_schema: Optional[jschon.JSONSchema] = None
 activities_schema: Optional[jschon.JSONSchema] = None
 activity_log_schema: Optional[jschon.JSONSchema] = None
 activity_logs_schema: Optional[jschon.JSONSchema] = None
+app_config_schema: Optional[jschon.JSONSchema] = None
+app_content_config_schema: Optional[jschon.JSONSchema] = None
 assessment_schema: Optional[jschon.JSONSchema] = None
 assessments_schema: Optional[jschon.JSONSchema] = None
 assessment_content_schema: Optional[jschon.JSONSchema] = None
@@ -30,10 +32,13 @@ patient_schema: Optional[jschon.JSONSchema] = None
 patients_schema: Optional[jschon.JSONSchema] = None
 patient_identity_schema: Optional[jschon.JSONSchema] = None
 patient_profile_schema: Optional[jschon.JSONSchema] = None
+patient_summary_schema: Optional[jschon.JSONSchema] = None
 provider_identity_schema: Optional[jschon.JSONSchema] = None
 provider_identities_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
 regexes: Optional[jschon.JSONSchema] = None
+resource_content_schema: Optional[jschon.JSONSchema] = None
+resource_contents_schema: Optional[jschon.JSONSchema] = None
 safety_plan_schema: Optional[jschon.JSONSchema] = None
 scheduled_activity_schema: Optional[jschon.JSONSchema] = None
 scheduled_activities_schema: Optional[jschon.JSONSchema] = None
@@ -63,6 +68,8 @@ SCHEMAS = {
     "activities_schema": "activities.json",
     "activity_log_schema": "activity-log.json",
     "activity_logs_schema": "activity-logs.json",
+    "app_config_schema": "app-config.json",
+    "app_content_config_schema": "app-content-config.json",
     "assessment_schema": "assessment.json",
     "assessments_schema": "assessments.json",
     "assessment_content_schema": "assessment-content.json",
@@ -85,10 +92,13 @@ SCHEMAS = {
     "patients_schema": "patients.json",
     "patient_identity_schema": "patient-identity.json",
     "patient_profile_schema": "patient-profile.json",
+    "patient_summary_schema": "patient-summary.json",
     "provider_identity_schema": "provider-identity.json",
     "provider_identities_schema": "provider-identities.json",
     "referral_status_schema": "referral-status.json",
     "regexes": "datetime.json",
+    "resource_content_schema": "resource-content.json",
+    "resource_contents_schema": "resource-contents.json",
     "safety_plan_schema": "safety-plan.json",
     "scheduled_activity_schema": "scheduled-activity.json",
     "scheduled_activities_schema": "scheduled-activities.json",

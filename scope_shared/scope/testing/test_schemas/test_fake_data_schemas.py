@@ -423,7 +423,8 @@ def test_fake_data_schema(
                 scope.testing.schema.assert_schema(
                     data=document_singleton,
                     schema=config.schema,
-                    expected_valid=config.expected_singleton or config.expected_set_element,
+                    expected_valid=config.expected_singleton
+                    or config.expected_set_element,
                 )
 
             if config.expected_set_element:
@@ -439,22 +440,33 @@ def test_fake_data_schema(
                 if config.expected_set_ids is not None:
                     if "_set_id" in document_set_element:
                         # Verify the existing set id is allowable
-                        assert document_set_element["_set_id"] in config.expected_set_ids
+                        assert (
+                            document_set_element["_set_id"] in config.expected_set_ids
+                        )
                     else:
                         # Assign an allowable set id
-                        document_set_element["_set_id"] = random.choice(config.expected_set_ids)
+                        document_set_element["_set_id"] = random.choice(
+                            config.expected_set_ids
+                        )
 
                     if config.expected_semantic_set_id:
                         if config.expected_semantic_set_id in document_set_element:
-                            assert document_set_element[config.expected_semantic_set_id] == document_set_element["_set_id"]
+                            assert (
+                                document_set_element[config.expected_semantic_set_id]
+                                == document_set_element["_set_id"]
+                            )
                         else:
-                            document_set_element[config.expected_semantic_set_id] = document_set_element["_set_id"]
+                            document_set_element[
+                                config.expected_semantic_set_id
+                            ] = document_set_element["_set_id"]
                 else:
                     assert "_set_id" not in document_set_element
                     document_set_element["_set_id"] = collection_utils.generate_set_id()
 
                     if config.expected_semantic_set_id:
-                        assert config.expected_semantic_set_id not in document_set_element
+                        assert (
+                            config.expected_semantic_set_id not in document_set_element
+                        )
                         document_set_element[
                             config.expected_semantic_set_id
                         ] = document_set_element["_set_id"]

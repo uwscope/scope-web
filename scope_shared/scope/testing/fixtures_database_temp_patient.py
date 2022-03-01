@@ -34,8 +34,8 @@ def fixture_database_temp_patient_factory(
         temp_patient_profile = data_fake_patient_profile_factory()
         temp_patient_identity = scope.database.patients.create_patient(
             database=database_client,
-            name=temp_patient_profile["name"],
-            MRN=temp_patient_profile["MRN"],
+            patient_name=temp_patient_profile["name"],
+            patient_mrn=temp_patient_profile["MRN"],
         )
 
         temp_patient = DatabaseTempPatient(

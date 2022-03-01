@@ -404,7 +404,7 @@ export class PatientStore implements IPatientStore {
         const promise = this.patientService.updateSafetyPlan({
             ...toJS(this.safetyPlan),
             assigned: true,
-            assignedDate: new Date(),
+            assignedDateTime: new Date(),
         });
 
         await this.loadAndLogQuery<ISafetyPlan>(

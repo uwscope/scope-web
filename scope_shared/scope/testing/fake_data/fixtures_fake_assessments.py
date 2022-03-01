@@ -4,8 +4,8 @@ import pytest
 import random
 from typing import Callable, List
 
+import scope.database.date_utils as date_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
 import scope.database.patient.assessments
 
 import scope.schema
@@ -13,19 +13,22 @@ import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
+OPTIONAL_KEYS = ["frequency", "dayOfWeek"]
+
+
 def _fake_assessment(
     *,
     faker_factory: faker.Faker,
     assessment_content: dict,
 ) -> dict:
-    return {
+
+    fake_assessment = {
         # Assessments have a fixed set of allowable IDs
         "_set_id": assessment_content["id"],
         scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
-
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
         "assigned": random.choice([True, False]),
-        "assignedDate": format_utils.format_date(
+        "assignedDate": date_utils.format_date(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now(),
                 date_end=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
@@ -38,6 +41,14 @@ def _fake_assessment(
             scope.testing.fake_data.enums.DayOfWeek
         ),
     }
+
+    # Remove a randomly sampled subset of optional parameters.
+    fake_assessment = fake_utils.fake_optional(
+        document=fake_assessment,
+        optional_keys=OPTIONAL_KEYS,
+    )
+
+    return fake_assessment
 
 
 def fake_assessment_factory(

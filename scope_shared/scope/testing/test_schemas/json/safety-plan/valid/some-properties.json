@@ -2,7 +2,7 @@
 	"_type": "safetyPlan",
 	"_rev": 1,
 	"assigned": true,
-	"assignedDate": "2010-01-01T00:00:00Z",
+	"assignedDateTime": "2010-01-01T11:11:11Z",
 	"reasonsForLiving": "To stare at Mt. Rainier.",
 	"supporters": [
 		{

@@ -69,8 +69,8 @@ def populate_database(
         patient_identity_current = scope.database.patients.create_patient(
             database=database,
             patient_id="persistent",
-            name=profile["name"],
-            MRN=profile["MRN"],
+            patient_name=profile["name"],
+            patient_mrn=profile["MRN"],
         )
         patient_collection = database.get_collection(
             patient_identity_current["collection"]
@@ -97,8 +97,8 @@ def populate_database(
         patient_identity_current = scope.database.patients.create_patient(
             database=database,
             patient_id="persistentempty",
-            name=profile["name"],
-            MRN=profile["MRN"],
+            patient_name=profile["name"],
+            patient_mrn=profile["MRN"],
         )
 
     #
@@ -109,8 +109,8 @@ def populate_database(
 
         patient_identity_current = scope.database.patients.create_patient(
             database=database,
-            name=profile["name"],
-            MRN=profile["MRN"],
+            patient_name=profile["name"],
+            patient_mrn=profile["MRN"],
         )
         patient_collection = database.get_collection(
             patient_identity_current["collection"]
@@ -132,8 +132,8 @@ def populate_database(
 
         patient_identity_current = scope.database.patients.create_patient(
             database=database,
-            name=profile["name"],
-            MRN=profile["MRN"],
+            patient_name=profile["name"],
+            patient_mrn=profile["MRN"],
         )
 
     #
@@ -201,6 +201,28 @@ def _populate_patient(
     # These documents are simple and do not have any cross dependencies.
     ################################################################################
 
+    def _clinical_history():
+        existing_clinical_history = (
+            scope.database.patient.clinical_history.get_clinical_history(
+                collection=patient_collection
+            )
+        )
+
+        fake_clinical_history_factory = scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
+            faker_factory=faker_factory,
+        )
+        fake_clinical_history = fake_clinical_history_factory()
+
+        clinical_history = copy.deepcopy(existing_clinical_history)
+        del clinical_history["_id"]
+        clinical_history.update(fake_clinical_history)
+        scope.database.patient.clinical_history.put_clinical_history(
+            collection=patient_collection,
+            clinical_history=clinical_history,
+        )
+
+    _clinical_history()
+
     def _case_reviews():
         fake_case_reviews_factory = scope.testing.fake_data.fixtures_fake_case_reviews.fake_case_reviews_factory(
             fake_case_review_factory=scope.testing.fake_data.fixtures_fake_case_review.fake_case_review_factory(
@@ -215,18 +237,6 @@ def _populate_patient(
             )
 
     _case_reviews()
-
-    def _clinical_history():
-        fake_clinical_history_factory = scope.testing.fake_data.fixtures_fake_clinical_history.fake_clinical_history_factory(
-            faker_factory=faker_factory,
-        )
-        clinical_history = fake_clinical_history_factory()
-        scope.database.patient.clinical_history.put_clinical_history(
-            collection=patient_collection,
-            clinical_history=clinical_history,
-        )
-
-    _clinical_history()
 
     def _mood_logs():
         fake_mood_logs_factory = scope.testing.fake_data.fixtures_fake_mood_logs.fake_mood_logs_factory(
@@ -258,9 +268,19 @@ def _populate_patient(
                 fake_contact_factory=fake_contact_factory,
             )
         )
+
+        existing_safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+            collection=patient_collection
+        )
+
+        fake_safety_plan = fake_safety_plan_factory()
+
+        safety_plan = copy.deepcopy(existing_safety_plan)
+        del safety_plan["_id"]
+        safety_plan.update(fake_safety_plan)
         scope.database.patient.safety_plan.put_safety_plan(
             collection=patient_collection,
-            safety_plan=fake_safety_plan_factory(),
+            safety_plan=safety_plan,
         )
 
     _safety_plan()
@@ -330,11 +350,21 @@ def _populate_patient(
         life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
+        existing_values_inventory = (
+            scope.database.patient.values_inventory.get_values_inventory(
+                collection=patient_collection
+            )
+        )
+
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
             faker_factory=faker_factory,
             life_areas=life_area_contents,
         )
-        values_inventory = fake_values_inventory_factory()
+        fake_values_inventory = fake_values_inventory_factory()
+
+        values_inventory = copy.deepcopy(existing_values_inventory)
+        del values_inventory["_id"]
+        values_inventory.update(fake_values_inventory)
         scope.database.patient.values_inventory.put_values_inventory(
             collection=patient_collection,
             values_inventory=values_inventory,
@@ -356,7 +386,6 @@ def _populate_patient(
                 )
 
     _values_inventory_and_activities()
-
 
 
 # =======
