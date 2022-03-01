@@ -5,6 +5,7 @@ import faker
 import pytest
 import scope.database.patient.clinical_history
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -81,9 +82,9 @@ def fixture_data_fake_clinical_history_factory(
     def factory() -> dict:
         fake_clinical_history = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.clinical_history_schema,
-            document=fake_clinical_history,
+            data=fake_clinical_history,
         )
 
         return fake_clinical_history

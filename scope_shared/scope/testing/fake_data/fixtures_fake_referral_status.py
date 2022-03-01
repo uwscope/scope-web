@@ -10,6 +10,7 @@ from typing import Callable
 import faker
 import pytest
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -62,9 +63,9 @@ def fixture_data_fake_referral_status_factory(
     def factory() -> dict:
         fake_referral_status = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.referral_status_schema,
-            document=fake_referral_status,
+            data=fake_referral_status,
         )
 
         return fake_referral_status

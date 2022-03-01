@@ -5,6 +5,7 @@ import pytest
 import scope.database.collection_utils as collection_utils
 import scope.database.providers
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -45,9 +46,9 @@ def fixture_data_fake_provider_identity_factory(
     def factory() -> dict:
         fake_identity = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.provider_identity_schema,
-            document=fake_identity,
+            data=fake_identity,
         )
 
         return fake_identity

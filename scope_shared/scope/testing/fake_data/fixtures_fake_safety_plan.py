@@ -7,6 +7,7 @@ import scope.database.date_utils as date_utils
 import scope.database.document_utils as document_utils
 import scope.database.patient.safety_plan
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -86,9 +87,9 @@ def fixture_data_fake_safety_plan_factory(
     def factory() -> dict:
         fake_safety_plan = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.safety_plan_schema,
-            document=fake_safety_plan,
+            data=fake_safety_plan,
         )
 
         return fake_safety_plan

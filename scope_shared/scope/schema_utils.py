@@ -2,6 +2,11 @@ import jschon
 import pprint
 from typing import List, Union
 
+try:
+    import pytest
+except ImportError:
+    pytest = None
+
 
 def assert_schema(
     *,
@@ -26,10 +31,33 @@ def raise_for_invalid_schema(
     schema: jschon.JSONSchema,
 ) -> None:
     """
-    Verify a document matches a schema, raise an Error if it does not.
+    Verify a document matches a schema, raise ValueError if it does not.
     """
 
     result = schema.evaluate(jschon.JSON(data))
 
     if not result.valid:
         raise ValueError(result.output("detailed"))
+
+
+def xfail_for_invalid_schema(
+    *,
+    schema: jschon.JSONSchema,
+    data: Union[dict, List[dict]],
+) -> None:
+    """
+    Verify a document matches a schema, xfail if it does not.
+    """
+
+    result = schema.evaluate(jschon.JSON(data))
+    if not result.valid:
+        schema_output = result.output("detailed")
+
+        pprint.pprint(data)
+        print()
+        pprint.pprint(schema_output)
+
+        if pytest:
+            pytest.xfail("Invalid Schema.")
+        else:
+            raise ValueError(schema_output)

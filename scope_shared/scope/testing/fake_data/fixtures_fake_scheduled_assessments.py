@@ -9,6 +9,7 @@ import scope.database.date_utils as date_utils
 import scope.database.patient.assessments
 import scope.database.patient.scheduled_assessments
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -116,9 +117,9 @@ def fixture_data_fake_scheduled_assessment_factory(
 
         fake_scheduled_assessment = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.scheduled_assessment_schema,
-            document=fake_scheduled_assessment,
+            data=fake_scheduled_assessment,
         )
 
         return fake_scheduled_assessment
@@ -153,9 +154,9 @@ def fixture_data_fake_scheduled_assessments_factory(
 
             fake_scheduled_assessments.extend(unvalidated_factory())
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.scheduled_assessments_schema,
-            document=fake_scheduled_assessments,
+            data=fake_scheduled_assessments,
         )
 
         return fake_scheduled_assessments
