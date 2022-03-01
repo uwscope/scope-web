@@ -12,8 +12,9 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-
-OPTIONAL_KEYS = ["frequency", "dayOfWeek"]
+# TODO: Commenting because either both should exist or both should be removed
+# OPTIONAL_KEYS = ["frequency", "dayOfWeek"]
+OPTIONAL_KEYS = []
 
 
 def _fake_assessment(
