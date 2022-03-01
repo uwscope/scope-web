@@ -159,10 +159,9 @@ def get_patient_identities():
         database=database,
     )
 
-    # TODO: @James, do we need the below code?
     # Validate and normalize the response
-    # patient_identities = request_utils.set_get_response_validate(
-    #    documents=patient_identities,
-    # )
+    patient_identities = request_utils.set_get_response_validate(
+       documents=patient_identities,
+    )
 
     return {"patientidentities": patient_identities}

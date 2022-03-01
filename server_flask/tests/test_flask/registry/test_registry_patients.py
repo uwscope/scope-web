@@ -92,12 +92,11 @@ def test_patientidentities_get(
 
     assert "patientidentities" in response.json()
     patient_identity_documents = response.json()["patientidentities"]
-    for patient_identity_document_current in patient_identity_documents:
-        scope.testing.schema.assert_schema(
-            data=patient_identity_document_current,
-            schema=scope.schema.patient_identity_schema,
-            expected_valid=True,
-        )
+    scope.testing.schema.assert_schema(
+        data=patient_identity_documents,
+        schema=scope.schema.patient_identities_schema,
+        expected_valid=True,
+    )
 
     retrieved_ids = [
         patient_identity_document_current[
@@ -107,11 +106,6 @@ def test_patientidentities_get(
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
 
-    scope.testing.schema.assert_schema(
-        data=response.json()["patientidentities"],
-        schema=scope.schema.patient_identities_schema,
-        expected_valid=True,
-    )
 
 
 def test_patient_get(
