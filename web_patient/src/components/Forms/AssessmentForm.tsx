@@ -114,9 +114,8 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     }));
 
     const dataState = useLocalObservable<IAssessmentLog>(() => ({
-        scheduleId: scheduledAssessment.scheduleId,
+        scheduledAssessmentId: scheduledAssessment.scheduledAssessmentId,
         assessmentId: assessmentContent.id,
-        assessmentName: assessmentContent.name,
 
         completed: false,
 
@@ -136,6 +135,7 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     });
 
     const handleSubmit = action(async () => {
+        dataState.completed = true;
         return await patientStore.saveAssessmentLog(dataState);
     });
 

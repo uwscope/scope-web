@@ -167,7 +167,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
-        scheduleId: task.scheduleId,
+        scheduledActivityId: task.scheduledActivityId,
         alternative: '',
         comment: '',
         pleasure: 5,

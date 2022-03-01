@@ -28,14 +28,13 @@ const CompactList = withTheme(
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const navigate = useNavigate();
-    const { todayItems, config, scheduledAssessments } = rootStore.patientStore;
 
     const onTaskClick = action((item: IScheduledActivity) => () => {
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
                 [Parameters.activityId]: item.activityId,
-                [Parameters.taskId]: item.scheduleId,
-            })
+                [Parameters.taskId]: item.scheduledActivityId,
+            }),
         );
     });
 
@@ -49,8 +48,6 @@ export const HomePage: FunctionComponent = observer(() => {
         navigate(`${Routes.resources}/${Routes.valuesInventory}`);
     });
 
-    console.log(rootStore.inspirationalQuote);
-
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
@@ -60,7 +57,7 @@ export const HomePage: FunctionComponent = observer(() => {
             ) : null}
             <Section title={getString('Home_things_title')}>
                 <CompactList>
-                    {!!config.assignedValuesInventory && (
+                    {!!rootStore.patientStore.config.assignedValuesInventory && (
                         <ListItem button onClick={onValuesInventoryClick}>
                             <ListItemAvatar>
                                 <Avatar
@@ -72,8 +69,9 @@ export const HomePage: FunctionComponent = observer(() => {
                             <ListItemText primary={getString('Home_values_button_text')} />
                         </ListItem>
                     )}
-                    {config.assignedValuesInventory && config.assignedSafetyPlan && <Divider variant="middle" />}
-                    {!!config.assignedSafetyPlan && (
+                    {rootStore.patientStore.config.assignedValuesInventory &&
+                        rootStore.patientStore.config.assignedSafetyPlan && <Divider variant="middle" />}
+                    {!!rootStore.patientStore.config.assignedSafetyPlan && (
                         <ListItem button onClick={onSafetyPlanClick}>
                             <ListItemAvatar>
                                 <Avatar
@@ -85,38 +83,43 @@ export const HomePage: FunctionComponent = observer(() => {
                             <ListItemText primary={getString('Home_safety_button_text')} />
                         </ListItem>
                     )}
-                    {(config.assignedValuesInventory || config.assignedSafetyPlan) && <Divider variant="middle" />}
-                    {scheduledAssessments &&
-                        scheduledAssessments.length > 0 &&
-                        scheduledAssessments.map((assessment) => (
-                            <Fragment key={assessment.scheduleId}>
-                                <ListItem
-                                    button
-                                    component={Link}
-                                    to={getFormPath(ParameterValues.form.assessmentLog, {
-                                        [Parameters.taskId]: assessment.scheduleId,
-                                        [Parameters.assessmentId]: assessment.assessmentId,
-                                    })}>
-                                    <ListItemAvatar>
-                                        <Avatar
-                                            variant="square"
-                                            alt={getString('Home_assessment_button_text').replace(
+                    {(rootStore.patientStore.config.assignedValuesInventory ||
+                        rootStore.patientStore.config.assignedSafetyPlan) && <Divider variant="middle" />}
+                    {rootStore.patientStore.assessmentsToComplete &&
+                        rootStore.patientStore.assessmentsToComplete.length > 0 &&
+                        rootStore.patientStore.assessmentsToComplete.map((assessment) => {
+                            const assessmentContent = rootStore.getAssessmentContent(assessment.assessmentId);
+
+                            return (
+                                <Fragment key={assessment.scheduledAssessmentId}>
+                                    <ListItem
+                                        button
+                                        component={Link}
+                                        to={getFormPath(ParameterValues.form.assessmentLog, {
+                                            [Parameters.taskId]: assessment.scheduledAssessmentId,
+                                            [Parameters.assessmentId]: assessment.assessmentId,
+                                        })}>
+                                        <ListItemAvatar>
+                                            <Avatar
+                                                variant="square"
+                                                alt={getString('Home_assessment_button_text').replace(
+                                                    '${assessment}',
+                                                    assessmentContent?.name || 'Unknown assessment',
+                                                )}
+                                                src={getImage('Home_safety_button_image')}
+                                            />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={getString('Home_assessment_button_text').replace(
                                                 '${assessment}',
-                                                assessment.assessmentName,
+                                                assessmentContent?.name || 'Unknown assessment',
                                             )}
-                                            src={getImage('Home_safety_button_image')}
                                         />
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={getString('Home_assessment_button_text').replace(
-                                            '${assessment}',
-                                            assessment.assessmentName,
-                                        )}
-                                    />
-                                </ListItem>
-                                <Divider variant="middle" />
-                            </Fragment>
-                        ))}
+                                    </ListItem>
+                                    <Divider variant="middle" />
+                                </Fragment>
+                            );
+                        })}
                     <ListItem button component={Link} to={getFormLink(ParameterValues.form.moodLog)}>
                         <ListItemAvatar>
                             <Avatar
@@ -130,12 +133,12 @@ export const HomePage: FunctionComponent = observer(() => {
                 </CompactList>
             </Section>
             <Section title={getString('Home_plan_title')}>
-                {!!todayItems && todayItems.length > 0 ? (
+                {!!rootStore.patientStore.todayItems && rootStore.patientStore.todayItems.length > 0 ? (
                     <CompactList>
-                        {todayItems.map((item, idx) => (
-                            <Fragment key={item.scheduleId}>
+                        {rootStore.patientStore.todayItems.map((item, idx) => (
+                            <Fragment key={item.scheduledActivityId}>
                                 <ScheduledListItem item={item} onClick={onTaskClick(item)} />
-                                {idx < todayItems.length - 1 && <Divider variant="middle" />}
+                                {idx < rootStore.patientStore.todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
                         ))}
                     </CompactList>

@@ -130,7 +130,7 @@ export const behavioralStrategyChecklistValues = [
 ] as const;
 export type BehavioralStrategyChecklistItem = typeof behavioralStrategyChecklistValues[number] | OtherSpecify;
 
-export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly', 'None'] as const;
+export const assessmentFrequencyValues = ['Daily', 'Once a week', 'Every 2 weeks', 'Monthly'] as const;
 export type AssessmentFrequency = typeof assessmentFrequencyValues[number];
 
 export const phq9ItemValues = [

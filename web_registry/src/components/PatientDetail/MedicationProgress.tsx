@@ -14,7 +14,7 @@ import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { GridDropdownField } from 'src/components/common/GridField';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
-import { usePatient } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 
 export interface IMedicationProgressProps {
     assessment: IAssessment;
@@ -23,8 +23,11 @@ export interface IMedicationProgressProps {
 
 export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = observer((props) => {
     const currentPatient = usePatient();
+    const rootStore = useStores();
 
     const { assessment, assessmentLogs } = props;
+
+    const assessmentContent = rootStore.getAssessmentContent(assessment.assessmentId);
 
     const state = useLocalObservable<{
         openConfigure: boolean;
@@ -42,7 +45,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const handleConfigure = action(() => {
         state.openConfigure = true;
-        state.frequency = assessment.frequency || 'None';
+        state.frequency = assessment.frequency || 'Every 2 weeks';
         state.dayOfWeek = assessment.dayOfWeek || 'Monday';
     });
 
@@ -113,7 +116,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
     return (
         <ActionPanel
             id={assessment.assessmentId}
-            title={assessment.assessmentName}
+            title={assessmentContent?.name || 'Unknown assessment'}
             inlineTitle={recurrence}
             loading={currentPatient?.loadAssessmentLogsState.pending}
             error={currentPatient?.loadAssessmentLogsState.error}

@@ -29,7 +29,6 @@ export const ProgressInformation: FunctionComponent = observer(() => {
             currentPatient?.assessments.find((a) => a.assessmentId == assessmentId) ||
             ({
                 assessmentId,
-                assessmentName: assessmentContent.name,
                 assigned: false,
             } as IAssessment);
 
@@ -44,6 +43,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                         <AssessmentProgress
                             assessment={assessment}
                             assessmentLogs={assessmentLogs}
+                            assessmentName={assessmentContent.name}
                             instruction={assessmentContent.instruction}
                             questions={assessmentContent.questions}
                             options={assessmentContent.options}

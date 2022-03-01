@@ -1,5 +1,5 @@
-import { makeAutoObservable } from 'mobx';
-import { IAppConfig, IAppContentConfig } from 'shared/types';
+import { action, makeAutoObservable } from 'mobx';
+import { IAppConfig, IAppContentConfig, IAssessmentContent } from 'shared/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 
@@ -11,6 +11,9 @@ export interface IRootStore {
     // App metadata
     appTitle: string;
     appContentConfig: IAppContentConfig;
+
+    // Helpers
+    getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
 }
 
 export class RootStore implements IRootStore {
@@ -30,5 +33,10 @@ export class RootStore implements IRootStore {
         this.authStore = new AuthStore(serverConfig.auth);
 
         makeAutoObservable(this);
+    }
+
+    @action.bound
+    public getAssessmentContent(assessmentId: string) {
+        return this.appContentConfig.assessments.find((s) => s.id.toLowerCase() == assessmentId.toLowerCase());
     }
 }

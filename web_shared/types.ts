@@ -91,7 +91,6 @@ export interface ICaseReview {
 
 export interface IAssessment {
     assessmentId: string;
-    assessmentName: string;
     assigned: boolean;
     assignedDate?: Date;
     frequency?: AssessmentFrequency;
@@ -114,12 +113,13 @@ export interface IActivity {
 }
 
 export interface IScheduledItem {
-    scheduleId: string;
     dueDate: Date;
     dueType: DueType;
 }
 
 export interface IScheduledActivity extends IScheduledItem {
+    scheduledActivityId: string;
+
     activityId: string;
     activityName: string;
     reminder: Date;
@@ -128,15 +128,15 @@ export interface IScheduledActivity extends IScheduledItem {
 }
 
 export interface IScheduledAssessment extends IScheduledItem {
+    scheduledAssessmentId: string;
+
     assessmentId: string;
-    assessmentName: string;
 
     completed: boolean;
 }
 export type AssessmentData = KeyedMap<number | undefined>;
 
 export interface ILog {
-    logId?: string; // Should these be optional until committed?
     recordedDate: Date;
     comment?: string;
 }
@@ -144,7 +144,7 @@ export interface ILog {
 export interface IActivityLog extends ILog {
     activityLogId?: string;
 
-    scheduleId: string;
+    scheduledActivityId: string;
     activityName: string;
 
     completed?: boolean;
@@ -157,9 +157,8 @@ export interface IActivityLog extends ILog {
 export interface IAssessmentLog extends ILog {
     assessmentLogId?: string;
 
-    scheduleId: string;
+    scheduledAssessmentId: string;
     assessmentId: string; // NEW
-    assessmentName: string;
 
     completed: boolean;
     patientSubmitted?: boolean; // NEW
@@ -292,7 +291,7 @@ export interface IPatientList {
 export interface IPatientConfig {
     assignedValuesInventory: boolean;
     assignedSafetyPlan: boolean;
-    assignedAssessmentIds: string[];
+    assignedScheduledAssessments: IScheduledAssessment[];
 }
 
 export interface IAppConfig {

@@ -8,7 +8,7 @@ import ActionPanel from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
-import { usePatient } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 
 export interface IMoodProgressProps {
     assessment: IAssessment;
@@ -18,8 +18,11 @@ export interface IMoodProgressProps {
 
 export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
     const currentPatient = usePatient();
+    const rootStore = useStores();
 
     const { moodLogs, assessment, maxValue } = props;
+
+    const assessmentContent = rootStore.getAssessmentContent(assessment.assessmentId);
 
     const sortedMoodLogs = moodLogs?.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
 
@@ -72,7 +75,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
     return (
         <ActionPanel
             id={assessment.assessmentId}
-            title={assessment.assessmentName}
+            title={assessmentContent?.name || 'Mood'}
             loading={currentPatient?.loadMoodLogsState.pending}
             error={currentPatient?.loadMoodLogsState.error}>
             <Grid container alignItems="stretch">
