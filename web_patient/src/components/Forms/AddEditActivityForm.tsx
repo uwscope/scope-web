@@ -105,13 +105,17 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleSubmit = action(async () => {
         const activity = toJS(dataState);
 
-        if (!!activity.activityId) {
-            await patientStore.updateActivity(dataState);
-        } else {
-            await patientStore.addActivity(dataState);
-        }
+        try {
+            if (!!activity.activityId) {
+                await patientStore.updateActivity(dataState);
+            } else {
+                await patientStore.addActivity(dataState);
+            }
 
-        return !patientStore.loadActivitiesState.error;
+            return !patientStore.loadActivitiesState.error;
+        } catch {
+            return false;
+        }
     });
 
     const handleOpenImportActivity = action(() => {

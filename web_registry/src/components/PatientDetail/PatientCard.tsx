@@ -152,7 +152,7 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
                 <Snackbar
                     open={openError && !state.open}
                     message={`Sorry, there was an error processing your request. Please try again.`}
-                    autoHideDuration={2000}
+                    autoHideDuration={6000}
                     onClose={handleErrorClose}
                 />
             </Grid>

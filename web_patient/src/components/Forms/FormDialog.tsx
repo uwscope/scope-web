@@ -151,6 +151,10 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         forceClose();
     });
 
+    const handleSnackbarClose = action(() => {
+        state.submitErrorOpen = false;
+    });
+
     return (
         <Dialog fullScreen open={isOpen} onClose={closeAction} TransitionComponent={Transition}>
             <AppBar>
@@ -197,7 +201,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Snackbar open={state.submitErrorOpen}>
+            <Snackbar open={state.submitErrorOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
                 <Alert
                     severity="error"
                     action={

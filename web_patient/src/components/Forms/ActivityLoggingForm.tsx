@@ -177,7 +177,12 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const handleSubmit = action(async () => {
-        return await patientStore.completeScheduledActivity(task, dataState);
+        try {
+            await patientStore.completeScheduledActivity(dataState);
+            return !patientStore.loadActivityLogsState.error;
+        } catch {
+            return false;
+        }
     });
 
     const handleValueChange = action((key: string, value: any) => {

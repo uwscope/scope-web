@@ -1,4 +1,4 @@
-import { action, computed, makeAutoObservable } from 'mobx';
+import { action, computed, makeAutoObservable, toJS } from 'mobx';
 import {
     IActivity,
     IActivityLog,
@@ -54,9 +54,8 @@ export interface IPatientStore {
     // Data load/save
     load: () => Promise<void>;
 
-    // TODO: Don't require boolean return, handle error in the dialog
-    completeScheduledActivity: (scheduledItem: IScheduledActivity, activityLog: IActivityLog) => Promise<boolean>;
-    saveAssessmentLog: (assessmentData: IAssessmentLog) => Promise<boolean>;
+    completeScheduledActivity: (activityLog: IActivityLog) => Promise<void>;
+    saveAssessmentLog: (assessmentData: IAssessmentLog) => Promise<void>;
 
     updateSafetyPlan: (safetyPlan: ISafetyPlan) => Promise<void>;
 
@@ -255,26 +254,25 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async completeScheduledActivity(scheduledItem: IScheduledActivity, activityLog: IActivityLog) {
-        const promise = this.patientService.addActivityLog(activityLog).then((addedLog) => {
-            const newLogs = this.activityLogs.slice() || [];
-            newLogs.push(addedLog);
-            return newLogs;
-        });
+    public async completeScheduledActivity(activityLog: IActivityLog) {
+        const promise = this.patientService
+            .addActivityLog({ ...activityLog, completed: true, recordedDate: new Date() })
+            .then((addedLog) => {
+                const newLogs = this.activityLogs.slice() || [];
+                newLogs.push(addedLog);
+                return newLogs;
+            });
 
-        await this.loadActivityLogsQuery.fromPromise(promise);
-
-        const found = this.taskItems.filter((i) => i.scheduledActivityId == scheduledItem.scheduledActivityId)[0];
-        if (!!found) {
-            found.completed = true;
-        }
-
-        return true; // TODO: need to decide how to handle server errors
+        await this.loadAndLogQuery<IActivityLog[]>(
+            () => promise,
+            this.loadActivityLogsQuery,
+            onArrayConflict('activitylog', 'activityLogId', () => this.activityLogs, logger),
+        );
     }
 
     @action.bound
     public async saveMoodLog(moodLog: IMoodLog) {
-        const promise = this.patientService.addMoodLog(moodLog).then((addedLog) => {
+        const promise = this.patientService.addMoodLog({ ...moodLog, recordedDate: new Date() }).then((addedLog) => {
             const newLogs = this.moodLogs.slice() || [];
             newLogs.push(addedLog);
             return newLogs;
@@ -289,23 +287,32 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async saveAssessmentLog(assessmentLog: IAssessmentLog) {
-        const promise = this.patientService.addAssessmentLog(assessmentLog).then((addedLog) => {
-            const newLogs = this.assessmentLogs.slice() || [];
-            newLogs.push(addedLog);
-            return newLogs;
-        });
+        const promise = this.patientService
+            .addAssessmentLog({ ...assessmentLog, completed: true, recordedDate: new Date() })
+            .then((addedLog) => {
+                const newLogs = this.assessmentLogs.slice() || [];
+                newLogs.push(addedLog);
+                return newLogs;
+            });
 
-        await this.loadAssessmentLogsQuery.fromPromise(promise);
-        console.log('TODO: Mark assessment as done on the server and reload client config');
-
-        await this.loadAndLogQuery<IPatientConfig>(this.patientService.getPatientConfig, this.loadConfigQuery);
-        return true;
+        await this.loadAndLogQuery<IAssessmentLog[]>(
+            () => promise,
+            this.loadAssessmentLogsQuery,
+            onArrayConflict('assessmentlog', 'assessmentLogId', () => this.assessmentLogs, logger),
+        );
     }
 
     @action.bound
     public async updateSafetyPlan(safetyPlan: ISafetyPlan) {
-        const promise = this.patientService.updateSafetyPlan(safetyPlan);
-        await this.loadSafetyPlanQuery.fromPromise(promise);
+        const promise = this.patientService.updateSafetyPlan({
+            ...toJS(safetyPlan),
+        });
+
+        await this.loadAndLogQuery<ISafetyPlan>(
+            () => promise,
+            this.loadSafetyPlanQuery,
+            onSingletonConflict('safetyplan'),
+        );
     }
 
     @action.bound
@@ -350,66 +357,19 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async updateValuesInventory(inventory: IValuesInventory) {
-        const loggedCall = logger.logFunction<IValuesInventory>({
-            eventName: 'updateValuesInventory',
-        })(() => this.patientService.updateValuesInventory(inventory));
-        await this.loadValuesInventoryQuery.fromPromise(loggedCall, onSingletonConflict('valuesinventory'));
+        const promise = this.patientService.updateValuesInventory({
+            ...toJS(inventory),
+        });
+
+        await this.loadAndLogQuery<IValuesInventory>(
+            () => promise,
+            this.loadValuesInventoryQuery,
+            onSingletonConflict('valuesinventory'),
+        );
     }
 
     @action.bound
     public async loadMoodLogs() {
         await this.loadAndLogQuery<IMoodLog[]>(this.patientService.getMoodLogs, this.loadMoodLogsQuery);
     }
-
-    // private async loadAndLogQuery<T>(
-    //     queryCall: () => Promise<T>,
-    //     promiseQuery: PromiseQuery<T>,
-    //     onConflict?: (responseData?: any) => T,
-    // ) {
-    //     const effect = async () => {
-    //         const loggedCall = logger.logFunction<T>({ eventName: promiseQuery.name })(
-    //             queryCall.bind(this.patientService),
-    //         );
-    //         await promiseQuery.fromPromise(loggedCall, onConflict);
-    //     };
-
-    //     if (promiseQuery.state == 'Pending') {
-    //         when(
-    //             () => {
-    //                 return promiseQuery.state != 'Pending';
-    //             },
-    //             async () => {
-    //                 await effect();
-    //             },
-    //         );
-    //     } else {
-    //         await effect();
-    //     }
-    // }
-
-    // private onSingletonConflict =
-    //     (fieldName: string) =>
-    //     <T>(responseData?: any) => {
-    //         return responseData?.[fieldName] as T;
-    //     };
-
-    // private onArrayConflict =
-    //     <T>(itemName: string, idName: string, getArray: () => T[]) =>
-    //     (responseData: any | undefined) => {
-    //         const updatedLog = responseData?.[itemName];
-    //         if (!!updatedLog) {
-    //             const array = getArray();
-    //             const existing = array.find((l) => (l as any)[idName] == updatedLog[idName]);
-    //             logger.assert(!!existing, 'Log not found when expected');
-
-    //             if (!!existing) {
-    //                 Object.assign(existing, updatedLog);
-    //                 return array;
-    //             } else {
-    //                 return array.slice().concat([updatedLog]);
-    //             }
-    //         }
-
-    //         return getArray();
-    //     };
 }

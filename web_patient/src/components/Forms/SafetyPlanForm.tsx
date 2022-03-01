@@ -202,8 +202,12 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
     const dataState = useLocalObservable<ISafetyPlan>(() => ({ ...safetyPlan }));
 
     const handleSubmit = action(async () => {
-        await patientStore.updateSafetyPlan(dataState);
-        return true;
+        try {
+            await patientStore.updateSafetyPlan(dataState);
+            return !patientStore.loadSafetyPlanState.error;
+        } catch {
+            return false;
+        }
     });
 
     const onValueChange = (key: string) =>
