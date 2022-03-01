@@ -1,0 +1,11 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/patient-identities",
+	"title": "IPatientIdentity[]?",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/patient-identity"
+	},
+	"additionalProperties": false,
+	"required": []
+}
