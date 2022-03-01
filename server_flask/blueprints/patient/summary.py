@@ -1,4 +1,5 @@
 import datetime
+
 import flask
 import flask_json
 from typing import List
@@ -98,6 +99,7 @@ def get_patient_summary(patient_id):
             collection=patient_collection,
         )
     )
+    scheduled_assessment_documents = scheduled_assessment_documents or []
     values_inventory_document = (
         scope.database.patient.values_inventory.get_values_inventory(
             collection=patient_collection,
@@ -107,7 +109,6 @@ def get_patient_summary(patient_id):
     if not all(
         [
             safety_plan_document,
-            scheduled_assessment_documents,
             values_inventory_document,
         ]
     ):
