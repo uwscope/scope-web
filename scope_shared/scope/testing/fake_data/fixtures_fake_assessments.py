@@ -85,11 +85,12 @@ def fake_assessments_factory(
 
         fake_assessments = []
         for assessment_content_current in assessment_contents:
-            fake_assessment = _fake_assessment(
-                faker_factory=faker_factory,
-                assessment_content=assessment_content_current,
-            )
-            fake_assessments.append(fake_assessment)
+            if assessment_content_current["id"] != "mood":
+                fake_assessment = _fake_assessment(
+                    faker_factory=faker_factory,
+                    assessment_content=assessment_content_current,
+                )
+                fake_assessments.append(fake_assessment)
 
         return fake_assessments
 
