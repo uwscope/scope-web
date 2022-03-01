@@ -47,8 +47,8 @@ def compute_patient_summary(
     assigned_safety_plan: bool = safety_plan_document["assigned"]
     if assigned_safety_plan:
         if "lastUpdatedDateTime" in safety_plan_document:
-            assigned_safety_plan =(
-                date_utils.parse_datetime(safety_plan_document["lastUpdatedDateTime"]) >
+            assigned_safety_plan = (
+                date_utils.parse_datetime(safety_plan_document["lastUpdatedDateTime"]) <
                 date_utils.parse_datetime(safety_plan_document["assignedDateTime"])
             )
 
