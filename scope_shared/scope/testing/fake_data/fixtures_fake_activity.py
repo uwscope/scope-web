@@ -49,7 +49,7 @@ def fake_activity_factory(
             # Generate a text-based activity
             activity_name = faker_factory.text()
 
-        fake_activity = {
+        return {
             "_type": scope.database.patient.activities.DOCUMENT_TYPE,
             "name": activity_name,
             "value": activity_value["name"],
@@ -70,8 +70,6 @@ def fake_activity_factory(
             "isActive": random.choice([True, False]),
             "isDeleted": random.choice([True, False]),
         }
-
-        return document_utils.normalize_document(document=fake_activity)
 
     return factory
 
