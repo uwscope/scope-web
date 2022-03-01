@@ -67,7 +67,6 @@ const LoginForm: FunctionComponent<{
                 }}
             />
             <ButtonContainer>
-                <FormControlLabel control={<Checkbox name="checkedB" color="primary" />} label="Remember me" />
                 <Button type="submit" color="primary" variant="contained" onClick={onSubmit}>
                     Sign in
                 </Button>
@@ -103,7 +102,6 @@ const PasswordUpdateForm: FunctionComponent<{
                     shrink: true,
                 }}
             />
-            <FormControlLabel control={<Checkbox name="checkedB" color="primary" />} label="Remember me" />
             <Button type="submit" color="primary" variant="contained" fullWidth onClick={onSubmit}>
                 Update password
             </Button>
