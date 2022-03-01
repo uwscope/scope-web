@@ -82,32 +82,6 @@ def _fake_assessment_logs(
     return fake_assessment_logs
 
 
-# def fake_assessment_log_factory(
-#     *,
-#     faker_factory: faker.Faker,
-#     scheduled_assessments: List[dict],
-#     assessment_contents: List[dict],
-# ) -> Callable[[], dict]:
-#     """
-#     Obtain a factory that will generate fake assessment log document.
-#     """
-#
-#
-#
-#     def factory() -> dict:
-#         fake_assessment_log = random.choice(
-#             _fake_assessment_logs(
-#                 faker_factory=faker_factory,
-#                 scheduled_assessments=scheduled_assessments,
-#                 assessment_contents=assessment_contents,
-#             )
-#         )
-#
-#         return document_utils.normalize_document(document=fake_assessment_log)
-#
-#     return factory
-
-
 def fake_assessment_logs_factory(
     *,
     faker_factory: faker.Faker,
