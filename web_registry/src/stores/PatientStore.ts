@@ -73,7 +73,7 @@ export class PatientStore implements IPatientStore {
 
     public safetyPlan: ISafetyPlan = {
         assigned: false,
-        assignedDate: new Date(),
+        assignedDateTime: new Date(),
     };
 
     // Assessments
@@ -300,7 +300,7 @@ export class PatientStore implements IPatientStore {
         const { registryService } = useServices();
         const promise = registryService.updatePatientSafetyPlan(this.recordId, {
             assigned: true,
-            assignedDate: new Date(),
+            assignedDateTime: new Date(),
         });
 
         this.runPromiseAfterLoad(promise);

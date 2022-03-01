@@ -6,7 +6,6 @@ from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
 import scope.database.patient.activity_logs
 import scope.database.patient.scheduled_activities
 import scope.schema
@@ -29,8 +28,7 @@ def _fake_activity_logs(
 ) -> List[dict]:
     if len(scheduled_activities) > 1:
         sampled_scheduled_activities = random.sample(
-            scheduled_activities,
-            random.randint(1, len(scheduled_activities))
+            scheduled_activities, random.randint(1, len(scheduled_activities))
         )
     else:
         sampled_scheduled_activities = scheduled_activities
@@ -98,8 +96,15 @@ def fake_activity_logs_factory(
         raise ValueError("scheduled_activities must include at least one element.")
 
     for scheduled_activity_current in scheduled_activities:
-        if scope.database.patient.scheduled_activities.SEMANTIC_SET_ID not in scheduled_activity_current:
-            raise ValueError('scheduled_activities must include "{}".'.format(scope.database.patient.scheduled_activities.SEMANTIC_SET_ID))
+        if (
+            scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+            not in scheduled_activity_current
+        ):
+            raise ValueError(
+                'scheduled_activities must include "{}".'.format(
+                    scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+                )
+            )
 
     def factory() -> List[dict]:
         fake_activity_logs = _fake_activity_logs(
@@ -149,7 +154,9 @@ def fixture_data_fake_activity_logs_factory(
     for scheduled_activity_current in scheduled_activities:
         generated_set_id = collection_utils.generate_set_id()
         scheduled_activity_current["_set_id"] = generated_set_id
-        scheduled_activity_current[scope.database.patient.scheduled_activities.SEMANTIC_SET_ID] = generated_set_id
+        scheduled_activity_current[
+            scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+        ] = generated_set_id
 
     unvalidated_factory = fake_activity_logs_factory(
         faker_factory=faker,

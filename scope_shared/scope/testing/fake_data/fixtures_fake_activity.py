@@ -6,7 +6,7 @@ from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.activities
 
 import scope.schema
@@ -54,7 +54,7 @@ def fake_activity_factory(
             "name": activity_name,
             "value": activity_value["name"],
             "lifeareaId": activity_value["lifeareaId"],
-            "startDate": format_utils.format_date(
+            "startDate": date_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now(),
                     date_end=datetime.datetime.now() + datetime.timedelta(days=60),

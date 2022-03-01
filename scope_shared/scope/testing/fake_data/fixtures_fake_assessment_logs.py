@@ -6,7 +6,6 @@ from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
 import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.scheduled_assessments
@@ -47,13 +46,18 @@ def _fake_assessment_logs(
 ) -> List[dict]:
     # A utility dictionary for "id" lookups
     assessment_content_by_id = {
-        assessment_content["id"]: assessment_content for assessment_content in assessment_contents
+        assessment_content["id"]: assessment_content
+        for assessment_content in assessment_contents
     }
 
     fake_assessment_logs = []
     for scheduled_assessment_current in scheduled_assessments:
         fake_point_values = _fake_assessment_point_values(
-            assessment_content=assessment_content_by_id[scheduled_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID]]
+            assessment_content=assessment_content_by_id[
+                scheduled_assessment_current[
+                    scope.database.patient.assessments.SEMANTIC_SET_ID
+                ]
+            ]
         )
 
         fake_assessment_log = {
@@ -118,8 +122,15 @@ def fake_assessment_logs_factory(
         raise ValueError("scheduled_assessments must include at least one element.")
 
     for scheduled_assessment_current in scheduled_assessments:
-        if scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID not in scheduled_assessment_current:
-            raise ValueError('scheduled_assessments must include "{}".'.format(scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID))
+        if (
+            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+            not in scheduled_assessment_current
+        ):
+            raise ValueError(
+                'scheduled_assessments must include "{}".'.format(
+                    scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+                )
+            )
 
     def factory() -> List[dict]:
         fake_assessment_logs = _fake_assessment_logs(
@@ -129,8 +140,7 @@ def fake_assessment_logs_factory(
         )
 
         sampled_fake_assessment_logs = random.sample(
-            fake_assessment_logs,
-            random.randint(1, len(fake_assessment_logs))
+            fake_assessment_logs, random.randint(1, len(fake_assessment_logs))
         )
 
         return sampled_fake_assessment_logs
@@ -177,7 +187,9 @@ def fixture_data_fake_assessment_logs_factory(
     for scheduled_assessment_current in scheduled_assessments:
         generated_set_id = collection_utils.generate_set_id()
         scheduled_assessment_current["_set_id"] = generated_set_id
-        scheduled_assessment_current[scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID] = generated_set_id
+        scheduled_assessment_current[
+            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+        ] = generated_set_id
 
     unvalidated_factory = fake_assessment_logs_factory(
         faker_factory=faker,

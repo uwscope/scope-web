@@ -67,7 +67,7 @@
 		"_type": "safetyPlan",
 		"_rev": 1,
 		"assigned": true,
-		"assignedDate": "1991-08-19T00:00:00Z",
+		"assignedDateTime": "1991-08-19T11:11:11Z",
 		"reasonsForLiving": "reasons",
 		"warningSigns": ["warningSign1", "warningSign2"],
 		"copingStrategies": ["copingStrategies1", "copingStrategies2"],

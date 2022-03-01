@@ -3,6 +3,8 @@ from typing import Callable
 from urllib.parse import urljoin
 
 import scope.config
+import scope.schema
+import scope.testing.schema
 import tests.testing_config
 
 TESTING_CONFIGS = tests.testing_config.ALL_CONFIGS
@@ -21,18 +23,19 @@ def test_app_config(
             "app/config",
         ),
     )
-
     assert response.ok
 
     config = response.json()
 
-    # TODO: Anant: Define and check a schema
+    # Remove "status" for schema validation
+    assert "status" in config
+    del config["status"]
 
-    assert "auth" in config
-    assert "content" in config
-    assert "assessments" in config["content"]
-    assert "lifeAreas" in config["content"]
-    assert "resources" in config["content"]
+    scope.testing.schema.assert_schema(
+        data=config,
+        schema=scope.schema.app_config_schema,
+        expected_valid=True
+    )
 
 
 def test_app_quote(

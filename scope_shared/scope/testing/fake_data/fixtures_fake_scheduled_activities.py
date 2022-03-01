@@ -5,8 +5,8 @@ import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
+import scope.database.date_utils as date_utils
 import scope.database.document_utils as document_utils
-import scope.database.format_utils as format_utils
 import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
 import scope.schema
@@ -21,16 +21,18 @@ def _fake_scheduled_activity(
 ) -> dict:
     return {
         "_type": scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
-        "dueDate": format_utils.format_date(
+        "dueDate": date_utils.format_date(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now() - datetime.timedelta(days=10),
                 date_end=datetime.datetime.now() + datetime.timedelta(days=10),
             )
         ),
         "dueType": fake_utils.fake_enum_value(scope.testing.fake_data.enums.DueType),
-        scope.database.patient.activities.SEMANTIC_SET_ID: activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+        scope.database.patient.activities.SEMANTIC_SET_ID: activity[
+            scope.database.patient.activities.SEMANTIC_SET_ID
+        ],
         "activityName": activity["name"],
-        "reminder": format_utils.format_date(
+        "reminder": date_utils.format_date(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now(),
                 date_end=datetime.datetime.now() + datetime.timedelta(days=7),
@@ -92,7 +94,11 @@ def fake_scheduled_activities_factory(
 
     for activity_current in activities:
         if scope.database.patient.activities.SEMANTIC_SET_ID not in activity_current:
-            raise ValueError('activities must include "{}".'.format(scope.database.patient.activities.SEMANTIC_SET_ID))
+            raise ValueError(
+                'activities must include "{}".'.format(
+                    scope.database.patient.activities.SEMANTIC_SET_ID
+                )
+            )
 
     def factory() -> List[dict]:
         fake_scheduled_activities = _fake_scheduled_activities(
@@ -115,7 +121,9 @@ def fixture_data_fake_scheduled_activity_factory(
     """
 
     def factory() -> dict:
-        fake_scheduled_activity = random.choice(data_fake_scheduled_activities_factory())
+        fake_scheduled_activity = random.choice(
+            data_fake_scheduled_activities_factory()
+        )
 
         fake_utils.xfail_for_invalid(
             schema=scope.schema.scheduled_activity_schema,
@@ -147,7 +155,9 @@ def fixture_data_fake_scheduled_activities_factory(
     for activity_current in activities:
         generated_set_id = collection_utils.generate_set_id()
         activity_current["_set_id"] = generated_set_id
-        activity_current[scope.database.patient.activities.SEMANTIC_SET_ID] = generated_set_id
+        activity_current[
+            scope.database.patient.activities.SEMANTIC_SET_ID
+        ] = generated_set_id
 
     unvalidated_factory = fake_scheduled_activities_factory(
         faker_factory=faker,

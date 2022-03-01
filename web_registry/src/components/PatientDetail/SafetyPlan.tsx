@@ -13,16 +13,16 @@ import { usePatient } from 'src/stores/stores';
 export const SafetyPlan: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
     const { safetyPlan } = currentPatient;
-    const { assigned, assignedDate, lastUpdatedDate } = safetyPlan;
+    const { assigned, assignedDateTime, lastUpdatedDateTime } = safetyPlan;
 
     var dateStrings: string[] = [];
-    if (assigned && !!assignedDate) {
-        dateStrings.push(`${getString('patient_safety_plan_assigned_date')} ${format(assignedDate, 'MM/dd/yyyy')}`);
+    if (assigned && !!assignedDateTime) {
+        dateStrings.push(`${getString('patient_safety_plan_assigned_date')} ${format(assignedDateTime, 'MM/dd/yyyy')}`);
     }
 
-    if (!!lastUpdatedDate) {
+    if (!!lastUpdatedDateTime) {
         dateStrings.push(
-            `${getString('patient_safety_plan_activity_date_header')} ${format(lastUpdatedDate, 'MM/dd/yyyy')}`,
+            `${getString('patient_safety_plan_activity_date_header')} ${format(lastUpdatedDateTime, 'MM/dd/yyyy')}`,
         );
     }
 

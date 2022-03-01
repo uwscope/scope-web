@@ -37,12 +37,7 @@ def create_patient(
     generated_patient_collection_name = _patient_collection_name(patient_id=patient_id)
 
     # Ensure this patient id and collection do not already exist
-    if (
-        scope.database.patients.get_patient_identity(
-            database=database, patient_id=patient_id
-        )
-        is not None
-    ):
+    if get_patient_identity(database=database, patient_id=patient_id) is not None:
         raise ValueError('Patient "{}" already exists'.format(patient_id))
     if generated_patient_collection_name in database.list_collection_names():
         raise ValueError(
@@ -75,7 +70,7 @@ def create_patient(
     # Atomically store the patient identity document.
     # Do this last, because it means all other steps have already succeeded.
     patient_identity_document = {
-        "_type": scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE,
+        "_type": PATIENT_IDENTITY_DOCUMENT_TYPE,
         "name": name,
         "MRN": MRN,
         "collection": generated_patient_collection_name,

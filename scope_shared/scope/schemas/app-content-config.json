@@ -1,0 +1,20 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/app-content-config",
+	"title": "IAppContentConfig",
+	"description": "IAppContentConfig Type",
+	"type": "object",
+	"properties": {
+		"assessments": {
+			"$ref": "/schemas/assessment-contents"
+		},
+		"lifeAreas": {
+			"$ref": "/schemas/life-area-contents"
+		},
+		"resources": {
+			"$ref": "/schemas/resource-contents"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["assessments", "lifeAreas", "resources"]
+}
