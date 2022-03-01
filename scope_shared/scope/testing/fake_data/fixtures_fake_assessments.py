@@ -12,9 +12,9 @@ import scope.schema
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
-
 # TODO: Commenting because either both should exist or both should be removed
 # OPTIONAL_KEYS = ["frequency", "dayOfWeek"]
+OPTIONAL_KEYS = []
 
 
 def _fake_assessment(
@@ -44,10 +44,10 @@ def _fake_assessment(
     }
 
     # Remove a randomly sampled subset of optional parameters.
-    # fake_assessment = fake_utils.fake_optional(
-    #     document=fake_assessment,
-    #     optional_keys=OPTIONAL_KEYS,
-    # )
+    fake_assessment = fake_utils.fake_optional(
+        document=fake_assessment,
+        optional_keys=OPTIONAL_KEYS,
+    )
 
     return fake_assessment
 
