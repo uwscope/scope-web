@@ -13,11 +13,11 @@
         "assigned": {
             "type": "boolean"
         },
-        "assignedDate": {
-            "$ref": "/schemas/datetime#/properties/date"
+        "assignedDateTime": {
+            "$ref": "/schemas/datetime#/properties/datetime"
         },
-        "lastUpdatedDate": {
-            "$ref": "/schemas/datetime#/properties/date"
+        "lastUpdatedDateTime": {
+            "$ref": "/schemas/datetime#/properties/datetime"
         },
         "reasonsForLiving": {
             "type": "string"
@@ -64,5 +64,5 @@
         }
     },
     "additionalProperties": false,
-    "required": ["_type", "assigned", "assignedDate"]
+    "required": ["_type", "assigned", "assignedDateTime"]
 }

@@ -11,7 +11,7 @@ import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
-    "lastUpdatedDate",
+    "lastUpdatedDateTime",
     "reasonsForLiving",
     "warningSigns",
     "copingStrategies",
@@ -37,8 +37,8 @@ def fake_safety_plan_factory(
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDate": date_utils.format_date(faker_factory.date_object()),
-            "lastUpdatedDate": date_utils.format_date(faker_factory.date_object()),
+            "assignedDateTime": date_utils.format_datetime(faker_factory.date_object()),
+            "lastUpdatedDateTime": date_utils.format_datetime(faker_factory.date_object()),
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),
             "copingStrategies": faker_factory.texts(nb_texts=random.randint(1, 5)),
