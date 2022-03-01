@@ -35,5 +35,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDate", "frequency", "dayOfWeek"]
+	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDate"]
 }
