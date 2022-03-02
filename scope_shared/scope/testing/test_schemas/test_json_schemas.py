@@ -40,6 +40,13 @@ TEST_CONFIGS = [
         document_path="patient-identity.json",
         expected_valid=True,
     ),
+    # populate-config
+    ConfigTestJSONSchema(
+        name="populate-config",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/empty-create-existing.json",
+        expected_valid=True,
+    ),
     # provider-identity
     ConfigTestJSONSchema(
         name="provider-identity",
