@@ -1,9 +1,19 @@
 import datetime as _datetime
+import dateutil.rrule
 from typing import Union
 
 
 DATETIME_FORMAT_COMPLETE = "%Y-%m-%dT%H:%M:%S.%fZ"
 DATETIME_FORMAT_NO_MICROSECONDS = "%Y-%m-%dT%H:%M:%SZ"
+DATEUTIL_WEEKDAYS_MAP = {
+    "Monday": dateutil.rrule.MO,
+    "Tuesday": dateutil.rrule.TU,
+    "Wednesday": dateutil.rrule.WE,
+    "Thursday": dateutil.rrule.TH,
+    "Friday": dateutil.rrule.FR,
+    "Saturday": dateutil.rrule.SA,
+    "Sunday": dateutil.rrule.SU,
+}
 
 
 def parse_date(date: str) -> _datetime.date:
@@ -12,7 +22,11 @@ def parse_date(date: str) -> _datetime.date:
     """
     parsed_datetime = parse_datetime(date)
 
-    if (parsed_datetime.hour, parsed_datetime.minute, parsed_datetime.second) != (0, 0, 0):
+    if (parsed_datetime.hour, parsed_datetime.minute, parsed_datetime.second) != (
+        0,
+        0,
+        0,
+    ):
         raise ValueError(
             "time data {} does not match format '%Y-%m-%dT00:00:00Z".format(date)
         )
