@@ -83,6 +83,7 @@ def task_populate(
 
         print('Using config "{}".'.format(populate_config_path.name))
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        yaml.default_flow_style = False
         populate_config = yaml.load(populate_config_current_path(populate_dir_path=populate_dir_path))
 
         # Obtain a database client
