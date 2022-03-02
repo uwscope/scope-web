@@ -47,6 +47,18 @@ TEST_CONFIGS = [
         document_path="populate-config/empty-create-existing.json",
         expected_valid=True,
     ),
+    ConfigTestJSONSchema(
+        name="populate-config",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/patients-create-missing.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="populate-config",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/patients-create-existing-missing.json",
+        expected_valid=False,
+    ),
     # provider-identity
     ConfigTestJSONSchema(
         name="provider-identity",
