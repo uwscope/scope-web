@@ -3,7 +3,6 @@ import contextlib
 import datetime
 from invoke import task
 from pathlib import Path
-import pymongo.database
 import re
 import ruamel.yaml
 from typing import Union
@@ -11,7 +10,7 @@ from typing import Union
 import scope.config
 import scope.database.initialize
 import scope.documentdb.client
-import scope.tasks.populate_fake
+import scope.populate
 
 
 def populate_config_current_path(
@@ -58,20 +57,6 @@ def populate_config_generate_path(
     )
 
 
-def populate_from_config(
-    *,
-    database: pymongo.database.Database,
-    populate_config: dict
-) -> dict:
-    """
-    Populate from a provided config.
-
-    Return a new state of the populate config.
-    """
-
-    return populate_config
-
-
 def task_populate(
     *,
     instance_ssh_config_path: Union[Path, str],
@@ -93,10 +78,10 @@ def task_populate(
         Populate the {} database with fake data.
         """
 
+        # Obtain the current populate config
         populate_config_path = populate_config_current_path(populate_dir_path=populate_dir_path)
 
         print('Using config "{}".'.format(populate_config_path.name))
-
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         populate_config = yaml.load(populate_config_current_path(populate_dir_path=populate_dir_path))
 
@@ -114,11 +99,13 @@ def task_populate(
                 password=database_config.password,
             )
 
-            populate_config_update = populate_from_config(
+            # Perform the populate
+            populate_config_update = scope.populate.populate_from_config(
                 database=database,
                 populate_config=populate_config
             )
 
+        # Store the updated populate config
         populate_config_update_path = populate_config_generate_path(
             populate_dir_path=populate_dir_path
         )
