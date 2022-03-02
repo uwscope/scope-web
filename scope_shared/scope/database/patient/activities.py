@@ -56,7 +56,8 @@ def post_activity(
     # TODO: Create scheduledActivities here.
     scheduled_activities = (
         scope.database.patient.scheduled_activities.create_scheduled_activities(
-            activity=activity_set_post_result.document
+            activity=activity_set_post_result.document,
+            weeks=12,  # ~ 3 months
         )
     )
     for scheduled_activity_current in scheduled_activities:

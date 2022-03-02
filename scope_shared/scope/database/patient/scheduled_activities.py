@@ -51,6 +51,7 @@ def _compute_scheduled_activity_properties(
 def create_scheduled_activities(
     *,
     activity: dict,
+    weeks: int = 12,
 ) -> List[dict]:
     scheduled_activities = []
 
@@ -68,7 +69,7 @@ def create_scheduled_activities(
                 dateutil.rrule.WEEKLY,
                 dtstart=date_utils.parse_date(activity["startDate"]),
                 until=date_utils.parse_date(activity["startDate"])
-                + datetime.timedelta(weeks=12),  # ~ next 3 months
+                + datetime.timedelta(weeks=weeks),
                 byweekday=_compute_byweekday(
                     repeat_day_flags=activity["repeatDayFlags"]
                 ),
@@ -77,7 +78,9 @@ def create_scheduled_activities(
         for scheduled_activity_day_date_current in scheduled_activity_day_dates:
             scheduled_activity = _compute_scheduled_activity_properties(
                 activity=activity,
-                scheduled_activity_day_date=scheduled_activity_day_date_current,
+                scheduled_activity_day_date=date_utils.format_date(
+                    scheduled_activity_day_date_current
+                ),
             )
             scheduled_activities.append(scheduled_activity)
 
