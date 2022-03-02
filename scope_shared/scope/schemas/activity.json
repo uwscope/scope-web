@@ -30,16 +30,20 @@
 			"type": "string"
 		},
 		"startDate": {
-			"type": "string"
+			"$ref": "/schemas/datetime#/properties/date"
 		},
 		"timeOfDay": {
-			"type": "number"
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
 		},
 		"hasReminder": {
 			"type": "boolean"
 		},
 		"reminderTimeOfDay": {
-			"type": "number"
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
 		},
 		"hasRepetition": {
 			"type": "boolean"
