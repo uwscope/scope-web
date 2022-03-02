@@ -1,10 +1,92 @@
-from typing import List, Optional
+import datetime
+import dateutil.rrule
+import dateutil.parser
+from typing import List, Optional, Tuple
 
 import pymongo.collection
 import scope.database.collection_utils
+import scope.database.date_utils as date_utils
+import scope.database.patient.activities
+import scope.schema
+import scope.schema_utils as schema_utils
+
 
 DOCUMENT_TYPE = "scheduledActivity"
 SEMANTIC_SET_ID = "scheduledActivityId"
+
+
+def _compute_byweekday(repeat_day_flags: dict) -> Tuple:
+    byweekday = []
+    for day, day_flag in repeat_day_flags.items():
+        if day_flag:
+            byweekday.append(date_utils.DATEUTIL_WEEKDAYS_MAP[day])
+
+    return byweekday
+
+
+def _compute_scheduled_activity_properties(
+    activity: dict, scheduled_activity_day_date: str
+) -> dict:
+    scheduled_activity = {
+        "_type": DOCUMENT_TYPE,
+        "dueType": "Exact",
+        "activityId": activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+        "activityName": activity["name"],
+        "completed": False,
+    }
+    scheduled_activity["dueDate"] = date_utils.format_datetime(
+        date_utils.parse_date(scheduled_activity_day_date)
+        + datetime.timedelta(hours=activity["timeOfDay"])
+    )
+    if not activity.get("hasReminder"):
+        scheduled_activity["reminder"] = None
+    else:
+        scheduled_activity["reminder"] = date_utils.format_datetime(
+            date_utils.parse_date(scheduled_activity_day_date)
+            + datetime.timedelta(hours=activity["reminderTimeOfDay"])
+        )
+    return scheduled_activity
+
+
+def create_scheduled_activities(
+    *,
+    activity: dict,
+) -> List[dict]:
+    scheduled_activities = []
+
+    if not activity.get("hasRepetition"):
+        # Create 1 scheduled activity
+        # TODO: schema of scheduledItem/dueDate should be datetime. Want to see if jsonschema throws an error.
+        scheduled_activity = _compute_scheduled_activity_properties(
+            activity=activity, scheduled_activity_day_date=activity["startDate"]
+        )
+        scheduled_activities.append(scheduled_activity)
+    else:
+        # Create future dates using startDate and repeatDayFlags for the next 3 months
+        scheduled_activity_day_dates = list(
+            dateutil.rrule.rrule(
+                dateutil.rrule.WEEKLY,
+                dtstart=date_utils.parse_date(activity["startDate"]),
+                until=date_utils.parse_date(activity["startDate"])
+                + datetime.timedelta(weeks=12),  # ~ next 3 months
+                byweekday=_compute_byweekday(
+                    repeat_day_flags=activity["repeatDayFlags"]
+                ),
+            )
+        )
+        for scheduled_activity_day_date_current in scheduled_activity_day_dates:
+            scheduled_activity = _compute_scheduled_activity_properties(
+                activity=activity,
+                scheduled_activity_day_date=scheduled_activity_day_date_current,
+            )
+            scheduled_activities.append(scheduled_activity)
+
+    schema_utils.raise_for_invalid_schema(
+        data=scheduled_activities,
+        schema=scope.schema.scheduled_activities_schema,
+    )
+
+    return scheduled_activities
 
 
 def get_scheduled_activities(

@@ -33,7 +33,7 @@
 			"type": "string"
 		},
 		"reminder": {
-			"$ref": "/schemas/datetime#/properties/date"
+			"oneOf": [{ "$ref": "/schemas/datetime#/properties/datetime" }, { "type": "null" }]
 		},
 		"completed": {
 			"type": "boolean"
