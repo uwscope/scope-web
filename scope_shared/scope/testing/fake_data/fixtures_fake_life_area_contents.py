@@ -10,6 +10,7 @@ import pytest
 from typing import Callable, List
 
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
 APP_CONFIG_LIFE_AREAS_PATH = Path(
@@ -47,9 +48,9 @@ def fixture_data_fake_life_area_contents_factory() -> Callable[[], List[dict]]:
     def factory() -> List[dict]:
         fake_life_area_contents = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.life_area_contents_schema,
-            document=fake_life_area_contents,
+            data=fake_life_area_contents,
         )
 
         return fake_life_area_contents

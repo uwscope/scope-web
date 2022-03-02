@@ -9,6 +9,7 @@ import scope.database.document_utils as document_utils
 import scope.database.patient.assessments
 
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -112,9 +113,9 @@ def fixture_data_fake_assessment_factory(
 
         fake_assessment = random.choice(fake_assessments)
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.assessment_schema,
-            document=fake_assessment,
+            data=fake_assessment,
         )
 
         return fake_assessment
@@ -141,9 +142,9 @@ def fixture_data_fake_assessments_factory(
     def factory() -> List[dict]:
         fake_assessments = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.assessments_schema,
-            document=fake_assessments,
+            data=fake_assessments,
         )
 
         return fake_assessments

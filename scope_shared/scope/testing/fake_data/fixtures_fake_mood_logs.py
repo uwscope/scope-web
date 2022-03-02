@@ -4,6 +4,7 @@ from typing import Callable, List
 
 import scope.database.document_utils as document_utils
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
@@ -38,9 +39,9 @@ def fixture_data_fake_mood_logs_factory(
     def factory() -> List[dict]:
         fake_mood_logs = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.mood_logs_schema,
-            document=fake_mood_logs,
+            data=fake_mood_logs,
         )
 
         return fake_mood_logs

@@ -6,6 +6,7 @@ import pytest
 import scope.database.date_utils as date_utils
 import scope.database.patient.patient_profile
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -96,9 +97,9 @@ def fixture_data_fake_patient_profile_factory(
     def factory() -> dict:
         fake_patient_profile = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.patient_profile_schema,
-            document=fake_patient_profile,
+            data=fake_patient_profile,
         )
 
         return fake_patient_profile

@@ -3,6 +3,7 @@ import random
 from typing import Callable, List
 
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
@@ -37,9 +38,9 @@ def fixture_data_fake_activities_factory(
     def factory() -> List[dict]:
         fake_activities = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.activities_schema,
-            document=fake_activities,
+            data=fake_activities,
         )
 
         return fake_activities

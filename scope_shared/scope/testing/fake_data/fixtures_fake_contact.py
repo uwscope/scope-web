@@ -10,6 +10,7 @@ from typing import Callable
 import faker
 import pytest
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -61,9 +62,9 @@ def fixture_data_fake_contact_factory(
     def factory() -> dict:
         fake_contact = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.contact_schema,
-            document=fake_contact,
+            data=fake_contact,
         )
 
         return fake_contact
