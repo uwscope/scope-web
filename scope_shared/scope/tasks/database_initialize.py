@@ -7,7 +7,6 @@ from typing import Union
 import scope.config
 import scope.database.initialize
 import scope.documentdb.client
-import scope.testing.fake_data.populate
 
 
 def _initialize(
