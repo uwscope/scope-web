@@ -21,6 +21,7 @@ configure({
     reactionRequiresObservable: true,
     // observableRequiresReaction: true,
     disableErrorBoundaries: !isDev,
+    useProxies: 'never',
 });
 
 const theme = createAppTheme();
