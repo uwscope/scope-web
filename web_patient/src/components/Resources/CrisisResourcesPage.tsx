@@ -1,0 +1,85 @@
+import { Link, Stack, Typography } from '@mui/material';
+import { action } from 'mobx';
+import React, { FunctionComponent } from 'react';
+import { useNavigate } from 'react-router';
+import { DetailPage } from 'src/components/common/DetailPage';
+import { getString } from 'src/services/strings';
+import styled, { withTheme } from 'styled-components';
+
+const HeaderText = withTheme(
+    styled.div((props) => ({
+        fontSize: props.theme.typography.h6.fontSize,
+        fontWeight: props.theme.typography.fontWeightBold,
+        lineHeight: 1,
+        textTransform: 'uppercase',
+    })),
+);
+
+const ListDiv = styled.ul({
+    marginBlockStart: '0.5em',
+    marginBlockEnd: '0.5em',
+});
+
+export const CrisisResourcesPage: FunctionComponent = () => {
+    const navigate = useNavigate();
+
+    const handleGoBack = action(() => {
+        navigate(-1);
+    });
+
+    return (
+        <DetailPage title={getString('Resources_crisis_resources_title')} onBack={handleGoBack}>
+            <Stack spacing={4}>
+                <HeaderText>All resources are available 24x7</HeaderText>
+                <div>
+                    <Typography variant="body1">
+                        <b>National Suicide Prevention Lifeline</b>
+                    </Typography>
+                    <ListDiv>
+                        <li>
+                            <Typography variant="body1">Call 1-800-273-TALK (8255)</Typography>
+                        </li>
+                        <li>
+                            <Typography variant="body1">
+                                Lifeline Web Chat{'  '}
+                                <Link
+                                    href="https://suicidepreventionlifeline.org/chat/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    https://suicidepreventionlifeline.org/chat/
+                                </Link>
+                            </Typography>
+                        </li>
+                        <li>
+                            <Typography variant="body1">
+                                Crisis Text Line - Text "HELLO" to 741741{'  '}
+                                <Link
+                                    href="https://www.crisistextline.org/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    https://www.crisistextline.org/
+                                </Link>
+                            </Typography>
+                        </li>
+                    </ListDiv>
+                </div>
+                <div>
+                    <Typography variant="body1">
+                        <b>Crisis Connection</b> (Crisis Lines in Washington State)
+                    </Typography>
+                    <ListDiv>
+                        <Typography variant="body1">
+                            <li>
+                                <Link href="https://www.crisisconnections.org/24-hour-crisis-line/" target="_blank">
+                                    https://www.crisisconnections.org/24-hour-crisis-line/
+                                </Link>
+                            </li>
+                        </Typography>
+                    </ListDiv>
+                </div>
+            </Stack>
+        </DetailPage>
+    );
+};
+
+export default CrisisResourcesPage;

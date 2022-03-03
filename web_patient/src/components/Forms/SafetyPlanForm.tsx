@@ -203,7 +203,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
 
     const handleSubmit = action(async () => {
         try {
-            await patientStore.updateSafetyPlan(dataState);
+            await patientStore.updateSafetyPlan({ ...dataState });
             return !patientStore.loadSafetyPlanState.error;
         } catch {
             return false;

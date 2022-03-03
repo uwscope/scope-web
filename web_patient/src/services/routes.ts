@@ -7,6 +7,8 @@ export const Routes = {
     resources: 'resources',
     valuesInventory: 'inventory',
     worksheets: 'worksheets',
+    aboutus: 'aboutus',
+    crisisresources: 'crisisresources',
     phqProgress: 'phq',
     gadProgress: 'gad',
     activityProgress: 'activities',
