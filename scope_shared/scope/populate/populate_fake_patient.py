@@ -16,6 +16,7 @@ import scope.database.patient.sessions
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
+import scope.database.patient_unsafe_utils
 import scope.database.patients
 import scope.database.providers
 import scope.testing.fake_data.enums
@@ -267,10 +268,10 @@ def _populate_fake_patient_documents(
         fake_assessments = fake_assessments_factory()
 
         for fake_assessment_current in fake_assessments:
-            scope.database.patient.assessments.put_assessment(
+            scope.database.patient_unsafe_utils.unsafe_update_assessment(
                 collection=patient_collection,
-                assessment=fake_assessment_current,
                 set_id=fake_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
+                assessment=fake_assessment_current,
             )
 
             fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
