@@ -165,10 +165,10 @@ class BehavioralStrategyChecklist(Enum):
 
 
 class AssessmentType(Enum):
-    PHQ9 = "PHQ-9"
-    GAD7 = "GAD-7"
-    MoodLogging = "Mood Logging"
-    Medication = "Medication Tracking"
+    PHQ9 = "phq-9"
+    GAD7 = "gad-7"
+    MoodLogging = "mood"
+    Medication = "medication"
 
 
 class AssessmentFrequency(Enum):
