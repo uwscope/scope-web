@@ -11,6 +11,8 @@ import scope.config
 import scope.database.initialize
 import scope.documentdb.client
 import scope.populate
+import scope.schema
+import scope.schema_utils
 
 
 def populate_config_current_path(
@@ -78,13 +80,18 @@ def task_populate(
         Populate the {} database with fake data.
         """
 
+        # Configure a YAML object
+        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        yaml.default_flow_style = False
+
         # Obtain the current populate config
         populate_config_path = populate_config_current_path(populate_dir_path=populate_dir_path)
 
         print('Using config "{}".'.format(populate_config_path.name))
-        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
-        yaml.default_flow_style = False
         populate_config = yaml.load(populate_config_current_path(populate_dir_path=populate_dir_path))
+
+        # Verify the config schema
+        scope.schema_utils.raise_for_invalid_schema(data=populate_config, schema=scope.schema.populate_config_schema)
 
         # Obtain a database client
         with contextlib.ExitStack() as context_manager:
@@ -105,6 +112,9 @@ def task_populate(
                 database=database,
                 populate_config=populate_config
             )
+
+        # Verify the config schema
+        scope.schema_utils.raise_for_invalid_schema(data=populate_config_update, schema=scope.schema.populate_config_schema)
 
         # Store the updated populate config
         populate_config_update_path = populate_config_generate_path(

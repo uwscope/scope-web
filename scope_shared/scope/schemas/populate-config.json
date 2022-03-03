@@ -7,6 +7,18 @@
 		"patients": {
 			"type": "object",
 			"properties": {
+				"create_persistent": {
+					"type": "boolean"
+				},
+				"create_persistent_empty": {
+					"type": "boolean"
+				},
+				"create_fake": {
+					"type": "number"
+				},
+				"create_fake_empty": {
+					"type": "number"
+				},
 				"create": {
 					"type": "array",
 					"items": {
@@ -43,6 +55,7 @@
 					"minItems": 0
 				}
 			},
+			"additionalProperties": false,
 			"required": ["create", "existing"]
 		},
 		"providers": {
@@ -85,6 +98,7 @@
 					"minItems": 0
 				}
 			},
+			"additionalProperties": false,
 			"required": ["create", "existing"]
 		}
 	},
