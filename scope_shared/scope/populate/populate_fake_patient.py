@@ -52,8 +52,8 @@ def _create_faker_factory(faker_factory: Optional[faker.Faker]):
 
 def populate_fake_patient_empty(
     *,
-    database: pymongo.database.Database,
     faker_factory: faker.Faker = None,
+    database: pymongo.database.Database,
     patient_id: str = None,
 ) -> dict:
     faker_factory = _create_faker_factory(faker_factory)
@@ -84,8 +84,8 @@ def populate_fake_patient_empty(
 
 def populate_fake_patient(
     *,
-    database: pymongo.database.Database,
     faker_factory: faker.Faker = None,
+    database: pymongo.database.Database,
     patient_id: str = None,
 ) -> dict:
     faker_factory = _create_faker_factory(faker_factory)
@@ -110,38 +110,6 @@ def populate_fake_patient(
     )
 
     return created_patient
-
-
-    # #
-    # # Provider identity factory
-    # #
-    # fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
-    #     faker_factory=faker_factory,
-    # )
-    #
-    # generate_roles = [
-    #     {
-    #         "role_value": scope.testing.fake_data.enums.ProviderRole.Psychiatrist.value,
-    #         "number_to_generate": 2,
-    #     },
-    #     {
-    #         "role_value": scope.testing.fake_data.enums.ProviderRole.SocialWorker.value,
-    #         "number_to_generate": 8,
-    #     },
-    #     {
-    #         "role_value": scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
-    #         "number_to_generate": 5,
-    #     },
-    # ]
-    # for generate_current in generate_roles:
-    #     for _ in range(generate_current["number_to_generate"]):
-    #         provider_identity_current = fake_provider_identity_factory()
-    #
-    #         provider_identity_current = scope.database.providers.create_provider(
-    #             database=database,
-    #             name=provider_identity_current["name"],
-    #             role=generate_current["role_value"],
-    #         )
 
 
 def _populate_fake_patient_documents(

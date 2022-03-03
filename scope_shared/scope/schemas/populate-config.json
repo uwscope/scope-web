@@ -7,17 +7,17 @@
 		"patients": {
 			"type": "object",
 			"properties": {
-				"create_persistent": {
-					"type": "boolean"
-				},
-				"create_persistent_empty": {
-					"type": "boolean"
-				},
 				"create_fake": {
 					"type": "number"
 				},
 				"create_fake_empty": {
 					"type": "number"
+				},
+				"create_fake_persistent": {
+					"type": "boolean"
+				},
+				"create_fake_persistent_empty": {
+					"type": "boolean"
 				},
 				"create": {
 					"type": "array",
@@ -61,6 +61,15 @@
 		"providers": {
 			"type": "object",
 			"properties": {
+				"create_fake_psychiatrist": {
+					"type": "number"
+				},
+				"create_fake_social_worker": {
+					"type": "number"
+				},
+				"create_fake_study_staff": {
+					"type": "number"
+				},
 				"create": {
 					"type": "array",
 					"items": {
