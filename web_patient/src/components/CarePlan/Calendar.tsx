@@ -140,13 +140,13 @@ export const Calendar: FunctionComponent<ICalendarProps> = observer((props) => {
                 </IconButton>
             </NavContainer>
             <DoWHeaderContainer>
-                <DowHeader>S</DowHeader>
+                <DowHeader>Su</DowHeader>
                 <DowHeader>M</DowHeader>
-                <DowHeader>T</DowHeader>
+                <DowHeader>Tu</DowHeader>
                 <DowHeader>W</DowHeader>
-                <DowHeader>R</DowHeader>
+                <DowHeader>Th</DowHeader>
                 <DowHeader>F</DowHeader>
-                <DowHeader>S</DowHeader>
+                <DowHeader>Sa</DowHeader>
             </DoWHeaderContainer>
             {weeksInCurrentMonth.map((mondayOfWeek) => {
                 return getWeekRow(mondayOfWeek);
