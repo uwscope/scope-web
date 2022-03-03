@@ -8,6 +8,7 @@ import scope.database.collection_utils as collection_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.activities
 import scope.schema
+import scope.schema_utils
 import scope.schema_utils as schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
@@ -101,9 +102,9 @@ def fixture_data_fake_activity_factory(
             schema=scope.schema.activity_schema,
         )
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.activity_schema,
-            document=fake_activity,
+            data=fake_activity,
         )
 
         return fake_activity

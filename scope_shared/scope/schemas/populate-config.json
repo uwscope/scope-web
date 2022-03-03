@@ -1,0 +1,116 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/populate-config",
+	"title": "PopulateConfig",
+	"type": "object",
+	"properties": {
+		"patients": {
+			"type": "object",
+			"properties": {
+				"create_fake": {
+					"type": "number"
+				},
+				"create_fake_empty": {
+					"type": "number"
+				},
+				"create_fake_persistent": {
+					"type": "boolean"
+				},
+				"create_fake_persistent_empty": {
+					"type": "boolean"
+				},
+				"create": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"MRN": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": false,
+						"required": ["name", "MRN"]
+					},
+					"minItems": 0
+				},
+				"existing": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"MRN": {
+								"type": "string"
+							},
+							"patientId": { "type": "string" }
+						},
+						"additionalProperties": false,
+						"required": ["name", "MRN", "patientId"]
+					},
+					"minItems": 0
+				}
+			},
+			"additionalProperties": false,
+			"required": ["create", "existing"]
+		},
+		"providers": {
+			"type": "object",
+			"properties": {
+				"create_fake_psychiatrist": {
+					"type": "number"
+				},
+				"create_fake_social_worker": {
+					"type": "number"
+				},
+				"create_fake_study_staff": {
+					"type": "number"
+				},
+				"create": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"role": {
+								"$ref": "/schemas/enums#/properties/providerRole"
+							}
+						},
+						"additionalProperties": false,
+						"required": ["name", "role"]
+					},
+					"minItems": 0
+				},
+				"existing": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"providerId": {
+								"type": "string"
+							},
+							"role": {
+								"$ref": "/schemas/enums#/properties/providerRole"
+							}
+						},
+						"required": ["name", "providerId", "role"]
+					},
+					"minItems": 0
+				}
+			},
+			"additionalProperties": false,
+			"required": ["create", "existing"]
+		}
+	},
+	"additionalProperties": false,
+	"required": ["patients", "providers"]
+}

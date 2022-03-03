@@ -40,6 +40,37 @@ TEST_CONFIGS = [
         document_path="patient-identity.json",
         expected_valid=True,
     ),
+    # populate-config
+    ConfigTestJSONSchema(
+        name="populate-config-empty-create-existing",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/empty-create-existing.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="populate-config-providers-existing",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/providers-existing.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="populate-config-providers-existing-missing-providerId",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/providers-existing-missing-providerId.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="populate-config-patients-create-missing.json",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/patients-create-missing.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="populate-config-patients-create-existing-missing",
+        schema=scope.schema.populate_config_schema,
+        document_path="populate-config/patients-create-existing-missing.json",
+        expected_valid=False,
+    ),
     # provider-identity
     ConfigTestJSONSchema(
         name="provider-identity",

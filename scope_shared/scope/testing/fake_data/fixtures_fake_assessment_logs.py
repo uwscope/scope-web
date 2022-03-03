@@ -10,6 +10,7 @@ import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.scheduled_assessments
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -134,9 +135,9 @@ def fixture_data_fake_assessment_log_factory(
     def factory() -> dict:
         fake_assessment_log = random.choice(data_fake_assessment_logs_factory())
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.assessment_log_schema,
-            document=fake_assessment_log,
+            data=fake_assessment_log,
         )
 
         return fake_assessment_log
@@ -174,9 +175,9 @@ def fixture_data_fake_assessment_logs_factory(
     def factory() -> List[dict]:
         fake_assessment_logs = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.assessment_logs_schema,
-            document=fake_assessment_logs,
+            data=fake_assessment_logs,
         )
 
         return fake_assessment_logs

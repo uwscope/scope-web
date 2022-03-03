@@ -1,0 +1,16 @@
+{
+	"patients": {
+		"create": [],
+		"existing": []
+	},
+	"providers": {
+		"create": [],
+		"existing": [
+			{
+				"name": "Ravi Karkar",
+				"providerId": "a4gylr2wly",
+				"role": "studyStaff"
+			}
+		]
+	}
+}

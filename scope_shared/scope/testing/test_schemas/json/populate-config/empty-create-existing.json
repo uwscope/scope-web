@@ -1,0 +1,10 @@
+{
+	"patients": {
+		"create": [],
+		"existing": []
+	},
+	"providers": {
+		"create": [],
+		"existing": []
+	}
+}

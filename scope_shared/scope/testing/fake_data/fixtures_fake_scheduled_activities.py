@@ -10,6 +10,7 @@ import scope.database.document_utils as document_utils
 import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
 import scope.schema
+import scope.schema_utils
 import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
@@ -125,9 +126,9 @@ def fixture_data_fake_scheduled_activity_factory(
             data_fake_scheduled_activities_factory()
         )
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.scheduled_activity_schema,
-            document=fake_scheduled_activity,
+            data=fake_scheduled_activity,
         )
 
         return fake_scheduled_activity
@@ -167,9 +168,9 @@ def fixture_data_fake_scheduled_activities_factory(
     def factory() -> List[dict]:
         fake_scheduled_activities = unvalidated_factory()
 
-        fake_utils.xfail_for_invalid(
+        scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.scheduled_activities_schema,
-            document=fake_scheduled_activities,
+            data=fake_scheduled_activities,
         )
 
         return fake_scheduled_activities

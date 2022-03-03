@@ -1,8 +1,5 @@
 import copy
-import jschon
 import math
-import pprint
-import pytest
 import random
 from typing import List
 
@@ -42,22 +39,3 @@ def fake_optional(*, document: dict, optional_keys: List[str]) -> dict:
         del fake_optional_document[key]
 
     return fake_optional_document
-
-
-def xfail_for_invalid(*, schema: jschon.JSONSchema, document) -> None:
-    """
-    Verify a document matches a schema, xfail if it does not.
-    """
-
-    schema_result = schema.evaluate(jschon.JSON(document))
-    if not schema_result.valid:
-        schema_output = schema_result.output("detailed")
-
-        pprint.pprint(document)
-        print()
-        pprint.pprint(schema_output)
-
-        # Use xfail when reduced verbosity is preferred
-        # pytest.xfail("Fake data schema invalid.")
-
-        assert schema_result.valid

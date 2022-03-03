@@ -214,6 +214,10 @@ const _strings = {
 
     Resources_safety_plan_title: 'Safety Plan',
     Resources_safety_plan_subtitle: 'Emergency contacts and resources',
+    Resources_about_us_title: 'About Us',
+    Resources_about_us_subtitle: 'Learn about the study',
+    Resources_crisis_resources_title: 'Crisis Resources',
+    Resources_crisis_resources_subtitle: 'Crisis resources and hotlines',
 
     Safetyplan_title: 'Safety Plan',
     Safetyplan_reasons_for_living_title: 'Reasons for living',
