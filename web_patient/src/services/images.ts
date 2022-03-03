@@ -4,6 +4,8 @@ import MoodLoggingImageSrc from 'src/assets/mood_smiley.png';
 import MySafetyPlanImageSrc from 'src/assets/safety_plan_icon.png';
 import MyValuesInventoryImageSrc from 'src/assets/value_diamond.png';
 import MyWorksheetsImageSrc from 'src/assets/resources_folder.png';
+import AboutUsImageSrc from 'src/assets/about_us_icon.png';
+import CrisisResourcesImageSrc from 'src/assets/crisis_resources_icon.png';
 import PhqAssessmentImageSrc from 'src/assets/assessment_phq9_depression.png';
 import GadAssessmentImageSrc from 'src/assets/assessment_gad7_anxiety.png';
 
@@ -14,6 +16,8 @@ const _images = {
     Resources_values_button_image: MyValuesInventoryImageSrc,
     Resources_safety_button_image: MySafetyPlanImageSrc,
     Resources_worksheets_button_image: MyWorksheetsImageSrc,
+    Resources_about_us_button_image: AboutUsImageSrc,
+    Resources_crisis_resources_button_image: CrisisResourcesImageSrc,
     Progress_activity_button_image: ActivityProgressImageSrc,
     Progress_assessment_phq_button_image: PhqAssessmentImageSrc,
     Progress_assessment_gad_button_image: GadAssessmentImageSrc,

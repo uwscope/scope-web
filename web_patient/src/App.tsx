@@ -8,6 +8,8 @@ import ActivityTrackingHome from 'src/components/Progress/ActivityTrackingHome';
 import AssessmentHome from 'src/components/Progress/AssessmentHome';
 import MoodTrackingHome from 'src/components/Progress/MoodTrackingHome';
 import ProgressPage from 'src/components/Progress/ProgressPage';
+import AboutUsPage from 'src/components/Resources/AboutUsPage';
+import CrisisResourcesPage from 'src/components/Resources/CrisisResourcesPage';
 import ResourcesPage from 'src/components/Resources/ResourcesPage';
 import LifeAreaDetail from 'src/components/ValuesInventory/LifeAreaDetail';
 import ValuesInventoryHome from 'src/components/ValuesInventory/ValuesInventoryHome';
@@ -30,6 +32,8 @@ export const App: FunctionComponent = () => {
                                     />
                                     <Route path={`/${Routes.valuesInventory}`} element={<ValuesInventoryHome />} />
                                     <Route path={`/${Routes.worksheets}`} element={<WorksheetsHome />} />
+                                    <Route path={`/${Routes.aboutus}`} element={<AboutUsPage />} />
+                                    <Route path={`/${Routes.crisisresources}`} element={<CrisisResourcesPage />} />
                                     <Route path="/" element={<ResourcesPage />} />
                                 </RouterSwitch>
                             }

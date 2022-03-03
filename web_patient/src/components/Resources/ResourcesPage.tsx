@@ -44,6 +44,24 @@ export const ResourcesPage: FunctionComponent = () => {
                             imageSrc={getImage('Resources_safety_button_image')}
                         />
                     </ListItem>
+                    <ListItem alignItems="flex-start" disableGutters={true} component={Link} to={Routes.aboutus}>
+                        <ListCard
+                            title={getString('Resources_about_us_title')}
+                            subtitle={getString('Resources_about_us_subtitle')}
+                            imageSrc={getImage('Resources_about_us_button_image')}
+                        />
+                    </ListItem>
+                    <ListItem
+                        alignItems="flex-start"
+                        disableGutters={true}
+                        component={Link}
+                        to={Routes.crisisresources}>
+                        <ListCard
+                            title={getString('Resources_crisis_resources_title')}
+                            subtitle={getString('Resources_crisis_resources_subtitle')}
+                            imageSrc={getImage('Resources_crisis_resources_button_image')}
+                        />
+                    </ListItem>
                 </List>
             </Section>
         </MainPage>
