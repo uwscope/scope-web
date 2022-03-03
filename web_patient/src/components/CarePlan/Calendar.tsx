@@ -125,7 +125,7 @@ export const Calendar: FunctionComponent<ICalendarProps> = observer((props) => {
             start: new Date(year, month, 1),
             end: lastDayOfMonth(viewState.currentMonth),
         },
-        { weekStartsOn: 1 }
+        { weekStartsOn: 0 }
     );
 
     return (
@@ -140,12 +140,12 @@ export const Calendar: FunctionComponent<ICalendarProps> = observer((props) => {
                 </IconButton>
             </NavContainer>
             <DoWHeaderContainer>
+                <DowHeader>S</DowHeader>
                 <DowHeader>M</DowHeader>
                 <DowHeader>T</DowHeader>
                 <DowHeader>W</DowHeader>
                 <DowHeader>R</DowHeader>
                 <DowHeader>F</DowHeader>
-                <DowHeader>S</DowHeader>
                 <DowHeader>S</DowHeader>
             </DoWHeaderContainer>
             {weeksInCurrentMonth.map((mondayOfWeek) => {
