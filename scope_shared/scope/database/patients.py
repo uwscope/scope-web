@@ -1,15 +1,19 @@
 import datetime
+import pprint
+
 import pymongo.database
 from typing import List, Optional
 
 import scope.database.date_utils as date_utils
 import scope.database.collection_utils as collection_utils
+import scope.database.patient.assessments
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.values_inventory
 import scope.schema
 import scope.schema_utils as schema_utils
+import scope.testing.fake_data.enums
 
 PATIENT_IDENTITY_COLLECTION = "patients"
 
@@ -36,6 +40,7 @@ def create_patient(
     - Create an initial empty clinical history.
     - Create an initial safety plan, assigned at the current time.
     - Create an initial values inventory, assigned at the current time.
+    - Create initial assessments, assigned at the current time.
     - Finally, create the patient identity document.
     """
 
@@ -95,13 +100,16 @@ def create_patient(
         clinical_history=clinical_history_document,
     )
 
+    # Use a uniform datetime for the new assignments for this patient
+    datetime_assigned = scope.database.date_utils.format_datetime(
+        datetime.datetime.utcnow()
+    )
+
     # Create the initial safety plan document
     safety_plan_document = {
         "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
         "assigned": True,
-        "assignedDateTime": scope.database.date_utils.format_datetime(
-            datetime.datetime.utcnow()
-        ),
+        "assignedDateTime": datetime_assigned,
     }
     schema_utils.raise_for_invalid_schema(
         schema=scope.schema.safety_plan_schema,
@@ -116,9 +124,7 @@ def create_patient(
     values_inventory_document = {
         "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
         "assigned": True,
-        "assignedDateTime": scope.database.date_utils.format_datetime(
-            datetime.datetime.utcnow()
-        ),
+        "assignedDateTime": datetime_assigned,
     }
     schema_utils.raise_for_invalid_schema(
         schema=scope.schema.values_inventory_schema,
@@ -128,6 +134,37 @@ def create_patient(
         collection=patient_collection,
         values_inventory=values_inventory_document,
     )
+
+    # Create initial assessments
+
+    # TODO: Jina remove this when assignedDate converted to assignedDateTime
+    date_assigned = scope.database.date_utils.format_date(
+        datetime.datetime.utcnow()
+    )
+
+    for assessment_current in [
+        scope.testing.fake_data.enums.AssessmentType.GAD7.value,
+        scope.testing.fake_data.enums.AssessmentType.Medication.value,
+        scope.testing.fake_data.enums.AssessmentType.PHQ9.value,
+    ]:
+        assessment_document = {
+            "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
+            "_set_id": assessment_current,
+            scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
+            "assigned": True,
+            # TODO: Jina replace
+            "assignedDate": date_assigned,
+            # "assignedDateTime": datetime_assigned,
+        }
+        schema_utils.raise_for_invalid_schema(
+            data=assessment_document,
+            schema=scope.schema.assessment_schema,
+        )
+        result = scope.database.patient.assessments.put_assessment(
+            collection=patient_collection,
+            set_id=assessment_current,
+            assessment=assessment_document,
+        )
 
     # Atomically store the patient identity document.
     # Do this last, because it means all other steps have already succeeded.
