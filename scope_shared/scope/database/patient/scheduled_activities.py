@@ -121,7 +121,7 @@ def get_scheduled_activities_for_activity(
 
     query = {
         "_type": DOCUMENT_TYPE,
-        scope.database.patient.activities: activity_id,
+        scope.database.patient.activities.SEMANTIC_SET_ID: activity_id,
         # "isDeleted": False, #TODO Check with James
     }
 

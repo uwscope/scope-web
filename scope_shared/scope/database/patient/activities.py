@@ -75,33 +75,47 @@ def put_activity(
     Put "activity" document.
     """
 
+    activity_set_put_result = scope.database.collection_utils.put_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        semantic_set_id=SEMANTIC_SET_ID,
+        set_id=set_id,
+        document=activity,
+    )
+    activity = activity_set_put_result.document
+
     # GET already stored scheduledActivities for this activity
+    # TODO: Flask set PUT element tests are going to fail because scheduled activities don't exist.
     stored_scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities_for_activity(
         collection=collection,
-        activity_id=activity,
+        activity_id=set_id,
     )
 
-    # Update the stored scheduled activities
-    for stored_scheduled_activity_current in stored_scheduled_activities:
-        # TODO: Check w/ James if no return is fine.
-        del stored_scheduled_activity_current["_id"]
-        due_date = date_utils.parse_datetime(
-            stored_scheduled_activity_current["dueDate"]
-        )
-        if due_date > datetime.datetime.today():
-            # Mark the future scheduled activities as deleted
-            stored_scheduled_activity_current.update({"isDeleted": True})
-            scope.database.patient.scheduled_activities.put_scheduled_activity(
-                collection=collection,
-                scheduled_activity=stored_scheduled_activity_current,
-                set_id=stored_scheduled_activity_current["_set_id"],
+    if stored_scheduled_activities:
+        # Update the stored scheduled activities
+        for stored_scheduled_activity_current in stored_scheduled_activities:
+            # TODO: Check w/ James if no return is fine.
+            del stored_scheduled_activity_current["_id"]
+            due_date = date_utils.parse_datetime(
+                stored_scheduled_activity_current["dueDate"]
             )
+            if due_date > datetime.datetime.today():
+                # Mark the future scheduled activities as deleted
+                # TODO: Add isDeleted to jsonschema.
+                stored_scheduled_activity_current.update({"isDeleted": True})
+                scope.database.patient.scheduled_activities.put_scheduled_activity(
+                    collection=collection,
+                    scheduled_activity=stored_scheduled_activity_current,
+                    set_id=stored_scheduled_activity_current["_set_id"],
+                )
 
     # Update start date of activity to create scheduled activities
     # TODO: Find better name than activity_copy
     activity_copy = copy.deepcopy(activity)
     start_date = date_utils.parse_date(activity_copy["startDate"])
-    if start_date < datetime.datetime.today().date():
+    if start_date < date_utils.parse_date(
+        date_utils.format_date(datetime.datetime.today())
+    ):
         activity_copy.update(
             {"startDate": date_utils.format_date(datetime.datetime.today())}
         )
@@ -113,10 +127,4 @@ def put_activity(
         weeks=12,  # ~ 3 months
     )
 
-    return scope.database.collection_utils.put_set_element(
-        collection=collection,
-        document_type=DOCUMENT_TYPE,
-        semantic_set_id=SEMANTIC_SET_ID,
-        set_id=set_id,
-        document=activity,
-    )
+    return activity_set_put_result
