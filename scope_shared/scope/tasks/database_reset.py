@@ -81,7 +81,9 @@ def _reset(
     shutil.copytree(src=populate_reset_dir_path, dst=populate_dir_path)
     shutil.move(
         src=Path(populate_dir_path, "populate.yaml"),
-        dst=scope.tasks.database_populate.populate_config_generate_path(populate_dir_path=populate_dir_path),
+        dst=scope.tasks.database_populate.populate_config_generate_path(
+            populate_dir_path=populate_dir_path
+        ),
     )
 
 

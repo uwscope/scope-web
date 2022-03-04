@@ -12,7 +12,13 @@ def parse_date(date: str) -> _datetime.date:
     """
     parsed_datetime = parse_datetime(date)
 
-    if (parsed_datetime.hour, parsed_datetime.minute, parsed_datetime.second) != (0, 0, 0):
+    if any(
+        [
+            parsed_datetime.hour != 0,
+            parsed_datetime.minute != 0,
+            parsed_datetime.second != 0,
+        ]
+    ):
         raise ValueError(
             "time data {} does not match format '%Y-%m-%dT00:00:00Z".format(date)
         )

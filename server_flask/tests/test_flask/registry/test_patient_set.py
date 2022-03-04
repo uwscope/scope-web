@@ -35,6 +35,7 @@ class ConfigTestPatientSetOptions:
     # This will impact expectation that an initial get would fail.
     set_element_will_already_exist: bool = False
 
+
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
     name: str
@@ -44,13 +45,16 @@ class ConfigTestPatientSet:
     database_get_set_function: Callable[[...], List[dict]]
     database_get_function: Callable[[...], dict]
     database_post_function: Optional[Callable[[...], collection_utils.SetPostResult]]
-    database_unsafe_update_function: Optional[Callable[[...], scope.database.collection_utils.PutResult]]
+    database_unsafe_update_function: Optional[
+        Callable[[...], scope.database.collection_utils.PutResult]
+    ]
     database_document_parameter_name: str
     flask_query_set_type: str
     flask_document_set_key: str
     flask_query_set_element_type: str
     flask_document_set_element_key: str
     options: ConfigTestPatientSetOptions = ConfigTestPatientSetOptions()
+
 
 TEST_CONFIGS = [
     ConfigTestPatientSet(
@@ -100,7 +104,7 @@ TEST_CONFIGS = [
         options=ConfigTestPatientSetOptions(
             set_id_will_already_exist=True,
             set_element_will_already_exist=True,
-        )
+        ),
     ),
     ConfigTestPatientSet(
         name="assessmentlogs",

@@ -11,7 +11,7 @@ import scope.testing.fake_data.enums
 def populate_from_config(
     *,
     database: pymongo.database.Database,
-    populate_config: dict
+    populate_config: dict,
 ) -> dict:
     """
     Populate from a provided config.
@@ -25,7 +25,7 @@ def populate_from_config(
     #
     if populate_config["patients"].get("create_fake_persistent", False):
         created_patient = _create_fake_persistent_patient(
-            database=database
+            database=database,
         )
         del populate_config["patients"]["create_fake_persistent"]
 
@@ -37,7 +37,7 @@ def populate_from_config(
     #
     if populate_config["patients"].get("create_fake_persistent_empty", False):
         created_patient = _create_fake_persistent_empty_patient(
-            database=database
+            database=database,
         )
         del populate_config["patients"]["create_fake_persistent_empty"]
 
@@ -50,7 +50,7 @@ def populate_from_config(
     if "create_fake" in populate_config["patients"]:
         created_patients = _create_fake_patients(
             database=database,
-            create_fake=populate_config["patients"]["create_fake"]
+            create_fake=populate_config["patients"]["create_fake"],
         )
         del populate_config["patients"]["create_fake"]
 
@@ -62,7 +62,7 @@ def populate_from_config(
     if "create_fake_empty" in populate_config["patients"]:
         created_patients = _create_fake_empty_patients(
             database=database,
-            create_fake_empty=populate_config["patients"]["create_fake_empty"]
+            create_fake_empty=populate_config["patients"]["create_fake_empty"],
         )
         del populate_config["patients"]["create_fake_empty"]
 
@@ -138,7 +138,7 @@ def _create_fake_patients(
     created_patients = []
     for _ in range(create_fake):
         created_patient = scope.populate.populate_fake_patient.populate_fake_patient(
-            database=database
+            database=database,
         )
         created_patients.append(created_patient)
 
@@ -152,8 +152,10 @@ def _create_fake_empty_patients(
 ) -> List[dict]:
     created_patients = []
     for _ in range(create_fake_empty):
-        created_patient = scope.populate.populate_fake_patient.populate_fake_patient_empty(
-            database=database
+        created_patient = (
+            scope.populate.populate_fake_patient.populate_fake_patient_empty(
+                database=database
+            )
         )
         created_patients.append(created_patient)
 
@@ -167,13 +169,13 @@ def _create_fake_persistent_patient(
     # To be idempotent, do not attempt to create if patient already exists
     if scope.database.patients.get_patient_identity(
         database=database,
-        patient_id="persistent"
+        patient_id="persistent",
     ):
         return
 
     created_patient = scope.populate.populate_fake_patient.populate_fake_patient(
         database=database,
-        patient_id="persistent"
+        patient_id="persistent",
     )
 
     return created_patient
@@ -186,13 +188,13 @@ def _create_fake_persistent_empty_patient(
     # To be idempotent, do not attempt to create if patient already exists
     if scope.database.patients.get_patient_identity(
         database=database,
-        patient_id="persistentempty"
+        patient_id="persistentempty",
     ):
         return
 
     created_patient = scope.populate.populate_fake_patient.populate_fake_patient_empty(
         database=database,
-        patient_id="persistentempty"
+        patient_id="persistentempty",
     )
 
     return created_patient
@@ -229,7 +231,9 @@ def _create_patients(
         )
 
         created_patient = {
-            "patientId": patient_identity_document[scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID],
+            "patientId": patient_identity_document[
+                scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+            ],
             "name": patient_identity_document["name"],
             "MRN": patient_identity_document["MRN"],
         }
@@ -253,7 +257,9 @@ def _create_providers(
         )
 
         created_provider = {
-            "providerId": provider_identity_document[scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID],
+            "providerId": provider_identity_document[
+                scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
+            ],
             "name": provider_identity_document["name"],
             "role": provider_identity_document["role"],
         }

@@ -9,7 +9,9 @@ import scope.database.patient
 def _unsafe_update_set_element(
     *,
     database_get_function: Callable[[...], Optional[dict]],
-    database_put_function: Callable[[...], scope.database.collection_utils.SetPutResult],
+    database_put_function: Callable[
+        [...], scope.database.collection_utils.SetPutResult
+    ],
     database_put_document_parameter: str,
     collection: pymongo.collection.Collection,
     set_id: str,
@@ -80,6 +82,7 @@ def _unsafe_update_singleton(
         }
     )
 
+
 #
 # Unsafe set updates
 #
@@ -104,6 +107,7 @@ def unsafe_update_assessment(
 #
 # Unsafe singleton updates
 #
+
 
 def unsafe_update_clinical_history(
     *,

@@ -32,7 +32,9 @@ class ConfigTestPatientSingleton:
     name: str
     document_factory_fixture: str
     database_get_function: Callable[[...], Optional[dict]]
-    database_unsafe_update_function: Callable[[...], scope.database.collection_utils.PutResult]
+    database_unsafe_update_function: Callable[
+        [...], scope.database.collection_utils.PutResult
+    ]
     database_unsafe_update_document_parameter: str
     flask_query_type: str
     flask_document_key: str
@@ -124,7 +126,7 @@ def test_patient_singleton_get(
         result = config.database_unsafe_update_function(
             **{
                 "collection": temp_patient.collection,
-                config.database_unsafe_update_document_parameter: document
+                config.database_unsafe_update_document_parameter: document,
             }
         )
         assert result.inserted_count
@@ -435,7 +437,7 @@ def test_patient_singleton_put_update(
         result = config.database_unsafe_update_function(
             **{
                 "collection": temp_patient.collection,
-                config.database_unsafe_update_document_parameter: document
+                config.database_unsafe_update_document_parameter: document,
             }
         )
         assert result.inserted_count
@@ -515,7 +517,7 @@ def test_patient_singleton_put_update_invalid(
         result = config.database_unsafe_update_function(
             **{
                 "collection": temp_patient.collection,
-                config.database_unsafe_update_document_parameter: document
+                config.database_unsafe_update_document_parameter: document,
             }
         )
         assert result.inserted_count

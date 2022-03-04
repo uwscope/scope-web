@@ -104,7 +104,6 @@ def test_patientidentities_get(
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
 
 
-
 def test_patient_get(
     database_temp_patient_factory: Callable[
         [],

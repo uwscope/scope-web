@@ -221,7 +221,7 @@ def get_patient_identities():
 
     # Validate and normalize the response
     patient_identities = request_utils.set_get_response_validate(
-       documents=patient_identities,
+        documents=patient_identities,
     )
 
     return {"patientidentities": patient_identities}
