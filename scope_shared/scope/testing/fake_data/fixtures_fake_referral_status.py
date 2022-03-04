@@ -4,14 +4,13 @@ Referral status are not stored documents.
 They are generated and stored as elements of other documents.
 """
 
-import random
-from typing import Callable
-
 import faker
 import pytest
+from typing import Callable
+
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
@@ -30,10 +29,10 @@ def fake_referral_status_factory(
     def factory() -> dict:
         fake_referral_status = {
             "referralType": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.Referral
+                scope.enums.Referral
             ),
             "referralStatus": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.ReferralStatus
+                scope.enums.ReferralStatus
             ),
             "referralOther": faker_factory.text(),
         }

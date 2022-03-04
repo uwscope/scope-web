@@ -1,13 +1,13 @@
+import faker
+import pytest
 import random
 from typing import Callable
 
-import faker
-import pytest
 import scope.database.date_utils as date_utils
 import scope.database.patient.patient_profile
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
@@ -42,32 +42,32 @@ def fake_patient_profile_factory(
             "name": name,
             "MRN": mrn,
             "clinicCode": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.ClinicCode
+                scope.enums.ClinicCode
             ),
             "birthdate": date_utils.format_date(
                 faker_factory.date_of_birth(),
             ),
-            "sex": fake_utils.fake_enum_value(scope.testing.fake_data.enums.PatientSex),
+            "sex": fake_utils.fake_enum_value(scope.enums.PatientSex),
             "gender": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.PatientGender
+                scope.enums.PatientGender
             ),
             "pronoun": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.PatientPronoun
+                scope.enums.PatientPronoun
             ),
             "race": fake_utils.fake_enum_flag_values(
-                scope.testing.fake_data.enums.PatientRace
+                scope.enums.PatientRace
             ),
             # TODO: identity information
             # "primaryOncologyProvider": data_fake_identity_factory(),
             # "primaryCareManager": data_fake_identity_factory(),
             "discussionFlag": fake_utils.fake_enum_flag_values(
-                scope.testing.fake_data.enums.DiscussionFlag
+                scope.enums.DiscussionFlag
             ),
             "followupSchedule": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.FollowupSchedule
+                scope.enums.FollowupSchedule
             ),
             "depressionTreatmentStatus": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.DepressionTreatmentStatus
+                scope.enums.DepressionTreatmentStatus
             ),
         }
 

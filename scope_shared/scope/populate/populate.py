@@ -3,9 +3,9 @@ from typing import List, Optional
 
 import scope.database.patients
 import scope.database.providers
+import scope.enums
 import scope.populate.populate_fake_patient
 import scope.populate.populate_fake_provider
-import scope.testing.fake_data.enums
 
 
 def populate_from_config(
@@ -75,7 +75,7 @@ def populate_from_config(
         created_providers = _create_fake_providers(
             database=database,
             create_fake=populate_config["providers"]["create_fake_psychiatrist"],
-            role=scope.testing.fake_data.enums.ProviderRole.Psychiatrist.value,
+            role=scope.enums.ProviderRole.Psychiatrist.value,
         )
         del populate_config["providers"]["create_fake_psychiatrist"]
 
@@ -88,7 +88,7 @@ def populate_from_config(
         created_providers = _create_fake_providers(
             database=database,
             create_fake=populate_config["providers"]["create_fake_social_worker"],
-            role=scope.testing.fake_data.enums.ProviderRole.SocialWorker.value,
+            role=scope.enums.ProviderRole.SocialWorker.value,
         )
         del populate_config["providers"]["create_fake_social_worker"]
 
@@ -101,7 +101,7 @@ def populate_from_config(
         created_providers = _create_fake_providers(
             database=database,
             create_fake=populate_config["providers"]["create_fake_study_staff"],
-            role=scope.testing.fake_data.enums.ProviderRole.StudyStaff.value,
+            role=scope.enums.ProviderRole.StudyStaff.value,
         )
         del populate_config["providers"]["create_fake_study_staff"]
 

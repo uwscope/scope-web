@@ -6,12 +6,11 @@ from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
 import scope.database.date_utils as date_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
@@ -28,7 +27,7 @@ def _fake_scheduled_activity(
                 date_end=datetime.datetime.now() + datetime.timedelta(days=10),
             )
         ),
-        "dueType": fake_utils.fake_enum_value(scope.testing.fake_data.enums.DueType),
+        "dueType": fake_utils.fake_enum_value(scope.enums.DueType),
         scope.database.patient.activities.SEMANTIC_SET_ID: activity[
             scope.database.patient.activities.SEMANTIC_SET_ID
         ],

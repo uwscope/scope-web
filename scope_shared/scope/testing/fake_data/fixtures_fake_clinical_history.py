@@ -1,12 +1,12 @@
+import faker
+import pytest
 import random
 from typing import Callable
 
-import faker
-import pytest
 import scope.database.patient.clinical_history
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
@@ -46,7 +46,7 @@ def fake_clinical_history_factory(
             "primaryCancerDiagnosis": faker_factory.text(),
             "dateOfCancerDiagnosis": dateOfCancerDiagnosis,
             "currentTreatmentRegimen": fake_utils.fake_enum_flag_values(
-                scope.testing.fake_data.enums.CancerTreatmentRegimen
+                scope.enums.CancerTreatmentRegimen
             ),
             "currentTreatmentRegimenOther": faker_factory.text(),
             "currentTreatmentRegimenNotes": faker_factory.text(),
