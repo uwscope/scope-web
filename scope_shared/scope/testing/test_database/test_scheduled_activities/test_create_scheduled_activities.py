@@ -213,6 +213,9 @@ def test_create_scheduled_activities_condition_two(
         has_repetition=True,
         has_reminder=True,
     )
+    activity["startDate"] = start_date
+    activity["timeOfDay"] = time_of_day
+    activity["repeatDayFlags"] = repeat_day_flags
 
     scheduled_activities = (
         scope.database.patient.scheduled_activities.create_scheduled_activities(

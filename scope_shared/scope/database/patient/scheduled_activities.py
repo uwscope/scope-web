@@ -57,7 +57,6 @@ def create_scheduled_activities(
 
     if not activity.get("hasRepetition"):
         # Create 1 scheduled activity
-        # TODO: schema of scheduledItem/dueDate should be datetime. Want to see if jsonschema throws an error.
         scheduled_activity = _compute_scheduled_activity_properties(
             activity=activity, scheduled_activity_day_date=activity["startDate"]
         )
@@ -90,6 +89,46 @@ def create_scheduled_activities(
     )
 
     return scheduled_activities
+
+
+def create_and_post_scheduled_activities(
+    *,
+    collection: pymongo.collection.Collection,
+    activity: dict,
+    weeks: int = 12,  # ~ 3 months
+):
+    # Create scheduledActivities here
+    scheduled_activities = create_scheduled_activities(
+        activity=activity,
+        weeks=weeks,
+    )
+    for scheduled_activity_current in scheduled_activities:
+        # TODO: Check w/ James if no return is fine.
+        post_scheduled_activity(
+            collection=collection,
+            scheduled_activity=scheduled_activity_current,
+        )
+
+
+def get_scheduled_activities_for_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    activity_id: str,
+) -> Optional[List[dict]]:
+    """
+    Get list of "schedulAactivity" documents.
+    """
+
+    query = {
+        "_type": DOCUMENT_TYPE,
+        scope.database.patient.activities: activity_id,
+        # "isDeleted": False, #TODO Check with James
+    }
+
+    return scope.database.collection_utils.get_set_query(
+        collection=collection,
+        match_query=query,
+    )
 
 
 def get_scheduled_activities(

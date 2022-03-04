@@ -169,6 +169,44 @@ def get_set(
     return documents
 
 
+def get_set_query(
+    *,
+    collection: pymongo.collection.Collection,
+    match_query: dict,
+) -> Optional[List[dict]]:
+    """
+    Retrieve all elements of set which match match_query.
+
+    If none exist, return None.
+    """
+
+    # Query pipeline
+    pipeline = [
+        {"$match": match_query},
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": "$_set_id",
+                "result": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$result"}},
+    ]
+
+    # Execute pipeline, obtain list of results
+    with collection.aggregate(pipeline) as pipeline_result:
+        # Confirm a result was found
+        if not pipeline_result.alive:
+            return None
+
+        documents = list(pipeline_result)
+
+    # Normalize the list of documents
+    documents = document_utils.normalize_documents(documents=documents)
+
+    return documents
+
+
 def get_set_element(
     *,
     collection: pymongo.collection.Collection,
