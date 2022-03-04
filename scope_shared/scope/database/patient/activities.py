@@ -85,7 +85,6 @@ def put_activity(
     activity = activity_set_put_result.document
 
     # GET already stored scheduledActivities for this activity
-    # TODO: Flask set PUT element tests are going to fail because scheduled activities don't exist.
     stored_scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities_for_activity(
         collection=collection,
         activity_id=set_id,
