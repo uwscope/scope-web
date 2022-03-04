@@ -10,6 +10,7 @@ flask-json = "*"
 jschon = "*"
 lorem = "*"
 numpy = "*"
+pytest = "*"
 requests = "*"
 waitress = "*"
 pymongo = "*"
@@ -24,7 +25,6 @@ subdirectory = "aws_infrastructure"
 editable = true
 
 [dev-packages]
-pytest = "*"
 
 [requires]
 python_version = "3.9"

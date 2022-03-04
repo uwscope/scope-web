@@ -5,10 +5,9 @@ from typing import Callable
 
 import scope.database.date_utils as date_utils
 import scope.database.patient.case_reviews
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def fake_case_review_factory(
