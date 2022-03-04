@@ -33,7 +33,7 @@
 			"type": "string"
 		},
 		"reminder": {
-			"$ref": "/schemas/datetime#/properties/date"
+			"$ref": "/schemas/datetime#/properties/datetime"
 		},
 		"completed": {
 			"type": "boolean"
