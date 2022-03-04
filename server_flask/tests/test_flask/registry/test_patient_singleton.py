@@ -10,10 +10,6 @@ from urllib.parse import urljoin
 import scope.config
 import scope.database.collection_utils as collection_utils
 import scope.database.patient
-import scope.database.patient.clinical_history
-import scope.database.patient.patient_profile
-import scope.database.patient.safety_plan
-import scope.database.patient.values_inventory
 import scope.database.patient_unsafe_utils
 import scope.testing.fixtures_database_temp_patient
 import tests.testing_config

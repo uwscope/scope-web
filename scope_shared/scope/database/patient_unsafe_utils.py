@@ -6,6 +6,45 @@ import scope.database.collection_utils
 import scope.database.patient
 
 
+def _unsafe_update_set_element(
+    *,
+    database_get_function: Callable[[...], Optional[dict]],
+    database_put_function: Callable[[...], scope.database.collection_utils.SetPutResult],
+    database_put_document_parameter: str,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    new_document: dict,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Update a set element.
+
+    Unsafe because it gets and updates the current document,
+    effectively ignoring use of _rev to prevent race conflicts in modifications.
+    """
+
+    current_document = database_get_function(
+        **{
+            "collection": collection,
+            "set_id": set_id,
+        }
+    )
+
+    if current_document:
+        updated_document = copy.deepcopy(current_document)
+        updated_document.update(copy.deepcopy(new_document))
+        del updated_document["_id"]
+    else:
+        updated_document = new_document
+
+    return database_put_function(
+        **{
+            "collection": collection,
+            "set_id": set_id,
+            database_put_document_parameter: updated_document,
+        }
+    )
+
+
 def _unsafe_update_singleton(
     *,
     database_get_function: Callable[[...], Optional[dict]],
@@ -41,6 +80,10 @@ def _unsafe_update_singleton(
         }
     )
 
+#
+# Unsafe set updates
+#
+
 
 def unsafe_update_assessment(
     *,
@@ -48,32 +91,19 @@ def unsafe_update_assessment(
     set_id: str,
     assessment: dict,
 ) -> scope.database.collection_utils.SetPutResult:
-    """
-    Update an assessment document.
-
-    Unsafe because it gets and updates the current document,
-    effectively ignoring use of _rev to prevent race conflicts in modifications.
-    """
-
-    new_document = assessment
-    current_document = scope.database.patient.get_assessment(
+    return _unsafe_update_set_element(
+        database_get_function=scope.database.patient.assessments.get_assessment,
+        database_put_function=scope.database.patient.assessments.put_assessment,
+        database_put_document_parameter="assessment",
         collection=collection,
         set_id=set_id,
+        new_document=assessment,
     )
 
-    if current_document:
-        updated_document = copy.deepcopy(current_document)
-        updated_document.update(copy.deepcopy(new_document))
-        del updated_document["_id"]
-    else:
-        updated_document = new_document
 
-    return scope.database.patient.put_assessment(
-        collection=collection,
-        set_id=set_id,
-        assessment=updated_document,
-    )
-
+#
+# Unsafe singleton updates
+#
 
 def unsafe_update_clinical_history(
     *,
