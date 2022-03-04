@@ -28,8 +28,12 @@ def _fake_activity(
 
     fake_activity = {
         "name": faker_factory.text(),
-        "createdDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
-        "editedDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
+        "createdDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
+        "editedDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
         "enjoyment": random.randint(1, 10),
         "importance": random.randint(1, 10),
     }
@@ -52,8 +56,12 @@ def _fake_value(
 
     return {
         "name": faker_factory.text(),
-        "createdDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
-        "editedDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
+        "createdDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
+        "editedDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
         "lifeareaId": life_area["id"],
         "activities": [
             _fake_activity(
@@ -80,8 +88,12 @@ def fake_values_inventory_factory(
         fake_values_inventory = {
             "_type": "valuesInventory",
             "assigned": random.choice([True, False]),
-            "assignedDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
-            "lastUpdatedDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
+            "lastUpdatedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
         }
 
         values = []

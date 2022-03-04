@@ -39,7 +39,9 @@ def fake_safety_plan_factory(
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDateTime": date_utils.format_datetime(pytz.utc.localize(faker_factory.date_time())),
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
             "lastUpdatedDateTime": date_utils.format_datetime(
                 pytz.utc.localize(faker_factory.date_time())
             ),
