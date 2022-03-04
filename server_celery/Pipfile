@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 celery = "*"
+pytest = "*"
 
 [packages.scope]
 editable = true
@@ -16,7 +17,6 @@ subdirectory = "aws_infrastructure"
 editable = true
 
 [dev-packages]
-pytest = "*"
 
 # Used by Celery filesystem broker in Windows development
 pypiwin32 = {version = "*", sys_platform = "== 'win32'"}
