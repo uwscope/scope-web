@@ -17,6 +17,9 @@
 		"_rev": {
 			"type": "number"
 		},
+		"_deleted": {
+			"type": "boolean"
+		},
 		"scheduledActivityId": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
@@ -40,5 +43,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "dueDate", "dueType", "activityId", "reminder", "completed"]
+	"required": ["_type", "dueDate", "dueType", "activityId", "completed"]
 }

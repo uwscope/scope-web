@@ -9,7 +9,7 @@
 			"type": "string"
 		},
 		"dueDate": {
-			"$ref": "/schemas/datetime#/properties/date"
+			"$ref": "/schemas/datetime#/properties/datetime"
 		},
 		"dueType": {
 			"$ref": "/schemas/enums#/properties/dueType"
