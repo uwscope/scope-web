@@ -183,7 +183,7 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
         ),
         (
             # TODO: James; need help with fixtures.
-            "2022-04-01T00:00:00Z",  # Friday - Passes because this "put" has a start date in future. Need to automate this.
+            "2022-04-01T00:00:00Z",  # Friday - Passes because this "put" has a start date in future. Need to automate this because this test will fail once April starts.
             7,
             {
                 "Monday": True,
