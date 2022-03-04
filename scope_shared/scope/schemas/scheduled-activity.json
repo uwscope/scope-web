@@ -17,6 +17,9 @@
 		"_rev": {
 			"type": "number"
 		},
+		"_deleted": {
+			"type": "boolean"
+		},
 		"scheduledActivityId": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
@@ -33,12 +36,12 @@
 			"type": "string"
 		},
 		"reminder": {
-			"oneOf": [{ "$ref": "/schemas/datetime#/properties/datetime" }, { "type": "null" }]
+			"$ref": "/schemas/datetime#/properties/datetime"
 		},
 		"completed": {
 			"type": "boolean"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "dueDate", "dueType", "activityId", "reminder", "completed"]
+	"required": ["_type", "dueDate", "dueType", "activityId", "completed"]
 }

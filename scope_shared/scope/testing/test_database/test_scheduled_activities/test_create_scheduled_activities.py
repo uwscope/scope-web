@@ -50,7 +50,7 @@ def _scheduled_activities_assertions(
         if not activity[
             "hasReminder"
         ]:  # CONDITION 1 - hasRepetition is False, Subcondition 1 - hasReminder is False
-            assert scheduled_activities[0]["reminder"] == None
+            assert "reminder" not in scheduled_activities[0]
         else:  # CONDITION 1 - hasRepetition is False, Subcondition 2 - hasReminder is True
             assert scheduled_activities[0]["reminder"] == date_utils.format_datetime(
                 datetime.datetime.combine(
@@ -63,7 +63,7 @@ def _scheduled_activities_assertions(
             if not activity[
                 "hasReminder"
             ]:  # CONDITION 2 - hasRepetition is True, Subcondition 1 - hasReminder is False
-                assert scheduled_activity_current["reminder"] == None
+                assert "reminder" not in scheduled_activity_current
             else:  # CONDITION 2 - hasRepetition is True, Subcondition 2 - hasReminder is True
                 scheduled_activity_day_date = date_utils.format_date(
                     date_utils.parse_datetime(scheduled_activity_current["dueDate"]),
@@ -78,8 +78,13 @@ def _scheduled_activities_assertions(
                 )
 
 
+@pytest.mark.parametrize(
+    "activity_method",
+    [("post", "put")],
+)
 def test_create_scheduled_activities_condition_one_subcondition_one(
     data_fake_activity_factory: Callable[[], dict],
+    activity_method: str,
 ):
     # CONDITION 1 - hasRepetition is False, Subcondition 1 - hasReminder is False
     activity = _dummy_inserted_activity(
@@ -90,29 +95,8 @@ def test_create_scheduled_activities_condition_one_subcondition_one(
 
     scheduled_activities = (
         scope.database.patient.scheduled_activities.create_scheduled_activities(
-            activity=activity
-        )
-    )
-
-    _scheduled_activities_assertions(
-        activity=activity,
-        scheduled_activities=scheduled_activities,
-    )
-
-
-def test_create_scheduled_activities_condition_one_subcondition_two(
-    data_fake_activity_factory: Callable[[], dict],
-):
-    # CONDITION 1 - hasRepetition is False, Subcondition 2 - hasReminder is True
-    activity = _dummy_inserted_activity(
-        fake_activity_factory=data_fake_activity_factory,
-        has_repetition=False,
-        has_reminder=True,
-    )
-
-    scheduled_activities = (
-        scope.database.patient.scheduled_activities.create_scheduled_activities(
-            activity=activity
+            activity=activity,
+            activity_method=activity_method,
         )
     )
 
@@ -123,7 +107,35 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
 
 
 @pytest.mark.parametrize(
-    "start_date,time_of_day,repeat_day_flags,weeks,scheduled_activity_due_dates",
+    "activity_method",
+    [("post", "put")],
+)
+def test_create_scheduled_activities_condition_one_subcondition_two(
+    data_fake_activity_factory: Callable[[], dict],
+    activity_method: str,
+):
+    # CONDITION 1 - hasRepetition is False, Subcondition 2 - hasReminder is True
+    activity = _dummy_inserted_activity(
+        fake_activity_factory=data_fake_activity_factory,
+        has_repetition=False,
+        has_reminder=True,
+    )
+
+    scheduled_activities = (
+        scope.database.patient.scheduled_activities.create_scheduled_activities(
+            activity=activity,
+            activity_method=activity_method,
+        )
+    )
+
+    _scheduled_activities_assertions(
+        activity=activity,
+        scheduled_activities=scheduled_activities,
+    )
+
+
+@pytest.mark.parametrize(
+    "start_date,time_of_day,repeat_day_flags,weeks,scheduled_activity_due_dates,activity_method",
     [
         (
             "2022-03-01T00:00:00Z",  # Monday
@@ -144,6 +156,7 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
                 "2022-03-07T16:00:00Z",
                 "2022-03-08T16:00:00Z",
             ],
+            "post",
         ),
         (
             "2022-04-01T00:00:00Z",  # Friday
@@ -166,6 +179,31 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
                 "2022-04-12T07:00:00Z",
                 "2022-04-14T07:00:00Z",
             ],
+            "post",
+        ),
+        (
+            # TODO: James; need help with fixtures.
+            "2022-04-01T00:00:00Z",  # Friday - Passes because this "put" has a start date in future. Need to automate this.
+            7,
+            {
+                "Monday": True,
+                "Tuesday": True,
+                "Wednesday": False,
+                "Thursday": True,
+                "Friday": False,
+                "Saturday": False,
+                "Sunday": False,
+            },
+            2,
+            [
+                "2022-04-04T07:00:00Z",
+                "2022-04-05T07:00:00Z",
+                "2022-04-07T07:00:00Z",
+                "2022-04-11T07:00:00Z",
+                "2022-04-12T07:00:00Z",
+                "2022-04-14T07:00:00Z",
+            ],
+            "put",
         ),
     ],
 )
@@ -176,6 +214,7 @@ def test_create_scheduled_activities_condition_two(
     repeat_day_flags: dict,
     weeks: int,
     scheduled_activity_due_dates: List[str],
+    activity_method: str,
 ):
     # CONDITION 2 - hasRepetition is True, Subcondition 1 - hasReminder is False
     activity = _dummy_inserted_activity(
@@ -192,6 +231,7 @@ def test_create_scheduled_activities_condition_two(
         scope.database.patient.scheduled_activities.create_scheduled_activities(
             activity=activity,
             weeks=weeks,
+            activity_method=activity_method,
         )
     )
 
@@ -221,6 +261,7 @@ def test_create_scheduled_activities_condition_two(
         scope.database.patient.scheduled_activities.create_scheduled_activities(
             activity=activity,
             weeks=weeks,
+            activity_method=activity_method,
         )
     )
 

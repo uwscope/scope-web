@@ -38,9 +38,7 @@ def _compute_scheduled_activity_properties(
         date_utils.parse_date(scheduled_activity_day_date)
         + datetime.timedelta(hours=activity["timeOfDay"])
     )
-    if not activity.get("hasReminder"):
-        scheduled_activity["reminder"] = None
-    else:
+    if activity.get("hasReminder"):
         scheduled_activity["reminder"] = date_utils.format_datetime(
             date_utils.parse_date(scheduled_activity_day_date)
             + datetime.timedelta(hours=activity["reminderTimeOfDay"])
@@ -52,9 +50,20 @@ def create_scheduled_activities(
     *,
     activity: dict,
     weeks: int = 12,
+    activity_method: str = "post",
 ) -> List[dict]:
-    scheduled_activities = []
 
+    if activity_method == "put":
+        start_date = date_utils.parse_date(activity["startDate"])
+        todays_date = date_utils.parse_date(
+            date_utils.format_date(datetime.datetime.today())
+        )
+        if start_date < todays_date:
+            activity.update(
+                {"startDate": date_utils.format_date(datetime.datetime.today())}
+            )
+
+    scheduled_activities = []
     if not activity.get("hasRepetition"):
         # Create 1 scheduled activity
         scheduled_activity = _compute_scheduled_activity_properties(
@@ -83,11 +92,6 @@ def create_scheduled_activities(
             )
             scheduled_activities.append(scheduled_activity)
 
-    schema_utils.raise_for_invalid_schema(
-        data=scheduled_activities,
-        schema=scope.schema.scheduled_activities_schema,
-    )
-
     return scheduled_activities
 
 
@@ -96,39 +100,103 @@ def create_and_post_scheduled_activities(
     collection: pymongo.collection.Collection,
     activity: dict,
     weeks: int = 12,  # ~ 3 months
+    activity_method: str = "post",
 ):
     # Create scheduledActivities here
     scheduled_activities = create_scheduled_activities(
         activity=activity,
         weeks=weeks,
+        activity_method=activity_method,
     )
+
+    schema_utils.raise_for_invalid_schema(
+        data=scheduled_activities,
+        schema=scope.schema.scheduled_activities_schema,
+    )
+
     for scheduled_activity_current in scheduled_activities:
-        # TODO: Check w/ James if no return is fine.
+
         post_scheduled_activity(
             collection=collection,
             scheduled_activity=scheduled_activity_current,
         )
 
 
-def get_scheduled_activities_for_activity(
+# TODO: Can this method be better named.
+def filter_scheduled_activities(
+    *,
+    all_scheduled_activities: List[dict],
+    activity: dict,
+) -> List[dict]:
+    """
+    GET future due date scheduled activities for an activity
+    """
+
+    if all_scheduled_activities:
+        filtered_scheduled_activities = list(
+            filter(
+                lambda all_scheduled_activity_current: (
+                    # Keep scheduled activities which match activity
+                    (
+                        all_scheduled_activity_current[
+                            scope.database.patient.activities.SEMANTIC_SET_ID
+                        ]
+                        == activity[scope.database.patient.activities.SEMANTIC_SET_ID]
+                    )
+                    # Keep scheduled activities which are due in future
+                    and (
+                        date_utils.parse_datetime(
+                            all_scheduled_activity_current["dueDate"]
+                        )
+                        > datetime.datetime.today()
+                    )
+                ),
+                all_scheduled_activities,
+            )
+        )
+        return filtered_scheduled_activities
+    return []
+
+
+def get_filter_and_put_scheduled_activities(
     *,
     collection: pymongo.collection.Collection,
-    activity_id: str,
-) -> Optional[List[dict]]:
-    """
-    Get list of "schedulAactivity" documents.
-    """
+    activity: dict,
+):
 
-    query = {
-        "_type": DOCUMENT_TYPE,
-        scope.database.patient.activities.SEMANTIC_SET_ID: activity_id,
-        # "isDeleted": False, #TODO Check with James
-    }
-
-    return scope.database.collection_utils.get_set_query(
+    # GET all stored scheduledActivities
+    all_scheduled_activities = get_scheduled_activities(
         collection=collection,
-        match_query=query,
     )
+
+    # Get future due date scheduled activities for activity
+    filtered_scheduled_activities = filter_scheduled_activities(
+        all_scheduled_activities=all_scheduled_activities,
+        activity=activity,
+    )
+
+    schema_utils.raise_for_invalid_schema(
+        data=filtered_scheduled_activities,
+        schema=scope.schema.scheduled_activities_schema,
+    )
+
+    # PUT the filtered scheduled activities
+    for scheduled_activity_current in filtered_scheduled_activities:
+        # Delete _id for putting
+        del scheduled_activity_current["_id"]
+        # Mark them as deleted
+        scheduled_activity_current.update({"_deleted": True})
+
+        schema_utils.raise_for_invalid_schema(
+            data=scheduled_activity_current,
+            schema=scope.schema.scheduled_activity_schema,
+        )
+
+        put_scheduled_activity(
+            collection=collection,
+            scheduled_activity=scheduled_activity_current,
+            set_id=scheduled_activity_current["_set_id"],
+        )
 
 
 def get_scheduled_activities(
