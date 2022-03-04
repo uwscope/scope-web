@@ -1,4 +1,5 @@
 import datetime as _datetime
+import pytz
 from typing import Union
 
 
@@ -12,10 +13,14 @@ def parse_date(date: str) -> _datetime.date:
     """
     parsed_datetime = parse_datetime(date)
 
-    if (parsed_datetime.hour, parsed_datetime.minute, parsed_datetime.second) != (0, 0, 0):
-        raise ValueError(
-            "time data {} does not match format '%Y-%m-%dT00:00:00Z".format(date)
-        )
+    if any(
+        [
+            parsed_datetime.hour != 0,
+            parsed_datetime.minute != 0,
+            parsed_datetime.second != 0,
+        ]
+    ):
+        raise ValueError('Invalid date format: "{}".'.format(date))
 
     parsed_date = parsed_datetime
 
@@ -27,12 +32,28 @@ def parse_datetime(datetime: str) -> _datetime.datetime:
     Parse date string from our datetime format.
     """
 
+    parsed_naive_datetime = None
+
     try:
-        return _datetime.datetime.strptime(datetime, DATETIME_FORMAT_NO_MICROSECONDS)
+        parsed_naive_datetime = _datetime.datetime.strptime(
+            datetime,
+            DATETIME_FORMAT_NO_MICROSECONDS,
+        )
     except ValueError:
         pass
 
-    return _datetime.datetime.strptime(datetime, DATETIME_FORMAT_COMPLETE)
+    try:
+        parsed_naive_datetime = _datetime.datetime.strptime(
+            datetime,
+            DATETIME_FORMAT_COMPLETE,
+        )
+    except ValueError:
+        pass
+
+    if not parsed_naive_datetime:
+        raise ValueError('Invalid datetime format: "{}".'.format(datetime))
+
+    return pytz.utc.localize(parsed_naive_datetime)
 
 
 def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
@@ -40,16 +61,23 @@ def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
     Format the date portion of a datetime into our format.
     """
 
-    # Ensure a datetime.date object
     if isinstance(date, _datetime.datetime):
+        if date.tzinfo is None:
+            raise ValueError("datetime must be UTC aware.")
+        if date.tzinfo.utcoffset(date).total_seconds() != 0:
+            raise ValueError("datetime must be UTC aware.")
+
+        # Ensure a datetime.date object
         date = date.date()
 
+    # Convert date into a datetime with 0 values
     date = _datetime.datetime.combine(
         date,
         _datetime.datetime.min.time(),  # 00:00.00.00
     )
+    date = pytz.utc.localize(date)
 
-    return "{}Z".format(date.isoformat())
+    return date.strftime(DATETIME_FORMAT_NO_MICROSECONDS)
 
 
 def format_datetime(datetime: _datetime.datetime) -> str:
@@ -57,4 +85,11 @@ def format_datetime(datetime: _datetime.datetime) -> str:
     Format a datetime into our format.
     """
 
-    return "{}Z".format(datetime.isoformat())
+    if not isinstance(datetime, _datetime.datetime):
+        raise ValueError("datetime must be UTC aware.")
+    if datetime.tzinfo is None:
+        raise ValueError("datetime must be UTC aware.")
+    if datetime.tzinfo.utcoffset(datetime).total_seconds() != 0:
+        raise ValueError("datetime must be UTC aware.")
+
+    return datetime.strftime(DATETIME_FORMAT_NO_MICROSECONDS)

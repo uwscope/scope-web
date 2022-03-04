@@ -61,8 +61,8 @@ def compute_patient_summary(
             lambda scheduled_assessment_current: (
                 (not scheduled_assessment_current["completed"])
                 and (
-                    date_utils.parse_date(scheduled_assessment_current["dueDate"])
-                    <= datetime.datetime.today()
+                    date_utils.parse_date(scheduled_assessment_current["dueDate"]).date()
+                    <= datetime.date.today()
                 )
             ),
             scheduled_assessment_documents,

@@ -42,8 +42,8 @@ def raise_for_invalid_schema(
 
 def xfail_for_invalid_schema(
     *,
-    schema: jschon.JSONSchema,
     data: Union[dict, List[dict]],
+    schema: jschon.JSONSchema,
 ) -> None:
     """
     Verify a document matches a schema, xfail if it does not.

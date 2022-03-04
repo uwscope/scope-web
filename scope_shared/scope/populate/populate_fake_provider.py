@@ -36,7 +36,9 @@ def populate_fake_provider(
 
     # Construct the populate config object
     created_provider = {
-        "providerId": fake_provider_identity[scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID],
+        "providerId": fake_provider_identity[
+            scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
+        ],
         "name": fake_provider_identity["name"],
         "role": fake_provider_identity["role"],
     }
