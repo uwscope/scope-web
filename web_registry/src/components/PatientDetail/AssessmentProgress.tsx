@@ -194,9 +194,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         });
 
     const recurrence =
-        assessment.assigned && assessment.assignedDate
+        assessment.assigned && assessment.assignedDateTime
             ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-                  assessment.assignedDate,
+                  assessment.assignedDateTime,
                   'MM/dd/yyyy',
               )}`
             : 'Not assigned';

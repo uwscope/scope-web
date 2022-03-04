@@ -24,9 +24,9 @@
 		"assigned": {
 			"type": "boolean"
 		},
-		"assignedDate": {
-			"type": "string"
-		},
+        "assignedDateTime": {
+            "$ref": "/schemas/datetime#/properties/datetime"
+        },
 		"frequency": {
 			"$ref": "/schemas/enums#/properties/assessmentFrequency"
 		},
@@ -35,5 +35,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDate"]
+	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"]
 }

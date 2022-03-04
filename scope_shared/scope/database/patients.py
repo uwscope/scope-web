@@ -136,12 +136,6 @@ def create_patient(
     )
 
     # Create initial assessments
-
-    # TODO: Jina remove this when assignedDate converted to assignedDateTime
-    date_assigned = scope.database.date_utils.format_date(
-        datetime.datetime.utcnow()
-    )
-
     for assessment_current in [
         scope.testing.fake_data.enums.AssessmentType.GAD7.value,
         scope.testing.fake_data.enums.AssessmentType.Medication.value,
@@ -152,9 +146,7 @@ def create_patient(
             "_set_id": assessment_current,
             scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
             "assigned": True,
-            # TODO: Jina replace
-            "assignedDate": date_assigned,
-            # "assignedDateTime": datetime_assigned,
+            "assignedDateTime": datetime_assigned,
         }
         schema_utils.raise_for_invalid_schema(
             data=assessment_document,

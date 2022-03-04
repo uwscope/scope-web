@@ -92,7 +92,7 @@ export interface ICaseReview {
 export interface IAssessment {
     assessmentId: string;
     assigned: boolean;
-    assignedDate?: Date;
+    assignedDateTime?: Date;
     frequency?: AssessmentFrequency;
     dayOfWeek?: DayOfWeek;
 }

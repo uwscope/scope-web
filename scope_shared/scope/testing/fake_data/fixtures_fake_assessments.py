@@ -30,7 +30,7 @@ def _fake_assessment(
         scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
         "assigned": random.choice([True, False]),
-        "assignedDate": date_utils.format_date(
+        "assignedDateTime": date_utils.format_datetime(
             faker_factory.date_between_dates(
                 date_start=datetime.datetime.now(),
                 date_end=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
