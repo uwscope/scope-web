@@ -1,13 +1,12 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable, List
 
 import scope.database.date_utils as date_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.assessments
-
 import scope.schema
 import scope.schema_utils
 import scope.testing.fake_data.enums
@@ -31,10 +30,10 @@ def _fake_assessment(
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
         "assigned": random.choice([True, False]),
         "assignedDateTime": date_utils.format_datetime(
-            faker_factory.date_between_dates(
-                date_start=datetime.datetime.now(),
-                date_end=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
-            )
+            pytz.utc.localize(faker_factory.date_time_between(
+                start_date=datetime.datetime.now(),
+                end_date=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
+            ))
         ),
         "frequency": fake_utils.fake_enum_value(
             scope.testing.fake_data.enums.AssessmentFrequency

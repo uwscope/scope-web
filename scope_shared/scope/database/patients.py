@@ -1,7 +1,6 @@
 import datetime
-import pprint
-
 import pymongo.database
+import pytz
 from typing import List, Optional
 
 import scope.database.date_utils as date_utils
@@ -102,7 +101,7 @@ def create_patient(
 
     # Use a uniform datetime for the new assignments for this patient
     datetime_assigned = scope.database.date_utils.format_datetime(
-        datetime.datetime.utcnow()
+        pytz.utc.localize(datetime.datetime.utcnow())
     )
 
     # Create the initial safety plan document
