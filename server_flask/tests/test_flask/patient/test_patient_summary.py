@@ -36,8 +36,8 @@ def _patient_summary_assertions(summary: dict) -> None:
     for assigned_scheduled_assessment_current in assigned_scheduled_assessments:
         assert not assigned_scheduled_assessment_current["completed"]
         assert (
-            date_utils.parse_date(assigned_scheduled_assessment_current["dueDate"])
-            <= datetime.datetime.today()
+            date_utils.parse_date(assigned_scheduled_assessment_current["dueDate"]).date()
+            <= datetime.date.today()
         )
 
 
@@ -240,7 +240,7 @@ def test_compute_patient_summary_scheduled_assessments(
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
-            datetime.datetime.today() + datetime.timedelta(days=2)
+            datetime.date.today() + datetime.timedelta(days=2)
         )
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
@@ -254,7 +254,7 @@ def test_compute_patient_summary_scheduled_assessments(
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
-            datetime.datetime.today()
+            datetime.date.today()
         )
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
@@ -268,7 +268,7 @@ def test_compute_patient_summary_scheduled_assessments(
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = False
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
-            datetime.datetime.today() - datetime.timedelta(days=1)
+            datetime.date.today() - datetime.timedelta(days=1)
         )
     summary = blueprints.patient.summary.compute_patient_summary(
         safety_plan_document=safety_plan,
