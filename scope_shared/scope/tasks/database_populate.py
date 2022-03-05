@@ -116,17 +116,18 @@ def task_populate(
                 populate_config=populate_config,
             )
 
-        # Verify the config schema
-        scope.schema_utils.raise_for_invalid_schema(
-            data=populate_config_update, schema=scope.schema.populate_config_schema
-        )
-
         # Store the updated populate config
         populate_config_update_path = populate_config_generate_path(
             populate_dir_path=populate_dir_path
         )
         with open(populate_config_update_path, "w") as f:
             yaml.dump(populate_config_update, f)
+
+        # Verify the config schema after storing it
+        # This will therefore display an error, but not "lose" the new config schema
+        scope.schema_utils.raise_for_invalid_schema(
+            data=populate_config_update, schema=scope.schema.populate_config_schema
+        )
 
     populate.__doc__ = populate.__doc__.format(database_config.name)
 

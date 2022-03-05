@@ -95,14 +95,17 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"name": {
+							"providerId": {
 								"type": "string"
 							},
-							"providerId": {
+							"name": {
 								"type": "string"
 							},
 							"role": {
 								"$ref": "/schemas/enums#/properties/providerRole"
+							},
+							"account": {
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"required": ["name", "providerId", "role"]

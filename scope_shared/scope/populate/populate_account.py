@@ -22,7 +22,8 @@ def _generate_temporary_password() -> str:
     numbers = string.digits
     symbols = "^$*.[]{}()?!@#%&/\,><':;|_~`=+-" + '"'
 
-    combined = lowercase + uppercase + numbers + symbols
+    # Symbols provide more strength, but make temporary passwords difficult
+    combined = lowercase + uppercase + numbers
 
     characters = []
     characters.extend([
@@ -119,10 +120,6 @@ def populate_account_from_config(
             "email": create_email,
             "temporaryPassword": create_temporary_password,
         }
-        # del populate_config_account["create"]
-
-        pprint.pprint(response)
-        pprint.pprint(populate_config_account)
-
+        del populate_config_account["create"]
 
     return populate_config_account
