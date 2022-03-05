@@ -50,7 +50,7 @@ def generate_set_id() -> str:
     # Obtain uniqueness
     generated_uuid = uuid.uuid4()
     # Manage length so these don't seem obscenely long
-    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=6).digest()
+    generated_digest = hashlib.blake2b(generated_uuid.bytes, digest_size=8).digest()
     # Obtain URL safety and MongoDB collection name compatibility.
     generated_base64 = base64.b32encode(generated_digest).decode("ascii").casefold()
 
