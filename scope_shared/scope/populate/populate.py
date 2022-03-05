@@ -1,7 +1,10 @@
 import copy
+import pprint
+
 import pymongo.database
 from typing import List
 
+import scope.populate.populate_account
 import scope.populate.populate_fake
 import scope.populate.populate_patient
 import scope.populate.populate_provider
@@ -38,6 +41,16 @@ def populate_from_config(
     populate_config["patients"]["existing"].extend(created_patients)
 
     #
+    # Populate patient accounts
+    #
+    for patient_current in populate_config["patients"]["existing"]:
+        if "account" in patient_current:
+            patient_current["account"] = scope.populate.populate_account.populate_account_from_config(
+                database=database,
+                populate_config_account=patient_current["account"]
+            )
+
+    #
     # Create specified providers
     #
     created_providers = _create_providers(
@@ -46,6 +59,16 @@ def populate_from_config(
     )
     populate_config["providers"]["create"] = []
     populate_config["providers"]["existing"].extend(created_providers)
+
+    #
+    # Populate provider accounts
+    #
+    for provider_current in populate_config["providers"]["existing"]:
+        if "account" in provider_current:
+            provider_current["account"] = scope.populate.populate_account.populate_account_from_config(
+                database=database,
+                populate_config_account=provider_current["account"]
+            )
 
     return populate_config
 
