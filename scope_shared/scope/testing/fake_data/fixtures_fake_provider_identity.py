@@ -4,9 +4,9 @@ import faker
 import pytest
 import scope.database.collection_utils as collection_utils
 import scope.database.providers
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
@@ -23,7 +23,7 @@ def fake_provider_identity_factory(
             "_type": scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE,
             "name": faker_factory.name(),
             "role": fake_utils.fake_enum_value(
-                scope.testing.fake_data.enums.ProviderRole
+                scope.enums.ProviderRole
             ),
         }
 

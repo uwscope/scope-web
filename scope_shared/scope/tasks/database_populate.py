@@ -15,10 +15,7 @@ import scope.schema
 import scope.schema_utils
 
 
-def populate_config_current_path(
-    *,
-    populate_dir_path: Path
-) -> Path:
+def populate_config_current_path(*, populate_dir_path: Path) -> Path:
     """
     Obtain the current path for a populate config.
 
@@ -29,9 +26,9 @@ def populate_config_current_path(
 
     filtered_config_paths = []
     for config_path_current in config_paths:
-        if (
-            config_path_current.is_file() and
-            re.fullmatch("populate_(.*).yaml", config_path_current.name)
+        if config_path_current.is_file() and re.fullmatch(
+            "populate_(.*).yaml",
+            config_path_current.name,
         ):
             filtered_config_paths.append(config_path_current)
     config_paths = filtered_config_paths
@@ -41,10 +38,7 @@ def populate_config_current_path(
     return config_paths[0]
 
 
-def populate_config_generate_path(
-    *,
-    populate_dir_path: Path
-) -> Path:
+def populate_config_generate_path(*, populate_dir_path: Path) -> Path:
     """
     Generate a path that should be used to store the current populate configuration.
 
@@ -55,7 +49,7 @@ def populate_config_generate_path(
         populate_dir_path,
         "populate_{}.yaml".format(
             datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%SZ")
-        )
+        ),
     )
 
 
@@ -85,13 +79,19 @@ def task_populate(
         yaml.default_flow_style = False
 
         # Obtain the current populate config
-        populate_config_path = populate_config_current_path(populate_dir_path=populate_dir_path)
+        populate_config_path = populate_config_current_path(
+            populate_dir_path=populate_dir_path
+        )
 
         print('Using config "{}".'.format(populate_config_path.name))
-        populate_config = yaml.load(populate_config_current_path(populate_dir_path=populate_dir_path))
+        populate_config = yaml.load(
+            populate_config_current_path(populate_dir_path=populate_dir_path)
+        )
 
         # Verify the config schema
-        scope.schema_utils.raise_for_invalid_schema(data=populate_config, schema=scope.schema.populate_config_schema)
+        scope.schema_utils.raise_for_invalid_schema(
+            data=populate_config, schema=scope.schema.populate_config_schema
+        )
 
         # Obtain a database client
         with contextlib.ExitStack() as context_manager:
@@ -110,11 +110,13 @@ def task_populate(
             # Perform the populate
             populate_config_update = scope.populate.populate_from_config(
                 database=database,
-                populate_config=populate_config
+                populate_config=populate_config,
             )
 
         # Verify the config schema
-        scope.schema_utils.raise_for_invalid_schema(data=populate_config_update, schema=scope.schema.populate_config_schema)
+        scope.schema_utils.raise_for_invalid_schema(
+            data=populate_config_update, schema=scope.schema.populate_config_schema
+        )
 
         # Store the updated populate config
         populate_config_update_path = populate_config_generate_path(

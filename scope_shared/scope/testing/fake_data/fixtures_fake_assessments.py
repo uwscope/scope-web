@@ -1,16 +1,15 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable, List
 
 import scope.database.date_utils as date_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.assessments
-
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 # TODO: Commenting because either both should exist or both should be removed
@@ -30,17 +29,19 @@ def _fake_assessment(
         scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
         "assigned": random.choice([True, False]),
-        "assignedDate": date_utils.format_date(
-            faker_factory.date_between_dates(
-                date_start=datetime.datetime.now(),
-                date_end=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
+        "assignedDateTime": date_utils.format_datetime(
+            pytz.utc.localize(
+                faker_factory.date_time_between(
+                    start_date=datetime.datetime.now(),
+                    end_date=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
+                )
             )
         ),
         "frequency": fake_utils.fake_enum_value(
-            scope.testing.fake_data.enums.AssessmentFrequency
+            scope.enums.AssessmentFrequency
         ),
         "dayOfWeek": fake_utils.fake_enum_value(
-            scope.testing.fake_data.enums.DayOfWeek
+            scope.enums.DayOfWeek
         ),
     }
 

@@ -1,14 +1,14 @@
+import faker
 import random
+import pytest
+import pytz
 from typing import Callable
 
-import faker
-import pytest
 import scope.database.date_utils as date_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.safety_plan
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
@@ -38,9 +38,11 @@ def fake_safety_plan_factory(
         fake_safety_plan = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": random.choice([True, False]),
-            "assignedDateTime": date_utils.format_datetime(faker_factory.date_time()),
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
             "lastUpdatedDateTime": date_utils.format_datetime(
-                faker_factory.date_time()
+                pytz.utc.localize(faker_factory.date_time())
             ),
             "reasonsForLiving": faker_factory.text(),
             "warningSigns": faker_factory.texts(nb_texts=random.randint(1, 5)),

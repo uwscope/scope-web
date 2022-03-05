@@ -14,6 +14,7 @@ setuptools.setup(
     python_requires=">=3",
     install_requires=[
         "pymongo",
+        "pytz",
         "requests",
         "ruamel.yaml",
         # jschon is active and < 1.0,

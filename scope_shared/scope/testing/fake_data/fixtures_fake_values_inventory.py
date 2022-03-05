@@ -1,13 +1,14 @@
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable, List
 
 import scope.database.date_utils as date_utils
 import scope.database.patient.patient_profile
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS_VALUES_INVENTORY = [
@@ -27,8 +28,12 @@ def _fake_activity(
 
     fake_activity = {
         "name": faker_factory.text(),
-        "createdDateTime": date_utils.format_date(faker_factory.date_time()),
-        "editedDateTime": date_utils.format_date(faker_factory.date_time()),
+        "createdDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
+        "editedDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
         "enjoyment": random.randint(1, 10),
         "importance": random.randint(1, 10),
     }
@@ -51,8 +56,12 @@ def _fake_value(
 
     return {
         "name": faker_factory.text(),
-        "createdDateTime": date_utils.format_date(faker_factory.date_time()),
-        "editedDateTime": date_utils.format_date(faker_factory.date_time()),
+        "createdDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
+        "editedDateTime": date_utils.format_datetime(
+            pytz.utc.localize(faker_factory.date_time())
+        ),
         "lifeareaId": life_area["id"],
         "activities": [
             _fake_activity(
@@ -79,8 +88,12 @@ def fake_values_inventory_factory(
         fake_values_inventory = {
             "_type": "valuesInventory",
             "assigned": random.choice([True, False]),
-            "assignedDateTime": date_utils.format_date(faker_factory.date_time()),
-            "lastUpdatedDateTime": date_utils.format_date(faker_factory.date_time()),
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
+            "lastUpdatedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(faker_factory.date_time())
+            ),
         }
 
         values = []

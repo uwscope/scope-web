@@ -4,14 +4,14 @@ Contacts are not stored documents.
 They are generated and stored as elements of other documents.
 """
 
+import faker
+import pytest
 import random
 from typing import Callable
 
-import faker
-import pytest
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [

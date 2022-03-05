@@ -89,7 +89,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
             {getTextField('Primary Oncology Provider', primaryOncologyProvider, 'primaryOncologyProvider')}
             <GridDropdownField
                 editable
-                label={'Primary Care Manager'}
+                label={'Primary Social Worker'}
                 value={primaryCareManager?.name || ''}
                 options={availableCareManagerNames}
                 onChange={(text) => onCareManagerChange(text as string)}

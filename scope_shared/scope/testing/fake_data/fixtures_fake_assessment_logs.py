@@ -1,18 +1,15 @@
-import datetime
 import faker
 import pytest
 import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.scheduled_assessments
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def _fake_assessment_point_values(

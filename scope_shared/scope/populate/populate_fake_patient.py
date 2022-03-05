@@ -16,9 +16,10 @@ import scope.database.patient.sessions
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
+import scope.database.patient_unsafe_utils
 import scope.database.patients
 import scope.database.providers
-import scope.testing.fake_data.enums
+import scope.enums
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activity_logs
 import scope.testing.fake_data.fixtures_fake_assessments
@@ -74,7 +75,9 @@ def populate_fake_patient_empty(
 
     # Construct the populate config object
     created_patient = {
-        "patientId": fake_patient_identity[scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID],
+        "patientId": fake_patient_identity[
+            scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+        ],
         "name": fake_patient_identity["name"],
         "MRN": fake_patient_identity["MRN"],
     }
@@ -99,14 +102,16 @@ def populate_fake_patient(
 
     patient_identity_document = scope.database.patients.get_patient_identity(
         database=database,
-        patient_id=patient_id
+        patient_id=patient_id,
     )
 
     _populate_fake_patient_documents(
         faker_factory=faker_factory,
         database=database,
         patient_id=patient_id,
-        patient_collection=database.get_collection(patient_identity_document["collection"])
+        patient_collection=database.get_collection(
+            patient_identity_document["collection"]
+        ),
     )
 
     return created_patient
@@ -258,19 +263,25 @@ def _populate_fake_patient_documents(
     # Assessments required to create scheduled assessments.
     ################################################################################
     def _assessments_and_scheduled_assessments():
-        fake_assessment_contents = scope.testing.fake_data.fixtures_fake_assessment_contents.fake_assessment_contents_factory()()
+        fake_assessment_contents = (
+            scope.testing.fake_data.fixtures_fake_assessment_contents.fake_assessment_contents_factory()()
+        )
 
-        fake_assessments_factory = scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
-            faker_factory=faker_factory,
-            assessment_contents=fake_assessment_contents
+        fake_assessments_factory = (
+            scope.testing.fake_data.fixtures_fake_assessments.fake_assessments_factory(
+                faker_factory=faker_factory,
+                assessment_contents=fake_assessment_contents,
+            )
         )
         fake_assessments = fake_assessments_factory()
 
         for fake_assessment_current in fake_assessments:
-            scope.database.patient.assessments.put_assessment(
+            scope.database.patient_unsafe_utils.unsafe_update_assessment(
                 collection=patient_collection,
+                set_id=fake_assessment_current[
+                    scope.database.patient.assessments.SEMANTIC_SET_ID
+                ],
                 assessment=fake_assessment_current,
-                set_id=fake_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID],
             )
 
             fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
