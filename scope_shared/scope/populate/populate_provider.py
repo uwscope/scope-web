@@ -25,7 +25,7 @@ def create_provider(
         role=role,
     )
 
-    # Update the populate config object
+    # Update the provider object
     created_provider = copy.deepcopy(create_provider)
     created_provider.update({
         "providerId": provider_identity_document[

@@ -25,7 +25,7 @@ def create_patient(
         patient_mrn=mrn,
     )
 
-    # Update the populate config object
+    # Update the patient object
     created_patient = copy.deepcopy(create_patient)
     created_patient.update({
         "patientId": patient_identity_document[
