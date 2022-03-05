@@ -1,3 +1,5 @@
+import copy
+
 import pymongo.database
 from typing import List, Optional
 
@@ -6,6 +8,8 @@ import scope.database.providers
 import scope.enums
 import scope.populate.populate_fake_patient
 import scope.populate.populate_fake_provider
+import scope.populate.populate_patient
+import scope.populate.populate_provider
 
 
 def populate_from_config(
@@ -224,19 +228,12 @@ def _create_patients(
 ) -> List[dict]:
     result: List[dict] = []
     for create_patient_current in create_patients:
-        patient_identity_document = scope.database.patients.create_patient(
+        created_patient = scope.populate.populate_patient.create_patient(
             database=database,
-            patient_name=create_patient_current["name"],
-            patient_mrn=create_patient_current["MRN"],
+            name=create_patient_current["name"],
+            mrn=create_patient_current["MRN"],
+            create_patient=create_patient_current,
         )
-
-        created_patient = {
-            "patientId": patient_identity_document[
-                scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
-            ],
-            "name": patient_identity_document["name"],
-            "MRN": patient_identity_document["MRN"],
-        }
 
         result.append(created_patient)
 
@@ -250,19 +247,12 @@ def _create_providers(
 ) -> List[dict]:
     result: List[dict] = []
     for create_provider_current in create_providers:
-        provider_identity_document = scope.database.providers.create_provider(
+        created_provider = scope.populate.populate_provider.create_provider(
             database=database,
             name=create_provider_current["name"],
             role=create_provider_current["role"],
+            create_provider=create_provider_current,
         )
-
-        created_provider = {
-            "providerId": provider_identity_document[
-                scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID
-            ],
-            "name": provider_identity_document["name"],
-            "role": provider_identity_document["role"],
-        }
 
         result.append(created_provider)
 
