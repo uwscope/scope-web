@@ -82,34 +82,7 @@
 								"$ref": "/schemas/enums#/properties/providerRole"
 							},
 							"account": {
-								"type": "object",
-								"properties": {
-									"create": {
-										"type": "object",
-										"properties": {
-											"account": {
-												"type": "string"
-											},
-											"email": {
-												"type": "string"
-											}
-										},
-										"additionalProperties": false
-									},
-									"existing": {
-										"type": "object",
-										"properties": {
-											"account": {
-												"type": "string"
-											},
-											"email": {
-												"type": "string"
-											}
-										},
-										"additionalProperties": false
-									}
-								},
-								"additionalProperties": false
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"additionalProperties": false,

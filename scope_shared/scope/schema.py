@@ -35,6 +35,7 @@ patient_identities_schema: Optional[jschon.JSONSchema] = None
 patient_profile_schema: Optional[jschon.JSONSchema] = None
 patient_summary_schema: Optional[jschon.JSONSchema] = None
 populate_config_schema: Optional[jschon.JSONSchema] = None
+populate_config_account_schema: Optional[jschon.JSONSchema] = None
 provider_identity_schema: Optional[jschon.JSONSchema] = None
 provider_identities_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
@@ -86,6 +87,7 @@ SCHEMAS = {
     "patient_profile_schema": "patient-profile.json",
     "patient_summary_schema": "patient-summary.json",
     "populate_config_schema": "populate-config.json",
+    "populate_config_account_schema": "populate-config-account.json",
     "provider_identity_schema": "provider-identity.json",
     "provider_identities_schema": "provider-identities.json",
     "referral_status_schema": "referral-status.json",

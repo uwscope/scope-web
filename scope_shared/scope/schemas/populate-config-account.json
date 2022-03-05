@@ -1,0 +1,33 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/populate-config-account",
+	"title": "PopulateConfigAccount",
+	"type": "object",
+	"properties": {
+		"create": {
+			"type": "object",
+			"properties": {
+				"account": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"existing": {
+			"type": "object",
+			"properties": {
+				"account": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"additionalProperties": false
+}
