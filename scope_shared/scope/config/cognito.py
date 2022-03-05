@@ -12,8 +12,8 @@ class CognitoClientConfig:
     Excludes internal fields that a client should not access.
     """
 
-    pool_id: str
-    client_id: str
+    poolid: str
+    clientid: str
 
     @staticmethod
     def load(config_path: Union[Path, str]):
@@ -28,8 +28,8 @@ class CognitoClientConfig:
     @staticmethod
     def parse(config_dict: dict):
         return CognitoClientConfig(
-            pool_id=config_dict["pool_id"],
-            client_id=config_dict["client_id"],
+            poolid=config_dict["poolid"],
+            clientid=config_dict["clientid"],
         )
 
 
