@@ -8,6 +8,7 @@ import scope.tasks.database_reset
 
 INSTANCE_SSH_CONFIG_PATH = './secrets/configuration/instance_ssh.yaml'
 DOCUMENTDB_CONFIG_PATH = './secrets/configuration/documentdb.yaml'
+COGNITO_CONFIG_PATH = "./secrets/configuration/cognito.yaml"
 
 DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 POPULATE_DEV_DIR_PATH = "./secrets/configuration/populate_dev"
@@ -27,6 +28,7 @@ if Path(DATABASE_DEV_CONFIG_PATH).exists():
         instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
         documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
         database_config_path=DATABASE_DEV_CONFIG_PATH,
+        cognito_config_path=COGNITO_CONFIG_PATH,
         populate_dir_path=POPULATE_DEV_DIR_PATH,
     ), "populate")
     ns_dev.add_task(scope.tasks.database_reset.task_reset(

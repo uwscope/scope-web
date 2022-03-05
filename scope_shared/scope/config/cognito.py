@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 import ruamel.yaml
-from typing import List
 from typing import Union
 
 
@@ -13,8 +12,8 @@ class CognitoClientConfig:
     Excludes internal fields that a client should not access.
     """
 
-    poolid: str
-    clientid: str
+    pool_id: str
+    client_id: str
 
     @staticmethod
     def load(config_path: Union[Path, str]):
@@ -29,8 +28,8 @@ class CognitoClientConfig:
     @staticmethod
     def parse(config_dict: dict):
         return CognitoClientConfig(
-            poolid=config_dict["poolid"],
-            clientid=config_dict["clientid"],
+            pool_id=config_dict["pool_id"],
+            client_id=config_dict["client_id"],
         )
 
 

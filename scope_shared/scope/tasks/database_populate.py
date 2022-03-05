@@ -58,13 +58,15 @@ def task_populate(
     instance_ssh_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
+    cognito_config_path: Union[Path, str],
     populate_dir_path: Union[Path, str],
 ):
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
         instance_ssh_config_path
     )
-    documentdb_config = scope.config.DocumentDBConfig.load(documentdb_config_path)
-    database_config = scope.config.DatabaseConfig.load(database_config_path)
+    documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
+    database_config = scope.config.DatabaseClientConfig.load(database_config_path)
+    cognito_config = scope.config.CognitoClientConfig.load(cognito_config_path)
 
     populate_dir_path = Path(populate_dir_path)
 
@@ -110,13 +112,9 @@ def task_populate(
             # Perform the populate
             populate_config_update = scope.populate.populate_from_config(
                 database=database,
+                cognito_config=cognito_config,
                 populate_config=populate_config,
             )
-
-        # Verify the config schema
-        scope.schema_utils.raise_for_invalid_schema(
-            data=populate_config_update, schema=scope.schema.populate_config_schema
-        )
 
         # Store the updated populate config
         populate_config_update_path = populate_config_generate_path(
@@ -124,6 +122,12 @@ def task_populate(
         )
         with open(populate_config_update_path, "w") as f:
             yaml.dump(populate_config_update, f)
+
+        # Verify the config schema after storing it
+        # This will therefore display an error, but not "lose" the new config schema
+        scope.schema_utils.raise_for_invalid_schema(
+            data=populate_config_update, schema=scope.schema.populate_config_schema
+        )
 
     populate.__doc__ = populate.__doc__.format(database_config.name)
 
