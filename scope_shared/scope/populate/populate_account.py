@@ -50,7 +50,7 @@ def _get_cognito_users_existing(
 
     user_paginator = boto_userpool.get_paginator("list_users")
     user_pages = user_paginator.paginate(
-        UserPoolId=cognito_config.pool_id
+        UserPoolId=cognito_config.poolid
     )
 
     users = []
@@ -91,7 +91,7 @@ def populate_account_from_config(
 
         # Create an account
         response = boto_userpool.admin_create_user(
-            UserPoolId=cognito_config.pool_id,
+            UserPoolId=cognito_config.poolid,
             Username=create_account_name,
             TemporaryPassword=create_temporary_password,
             MessageAction="SUPPRESS",
