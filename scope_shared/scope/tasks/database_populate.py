@@ -75,7 +75,7 @@ def task_populate(
         """
 
         # Configure a YAML object
-        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        yaml = ruamel.yaml.YAML(typ="rt", pure=True)
         yaml.default_flow_style = False
 
         # Obtain the current populate config
