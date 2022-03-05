@@ -1,7 +1,9 @@
 import aws_infrastructure.tasks.library.color
 from aws_infrastructure.tasks.collection import compose_collection
+import aws_infrastructure.tasks.library.aws_configure
 from invoke import Collection
 
+import tasks.aws
 import tasks.celery
 import tasks.database
 import tasks.documentdb
@@ -13,9 +15,16 @@ import tasks.test
 
 # Enable color
 aws_infrastructure.tasks.library.color.enable_color()
+# Apply the current AWS configuration
+aws_infrastructure.tasks.library.aws_configure.apply_aws_env(
+    aws_env_path=tasks.aws.AWS_ENV_PATH
+)
 
 # Build our task collection
 ns = Collection()
+
+# Compose from aws.py
+# compose_collection(ns, tasks.aws.ns, name="aws")
 
 # Compose from database_populate.py
 compose_collection(ns, tasks.database.ns, name="database")

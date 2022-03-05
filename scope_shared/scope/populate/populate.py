@@ -4,6 +4,7 @@ import pprint
 import pymongo.database
 from typing import List
 
+import scope.config
 import scope.populate.populate_account
 import scope.populate.populate_fake
 import scope.populate.populate_patient
@@ -13,6 +14,7 @@ import scope.populate.populate_provider
 def populate_from_config(
     *,
     database: pymongo.database.Database,
+    cognito_config: scope.config.CognitoClientConfig,
     populate_config: dict,
 ) -> dict:
     """
@@ -47,6 +49,7 @@ def populate_from_config(
         if "account" in patient_current:
             patient_current["account"] = scope.populate.populate_account.populate_account_from_config(
                 database=database,
+                cognito_config=cognito_config,
                 populate_config_account=patient_current["account"]
             )
 
@@ -67,6 +70,7 @@ def populate_from_config(
         if "account" in provider_current:
             provider_current["account"] = scope.populate.populate_account.populate_account_from_config(
                 database=database,
+                cognito_config=cognito_config,
                 populate_config_account=provider_current["account"]
             )
 
