@@ -1,6 +1,4 @@
 import copy
-import pprint
-
 import pymongo.database
 from typing import List
 
@@ -35,7 +33,7 @@ def populate_from_config(
     #
     # Create specified patients
     #
-    created_patients = _create_patients(
+    created_patients = scope.populate.populate_patient.create_patients(
         database=database,
         create_patients=populate_config["patients"]["create"],
     )
@@ -43,7 +41,7 @@ def populate_from_config(
     populate_config["patients"]["existing"].extend(created_patients)
 
     #
-    # Populate patient accounts
+    # Populate patient Cognito accounts
     #
     for patient_current in populate_config["patients"]["existing"]:
         if "account" in patient_current:
@@ -56,7 +54,7 @@ def populate_from_config(
     #
     # Create specified providers
     #
-    created_providers = _create_providers(
+    created_providers = scope.populate.populate_provider.create_providers(
         database=database,
         create_providers=populate_config["providers"]["create"],
     )
@@ -64,7 +62,7 @@ def populate_from_config(
     populate_config["providers"]["existing"].extend(created_providers)
 
     #
-    # Populate provider accounts
+    # Populate provider Cognito accounts
     #
     for provider_current in populate_config["providers"]["existing"]:
         if "account" in provider_current:
@@ -75,41 +73,3 @@ def populate_from_config(
             )
 
     return populate_config
-
-
-def _create_patients(
-    *,
-    database: pymongo.database.Database,
-    create_patients: List[dict],
-) -> List[dict]:
-    result: List[dict] = []
-    for create_patient_current in create_patients:
-        created_patient = scope.populate.populate_patient.create_patient(
-            database=database,
-            name=create_patient_current["name"],
-            mrn=create_patient_current["MRN"],
-            create_patient=create_patient_current,
-        )
-
-        result.append(created_patient)
-
-    return result
-
-
-def _create_providers(
-    *,
-    database: pymongo.database.Database,
-    create_providers: List[dict],
-) -> List[dict]:
-    result: List[dict] = []
-    for create_provider_current in create_providers:
-        created_provider = scope.populate.populate_provider.create_provider(
-            database=database,
-            name=create_provider_current["name"],
-            role=create_provider_current["role"],
-            create_provider=create_provider_current,
-        )
-
-        result.append(created_provider)
-
-    return result

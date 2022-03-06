@@ -1,10 +1,30 @@
 import copy
 import pymongo.database
+from typing import List
 
 import scope.database.providers
 
 
-def create_provider(
+def create_providers(
+    *,
+    database: pymongo.database.Database,
+    create_providers: List[dict],
+) -> List[dict]:
+    result: List[dict] = []
+    for create_provider_current in create_providers:
+        created_provider = _create_provider(
+            database=database,
+            name=create_provider_current["name"],
+            role=create_provider_current["role"],
+            create_provider=create_provider_current,
+        )
+
+        result.append(created_provider)
+
+    return result
+
+
+def _create_provider(
     *,
     database: pymongo.database.Database,
     name: str,
