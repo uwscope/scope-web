@@ -1,10 +1,17 @@
-import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
+import {
+    AuthenticationDetails,
+    CognitoRefreshToken,
+    CognitoUser,
+    CognitoUserPool,
+    CognitoUserSession,
+} from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
-import { IAppAuthConfig, IPatientIdentity, IPatientUser } from 'shared/types';
+import { IAppAuthConfig, IPatientIdentity } from 'shared/types';
 import { PromiseQuery } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { getLogger } from 'shared/logger';
 import { getLoadAndLogQuery } from 'shared/stores';
+import { AxiosError } from 'axios';
 
 export enum AuthState {
     Initialized,
@@ -17,12 +24,14 @@ export interface IAuthStore {
     isAuthenticated: boolean;
     authState: AuthState;
     authStateDetail?: string;
-    authUser?: CognitoUser;
 
-    currentUserIdentity?: IPatientUser;
+    currentUserIdentity?: IPatientIdentity;
     login(username: string, password: string): Promise<void>;
     updateTempPassword(newPassword: string): Promise<void>;
+    refreshToken(): Promise<void>;
     logout(): void;
+
+    getToken(): string | undefined;
 }
 
 const logger = getLogger('AuthStore');
@@ -32,27 +41,28 @@ export class AuthStore implements IAuthStore {
 
     public authState = AuthState.Initialized;
 
-    // This is only used to keep state for temp password change
-    public authUser?: CognitoUser;
-
     // Promise queries
-    private readonly authQuery: PromiseQuery<IPatientUser>;
-    private readonly identityQuery: PromiseQuery<IPatientIdentity>;
+    private readonly authQuery: PromiseQuery<IPatientIdentity>;
+    private readonly sessionQuery: PromiseQuery<CognitoUserSession>;
 
     private errorDetail = '';
+
+    // This is only used to keep state for temp password change
+    private authUser?: CognitoUser;
 
     constructor(authConfig: IAppAuthConfig) {
         this.authConfig = authConfig;
 
-        this.authQuery = new PromiseQuery<IPatientUser>(undefined, 'authQuery');
-        this.identityQuery = new PromiseQuery<IPatientIdentity>(undefined, 'identityQuery');
+        this.authQuery = new PromiseQuery<IPatientIdentity>(undefined, 'authQuery');
+        this.sessionQuery = new PromiseQuery<CognitoUserSession>(undefined, 'sessionQuery');
 
         makeAutoObservable(this);
     }
 
     @computed
     public get isAuthenticated() {
-        return !!this.currentUserIdentity && !!this.currentUserIdentity.authToken;
+        const token = this.getToken();
+        return !!this.currentUserSession && !!this.currentUserIdentity && !!token;
     }
 
     @computed
@@ -62,6 +72,11 @@ export class AuthStore implements IAuthStore {
             : undefined;
     }
 
+    @action.bound
+    public getToken() {
+        return this.currentUserSession?.getIdToken().getJwtToken();
+    }
+
     @computed
     public get currentUserIdentity() {
         if (this.authState == AuthState.Authenticated) {
@@ -69,6 +84,11 @@ export class AuthStore implements IAuthStore {
         }
 
         return undefined;
+    }
+
+    @computed
+    private get currentUserSession() {
+        return this.sessionQuery.value;
     }
 
     @action.bound
@@ -126,6 +146,27 @@ export class AuthStore implements IAuthStore {
     }
 
     @action.bound
+    public async refreshToken() {
+        if (this.currentUserSession && this.currentUserSession.isValid) {
+            const loadAndLogQuery = getLoadAndLogQuery(logger);
+            var token = new CognitoRefreshToken({ RefreshToken: this.currentUserSession.getRefreshToken().getToken() });
+            const promise = new Promise<CognitoUserSession>((resolve, reject) => {
+                this.authUser?.refreshSession(token, (error, session) => {
+                    if (error) {
+                        reject(error);
+
+                        // TODO: Kick user out of the app
+                    }
+
+                    resolve(session);
+                });
+            });
+
+            await loadAndLogQuery(() => promise, this.sessionQuery);
+        }
+    }
+
+    @action.bound
     public async updateTempPassword(password: string) {
         // Clear states
         this.errorDetail = '';
@@ -161,25 +202,27 @@ export class AuthStore implements IAuthStore {
 
     @action.bound
     public logout() {
-        const { authToken, ...currentUser } = this.currentUserIdentity || { authToken: '' };
         this.authUser?.signOut();
         this.authState = AuthState.Initialized;
         this.authUser = undefined;
 
-        logger.event('UserLoggedOut', { ...currentUser });
+        logger.event('UserLoggedOut', { ...this.authQuery.value });
     }
 
     private getIdentityFromSession(promise: Promise<CognitoUserSession>) {
-        const identifiedPromise = promise.then(async (session) => {
+        const identifiedPromise = this.sessionQuery.fromPromise(promise).then(async (session) => {
             // Once the promise is resolved, get the identity
 
             const { identityService } = useServices();
             var idToken = session?.getIdToken()?.getJwtToken();
 
             try {
-                const patientIdentity = await this.identityQuery.fromPromise(
-                    identityService.getPatientIdentity(idToken),
-                );
+                const patientIdentity = await identityService.getPatientIdentity(idToken);
+
+                // Temporary check for expected data
+                if (!patientIdentity) {
+                    throw new Error('Unauthorized');
+                }
 
                 logger.event('UserLoggedIn', { ...patientIdentity });
 
@@ -189,14 +232,18 @@ export class AuthStore implements IAuthStore {
 
                 return {
                     ...patientIdentity,
-                    authToken: idToken,
-                } as IPatientUser;
-            } catch (err) {
+                } as IPatientIdentity;
+            } catch (error) {
                 // Password reset was successful but identity call failed
-                logger.error(new Error(`${err}`));
+                logger.error(new Error(`${error}`));
+
+                const axiosError = error as AxiosError;
+                const myError = error as Error;
+                const unauthorized = axiosError?.response?.status == 403 || myError?.message == 'Unauthorized';
+
                 runInAction(() => {
                     this.authState = AuthState.AuthenticationFailed;
-                    this.errorDetail = this.identityQuery.unauthorized
+                    this.errorDetail = unauthorized
                         ? 'Sorry, you are not authorized to access this service'
                         : 'Sorry, there was an issue accessing the service';
                 });

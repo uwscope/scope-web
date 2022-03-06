@@ -38,12 +38,9 @@ export interface IProviderIdentity extends IIdentity {
     role: ProviderRole;
 }
 
-export interface IPatientUser extends IPatientIdentity {
-    authToken: string;
-}
-
 export interface IProviderUser extends IProviderIdentity {
     authToken: string;
+    refreshToken: string;
 }
 
 export interface IReferralStatus {
