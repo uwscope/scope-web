@@ -5,6 +5,7 @@ from flask import Blueprint, Flask, request
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json
 
+import blueprints.identity
 import blueprints.app.config
 import blueprints.patient.summary
 import blueprints.registry.activities
@@ -73,6 +74,12 @@ def create_app():
     app.register_blueprint(
         blueprints.patient.summary.patient_summary_blueprint,
         url_prefix="/patient",
+    )
+
+    # Register the identity blueprint
+    app.register_blueprint(
+        blueprints.identity.identity_blueprint,
+        url_prefix="/",
     )
 
     # Register all the `registry` blueprints, i.e. blueprints for web_registry
