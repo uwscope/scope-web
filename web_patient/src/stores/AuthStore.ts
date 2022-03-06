@@ -143,7 +143,11 @@ export class AuthStore implements IAuthStore {
                         logger.error(err, { username: this.authUser?.getUsername() || 'unknown' });
                         runInAction(() => {
                             this.errorDetail = err.message;
-                            this.authState = AuthState.NewPasswordRequired;
+
+                            this.authState =
+                                err.code == 'NotAuthorizedException'
+                                    ? AuthState.AuthenticationFailed
+                                    : AuthState.NewPasswordRequired;
                         });
                         reject(err);
                     }),

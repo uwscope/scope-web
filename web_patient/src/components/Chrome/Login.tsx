@@ -1,4 +1,4 @@
-import { Avatar, Button, FormControl, FormHelperText, TextField } from '@mui/material';
+import { Avatar, Button, FormControl, FormHelperText, TextField, Typography } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import Logo from 'src/assets/scope-logo.png';
@@ -110,6 +110,24 @@ const PasswordUpdateForm: FunctionComponent<{
         <Fragment>
             <Avatar alt="Scope logo" src={Logo} />
             <h2>Update password</h2>
+            <Typography variant="subtitle2">Please generate a password that meets the following criteria:</Typography>
+            <ul style={{ alignSelf: 'flex-start' }}>
+                <li>
+                    <Typography variant="caption">At least 8 characters</Typography>
+                </li>
+                <li>
+                    <Typography variant="caption">Must contain uppercase letters</Typography>
+                </li>
+                <li>
+                    <Typography variant="caption">Must contain lowercase letters</Typography>
+                </li>
+                <li>
+                    <Typography variant="caption">Must contain digits</Typography>
+                </li>
+                <li>
+                    <Typography variant="caption">Must contain symbol characters</Typography>
+                </li>
+            </ul>
             <FormControl error={!!error} fullWidth>
                 <TextField
                     label="Password"
