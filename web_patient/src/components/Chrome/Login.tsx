@@ -55,6 +55,11 @@ const LoginForm: FunctionComponent<{
                     InputLabelProps={{
                         shrink: true,
                     }}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter' && canLogin) {
+                            onSubmit();
+                        }
+                    }}
                 />
                 <TextField
                     label="Password"
@@ -69,8 +74,17 @@ const LoginForm: FunctionComponent<{
                     InputLabelProps={{
                         shrink: true,
                     }}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter' && canLogin) {
+                            onSubmit();
+                        }
+                    }}
                 />
-                {error && <FormHelperText id="component-error-text">{error}</FormHelperText>}
+                {error && (
+                    <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
+                        {error}
+                    </FormHelperText>
+                )}
                 <ButtonContainer>
                     <Button type="submit" color="primary" variant="contained" onClick={onSubmit} disabled={!canLogin}>
                         Sign in
@@ -104,13 +118,23 @@ const PasswordUpdateForm: FunctionComponent<{
                     fullWidth
                     required
                     variant="standard"
+                    margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     InputLabelProps={{
                         shrink: true,
                     }}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !!password) {
+                            onSubmit();
+                        }
+                    }}
                 />
-                {error && <FormHelperText id="component-error-text">{error}</FormHelperText>}
+                {error && (
+                    <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
+                        {error}
+                    </FormHelperText>
+                )}
                 <ButtonContainer>
                     <Button type="submit" color="primary" variant="contained" onClick={onSubmit} disabled={!password}>
                         Update password

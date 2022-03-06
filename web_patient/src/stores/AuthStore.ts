@@ -1,6 +1,6 @@
 import { AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { action, computed, makeAutoObservable, runInAction } from 'mobx';
-import {IAppAuthConfig, IPatientUser} from 'shared/types';
+import { IAppAuthConfig, IPatientIdentity, IPatientUser } from 'shared/types';
 import { PromiseQuery } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
 import { getLogger } from 'shared/logger';
@@ -37,6 +37,7 @@ export class AuthStore implements IAuthStore {
 
     // Promise queries
     private readonly authQuery: PromiseQuery<IPatientUser>;
+    private readonly identityQuery: PromiseQuery<IPatientIdentity>;
 
     private errorDetail = '';
 
@@ -44,6 +45,7 @@ export class AuthStore implements IAuthStore {
         this.authConfig = authConfig;
 
         this.authQuery = new PromiseQuery<IPatientUser>(undefined, 'authQuery');
+        this.identityQuery = new PromiseQuery<IPatientIdentity>(undefined, 'identityQuery');
 
         makeAutoObservable(this);
     }
@@ -55,7 +57,9 @@ export class AuthStore implements IAuthStore {
 
     @computed
     public get authStateDetail() {
-        return this.authState == AuthState.AuthenticationFailed ? this.errorDetail : undefined;
+        return this.authState == AuthState.AuthenticationFailed || this.authState == AuthState.NewPasswordRequired
+            ? this.errorDetail
+            : undefined;
     }
 
     @computed
@@ -71,6 +75,7 @@ export class AuthStore implements IAuthStore {
     public async login(username: string, password: string) {
         // Clear states
         this.authState = AuthState.Initialized;
+        this.errorDetail = '';
 
         const authUser = new CognitoUser({
             Username: username,
@@ -105,8 +110,8 @@ export class AuthStore implements IAuthStore {
                     });
                     reject(err);
                 }),
-                newPasswordRequired: action((data: CognitoUser) => {
-                    logger.event('newPasswordRequired', { username: data.getUsername() });
+                newPasswordRequired: action((data: any) => {
+                    logger.event('newPasswordRequired', data);
                     runInAction(() => {
                         this.authUser = authUser;
                         this.authState = AuthState.NewPasswordRequired;
@@ -122,21 +127,23 @@ export class AuthStore implements IAuthStore {
 
     @action.bound
     public async updateTempPassword(password: string) {
+        // Clear states
+        this.errorDetail = '';
+
         const promise = new Promise<CognitoUserSession>((resolve, reject) => {
             this.authUser?.completeNewPasswordChallenge(
                 password,
                 {}, // No additional required fields to set/update
                 {
-                    onSuccess: action((data) => {
+                    onSuccess: action((data: CognitoUserSession) => {
                         logger.event('onLoginSuccess', { username: this.authUser?.getUsername() || 'unknown' });
                         resolve(data);
                     }),
                     onFailure: action((err) => {
                         logger.error(err, { username: this.authUser?.getUsername() || 'unknown' });
                         runInAction(() => {
-                            this.authUser = undefined;
                             this.errorDetail = err.message;
-                            this.authState = AuthState.AuthenticationFailed;
+                            this.authState = AuthState.NewPasswordRequired;
                         });
                         reject(err);
                     }),
@@ -159,14 +166,17 @@ export class AuthStore implements IAuthStore {
     }
 
     private getIdentityFromSession(promise: Promise<CognitoUserSession>) {
-        const identifiedPromise = promise
-            .then(async (session) => {
-                // Once the promise is resolved, get the identity
+        const identifiedPromise = promise.then(async (session) => {
+            // Once the promise is resolved, get the identity
 
-                const { identityService } = useServices();
-                var idToken = session?.getIdToken()?.getJwtToken();
+            const { identityService } = useServices();
+            var idToken = session?.getIdToken()?.getJwtToken();
 
-                const patientIdentity = await identityService.getPatientIdentity(idToken);
+            try {
+                const patientIdentity = await this.identityQuery.fromPromise(
+                    identityService.getPatientIdentity(idToken),
+                );
+
                 logger.event('UserLoggedIn', { ...patientIdentity });
 
                 runInAction(() => {
@@ -177,13 +187,17 @@ export class AuthStore implements IAuthStore {
                     ...patientIdentity,
                     authToken: idToken,
                 } as IPatientUser;
-            })
-            .catch((err) => {
-                logger.error(err);
+            } catch (err) {
+                // Password reset was successful but identity call failed
+                logger.error(new Error(`${err}`));
                 runInAction(() => {
                     this.authState = AuthState.AuthenticationFailed;
+                    this.errorDetail = this.identityQuery.unauthorized
+                        ? 'Sorry, you are not authorized to access this service'
+                        : 'Sorry, there was an issue accessing the service';
                 });
-            });
+            }
+        });
 
         return identifiedPromise;
     }

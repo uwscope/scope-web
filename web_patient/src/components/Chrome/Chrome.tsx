@@ -87,10 +87,12 @@ export const Chrome: FunctionComponent = observer((props) => {
             <ResponsiveContainer>
                 <AppLoader isLoading={rootStore.loadState != 'Fulfilled'} text="Loading" />
                 <GetFormDialog />
-                <ContentContainer>
-                    {mainLevel ? <Background src={BackgroundImageSrc} /> : null}
-                    {props.children}
-                </ContentContainer>
+                {rootStore.loadState == 'Fulfilled' && (
+                    <ContentContainer>
+                        {mainLevel ? <Background src={BackgroundImageSrc} /> : null}
+                        {props.children}
+                    </ContentContainer>
+                )}
                 {mainLevel ? (
                     <BottomBar value={selectedPath} color="transparent">
                         <BottomNavigationAction
