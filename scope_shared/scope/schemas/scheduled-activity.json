@@ -17,9 +17,6 @@
 		"_rev": {
 			"type": "number"
 		},
-		"_deleted": {
-			"type": "boolean"
-		},
 		"scheduledActivityId": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
@@ -36,7 +33,7 @@
 			"type": "string"
 		},
 		"reminder": {
-			"$ref": "/schemas/datetime#/properties/datetime"
+			"$ref": "/schemas/datetime#/properties/date"
 		},
 		"completed": {
 			"type": "boolean"
