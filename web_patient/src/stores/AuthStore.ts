@@ -51,6 +51,7 @@ export class AuthStore implements IAuthStore {
 
             if (idToken?.payload['sub'] && idToken?.getJwtToken()) {
                 return {
+                    // Need to chain from idToken?.payload['sub'] to an identity
                     patientId: "persistent", // idToken?.payload['sub'],
                     name: "TODO", // idToken?.payload['name'],
                     authToken: idToken?.getJwtToken(),

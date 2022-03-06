@@ -49,10 +49,11 @@ export class AuthStore implements IAuthStore {
         if (this.authState == AuthState.Authenticated) {
             var idToken = this.authQuery.value?.getIdToken();
 
-            if (idToken?.payload['sub'] && idToken?.payload['name'] && idToken?.getJwtToken()) {
+            if (idToken?.payload['sub'] && idToken?.getJwtToken()) {
                 return {
-                    providerId: idToken?.payload['sub'],
-                    name: idToken?.payload['name'],
+                    // Need to chain from idToken?.payload['sub'] to an identity
+                    providerId: "TODO", // idToken?.payload['sub'],
+                    name: "TODO", // idToken?.payload['name'],
                     authToken: idToken?.getJwtToken(),
                 } as IProviderUser;
             }
