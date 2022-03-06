@@ -100,6 +100,7 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                     CLIENT_CONFIG.flaskBaseUrl,
                     state.store?.authStore.currentUserIdentity?.patientId,
                 );
+                newPatientService.applyAuth(state.store?.authStore.currentUserIdentity.authToken);
                 state.store?.createPatientStore(newPatientService);
                 state.ready = true;
             }
