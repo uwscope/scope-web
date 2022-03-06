@@ -52,6 +52,14 @@ def populate_from_config(
             )
 
     #
+    # Link patient identities to patient Cognito accounts
+    #
+    scope.populate.populate_patient.ensure_patient_identities(
+        database=database,
+        patients=populate_config["patients"]["existing"],
+    )
+
+    #
     # Create specified providers
     #
     created_providers = scope.populate.populate_provider.create_providers(
@@ -71,5 +79,13 @@ def populate_from_config(
                 cognito_config=cognito_config,
                 populate_config_account=provider_current["account"]
             )
+
+    #
+    # Link provider identities to provider Cognito accounts
+    #
+    scope.populate.populate_provider.ensure_provider_identities(
+        database=database,
+        providers=populate_config["providers"]["existing"],
+    )
 
     return populate_config

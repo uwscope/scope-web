@@ -19,7 +19,7 @@
 		"existing": {
 			"type": "object",
 			"properties": {
-				"accountId": {
+				"cognitoId": {
 					"type": "string"
 				},
 				"accountName": {
