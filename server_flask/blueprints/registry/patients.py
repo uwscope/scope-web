@@ -135,6 +135,24 @@ def _construct_patient_document(
 
     return patient_document
 
+@patients_blueprint.route(
+    "/identity",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_patient_identity():
+    return {
+        "patientIdentity": {
+            "name": "David Grant",
+            "patientId": "persistent"
+        },
+        "providerIdentity": {
+            "name": "Diana Armstrong",
+            "providerId": "f3f3jja3pguzi",
+            "role": "psychiatrist"
+        }
+    }
+
 
 @patients_blueprint.route(
     "/patients",
