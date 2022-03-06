@@ -37,50 +37,38 @@ def _scheduled_activities_assertions(
     for scheduled_activity_current in scheduled_activities:
         assert not scheduled_activity_current["completed"]
         assert scheduled_activity_current["dueType"] == "Exact"
+        assert scheduled_activity_current["timeOfDay"] == activity["timeOfDay"]
 
     if not activity["hasRepetition"]:
         assert len(scheduled_activities) == 1
-        assert scheduled_activities[0]["dueDate"] == date_utils.format_datetime(
-            datetime.datetime.combine(
-                date_utils.parse_date(activity["startDate"]),
-                datetime.time(hour=activity["timeOfDay"]),
-            )
-        )
+        assert scheduled_activities[0]["dueDate"] == activity["startDate"]
 
         if not activity[
             "hasReminder"
         ]:  # CONDITION 1 - hasRepetition is False, Subcondition 1 - hasReminder is False
-            assert "reminder" not in scheduled_activities[0]
+            assert "reminderTimeOfDay" not in scheduled_activities[0]
         else:  # CONDITION 1 - hasRepetition is False, Subcondition 2 - hasReminder is True
-            assert scheduled_activities[0]["reminder"] == date_utils.format_datetime(
-                datetime.datetime.combine(
-                    date_utils.parse_date(activity["startDate"]),
-                    datetime.time(hour=activity["reminderTimeOfDay"]),
-                )
+            assert (
+                scheduled_activities[0]["reminderTimeOfDay"]
+                == activity["reminderTimeOfDay"]
             )
     else:
         for scheduled_activity_current in scheduled_activities:
             if not activity[
                 "hasReminder"
             ]:  # CONDITION 2 - hasRepetition is True, Subcondition 1 - hasReminder is False
-                assert "reminder" not in scheduled_activity_current
+                assert "reminderTimeOfDay" not in scheduled_activity_current
             else:  # CONDITION 2 - hasRepetition is True, Subcondition 2 - hasReminder is True
-                scheduled_activity_day_date = date_utils.format_date(
-                    date_utils.parse_datetime(scheduled_activity_current["dueDate"]),
-                )
-                assert scheduled_activity_current[
-                    "reminder"
-                ] == date_utils.format_datetime(
-                    datetime.datetime.combine(
-                        date_utils.parse_date(scheduled_activity_day_date),
-                        datetime.time(hour=activity["reminderTimeOfDay"]),
-                    )
+                assert "reminderTimeOfDay" in scheduled_activity_current
+                assert (
+                    scheduled_activity_current["reminderTimeOfDay"]
+                    == activity["reminderTimeOfDay"]
                 )
 
 
 @pytest.mark.parametrize(
     "activity_method",
-    [("post", "put")],
+    [("post"), ("put")],
 )
 def test_create_scheduled_activities_condition_one_subcondition_one(
     data_fake_activity_factory: Callable[[], dict],
@@ -108,7 +96,7 @@ def test_create_scheduled_activities_condition_one_subcondition_one(
 
 @pytest.mark.parametrize(
     "activity_method",
-    [("post", "put")],
+    [("post"), ("put")],
 )
 def test_create_scheduled_activities_condition_one_subcondition_two(
     data_fake_activity_factory: Callable[[], dict],
@@ -151,10 +139,10 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
             },
             1,
             [
-                "2022-03-01T16:00:00Z",
-                "2022-03-03T16:00:00Z",
-                "2022-03-07T16:00:00Z",
-                "2022-03-08T16:00:00Z",
+                "2022-03-01T00:00:00Z",
+                "2022-03-03T00:00:00Z",
+                "2022-03-07T00:00:00Z",
+                "2022-03-08T00:00:00Z",
             ],
             "post",
         ),
@@ -172,18 +160,17 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
             },
             2,
             [
-                "2022-04-04T07:00:00Z",
-                "2022-04-05T07:00:00Z",
-                "2022-04-07T07:00:00Z",
-                "2022-04-11T07:00:00Z",
-                "2022-04-12T07:00:00Z",
-                "2022-04-14T07:00:00Z",
+                "2022-04-04T00:00:00Z",
+                "2022-04-05T00:00:00Z",
+                "2022-04-07T00:00:00Z",
+                "2022-04-11T00:00:00Z",
+                "2022-04-12T00:00:00Z",
+                "2022-04-14T00:00:00Z",
             ],
             "post",
         ),
         (
-            # TODO: James; need help with fixtures.
-            "2022-04-01T00:00:00Z",  # Friday - Passes because this "put" has a start date in future. Need to automate this because this test will fail once April starts.
+            "2122-04-01T00:00:00Z",  # Wednesday
             7,
             {
                 "Monday": True,
@@ -196,12 +183,12 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
             },
             2,
             [
-                "2022-04-04T07:00:00Z",
-                "2022-04-05T07:00:00Z",
-                "2022-04-07T07:00:00Z",
-                "2022-04-11T07:00:00Z",
-                "2022-04-12T07:00:00Z",
-                "2022-04-14T07:00:00Z",
+                "2122-04-02T00:00:00Z",
+                "2122-04-06T00:00:00Z",
+                "2122-04-07T00:00:00Z",
+                "2122-04-09T00:00:00Z",
+                "2122-04-13T00:00:00Z",
+                "2122-04-14T00:00:00Z",
             ],
             "put",
         ),

@@ -40,17 +40,16 @@ def _filtered_scheduled_activities_assertions(
             ]
             == activity[scope.database.patient.activities.SEMANTIC_SET_ID]
         )
-        assert (
-            date_utils.parse_datetime(scheduled_activity_current["dueDate"])
-            > datetime.datetime.today()
-        )
+        assert date_utils.parse_date(
+            scheduled_activity_current["dueDate"]
+        ) > date_utils.parse_date(date_utils.format_date(datetime.date.today()))
 
 
 @pytest.mark.parametrize(
     "activity_method",
-    [("post", "put")],
+    [("post"), ("put")],
 )
-def test_get_filtered_scheduled_activities(
+def test_filter_scheduled_activities(
     data_fake_activity_factory: Callable[[], dict],
     activity_method: str,
 ):
@@ -65,9 +64,11 @@ def test_get_filtered_scheduled_activities(
         )
     )
 
-    filtered_scheduled_activities = scope.database.patient.scheduled_activities.filter_scheduled_activities(
-        all_scheduled_activities=scheduled_activities,  # NOTE: These are not ALL the stored scheduled activities
-        activity=activity,
+    filtered_scheduled_activities = (
+        scope.database.patient.scheduled_activities.filter_scheduled_activities(
+            all_scheduled_activities=scheduled_activities,
+            activity=activity,
+        )
     )
 
     _filtered_scheduled_activities_assertions(

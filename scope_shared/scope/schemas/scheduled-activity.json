@@ -35,8 +35,15 @@
 		"activityName": {
 			"type": "string"
 		},
-		"reminder": {
-			"$ref": "/schemas/datetime#/properties/datetime"
+		"timeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"reminderTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
 		},
 		"completed": {
 			"type": "boolean"

@@ -32,17 +32,20 @@ def _compute_scheduled_activity_properties(
         "dueType": "Exact",
         "activityId": activity[scope.database.patient.activities.SEMANTIC_SET_ID],
         "activityName": activity["name"],
+        "timeOfDay": activity["timeOfDay"],
         "completed": False,
     }
     scheduled_activity["dueDate"] = date_utils.format_datetime(
         date_utils.parse_date(scheduled_activity_day_date)
-        + datetime.timedelta(hours=activity["timeOfDay"])
+        # + datetime.timedelta(hours=activity["timeOfDay"]) # TODO: Comment this until we fix the timezone concern.
     )
     if activity.get("hasReminder"):
-        scheduled_activity["reminder"] = date_utils.format_datetime(
-            date_utils.parse_date(scheduled_activity_day_date)
-            + datetime.timedelta(hours=activity["reminderTimeOfDay"])
-        )
+        scheduled_activity["reminderTimeOfDay"] = activity["reminderTimeOfDay"]
+        # TODO: Comment this until we fix the timezone concern.
+        # scheduled_activity["reminder"] = date_utils.format_datetime(
+        #     date_utils.parse_date(scheduled_activity_day_date)
+        #     + datetime.timedelta(hours=activity["reminderTimeOfDay"])
+        # )
     return scheduled_activity
 
 
@@ -50,17 +53,17 @@ def create_scheduled_activities(
     *,
     activity: dict,
     weeks: int = 12,
-    activity_method: str = "post",
+    activity_method: str,
 ) -> List[dict]:
 
     if activity_method == "put":
         start_date = date_utils.parse_date(activity["startDate"])
         todays_date = date_utils.parse_date(
-            date_utils.format_date(datetime.datetime.today())
+            date_utils.format_date(datetime.date.today())
         )
         if start_date < todays_date:
             activity.update(
-                {"startDate": date_utils.format_date(datetime.datetime.today())}
+                {"startDate": date_utils.format_date(datetime.date.today())}
             )
 
     scheduled_activities = []
@@ -100,7 +103,7 @@ def create_and_post_scheduled_activities(
     collection: pymongo.collection.Collection,
     activity: dict,
     weeks: int = 12,  # ~ 3 months
-    activity_method: str = "post",
+    activity_method: str,
 ):
     # Create scheduledActivities here
     scheduled_activities = create_scheduled_activities(
@@ -145,10 +148,10 @@ def filter_scheduled_activities(
                     )
                     # Keep scheduled activities which are due in future
                     and (
-                        date_utils.parse_datetime(
-                            all_scheduled_activity_current["dueDate"]
+                        date_utils.parse_date(all_scheduled_activity_current["dueDate"])
+                        > date_utils.parse_date(
+                            date_utils.format_date(datetime.date.today())
                         )
-                        > datetime.datetime.today()
                     )
                 ),
                 all_scheduled_activities,
