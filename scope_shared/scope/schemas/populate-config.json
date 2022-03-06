@@ -29,6 +29,9 @@
 							},
 							"MRN": {
 								"type": "string"
+							},
+							"account": {
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"additionalProperties": false,
@@ -41,13 +44,18 @@
 					"items": {
 						"type": "object",
 						"properties": {
+							"patientId": {
+								"type": "string"
+							},
 							"name": {
 								"type": "string"
 							},
 							"MRN": {
 								"type": "string"
 							},
-							"patientId": { "type": "string" }
+							"account": {
+								"$ref": "/schemas/populate-config-account"
+							}
 						},
 						"additionalProperties": false,
 						"required": ["name", "MRN", "patientId"]
