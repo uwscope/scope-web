@@ -28,6 +28,19 @@
 		},
 		"name": {
 			"type": "string"
+		},
+		"cognitoAccount": {
+			"type": "object",
+			"properties": {
+				"cognitoId": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["_type", "cognitoId", "email"]
 		}
 	},
 	"additionalProperties": false,
