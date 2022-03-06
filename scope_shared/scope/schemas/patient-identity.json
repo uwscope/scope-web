@@ -40,7 +40,7 @@
 				}
 			},
 			"additionalProperties": false,
-			"required": ["_type", "cognitoId", "email"]
+			"required": ["cognitoId", "email"]
 		}
 	},
 	"additionalProperties": false,

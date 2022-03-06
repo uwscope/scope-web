@@ -112,10 +112,10 @@ def populate_account_from_config(
         created_attributes = {
             attribute["Name"]: attribute["Value"] for attribute in response["User"]["Attributes"]
         }
-        created_account_id = created_attributes["sub"]
+        cognito_id = created_attributes["sub"]
 
         populate_config_account["existing"] = {
-            "accountId": created_account_id,
+            "cognitoId": cognito_id,
             "accountName": create_account_name,
             "email": create_email,
             "temporaryPassword": create_temporary_password,
