@@ -1,4 +1,4 @@
-import { Avatar, Button, TextField } from '@mui/material';
+import { Avatar, Button, FormControl, FormHelperText, TextField } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import Logo from 'src/assets/scope-logo.png';
@@ -26,8 +26,9 @@ const ButtonContainer = styled.div({
 
 const LoginForm: FunctionComponent<{
     onLogin: (username: string, password: string) => void;
+    error?: string;
 }> = (props) => {
-    const { onLogin } = props;
+    const { onLogin, error } = props;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -35,50 +36,56 @@ const LoginForm: FunctionComponent<{
         onLogin && onLogin(email, password);
     };
 
+    const canLogin = !!email && !!password;
+
     return (
         <Fragment>
             <Avatar alt="Scope logo" src={Logo} sx={{ width: 64, height: 64 }} variant="square" />
             <h2>Welcome!</h2>
-            <TextField
-                label="Username"
-                placeholder="Enter username"
-                fullWidth
-                required
-                margin="normal"
-                variant="standard"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-            />
-            <TextField
-                label="Password"
-                placeholder="Enter password"
-                type="password"
-                fullWidth
-                required
-                variant="standard"
-                margin="normal"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-            />
-            <ButtonContainer>
-                <Button type="submit" color="primary" variant="contained" onClick={onSubmit}>
-                    Sign in
-                </Button>
-            </ButtonContainer>
+            <FormControl error={!!error} fullWidth>
+                <TextField
+                    label="Username"
+                    placeholder="Enter username"
+                    fullWidth
+                    required
+                    margin="normal"
+                    variant="standard"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+                <TextField
+                    label="Password"
+                    placeholder="Enter password"
+                    type="password"
+                    fullWidth
+                    required
+                    variant="standard"
+                    margin="normal"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+                {error && <FormHelperText id="component-error-text">{error}</FormHelperText>}
+                <ButtonContainer>
+                    <Button type="submit" color="primary" variant="contained" onClick={onSubmit} disabled={!canLogin}>
+                        Sign in
+                    </Button>
+                </ButtonContainer>
+            </FormControl>
         </Fragment>
     );
 };
 
 const PasswordUpdateForm: FunctionComponent<{
     onUpdate: (password: string) => void;
+    error?: string;
 }> = (props) => {
-    const { onUpdate } = props;
+    const { onUpdate, error } = props;
     const [password, setPassword] = useState('');
 
     const onSubmit = () => {
@@ -89,22 +96,27 @@ const PasswordUpdateForm: FunctionComponent<{
         <Fragment>
             <Avatar alt="Scope logo" src={Logo} />
             <h2>Update password</h2>
-            <TextField
-                label="Password"
-                placeholder="Enter password"
-                type="password"
-                fullWidth
-                required
-                variant="standard"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-            />
-            <Button type="submit" color="primary" variant="contained" fullWidth onClick={onSubmit}>
-                Update password
-            </Button>
+            <FormControl error={!!error} fullWidth>
+                <TextField
+                    label="Password"
+                    placeholder="Enter password"
+                    type="password"
+                    fullWidth
+                    required
+                    variant="standard"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+                {error && <FormHelperText id="component-error-text">{error}</FormHelperText>}
+                <ButtonContainer>
+                    <Button type="submit" color="primary" variant="contained" onClick={onSubmit} disabled={!password}>
+                        Update password
+                    </Button>
+                </ButtonContainer>
+            </FormControl>
         </Fragment>
     );
 };
@@ -123,9 +135,9 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer((pro
     return (
         <Container>
             {authStore.authState == AuthState.NewPasswordRequired ? (
-                <PasswordUpdateForm onUpdate={onUpdate} />
+                <PasswordUpdateForm onUpdate={onUpdate} error={authStore.authStateDetail} />
             ) : (
-                <LoginForm onLogin={onLogin} />
+                <LoginForm onLogin={onLogin} error={authStore.authStateDetail} />
             )}
         </Container>
     );

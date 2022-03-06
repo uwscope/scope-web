@@ -16,6 +16,7 @@ export enum AuthState {
 export interface IAuthStore {
     isAuthenticated: boolean;
     authState: AuthState;
+    authStateDetail?: string;
     authUser?: CognitoUser;
 
     currentUserIdentity?: IPatientUser;
@@ -37,6 +38,8 @@ export class AuthStore implements IAuthStore {
     // Promise queries
     private readonly authQuery: PromiseQuery<IPatientUser>;
 
+    private errorDetail = '';
+
     constructor(authConfig: IAppAuthConfig) {
         this.authConfig = authConfig;
 
@@ -51,6 +54,11 @@ export class AuthStore implements IAuthStore {
     }
 
     @computed
+    public get authStateDetail() {
+        return this.authState == AuthState.AuthenticationFailed ? this.errorDetail : undefined;
+    }
+
+    @computed
     public get currentUserIdentity() {
         if (this.authState == AuthState.Authenticated) {
             return this.authQuery.value;
@@ -61,6 +69,9 @@ export class AuthStore implements IAuthStore {
 
     @action.bound
     public async login(username: string, password: string) {
+        // Clear states
+        this.authState = AuthState.Initialized;
+
         const authUser = new CognitoUser({
             Username: username,
             Pool: new CognitoUserPool({
@@ -77,7 +88,7 @@ export class AuthStore implements IAuthStore {
         const promise = new Promise<CognitoUserSession>((resolve, reject) => {
             authUser.authenticateUser(authDetails, {
                 onSuccess: action((data) => {
-                    console.log('onLoginSuccess: ', data);
+                    logger.event('onLoginSuccess: ', { username });
                     resolve(data);
 
                     // Once the promise is resolved, set the correct states.
@@ -86,16 +97,16 @@ export class AuthStore implements IAuthStore {
                     });
                 }),
                 onFailure: action((err) => {
-                    console.error('onLoginFailure: ', err);
+                    logger.error(err, { username });
                     runInAction(() => {
                         this.authUser = undefined;
-
+                        this.errorDetail = err.message;
                         this.authState = AuthState.AuthenticationFailed;
                     });
                     reject(err);
                 }),
                 newPasswordRequired: action((data: CognitoUser) => {
-                    console.log('newPasswordRequired: ', data);
+                    logger.event('newPasswordRequired', { username: data.getUsername() });
                     runInAction(() => {
                         this.authUser = authUser;
                         this.authState = AuthState.NewPasswordRequired;
@@ -117,13 +128,14 @@ export class AuthStore implements IAuthStore {
                 {}, // No additional required fields to set/update
                 {
                     onSuccess: action((data) => {
-                        console.log('onUpdateSuccess: ', data);
+                        logger.event('onLoginSuccess', { username: this.authUser?.getUsername() || 'unknown' });
                         resolve(data);
                     }),
                     onFailure: action((err) => {
-                        console.error('onUpdateFailure: ', err);
+                        logger.error(err, { username: this.authUser?.getUsername() || 'unknown' });
                         runInAction(() => {
                             this.authUser = undefined;
+                            this.errorDetail = err.message;
                             this.authState = AuthState.AuthenticationFailed;
                         });
                         reject(err);
@@ -138,29 +150,40 @@ export class AuthStore implements IAuthStore {
 
     @action.bound
     public logout() {
+        const { authToken, ...currentUser } = this.currentUserIdentity || { authToken: '' };
         this.authUser?.signOut();
         this.authState = AuthState.Initialized;
         this.authUser = undefined;
+
+        logger.event('UserLoggedOut', { ...currentUser });
     }
 
     private getIdentityFromSession(promise: Promise<CognitoUserSession>) {
-        const identifiedPromise = promise.then(async (session) => {
-            // Once the promise is resolved, get the identity
+        const identifiedPromise = promise
+            .then(async (session) => {
+                // Once the promise is resolved, get the identity
 
-            const { identityService } = useServices();
-            var idToken = session?.getIdToken()?.getJwtToken();
+                const { identityService } = useServices();
+                var idToken = session?.getIdToken()?.getJwtToken();
 
-            const patientIdentity = await identityService.getPatientIdentity(idToken);
+                const patientIdentity = await identityService.getPatientIdentity(idToken);
+                logger.event('UserLoggedIn', { ...patientIdentity });
 
-            runInAction(() => {
-                this.authState = AuthState.Authenticated;
+                runInAction(() => {
+                    this.authState = AuthState.Authenticated;
+                });
+
+                return {
+                    ...patientIdentity,
+                    authToken: idToken,
+                } as IPatientUser;
+            })
+            .catch((err) => {
+                logger.error(err);
+                runInAction(() => {
+                    this.authState = AuthState.AuthenticationFailed;
+                });
             });
-
-            return {
-                ...patientIdentity,
-                authToken: idToken,
-            } as IPatientUser;
-        });
 
         return identifiedPromise;
     }
