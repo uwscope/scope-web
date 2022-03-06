@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 import ruamel.yaml
-from typing import List
 from typing import Union
 
 
