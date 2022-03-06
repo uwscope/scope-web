@@ -47,7 +47,7 @@ export class RootStore implements IRootStore {
     private readonly loadQuery: PromiseQuery<PromiseSettledResult<void>[]>;
 
     constructor(serverConfig: IAppConfig) {
-        this.authStore = new AuthStore();
+        this.authStore = new AuthStore(serverConfig.auth);
 
         // Create a dummy patient store which should fail if tried to access
         this.patientStore = new PatientStore(getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, 'invalid'));
