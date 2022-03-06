@@ -28,9 +28,6 @@ export class AuthStore implements IAuthStore {
 
     public authUser?: CognitoUser;
 
-    // App metadata
-    public appTitle = 'SCOPE Registry';
-
     // Promise queries
     private readonly authQuery: PromiseQuery<CognitoUserSession>;
 
