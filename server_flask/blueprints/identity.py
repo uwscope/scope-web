@@ -1,9 +1,12 @@
 import copy
+import dataclasses
 import pprint
+import pymongo.database
 import flask
 import flask_json
 import jwt
 import re
+from typing import Optional
 
 from request_context import request_context
 import request_utils
@@ -16,15 +19,16 @@ identity_blueprint = flask.Blueprint(
 )
 
 
-@identity_blueprint.route(
-    "/identity",
-    methods=["GET"],
-)
-@flask_json.as_json
-def get_identity():
-    context = request_context()
+@dataclasses.dataclass(frozen=True)
+class VerifiedIdentities:
+    patient_identity: Optional[str]
+    provider_identity: Optional[str]
 
 
+def _hot_mess_code(
+    *,
+    database: pymongo.database.Database,
+) -> VerifiedIdentities:
     headers = flask.request.headers
     if "Authorization" not in headers:
         request_utils.abort_authorization_required()
@@ -69,7 +73,6 @@ def get_identity():
         )
     except jwt.exceptions.InvalidTokenError:
         request_utils.abort_authorization_required()
-        return
 
     if authorization_data["token_use"] != "id":
         request_utils.abort_authorization_required()
@@ -81,7 +84,7 @@ def get_identity():
 
     verified_patient_identity = None
     patient_identities = scope.database.patients.get_patient_identities(
-        database=context.database
+        database=database
     )
     for patient_identity_current in patient_identities:
         account_current = patient_identity_current.get("cognitoAccount", {})
@@ -93,7 +96,7 @@ def get_identity():
 
     verified_provider_identity = None
     provider_identities = scope.database.providers.get_provider_identities(
-        database=context.database
+        database=database
     )
     for provider_identity_current in provider_identities:
         account_current = provider_identity_current.get("cognitoAccount", {})
@@ -102,14 +105,68 @@ def get_identity():
         if cognito_id_current == verified_cognito_id:
             verified_provider_identity = provider_identity_current
 
+    return VerifiedIdentities(
+        patient_identity=verified_patient_identity,
+        provider_identity=verified_provider_identity,
+    )
 
-    if not any([verified_patient_identity, verified_provider_identity]):
+
+@identity_blueprint.route(
+    "/identities",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_identities():
+    context = request_context()
+
+    verified_identities = _hot_mess_code(database=context.database)
+
+    if not any([
+        verified_identities.patient_identity,
+        verified_identities.provider_identity,
+    ]):
         request_utils.abort_authorization_required()
 
     result = {}
-    if verified_patient_identity:
-        result[scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE] = verified_patient_identity
-    if verified_provider_identity:
-        result[scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE] = verified_provider_identity
+    if verified_identities.patient_identity:
+        result[scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE] = verified_identities.patient_identity
+    if verified_identities.provider_identity:
+        result[scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE] = verified_identities.provider_identity
 
     return result
+
+
+@identity_blueprint.route(
+    "/identities/patientIdentity",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_patient_identity():
+    context = request_context()
+
+    verified_identities = _hot_mess_code(database=context.database)
+
+    if not verified_identities.patient_identity:
+        request_utils.abort_authorization_required()
+
+    return {
+        scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE: verified_identities.patient_identity
+    }
+
+
+@identity_blueprint.route(
+    "/identities/providerIdentity",
+    methods=["GET"],
+)
+@flask_json.as_json
+def get_provider_identity():
+    context = request_context()
+
+    verified_identities = _hot_mess_code(database=context.database)
+
+    if not verified_identities.provider_identity:
+        request_utils.abort_authorization_required()
+
+    return {
+        scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE: verified_identities.provider_identity
+    }
