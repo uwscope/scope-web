@@ -57,8 +57,6 @@ import {
 } from './serviceTypes';
 
 export interface IPatientService extends IServiceBase {
-    applyAuth(authToken: string): void;
-
     // Dynamic
     getPatientConfig(): Promise<IPatientConfig>;
 

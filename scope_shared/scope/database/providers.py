@@ -136,9 +136,9 @@ def get_provider_identities(
     Retrieve all provider identity documents.
     """
 
-    patient_identity_collection = database.get_collection(PROVIDER_IDENTITY_COLLECTION)
+    provider_identity_collection = database.get_collection(PROVIDER_IDENTITY_COLLECTION)
 
     return scope.database.collection_utils.get_set(
-        collection=patient_identity_collection,
+        collection=provider_identity_collection,
         document_type=PROVIDER_IDENTITY_DOCUMENT_TYPE,
     )

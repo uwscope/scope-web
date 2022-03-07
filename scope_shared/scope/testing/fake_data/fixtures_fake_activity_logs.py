@@ -43,9 +43,7 @@ def _fake_activity_logs(
             ],
             "activityName": fake_scheduled_activity["activityName"],
             "completed": random.choice([True, False]),
-            "success": fake_utils.fake_enum_value(
-                scope.enums.ActivitySuccessType
-            ),
+            "success": fake_utils.fake_enum_value(scope.enums.ActivitySuccessType),
             "alternative": faker_factory.text(),
             "pleasure": random.randint(1, 10),
             "accomplishment": random.randint(1, 10),

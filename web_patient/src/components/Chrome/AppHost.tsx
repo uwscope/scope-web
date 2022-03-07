@@ -95,10 +95,14 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
 
     useEffect(() => {
         runInAction(() => {
-            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.authToken) {
+            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.patientId) {
                 const newPatientService = getPatientServiceInstance(
                     CLIENT_CONFIG.flaskBaseUrl,
                     state.store?.authStore.currentUserIdentity?.patientId,
+                );
+                newPatientService.applyAuth(
+                    () => state.store?.authStore.getToken(),
+                    () => state.store?.authStore.refreshToken(),
                 );
                 state.store?.createPatientStore(newPatientService);
                 state.ready = true;

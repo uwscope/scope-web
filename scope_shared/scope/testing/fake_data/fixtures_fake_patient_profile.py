@@ -41,22 +41,14 @@ def fake_patient_profile_factory(
             "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
             "name": name,
             "MRN": mrn,
-            "clinicCode": fake_utils.fake_enum_value(
-                scope.enums.ClinicCode
-            ),
+            "clinicCode": fake_utils.fake_enum_value(scope.enums.ClinicCode),
             "birthdate": date_utils.format_date(
                 faker_factory.date_of_birth(),
             ),
             "sex": fake_utils.fake_enum_value(scope.enums.PatientSex),
-            "gender": fake_utils.fake_enum_value(
-                scope.enums.PatientGender
-            ),
-            "pronoun": fake_utils.fake_enum_value(
-                scope.enums.PatientPronoun
-            ),
-            "race": fake_utils.fake_enum_flag_values(
-                scope.enums.PatientRace
-            ),
+            "gender": fake_utils.fake_enum_value(scope.enums.PatientGender),
+            "pronoun": fake_utils.fake_enum_value(scope.enums.PatientPronoun),
+            "race": fake_utils.fake_enum_flag_values(scope.enums.PatientRace),
             # TODO: identity information
             # "primaryOncologyProvider": data_fake_identity_factory(),
             # "primaryCareManager": data_fake_identity_factory(),

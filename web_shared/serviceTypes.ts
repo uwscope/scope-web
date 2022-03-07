@@ -7,6 +7,7 @@ import {
     IClinicalHistory,
     IMoodLog,
     IPatient,
+    IPatientIdentity,
     IPatientProfile,
     IProviderIdentity,
     ISafetyPlan,
@@ -159,4 +160,9 @@ export interface IActivityLogResponse extends IServiceResponse {
 
 export interface IActivityLogRequest extends IServiceResponse {
     activitylog: IActivityLog;
+}
+
+export interface IIdentityResponse extends IServiceResponse {
+    providerIdentity: IProviderIdentity;
+    patientIdentity: IPatientIdentity;
 }

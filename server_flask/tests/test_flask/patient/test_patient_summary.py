@@ -36,7 +36,9 @@ def _patient_summary_assertions(summary: dict) -> None:
     for assigned_scheduled_assessment_current in assigned_scheduled_assessments:
         assert not assigned_scheduled_assessment_current["completed"]
         assert (
-            date_utils.parse_date(assigned_scheduled_assessment_current["dueDate"]).date()
+            date_utils.parse_date(
+                assigned_scheduled_assessment_current["dueDate"]
+            ).date()
             <= datetime.date.today()
         )
 
