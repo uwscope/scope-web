@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.assessments
-from request_context import request_context
-import request_utils
-from scope.schema import assessment_schema
+import scope.schema
 
 assessments_blueprint = flask.Blueprint(
     "assessments_blueprint",
@@ -19,9 +20,7 @@ assessments_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_assessments(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     documents = scope.database.patient.assessments.get_assessments(
@@ -44,9 +43,7 @@ def get_assessments(patient_id):
 )
 @flask_json.as_json
 def get_assessment(patient_id, assessment_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -70,14 +67,12 @@ def get_assessment(patient_id, assessment_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=assessment_schema,
+    schema=scope.schema.assessment_schema,
     key="assessment",
 )
 @flask_json.as_json
 def put_assessment(patient_id, assessment_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
