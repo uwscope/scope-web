@@ -12,7 +12,10 @@ class RequestContext:
     @property
     def database(self) -> pymongo.database.Database:
         # noinspection PyUnresolvedReferences
-        return cast(pymongo.database.Database, flask.current_app.database_must_not_be_directly_accessed)
+        return cast(
+            pymongo.database.Database,
+            flask.current_app.database_must_not_be_directly_accessed,
+        )
 
     def patient_collection(self, *, patient_id: str) -> pymongo.collection.Collection:
         # Use patient ID to confirm validity and obtain collection
