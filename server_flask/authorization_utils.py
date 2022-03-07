@@ -1,34 +1,25 @@
-import copy
 import dataclasses
-import pprint
-import pymongo.database
 import flask
-import flask_json
 import jwt
+import pymongo.database
 import re
 from typing import Optional
 
-from request_context import request_context
 import request_utils
 import scope.database.patients
 import scope.database.providers
 
-identity_blueprint = flask.Blueprint(
-    "identity_blueprint",
-    __name__,
-)
-
 
 @dataclasses.dataclass(frozen=True)
-class VerifiedIdentities:
+class AuthorizedIdentities:
     patient_identity: Optional[str]
     provider_identity: Optional[str]
 
 
-def _hot_mess_code(
+def authenticated_identities(
     *,
     database: pymongo.database.Database,
-) -> VerifiedIdentities:
+) -> AuthorizedIdentities:
     headers = flask.request.headers
     if "Authorization" not in headers:
         request_utils.abort_authorization_required()
@@ -54,9 +45,6 @@ def _hot_mess_code(
 
     jwks_client = jwt.PyJWKClient(jwks_url)
     signing_key = jwks_client.get_signing_key_from_jwt(authorization_token)
-
-    pprint.pprint(signing_key)
-    print("", flush=True)
 
     try:
         authorization_data = jwt.decode(
@@ -105,68 +93,7 @@ def _hot_mess_code(
         if cognito_id_current == verified_cognito_id:
             verified_provider_identity = provider_identity_current
 
-    return VerifiedIdentities(
+    return AuthorizedIdentities(
         patient_identity=verified_patient_identity,
         provider_identity=verified_provider_identity,
     )
-
-
-@identity_blueprint.route(
-    "/identities",
-    methods=["GET"],
-)
-@flask_json.as_json
-def get_identities():
-    context = request_context()
-
-    verified_identities = _hot_mess_code(database=context.database)
-
-    if not any([
-        verified_identities.patient_identity,
-        verified_identities.provider_identity,
-    ]):
-        request_utils.abort_authorization_required()
-
-    result = {}
-    if verified_identities.patient_identity:
-        result[scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE] = verified_identities.patient_identity
-    if verified_identities.provider_identity:
-        result[scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE] = verified_identities.provider_identity
-
-    return result
-
-
-@identity_blueprint.route(
-    "/identities/patientIdentity",
-    methods=["GET"],
-)
-@flask_json.as_json
-def get_patient_identity():
-    context = request_context()
-
-    verified_identities = _hot_mess_code(database=context.database)
-
-    if not verified_identities.patient_identity:
-        request_utils.abort_authorization_required()
-
-    return {
-        scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE: verified_identities.patient_identity
-    }
-
-
-@identity_blueprint.route(
-    "/identities/providerIdentity",
-    methods=["GET"],
-)
-@flask_json.as_json
-def get_provider_identity():
-    context = request_context()
-
-    verified_identities = _hot_mess_code(database=context.database)
-
-    if not verified_identities.provider_identity:
-        request_utils.abort_authorization_required()
-
-    return {
-        scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE: verified_identities.provider_identity
-    }
