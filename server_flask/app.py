@@ -73,7 +73,7 @@ def create_app():
 
     # Register the identity blueprint
     app.register_blueprint(
-        blueprints.identity.identities_blueprint,
+        blueprints.identities.identities_blueprint,
         url_prefix="/",
     )
 
