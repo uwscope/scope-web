@@ -25,7 +25,7 @@ def _compute_byweekday(repeat_day_flags: dict) -> Tuple:
 
 
 def _compute_scheduled_activity_properties(
-    activity: dict, scheduled_activity_day_date: str
+    activity: dict, scheduled_activity_due_date: str
 ) -> dict:
     scheduled_activity = {
         "_type": DOCUMENT_TYPE,
@@ -36,14 +36,14 @@ def _compute_scheduled_activity_properties(
         "completed": False,
     }
     scheduled_activity["dueDate"] = date_utils.format_datetime(
-        date_utils.parse_date(scheduled_activity_day_date)
+        date_utils.parse_date(scheduled_activity_due_date)
         # + datetime.timedelta(hours=activity["timeOfDay"]) # TODO: Comment this until we fix the timezone concern.
     )
     if activity.get("hasReminder"):
         scheduled_activity["reminderTimeOfDay"] = activity["reminderTimeOfDay"]
         # TODO: Comment this until we fix the timezone concern.
         # scheduled_activity["reminder"] = date_utils.format_datetime(
-        #     date_utils.parse_date(scheduled_activity_day_date)
+        #     date_utils.parse_date(scheduled_activity_due_date)
         #     + datetime.timedelta(hours=activity["reminderTimeOfDay"])
         # )
     return scheduled_activity
@@ -70,12 +70,12 @@ def create_scheduled_activities(
     if not activity.get("hasRepetition"):
         # Create 1 scheduled activity
         scheduled_activity = _compute_scheduled_activity_properties(
-            activity=activity, scheduled_activity_day_date=activity["startDate"]
+            activity=activity, scheduled_activity_due_date=activity["startDate"]
         )
         scheduled_activities.append(scheduled_activity)
     else:
         # Create future dates using startDate and repeatDayFlags for the next 3 months
-        scheduled_activity_day_dates = list(
+        scheduled_activity_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
                 dtstart=date_utils.parse_date(activity["startDate"]),
@@ -86,11 +86,11 @@ def create_scheduled_activities(
                 ),
             )
         )
-        for scheduled_activity_day_date_current in scheduled_activity_day_dates:
+        for scheduled_activity_due_date_current in scheduled_activity_due_dates:
             scheduled_activity = _compute_scheduled_activity_properties(
                 activity=activity,
-                scheduled_activity_day_date=date_utils.format_date(
-                    scheduled_activity_day_date_current
+                scheduled_activity_due_date=date_utils.format_date(
+                    scheduled_activity_due_date_current
                 ),
             )
             scheduled_activities.append(scheduled_activity)

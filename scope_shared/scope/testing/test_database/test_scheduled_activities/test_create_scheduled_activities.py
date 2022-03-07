@@ -1,6 +1,7 @@
 import datetime
 from typing import Callable, List
 
+import freezegun
 import pytest
 import scope.database.collection_utils as collection_utils
 import scope.database.date_utils as date_utils
@@ -121,7 +122,7 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
         scheduled_activities=scheduled_activities,
     )
 
-
+@freezegun.freeze_time("2022-02-15")
 @pytest.mark.parametrize(
     "start_date,time_of_day,repeat_day_flags,weeks,scheduled_activity_due_dates,activity_method",
     [
@@ -170,7 +171,7 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
             "post",
         ),
         (
-            "2122-04-01T00:00:00Z",  # Wednesday
+            "2122-04-01T00:00:00Z",  # Wednesday in future
             7,
             {
                 "Monday": True,
@@ -192,6 +193,30 @@ def test_create_scheduled_activities_condition_one_subcondition_two(
             ],
             "put",
         ),
+        (
+            "2022-02-01T00:00:00Z",  # Tuesday in past
+            7,
+            {
+                "Monday": True,
+                "Tuesday": True,
+                "Wednesday": False,
+                "Thursday": True,
+                "Friday": False,
+                "Saturday": False,
+                "Sunday": False,
+            },
+            2,
+            [
+                "2022-02-15T00:00:00Z",
+                "2022-02-17T00:00:00Z",
+                "2022-02-21T00:00:00Z",
+                "2022-02-22T00:00:00Z",
+                "2022-02-24T00:00:00Z",
+                "2022-02-28T00:00:00Z",
+                "2022-03-01T00:00:00Z",
+            ],
+            "put",
+        ),
     ],
 )
 def test_create_scheduled_activities_condition_two(
@@ -203,6 +228,10 @@ def test_create_scheduled_activities_condition_two(
     scheduled_activity_due_dates: List[str],
     activity_method: str,
 ):
+
+    # Freeze today's date to 15th Feb, 2022 to test "put" activity method
+    assert datetime.datetime.now() == datetime.datetime(2022, 2, 15)
+
     # CONDITION 2 - hasRepetition is True, Subcondition 1 - hasReminder is False
     activity = _dummy_inserted_activity(
         fake_activity_factory=data_fake_activity_factory,
