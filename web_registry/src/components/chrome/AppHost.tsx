@@ -92,9 +92,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const state = useLocalObservable<{
         store: IRootStore | undefined;
         failed: boolean;
+        ready: boolean;
     }>(() => ({
         store: undefined,
         failed: false,
+        ready: false,
     }));
 
     useEffect(() => {
@@ -117,9 +119,23 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             });
     }, []);
 
+    useEffect(() => {
+        runInAction(() => {
+            if (state.store?.authStore.isAuthenticated) {
+                const { registryService } = useServices();
+                registryService.applyAuth(
+                    () => state.store?.authStore.getToken(),
+                    () => state.store?.authStore.refreshToken(),
+                );
+
+                state.ready = true;
+            }
+        });
+    }, [state.store?.authStore.isAuthenticated]);
+
     return (
         <Fragment>
-            {state.store?.authStore.isAuthenticated && (
+            {state.ready && state.store?.authStore.isAuthenticated && (
                 <Fragment>
                     <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
@@ -131,9 +147,7 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                     </ImageContainer>
                     <LoginContainer>
                         {!!state.store ? (
-                            <StoreProvider store={state.store}>
-                                <Login />
-                            </StoreProvider>
+                            <Login authStore={state.store.authStore} />
                         ) : !state.failed ? (
                             <ProgressContainer>
                                 <CircularProgress />

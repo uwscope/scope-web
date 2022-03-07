@@ -73,7 +73,10 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     React.useEffect(
         action(() => {
             if (currentPatient) {
-                currentPatient.load();
+                currentPatient.load(
+                    () => rootStore.authStore.getToken(),
+                    () => rootStore.authStore.refreshToken(),
+                );
             }
         }),
         []
