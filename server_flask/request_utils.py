@@ -14,21 +14,21 @@ def _flask_abort(response: dict, status: int) -> NoReturn:
     )
 
 
-def abort_authorization_required() -> NoReturn:
-    _flask_abort(
-        {
-            "message": "Authorization required.",
-        },
-        http.HTTPStatus.FORBIDDEN,
-    )
-
-
 def abort_document_not_found() -> NoReturn:
     _flask_abort(
         {
             "message": "Document not found.",
         },
         http.HTTPStatus.NOT_FOUND,
+    )
+
+
+def abort_not_authorized() -> NoReturn:
+    _flask_abort(
+        {
+            "message": "Not authorized.",
+        },
+        http.HTTPStatus.FORBIDDEN,
     )
 
 

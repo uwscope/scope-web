@@ -2,7 +2,7 @@ import flask
 import flask_json
 
 import authorization_utils
-from request_context import request_context
+import request_context
 import request_utils
 import scope.database.patients
 import scope.database.providers
@@ -19,7 +19,7 @@ identities_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_identities():
-    context = request_context()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database
@@ -31,7 +31,7 @@ def get_identities():
             authenticated_identities.provider_identity,
         ]
     ):
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     result = {}
     if authenticated_identities.patient_identity:
@@ -52,14 +52,14 @@ def get_identities():
 )
 @flask_json.as_json
 def get_patient_identity():
-    context = request_context()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database
     )
 
     if not authenticated_identities.patient_identity:
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     return {
         scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE: authenticated_identities.patient_identity
@@ -72,14 +72,14 @@ def get_patient_identity():
 )
 @flask_json.as_json
 def get_provider_identity():
-    context = request_context()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database
     )
 
     if not authenticated_identities.provider_identity:
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     return {
         scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE: authenticated_identities.provider_identity
