@@ -19,7 +19,7 @@ identities_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_identities():
-    context = request_context.unauthorized()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database
@@ -52,7 +52,7 @@ def get_identities():
 )
 @flask_json.as_json
 def get_patient_identity():
-    context = request_context.unauthorized()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database
@@ -72,7 +72,7 @@ def get_patient_identity():
 )
 @flask_json.as_json
 def get_provider_identity():
-    context = request_context.unauthorized()
+    context = request_context.authorization_unverified()
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=context.database

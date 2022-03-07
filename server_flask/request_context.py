@@ -80,5 +80,5 @@ def authorized_for_patient(patient_id: str) -> RequestContext:
     return request_context
 
 
-def unauthorized() -> RequestContext:
+def authorization_unverified() -> RequestContext:
     return RequestContext()
