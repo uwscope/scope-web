@@ -59,9 +59,9 @@ def fake_activity_factory(
                     date_end=datetime.datetime.now() + datetime.timedelta(days=60),
                 )
             ),
-            "timeOfDay": random.randrange(1, 25),
+            "timeOfDay": random.randrange(0, 24),
             "hasReminder": random.choice([True, False]),
-            "reminderTimeOfDay": random.randrange(1, 25),
+            "reminderTimeOfDay": random.randrange(0, 24),
             "hasRepetition": random.choice([True, False]),
             "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
             "isActive": random.choice([True, False]),
