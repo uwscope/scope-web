@@ -89,7 +89,6 @@ def get_patient_summary(patient_id):
     """
 
     context = request_context.authorized_for_patient(patient_id=patient_id)
-
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     safety_plan_document = scope.database.patient.safety_plan.get_safety_plan(
