@@ -35,10 +35,12 @@ def _create_patient(
 ) -> dict:
     # Consistency check:
     # - All patient creates should include name and MRN per schema
-    if not all([
-        name == create_patient["name"],
-        mrn == create_patient["MRN"],
-    ]):
+    if not all(
+        [
+            name == create_patient["name"],
+            mrn == create_patient["MRN"],
+        ]
+    ):
         raise ValueError()
 
     # Create the patient
@@ -50,11 +52,13 @@ def _create_patient(
 
     # Update the patient object
     created_patient = copy.deepcopy(create_patient)
-    created_patient.update({
-        "patientId": patient_identity_document[
-            scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
-        ],
-    })
+    created_patient.update(
+        {
+            "patientId": patient_identity_document[
+                scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
+            ],
+        }
+    )
 
     return created_patient
 
@@ -68,17 +72,16 @@ def ensure_patient_identities(
         # Consistency check:
         # - Should only be called with existing patients
         # - All patients should include patientId per schema
-        if not all([
-            "patientId" in patient_current,
-        ]):
+        if not all(
+            [
+                "patientId" in patient_current,
+            ]
+        ):
             raise ValueError()
 
         # Only ensure identities for patients that have an account
         if "account" in patient_current:
-            _ensure_patient_identity(
-                database=database,
-                patient=patient_current
-            )
+            _ensure_patient_identity(database=database, patient=patient_current)
 
 
 def _ensure_patient_identity(
@@ -90,13 +93,15 @@ def _ensure_patient_identity(
     # - Should only be called for patients with an account
     # - Should only be called after account creation
     # - Account should include cognitoId and email per schema
-    if not all([
-        "account" in patient,
-        "create" not in patient["account"],
-        "existing" in patient["account"],
-        "cognitoId" in patient["account"]["existing"],
-        "email" in patient["account"]["existing"],
-    ]):
+    if not all(
+        [
+            "account" in patient,
+            "create" not in patient["account"],
+            "existing" in patient["account"],
+            "cognitoId" in patient["account"]["existing"],
+            "email" in patient["account"]["existing"],
+        ]
+    ):
         raise ValueError()
 
     patient_identity_document = scope.database.patients.get_patient_identity(
@@ -109,21 +114,29 @@ def _ensure_patient_identity(
     if not update_identity_document:
         update_identity_document = "cognitoAccount" not in patient_identity_document
     if not update_identity_document:
-        update_identity_document = patient_identity_document["cognitoAccount"]["cognitoId"] != patient["account"]["existing"]["cognitoId"]
+        update_identity_document = (
+            patient_identity_document["cognitoAccount"]["cognitoId"]
+            != patient["account"]["existing"]["cognitoId"]
+        )
     if not update_identity_document:
-        update_identity_document = patient_identity_document["cognitoAccount"]["email"] != patient["account"]["existing"]["email"]
+        update_identity_document = (
+            patient_identity_document["cognitoAccount"]["email"]
+            != patient["account"]["existing"]["email"]
+        )
 
     # Perform the update if needed
     if update_identity_document:
         patient_identity_document = copy.deepcopy(patient_identity_document)
 
         del patient_identity_document["_id"]
-        patient_identity_document.update({
-            "cognitoAccount": {
-                "cognitoId": patient["account"]["existing"]["cognitoId"],
-                "email": patient["account"]["existing"]["email"],
+        patient_identity_document.update(
+            {
+                "cognitoAccount": {
+                    "cognitoId": patient["account"]["existing"]["cognitoId"],
+                    "email": patient["account"]["existing"]["email"],
+                }
             }
-        })
+        )
 
         scope.schema_utils.raise_for_invalid_schema(
             data=patient_identity_document,
@@ -133,7 +146,7 @@ def _ensure_patient_identity(
         result = scope.database.patients.put_patient_identity(
             database=database,
             patient_id=patient["patientId"],
-            patient_identity=patient_identity_document
+            patient_identity=patient_identity_document,
         )
         if not result.inserted_count == 1:
             raise RuntimeError()

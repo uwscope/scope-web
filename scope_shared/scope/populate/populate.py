@@ -45,10 +45,12 @@ def populate_from_config(
     #
     for patient_current in populate_config["patients"]["existing"]:
         if "account" in patient_current:
-            patient_current["account"] = scope.populate.populate_account.populate_account_from_config(
+            patient_current[
+                "account"
+            ] = scope.populate.populate_account.populate_account_from_config(
                 database=database,
                 cognito_config=cognito_config,
-                populate_config_account=patient_current["account"]
+                populate_config_account=patient_current["account"],
             )
 
     #
@@ -74,10 +76,12 @@ def populate_from_config(
     #
     for provider_current in populate_config["providers"]["existing"]:
         if "account" in provider_current:
-            provider_current["account"] = scope.populate.populate_account.populate_account_from_config(
+            provider_current[
+                "account"
+            ] = scope.populate.populate_account.populate_account_from_config(
                 database=database,
                 cognito_config=cognito_config,
-                populate_config_account=provider_current["account"]
+                populate_config_account=provider_current["account"],
             )
 
     #

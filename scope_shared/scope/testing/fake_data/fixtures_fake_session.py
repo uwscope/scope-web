@@ -30,9 +30,7 @@ def fake_session_factory(
                     date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
                 )
             ),
-            "sessionType": fake_utils.fake_enum_value(
-                scope.enums.SessionType
-            ),
+            "sessionType": fake_utils.fake_enum_value(scope.enums.SessionType),
             "billableMinutes": random.choice([30, 45, 60, 80]),
             "medicationChange": faker_factory.text(),
             "currentMedications": faker_factory.text(),

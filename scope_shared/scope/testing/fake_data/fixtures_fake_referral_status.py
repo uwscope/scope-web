@@ -28,12 +28,8 @@ def fake_referral_status_factory(
 
     def factory() -> dict:
         fake_referral_status = {
-            "referralType": fake_utils.fake_enum_value(
-                scope.enums.Referral
-            ),
-            "referralStatus": fake_utils.fake_enum_value(
-                scope.enums.ReferralStatus
-            ),
+            "referralType": fake_utils.fake_enum_value(scope.enums.Referral),
+            "referralStatus": fake_utils.fake_enum_value(scope.enums.ReferralStatus),
             "referralOther": faker_factory.text(),
         }
 

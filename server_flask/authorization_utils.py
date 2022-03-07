@@ -39,9 +39,7 @@ def authenticated_identities(
         userPoolId=pool_id,
     )
 
-    jwks_url = "{tokenIssuer}/.well-known/jwks.json".format(
-        tokenIssuer=token_issuer
-    )
+    jwks_url = "{tokenIssuer}/.well-known/jwks.json".format(tokenIssuer=token_issuer)
 
     jwks_client = jwt.PyJWKClient(jwks_url)
     signing_key = jwks_client.get_signing_key_from_jwt(authorization_token)
@@ -57,7 +55,7 @@ def authenticated_identities(
                 "verify_aud": True,
                 "verify_exp": True,
                 "verify_iss": True,
-            }
+            },
         )
     except jwt.exceptions.InvalidTokenError:
         request_utils.abort_authorization_required()
@@ -65,10 +63,7 @@ def authenticated_identities(
     if authorization_data["token_use"] != "id":
         request_utils.abort_authorization_required()
 
-
     verified_cognito_id = authorization_data["sub"]
-
-
 
     verified_patient_identity = None
     patient_identities = scope.database.patients.get_patient_identities(
@@ -80,7 +75,6 @@ def authenticated_identities(
 
         if cognito_id_current == verified_cognito_id:
             verified_patient_identity = patient_identity_current
-
 
     verified_provider_identity = None
     provider_identities = scope.database.providers.get_provider_identities(

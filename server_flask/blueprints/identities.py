@@ -21,19 +21,27 @@ identities_blueprint = flask.Blueprint(
 def get_identities():
     context = request_context()
 
-    authenticated_identities = authorization_utils.authenticated_identities(database=context.database)
+    authenticated_identities = authorization_utils.authenticated_identities(
+        database=context.database
+    )
 
-    if not any([
-        authenticated_identities.patient_identity,
-        authenticated_identities.provider_identity,
-    ]):
+    if not any(
+        [
+            authenticated_identities.patient_identity,
+            authenticated_identities.provider_identity,
+        ]
+    ):
         request_utils.abort_authorization_required()
 
     result = {}
     if authenticated_identities.patient_identity:
-        result[scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE] = authenticated_identities.patient_identity
+        result[
+            scope.database.patients.PATIENT_IDENTITY_DOCUMENT_TYPE
+        ] = authenticated_identities.patient_identity
     if authenticated_identities.provider_identity:
-        result[scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE] = authenticated_identities.provider_identity
+        result[
+            scope.database.providers.PROVIDER_IDENTITY_DOCUMENT_TYPE
+        ] = authenticated_identities.provider_identity
 
     return result
 
@@ -46,7 +54,9 @@ def get_identities():
 def get_patient_identity():
     context = request_context()
 
-    authenticated_identities = authorization_utils.authenticated_identities(database=context.database)
+    authenticated_identities = authorization_utils.authenticated_identities(
+        database=context.database
+    )
 
     if not authenticated_identities.patient_identity:
         request_utils.abort_authorization_required()
@@ -64,7 +74,9 @@ def get_patient_identity():
 def get_provider_identity():
     context = request_context()
 
-    authenticated_identities = authorization_utils.authenticated_identities(database=context.database)
+    authenticated_identities = authorization_utils.authenticated_identities(
+        database=context.database
+    )
 
     if not authenticated_identities.provider_identity:
         request_utils.abort_authorization_required()
