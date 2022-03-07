@@ -195,6 +195,10 @@ TEST_CONFIGS = [
         flask_document_set_key="scheduledassessments",
         flask_query_set_element_type="scheduledassessment",
         flask_document_set_element_key="scheduledassessment",
+        options=ConfigTestPatientSetOptions(
+            set_id_will_already_exist=False,
+            set_element_will_already_exist=True,
+        ),
     ),
 ]
 
