@@ -4,7 +4,7 @@ import flask_json
 import pymongo.collection
 
 import request_utils
-from request_context import request_context
+import request_context
 import scope.database.patient.activity_logs
 import scope.database.patient.activities
 import scope.database.patient.assessment_logs
@@ -142,9 +142,7 @@ def _construct_patient_document(
 )
 @flask_json.as_json
 def get_patients():
-    # TODO require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patients()
     database = context.database
 
     # List of documents from the patient identities collection
@@ -177,9 +175,7 @@ def get_patients():
 )
 @flask_json.as_json
 def get_patient(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     database = context.database
 
     # Document from the patient identities collection
@@ -209,9 +205,7 @@ def get_patient(patient_id):
 )
 @flask_json.as_json
 def get_patient_identities():
-    # TODO require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patients()
     database = context.database
 
     # List of documents from the patient identities collection
