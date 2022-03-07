@@ -142,7 +142,7 @@ def _construct_patient_document(
 )
 @flask_json.as_json
 def get_patients():
-    context = request_context.authorized_for_patients()
+    context = request_context.authorized_for_everything()
     database = context.database
 
     # List of documents from the patient identities collection
@@ -205,7 +205,7 @@ def get_patient(patient_id):
 )
 @flask_json.as_json
 def get_patient_identities():
-    context = request_context.authorized_for_patients()
+    context = request_context.authorized_for_everything()
     database = context.database
 
     # List of documents from the patient identities collection

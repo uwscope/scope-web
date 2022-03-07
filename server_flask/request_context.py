@@ -61,7 +61,7 @@ def authorized_for_patient(patient_id: str) -> RequestContext:
     return request_context
 
 
-def authorized_for_patients() -> RequestContext:
+def authorized_for_everything() -> RequestContext:
     request_context = RequestContext()
 
     authenticated_identities = authorization_utils.authenticated_identities(
