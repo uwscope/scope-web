@@ -36,6 +36,9 @@ class RequestContext:
 def authorized_for_everything() -> RequestContext:
     request_context = RequestContext()
 
+    if flask.current_app.config.get("AUTHORIZATION_DISABLED_FOR_TESTING", False):
+        return request_context
+
     authenticated_identities = authorization_utils.authenticated_identities(
         database=request_context.database
     )
@@ -54,6 +57,9 @@ def authorized_for_everything() -> RequestContext:
 
 def authorized_for_patient(patient_id: str) -> RequestContext:
     request_context = RequestContext()
+
+    if flask.current_app.config.get("AUTHORIZATION_DISABLED_FOR_TESTING", False):
+        return request_context
 
     authenticated_identities = authorization_utils.authenticated_identities(
         database=request_context.database
