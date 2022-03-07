@@ -34,4 +34,4 @@ class Database:
         )
 
         # Store the database client on the Flask app
-        app.database = database
+        app.database_must_not_be_directly_accessed = database
