@@ -33,6 +33,25 @@ class RequestContext:
         return patient_collection
 
 
+def authorized_for_everything() -> RequestContext:
+    request_context = RequestContext()
+
+    authenticated_identities = authorization_utils.authenticated_identities(
+        database=request_context.database
+    )
+
+    authorized = False
+
+    # Providers have access to all patients.
+    if authenticated_identities.provider_identity:
+        authorized = True
+
+    if not authorized:
+        request_utils.abort_not_authorized()
+
+    return request_context
+
+
 def authorized_for_patient(patient_id: str) -> RequestContext:
     request_context = RequestContext()
 
@@ -54,25 +73,6 @@ def authorized_for_patient(patient_id: str) -> RequestContext:
 
         if authenticated_patient_id == patient_id:
             authorized = True
-
-    if not authorized:
-        request_utils.abort_not_authorized()
-
-    return request_context
-
-
-def authorized_for_everything() -> RequestContext:
-    request_context = RequestContext()
-
-    authenticated_identities = authorization_utils.authenticated_identities(
-        database=request_context.database
-    )
-
-    authorized = False
-
-    # Providers have access to all patients.
-    if authenticated_identities.provider_identity:
-        authorized = True
 
     if not authorized:
         request_utils.abort_not_authorized()
