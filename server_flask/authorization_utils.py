@@ -11,7 +11,7 @@ import scope.database.providers
 
 
 @dataclasses.dataclass(frozen=True)
-class AuthorizedIdentities:
+class AuthenticatedIdentities:
     patient_identity: Optional[str]
     provider_identity: Optional[str]
 
@@ -19,14 +19,14 @@ class AuthorizedIdentities:
 def authenticated_identities(
     *,
     database: pymongo.database.Database,
-) -> AuthorizedIdentities:
+) -> AuthenticatedIdentities:
     headers = flask.request.headers
     if "Authorization" not in headers:
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     authorization_header = flask.request.headers["Authorization"]
     if not re.fullmatch("Bearer ([^\\s]+)", authorization_header):
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     authorization_token = authorization_header.split()[1]
 
@@ -58,10 +58,10 @@ def authenticated_identities(
             },
         )
     except jwt.exceptions.InvalidTokenError:
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     if authorization_data["token_use"] != "id":
-        request_utils.abort_authorization_required()
+        request_utils.abort_not_authorized()
 
     verified_cognito_id = authorization_data["sub"]
 
@@ -87,7 +87,7 @@ def authenticated_identities(
         if cognito_id_current == verified_cognito_id:
             verified_provider_identity = provider_identity_current
 
-    return AuthorizedIdentities(
+    return AuthenticatedIdentities(
         patient_identity=verified_patient_identity,
         provider_identity=verified_provider_identity,
     )

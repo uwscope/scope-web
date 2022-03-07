@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.clinical_history
-from request_context import request_context
-import request_utils
-from scope.schema import clinical_history_schema
+import scope.schema
 
 clinical_history_blueprint = flask.Blueprint("clinical_history_blueprint", __name__)
 
@@ -16,9 +17,7 @@ clinical_history_blueprint = flask.Blueprint("clinical_history_blueprint", __nam
 )
 @flask_json.as_json
 def get_clinical_history(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -41,14 +40,12 @@ def get_clinical_history(patient_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=clinical_history_schema,
+    schema=scope.schema.clinical_history_schema,
     key="clinicalhistory",
 )
 @flask_json.as_json
 def put_clinical_history(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

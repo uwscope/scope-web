@@ -1,4 +1,3 @@
-import pprint
 import string
 
 import boto3
@@ -15,14 +14,20 @@ def _generate_temporary_password() -> str:
     Generate a temporary password with requirements:
     - 8 characters long
     - Includes at least 1 lowercase, uppercase, number, and symbol
+
+    Allowable Cognito symbols are:
+      ^$*.[]{}()?!@#%&/\,><'":;|_~`=+-
+
+    For readability of generated passwords that are emailed to people, we use:
+      !@#$%^&*
     """
 
     lowercase = string.ascii_lowercase
     uppercase = string.ascii_uppercase
     numbers = string.digits
-    symbols = "^$*.[]{}()?!@#%&/\,><':;|_~`=+-" + '"'
+    symbols = "!@#$%^&*"
 
-    # Symbols provide more strength, but make temporary passwords difficult
+    # Limit to 1 symbol for readability
     combined = lowercase + uppercase + numbers
 
     characters = []

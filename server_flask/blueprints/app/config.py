@@ -52,7 +52,6 @@ def get_app_config():
                 config_json = json.load(config_file)
                 content_resources.append(config_json)
 
-    # TODO: This should be a "config" object containing these fields
     result = {
         "auth": {
             "poolid": flask.current_app.config["COGNITO_POOLID"],

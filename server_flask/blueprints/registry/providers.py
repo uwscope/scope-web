@@ -1,8 +1,8 @@
 import flask
 import flask_json
 
+import request_context
 import request_utils
-from request_context import request_context
 import scope.database.providers
 
 providers_blueprint = flask.Blueprint(
@@ -17,9 +17,7 @@ providers_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_providers():
-    # TODO require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_everything()
     database = context.database
 
     # List of documents from the provider identities collection
@@ -38,9 +36,7 @@ def get_providers():
 )
 @flask_json.as_json
 def get_provider(provider_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_everything()
     database = context.database
 
     # Document from the provider identities collection

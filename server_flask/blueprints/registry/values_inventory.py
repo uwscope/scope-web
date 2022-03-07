@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.values_inventory
-from request_context import request_context
-import request_utils
-from scope.schema import values_inventory_schema
+import scope.schema
 
 values_inventory_blueprint = flask.Blueprint(
     "values_inventory_blueprint",
@@ -19,9 +20,7 @@ values_inventory_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_values_inventory(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -44,14 +43,12 @@ def get_values_inventory(patient_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=values_inventory_schema,
+    schema=scope.schema.values_inventory_schema,
     key="valuesinventory",
 )
 @flask_json.as_json
 def put_values_inventory(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
