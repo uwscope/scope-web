@@ -27,9 +27,11 @@ def fake_mood_log_factory(
     def factory() -> dict:
         fake_mood_log = {
             "_type": scope.database.patient.mood_logs.DOCUMENT_TYPE,
-            "recordedDate": date_utils.format_date(
-                faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
+            "recordedDateTime": date_utils.format_datetime(
+                faker_factory.date_time_between(
+                    start_date=datetime.datetime.now()
+                    - datetime.timedelta(days=6 * 30),
+                    tzinfo=datetime.timezone.utc,
                 )
             ),
             "comment": faker_factory.text(),

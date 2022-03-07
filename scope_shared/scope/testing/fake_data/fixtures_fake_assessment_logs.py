@@ -60,7 +60,9 @@ def _fake_assessment_logs(
 
         fake_assessment_log = {
             "_type": scope.database.patient.assessment_logs.DOCUMENT_TYPE,
-            "recordedDate": scheduled_assessment_current["dueDate"],
+            "recordedDateTime": scheduled_assessment_current[
+                "dueDate"
+            ],  # TODO: Anant; not sure if this is logically correct.
             "comment": faker_factory.text(),
             scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: scheduled_assessment_current[
                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID

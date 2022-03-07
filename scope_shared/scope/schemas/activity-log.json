@@ -20,8 +20,8 @@
 		"activityLogId": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"recordedDate": {
-			"$ref": "/schemas/log#/properties/recordedDate"
+		"recordedDateTime": {
+			"$ref": "/schemas/log#/properties/recordedDateTime"
 		},
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
@@ -49,5 +49,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduledActivityId", "activityName"]
+	"required": ["_type", "recordedDateTime", "scheduledActivityId", "activityName"]
 }

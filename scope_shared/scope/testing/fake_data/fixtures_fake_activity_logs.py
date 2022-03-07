@@ -36,7 +36,9 @@ def _fake_activity_logs(
     for fake_scheduled_activity in sampled_scheduled_activities:
         fake_activity_log = {
             "_type": scope.database.patient.activity_logs.DOCUMENT_TYPE,
-            "recordedDate": fake_scheduled_activity["dueDate"],
+            "recordedDateTime": fake_scheduled_activity[
+                "dueDate"
+            ],  # TODO: Anant; not sure if this is logically correct.
             "comment": faker_factory.text(),
             scope.database.patient.scheduled_activities.SEMANTIC_SET_ID: fake_scheduled_activity[
                 scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
