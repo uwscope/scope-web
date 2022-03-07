@@ -53,11 +53,6 @@ def create_app():
     # Database connection
     database.Database().init_app(app=app)
 
-    @app.route("/auth")
-    @as_json
-    def auth():
-        return {"name": "Luke Skywalker", "authToken": "my token"}
-
     # Basic status endpoint.
     # TODO - move this into a blueprint
     @app.route("/")
