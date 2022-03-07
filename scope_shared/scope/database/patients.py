@@ -146,6 +146,8 @@ def create_patient(
             scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
             "assigned": True,
             "assignedDateTime": datetime_assigned,
+            "frequency": "Every 2 weeks",
+            "dayOfWeek": "Monday",
         }
         schema_utils.raise_for_invalid_schema(
             data=assessment_document,
