@@ -5,6 +5,7 @@ import { IIdentityResponse } from 'shared/serviceTypes';
 import { IPatientIdentity, IProviderIdentity } from 'shared/types';
 
 export interface IIdentityService extends IServiceBase {
+    getIdentity(token: string): Promise<IPatientIdentity | IProviderIdentity>;
     getPatientIdentity(token: string): Promise<IPatientIdentity>;
     getProviderIdentity(token: string): Promise<IProviderIdentity>;
 }
@@ -16,9 +17,16 @@ class IdentityService extends ServiceBase implements IIdentityService {
         super(baseUrl);
     }
 
+    public async getIdentity(token: string): Promise<IPatientIdentity | IProviderIdentity> {
+        const requestConfig = this.getAuthRequestConfig(token);
+        const response = await this.axiosInstance.get<IIdentityResponse>('/identities', requestConfig);
+
+        return response.data?.patientIdentity || response.data?.providerIdentity;
+    }
+
     public async getPatientIdentity(token: string): Promise<IPatientIdentity> {
         const requestConfig = this.getAuthRequestConfig(token);
-        const response = await this.axiosInstance.get<IIdentityResponse>('/identity', requestConfig);
+        const response = await this.axiosInstance.get<IIdentityResponse>('/identities/patientIdentity', requestConfig);
 
         logger.assert(!!response.data?.patientIdentity, 'Did not received expected patient identity');
         return response.data?.patientIdentity;
@@ -26,7 +34,7 @@ class IdentityService extends ServiceBase implements IIdentityService {
 
     public async getProviderIdentity(token: string): Promise<IProviderIdentity> {
         const requestConfig = this.getAuthRequestConfig(token);
-        const response = await this.axiosInstance.get<IIdentityResponse>('/identity', requestConfig);
+        const response = await this.axiosInstance.get<IIdentityResponse>('/identities/providerIdentity', requestConfig);
 
         logger.assert(!!response.data?.providerIdentity, 'Did not received expected provider identity');
         return response.data?.providerIdentity;
