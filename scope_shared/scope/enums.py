@@ -173,7 +173,7 @@ class AssessmentFrequency(Enum):
     Daily = "Daily"
     Weekly = "Once a week"
     Biweekly = "Every 2 weeks"
-    Monthly = "Monthly"
+    Monthly = "Every 4 weeks"
 
 
 class DayOfWeek(Enum):

@@ -101,8 +101,7 @@ def _scheduled_assessments_assertions(
             ],
         ),
         (
-            # TODO: Confirm if monthly mean every 4 weeks or something else.
-            "Monthly",
+            "Every 4 weeks",
             "Friday",
             8,
             [

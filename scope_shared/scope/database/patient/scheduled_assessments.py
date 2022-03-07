@@ -85,7 +85,7 @@ def create_scheduled_assessments(
                 byweekday=(date_utils.DATEUTIL_WEEKDAYS_MAP[assessment["dayOfWeek"]]),
             )
         )
-    elif assessment["frequency"] == "Monthly":
+    elif assessment["frequency"] == "Every 4 weeks":
         scheduled_assessment_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
