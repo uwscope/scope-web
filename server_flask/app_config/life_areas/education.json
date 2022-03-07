@@ -3,53 +3,57 @@
   "name": "Education/Career/Contributing",
   "examples": [
     {
-      "name": "Being a loving parent",
+      "name": "Get more formal education",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Ask a friend for advice about school"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
-        },
-        {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Write out a plan for enrolling in school"
         }
       ]
     },
     {
-      "name": "Being a caring partner",
+      "name": "Learn new skills for work",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Ask someone at work to teach me a new skill"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
-        },
-        {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Take a class"
         }
       ]
     },
     {
-      "name": "Being an attentive and supportive friend",
+      "name": "Be knowledgeable about the world around you",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Read the newspaper everyday"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Talk about current events to a stranger"
+        }
+      ]
+    },
+    {
+      "name": "Use your knowledge and skills to help others",
+      "activities": [
+        {
+          "name": "Explore volunteer opportunities at the community center"
         },
         {
-          "name": "Take my child to the part on Saturday"
+          "name": "Knit blankets for the homeless shelter"
+        }
+      ]
+    },
+    {
+      "name": "Find a new job that fits with your skills and interests",
+      "activities": [
+        {
+          "name": "Look at job advertisements"
         },
         {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Talk to someone who has a job available"
         }
       ]
     }

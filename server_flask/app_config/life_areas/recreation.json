@@ -3,53 +3,49 @@
   "name": "Recreation/Interests/Creativity",
   "examples": [
     {
-      "name": "Being a loving parent",
+      "name": "Being active",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Go to the park with my son"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Take a walk outside"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Play football on Saturday"
         }
       ]
     },
     {
-      "name": "Being a caring partner",
+      "name": "Being artistic and creative",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Take painting classes"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
-        },
-        {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Make crafts"
         }
       ]
     },
     {
-      "name": "Being an attentive and supportive friend",
+      "name": "Making a sacrifice for something you believe in",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Start a petition"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Spend time helping at my place of worship"
+        }
+      ]
+    },
+    {
+      "name": "Helping others less fortunate or who need help",
+      "activities": [
+        {
+          "name": "Donate clothes"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Spend 30 minutes helping an elderly person"
         }
       ]
     }
