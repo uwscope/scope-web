@@ -3,18 +3,20 @@ import dateutil.rrule
 import pytz
 from typing import Union
 
+import scope.enums
 
 DATETIME_FORMAT_COMPLETE = "%Y-%m-%dT%H:%M:%S.%fZ"
 DATETIME_FORMAT_NO_MICROSECONDS = "%Y-%m-%dT%H:%M:%SZ"
 DATEUTIL_WEEKDAYS_MAP = {
-    "Monday": dateutil.rrule.MO,
-    "Tuesday": dateutil.rrule.TU,
-    "Wednesday": dateutil.rrule.WE,
-    "Thursday": dateutil.rrule.TH,
-    "Friday": dateutil.rrule.FR,
-    "Saturday": dateutil.rrule.SA,
-    "Sunday": dateutil.rrule.SU,
+    scope.enums.DayOfWeek.Monday.value: dateutil.rrule.MO,
+    scope.enums.DayOfWeek.Tuesday.value: dateutil.rrule.TU,
+    scope.enums.DayOfWeek.Wednesday.value: dateutil.rrule.WE,
+    scope.enums.DayOfWeek.Thursday.value: dateutil.rrule.TH,
+    scope.enums.DayOfWeek.Friday.value: dateutil.rrule.FR,
+    scope.enums.DayOfWeek.Saturday.value: dateutil.rrule.SA,
+    scope.enums.DayOfWeek.Sunday.value: dateutil.rrule.SU,
 }
+
 
 def parse_date(date: str) -> _datetime.date:
     """
