@@ -219,10 +219,24 @@ def get_scheduled_assessments(
     Get list of "scheduleAssessment" documents.
     """
 
-    return scope.database.collection_utils.get_set(
+    scheduled_assessments = scope.database.collection_utils.get_set(
         collection=collection,
         document_type=DOCUMENT_TYPE,
     )
+
+    if scheduled_assessments:
+        scheduled_assessments = list(
+            filter(
+                lambda scheduled_assessment_current: (
+                    # Keep scheduled assessments which are not deleted
+                    scheduled_assessment_current.get("_deleted")
+                    != True
+                ),
+                scheduled_assessments,
+            )
+        )
+
+    return scheduled_assessments
 
 
 def get_scheduled_assessment(
