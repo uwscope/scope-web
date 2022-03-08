@@ -3,53 +3,63 @@
   "name": "Mind/Body/Spirituality",
   "examples": [
     {
-      "name": "Being a loving parent",
+      "name": "Being physically healthy",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Go to a doctor for a physical/check-up"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Eat fruit everyday"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Take my medication as prescribed"
         }
       ]
     },
     {
-      "name": "Being a caring partner",
+      "name": "Talking to someone about your problems and feelings",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Ask someone to lunch to talk"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
-        },
-        {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Write in a journal"
         }
       ]
     },
     {
-      "name": "Being an attentive and supportive friend",
+      "name": "Developing your religious/spiritual views",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Talk with a religious figure"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Talk to others with religious beliefs you are interested in"
+        }
+      ]
+    },
+    {
+      "name": "Living a spiritual life",
+      "activities": [
+        {
+          "name": "Pray everyday"
         },
         {
-          "name": "Take my child to the part on Saturday"
+          "name": "Read my religious material"
         },
         {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Attend a religious service"
+        }
+      ]
+    },
+    {
+      "name": "Being tolerant, non-judgmental, accepting of others differences",
+      "activities": [
+        {
+          "name": "Talk to someone with a different background"
+        },
+        {
+          "name": "Read a book about a different culture"
         }
       ]
     }
