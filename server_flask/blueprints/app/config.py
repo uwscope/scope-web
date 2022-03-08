@@ -32,7 +32,7 @@ def get_app_config():
     content_assessments = []
     for path_current in Path(APP_CONFIG_ASSESSMENTS_PATH).iterdir():
         if path_current.match("*.json"):
-            with open(path_current) as config_file:
+            with open(path_current, encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
                 content_assessments.append(config_json)
 
@@ -40,7 +40,7 @@ def get_app_config():
     content_life_areas = []
     for path_current in Path(APP_CONFIG_LIFE_AREAS_PATH).iterdir():
         if path_current.match("*.json"):
-            with open(path_current) as config_file:
+            with open(path_current, encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
                 content_life_areas.append(config_json)
 
@@ -48,7 +48,7 @@ def get_app_config():
     content_resources = []
     for path_current in Path(APP_CONFIG_RESOURCES_PATH).iterdir():
         if path_current.match("*.json"):
-            with open(path_current) as config_file:
+            with open(path_current, encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
                 content_resources.append(config_json)
 
@@ -80,7 +80,7 @@ def get_app_quote():
     quotes_path = Path(APP_QUOTES_PATH)
 
     # Load quotes configurations
-    with open(quotes_path) as quotes_file:
+    with open(quotes_path, encoding="utf-8") as quotes_file:
         quotes_json = json.load(quotes_file)
 
     return {
