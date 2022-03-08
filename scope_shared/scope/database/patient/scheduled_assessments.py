@@ -9,6 +9,7 @@ import pymongo.collection
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.assessments
+import scope.enums
 import scope.schema
 import scope.schema_utils as schema_utils
 
@@ -57,7 +58,7 @@ def create_scheduled_assessments(
         )
     )
     until = date_start + datetime.timedelta(weeks=weeks)  # Next 3 months
-    if assessment["frequency"] == "Daily":
+    if assessment["frequency"] == scope.enums.AssessmentFrequency.Daily.value:
         scheduled_assessment_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.DAILY,
@@ -66,7 +67,7 @@ def create_scheduled_assessments(
             )
         )
 
-    elif assessment["frequency"] == "Once a week":
+    elif assessment["frequency"] == scope.enums.AssessmentFrequency.Weekly.value:
         scheduled_assessment_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
@@ -75,7 +76,7 @@ def create_scheduled_assessments(
                 byweekday=(date_utils.DATEUTIL_WEEKDAYS_MAP[assessment["dayOfWeek"]]),
             )
         )
-    elif assessment["frequency"] == "Every 2 weeks":
+    elif assessment["frequency"] == scope.enums.AssessmentFrequency.Biweekly.value:
         scheduled_assessment_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
@@ -85,7 +86,7 @@ def create_scheduled_assessments(
                 byweekday=(date_utils.DATEUTIL_WEEKDAYS_MAP[assessment["dayOfWeek"]]),
             )
         )
-    elif assessment["frequency"] == "Every 4 weeks":
+    elif assessment["frequency"] == scope.enums.AssessmentFrequency.Monthly.value:
         scheduled_assessment_due_dates = list(
             dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
