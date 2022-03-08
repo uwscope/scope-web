@@ -1,18 +1,26 @@
 {
   "id": "valuesandgoalsassessment",
-  "name": "Values and goals assessment",
+  "name": "Other documents",
   "resources": [
     {
-      "name": "Form A client education",
-      "filename": "sample.pdf"
+      "name": "Strategies for Better Sleep",
+      "filename": "Strategies_for_Better_Sleep.pdf"
     },
     {
-      "name": "Form B vicious cycle",
-      "filename": "sample.pdf"
+      "name": "Memory and Concentration Tips",
+      "filename": "Memory_and_Concentration_Tips.pdf"
     },
     {
-      "name": "Form C vicious cycle",
-      "filename": "sample.pdf"
+      "name": "Finding a Support Group",
+      "filename": "Finding_a_Support_Group.pdf"
+    },
+    {
+      "name": "Self-Care Plan (Relapse Prevention)",
+      "filename": "Self-Care_Plan_(Relapse_Prevention).pdf"
+    },
+    {
+      "name": "Helpful Websites",
+      "filename": "Helpful_Websites_for_Cancer_Information_Coping_Treatment_Support.pdf"
     }
   ]
 }
