@@ -26,8 +26,8 @@
 		"assessmentId": {
 			"type": "string"
 		},
-		"dueDate": {
-			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		"dueDateTime": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDateTime"
 		},
 		"dueTimeOfDay": {
 			"$ref": "/schemas/scheduled-item#/properties/dueTimeOfDay"
