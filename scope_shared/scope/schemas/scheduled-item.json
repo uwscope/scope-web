@@ -8,13 +8,13 @@
 		"scheduleId": {
 			"type": "string"
 		},
-		"dueDate": {
-			"$ref": "/schemas/datetime#/properties/date"
+		"dueDateTime": {
+			"$ref": "/schemas/datetime#/properties/datetime"
 		},
 		"dueType": {
 			"$ref": "/schemas/enums#/properties/dueType"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["scheduleId", "dueDate", "dueType"]
+	"required": ["scheduleId", "dueDateTime", "dueType"]
 }

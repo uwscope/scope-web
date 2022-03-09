@@ -8,7 +8,7 @@
 		"logId": {
 			"type": "string"
 		},
-		"recordedDate": {
+		"recordedDateTime": {
             "$ref": "/schemas/datetime#/properties/datetime"
         },
 		"comment": {
@@ -16,5 +16,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["recordedDate"]
+	"required": ["recordedDateTime"]
 }

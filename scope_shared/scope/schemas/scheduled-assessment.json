@@ -23,8 +23,8 @@
 		"scheduledAssessmentId": {
 			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
 		},
-		"dueDate": {
-			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		"dueDateTime": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDateTime"
 		},
 		"dueType": {
 			"$ref": "/schemas/scheduled-item#/properties/dueType"
@@ -37,5 +37,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "dueDate", "dueType", "assessmentId", "completed"]
+	"required": ["_type", "dueDateTime", "dueType", "assessmentId", "completed"]
 }
