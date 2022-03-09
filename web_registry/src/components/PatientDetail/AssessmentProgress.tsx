@@ -34,6 +34,15 @@ const ScoreCell = withTheme(
     })),
 );
 
+const SuicideCell = withTheme(
+    styled.div<{ score: number }>((props) => ({
+        width: 'calc(100% + 16px)',
+        textAlign: 'center',
+        padding: props.theme.spacing(0.5),
+        border: props.score > 0 ? `2px solid ${props.theme.customPalette.flagColors['safety']}` : 'none',
+    })),
+);
+
 export interface IAssessmentProgressProps {
     assessmentName: string;
     instruction?: string;
@@ -207,6 +216,11 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             {props.value}
         </ScoreCell>
     );
+
+    const renderSuicideCell = (props: GridCellParams) => (
+        <SuicideCell score={props.value as number}>{props.value}</SuicideCell>
+    );
+
     const columns: GridColDef[] = [
         {
             field: 'date',
@@ -233,6 +247,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     width: 60,
                     align: 'center',
                     headerAlign: 'center',
+                    renderCell: q == 'Suicide' ? renderSuicideCell : undefined,
                 } as GridColDef),
         ),
         {
