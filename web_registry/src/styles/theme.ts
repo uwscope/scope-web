@@ -21,6 +21,7 @@ declare module '@mui/material/styles' {
             label: React.CSSProperties['color'];
             discrete10: string[];
             scoreColors: { [key: string]: string };
+            flagColors: { [key: string]: string };
         };
         customSizes: {
             contentsMenuWidth: number;
@@ -80,10 +81,15 @@ export default function createAppTheme() {
                 '#17becf',
             ],
             scoreColors: {
-                bad: '#bf2e2e',
-                warning: '#ffbf00',
-                good: '#20ab41',
+                bad: '#FFA29F',
+                warning: '#FFF09F',
+                good: '#8ADC98',
                 unknown: '#fafafa',
+                disabled: '#eeeeee',
+            },
+            flagColors: {
+                safety: '#bf2e2e',
+                discussion: '#ffbf00',
                 disabled: '#eeeeee',
             },
         },

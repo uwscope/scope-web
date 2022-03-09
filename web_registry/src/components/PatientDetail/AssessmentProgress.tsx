@@ -27,10 +27,11 @@ const ScoreCell = withTheme(
         width: 'calc(100% + 16px)',
         marginLeft: -8,
         marginRight: -8,
+        textAlign: 'center',
         padding: props.theme.spacing(1),
         backgroundColor:
             props.theme.customPalette.scoreColors[getAssessmentScoreColorName(props.assessmentId, props.score)],
-    }))
+    })),
 );
 
 export interface IAssessmentProgressProps {

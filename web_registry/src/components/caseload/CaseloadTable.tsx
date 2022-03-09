@@ -29,6 +29,8 @@ const ColumnHeader = styled.div({
 const PHQCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('PHQ-9', props.score)],
     })),
 );
@@ -36,6 +38,8 @@ const PHQCell = withTheme(
 const GADCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('GAD-7', props.score)],
     })),
 );
@@ -43,19 +47,21 @@ const GADCell = withTheme(
 const ChangeCell = withTheme(
     styled.div<{ change: number }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.change <= -50 && props.theme.customPalette.scoreColors['good'],
     })),
 );
 
 const RedFlag = withTheme(
     styled(FlagIcon)<{ $on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.$on ? 'bad' : 'disabled'],
+        color: props.theme.customPalette.flagColors[props.$on ? 'safety' : 'disabled'],
     })),
 );
 
 const YellowFlag = withTheme(
     styled(FlagIcon)<{ $on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.$on ? 'warning' : 'disabled'],
+        color: props.theme.customPalette.flagColors[props.$on ? 'discussion' : 'disabled'],
     })),
 );
 
