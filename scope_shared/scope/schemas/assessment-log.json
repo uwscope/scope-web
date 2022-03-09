@@ -21,8 +21,8 @@
 		"assessmentLogId": {
 			"$ref": "/schemas/log#/properties/logId"
 		},
-		"recordedDate": {
-			"$ref": "/schemas/log#/properties/recordedDate"
+		"recordedDateTime": {
+			"$ref": "/schemas/log#/properties/recordedDateTime"
 		},
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
@@ -48,5 +48,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
+	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
 }
