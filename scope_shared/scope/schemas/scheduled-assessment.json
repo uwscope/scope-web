@@ -21,21 +21,33 @@
 			"type": "boolean"
 		},
 		"scheduledAssessmentId": {
-			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
+			"type": "string"
+		},
+		"assessmentId": {
+			"type": "string"
+		},
+		"dueDate": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		},
+		"dueTimeOfDay": {
+			"$ref": "/schemas/scheduled-item#/properties/dueTimeOfDay"
 		},
 		"dueDateTime": {
 			"$ref": "/schemas/scheduled-item#/properties/dueDateTime"
 		},
-		"dueType": {
-			"$ref": "/schemas/scheduled-item#/properties/dueType"
+		"reminderDate": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderDate"
 		},
-		"assessmentId": {
-			"type": "string"
+		"reminderTimeOfDay": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderTimeOfDay"
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderDateTime"
 		},
 		"completed": {
 			"type": "boolean"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "dueDateTime", "dueType", "assessmentId", "completed"]
+	"required": ["_type", "assessmentId", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }

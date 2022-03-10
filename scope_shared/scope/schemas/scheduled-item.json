@@ -5,16 +5,27 @@
 	"description": "IScheduledItem Type",
 	"type": "object",
 	"properties": {
-		"scheduleId": {
-			"type": "string"
+		"dueDate": {
+			"$ref": "/schemas/datetime#/properties/date"
+		},
+		"dueTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
 		},
 		"dueDateTime": {
 			"$ref": "/schemas/datetime#/properties/datetime"
 		},
-		"dueType": {
-			"$ref": "/schemas/enums#/properties/dueType"
+		"reminderDate": {
+			"$ref": "/schemas/datetime#/properties/date"
+		},
+		"reminderTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/datetime#/properties/datetime"
 		}
-	},
-	"additionalProperties": false,
-	"required": ["scheduleId", "dueDateTime", "dueType"]
+	}
 }
