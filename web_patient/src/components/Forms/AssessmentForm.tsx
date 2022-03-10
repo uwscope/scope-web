@@ -26,7 +26,7 @@ import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
 
-export interface IAssessmentFormProps extends IFormProps {}
+export interface IAssessmentFormProps extends IFormProps { }
 
 interface IQuestionFormProps {
     instruction: string;
@@ -68,10 +68,7 @@ const CrisisContent: FunctionComponent = () => {
             content={
                 <Stack spacing={2}>
                     <BodyText>
-                        Having thoughts of death or suicide can be serious. We suggest that you let your social worker
-                        know how you feel and work together to create a Safety Plan. If you would like to work on your
-                        Safety Plan now, finish your Check-In, go to Resouces from the bottom menu, and then to Safety
-                        Plan. If you are feeling distressed, try calling a supportive friend or family member.
+                        You indicated that you are having thoughts of death or suicide.
                     </BodyText>
                     <BodyText>If you need more help right away, here are some resources to try:</BodyText>
                     <ListDiv>
