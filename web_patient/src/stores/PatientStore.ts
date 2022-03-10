@@ -156,7 +156,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get assessmentsToComplete() {
-        const scheduledAssessments = this.loadConfigQuery.value?.assignedScheduledAssessments || [];
+        const scheduledAssessments = this.config?.assignedScheduledAssessments || [];
         // Returns deduped list of assessments to complete
         const latestAssessments: IScheduledAssessment[] = [];
         const assessmentGroups = _.groupBy(scheduledAssessments, (a) => a.assessmentId);
@@ -171,13 +171,32 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get config() {
-        return (
-            this.loadConfigQuery.value || {
-                assignedValuesInventory: true,
-                assignedSafetyPlan: true,
-                assignedScheduledAssessments: [],
-            }
-        );
+
+        const config = this.loadConfigQuery.value || {
+            assignedValuesInventory: true,
+            assignedSafetyPlan: true,
+            assignedScheduledAssessments: [],
+        };
+
+        // Temporary placeholder for scheduled assessments
+        // config.assignedScheduledAssessments.push(
+        //     {
+        //         assessmentId: 'phq-9',
+        //         dueDate: new Date(),
+        //         scheduledAssessmentId: 'fake-phq-9',
+        //     } as IScheduledAssessment,
+        // );
+
+        // config.assignedScheduledAssessments.push(
+        //     {
+        //         assessmentId: 'gad-7',
+        //         dueDate: new Date(),
+        //         scheduledAssessmentId: 'fake-gad-7',
+        //     } as IScheduledAssessment,
+        // );
+
+        return config;
+
     }
 
     @computed public get activities() {

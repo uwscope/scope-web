@@ -168,6 +168,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
             <ContentContainer>
                 <PageContent>{pages[state.activePage].content}</PageContent>
                 <MobileStepper
+                    sx={{ background: '#eee' }}
                     steps={maxPages}
                     position="static"
                     variant="text"

@@ -27,15 +27,20 @@ const ColumnHeader = styled.div({
 });
 
 const PHQCell = withTheme(
-    styled.div<{ score: number }>((props) => ({
+    styled.div<{ score: number; risk: boolean }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('PHQ-9', props.score)],
+        border: props.risk ? `2px solid ${props.theme.customPalette.flagColors['safety']}` : 'none',
     })),
 );
 
 const GADCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.theme.customPalette.scoreColors[getAssessmentScoreColorName('GAD-7', props.score)],
     })),
 );
@@ -43,25 +48,31 @@ const GADCell = withTheme(
 const ChangeCell = withTheme(
     styled.div<{ change: number }>((props) => ({
         width: '100%',
+        padding: props.theme.spacing(2),
+        textAlign: 'center',
         backgroundColor: props.change <= -50 && props.theme.customPalette.scoreColors['good'],
     })),
 );
 
 const RedFlag = withTheme(
     styled(FlagIcon)<{ $on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.$on ? 'bad' : 'disabled'],
+        color: props.theme.customPalette.flagColors[props.$on ? 'safety' : 'disabled'],
     })),
 );
 
 const YellowFlag = withTheme(
     styled(FlagIcon)<{ $on: boolean }>((props) => ({
-        color: props.theme.customPalette.scoreColors[props.$on ? 'warning' : 'disabled'],
+        color: props.theme.customPalette.flagColors[props.$on ? 'discussion' : 'disabled'],
     })),
 );
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
-const renderPHQCell = (props: GridCellParams) => <PHQCell score={props.value as number}>{props.value}</PHQCell>;
+const renderPHQCell = (props: GridCellParams, atRiskId: string) => (
+    <PHQCell score={props.value as number} risk={!!props.row[atRiskId]}>
+        {props.value}
+    </PHQCell>
+);
 
 const renderGADCell = (props: GridCellParams) => <GADCell score={props.value as number}>{props.value}</GADCell>;
 
@@ -190,7 +201,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             headerName: 'Initial PHQ-9',
             width: 50,
             renderHeader,
-            renderCell: renderPHQCell,
+            renderCell: (props) => renderPHQCell(props, 'initialAtRisk'),
             align: 'center',
             headerAlign: 'center',
         },
@@ -199,7 +210,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             headerName: 'Last PHQ-9',
             width: 50,
             renderHeader,
-            renderCell: renderPHQCell,
+            renderCell: (props) => renderPHQCell(props, 'lastAtRisk'),
             align: 'center',
             headerAlign: 'center',
         },
@@ -267,6 +278,14 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             .slice()
             .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate));
 
+        const initialAtRisk = phq9 && phq9.length > 0 && phq9[0].pointValues && !!phq9[0].pointValues['Suicide'];
+
+        const lastAtRisk =
+            phq9 &&
+            phq9.length > 0 &&
+            phq9[phq9.length - 1].pointValues &&
+            !!phq9[phq9.length - 1].pointValues['Suicide'];
+
         return {
             ...p,
             ...p.profile,
@@ -307,6 +326,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                       )
                     : NA,
             lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
+            initialAtRisk,
+            lastAtRisk,
         };
     });
 

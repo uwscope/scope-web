@@ -57,13 +57,13 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
             <FlaggedField
                 label="Safety risk"
                 flagged={flaggedForSafety}
-                color={'bad'}
+                color={'safety'}
                 onClick={() => onToggleFlag('Flag as safety risk', !flaggedForSafety)}
             />
             <FlaggedField
                 label="Discussion"
                 flagged={flaggedForDiscussion}
-                color={'warning'}
+                color={'discussion'}
                 onClick={() => onToggleFlag('Flag for discussion', !flaggedForDiscussion)}
             />
         </Container>
