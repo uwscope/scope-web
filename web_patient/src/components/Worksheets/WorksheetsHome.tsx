@@ -31,8 +31,13 @@ export const WorksheetsHome: FunctionComponent = observer(() => {
                             {r.name}
                         </ListSubheader>
                     }>
-                    {r.resources.map((resource) => (
-                        <ListItem button component={Link} to={getResourceLink(resource.filename)} target="_blank">
+                    {r.resources.map((resource, idx) => (
+                        <ListItem
+                            key={idx}
+                            button
+                            component={Link}
+                            to={getResourceLink(resource.filename)}
+                            target="_blank">
                             <ListItemIcon>
                                 <InsertDriveFileIcon />
                             </ListItemIcon>

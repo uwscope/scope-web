@@ -8,6 +8,7 @@ import AboutUsImageSrc from 'src/assets/about_us_icon.png';
 import CrisisResourcesImageSrc from 'src/assets/crisis_resources_icon.png';
 import PhqAssessmentImageSrc from 'src/assets/assessment_phq9_depression.png';
 import GadAssessmentImageSrc from 'src/assets/assessment_gad7_anxiety.png';
+import LogoutImageSrc from 'src/assets/log_out_icon.png';
 
 const _images = {
     Home_values_button_image: MyValuesInventoryImageSrc,
@@ -18,6 +19,7 @@ const _images = {
     Resources_worksheets_button_image: MyWorksheetsImageSrc,
     Resources_about_us_button_image: AboutUsImageSrc,
     Resources_crisis_resources_button_image: CrisisResourcesImageSrc,
+    Resources_logout_button_image: LogoutImageSrc,
     Progress_activity_button_image: ActivityProgressImageSrc,
     Progress_assessment_phq_button_image: PhqAssessmentImageSrc,
     Progress_assessment_gad_button_image: GadAssessmentImageSrc,

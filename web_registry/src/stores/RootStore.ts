@@ -14,6 +14,7 @@ export interface IRootStore {
 
     // Helpers
     getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
+    reset: () => void;
 }
 
 export class RootStore implements IRootStore {
@@ -36,5 +37,10 @@ export class RootStore implements IRootStore {
     @action.bound
     public getAssessmentContent(assessmentId: string) {
         return this.appContentConfig.assessments.find((s) => s.id.toLowerCase() == assessmentId.toLowerCase());
+    }
+
+    @action.bound
+    public reset() {
+        this.patientsStore = new PatientsStore();
     }
 }

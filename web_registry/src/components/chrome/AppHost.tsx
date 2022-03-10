@@ -8,6 +8,7 @@ import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import styled, { withTheme } from 'styled-components';
+import AppLoader from 'src/components/chrome/AppLoader';
 
 const RootContainer = styled.div({
     height: '100vh',
@@ -110,6 +111,8 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 runInAction(() => {
                     state.store = newStore;
                 });
+
+                newStore.authStore.initialize();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
@@ -130,6 +133,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
 
                 state.ready = true;
             }
+
+            if (!state.store?.authStore.isAuthenticated) {
+                state.ready = false;
+                state.store?.reset();
+            }
         });
     }, [state.store?.authStore.isAuthenticated]);
 
@@ -140,6 +148,7 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                     <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
+            <AppLoader isLoading={!!state.store?.authStore.isAuthenticating} text="Logging in..." />
             <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <RootContainer>
                     <ImageContainer>
