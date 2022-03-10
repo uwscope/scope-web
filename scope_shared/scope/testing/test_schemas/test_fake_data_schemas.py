@@ -58,10 +58,6 @@ class ConfigTestFakeDataSchema:
     expected_semantic_set_id: Optional[str]
     expected_set_ids: Optional[List[str]]
 
-    # Used to indicate test is not resolved
-    # because it has an issue in data or schema
-    XFAIL_TEST_HAS_TODO: bool = False
-
 
 TEST_ITERATIONS = 100
 
@@ -354,9 +350,6 @@ def test_fake_data_schema(
     request: pytest.FixtureRequest,
     config: ConfigTestFakeDataSchema,
 ):
-    if config.XFAIL_TEST_HAS_TODO:
-        pytest.xfail("Test has TODO in data or schema.")
-
     if config.schema is None:
         pytest.xfail("Schema failed to parse")
 
