@@ -34,12 +34,10 @@ def _fake_scheduled_activity(
         ),
         "dueTimeOfDay": random.randint(0, 23),
         "dueDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                faker_factory.date_time_between(
-                    start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
-                    end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
-                )
-            )
+            pytz.utc.localize(faker_factory.date_time_between(
+                start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
+                end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
+            ))
         ),
         "reminderDate": date_utils.format_date(
             faker_factory.date_between(
@@ -49,12 +47,10 @@ def _fake_scheduled_activity(
         ),
         "reminderTimeOfDay": random.randint(0, 23),
         "reminderDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                faker_factory.date_time_between(
-                    start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
-                    end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
-                )
-            )
+            pytz.utc.localize(faker_factory.date_time_between(
+                start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
+                end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
+            ))
         ),
         "completed": random.choice([True, False]),
     }

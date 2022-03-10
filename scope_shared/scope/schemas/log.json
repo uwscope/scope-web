@@ -10,7 +10,7 @@
         },
 		"comment": {
 			"type": "string"
-		},
+		}
 	},
 	"required": ["recordedDateTime"]
 }
