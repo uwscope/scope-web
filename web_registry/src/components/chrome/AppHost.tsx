@@ -133,6 +133,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
 
                 state.ready = true;
             }
+
+            if (!state.store?.authStore.isAuthenticated) {
+                state.ready = false;
+                state.store?.reset();
+            }
         });
     }, [state.store?.authStore.isAuthenticated]);
 

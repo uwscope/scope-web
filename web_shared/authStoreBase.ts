@@ -63,8 +63,11 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
 
     @computed
     public get isAuthenticated() {
-        const token = this.getToken();
-        return !!this.currentUserSession && !!this.currentUserIdentity && !!token;
+        if (this.authState == AuthState.Authenticated) {
+            const token = this.getToken();
+            return !!this.currentUserSession && !!this.currentUserIdentity && !!token;
+        }
+        return false;
     }
 
     @computed
@@ -81,7 +84,11 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
 
     @action.bound
     public getToken() {
-        return this.currentUserSession?.getIdToken().getJwtToken();
+        if (this.authState == AuthState.Authenticated) {
+            return this.currentUserSession?.getIdToken().getJwtToken();
+        }
+
+        return undefined;
     }
 
     @computed

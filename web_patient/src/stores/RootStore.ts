@@ -27,6 +27,7 @@ export interface IRootStore {
 
     // Data load/save
     load: () => void;
+    reset: () => void;
 }
 
 export class RootStore implements IRootStore {
@@ -107,5 +108,10 @@ export class RootStore implements IRootStore {
         const { appService } = useServices();
         const promise = appService.getInspirationalQuote();
         await this.quoteQuery.fromPromise(promise);
+    }
+
+    @action.bound
+    public reset() {
+        this.patientStore = new PatientStore(getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, 'invalid'));
     }
 }

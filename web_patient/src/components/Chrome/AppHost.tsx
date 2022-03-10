@@ -110,6 +110,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 state.store?.createPatientStore(newPatientService);
                 state.ready = true;
             }
+
+            if (!state.store?.authStore.isAuthenticated) {
+                state.ready = false;
+                state.store?.reset();
+            }
         });
     }, [state.store?.authStore.isAuthenticated]);
 
