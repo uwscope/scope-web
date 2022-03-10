@@ -196,7 +196,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         .map((a) => {
             return {
                 date: format(a.recordedDate, 'MM/dd/yy'),
-                total: getAssessmentScore(a.pointValues) || a.totalScore,
+                total:
+                    getAssessmentScore(a.pointValues) != undefined ? getAssessmentScore(a.pointValues) : a.totalScore,
                 id: a.assessmentLogId,
                 ...a.pointValues,
                 comment: a.comment,
