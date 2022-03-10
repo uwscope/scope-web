@@ -1,8 +1,9 @@
 import { Avatar, Button, FormControl, FormHelperText, TextField, Typography } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
+import { AuthState } from 'shared/authStoreBase';
 import Logo from 'src/assets/scope-logo.png';
-import { AuthState, IAuthStore } from 'src/stores/AuthStore';
+import { IAuthStore } from 'src/stores/AuthStore';
 import styled, { withTheme } from 'styled-components';
 
 const Container = withTheme(

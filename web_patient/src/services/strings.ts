@@ -218,6 +218,8 @@ const _strings = {
     Resources_about_us_subtitle: 'Learn about the study',
     Resources_crisis_resources_title: 'Crisis Resources',
     Resources_crisis_resources_subtitle: 'Crisis resources and hotlines',
+    Resources_logout_title: 'Log out',
+    Resources_logout_subtitle: 'Log out of the app',
 
     Safetyplan_title: 'Safety Plan',
     Safetyplan_reasons_for_living_title: 'Reasons for living',

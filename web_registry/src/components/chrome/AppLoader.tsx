@@ -34,9 +34,8 @@ export const AppLoader: FunctionComponent<IAppLoaderProps> = (props) => {
                     justifyContent="center"
                     flexDirection="column">
                     <CircularProgress />
-                    <Typography variant="caption" component="div" color="primary">
-                        {text}
-                    </Typography>
+                    <Box sx={{ height: 40 }} />
+                    <Typography component="div">{text}</Typography>
                 </Box>
             </Paper>
         </Cover>
