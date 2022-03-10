@@ -238,6 +238,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
 
     @action.bound
     public logout() {
+        window.localStorage.clear();
         this.authUser?.signOut();
         this.authState = AuthState.Initialized;
         this.authUser = undefined;
