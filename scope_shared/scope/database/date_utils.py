@@ -73,10 +73,7 @@ def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
     """
 
     if isinstance(date, _datetime.datetime):
-        if date.tzinfo is None:
-            raise ValueError("datetime must be UTC aware.")
-        if date.tzinfo.utcoffset(date).total_seconds() != 0:
-            raise ValueError("datetime must be UTC aware.")
+        raise_on_datetime_not_utc_aware(datetime=date)
 
         # Ensure a datetime.date object
         date = date.date()
@@ -96,6 +93,16 @@ def format_datetime(datetime: _datetime.datetime) -> str:
     Format a datetime into our format.
     """
 
+    raise_on_datetime_not_utc_aware(datetime=datetime)
+
+    return datetime.strftime(DATETIME_FORMAT_NO_MICROSECONDS)
+
+
+def raise_on_datetime_not_utc_aware(datetime: _datetime.datetime) -> None:
+    """
+    Raise if a provided datetime is not aware or not in UTC.
+    """
+
     if not isinstance(datetime, _datetime.datetime):
         raise ValueError("datetime must be UTC aware.")
     if datetime.tzinfo is None:
@@ -103,4 +110,3 @@ def format_datetime(datetime: _datetime.datetime) -> str:
     if datetime.tzinfo.utcoffset(datetime).total_seconds() != 0:
         raise ValueError("datetime must be UTC aware.")
 
-    return datetime.strftime(DATETIME_FORMAT_NO_MICROSECONDS)
