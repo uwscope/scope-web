@@ -27,6 +27,7 @@
         "mui-datatables": "^3.7.6",
         "react": "17.0.x",
         "react-dom": "17.0.x",
+        "react-idle-timer": "^5.0.0-rc.16",
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
         "react-vis": "^1.11.7",
