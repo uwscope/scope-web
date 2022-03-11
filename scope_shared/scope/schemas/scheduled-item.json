@@ -26,6 +26,11 @@
 		},
 		"reminderDateTime": {
 			"$ref": "/schemas/datetime#/properties/datetime"
+		},
+		"completed": {
+			"type": "boolean"
 		}
-	}
+	},
+	"additionalProperties": false,
+	"required": ["dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }

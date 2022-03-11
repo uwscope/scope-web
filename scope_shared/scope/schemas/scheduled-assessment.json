@@ -45,7 +45,7 @@
 			"$ref": "/schemas/scheduled-item#/properties/reminderDateTime"
 		},
 		"completed": {
-			"type": "boolean"
+			"$ref": "/schemas/scheduled-item#/properties/completed"
 		}
 	},
 	"additionalProperties": false,

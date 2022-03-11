@@ -2,10 +2,12 @@ import datetime as _datetime
 import dateutil.relativedelta
 import dateutil.rrule
 import pytz
-from typing import List
+from typing import List, Optional
 
 import scope.database.date_utils as date_utils
 import scope.enums
+import scope.schema
+import scope.schema_utils as schema_utils
 
 
 DATEUTIL_WEEKDAYS_MAP = {
@@ -25,12 +27,6 @@ def _localized_datetime(
     time_of_day: int,
     timezone: pytz.timezone,
 ) -> _datetime.datetime:
-    date_utils.raise_on_not_date(date)
-    if time_of_day < 0 or time_of_day > 23:
-        raise ValueError("time_of_day must be int >=0 and <= 23")
-    if timezone.zone not in pytz.all_timezones:
-        raise ValueError("timezone must be valid pytz timezone")
-
     datetime = _datetime.datetime.combine(
         date,
         _datetime.time(hour=time_of_day)
@@ -93,3 +89,67 @@ def _scheduled_dates(
         raise ValueError()
 
     return [repeat_datetime.date() for repeat_datetime in repeat_rule]
+
+
+def create_scheduled_items(
+    *,
+    start_date: _datetime.date,
+    day_of_week: str,
+    frequency: str,
+    due_time_of_day: int,
+    reminder: bool,
+    reminder_time_of_day: Optional[int] = None,
+    timezone: pytz.timezone,
+    months: int,
+) -> List[dict]:
+    date_utils.raise_on_not_date(start_date)
+    if due_time_of_day < 0 or due_time_of_day > 23:
+        raise ValueError("due_time_of_day must be int >=0 and <= 23")
+    if reminder:
+        if reminder is None or reminder_time_of_day < 0 or reminder_time_of_day > 23:
+            raise ValueError("reminder_time_of_day must be int >=0 and <= 23")
+    if timezone.zone not in pytz.all_timezones:
+        raise ValueError("timezone must be valid pytz timezone")
+
+    scheduled_dates = _scheduled_dates(
+        start_date=start_date,
+        day_of_week=day_of_week,
+        frequency=frequency,
+        months=months,
+    )
+
+    scheduled_items = []
+    for scheduled_date_current in scheduled_dates:
+        scheduled_item_current = {}
+
+        scheduled_item_current.update({
+            "dueDate": date_utils.format_date(scheduled_date_current),
+            "dueTimeOfDay": due_time_of_day,
+            "dueDateTime": date_utils.format_datetime(_localized_datetime(
+                date=scheduled_date_current,
+                time_of_day=due_time_of_day,
+                timezone=timezone,
+            ))
+        })
+
+        if reminder:
+            scheduled_item_current.update({
+                "reminderDate": date_utils.format_date(scheduled_date_current),
+                "reminderTimeOfDay": reminder_time_of_day,
+                "reminderDateTime": date_utils.format_datetime(_localized_datetime(
+                    date=scheduled_date_current,
+                    time_of_day=reminder_time_of_day,
+                    timezone=timezone,
+                ))
+            })
+
+        scheduled_item_current["completed"] = False
+
+        schema_utils.raise_for_invalid_schema(
+            data=scheduled_item_current,
+            schema=scope.schema.scheduled_item_schema
+        )
+
+        scheduled_items.append(scheduled_item_current)
+
+    return scheduled_items
