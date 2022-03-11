@@ -292,7 +292,9 @@ def test_patient_set_get(
             if config.semantic_set_id:
                 del document_retrieved[config.semantic_set_id]
 
-    assert documents_stored == documents_retrieved
+    # Other documents may already be present, so check those present include ours
+    for document_stored_current in documents_stored:
+        assert document_stored_current in documents_retrieved
 
 
 @pytest.mark.parametrize(
