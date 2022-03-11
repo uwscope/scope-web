@@ -169,7 +169,7 @@ class AssessmentType(Enum):
     Medication = "medication"
 
 
-class AssessmentFrequency(Enum):
+class ScheduledItemFrequency(Enum):
     Daily = "Daily"
     Weekly = "Once a week"
     Biweekly = "Every 2 weeks"

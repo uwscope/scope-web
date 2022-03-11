@@ -37,7 +37,7 @@ def _fake_assessment(
                 )
             )
         ),
-        "frequency": fake_utils.fake_enum_value(scope.enums.AssessmentFrequency),
+        "frequency": fake_utils.fake_enum_value(scope.enums.ScheduledItemFrequency),
         "dayOfWeek": fake_utils.fake_enum_value(scope.enums.DayOfWeek),
     }
 
