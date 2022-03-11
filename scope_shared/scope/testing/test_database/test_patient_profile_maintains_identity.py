@@ -1,12 +1,10 @@
 """
 In addition to its standard singleton properties,
-scope.database.patient.patient_profile maintains fields in the patient identity.
+a put to scope.database.patient.patient_profile must maintain the patient identity.
 """
 
 import copy
-import pymongo.collection
 import pymongo.database
-import pytest
 from typing import Callable
 
 import scope.database.patient.patient_profile

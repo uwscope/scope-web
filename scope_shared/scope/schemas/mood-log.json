@@ -18,10 +18,10 @@
 			"type": "number"
 		},
 		"moodLogId": {
-			"$ref": "/schemas/log#/properties/logId"
+			"type": "string"
 		},
-		"recordedDate": {
-			"$ref": "/schemas/log#/properties/recordedDate"
+		"recordedDateTime": {
+			"$ref": "/schemas/log#/properties/recordedDateTime"
 		},
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
@@ -31,5 +31,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "mood"]
+	"required": ["_type", "recordedDateTime", "mood"]
 }

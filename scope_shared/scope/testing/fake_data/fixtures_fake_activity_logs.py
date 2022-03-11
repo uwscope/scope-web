@@ -4,6 +4,7 @@ import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
+import scope.database.patient.activities
 import scope.database.patient.activity_logs
 import scope.database.patient.scheduled_activities
 import scope.enums
@@ -36,12 +37,15 @@ def _fake_activity_logs(
     for fake_scheduled_activity in sampled_scheduled_activities:
         fake_activity_log = {
             "_type": scope.database.patient.activity_logs.DOCUMENT_TYPE,
-            "recordedDate": fake_scheduled_activity["dueDate"],
-            "comment": faker_factory.text(),
             scope.database.patient.scheduled_activities.SEMANTIC_SET_ID: fake_scheduled_activity[
                 scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
             ],
+            scope.database.patient.activities.SEMANTIC_SET_ID: fake_scheduled_activity[
+                scope.database.patient.activities.SEMANTIC_SET_ID
+            ],
             "activityName": fake_scheduled_activity["activityName"],
+            "recordedDateTime": fake_scheduled_activity["dueDateTime"],
+            "comment": faker_factory.text(),
             "completed": random.choice([True, False]),
             "success": fake_utils.fake_enum_value(scope.enums.ActivitySuccessType),
             "alternative": faker_factory.text(),

@@ -18,13 +18,7 @@
 			"type": "number"
 		},
 		"scheduledActivityId": {
-			"$ref": "/schemas/scheduled-item#/properties/scheduleId"
-		},
-		"dueDate": {
-			"$ref": "/schemas/scheduled-item#/properties/dueDate"
-		},
-		"dueType": {
-			"$ref": "/schemas/scheduled-item#/properties/dueType"
+			"type": "string"
 		},
 		"activityId": {
 			"type": "string"
@@ -32,13 +26,28 @@
 		"activityName": {
 			"type": "string"
 		},
-		"reminder": {
-			"$ref": "/schemas/datetime#/properties/date"
+		"dueDate": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDate"
+		},
+		"dueTimeOfDay": {
+			"$ref": "/schemas/scheduled-item#/properties/dueTimeOfDay"
+		},
+		"dueDateTime": {
+			"$ref": "/schemas/scheduled-item#/properties/dueDateTime"
+		},
+		"reminderDate": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderDate"
+		},
+		"reminderTimeOfDay": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderTimeOfDay"
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/scheduled-item#/properties/reminderDateTime"
 		},
 		"completed": {
-			"type": "boolean"
+			"$ref": "/schemas/scheduled-item#/properties/completed"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "dueDate", "dueType", "activityId", "reminder", "completed"]
+	"required": ["_type", "activityId", "activityName", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }
