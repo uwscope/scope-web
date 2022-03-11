@@ -170,7 +170,7 @@ def test_scheduled_item_create_scheduled_items_no_reminder():
          'dueDate': '2022-06-06T00:00:00Z',
          'dueDateTime': '2022-06-06T15:00:00Z',
          'dueTimeOfDay': 8,
-         }
+         },
     ]
 
 
@@ -235,5 +235,68 @@ def test_scheduled_item_create_scheduled_items_with_reminder():
          'dueTimeOfDay': 8,
          'reminderDate': '2022-06-06T00:00:00Z',
          'reminderDateTime': '2022-06-06T13:00:00Z',
-         'reminderTimeOfDay': 6}
+         'reminderTimeOfDay': 6},
+    ]
+
+
+def test_scheduled_item_pending_items():
+    scheduled_items = [
+        {'completed': True,  # Completed item in past, should not be pending
+         'dueDate': '2022-03-14T00:00:00Z',
+         'dueDateTime': '2022-03-14T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,  # Incomplete item in past, should not be pending
+         'dueDate': '2022-03-28T00:00:00Z',
+         'dueDateTime': '2022-03-28T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,  # Incomplete item in past, should not be pending
+         'dueDate': '2022-04-11T00:00:00Z',
+         'dueDateTime': '2022-04-11T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': True,  # Completed item in future, should not be pending
+         'dueDate': '2022-04-25T00:00:00Z',
+         'dueDateTime': '2022-04-25T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,  # Incomplete item in future, should be pending
+         'dueDate': '2022-05-09T00:00:00Z',
+         'dueDateTime': '2022-05-09T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,  # Incomplete item in future, should be pending
+         'dueDate': '2022-05-23T00:00:00Z',
+         'dueDateTime': '2022-05-23T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,  # Incomplete item in future, should be pending
+         'dueDate': '2022-06-06T00:00:00Z',
+         'dueDateTime': '2022-06-06T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        ]
+
+    pending_items = scope.database.scheduled_item_utils.pending_scheduled_items(
+        scheduled_items=scheduled_items,
+        after_datetime=pytz.utc.localize(_datetime.datetime(2022, 4, 18))
+    )
+
+    assert pending_items == [
+        {'completed': False,
+         'dueDate': '2022-05-09T00:00:00Z',
+         'dueDateTime': '2022-05-09T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,
+         'dueDate': '2022-05-23T00:00:00Z',
+         'dueDateTime': '2022-05-23T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
+        {'completed': False,
+         'dueDate': '2022-06-06T00:00:00Z',
+         'dueDateTime': '2022-06-06T15:00:00Z',
+         'dueTimeOfDay': 8,
+         },
     ]

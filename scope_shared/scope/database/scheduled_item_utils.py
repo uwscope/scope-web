@@ -102,6 +102,9 @@ def create_scheduled_items(
     timezone: pytz.timezone,
     months: int,
 ) -> List[dict]:
+    """
+    Create a list of scheduled items based on a schedule.
+    """
     date_utils.raise_on_not_date(start_date)
     if due_time_of_day < 0 or due_time_of_day > 23:
         raise ValueError("due_time_of_day must be int >=0 and <= 23")
@@ -118,7 +121,7 @@ def create_scheduled_items(
         months=months,
     )
 
-    scheduled_items = []
+    result_scheduled_items = []
     for scheduled_date_current in scheduled_dates:
         scheduled_item_current = {}
 
@@ -150,6 +153,40 @@ def create_scheduled_items(
             schema=scope.schema.scheduled_item_schema
         )
 
-        scheduled_items.append(scheduled_item_current)
+        result_scheduled_items.append(scheduled_item_current)
 
-    return scheduled_items
+    return result_scheduled_items
+
+
+def pending_scheduled_items(
+    *,
+    scheduled_items: List[dict],
+    after_datetime: _datetime.datetime,
+) -> List[dict]:
+    """
+    Pending items are those which are:
+    - Not already completed
+    - In the future
+
+    Pending items will generally be deleted and replaced due to a change in the schedule.
+    """
+
+    date_utils.raise_on_not_datetime_utc_aware(after_datetime)
+
+    result_pending_scheduled_items = []
+    for scheduled_item_current in scheduled_items:
+        schema_utils.raise_for_invalid_schema(
+            data=scheduled_item_current,
+            schema=scope.schema.scheduled_item_schema
+        )
+
+        pending = not scheduled_item_current["completed"]
+        if pending:
+            pending = (
+                date_utils.parse_datetime(scheduled_item_current["dueDateTime"]) > after_datetime
+            )
+
+        if pending:
+            result_pending_scheduled_items.append(scheduled_item_current)
+
+    return result_pending_scheduled_items
