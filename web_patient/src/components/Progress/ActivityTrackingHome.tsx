@@ -65,7 +65,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                             {patientStore.activityLogs.map((log, idx) => (
                                 <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                     <TableCell component="th" scope="row">
-                                        {`${format(log.recordedDate, 'MM/dd')}`}
+                                        {`${format(log.recordedDateTime, 'MM/dd')}`}
                                     </TableCell>
                                     <TableCell>{log.activityName}</TableCell>
                                     <TableCell>{getSuccessString(log.success)}</TableCell>
@@ -84,8 +84,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                             {getString('Activity_tracking_column_date')}
                                         </TableCell>
                                         <TableCell>{`${
-                                            viewState.selectedLog?.recordedDate &&
-                                            format(viewState.selectedLog.recordedDate, 'MM/dd/yyyy h:mm aaa')
+                                            viewState.selectedLog?.recordedDateTime &&
+                                            format(viewState.selectedLog.recordedDateTime, 'MM/dd/yyyy h:mm aaa')
                                         }`}</TableCell>
                                     </TableRow>
                                     <TableRow>

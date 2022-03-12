@@ -79,7 +79,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         totalOnly: boolean;
         scheduledAssessmentId: string;
         assessmentLogId?: string;
-        recordedDate: Date;
+        recordedDateTime: Date;
         pointValues: AssessmentData;
         totalScore: number;
         comment: string;
@@ -88,7 +88,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         openEdit: false,
         totalOnly: false,
         scheduledAssessmentId: '',
-        recordedDate: new Date(),
+        recordedDateTime: new Date(),
         comment: '',
         pointValues: {},
         totalScore: -1,
@@ -117,12 +117,12 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onSaveEditRecord = action(() => {
-        const { scheduledAssessmentId, assessmentLogId, recordedDate, comment, pointValues, totalScore } = logState;
+        const { scheduledAssessmentId, assessmentLogId, recordedDateTime, comment, pointValues, totalScore } = logState;
 
         if (!!assessmentLogId) {
             currentPatient.updateAssessmentLog({
                 assessmentLogId,
-                recordedDate,
+                recordedDateTime: recordedDateTime,
                 comment,
                 scheduledAssessmentId,
                 assessmentId: assessment.assessmentId,
@@ -134,7 +134,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             });
         } else {
             currentPatient.addAssessmentLog({
-                recordedDate,
+                recordedDateTime: recordedDateTime,
                 comment,
                 scheduledAssessmentId: 'on-demand',
                 assessmentId: assessment.assessmentId,
@@ -160,7 +160,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onDateChange = action((date: Date) => {
-        logState.recordedDate = date;
+        logState.recordedDateTime = date;
     });
 
     const onTotalChange = action((value: number) => {
@@ -192,10 +192,10 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const tableData = assessmentLogs
         .slice()
-        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate))
+        .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime))
         .map((a) => {
             return {
-                date: format(a.recordedDate, 'MM/dd/yy'),
+                date: format(a.recordedDateTime, 'MM/dd/yy'),
                 total:
                     getAssessmentScore(a.pointValues) != undefined ? getAssessmentScore(a.pointValues) : a.totalScore,
                 id: a.assessmentLogId,
@@ -269,7 +269,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
             logState.scheduledAssessmentId = data.scheduledAssessmentId;
             logState.assessmentLogId = data.assessmentLogId;
-            logState.recordedDate = data.recordedDate;
+            logState.recordedDateTime = data.recordedDateTime;
             Object.assign(logState.pointValues, data.pointValues);
             logState.totalScore = data.totalScore || -1;
             logState.comment = data.comment || '';
@@ -339,7 +339,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 {assessmentLogs.length > 0 && (
                     <Grid item xs={12}>
                         <AssessmentVis
-                            data={assessmentLogs.slice().sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))}
+                            data={assessmentLogs.slice().sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))}
                             maxValue={maxValue}
                             useTime={useTime}
                             scaleOrder={questions.map((q) => q.id)}
@@ -367,7 +367,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         questions={questions}
                         options={options}
                         selectedValues={selectedValues}
-                        selectedDate={logState.recordedDate}
+                        selectedDate={logState.recordedDateTime}
                         instruction={instruction}
                         onSelect={onQuestionSelect}
                         onDateChange={onDateChange}

@@ -64,11 +64,11 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         state.dayOfWeek = dow;
     });
 
-    const sortedLogs = assessmentLogs?.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+    const sortedLogs = assessmentLogs?.slice().sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     const tableData = sortedLogs?.map((a) => {
         return {
-            date: format(a.recordedDate, 'MM/dd/yy'),
+            date: format(a.recordedDateTime, 'MM/dd/yy'),
             adherence:
                 a.pointValues['Adherence'] == 1
                     ? getString('patient_progress_medication_adherence_yes')

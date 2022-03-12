@@ -24,12 +24,12 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
 
     const assessmentContent = rootStore.getAssessmentContent(assessment.assessmentId);
 
-    const sortedMoodLogs = moodLogs?.slice().sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+    const sortedMoodLogs = moodLogs?.slice().sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     const tableData = sortedMoodLogs?.map((a) => {
         return {
-            date: format(a.recordedDate, 'MM/dd/yy'),
-            time: format(a.recordedDate, 'hh:mm aa'),
+            date: format(a.recordedDateTime, 'MM/dd/yy'),
+            time: format(a.recordedDateTime, 'hh:mm aa'),
             rating: a.mood,
             id: a.moodLogId,
             comment: a.comment,
@@ -102,9 +102,9 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
                         <AssessmentVis
                             data={moodLogs
                                 .slice()
-                                .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))
+                                .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))
                                 .map((log) => ({
-                                    recordedDate: log.recordedDate,
+                                    recordedDateTime: log.recordedDateTime,
                                     pointValues: { Mood: log.mood },
                                 }))}
                             maxValue={maxValue}

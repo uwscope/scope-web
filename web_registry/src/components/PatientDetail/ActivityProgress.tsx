@@ -18,7 +18,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     currentPatient.activityLogs
         ?.slice()
-        .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate))
+        .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))
         .forEach((log) => logMap.set(log.scheduledActivityId, log));
 
     const logs = currentPatient.scheduledActivities
@@ -46,7 +46,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             id: log.activityLogId,
             name: log.activityName,
             dueDate: format(log.dueDate, 'MM/dd/yyyy'),
-            recordedDate: log.completed && log.recordedDate ? format(log.recordedDate, 'MM/dd/yyyy') : '--',
+            recordedDateTime: log.completed && log.recordedDateTime ? format(log.recordedDateTime, 'MM/dd/yyyy') : '--',
             completed: log.completed && log.success ? getCompleted(log.success) : '--',
             alternative: log.alternative || '--',
             pleasure: log.completed ? log.pleasure : '--',
@@ -64,7 +64,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             hideSortIcons: false,
         },
         {
-            field: 'recordedDate',
+            field: 'recordedDateTime',
             headerName: getString('patient_progress_activity_header_submitted_date'),
             width: 100,
             sortable: true,

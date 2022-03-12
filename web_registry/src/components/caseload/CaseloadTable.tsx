@@ -272,11 +272,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         const phq9 = p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'phq-9')
             .slice()
-            .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate));
+            .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
         const gad7 = p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'gad-7')
             .slice()
-            .sort((a, b) => compareAsc(a.recordedDate, b.recordedDate));
+            .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
 
         const initialAtRisk = phq9 && phq9.length > 0 && phq9[0].pointValues && !!phq9[0].pointValues['Suicide'];
 
@@ -312,7 +312,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                               100,
                       )
                     : NA,
-            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
+            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
 
             initialGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[0].pointValues) : NA,
             lastGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[gad7.length - 1].pointValues) : NA,
@@ -325,7 +325,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                               100,
                       )
                     : NA,
-            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDate, 'MM/dd/yyyy') : NA,
+            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
             initialAtRisk,
             lastAtRisk,
         };

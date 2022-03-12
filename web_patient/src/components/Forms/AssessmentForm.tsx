@@ -201,7 +201,7 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
             const log = {
                 ...scheduledAssessment,
                 pointValues: Object.fromEntries(dataState.pointValues.entries()),
-                recordedDate: new Date(),
+                recordedDateTime: new Date(),
                 comment: dataState.comment,
             } as IAssessmentLog;
             await patientStore.saveAssessmentLog(log);
