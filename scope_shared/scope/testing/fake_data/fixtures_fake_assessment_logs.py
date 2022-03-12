@@ -68,7 +68,6 @@ def _fake_assessment_logs(
             ],
             "recordedDateTime": scheduled_assessment_current["dueDateTime"],
             "comment": faker_factory.text(),
-            "completed": random.choice([True, False]),
             "patientSubmitted": random.choice([True, False]),
             # "submittedByProviderId": data_fake_identity_factory(), # TODO: identity information
             "pointValues": fake_point_values,

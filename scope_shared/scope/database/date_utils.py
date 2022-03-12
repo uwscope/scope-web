@@ -106,4 +106,3 @@ def raise_on_not_datetime_utc_aware(datetime: _datetime.datetime) -> None:
         raise ValueError("datetime must be datetime that is UTC aware.")
     if datetime.tzinfo.utcoffset(datetime).total_seconds() != 0:
         raise ValueError("datetime must be datetime that is UTC aware.")
-
