@@ -139,9 +139,23 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                         </ProgressContainer>
                     ) : (
                         <FailureContainer>
-                            <Typography variant="h1">Sorry!</Typography>
-                            <Typography variant="h5">
-                                The app is not available at this moment. Please try again later.
+                            <Typography variant="h3">Sorry!</Typography>
+                            <Typography variant="body1">
+                                The app is not available at this moment. Please try again later.<br /><br />
+                            </Typography>
+                            <Typography variant="body1">
+                                If the problem persists, please contact us at &nbsp;
+                                <a
+                                    href="tel:2066163032"
+                                    target="_blank">
+                                    206-616-3032
+                                </a>
+                                &nbsp;or&nbsp;
+                                <a
+                                    href="mailto:scopestudy@uw.edu"
+                                    target="_blank">
+                                    scopestudy@uw.edu
+                                </a>
                             </Typography>
                         </FailureContainer>
                     )}
