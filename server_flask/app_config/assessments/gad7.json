@@ -52,25 +52,25 @@
   ],
   "interpretationName": "Anxiety severity",
   "interpretationTable": [
-    {
-      "score": "0-5",
-      "max": 5,
-      "interpretation": "None"
-    },
-    {
-      "score": "6-10",
-      "max": 10,
-      "interpretation": "Mild"
-    },
-    {
-      "score": "11-15",
-      "max": 15,
-      "interpretation": "Moderate"
-    },
-    {
-      "score": "16-21",
-      "max": 21,
-      "interpretation": "Severe"
-    }
+      {
+          "score": "0-4",
+          "max": 4,
+          "interpretation": "You have minimal or no symptoms – keep up the good work!"
+      },
+      {
+          "score": "5-9",
+          "max": 9,
+          "interpretation": "Your symptoms are relatively mild. Keep up the good work as you and your Clinical Social Worker collaborate to decrease them even more!"
+      },
+      {
+          "score": "10-14",
+          "max": 14,
+          "interpretation": "Your symptoms are in the moderate severity range. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
+      },
+      {
+          "score": "15+",
+          "max": 27,
+          "interpretation": "You still have significant symptoms that could benefit from more treatment. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
+      }
   ]
 }

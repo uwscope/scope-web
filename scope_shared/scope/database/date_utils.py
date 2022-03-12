@@ -4,7 +4,6 @@ import pytz
 
 from typing import Union
 
-
 DATETIME_FORMAT_COMPLETE = "%Y-%m-%dT%H:%M:%S.%fZ"
 DATETIME_FORMAT_NO_MICROSECONDS = "%Y-%m-%dT%H:%M:%SZ"
 DATEUTIL_WEEKDAYS_MAP = {
@@ -73,10 +72,7 @@ def format_date(date: Union[_datetime.date, _datetime.datetime]) -> str:
     """
 
     if isinstance(date, _datetime.datetime):
-        if date.tzinfo is None:
-            raise ValueError("datetime must be UTC aware.")
-        if date.tzinfo.utcoffset(date).total_seconds() != 0:
-            raise ValueError("datetime must be UTC aware.")
+        raise_on_not_datetime_utc_aware(datetime=date)
 
         # Ensure a datetime.date object
         date = date.date()
@@ -96,11 +92,28 @@ def format_datetime(datetime: _datetime.datetime) -> str:
     Format a datetime into our format.
     """
 
-    if not isinstance(datetime, _datetime.datetime):
-        raise ValueError("datetime must be UTC aware.")
-    if datetime.tzinfo is None:
-        raise ValueError("datetime must be UTC aware.")
-    if datetime.tzinfo.utcoffset(datetime).total_seconds() != 0:
-        raise ValueError("datetime must be UTC aware.")
+    raise_on_not_datetime_utc_aware(datetime=datetime)
 
     return datetime.strftime(DATETIME_FORMAT_NO_MICROSECONDS)
+
+
+def raise_on_not_date(date: _datetime.date) -> None:
+    """
+    Raise if a provided date is not a date.
+    """
+
+    if not isinstance(date, _datetime.date):
+        raise ValueError("date must be date.")
+
+
+def raise_on_not_datetime_utc_aware(datetime: _datetime.datetime) -> None:
+    """
+    Raise if a provided datetime is not a datetime, not aware, or not in UTC.
+    """
+
+    if not isinstance(datetime, _datetime.datetime):
+        raise ValueError("datetime must be datetime that is UTC aware.")
+    if datetime.tzinfo is None:
+        raise ValueError("datetime must be datetime that is UTC aware.")
+    if datetime.tzinfo.utcoffset(datetime).total_seconds() != 0:
+        raise ValueError("datetime must be datetime that is UTC aware.")

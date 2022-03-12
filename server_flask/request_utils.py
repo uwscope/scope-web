@@ -23,6 +23,15 @@ def abort_document_not_found() -> NoReturn:
     )
 
 
+def abort_not_authorized() -> NoReturn:
+    _flask_abort(
+        {
+            "message": "Not authorized.",
+        },
+        http.HTTPStatus.FORBIDDEN,
+    )
+
+
 def abort_patient_not_found() -> NoReturn:
     _flask_abort(
         {

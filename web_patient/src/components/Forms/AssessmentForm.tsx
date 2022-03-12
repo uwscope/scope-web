@@ -1,8 +1,10 @@
 import {
     FormControl,
     FormControlLabel,
+    Link,
     Radio,
     RadioGroup,
+    Stack,
     Table,
     TableBody,
     TableCell,
@@ -11,12 +13,12 @@ import {
     TextField,
 } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { action } from 'mobx';
+import { action, ObservableMap } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { IAssessmentLog } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
-import FormSection, { HelperText } from 'src/components/Forms/FormSection';
+import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters } from 'src/services/routes';
 import { getString } from 'src/services/strings';
@@ -24,7 +26,7 @@ import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
 
-export interface IAssessmentFormProps extends IFormProps {}
+export interface IAssessmentFormProps extends IFormProps { }
 
 interface IQuestionFormProps {
     instruction: string;
@@ -34,6 +36,93 @@ interface IQuestionFormProps {
     options: { text: string; value: number }[];
     onValueChange: (newValue: number) => void;
 }
+
+const ListDiv = styled.ul({
+    marginBlockStart: '0.5em',
+    marginBlockEnd: '0.5em',
+    paddingInlineStart: 20,
+});
+
+const TotalScoreText = withTheme(
+    styled.div((props) => ({
+        fontSize: props.theme.typography.h2.fontSize,
+        fontWeight: props.theme.typography.fontWeightMedium,
+        padding: props.theme.spacing(4),
+        paddingBottom: 0,
+        textAlign: 'center',
+        lineHeight: 1,
+    })),
+);
+
+const BodyText = withTheme(
+    styled.div((props) => ({
+        fontSize: props.theme.typography.body1.fontSize,
+        lineHeight: 1.1,
+    })),
+);
+
+const CrisisContent: FunctionComponent = () => {
+    return (
+        <FormSection
+            prompt={'Crisis resouces'}
+            content={
+                <Stack spacing={2}>
+                    <BodyText>
+                        You indicated that you are having thoughts of death or suicide.
+                    </BodyText>
+                    <BodyText>If you need more help right away, here are some resources to try:</BodyText>
+                    <ListDiv>
+                        <li>
+                            <BodyText>
+                                Call National Suicide Prevention Hotline by phone:{'  '}
+                                <Link
+                                    href="tel:18002738255"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    1-800-273-TALK (8255)
+                                </Link>
+                            </BodyText>
+                        </li>
+                        <li>
+                            <BodyText>
+                                National Suicide Prevention Web Chat{'  '}
+                                <Link
+                                    href="https://suicidepreventionlifeline.org/chat/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    https://suicidepreventionlifeline.org/chat/
+                                </Link>
+                            </BodyText>
+                        </li>
+                        <li>
+                            <BodyText>
+                                Crisis Text Line - Text "HELLO" to 741741{'  '}
+                                <Link
+                                    href="https://www.crisistextline.org/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    https://www.crisistextline.org/
+                                </Link>
+                            </BodyText>
+                        </li>
+                        <li>
+                            <BodyText>
+                                If you need immediate medical attention, please call{' '}
+                                <Link
+                                    href="tel:911"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    911
+                                </Link>{' '}
+                                or go to your nearest emergency room.
+                            </BodyText>
+                        </li>
+                    </ListDiv>
+                </Stack>
+            }
+        />
+    );
+};
 
 const QuestionForm: FunctionComponent<IQuestionFormProps> = (props) => {
     const { instruction, question, questionId, value, options, onValueChange } = props;
@@ -65,26 +154,6 @@ const QuestionForm: FunctionComponent<IQuestionFormProps> = (props) => {
     );
 };
 
-const TotalScoreText = withTheme(
-    styled.div((props) => ({
-        fontSize: props.theme.typography.h2.fontSize,
-        fontWeight: props.theme.typography.fontWeightMedium,
-        padding: props.theme.spacing(4),
-        paddingBottom: 0,
-        textAlign: 'center',
-        lineHeight: 1,
-    }))
-);
-
-const AssessmentText = withTheme(
-    styled.div((props) => ({
-        fontSize: props.theme.typography.body1.fontSize,
-        paddingBottom: props.theme.spacing(2),
-        textAlign: 'center',
-        lineHeight: 1,
-    }))
-);
-
 export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(() => {
     const assessmentId = getRouteParameter(Parameters.assessmentId);
     const scheduleId = getRouteParameter(Parameters.taskId);
@@ -113,18 +182,13 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
         hasData: false,
     }));
 
-    const dataState = useLocalObservable<IAssessmentLog>(() => ({
-        scheduledAssessmentId: scheduledAssessment.scheduledAssessmentId,
-        assessmentId: assessmentContent.id,
-
-        recordedDate: new Date(),
-        pointValues: {},
-
+    const dataState = useLocalObservable<{ pointValues: ObservableMap<string, number>; comment: string }>(() => ({
+        pointValues: new ObservableMap(),
         comment: '',
     }));
 
     const handleSelect = action((qid: string, value: number) => {
-        dataState.pointValues[qid] = value;
+        dataState.pointValues.set(qid, value);
         viewState.hasData = Object.keys(dataState.pointValues).length > 0;
     });
 
@@ -134,7 +198,13 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
 
     const handleSubmit = action(async () => {
         try {
-            await patientStore.saveAssessmentLog(dataState);
+            const log = {
+                ...scheduledAssessment,
+                pointValues: Object.fromEntries(dataState.pointValues.entries()),
+                recordedDate: new Date(),
+                comment: dataState.comment,
+            } as IAssessmentLog;
+            await patientStore.saveAssessmentLog(log);
             return !patientStore.loadAssessmentLogsState.error;
         } catch {
             return false;
@@ -148,14 +218,14 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
                     {...assessmentContent}
                     question={q.question}
                     questionId={q.id}
-                    value={dataState.pointValues[q.id]}
+                    value={dataState.pointValues.get(q.id)}
                     onValueChange={(val) => handleSelect(q.id, val)}
                 />
             ),
-            canGoNext: dataState.pointValues[q.id] != undefined,
+            canGoNext: dataState.pointValues.get(q.id) != undefined,
         }));
 
-        const total = getAssessmentScore(dataState.pointValues);
+        const total = getAssessmentScore(Object.fromEntries(dataState.pointValues.entries()));
         const assessment =
             assessmentContent.interpretationTable
                 .slice()
@@ -164,13 +234,21 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
 
         const scorePage = {
             content: (
-                <FormSection
-                    prompt={`Your total ${assessmentContent.name} score is`}
-                    content={
-                        <div>
-                            <TotalScoreText>{`${total}`}</TotalScoreText>
-                            <AssessmentText>{`(${assessment})`}</AssessmentText>
-                            <HelperText>{`How to interpret the ${assessmentContent.name} score:`}</HelperText>
+                <Stack spacing={4}>
+                    <FormSection
+                        prompt={`Your total ${assessmentContent.name} score is`}
+                        content={
+                            <div>
+                                <TotalScoreText>{`${total}`}</TotalScoreText>
+                                <BodyText>{`${assessment}`}</BodyText>
+                            </div>
+                        }
+                    />
+                    {assessmentId == 'phq-9' && !!dataState.pointValues.get('Suicide') && <CrisisContent />}
+
+                    <FormSection
+                        prompt={`How to interpret the ${assessmentContent.name} score:`}
+                        content={
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
@@ -189,9 +267,9 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
                                     ))}
                                 </TableBody>
                             </Table>
-                        </div>
-                    }
-                />
+                        }
+                    />
+                </Stack>
             ),
             canGoNext: true,
         };

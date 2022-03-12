@@ -3,9 +3,10 @@ import flask_json
 import pymongo.errors
 import scope.database
 import scope.database.patient.assessment_logs
-from request_context import request_context
+
+import request_context
 import request_utils
-from scope.schema import assessment_log_schema
+import scope.schema
 
 assessment_logs_blueprint = flask.Blueprint(
     "assessment_logs_blueprint",
@@ -19,9 +20,7 @@ assessment_logs_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_assessment_logs(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     documents = scope.database.patient.assessment_logs.get_assessment_logs(
@@ -43,14 +42,12 @@ def get_assessment_logs(patient_id):
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
+    schema=scope.schema.assessment_log_schema,
     key="assessmentlog",
 )
 @flask_json.as_json
 def post_assessment_logs(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
@@ -84,9 +81,7 @@ def post_assessment_logs(patient_id):
 )
 @flask_json.as_json
 def get_assessment_log(patient_id, assessmentlog_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -110,14 +105,12 @@ def get_assessment_log(patient_id, assessmentlog_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=assessment_log_schema,
+    schema=scope.schema.assessment_log_schema,
     key="assessmentlog",
 )
 @flask_json.as_json
 def put_assessment_log(patient_id, assessmentlog_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

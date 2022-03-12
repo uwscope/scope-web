@@ -3,53 +3,44 @@
   "name": "Responsibilities",
   "examples": [
     {
-      "name": "Being a loving parent",
+      "name": "Being someone others can depend upon",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Arrive at work on time"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Offer to help someone who is very busy"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Repay a debt"
         }
       ]
     },
     {
-      "name": "Being a caring partner",
+      "name": "Taking care of your belongings",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Complete a much-needed household repair"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Wash your clothes/shoes"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Clean the house"
         }
       ]
     },
     {
-      "name": "Being an attentive and supportive friend",
+      "name": "Being organized",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Review my days activities the night before"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Use a calendar to record dates and meetings"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Develop a filing system for important paperwork"
         }
       ]
     }

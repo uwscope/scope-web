@@ -2,11 +2,11 @@ import flask
 import flask_json
 import pymongo.errors
 
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.safety_plan
-from request_context import request_context
-import request_utils
-from scope.schema import safety_plan_schema
+import scope.schema
 
 safety_plan_blueprint = flask.Blueprint(
     "safety_plan_blueprint",
@@ -20,9 +20,7 @@ safety_plan_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_safety_plan(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -45,14 +43,12 @@ def get_safety_plan(patient_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=safety_plan_schema,
+    schema=scope.schema.safety_plan_schema,
     key="safetyplan",
 )
 @flask_json.as_json
 def put_safety_plan(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

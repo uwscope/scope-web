@@ -56,7 +56,7 @@ export interface IPatientStore extends IPatient {
 
     readonly latestSession: ISession | undefined;
 
-    load(): void;
+    load(getToken?: () => string | undefined, onUnauthorized?: () => void): void;
 
     updateProfile(profile: IPatientProfile): Promise<void>;
     updateClinicalHistory(history: IClinicalHistory): Promise<void>;
@@ -287,7 +287,11 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async load() {
+    public async load(getToken?: () => string | undefined, onUnauthorized?: () => void) {
+        if (getToken) {
+            this.patientService.applyAuth(getToken, onUnauthorized);
+        }
+
         // Use this to make a single patient call to load everything
         // const initialLoad = () =>
         //     this.patientService.getPatient().then((patient) => {

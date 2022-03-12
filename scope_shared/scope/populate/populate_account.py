@@ -1,4 +1,3 @@
-import pprint
 import string
 
 import boto3
@@ -15,29 +14,35 @@ def _generate_temporary_password() -> str:
     Generate a temporary password with requirements:
     - 8 characters long
     - Includes at least 1 lowercase, uppercase, number, and symbol
+
+    Allowable Cognito symbols are:
+      ^$*.[]{}()?!@#%&/\,><'":;|_~`=+-
+
+    For readability of generated passwords that are emailed to people, we use:
+      !@#$%^&*
     """
 
     lowercase = string.ascii_lowercase
     uppercase = string.ascii_uppercase
     numbers = string.digits
-    symbols = "^$*.[]{}()?!@#%&/\,><':;|_~`=+-" + '"'
+    symbols = "!@#$%^&*"
 
-    # Symbols provide more strength, but make temporary passwords difficult
+    # Limit to 1 symbol for readability
     combined = lowercase + uppercase + numbers
 
     characters = []
-    characters.extend([
-        random.choice(lowercase),
-        random.choice(uppercase),
-        random.choice(numbers),
-        random.choice(symbols),
-    ])
     characters.extend(
-        random.sample(combined, 4)
+        [
+            random.choice(lowercase),
+            random.choice(uppercase),
+            random.choice(numbers),
+            random.choice(symbols),
+        ]
     )
+    characters.extend(random.sample(combined, 4))
     random.shuffle(characters)
 
-    temporary_password = ''.join(characters)
+    temporary_password = "".join(characters)
 
     return temporary_password
 
@@ -49,9 +54,7 @@ def _get_cognito_users_existing(
 ) -> List[dict]:
 
     user_paginator = boto_userpool.get_paginator("list_users")
-    user_pages = user_paginator.paginate(
-        UserPoolId=cognito_config.poolid
-    )
+    user_pages = user_paginator.paginate(UserPoolId=cognito_config.poolid)
 
     users = []
     for user_page_current in user_pages:
@@ -83,11 +86,15 @@ def populate_account_from_config(
         # Raise if an account with the same name already exists
         cognito_users_existing = _get_cognito_users_existing(
             boto_userpool=boto_userpool,
-            cognito_config=cognito_config
+            cognito_config=cognito_config,
         )
         for cognito_user_current in cognito_users_existing:
             if cognito_user_current["Username"] == create_account_name:
-                raise ValueError('Cognito "Username" of "{}" already exists.'.format(create_account_name))
+                raise ValueError(
+                    'Cognito "Username" of "{}" already exists.'.format(
+                        create_account_name
+                    )
+                )
 
         # Create an account
         response = boto_userpool.admin_create_user(
@@ -103,19 +110,20 @@ def populate_account_from_config(
                 {
                     "Name": "email_verified",
                     "Value": "True",
-                }
-            ]
+                },
+            ],
         )
 
         # If no exception was raised, the account was created.
         # Recover the "sub" user attribute as the associated unique id.
         created_attributes = {
-            attribute["Name"]: attribute["Value"] for attribute in response["User"]["Attributes"]
+            attribute["Name"]: attribute["Value"]
+            for attribute in response["User"]["Attributes"]
         }
-        created_account_id = created_attributes["sub"]
+        cognito_id = created_attributes["sub"]
 
         populate_config_account["existing"] = {
-            "accountId": created_account_id,
+            "cognitoId": cognito_id,
             "accountName": create_account_name,
             "email": create_email,
             "temporaryPassword": create_temporary_password,

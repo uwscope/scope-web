@@ -1,6 +1,7 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable, List
 
@@ -21,21 +22,38 @@ def _fake_scheduled_activity(
 ) -> dict:
     return {
         "_type": scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
-        "dueDate": date_utils.format_date(
-            faker_factory.date_between_dates(
-                date_start=datetime.datetime.now() - datetime.timedelta(days=10),
-                date_end=datetime.datetime.now() + datetime.timedelta(days=10),
-            )
-        ),
-        "dueType": fake_utils.fake_enum_value(scope.enums.DueType),
         scope.database.patient.activities.SEMANTIC_SET_ID: activity[
             scope.database.patient.activities.SEMANTIC_SET_ID
         ],
         "activityName": activity["name"],
-        "reminder": date_utils.format_date(
-            faker_factory.date_between_dates(
-                date_start=datetime.datetime.now(),
-                date_end=datetime.datetime.now() + datetime.timedelta(days=7),
+        "dueDate": date_utils.format_date(
+            faker_factory.date_between(
+                start_date=datetime.date.today() - datetime.timedelta(days=10),
+                end_date=datetime.date.today() + datetime.timedelta(days=10),
+            )
+        ),
+        "dueTimeOfDay": random.randint(0, 23),
+        "dueDateTime": date_utils.format_datetime(
+            pytz.utc.localize(
+                faker_factory.date_time_between(
+                    start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
+                    end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
+                )
+            )
+        ),
+        "reminderDate": date_utils.format_date(
+            faker_factory.date_between(
+                start_date=datetime.date.today() - datetime.timedelta(days=10),
+                end_date=datetime.date.today() + datetime.timedelta(days=10),
+            )
+        ),
+        "reminderTimeOfDay": random.randint(0, 23),
+        "reminderDateTime": date_utils.format_datetime(
+            pytz.utc.localize(
+                faker_factory.date_time_between(
+                    start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
+                    end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
+                )
             )
         ),
         "completed": random.choice([True, False]),

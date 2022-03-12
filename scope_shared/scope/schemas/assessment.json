@@ -27,11 +27,11 @@
         "assignedDateTime": {
             "$ref": "/schemas/datetime#/properties/datetime"
         },
-		"frequency": {
-			"$ref": "/schemas/enums#/properties/assessmentFrequency"
-		},
 		"dayOfWeek": {
 			"$ref": "/schemas/enums#/properties/dayOfWeek"
+		},
+		"frequency": {
+			"$ref": "/schemas/enums#/properties/assessmentFrequency"
 		}
 	},
 	"additionalProperties": false,

@@ -12,7 +12,7 @@
           "name": "Make a special breakfast for my child on Saturday"
         },
         {
-          "name": "Take my child to the part on Saturday"
+          "name": "Take my child to the park on Saturday"
         },
         {
           "name": "Pick up my child from school promptly each day"
@@ -20,36 +20,30 @@
       ]
     },
     {
-      "name": "Being a caring partner",
+      "name": "Being an attentive and caring friend",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Call my friend once per week"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Text my friend"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Ask my friend about his/her week"
         }
       ]
     },
     {
-      "name": "Being an attentive and supportive friend",
+      "name": "Caring for the needs of your spouse",
       "activities": [
         {
-          "name": "Tell my child I love them every day"
+          "name": "Make special plans with spouse"
         },
         {
-          "name": "Make a special breakfast for my child on Saturday"
+          "name": "Tell spouse I love them every day"
         },
         {
-          "name": "Take my child to the part on Saturday"
-        },
-        {
-          "name": "Pick up my child from school promptly each day"
+          "name": "Buy my partner a surprise gift"
         }
       ]
     }

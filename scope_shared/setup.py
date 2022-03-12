@@ -14,6 +14,8 @@ setuptools.setup(
     python_requires=">=3",
     install_requires=[
         "boto3",
+        "cryptography",
+        "pyjwt",
         "pymongo",
         "pytz",
         "requests",

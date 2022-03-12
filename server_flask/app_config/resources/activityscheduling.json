@@ -1,14 +1,10 @@
 {
   "id": "activityscheduling",
-  "name": "Activity scheduling",
+  "name": "Your Psychosocial Team",
   "resources": [
     {
-      "name": "Form A client education",
-      "filename": "sample.pdf"
-    },
-    {
-      "name": "Form B vicious cycle",
-      "filename": "sample.pdf"
+      "name": "Your Psychosocial Team",
+      "filename": "Your_Psychosocial_Team.pdf"
     }
   ]
 }

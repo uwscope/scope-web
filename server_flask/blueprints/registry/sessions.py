@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.sessions
-from request_context import request_context
-import request_utils
-from scope.schema import session_schema
+import scope.schema
 
 sessions_blueprint = flask.Blueprint(
     "sessions_blueprint",
@@ -19,9 +20,7 @@ sessions_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_sessions(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     documents = scope.database.patient.sessions.get_sessions(
@@ -43,7 +42,7 @@ def get_sessions(patient_id):
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=session_schema,
+    schema=scope.schema.session_schema,
     key="session",
 )
 @flask_json.as_json
@@ -52,9 +51,7 @@ def post_session(patient_id):
     Creates and return a new session.
     """
 
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
@@ -88,9 +85,7 @@ def post_session(patient_id):
 )
 @flask_json.as_json
 def get_session(patient_id, session_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     document = scope.database.patient.sessions.get_session(
@@ -113,14 +108,12 @@ def get_session(patient_id, session_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=session_schema,
+    schema=scope.schema.session_schema,
     key="session",
 )
 @flask_json.as_json
 def put_session(patient_id, session_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

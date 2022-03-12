@@ -9,6 +9,7 @@ import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import styled, { withTheme } from 'styled-components';
+import AppLoader from 'src/components/Chrome/AppLoader';
 
 const LoginContainer = withTheme(
     styled.div((props) => ({
@@ -84,6 +85,8 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 runInAction(() => {
                     state.store = newStore;
                 });
+
+                newStore.authStore.initialize();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
@@ -95,13 +98,22 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
 
     useEffect(() => {
         runInAction(() => {
-            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.authToken) {
+            if (state.store?.authStore.isAuthenticated && state.store?.authStore.currentUserIdentity?.patientId) {
                 const newPatientService = getPatientServiceInstance(
                     CLIENT_CONFIG.flaskBaseUrl,
                     state.store?.authStore.currentUserIdentity?.patientId,
                 );
+                newPatientService.applyAuth(
+                    () => state.store?.authStore.getToken(),
+                    () => state.store?.authStore.refreshToken(),
+                );
                 state.store?.createPatientStore(newPatientService);
                 state.ready = true;
+            }
+
+            if (!state.store?.authStore.isAuthenticated) {
+                state.ready = false;
+                state.store?.reset();
             }
         });
     }, [state.store?.authStore.isAuthenticated]);
@@ -113,6 +125,8 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                     <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
+
+            <AppLoader isLoading={!!state.store?.authStore.isAuthenticating} text="Logging in..." />
             <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <LoginContainer>
                     {!!state.store ? (

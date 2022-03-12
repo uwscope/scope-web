@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+
+import request_context
+import request_utils
 import scope.database
 import scope.database.patient.scheduled_assessments
-from request_context import request_context
-import request_utils
-from scope.schema import scheduled_assessment_schema
+import scope.schema
 
 scheduled_assessments_blueprint = flask.Blueprint(
     "scheduled_assessments_blueprint",
@@ -19,9 +20,7 @@ scheduled_assessments_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_scheduled_assessments(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     documents = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
@@ -43,14 +42,12 @@ def get_scheduled_assessments(patient_id):
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=scheduled_assessment_schema,
+    schema=scope.schema.scheduled_assessment_schema,
     key="scheduledassessment",
 )
 @flask_json.as_json
 def post_scheduled_assessments(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
@@ -84,9 +81,7 @@ def post_scheduled_assessments(patient_id):
 )
 @flask_json.as_json
 def get_scheduled_assessment(patient_id, scheduleassessment_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -110,14 +105,12 @@ def get_scheduled_assessment(patient_id, scheduleassessment_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=scheduled_assessment_schema,
+    schema=scope.schema.scheduled_assessment_schema,
     key="scheduledassessment",
 )
 @flask_json.as_json
 def put_scheduled_assessment(patient_id, scheduleassessment_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

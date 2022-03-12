@@ -1,6 +1,7 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable
 
@@ -27,9 +28,13 @@ def fake_mood_log_factory(
     def factory() -> dict:
         fake_mood_log = {
             "_type": scope.database.patient.mood_logs.DOCUMENT_TYPE,
-            "recordedDate": date_utils.format_date(
-                faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
+            "recordedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    faker_factory.date_time_between_dates(
+                        datetime_start=datetime.datetime.now()
+                        - datetime.timedelta(days=6 * 30),
+                        datetime_end=datetime.datetime.now(),
+                    )
                 )
             ),
             "comment": faker_factory.text(),

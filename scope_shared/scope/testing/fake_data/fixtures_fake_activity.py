@@ -63,9 +63,7 @@ def fake_activity_factory(
             "hasReminder": random.choice([True, False]),
             "reminderTimeOfDay": random.randrange(0, 24),
             "hasRepetition": random.choice([True, False]),
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(
-                scope.enums.DayOfWeek
-            ),
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
             "isActive": random.choice([True, False]),
             "isDeleted": random.choice([True, False]),
         }

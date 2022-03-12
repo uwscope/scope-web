@@ -18,19 +18,22 @@
 			"type": "number"
 		},
 		"activityLogId": {
-			"$ref": "/schemas/log#/properties/logId"
-		},
-		"recordedDate": {
-			"$ref": "/schemas/log#/properties/recordedDate"
-		},
-		"comment": {
-			"$ref": "/schemas/log#/properties/comment"
+			"type": "string"
 		},
 		"scheduledActivityId": {
 			"type": "string"
 		},
+		"activityId": {
+			"type": "string"
+		},
 		"activityName": {
 			"type": "string"
+		},
+		"recordedDateTime": {
+			"$ref": "/schemas/log#/properties/recordedDateTime"
+		},
+		"comment": {
+			"$ref": "/schemas/log#/properties/comment"
 		},
 		"completed": {
 			"type": "boolean"
@@ -49,5 +52,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduledActivityId", "activityName"]
+	"required": ["_type", "scheduledActivityId", "activityId", "activityName", "recordedDateTime"]
 }

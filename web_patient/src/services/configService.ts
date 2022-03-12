@@ -16,9 +16,7 @@ class ConfigService implements IConfigService {
     }
 
     public async getServerConfig(): Promise<IAppConfig> {
-        await new Promise((resolve) => setTimeout(() => resolve(null), 3000));
         const response = await this.axiosInstance.get<IAppConfig>('app/config');
-
         return response.data;
     }
 }

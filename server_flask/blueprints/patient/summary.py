@@ -4,7 +4,7 @@ import flask
 import flask_json
 from typing import List
 
-from request_context import request_context
+import request_context
 import request_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
@@ -61,7 +61,9 @@ def compute_patient_summary(
             lambda scheduled_assessment_current: (
                 (not scheduled_assessment_current["completed"])
                 and (
-                    date_utils.parse_date(scheduled_assessment_current["dueDate"]).date()
+                    date_utils.parse_date(
+                        scheduled_assessment_current["dueDate"]
+                    ).date()
                     <= datetime.date.today()
                 )
             ),
@@ -86,9 +88,7 @@ def get_patient_summary(patient_id):
     Obtain patient summary to be used by patient app.
     """
 
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     safety_plan_document = scope.database.patient.safety_plan.get_safety_plan(

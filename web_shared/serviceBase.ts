@@ -3,12 +3,13 @@ import { handleDates } from 'shared/time';
 import { KeyedMap } from 'shared/types';
 
 export interface IServiceBase {
-    applyAuth(authToken: string): void;
+    applyAuth(getToken: () => string | undefined, onUnauthorized?: () => void): void;
 }
 
 export class ServiceBase implements IServiceBase {
     protected readonly axiosInstance: AxiosInstance;
     private authRequestInterceptor: number | undefined;
+    private authResponseInterceptor: number | undefined;
     private revIds: KeyedMap<string> = {};
 
     constructor(baseUrl: string) {
@@ -69,18 +70,34 @@ export class ServiceBase implements IServiceBase {
         this.axiosInstance.interceptors.request.use(handleRequest);
     }
 
-    public applyAuth(authToken: string) {
+    public applyAuth(getToken: () => string | undefined, onUnauthorized?: () => void) {
+        // Add auth request interceptor that adds token header
         if (this.authRequestInterceptor) {
             this.axiosInstance.interceptors.request.eject(this.authRequestInterceptor);
         }
 
-        this.authRequestInterceptor = this.axiosInstance.interceptors.request.use(async (config) => {
-            const bearer = `Bearer ${authToken}`;
+        this.authRequestInterceptor = this.axiosInstance.interceptors.request.use((config) => {
+            const bearer = `Bearer ${getToken()}`;
             if (!!config.headers) {
                 config.headers.Authorization = bearer;
             }
 
             return config;
         });
+
+        // Add response interceptor that checks for unauthorized access
+        if (this.authResponseInterceptor) {
+            this.axiosInstance.interceptors.response.eject(this.authResponseInterceptor);
+        }
+
+        if (onUnauthorized) {
+            this.authResponseInterceptor = this.axiosInstance.interceptors.response.use((response) => {
+                if (response.status == 403) {
+                    onUnauthorized();
+                }
+
+                return response;
+            });
+        }
     }
 }

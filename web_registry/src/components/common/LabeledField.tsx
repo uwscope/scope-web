@@ -29,13 +29,9 @@ const NoPaddingIconButton = styled(IconButton)({
 });
 
 const ColoredFlag = withTheme(
-    styled(FlagIcon)<{ customprops: { on: boolean; color: string } }>(
-        (props) => ({
-            color: props.theme.customPalette.scoreColors[
-                props.customprops.on ? props.customprops.color : 'disabled'
-            ],
-        })
-    )
+    styled(FlagIcon)<{ customprops: { on: boolean; color: string } }>((props) => ({
+        color: props.theme.customPalette.flagColors[props.customprops.on ? props.customprops.color : 'disabled'],
+    })),
 );
 
 export interface ILabeledFieldProps {
