@@ -21,21 +21,26 @@ def _maintain_scheduled_assessments(
     assessment: dict,
 ):
     # Remove existing scheduled items as necessary
-    scheduled_items = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=collection
+    scheduled_items = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=collection
+        )
     )
     if scheduled_items:
         # Filter to scheduled items for this assessment
         scheduled_items = [
             scheduled_assessment_current
             for scheduled_assessment_current in scheduled_items
-            if scheduled_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] == assessment_id
+            if scheduled_assessment_current[
+                scope.database.patient.assessments.SEMANTIC_SET_ID
+            ]
+            == assessment_id
         ]
 
         # Identify which scheduled items are still pending
         pending_items = scheduled_item_utils.pending_scheduled_items(
             scheduled_items=scheduled_items,
-            after_datetime=pytz.utc.localize(datetime.datetime.utcnow())
+            after_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
         )
 
         # Mark all of them as deleted
@@ -43,7 +48,9 @@ def _maintain_scheduled_assessments(
             scope.database.patient.scheduled_assessments.delete_scheduled_assessment(
                 collection=collection,
                 scheduled_assessment=pending_item_current,
-                set_id=pending_item_current[scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID]
+                set_id=pending_item_current[
+                    scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+                ],
             )
 
     # Create new scheduled items as necessary
@@ -55,7 +62,9 @@ def _maintain_scheduled_assessments(
 
     if assessment["assigned"]:
         new_scheduled_items = scheduled_item_utils.create_scheduled_items(
-            start_date=date_utils.parse_datetime(assessment["assignedDateTime"]).astimezone(timezone).date(),
+            start_date=date_utils.parse_datetime(assessment["assignedDateTime"])
+            .astimezone(timezone)
+            .date(),
             day_of_week=assessment["dayOfWeek"],
             frequency=assessment["frequency"],
             due_time_of_day=8,
@@ -68,20 +77,22 @@ def _maintain_scheduled_assessments(
         for new_scheduled_item_current in new_scheduled_items:
             new_scheduled_assessment = copy.deepcopy(new_scheduled_item_current)
 
-            new_scheduled_assessment.update({
-                "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
-                scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[
-                    scope.database.patient.assessments.SEMANTIC_SET_ID],
-            })
+            new_scheduled_assessment.update(
+                {
+                    "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
+                    scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[
+                        scope.database.patient.assessments.SEMANTIC_SET_ID
+                    ],
+                }
+            )
 
             schema_utils.assert_schema(
                 data=new_scheduled_assessment,
-                schema=scope.schema.scheduled_assessment_schema
+                schema=scope.schema.scheduled_assessment_schema,
             )
 
             scope.database.patient.scheduled_assessments.post_scheduled_assessment(
-                collection=collection,
-                scheduled_assessment=new_scheduled_assessment
+                collection=collection, scheduled_assessment=new_scheduled_assessment
             )
 
 

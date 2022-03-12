@@ -29,10 +29,13 @@ def fake_mood_log_factory(
         fake_mood_log = {
             "_type": scope.database.patient.mood_logs.DOCUMENT_TYPE,
             "recordedDateTime": date_utils.format_datetime(
-                pytz.utc.localize(faker_factory.date_time_between_dates(
-                    datetime_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30),
-                    datetime_end=datetime.datetime.now(),
-                ))
+                pytz.utc.localize(
+                    faker_factory.date_time_between_dates(
+                        datetime_start=datetime.datetime.now()
+                        - datetime.timedelta(days=6 * 30),
+                        datetime_end=datetime.datetime.now(),
+                    )
+                )
             ),
             "comment": faker_factory.text(),
             "mood": random.randint(0, 10),

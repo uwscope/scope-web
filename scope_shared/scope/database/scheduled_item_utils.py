@@ -27,10 +27,7 @@ def _localized_datetime(
     time_of_day: int,
     timezone: pytz.timezone,
 ) -> _datetime.datetime:
-    datetime = _datetime.datetime.combine(
-        date,
-        _datetime.time(hour=time_of_day)
-    )
+    datetime = _datetime.datetime.combine(date, _datetime.time(hour=time_of_day))
 
     localized_datetime = timezone.localize(datetime)
 
@@ -44,7 +41,9 @@ def _initial_date(
     start_date: _datetime.date,
     day_of_week: str,
 ) -> _datetime.date:
-    return start_date + dateutil.relativedelta.relativedelta(weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week])
+    return start_date + dateutil.relativedelta.relativedelta(
+        weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
+    )
 
 
 def _scheduled_dates(
@@ -54,36 +53,28 @@ def _scheduled_dates(
     frequency: str,
     months: int,
 ) -> List[_datetime.date]:
-    initial_date: _datetime.date = _initial_date(start_date=start_date, day_of_week=day_of_week)
-    until_date: _datetime.date = initial_date + dateutil.relativedelta.relativedelta(months=months)
+    initial_date: _datetime.date = _initial_date(
+        start_date=start_date, day_of_week=day_of_week
+    )
+    until_date: _datetime.date = initial_date + dateutil.relativedelta.relativedelta(
+        months=months
+    )
 
     if frequency == scope.enums.ScheduledItemFrequency.Daily.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.DAILY,
-            interval=1,
-            dtstart=initial_date,
-            until=until_date
+            dateutil.rrule.DAILY, interval=1, dtstart=initial_date, until=until_date
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Weekly.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY,
-            interval=1,
-            dtstart=initial_date,
-            until=until_date
+            dateutil.rrule.WEEKLY, interval=1, dtstart=initial_date, until=until_date
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Biweekly.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY,
-            interval=2,
-            dtstart=initial_date,
-            until=until_date
+            dateutil.rrule.WEEKLY, interval=2, dtstart=initial_date, until=until_date
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Monthly.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY,
-            interval=4,
-            dtstart=initial_date,
-            until=until_date
+            dateutil.rrule.WEEKLY, interval=4, dtstart=initial_date, until=until_date
         )
     else:
         raise ValueError()
@@ -125,32 +116,39 @@ def create_scheduled_items(
     for scheduled_date_current in scheduled_dates:
         scheduled_item_current = {}
 
-        scheduled_item_current.update({
-            "dueDate": date_utils.format_date(scheduled_date_current),
-            "dueTimeOfDay": due_time_of_day,
-            "dueDateTime": date_utils.format_datetime(_localized_datetime(
-                date=scheduled_date_current,
-                time_of_day=due_time_of_day,
-                timezone=timezone,
-            ))
-        })
+        scheduled_item_current.update(
+            {
+                "dueDate": date_utils.format_date(scheduled_date_current),
+                "dueTimeOfDay": due_time_of_day,
+                "dueDateTime": date_utils.format_datetime(
+                    _localized_datetime(
+                        date=scheduled_date_current,
+                        time_of_day=due_time_of_day,
+                        timezone=timezone,
+                    )
+                ),
+            }
+        )
 
         if reminder:
-            scheduled_item_current.update({
-                "reminderDate": date_utils.format_date(scheduled_date_current),
-                "reminderTimeOfDay": reminder_time_of_day,
-                "reminderDateTime": date_utils.format_datetime(_localized_datetime(
-                    date=scheduled_date_current,
-                    time_of_day=reminder_time_of_day,
-                    timezone=timezone,
-                ))
-            })
+            scheduled_item_current.update(
+                {
+                    "reminderDate": date_utils.format_date(scheduled_date_current),
+                    "reminderTimeOfDay": reminder_time_of_day,
+                    "reminderDateTime": date_utils.format_datetime(
+                        _localized_datetime(
+                            date=scheduled_date_current,
+                            time_of_day=reminder_time_of_day,
+                            timezone=timezone,
+                        )
+                    ),
+                }
+            )
 
         scheduled_item_current["completed"] = False
 
         schema_utils.raise_for_invalid_schema(
-            data=scheduled_item_current,
-            schema=scope.schema.scheduled_item_schema
+            data=scheduled_item_current, schema=scope.schema.scheduled_item_schema
         )
 
         result_scheduled_items.append(scheduled_item_current)
@@ -176,14 +174,14 @@ def pending_scheduled_items(
     result_pending_scheduled_items = []
     for scheduled_item_current in scheduled_items:
         schema_utils.raise_for_invalid_schema(
-            data=scheduled_item_current,
-            schema=scope.schema.scheduled_item_schema
+            data=scheduled_item_current, schema=scope.schema.scheduled_item_schema
         )
 
         pending = not scheduled_item_current["completed"]
         if pending:
             pending = (
-                date_utils.parse_datetime(scheduled_item_current["dueDateTime"]) > after_datetime
+                date_utils.parse_datetime(scheduled_item_current["dueDateTime"])
+                > after_datetime
             )
 
         if pending:

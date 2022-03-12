@@ -37,10 +37,14 @@ def test_assessment_maintains_scheduled_assessments(
     assessment_id = fake_assessment[scope.database.patient.assessments.SEMANTIC_SET_ID]
 
     # Remove assignment of the assessment
-    fake_assessment.update({
-        "assigned": False,
-        "assignedDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime.utcnow())),
-    })
+    fake_assessment.update(
+        {
+            "assigned": False,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+        }
+    )
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
@@ -48,18 +52,24 @@ def test_assessment_maintains_scheduled_assessments(
     )
 
     # Determine what scheduled assessments already exist
-    existing_scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    existing_scheduled_assessments = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
     if not existing_scheduled_assessments:
         existing_scheduled_assessments = []
 
     # Assign the assessment
-    fake_assessment.update({
-        "assigned": True,
-        "assignedDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime.utcnow())),
-        "frequency": scope.enums.ScheduledItemFrequency.Weekly.value
-    })
+    fake_assessment.update(
+        {
+            "assigned": True,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+            "frequency": scope.enums.ScheduledItemFrequency.Weekly.value,
+        }
+    )
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
@@ -67,8 +77,10 @@ def test_assessment_maintains_scheduled_assessments(
     )
 
     # Ensure we now obtain new scheduled assessments
-    new_scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    new_scheduled_assessments = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
     new_scheduled_assessments = [
         scheduled_assessment_current
@@ -78,10 +90,14 @@ def test_assessment_maintains_scheduled_assessments(
     assert len(new_scheduled_assessments) > 0
 
     # Remove assignment of the assessment
-    fake_assessment.update({
-        "assigned": False,
-        "assignedDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime.utcnow())),
-    })
+    fake_assessment.update(
+        {
+            "assigned": False,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+        }
+    )
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
@@ -91,8 +107,10 @@ def test_assessment_maintains_scheduled_assessments(
     # Ensure there are no pending scheduled assessments
     # Because pending logic is already tested,
     # this confirms cancellation while being robust to an item created in this test which is now in the past
-    existing_scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    existing_scheduled_assessments = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
     if not existing_scheduled_assessments:
         existing_scheduled_assessments = []
@@ -100,12 +118,15 @@ def test_assessment_maintains_scheduled_assessments(
     existing_scheduled_assessments = [
         scheduled_assessment_current
         for scheduled_assessment_current in existing_scheduled_assessments
-        if scheduled_assessment_current[scope.database.patient.assessments.SEMANTIC_SET_ID] == assessment_id
+        if scheduled_assessment_current[
+            scope.database.patient.assessments.SEMANTIC_SET_ID
+        ]
+        == assessment_id
     ]
 
     pending_scheduled_assessments = scheduled_item_utils.pending_scheduled_items(
         scheduled_items=existing_scheduled_assessments,
-        after_datetime=pytz.utc.localize(datetime.datetime.utcnow())
+        after_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
     )
 
     assert len(pending_scheduled_assessments) == 0
