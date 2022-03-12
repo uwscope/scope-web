@@ -33,20 +33,20 @@
 		"comment": {
 			"$ref": "/schemas/log#/properties/comment"
 		},
-		"completed": {
-			"type": "boolean"
-		},
 		"patientSubmitted": {
 			"type": "boolean"
 		},
 		"submittedByProviderId": {
 			"type": "string"
 		},
-		"pointValues": { "type": "object", "$comment": "TODO" },
+		"pointValues": {
+			"type": "object",
+			"$comment": "TODO"
+		},
 		"totalScore": {
 			"type": "number"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
+	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId", "pointValues"]
 }
