@@ -1,18 +1,15 @@
-import datetime
 import faker
 import pytest
 import random
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.scheduled_assessments
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def _fake_assessment_point_values(
@@ -63,17 +60,16 @@ def _fake_assessment_logs(
 
         fake_assessment_log = {
             "_type": scope.database.patient.assessment_logs.DOCUMENT_TYPE,
-            "recordedDate": scheduled_assessment_current["dueDate"],
-            "comment": faker_factory.text(),
             scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: scheduled_assessment_current[
                 scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
             ],
             scope.database.patient.assessments.SEMANTIC_SET_ID: scheduled_assessment_current[
                 scope.database.patient.assessments.SEMANTIC_SET_ID
             ],
-            "completed": random.choice([True, False]),
+            "recordedDateTime": scheduled_assessment_current["dueDateTime"],
+            "comment": faker_factory.text(),
             "patientSubmitted": random.choice([True, False]),
-            # "submittedBy": data_fake_identity_factory(), # TODO: identity information
+            # "submittedByProviderId": data_fake_identity_factory(), # TODO: identity information
             "pointValues": fake_point_values,
             "totalScore": random.randint(0, 27),
         }

@@ -7,9 +7,9 @@ from typing import Callable, List
 
 import scope.database.date_utils as date_utils
 import scope.database.patient.assessments
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 # TODO: Commenting because either both should exist or both should be removed
@@ -37,12 +37,8 @@ def _fake_assessment(
                 )
             )
         ),
-        "frequency": fake_utils.fake_enum_value(
-            scope.testing.fake_data.enums.AssessmentFrequency
-        ),
-        "dayOfWeek": fake_utils.fake_enum_value(
-            scope.testing.fake_data.enums.DayOfWeek
-        ),
+        "frequency": fake_utils.fake_enum_value(scope.enums.ScheduledItemFrequency),
+        "dayOfWeek": fake_utils.fake_enum_value(scope.enums.DayOfWeek),
     }
 
     # Remove a randomly sampled subset of optional parameters.

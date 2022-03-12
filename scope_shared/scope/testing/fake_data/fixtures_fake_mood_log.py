@@ -1,14 +1,15 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable
 
 import scope.database.date_utils as date_utils
 import scope.database.patient.mood_logs
+import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 OPTIONAL_KEYS = [
@@ -27,9 +28,13 @@ def fake_mood_log_factory(
     def factory() -> dict:
         fake_mood_log = {
             "_type": scope.database.patient.mood_logs.DOCUMENT_TYPE,
-            "recordedDate": date_utils.format_date(
-                faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now() - datetime.timedelta(days=6 * 30)
+            "recordedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    faker_factory.date_time_between_dates(
+                        datetime_start=datetime.datetime.now()
+                        - datetime.timedelta(days=6 * 30),
+                        datetime_end=datetime.datetime.now(),
+                    )
                 )
             ),
             "comment": faker_factory.text(),

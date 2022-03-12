@@ -19,7 +19,7 @@ import scope.database.patient.values_inventory
 import scope.database.patient_unsafe_utils
 import scope.database.patients
 import scope.database.providers
-import scope.testing.fake_data.enums
+import scope.enums
 import scope.testing.fake_data.fixtures_fake_activity
 import scope.testing.fake_data.fixtures_fake_activity_logs
 import scope.testing.fake_data.fixtures_fake_assessments

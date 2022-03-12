@@ -29,6 +29,9 @@
 							},
 							"MRN": {
 								"type": "string"
+							},
+							"account": {
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"additionalProperties": false,
@@ -41,13 +44,18 @@
 					"items": {
 						"type": "object",
 						"properties": {
+							"patientId": {
+								"type": "string"
+							},
 							"name": {
 								"type": "string"
 							},
 							"MRN": {
 								"type": "string"
 							},
-							"patientId": { "type": "string" }
+							"account": {
+								"$ref": "/schemas/populate-config-account"
+							}
 						},
 						"additionalProperties": false,
 						"required": ["name", "MRN", "patientId"]
@@ -80,6 +88,9 @@
 							},
 							"role": {
 								"$ref": "/schemas/enums#/properties/providerRole"
+							},
+							"account": {
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"additionalProperties": false,
@@ -92,14 +103,17 @@
 					"items": {
 						"type": "object",
 						"properties": {
-							"name": {
+							"providerId": {
 								"type": "string"
 							},
-							"providerId": {
+							"name": {
 								"type": "string"
 							},
 							"role": {
 								"$ref": "/schemas/enums#/properties/providerRole"
+							},
+							"account": {
+								"$ref": "/schemas/populate-config-account"
 							}
 						},
 						"required": ["name", "providerId", "role"]

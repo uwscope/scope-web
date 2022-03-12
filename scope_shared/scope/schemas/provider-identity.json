@@ -25,6 +25,19 @@
 		},
 		"role": {
 			"$ref": "/schemas/enums#/properties/providerRole"
+		},
+		"cognitoAccount": {
+			"type": "object",
+			"properties": {
+				"cognitoId": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["cognitoId", "email"]
 		}
 	},
 	"additionalProperties": false,

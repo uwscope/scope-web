@@ -5,16 +5,12 @@
 	"description": "ILog Type",
 	"type": "object",
 	"properties": {
-		"logId": {
-			"type": "string"
-		},
-		"recordedDate": {
+		"recordedDateTime": {
             "$ref": "/schemas/datetime#/properties/datetime"
         },
 		"comment": {
 			"type": "string"
 		}
 	},
-	"additionalProperties": false,
-	"required": ["recordedDate"]
+	"required": ["recordedDateTime"]
 }

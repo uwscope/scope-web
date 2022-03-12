@@ -1,5 +1,3 @@
-# TODO: these feel more fundamental than fake_data
-
 from enum import Enum
 
 
@@ -171,11 +169,11 @@ class AssessmentType(Enum):
     Medication = "medication"
 
 
-class AssessmentFrequency(Enum):
+class ScheduledItemFrequency(Enum):
     Daily = "Daily"
     Weekly = "Once a week"
     Biweekly = "Every 2 weeks"
-    Monthly = "Monthly"
+    Monthly = "Every 4 weeks"
 
 
 class DayOfWeek(Enum):

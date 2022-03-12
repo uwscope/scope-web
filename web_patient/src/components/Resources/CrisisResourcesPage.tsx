@@ -33,11 +33,25 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                 <HeaderText>All resources are available 24x7</HeaderText>
                 <div>
                     <Typography variant="body1">
-                        <b>National Suicide Prevention Lifeline</b>
+                        <b>National Suicide Prevention Lifeline</b> - {'  '}
+                        <Link
+                            href="https://suicidepreventionlifeline.org/"
+                            target="_blank"
+                            sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                            https://suicidepreventionlifeline.org/
+                        </Link>
                     </Typography>
                     <ListDiv>
                         <li>
-                            <Typography variant="body1">Call 1-800-273-TALK (8255)</Typography>
+                            <Typography variant="body1">
+                                Call {'  '}
+                                <Link
+                                    href="tel:18002738255/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    1-800-273-TALK (8255)
+                                </Link>
+                            </Typography>
                         </li>
                         <li>
                             <Typography variant="body1">

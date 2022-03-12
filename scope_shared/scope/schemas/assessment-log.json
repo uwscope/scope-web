@@ -19,13 +19,7 @@
 			"type": "number"
 		},
 		"assessmentLogId": {
-			"$ref": "/schemas/log#/properties/logId"
-		},
-		"recordedDate": {
-			"$ref": "/schemas/log#/properties/recordedDate"
-		},
-		"comment": {
-			"$ref": "/schemas/log#/properties/comment"
+			"type": "string"
 		},
 		"scheduledAssessmentId": {
 			"type": "string"
@@ -33,20 +27,26 @@
 		"assessmentId": {
 			"type": "string"
 		},
-		"completed": {
-			"type": "boolean"
+		"recordedDateTime": {
+			"$ref": "/schemas/log#/properties/recordedDateTime"
+		},
+		"comment": {
+			"$ref": "/schemas/log#/properties/comment"
 		},
 		"patientSubmitted": {
 			"type": "boolean"
 		},
-		"submittedBy": {
-			"$ref": "/schemas/provider-identity"
+		"submittedByProviderId": {
+			"type": "string"
 		},
-		"pointValues": { "type": "object", "$comment": "TODO" },
+		"pointValues": {
+			"type": "object",
+			"$comment": "TODO"
+		},
 		"totalScore": {
 			"type": "number"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDate", "scheduledAssessmentId", "assessmentId", "completed", "pointValues"]
+	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId", "pointValues"]
 }

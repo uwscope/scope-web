@@ -8,6 +8,7 @@ export interface IPromiseQueryState {
     readonly error: boolean;
     readonly pending: boolean;
     readonly done: boolean;
+    readonly unauthorized: boolean;
     resetState: () => void;
 }
 
@@ -25,6 +26,7 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
 
     @observable public value: T | undefined;
     @observable public state: PromiseState = 'Unknown';
+    @observable public unauthorized: boolean = false;
 
     constructor(defaultValue: T | undefined, name: string) {
         this.value = defaultValue;
@@ -51,6 +53,7 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
     public fromPromise(promise: Promise<T>, onConflict?: (responseData?: any) => T): Promise<T> {
         action(`${this.name} start`, () => {
             this.state = 'Pending';
+            this.unauthorized = false;
         })();
 
         return promise
@@ -70,6 +73,11 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
                         if (onConflict) {
                             this.value = onConflict(axiosError.response?.data);
                         }
+                    })();
+                } else if (axiosError.response?.status == 403) {
+                    action(`${this.name} unauthorized`, () => {
+                        this.state = 'Rejected';
+                        this.unauthorized = true;
                     })();
                 } else {
                     action(`${this.name} rejected`, () => {

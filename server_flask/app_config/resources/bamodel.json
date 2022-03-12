@@ -3,16 +3,32 @@
   "name": "Review of behavioral activation model",
   "resources": [
     {
-      "name": "Form A client education",
-      "filename": "sample.pdf"
+      "name": "Paying Closer Attention",
+      "filename": "Paying_Closer_Attention.pdf"
     },
     {
-      "name": "Form B vicious cycle",
-      "filename": "sample.pdf"
+      "name": "Activity Menu: General",
+      "filename": "Actvity_Menu-General.pdf"
     },
     {
-      "name": "Form C vicious cycle",
-      "filename": "sample.pdf"
+      "name": "Activity Menu: COVID",
+      "filename": "Activity_Menu-COVID.pdf"
+    },
+    {
+      "name": "TRAP-TRAC Mode",
+      "filename": "TRAP-TRAC_Model.pdf"
+    },
+    {
+      "name": "TRAP-TRAC Worksheet",
+      "filename": "TRAP-TRAC_Worksheet.pdf"
+    },
+    {
+      "name": "Problem Solving Steps",
+      "filename": "Problem_Solving_Steps.pdf"
+    },
+    {
+      "name": "Keeping it Going",
+      "filename": "Keeping_it_Going.pdf"
     }
   ]
 }

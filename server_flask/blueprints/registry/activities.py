@@ -1,11 +1,12 @@
 import flask
 import flask_json
 import pymongo.errors
+import request_context
+
+import request_utils
 import scope.database
 import scope.database.patient.activities
-from request_context import request_context
-import request_utils
-from scope.schema import activity_schema
+import scope.schema
 
 activities_blueprint = flask.Blueprint(
     "activities_blueprint",
@@ -19,9 +20,7 @@ activities_blueprint = flask.Blueprint(
 )
 @flask_json.as_json
 def get_activities(patient_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     documents = scope.database.patient.activities.get_activities(
@@ -43,7 +42,7 @@ def get_activities(patient_id):
     methods=["POST"],
 )
 @request_utils.validate_schema(
-    schema=activity_schema,
+    schema=scope.schema.activity_schema,
     key="activity",
 )
 @flask_json.as_json
@@ -51,9 +50,8 @@ def post_activities(patient_id):
     """
     Creates a new activity in the patient record and returns the activity result.
     """
-    # TODO: Require authentication
 
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put
@@ -87,9 +85,7 @@ def post_activities(patient_id):
 )
 @flask_json.as_json
 def get_activity(patient_id, activity_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Get the document
@@ -113,14 +109,12 @@ def get_activity(patient_id, activity_id):
     methods=["PUT"],
 )
 @request_utils.validate_schema(
-    schema=activity_schema,
+    schema=scope.schema.activity_schema,
     key="activity",
 )
 @flask_json.as_json
 def put_activity(patient_id, activity_id):
-    # TODO: Require authentication
-
-    context = request_context()
+    context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
     # Obtain the document being put

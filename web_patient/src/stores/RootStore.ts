@@ -1,5 +1,5 @@
 import { action, computed, makeAutoObservable } from 'mobx';
-import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent, IPatientUser } from 'shared/types';
+import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 import { getPatientServiceInstance, IPatientService } from 'shared/patientService';
 import { PromiseQuery, PromiseState } from 'shared/promiseQuery';
 import { useServices } from 'src/services/services';
@@ -17,7 +17,6 @@ export interface IRootStore {
 
     // UI states
     loadState: PromiseState;
-    loginState: PromiseState;
     inspirationalQuote: string;
 
     createPatientStore: (patientService: IPatientService) => void;
@@ -28,6 +27,7 @@ export interface IRootStore {
 
     // Data load/save
     load: () => void;
+    reset: () => void;
 }
 
 export class RootStore implements IRootStore {
@@ -42,28 +42,21 @@ export class RootStore implements IRootStore {
     // UI states
 
     // Promise queries
-    private readonly loginQuery: PromiseQuery<IPatientUser | undefined>;
     private readonly quoteQuery: PromiseQuery<string>;
     private readonly loadQuery: PromiseQuery<PromiseSettledResult<void>[]>;
 
     constructor(serverConfig: IAppConfig) {
-        this.authStore = new AuthStore();
+        this.authStore = new AuthStore(serverConfig.auth);
 
         // Create a dummy patient store which should fail if tried to access
         this.patientStore = new PatientStore(getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, 'invalid'));
 
-        this.loginQuery = new PromiseQuery(undefined, 'loginQuery');
         this.quoteQuery = new PromiseQuery('', 'quoteQuery');
         this.loadQuery = new PromiseQuery([], 'loadQuery');
 
         this.appContentConfig = serverConfig.content;
 
         makeAutoObservable(this);
-    }
-
-    @computed
-    public get loginState() {
-        return this.loginQuery.state;
     }
 
     @computed
@@ -115,5 +108,10 @@ export class RootStore implements IRootStore {
         const { appService } = useServices();
         const promise = appService.getInspirationalQuote();
         await this.quoteQuery.fromPromise(promise);
+    }
+
+    @action.bound
+    public reset() {
+        this.patientStore = new PatientStore(getPatientServiceInstance(CLIENT_CONFIG.flaskBaseUrl, 'invalid'));
     }
 }

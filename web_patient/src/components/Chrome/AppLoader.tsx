@@ -1,5 +1,4 @@
 import { Box, CircularProgress, Fade, Paper, Typography } from '@mui/material';
-// import { zIndex } from '@mui/material/styles';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -10,7 +9,7 @@ const Cover = styled(Fade)({
     top: 0,
     bottom: 0,
     background: 'white',
-    zIndex: 2000, //zIndex.modal + 1,
+    zIndex: 2000,
 });
 
 export interface IAppLoaderProps {
@@ -22,12 +21,7 @@ export const AppLoader: FunctionComponent<IAppLoaderProps> = (props) => {
     const { isLoading, text } = props;
 
     return (
-        <Cover
-            in={isLoading}
-            style={{
-                transitionDelay: !isLoading ? '800ms' : '0ms',
-            }}
-            unmountOnExit>
+        <Cover in={isLoading} unmountOnExit>
             <Paper elevation={0} square>
                 <Box
                     top={0}

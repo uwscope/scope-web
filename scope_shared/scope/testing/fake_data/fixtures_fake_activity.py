@@ -7,10 +7,10 @@ from typing import Callable
 import scope.database.collection_utils as collection_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.activities
+import scope.enums
 import scope.schema
 import scope.schema_utils
 import scope.schema_utils as schema_utils
-import scope.testing.fake_data.enums
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
@@ -63,9 +63,7 @@ def fake_activity_factory(
             "hasReminder": random.choice([True, False]),
             "reminderTimeOfDay": random.randrange(0, 24),
             "hasRepetition": random.choice([True, False]),
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(
-                scope.testing.fake_data.enums.DayOfWeek
-            ),
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
             "isActive": random.choice([True, False]),
             "isDeleted": random.choice([True, False]),
         }

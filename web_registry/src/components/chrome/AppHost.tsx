@@ -8,6 +8,7 @@ import { useServices } from 'src/services/services';
 import { IRootStore, RootStore } from 'src/stores/RootStore';
 import { StoreProvider } from 'src/stores/stores';
 import styled, { withTheme } from 'styled-components';
+import AppLoader from 'src/components/chrome/AppLoader';
 
 const RootContainer = styled.div({
     height: '100vh',
@@ -92,9 +93,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
     const state = useLocalObservable<{
         store: IRootStore | undefined;
         failed: boolean;
+        ready: boolean;
     }>(() => ({
         store: undefined,
         failed: false,
+        ready: false,
     }));
 
     useEffect(() => {
@@ -108,6 +111,8 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 runInAction(() => {
                     state.store = newStore;
                 });
+
+                newStore.authStore.initialize();
             })
             .catch((error) => {
                 console.error('Failed to retrieve server configuration', error);
@@ -117,13 +122,33 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
             });
     }, []);
 
+    useEffect(() => {
+        runInAction(() => {
+            if (state.store?.authStore.isAuthenticated) {
+                const { registryService } = useServices();
+                registryService.applyAuth(
+                    () => state.store?.authStore.getToken(),
+                    () => state.store?.authStore.refreshToken(),
+                );
+
+                state.ready = true;
+            }
+
+            if (!state.store?.authStore.isAuthenticated) {
+                state.ready = false;
+                state.store?.reset();
+            }
+        });
+    }, [state.store?.authStore.isAuthenticated]);
+
     return (
         <Fragment>
-            {state.store?.authStore.isAuthenticated && (
+            {state.ready && state.store?.authStore.isAuthenticated && (
                 <Fragment>
                     <StoreProvider store={state.store}>{children}</StoreProvider>
                 </Fragment>
             )}
+            <AppLoader isLoading={!!state.store?.authStore.isAuthenticating} text="Logging in..." />
             <Fade in={!state.store?.authStore.isAuthenticated} timeout={500}>
                 <RootContainer>
                     <ImageContainer>
@@ -131,9 +156,7 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                     </ImageContainer>
                     <LoginContainer>
                         {!!state.store ? (
-                            <StoreProvider store={state.store}>
-                                <Login />
-                            </StoreProvider>
+                            <Login authStore={state.store.authStore} />
                         ) : !state.failed ? (
                             <ProgressContainer>
                                 <CircularProgress />

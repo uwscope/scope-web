@@ -10,9 +10,9 @@ import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.values_inventory
+import scope.enums
 import scope.schema
 import scope.schema_utils as schema_utils
-import scope.testing.fake_data.enums
 
 PATIENT_IDENTITY_COLLECTION = "patients"
 
@@ -136,9 +136,9 @@ def create_patient(
 
     # Create initial assessments
     for assessment_current in [
-        scope.testing.fake_data.enums.AssessmentType.GAD7.value,
-        scope.testing.fake_data.enums.AssessmentType.Medication.value,
-        scope.testing.fake_data.enums.AssessmentType.PHQ9.value,
+        scope.enums.AssessmentType.GAD7.value,
+        scope.enums.AssessmentType.Medication.value,
+        scope.enums.AssessmentType.PHQ9.value,
     ]:
         assessment_document = {
             "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
@@ -146,6 +146,8 @@ def create_patient(
             scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
             "assigned": True,
             "assignedDateTime": datetime_assigned,
+            "frequency": "Every 2 weeks",
+            "dayOfWeek": "Monday",
         }
         schema_utils.raise_for_invalid_schema(
             data=assessment_document,
