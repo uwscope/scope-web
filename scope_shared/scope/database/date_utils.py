@@ -1,6 +1,5 @@
 import datetime as _datetime
 import pytz
-
 from typing import Union
 
 DATETIME_FORMAT_COMPLETE = "%Y-%m-%dT%H:%M:%S.%fZ"
