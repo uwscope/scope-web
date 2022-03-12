@@ -173,7 +173,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         pleasure: 5,
         accomplishment: 5,
         activityName: activity.name,
-        recordedDate: new Date(),
+        recordedDateTime: new Date(),
     }));
 
     const handleSubmit = action(async () => {

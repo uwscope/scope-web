@@ -23,7 +23,7 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
     const { patientStore } = useStores();
 
     const dataState = useLocalObservable<IMoodLog>(() => ({
-        recordedDate: new Date(),
+        recordedDateTime: new Date(),
         mood: 5,
         comment: undefined,
     }));

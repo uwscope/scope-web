@@ -134,7 +134,7 @@ export interface IScheduledAssessment extends IScheduledItem {
 export type AssessmentData = KeyedMap<number | undefined>;
 
 export interface ILog {
-    recordedDate: Date;
+    recordedDateTime: Date;
     comment?: string;
 }
 
