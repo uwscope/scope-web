@@ -34,7 +34,7 @@ export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: s
     if (filteredAssessmentLogs.length > 0) {
         const sortedAssessments = filteredAssessmentLogs
             .slice()
-            .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+            .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
         const latest = sortedAssessments[0];
 
         if (!!latest.totalScore) {

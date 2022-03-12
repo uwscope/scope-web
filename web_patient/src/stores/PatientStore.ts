@@ -275,7 +275,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async completeScheduledActivity(activityLog: IActivityLog) {
         const promise = this.patientService
-            .addActivityLog({ ...activityLog, completed: true, recordedDate: new Date() })
+            .addActivityLog({ ...activityLog, completed: true, recordedDateTime: new Date() })
             .then((addedLog) => {
                 const newLogs = this.activityLogs.slice() || [];
                 newLogs.push(addedLog);
@@ -291,7 +291,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async saveMoodLog(moodLog: IMoodLog) {
-        const promise = this.patientService.addMoodLog({ ...moodLog, recordedDate: new Date() }).then((addedLog) => {
+        const promise = this.patientService.addMoodLog({ ...moodLog, recordedDateTime: new Date() }).then((addedLog) => {
             const newLogs = this.moodLogs.slice() || [];
             newLogs.push(addedLog);
             return newLogs;
@@ -307,7 +307,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async saveAssessmentLog(assessmentLog: IAssessmentLog) {
         const promise = this.patientService
-            .addAssessmentLog({ ...assessmentLog, completed: true, recordedDate: new Date() })
+            .addAssessmentLog({ ...assessmentLog, completed: true, recordedDateTime: new Date() })
             .then((addedLog) => {
                 const newLogs = this.assessmentLogs.slice() || [];
                 newLogs.push(addedLog);

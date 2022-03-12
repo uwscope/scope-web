@@ -485,14 +485,14 @@ export const SessionInfo: FunctionComponent = observer(() => {
     const phqScores = currentPatient.assessmentLogs
         .filter((log) => log.assessmentId == 'phq-9')
         .map((log) => ({
-            date: log.recordedDate,
+            date: log.recordedDateTime,
             score: log.totalScore || getAssessmentScore(log.pointValues),
         }));
 
     const gadScores = currentPatient.assessmentLogs
         .filter((log) => log.assessmentId == 'gad-7')
         .map((log) => ({
-            date: log.recordedDate,
+            date: log.recordedDateTime,
             score: log.totalScore || getAssessmentScore(log.pointValues),
         }));
 

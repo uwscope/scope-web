@@ -97,7 +97,7 @@ const getColoredSwitch = (color: string) =>
     );
 
 export interface IVisDataPoint {
-    recordedDate: Date;
+    recordedDateTime: Date;
     pointValues: AssessmentData;
 }
 
@@ -168,7 +168,7 @@ export const AssessmentVis = withTheme(
         });
 
         if (!!data && data.length > 0) {
-            const oldestDataDate = data[0].recordedDate;
+            const oldestDataDate = data[0].recordedDateTime;
 
             // Minimum last 8 weeks and maximum 24 weeks of data, and snap to weeks
             const maxDate = nextSunday(clearTime(new Date()));
@@ -183,15 +183,15 @@ export const AssessmentVis = withTheme(
             }
 
             const filteredData = data.filter(
-                (d) => compareAsc(minDate, d.recordedDate) < 0 && compareAsc(maxDate, d.recordedDate) > 0
+                (d) => compareAsc(minDate, d.recordedDateTime) < 0 && compareAsc(maxDate, d.recordedDateTime) > 0
             );
 
             const dailyPoints = filteredData.map(
                 (d) =>
                     ({
-                        x: addHours(clearTime(d.recordedDate), useTime ? 12 : 0).getTime(),
+                        x: addHours(clearTime(d.recordedDateTime), useTime ? 12 : 0).getTime(),
                         y: getAssessmentScore(d.pointValues),
-                        _x: d.recordedDate.getTime(),
+                        _x: d.recordedDateTime.getTime(),
                     } as Point)
             );
 
@@ -245,7 +245,7 @@ export const AssessmentVis = withTheme(
             const timedDataPoints = filteredData.map(
                 (d) =>
                     ({
-                        x: d.recordedDate.getTime(),
+                        x: d.recordedDateTime.getTime(),
                         y: getAssessmentScore(d.pointValues),
                     } as Point)
             );
@@ -254,7 +254,7 @@ export const AssessmentVis = withTheme(
                 return filteredData.map(
                     (d) =>
                         ({
-                            x: d.recordedDate.getTime(),
+                            x: d.recordedDateTime.getTime(),
                             y: d.pointValues[key],
                             name: key,
                         } as Point)

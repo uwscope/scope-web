@@ -13,7 +13,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
 
     const sortedAssessmentLogs = currentPatient?.assessmentLogs
         .slice()
-        .sort((a, b) => compareDesc(a.recordedDate, b.recordedDate));
+        .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     const latestPhqLog = sortedAssessmentLogs.filter((a) => a.assessmentId == 'phq-9')[0];
     const latestPhqScore = getLatestScore(currentPatient?.assessmentLogs, 'phq-9');
@@ -65,7 +65,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     label="Latest PHQ-9 Score"
                     value={latestPhqScore > 0 ? latestPhqScore : 'No data'}
                     helperText={
-                        !!latestPhqLog ? `Updated: ${format(latestPhqLog.recordedDate, 'MM/dd/yyyy')}` : undefined
+                        !!latestPhqLog ? `Updated: ${format(latestPhqLog.recordedDateTime, 'MM/dd/yyyy')}` : undefined
                     }
                 />
                 <GridTextField
@@ -73,7 +73,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     label="Latest GAD-7 Score"
                     value={latestGadScore > 0 ? latestGadScore : 'No data'}
                     helperText={
-                        !!latestGadLog ? `Updated: ${format(latestGadLog.recordedDate, 'MM/dd/yyyy')}` : undefined
+                        !!latestGadLog ? `Updated: ${format(latestGadLog.recordedDateTime, 'MM/dd/yyyy')}` : undefined
                     }
                 />
                 <GridTextField
