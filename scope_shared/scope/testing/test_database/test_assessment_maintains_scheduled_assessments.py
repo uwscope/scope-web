@@ -116,7 +116,7 @@ def test_assessment_calculate_scheduled_assessments_to_delete():
     ]
 
 
-def test_assessment_maintains_scheduled_assessments(
+def test_assessment_put_maintains_scheduled_assessments(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -127,6 +127,7 @@ def test_assessment_maintains_scheduled_assessments(
     Test that the scheduled assessments are maintained.
 
     The actual logic of scheduling specific assessments is tested elsewhere.
+    This test just ensures that it sees the collection being manipulated.
     """
 
     temp_patient = database_temp_patient_factory()
