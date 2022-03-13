@@ -577,14 +577,15 @@ export class PatientStore implements IPatientStore {
                 ...toJS(assessmentLog),
             })
             .then((updatedAssessmentLog) => {
-                const existing = this.assessmentLogs.find(
+                const logsCopy = this.assessmentLogs.slice();
+                const existingIdx = this.assessmentLogs.findIndex(
                     (r) => r.assessmentLogId == updatedAssessmentLog.assessmentLogId,
                 );
-                logger.assert(!!existing, 'Assessment log not found when expected');
+                logger.assert(existingIdx >= 0, 'Assessment log not found when expected');
 
-                if (!!existing) {
-                    Object.assign(existing, updatedAssessmentLog);
-                    return this.assessmentLogs;
+                if (existingIdx >= 0) {
+                    logsCopy.splice(existingIdx, 1, updatedAssessmentLog);
+                    return logsCopy;
                 } else {
                     return this.assessmentLogs.slice().concat([updatedAssessmentLog]);
                 }

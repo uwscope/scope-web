@@ -197,9 +197,12 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
     });
 
     const handleSubmit = action(async () => {
+        const { scheduledAssessmentId, assessmentId } = scheduledAssessment;
         try {
             const log = {
-                ...scheduledAssessment,
+                scheduledAssessmentId,
+                assessmentId,
+                patientSubmitted: true,
                 pointValues: Object.fromEntries(dataState.pointValues.entries()),
                 recordedDateTime: new Date(),
                 comment: dataState.comment,

@@ -22,12 +22,12 @@ export interface IQuestionnaireProps {
     selectedValues: (number | undefined)[];
     selectedDate: Date;
     totalOnly: boolean;
-    totalScore?: number;
+    totalScore?: string;
     comment?: string;
     onDateChange?: (date: Date) => void;
     onSelect?: (qid: string, value: number) => void;
     onToggleTotalOnly?: (on: boolean) => void;
-    onTotalChange?: (total: number) => void;
+    onTotalChange?: (total: string) => void;
     onCommentChange?: (comment: string) => void;
 }
 
@@ -67,6 +67,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
                         : getString('patient_progress_assessment_dialog_add_administered_date_label')
                 }
                 value={selectedDate}
+                required={true}
                 onChange={(value) => onDateChange && onDateChange(value as Date)}
             />
             {!readonly && (
@@ -86,7 +87,8 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
                     editable={!readonly && totalOnly}
                     label="Total score"
                     value={totalScore}
-                    onChange={(value) => onTotalChange && onTotalChange(value as number)}
+                    required={totalOnly}
+                    onChange={(value) => onTotalChange && onTotalChange(`${value}`)}
                 />
             )}
             <Grid item xs={12}>
