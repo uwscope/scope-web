@@ -23,6 +23,7 @@ export interface IQuestionnaireProps {
     selectedDate: Date;
     totalOnly: boolean;
     totalScore?: string;
+    maxTotal: number;
     comment?: string;
     onDateChange?: (date: Date) => void;
     onSelect?: (qid: string, value: number) => void;
@@ -43,6 +44,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
         onDateChange,
         totalOnly,
         totalScore,
+        maxTotal,
         onToggleTotalOnly,
         onTotalChange,
         comment,
@@ -88,6 +90,7 @@ export const Questionnaire: FunctionComponent<IQuestionnaireProps> = (props) => 
                     label="Total score"
                     value={totalScore}
                     required={totalOnly}
+                    helperText={`Must be 0-${maxTotal}`}
                     onChange={(value) => onTotalChange && onTotalChange(`${value}`)}
                 />
             )}

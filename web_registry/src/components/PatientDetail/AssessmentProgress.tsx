@@ -65,6 +65,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const { instruction, questions, options, assessment, assessmentName, assessmentLogs, maxValue, canAdd, useTime } =
         props;
 
+    const maxTotal = maxValue * questions.length;
+
     const configureState = useLocalObservable<{
         openConfigure: boolean;
         frequency: AssessmentFrequency;
@@ -184,7 +186,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const selectedValues = questions.map((q) => logState.log.pointValues[q.id]);
 
     const saveDisabled = logState.totalOnly
-        ? logState.log.totalScore == undefined || logState.log.totalScore < 0
+        ? logState.log.totalScore == undefined || logState.log.totalScore < 0 || logState.log.totalScore > maxTotal
         : selectedValues.findIndex((v) => v == undefined) >= 0;
 
     const questionIds = questions.map((q) => q.id);
@@ -377,6 +379,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                         onToggleTotalOnly={onToggleTotalOnly}
                         totalOnly={logState.totalOnly}
                         totalScore={logState.totalScoreString}
+                        maxTotal={maxTotal}
                         comment={logState.log.comment}
                         onCommentChange={onCommentChange}
                     />
