@@ -279,9 +279,9 @@ def pending_scheduled_items(
     """
     Pending items are those which are:
     - Not already completed
-    - In the future
+    - After the provided datetime
 
-    Pending items will generally be deleted and replaced due to a change in the schedule.
+    For example, pending items may be deleted and replaced due to a change in the schedule.
     """
 
     date_utils.raise_on_not_datetime_utc_aware(after_datetime)
