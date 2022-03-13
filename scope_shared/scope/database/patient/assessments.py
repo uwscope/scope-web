@@ -43,14 +43,6 @@ def _calculate_scheduled_assessments_to_create(
         months=3,
     )
 
-    # Because create_scheduled_items is unaware of scheduled_item_pending_after_datetime,
-    # it can create items which are today but also in the past.
-    # Such an item would not be pending and should not be created.
-    new_scheduled_items = scheduled_item_utils.pending_scheduled_items(
-        scheduled_items=new_scheduled_items,
-        after_datetime=maintenance_datetime,
-    )
-
     # Fill in additional data needed for scheduled assessments
     new_scheduled_assessments = []
     for new_scheduled_item_current in new_scheduled_items:
