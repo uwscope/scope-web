@@ -141,14 +141,14 @@ def post_activity(
         document=activity,
     )
 
-    if activity_set_post_result.inserted_count == 1:
+    # if activity_set_post_result.inserted_count == 1:
 
-        _maintain_scheduled_activities(
-            collection=collection,
-            activity_id=activity_set_post_result.inserted_set_id,
-            activity=activity_set_post_result.document,
-            delete_existing=False,
-        )
+    #     _maintain_scheduled_activities(
+    #         collection=collection,
+    #         activity_id=activity_set_post_result.inserted_set_id,
+    #         activity=activity_set_post_result.document,
+    #         delete_existing=False,
+    #     )
 
     return activity_set_post_result
 
@@ -173,17 +173,17 @@ def put_activity(
     #
     # Update the corresponding scheduled assessments
     #
-    if activity_set_put_result.inserted_count == 1:
+    # if activity_set_put_result.inserted_count == 1:
 
-        # NOTE: Update startDateTime here.
-        # TODO: If "PUT", then if start_date is in past, reinitialize it as today, else leave it as it is.
-        # TODO: We might not need it, might try disabling past date selections in client.
+    #     # NOTE: Update startDateTime here.
+    #     # TODO: If "PUT", then if start_date is in past, reinitialize it as today, else leave it as it is.
+    #     # TODO: We might not need it, might try disabling past date selections in client.
 
-        _maintain_scheduled_activities(
-            collection=collection,
-            activity_id=set_id,
-            activity=activity_set_put_result.document,
-            delete_existing=True,
-        )
+    #     _maintain_scheduled_activities(
+    #         collection=collection,
+    #         activity_id=set_id,
+    #         activity=activity_set_put_result.document,
+    #         delete_existing=True,
+    #     )
 
     return activity_set_put_result
