@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
+
 import scope.database.patient.scheduled_assessments
 import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.schema
@@ -31,10 +32,7 @@ def _maintain_scheduled_assessments(
         scheduled_items = [
             scheduled_assessment_current
             for scheduled_assessment_current in scheduled_items
-            if scheduled_assessment_current[
-                scope.database.patient.assessments.SEMANTIC_SET_ID
-            ]
-            == assessment_id
+            if scheduled_assessment_current[SEMANTIC_SET_ID] == assessment_id
         ]
 
         # Identify which scheduled items are still pending
@@ -65,6 +63,8 @@ def _maintain_scheduled_assessments(
             start_date=date_utils.parse_datetime(assessment["assignedDateTime"])
             .astimezone(timezone)
             .date(),
+            has_repetition=None,
+            repeat_day_flags=None,
             day_of_week=assessment["dayOfWeek"],
             frequency=assessment["frequency"],
             due_time_of_day=8,
@@ -80,9 +80,7 @@ def _maintain_scheduled_assessments(
             new_scheduled_assessment.update(
                 {
                     "_type": scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
-                    scope.database.patient.assessments.SEMANTIC_SET_ID: assessment[
-                        scope.database.patient.assessments.SEMANTIC_SET_ID
-                    ],
+                    SEMANTIC_SET_ID: assessment[SEMANTIC_SET_ID],
                 }
             )
 
