@@ -510,7 +510,10 @@ export const SessionInfo: FunctionComponent = observer(() => {
             id: r.caseReviewId as string,
         }));
 
-    const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadCaseReviewsState.pending;
+    const loading =
+        currentPatient?.loadPatientState.pending ||
+        currentPatient?.loadSessionsState.pending ||
+        currentPatient?.loadCaseReviewsState.pending;
     const error = currentPatient?.loadSessionsState.error || currentPatient?.loadCaseReviewsState.error;
 
     const availablePsychiatristNames = patientsStore.psychiatrists.map((p) => p.name);

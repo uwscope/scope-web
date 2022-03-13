@@ -279,7 +279,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             id={assessment.assessmentId}
             title={assessmentName}
             inlineTitle={recurrence}
-            loading={currentPatient?.loadAssessmentLogsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadAssessmentLogsState.pending}
             error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {

@@ -76,7 +76,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
         <ActionPanel
             id={assessment.assessmentId}
             title={assessmentContent?.name || 'Mood'}
-            loading={currentPatient?.loadMoodLogsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadMoodLogsState.pending}
             error={currentPatient?.loadMoodLogsState.error}>
             <Grid container alignItems="stretch">
                 {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (

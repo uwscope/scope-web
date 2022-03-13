@@ -57,7 +57,7 @@ export const BAChecklist: FunctionComponent = observer(() => {
         <ActionPanel
             id={getString('patient_detail_subsection_checklist_hash')}
             title={getString('patient_detail_subsection_checklist_title')}
-            loading={currentPatient?.loadSessionsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadSessionsState.pending}
             error={currentPatient?.loadSessionsState.error}
             actionButtons={[]}>
             <TableContainer>

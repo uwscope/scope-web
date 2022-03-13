@@ -176,7 +176,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                         <Grid container spacing={1} direction="column" justifyContent="flex-start" alignItems="stretch">
                             <Grid item>
                                 <PatientCard
-                                    loading={currentPatient.loadProfileState.pending}
+                                    loading={currentPatient.loadPatientState.pending ||  currentPatient.loadProfileState.pending}
                                     error={currentPatient.loadProfileState.error}
                                 />
                             </Grid>
@@ -208,6 +208,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
             </PatientStoreProvider>
         );
     } else {
+        console.log('no patient store');
         return null;
     }
 });
