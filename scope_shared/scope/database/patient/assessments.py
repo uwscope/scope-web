@@ -6,7 +6,6 @@ from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
-
 import scope.database.patient.scheduled_assessments
 import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.schema
@@ -71,8 +70,8 @@ def _calculate_scheduled_assessments_to_create(
 
 
 def _calculate_scheduled_assessments_to_delete(
-    assessment_id: str,
     scheduled_assessments: List[dict],
+    assessment_id: str,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
     date_utils.raise_on_not_datetime_utc_aware(maintenance_datetime)
