@@ -1,4 +1,6 @@
 import datetime as _datetime
+import dateutil.rrule
+
 import pprint
 
 import pytz
@@ -6,6 +8,56 @@ import pytz
 import scope.database.date_utils
 import scope.database.scheduled_item_utils
 import scope.enums
+
+
+def test_scheduled_item_compute_byweekday():
+    for (repeat_day_flags, expected) in [
+        (
+            {
+                "Monday": True,
+                "Tuesday": True,
+                "Wednesday": True,
+                "Thursday": True,
+                "Friday": True,
+                "Saturday": True,
+                "Sunday": True,
+            },
+            (
+                dateutil.rrule.MO,
+                dateutil.rrule.TU,
+                dateutil.rrule.WE,
+                dateutil.rrule.TH,
+                dateutil.rrule.FR,
+                dateutil.rrule.SA,
+                dateutil.rrule.SU,
+            ),
+        ),
+        (
+            {
+                "Monday": True,
+                "Tuesday": False,
+                "Wednesday": True,
+                "Thursday": True,
+                "Friday": True,
+                "Saturday": True,
+                "Sunday": True,
+            },
+            (
+                dateutil.rrule.MO,
+                dateutil.rrule.WE,
+                dateutil.rrule.TH,
+                dateutil.rrule.FR,
+                dateutil.rrule.SA,
+                dateutil.rrule.SU,
+            ),
+        ),
+    ]:
+        assert (
+            scope.database.scheduled_item_utils._compute_byweekday(
+                repeat_day_flags=repeat_day_flags
+            )
+            == expected
+        )
 
 
 def test_scheduled_item_localized_datetime():
@@ -64,8 +116,18 @@ def test_scheduled_item_initial_date():
 
 
 def test_scheduled_item_scheduled_dates():
-    for (start_date, day_of_week, frequency, months, expected) in [
+    for (
+        has_repetition,
+        repeat_day_flags,
+        start_date,
+        day_of_week,
+        frequency,
+        months,
+        expected,
+    ) in [
         (
+            None,
+            None,
             _datetime.date(2022, 3, 11),  # Friday
             scope.enums.DayOfWeek.Monday.value,
             scope.enums.ScheduledItemFrequency.Daily.value,
@@ -76,6 +138,8 @@ def test_scheduled_item_scheduled_dates():
             ),
         ),
         (
+            None,
+            None,
             _datetime.date(2022, 3, 11),  # Friday
             scope.enums.DayOfWeek.Monday.value,
             scope.enums.ScheduledItemFrequency.Weekly.value,
@@ -89,6 +153,8 @@ def test_scheduled_item_scheduled_dates():
             ],
         ),
         (
+            None,
+            None,
             _datetime.date(2022, 3, 11),  # Friday
             scope.enums.DayOfWeek.Monday.value,
             scope.enums.ScheduledItemFrequency.Biweekly.value,
@@ -100,6 +166,8 @@ def test_scheduled_item_scheduled_dates():
             ],
         ),
         (
+            None,
+            None,
             _datetime.date(2022, 3, 11),  # Friday
             scope.enums.DayOfWeek.Monday.value,
             scope.enums.ScheduledItemFrequency.Monthly.value,
@@ -110,6 +178,8 @@ def test_scheduled_item_scheduled_dates():
             ],
         ),
         (
+            None,
+            None,
             _datetime.date(2022, 3, 11),  # Friday
             scope.enums.DayOfWeek.Monday.value,
             scope.enums.ScheduledItemFrequency.Monthly.value,
@@ -124,6 +194,8 @@ def test_scheduled_item_scheduled_dates():
     ]:
         assert (
             scope.database.scheduled_item_utils._scheduled_dates(
+                has_repetition=has_repetition,
+                repeat_day_flags=repeat_day_flags,
                 start_date=start_date,
                 day_of_week=day_of_week,
                 frequency=frequency,
@@ -135,6 +207,8 @@ def test_scheduled_item_scheduled_dates():
 
 def test_scheduled_item_create_scheduled_items_no_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
+        has_repetition=None,
+        repeat_day_flags=None,
         start_date=_datetime.date(2022, 3, 11),
         day_of_week=scope.enums.DayOfWeek.Monday.value,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
@@ -192,6 +266,8 @@ def test_scheduled_item_create_scheduled_items_no_reminder():
 
 def test_scheduled_item_create_scheduled_items_with_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
+        has_repetition=None,
+        repeat_day_flags=None,
         start_date=_datetime.date(2022, 3, 11),
         day_of_week=scope.enums.DayOfWeek.Monday.value,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
