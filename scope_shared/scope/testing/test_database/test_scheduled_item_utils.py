@@ -339,7 +339,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             True,
             scope.enums.ScheduledItemFrequency.Biweekly.value,
             _REPEAT_DAY_FLAGS_TUE_THU_FRI,  # None
-            None,
+            scope.enums.DayOfWeek.Wednesday.value,
             3,
         ),
         (  # frequency is Biweekly, must provide day_of_week
