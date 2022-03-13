@@ -2,7 +2,7 @@ import datetime as _datetime
 import dateutil.relativedelta
 import dateutil.rrule
 import pytz
-from typing import List, Optional, Tuple
+from typing import List, Dict, Optional, Tuple
 
 import scope.database.date_utils as date_utils
 import scope.enums
@@ -40,6 +40,15 @@ def _localized_datetime(
     time_of_day: int,
     timezone: pytz.timezone,
 ) -> _datetime.datetime:
+    """
+    Obtain an absolute datetime corresponding to:
+    - a provided date
+    - a provided time_of_day
+    - a provided timezone
+
+    The datetime will correspond to the above, but will be UTC aware.
+    """
+
     datetime = _datetime.datetime.combine(date, _datetime.time(hour=time_of_day))
 
     localized_datetime = timezone.localize(datetime)
@@ -52,29 +61,84 @@ def _localized_datetime(
 def _initial_date(
     *,
     start_date: _datetime.date,
-    day_of_week: str,
+    repeat_day_flags: Optional[Dict[str, bool]],
+    day_of_week: Optional[str],
 ) -> _datetime.date:
-    return start_date + dateutil.relativedelta.relativedelta(
-        weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
-    )
+    day_variable_count = 0
+    if repeat_day_flags is not None:
+        day_variable_count += 1
+    if day_of_week is not None:
+        day_variable_count += 1
+
+    if day_variable_count != 1:
+        raise ValueError("Either repeat_day_flags or day_of_week must be provided")
+
+    if day_of_week:
+        return start_date + dateutil.relativedelta.relativedelta(
+            weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
+        )
+    else:
+        initial_date_earliest = None
+        for (day_of_week, flag) in repeat_day_flags.items():
+            if flag:
+                initial_date_current = start_date + dateutil.relativedelta.relativedelta(
+                    weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
+                )
+
+                if initial_date_earliest is None or initial_date_current < initial_date_earliest:
+                    initial_date_earliest = initial_date_current
+
+        return initial_date_earliest
 
 
 def _scheduled_dates(
     *,
-    has_repetition: Optional[bool],
-    repeat_day_flags: Optional[dict],
-    start_date: _datetime.date,
-    day_of_week: Optional[str],
-    frequency: str,
-    months: int,
+    start_date: _datetime.date,         # Scheduled date of first/only item
+    has_repetition: bool,               # Whether to repeat
+    frequency: Optional[str],           # Frequency to repeat
+    repeat_day_flags: Optional[dict],   # For weekly frequency, days of week to repeat
+    day_of_week: Optional[str],         # For frequencies beyond weekly, day of week to start/repeat
+    months: Optional[int],              # How many months of items to generate
 ) -> List[_datetime.date]:
+    date_utils.raise_on_not_date(date=start_date)
+    if not has_repetition:
+        if any([frequency is not None, repeat_day_flags is not None, day_of_week is not None, months is not None]):
+            raise ValueError("If has_repetition is False, repetition variables must be None")
+    if has_repetition:
+        if frequency is None:
+            raise ValueError("If has_repetition is True, frequency must be provided")
+        if months is None:
+            raise ValueError("If has_repetition is True, months must be provided")
+    if frequency is scope.enums.ScheduledItemFrequency.Daily.value:
+        if any([repeat_day_flags is not None, day_of_week is not None]):
+            raise ValueError("If frequency is Daily, repeat_day_flags and day_of_week must be None")
+    elif frequency is scope.enums.ScheduledItemFrequency.Weekly.value:
+        day_variable_count = 0
+        if repeat_day_flags is not None:
+            day_variable_count += 1
+        if day_of_week is not None:
+            day_variable_count += 1
 
-    if has_repetition == False:
+        if day_variable_count != 1:
+            raise ValueError("If frequency is Weekly, either repeat_day_flags or day_of_week must be provided")
+    elif frequency in [
+        scope.enums.ScheduledItemFrequency.Biweekly.value,
+        scope.enums.ScheduledItemFrequency.Monthly.value,
+    ]:
+        if repeat_day_flags is not None:
+            raise ValueError("If frequency is Biweekly or Monthly, repeat_day_flags must be None")
+        if day_of_week is None:
+            raise ValueError("If frequency is Biweekly or Monthly, day_of_week must be provided")
+    if repeat_day_flags is not None:
+        if not any(repeat_day_flags.values()):
+            raise ValueError("At least one repeat_day_flag must be True")
+
+    if not has_repetition:
         return [start_date]
 
-    if day_of_week:
+    if repeat_day_flags or day_of_week:
         initial_date: _datetime.date = _initial_date(
-            start_date=start_date, day_of_week=day_of_week
+            start_date=start_date, repeat_day_flags=repeat_day_flags, day_of_week=day_of_week
         )
     else:
         initial_date: _datetime.date = start_date
@@ -91,7 +155,7 @@ def _scheduled_dates(
             until=until_date,
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Weekly.value:
-        if repeat_day_flags and has_repetition:
+        if repeat_day_flags:
             repeat_rule = dateutil.rrule.rrule(
                 dateutil.rrule.WEEKLY,
                 dtstart=initial_date,
