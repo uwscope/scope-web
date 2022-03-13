@@ -99,6 +99,7 @@ const getColoredSwitch = (color: string) =>
 export interface IVisDataPoint {
     recordedDateTime: Date;
     pointValues: AssessmentData;
+    totalScore?: number;
 }
 
 export interface IAssessmentChartProps {
@@ -140,7 +141,7 @@ export const AssessmentVis = withTheme(
                 state.hoveredPoint = point;
                 state.hoveredIndex = index;
             }),
-            500
+            500,
         );
 
         const dataKeys = scaleOrder || (!!data && data.length > 0 ? Object.keys(data[0].pointValues) : []);
@@ -183,16 +184,19 @@ export const AssessmentVis = withTheme(
             }
 
             const filteredData = data.filter(
-                (d) => compareAsc(minDate, d.recordedDateTime) < 0 && compareAsc(maxDate, d.recordedDateTime) > 0
+                (d) => compareAsc(minDate, d.recordedDateTime) < 0 && compareAsc(maxDate, d.recordedDateTime) > 0,
             );
 
             const dailyPoints = filteredData.map(
                 (d) =>
                     ({
                         x: addHours(clearTime(d.recordedDateTime), useTime ? 12 : 0).getTime(),
-                        y: getAssessmentScore(d.pointValues),
+                        y:
+                            d.totalScore != undefined && d.totalScore >= 0
+                                ? d.totalScore
+                                : getAssessmentScore(d.pointValues),
                         _x: d.recordedDateTime.getTime(),
-                    } as Point)
+                    } as Point),
             );
 
             const reduced = dailyPoints.reduce((m, d) => {
@@ -247,7 +251,7 @@ export const AssessmentVis = withTheme(
                     ({
                         x: d.recordedDateTime.getTime(),
                         y: getAssessmentScore(d.pointValues),
-                    } as Point)
+                    } as Point),
             );
 
             const getDataForKey = (key: string) => {
@@ -257,7 +261,7 @@ export const AssessmentVis = withTheme(
                             x: d.recordedDateTime.getTime(),
                             y: d.pointValues[key],
                             name: key,
-                        } as Point)
+                        } as Point),
                 );
             };
 
@@ -350,7 +354,7 @@ export const AssessmentVis = withTheme(
                                                     <div key={p.x.toString()}>
                                                         {`${format(p.x as number, 'hh:mm aaa')}: ${p.y}`}
                                                     </div>
-                                                )
+                                                ),
                                             )}
                                     </CrosshairContainer>
                                 </Crosshair>
@@ -392,5 +396,5 @@ export const AssessmentVis = withTheme(
         } else {
             return null;
         }
-    })
+    }),
 );

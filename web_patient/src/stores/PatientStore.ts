@@ -307,7 +307,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async saveAssessmentLog(assessmentLog: IAssessmentLog) {
         const promise = this.patientService
-            .addAssessmentLog({ ...assessmentLog, completed: true, recordedDateTime: new Date() })
+            .addAssessmentLog({ ...assessmentLog, recordedDateTime: new Date() })
             .then((addedLog) => {
                 const newLogs = this.assessmentLogs.slice() || [];
                 newLogs.push(addedLog);

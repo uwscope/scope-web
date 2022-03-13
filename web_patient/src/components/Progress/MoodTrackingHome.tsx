@@ -22,7 +22,10 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
     const navigate = useNavigate();
     const { patientStore } = useStores();
 
-    const viewState = useLocalObservable<{ selectedLog?: IMoodLog }>(() => ({}));
+    const viewState = useLocalObservable<{ selectedLog?: IMoodLog; isOpen: boolean }>(() => ({
+        selectedLog: undefined,
+        isOpen: false,
+    }));
 
     const handleGoBack = action(() => {
         navigate(-1);
@@ -30,10 +33,12 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
 
     const handleLogClick = action((log: IMoodLog) => {
         viewState.selectedLog = log;
+        viewState.isOpen = true;
     });
 
     const handleClose = action(() => {
         viewState.selectedLog = undefined;
+        viewState.isOpen = false;
     });
 
     return (
@@ -64,38 +69,43 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                                 ))}
                             </TableBody>
                         </Table>
-                        <ProgressDialog
-                            isOpen={!!viewState.selectedLog}
-                            title={getString('Mood_tracking_detail_title')}
-                            content={
-                                <Table size="small" aria-label="a dense table">
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Mood_tracking_column_date')}
-                                            </TableCell>
-                                            <TableCell>{`${
-                                                viewState.selectedLog?.recordedDateTime &&
-                                                format(viewState.selectedLog.recordedDateTime, 'MM/dd/yyyy h:mm aaa')
-                                            }`}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Mood_tracking_column_mood')}
-                                            </TableCell>
-                                            <TableCell>{viewState.selectedLog?.mood}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Mood_tracking_column_comment')}
-                                            </TableCell>
-                                            <TableCell>{viewState.selectedLog?.comment}</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            }
-                            onClose={handleClose}
-                        />
+                        {viewState.selectedLog && (
+                            <ProgressDialog
+                                isOpen={viewState.isOpen}
+                                title={getString('Mood_tracking_detail_title')}
+                                content={
+                                    <Table size="small" aria-label="a dense table">
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Mood_tracking_column_date')}
+                                                </TableCell>
+                                                <TableCell>{`${
+                                                    viewState.selectedLog?.recordedDateTime &&
+                                                    format(
+                                                        viewState.selectedLog.recordedDateTime,
+                                                        'MM/dd/yyyy h:mm aaa',
+                                                    )
+                                                }`}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Mood_tracking_column_mood')}
+                                                </TableCell>
+                                                <TableCell>{viewState.selectedLog?.mood}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Mood_tracking_column_comment')}
+                                                </TableCell>
+                                                <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                }
+                                onClose={handleClose}
+                            />
+                        )}
                     </Fragment>
                 ) : (
                     <Typography>{getString('Mood_tracking_no_data')}</Typography>
