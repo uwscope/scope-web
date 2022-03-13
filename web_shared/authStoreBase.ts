@@ -122,10 +122,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
                 }),
             });
 
-            authUser.getSession(async (err: any, session: any) => {
-                console.log('error', err);
-                console.log('session', session);
-
+            authUser.getSession(async (_: any, session: any) => {
                 if (!!session) {
                     const loadAndLogQuery = getLoadAndLogQuery(logger);
                     await loadAndLogQuery(() => this.getIdentityFromSession(Promise.resolve(session)), this.authQuery);

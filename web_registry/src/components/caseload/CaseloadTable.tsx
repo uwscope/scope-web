@@ -12,7 +12,7 @@ import React, { FunctionComponent } from 'react';
 import { getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
-import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
+import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const TableContainer = styled.div({
@@ -286,6 +286,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             phq9[phq9.length - 1].pointValues &&
             !!phq9[phq9.length - 1].pointValues['Suicide'];
 
+        const initialPHQScore = phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[0]) : undefined;
+        const initialGADScore = gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[0]) : undefined;
+
         return {
             ...p,
             ...p.profile,
@@ -301,27 +304,25 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 initialSessionDate && recentSessionDate
                     ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
                     : 0,
-            initialPHQ: phq9 && phq9.length > 0 ? getAssessmentScore(phq9[0].pointValues) : NA,
-            lastPHQ: phq9 && phq9.length > 0 ? getAssessmentScore(phq9[phq9.length - 1].pointValues) : NA,
+            initialPHQ: phq9 && phq9.length > 0 ? initialPHQScore : NA,
+            lastPHQ: phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) : NA,
             changePHQ:
-                phq9 && phq9.length > 1
+                initialPHQScore && initialPHQScore
                     ? Math.round(
-                          ((getAssessmentScore(phq9[phq9.length - 1].pointValues) -
-                              getAssessmentScore(phq9[0].pointValues)) /
-                              getAssessmentScore(phq9[0].pointValues)) *
+                          ((getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) - initialPHQScore) /
+                              initialPHQScore) *
                               100,
                       )
                     : NA,
             lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
 
-            initialGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[0].pointValues) : NA,
-            lastGAD: gad7 && gad7.length > 0 ? getAssessmentScore(gad7[gad7.length - 1].pointValues) : NA,
+            initialGAD: gad7 && gad7.length > 0 ? initialGADScore : NA,
+            lastGAD: gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) : NA,
             changeGAD:
-                gad7 && gad7.length > 1
+                initialGADScore && initialGADScore > 0
                     ? Math.round(
-                          ((getAssessmentScore(gad7[gad7.length - 1].pointValues) -
-                              getAssessmentScore(gad7[0].pointValues)) /
-                              getAssessmentScore(gad7[0].pointValues)) *
+                          ((getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) - initialGADScore) /
+                              initialGADScore) *
                               100,
                       )
                     : NA,
