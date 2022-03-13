@@ -28,7 +28,7 @@ import { SessionProgressVis } from 'src/components/common/SessionProgressVis';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 import { SessionReviewTable } from 'src/components/PatientDetail/SessionReviewTable';
 import { usePatient, useStores } from 'src/stores/stores';
-import { getAssessmentScore } from 'src/utils/assessment';
+import { getAssessmentScoreFromPointValues } from 'src/utils/assessment';
 
 const getDefaultSession = () =>
     ({
@@ -486,14 +486,14 @@ export const SessionInfo: FunctionComponent = observer(() => {
         .filter((log) => log.assessmentId == 'phq-9')
         .map((log) => ({
             date: log.recordedDateTime,
-            score: log.totalScore || getAssessmentScore(log.pointValues),
+            score: log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
         }));
 
     const gadScores = currentPatient.assessmentLogs
         .filter((log) => log.assessmentId == 'gad-7')
         .map((log) => ({
             date: log.recordedDateTime,
-            score: log.totalScore || getAssessmentScore(log.pointValues),
+            score: log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
         }));
 
     const sessionDates = currentPatient.sessions
@@ -510,7 +510,10 @@ export const SessionInfo: FunctionComponent = observer(() => {
             id: r.caseReviewId as string,
         }));
 
-    const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadCaseReviewsState.pending;
+    const loading =
+        currentPatient?.loadPatientState.pending ||
+        currentPatient?.loadSessionsState.pending ||
+        currentPatient?.loadCaseReviewsState.pending;
     const error = currentPatient?.loadSessionsState.error || currentPatient?.loadCaseReviewsState.error;
 
     const availablePsychiatristNames = patientsStore.psychiatrists.map((p) => p.name);

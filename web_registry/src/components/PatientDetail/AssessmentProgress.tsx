@@ -20,7 +20,7 @@ import StatefulDialog from 'src/components/common/StatefulDialog';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
 import { usePatient, useStores } from 'src/stores/stores';
-import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
+import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const ScoreCell = withTheme(
@@ -197,8 +197,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         .map((a) => {
             return {
                 date: format(a.recordedDateTime, 'MM/dd/yy'),
-                total:
-                    a.totalScore != undefined && a.totalScore >= 0 ? a.totalScore : getAssessmentScore(a.pointValues),
+                total: getAssessmentScoreFromAssessmentLog(a),
                 id: a.assessmentLogId,
                 ...a.pointValues,
                 comment: a.comment,
@@ -268,8 +267,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             logState.openEdit = true;
             logState.log = { ...data };
             logState.log.pointValues = { ...data.pointValues };
-            logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
-            logState.log.totalScore = data.totalScore || -1;
+            logState.totalOnly = data.totalScore != undefined && data.totalScore >= 0;
+            logState.log.totalScore = data.totalScore != undefined && data.totalScore >= 0 ? data.totalScore : -1;
             logState.totalScoreString = `${logState.log.totalScore}`;
             logState.log.comment = data.comment || '';
         }
@@ -280,7 +279,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             id={assessment.assessmentId}
             title={assessmentName}
             inlineTitle={recurrence}
-            loading={currentPatient?.loadAssessmentLogsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadAssessmentLogsState.pending}
             error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {

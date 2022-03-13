@@ -54,7 +54,10 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
         .join('\n');
 
 
-    const loading = currentPatient?.loadSessionsState.pending || currentPatient?.loadAssessmentLogsState.pending;
+    const loading =
+        currentPatient?.loadPatientState.pending ||
+        currentPatient?.loadSessionsState.pending ||
+        currentPatient?.loadAssessmentLogsState.pending;
     const error = currentPatient?.loadSessionsState.error || currentPatient?.loadAssessmentLogsState.error;
 
     return (

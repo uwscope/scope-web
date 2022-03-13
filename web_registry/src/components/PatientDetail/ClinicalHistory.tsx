@@ -174,7 +174,7 @@ export const ClinicalHistory: FunctionComponent = observer(() => {
             id="clinical-history"
             title="Clinical History and Diagnosis"
             error={currentPatient?.loadClinicalHistoryState.error}
-            loading={currentPatient?.loadClinicalHistoryState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadClinicalHistoryState.pending}
             showSnackbar={!state.open}
             actionButtons={[{ icon: <EditIcon />, text: 'Edit', onClick: handleOpen } as IActionButton]}>
             <ClinicalHistoryContent editable={false} {...clinicalHistory} onValueChange={onValueChange} />

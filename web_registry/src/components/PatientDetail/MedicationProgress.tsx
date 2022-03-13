@@ -118,7 +118,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             id={assessment.assessmentId}
             title={assessmentContent?.name || 'Unknown assessment'}
             inlineTitle={recurrence}
-            loading={currentPatient?.loadAssessmentLogsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadAssessmentLogsState.pending}
             error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {
