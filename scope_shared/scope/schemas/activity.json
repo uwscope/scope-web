@@ -29,8 +29,8 @@
 		"lifeareaId": {
 			"type": "string"
 		},
-		"startDate": {
-			"$ref": "/schemas/datetime#/properties/date"
+		"startDateTime": {
+			"$ref": "/schemas/datetime#/properties/datetime"
 		},
 		"timeOfDay": {
 			"type": "number",
@@ -53,24 +53,8 @@
 		},
 		"isActive": {
 			"type": "boolean"
-		},
-		"isDeleted": {
-			"type": "boolean"
 		}
 	},
 	"additionalProperties": false,
-	"required": [
-		"_type",
-		"name",
-		"value",
-		"lifeareaId",
-		"startDate",
-		"timeOfDay",
-		"hasReminder",
-		"reminderTimeOfDay",
-		"hasRepetition",
-		"repeatDayFlags",
-		"isActive",
-		"isDeleted"
-	]
+	"required": ["_type", "name", "value", "lifeareaId", "startDateTime", "timeOfDay", "hasReminder", "hasRepetition"]
 }
