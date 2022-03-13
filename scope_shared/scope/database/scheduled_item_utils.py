@@ -21,7 +21,11 @@ DATEUTIL_WEEKDAYS_MAP = {
 }
 
 
-def _compute_byweekday(repeat_day_flags: dict) -> Tuple:
+def _convert_byweekday(repeat_day_flags: dict) -> Tuple:
+    """
+    Convert our repeat day flags format into the byweekday format expected by dateutil.
+    """
+
     byweekday = []
     for day, day_flag in repeat_day_flags.items():
         if day_flag:
@@ -92,7 +96,7 @@ def _scheduled_dates(
                 dateutil.rrule.WEEKLY,
                 dtstart=initial_date,
                 until=until_date,
-                byweekday=_compute_byweekday(repeat_day_flags),
+                byweekday=_convert_byweekday(repeat_day_flags),
             )
         else:
             repeat_rule = dateutil.rrule.rrule(

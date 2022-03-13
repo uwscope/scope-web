@@ -1,8 +1,5 @@
 import datetime as _datetime
 import dateutil.rrule
-
-import pprint
-
 import pytz
 
 import scope.database.date_utils
@@ -10,17 +7,17 @@ import scope.database.scheduled_item_utils
 import scope.enums
 
 
-def test_scheduled_item_compute_byweekday():
+def test_scheduled_item_convert_byweekday():
     for (repeat_day_flags, expected) in [
-        (
+        (   # Every day of the week
             {
-                "Monday": True,
-                "Tuesday": True,
-                "Wednesday": True,
-                "Thursday": True,
-                "Friday": True,
-                "Saturday": True,
-                "Sunday": True,
+                scope.enums.DayOfWeek.Monday.value: True,
+                scope.enums.DayOfWeek.Tuesday.value: True,
+                scope.enums.DayOfWeek.Wednesday.value: True,
+                scope.enums.DayOfWeek.Thursday.value: True,
+                scope.enums.DayOfWeek.Friday.value: True,
+                scope.enums.DayOfWeek.Saturday.value: True,
+                scope.enums.DayOfWeek.Sunday.value: True,
             },
             (
                 dateutil.rrule.MO,
@@ -32,15 +29,15 @@ def test_scheduled_item_compute_byweekday():
                 dateutil.rrule.SU,
             ),
         ),
-        (
+        (   # Every day of the week except Tuesday
             {
-                "Monday": True,
-                "Tuesday": False,
-                "Wednesday": True,
-                "Thursday": True,
-                "Friday": True,
-                "Saturday": True,
-                "Sunday": True,
+                scope.enums.DayOfWeek.Monday.value: True,
+                scope.enums.DayOfWeek.Tuesday.value: False,
+                scope.enums.DayOfWeek.Wednesday.value: True,
+                scope.enums.DayOfWeek.Thursday.value: True,
+                scope.enums.DayOfWeek.Friday.value: True,
+                scope.enums.DayOfWeek.Saturday.value: True,
+                scope.enums.DayOfWeek.Sunday.value: True,
             },
             (
                 dateutil.rrule.MO,
@@ -53,7 +50,7 @@ def test_scheduled_item_compute_byweekday():
         ),
     ]:
         assert (
-            scope.database.scheduled_item_utils._compute_byweekday(
+            scope.database.scheduled_item_utils._convert_byweekday(
                 repeat_day_flags=repeat_day_flags
             )
             == expected
