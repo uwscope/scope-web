@@ -2,7 +2,7 @@ import datetime as _datetime
 import dateutil.relativedelta
 import dateutil.rrule
 import pytz
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import scope.database.date_utils as date_utils
 import scope.enums
@@ -19,6 +19,15 @@ DATEUTIL_WEEKDAYS_MAP = {
     scope.enums.DayOfWeek.Saturday.value: dateutil.rrule.SA,
     scope.enums.DayOfWeek.Sunday.value: dateutil.rrule.SU,
 }
+
+
+def _compute_byweekday(repeat_day_flags: dict) -> Tuple:
+    byweekday = []
+    for day, day_flag in repeat_day_flags.items():
+        if day_flag:
+            byweekday.append(DATEUTIL_WEEKDAYS_MAP[day])
+
+    return tuple(byweekday)
 
 
 def _localized_datetime(
@@ -48,33 +57,63 @@ def _initial_date(
 
 def _scheduled_dates(
     *,
+    has_repetition: Optional[bool],
+    repeat_day_flags: Optional[dict],
     start_date: _datetime.date,
-    day_of_week: str,
+    day_of_week: Optional[str],
     frequency: str,
     months: int,
 ) -> List[_datetime.date]:
-    initial_date: _datetime.date = _initial_date(
-        start_date=start_date, day_of_week=day_of_week
-    )
+
+    if has_repetition == False:
+        return [start_date]
+
+    if day_of_week:
+        initial_date: _datetime.date = _initial_date(
+            start_date=start_date, day_of_week=day_of_week
+        )
+    else:
+        initial_date: _datetime.date = start_date
+
     until_date: _datetime.date = initial_date + dateutil.relativedelta.relativedelta(
         months=months
     )
 
     if frequency == scope.enums.ScheduledItemFrequency.Daily.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.DAILY, interval=1, dtstart=initial_date, until=until_date
+            dateutil.rrule.DAILY,
+            interval=1,
+            dtstart=initial_date,
+            until=until_date,
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Weekly.value:
-        repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY, interval=1, dtstart=initial_date, until=until_date
-        )
+        if repeat_day_flags and has_repetition:
+            repeat_rule = dateutil.rrule.rrule(
+                dateutil.rrule.WEEKLY,
+                dtstart=initial_date,
+                until=until_date,
+                byweekday=_compute_byweekday(repeat_day_flags),
+            )
+        else:
+            repeat_rule = dateutil.rrule.rrule(
+                dateutil.rrule.WEEKLY,
+                interval=1,
+                dtstart=initial_date,
+                until=until_date,
+            )
     elif frequency == scope.enums.ScheduledItemFrequency.Biweekly.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY, interval=2, dtstart=initial_date, until=until_date
+            dateutil.rrule.WEEKLY,
+            interval=2,
+            dtstart=initial_date,
+            until=until_date,
         )
     elif frequency == scope.enums.ScheduledItemFrequency.Monthly.value:
         repeat_rule = dateutil.rrule.rrule(
-            dateutil.rrule.WEEKLY, interval=4, dtstart=initial_date, until=until_date
+            dateutil.rrule.WEEKLY,
+            interval=4,
+            dtstart=initial_date,
+            until=until_date,
         )
     else:
         raise ValueError()
@@ -85,7 +124,9 @@ def _scheduled_dates(
 def create_scheduled_items(
     *,
     start_date: _datetime.date,
-    day_of_week: str,
+    has_repetition: Optional[bool],
+    repeat_day_flags: Optional[dict],
+    day_of_week: Optional[str],
     frequency: str,
     due_time_of_day: int,
     reminder: bool,
@@ -104,8 +145,14 @@ def create_scheduled_items(
             raise ValueError("reminder_time_of_day must be int >=0 and <= 23")
     if timezone.zone not in pytz.all_timezones:
         raise ValueError("timezone must be valid pytz timezone")
+    if has_repetition and day_of_week:
+        raise ValueError("both has_repetition and day_of_week cannot be True")
+    if repeat_day_flags and day_of_week:
+        raise ValueError("both repeat_day_flags and day_of_week cannot be True")
 
     scheduled_dates = _scheduled_dates(
+        has_repetition=has_repetition,
+        repeat_day_flags=repeat_day_flags,
         start_date=start_date,
         day_of_week=day_of_week,
         frequency=frequency,
