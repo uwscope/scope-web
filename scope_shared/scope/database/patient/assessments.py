@@ -192,7 +192,7 @@ def put_assessment(
             collection=collection,
             assessment_id=set_id,
             assessment=assessment_set_put_result.document,
-            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow())
+            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
         )
 
     return assessment_set_put_result

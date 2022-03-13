@@ -23,57 +23,75 @@ def test_assessment_calculate_scheduled_assessments_to_delete():
             "assessmentId": "differentId",
             "dueDate": date_utils.format_date(datetime.date(2022, 4, 1)),
             "dueTimeOfDay": 8,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 4, 1, 8))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 4, 1, 8))
+            ),
             "completed": False,
         },
         {  # Past item (previous date, later time), should not be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 3, 12)),
             "dueTimeOfDay": 16,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 3, 12, 16))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 3, 12, 16))
+            ),
             "completed": False,
         },
         {  # Past item (same date, previous time), should not be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 3, 13)),
             "dueTimeOfDay": 8,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 3, 13, 8))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 3, 13, 8))
+            ),
             "completed": False,
         },
         {  # Future item (same date, later time), already completed, should not be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 3, 13)),
             "dueTimeOfDay": 16,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))
+            ),
             "completed": True,
         },
         {  # Future item (later date, earlier time), already completed, should not be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 4, 1)),
             "dueTimeOfDay": 4,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))
+            ),
             "completed": True,
         },
         {  # Future item (same date, later time), should be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 3, 13)),
             "dueTimeOfDay": 16,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))
+            ),
             "completed": False,
         },
         {  # Future item (later date, earlier time), should be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 4, 1)),
             "dueTimeOfDay": 4,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))
+            ),
             "completed": False,
         },
     ]
 
-    deleted_assessments = scope.database.patient.assessments._calculate_scheduled_assessments_to_delete(
-        assessment_id="deleteTestId",
-        scheduled_assessments=scheduled_assessments,
-        maintenance_datetime=pytz.utc.localize(datetime.datetime(2022, 3, 13, 12, 0, 0))
+    deleted_assessments = (
+        scope.database.patient.assessments._calculate_scheduled_assessments_to_delete(
+            assessment_id="deleteTestId",
+            scheduled_assessments=scheduled_assessments,
+            maintenance_datetime=pytz.utc.localize(
+                datetime.datetime(2022, 3, 13, 12, 0, 0)
+            ),
+        )
     )
 
     assert deleted_assessments == [
@@ -81,14 +99,18 @@ def test_assessment_calculate_scheduled_assessments_to_delete():
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 3, 13)),
             "dueTimeOfDay": 16,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 3, 13, 16))
+            ),
             "completed": False,
         },
         {  # Future item (later date, earlier time), should be deleted
             "assessmentId": "deleteTestId",
             "dueDate": date_utils.format_date(datetime.date(2022, 4, 1)),
             "dueTimeOfDay": 4,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime(2022, 4, 1, 4))
+            ),
             "completed": False,
         },
     ]

@@ -84,8 +84,11 @@ def _initial_date(
             initial_date = None
             for (day_of_week, flag) in repeat_day_flags.items():
                 if flag:
-                    initial_date_current = effective_date + dateutil.relativedelta.relativedelta(
-                        weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
+                    initial_date_current = (
+                        effective_date
+                        + dateutil.relativedelta.relativedelta(
+                            weekday=DATEUTIL_WEEKDAYS_MAP[day_of_week]
+                        )
                     )
 
                     if initial_date is None or initial_date_current < initial_date:
@@ -118,18 +121,29 @@ def _initial_date(
 
 def _scheduled_dates(
     *,
-    start_date: _datetime.date,         # Scheduled date of first/only item
-    effective_date: _datetime.date,     # Date from which we want to schedule
-    has_repetition: bool,               # Whether to repeat
-    frequency: Optional[str],           # Frequency to repeat
-    repeat_day_flags: Optional[dict],   # For weekly frequency, days of week to repeat
-    day_of_week: Optional[str],         # For frequencies beyond weekly, day of week to start/repeat
-    months: Optional[int],              # How many months of items to generate
+    start_date: _datetime.date,  # Scheduled date of first/only item
+    effective_date: _datetime.date,  # Date from which we want to schedule
+    has_repetition: bool,  # Whether to repeat
+    frequency: Optional[str],  # Frequency to repeat
+    repeat_day_flags: Optional[dict],  # For weekly frequency, days of week to repeat
+    day_of_week: Optional[
+        str
+    ],  # For frequencies beyond weekly, day of week to start/repeat
+    months: Optional[int],  # How many months of items to generate
 ) -> List[_datetime.date]:
     date_utils.raise_on_not_date(date=start_date)
     if not has_repetition:
-        if any([frequency is not None, repeat_day_flags is not None, day_of_week is not None, months is not None]):
-            raise ValueError("If has_repetition is False, repetition variables must be None")
+        if any(
+            [
+                frequency is not None,
+                repeat_day_flags is not None,
+                day_of_week is not None,
+                months is not None,
+            ]
+        ):
+            raise ValueError(
+                "If has_repetition is False, repetition variables must be None"
+            )
     if has_repetition:
         if frequency is None:
             raise ValueError("If has_repetition is True, frequency must be provided")
@@ -137,7 +151,9 @@ def _scheduled_dates(
             raise ValueError("If has_repetition is True, months must be provided")
     if frequency is scope.enums.ScheduledItemFrequency.Daily.value:
         if any([repeat_day_flags is not None, day_of_week is not None]):
-            raise ValueError("If frequency is Daily, repeat_day_flags and day_of_week must be None")
+            raise ValueError(
+                "If frequency is Daily, repeat_day_flags and day_of_week must be None"
+            )
     elif frequency is scope.enums.ScheduledItemFrequency.Weekly.value:
         day_variable_count = 0
         if repeat_day_flags is not None:
@@ -146,15 +162,21 @@ def _scheduled_dates(
             day_variable_count += 1
 
         if day_variable_count != 1:
-            raise ValueError("If frequency is Weekly, either repeat_day_flags or day_of_week must be provided")
+            raise ValueError(
+                "If frequency is Weekly, either repeat_day_flags or day_of_week must be provided"
+            )
     elif frequency in [
         scope.enums.ScheduledItemFrequency.Biweekly.value,
         scope.enums.ScheduledItemFrequency.Monthly.value,
     ]:
         if repeat_day_flags is not None:
-            raise ValueError("If frequency is Biweekly or Monthly, repeat_day_flags must be None")
+            raise ValueError(
+                "If frequency is Biweekly or Monthly, repeat_day_flags must be None"
+            )
         if day_of_week is None:
-            raise ValueError("If frequency is Biweekly or Monthly, day_of_week must be provided")
+            raise ValueError(
+                "If frequency is Biweekly or Monthly, day_of_week must be provided"
+            )
     if repeat_day_flags is not None:
         if not any(repeat_day_flags.values()):
             raise ValueError("At least one repeat_day_flag must be True")
@@ -169,7 +191,7 @@ def _scheduled_dates(
             effective_date=effective_date,
             frequency=frequency,
             repeat_day_flags=repeat_day_flags,
-            day_of_week=day_of_week
+            day_of_week=day_of_week,
         )
     else:
         initial_date: _datetime.date = start_date

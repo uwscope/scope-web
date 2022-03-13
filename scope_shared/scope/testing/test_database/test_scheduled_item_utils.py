@@ -93,7 +93,14 @@ def test_scheduled_item_localized_datetime():
 
 
 def test_scheduled_item_initial_date():
-    for (start_date, effective_date, frequency, repeat_day_flags, day_of_week, expected_date) in [
+    for (
+        start_date,
+        effective_date,
+        frequency,
+        repeat_day_flags,
+        day_of_week,
+        expected_date,
+    ) in [
         (  # Daily item, effective the same day
             _datetime.date(2022, 3, 11),  # Friday
             _datetime.date(2022, 3, 11),
@@ -119,100 +126,100 @@ def test_scheduled_item_initial_date():
             _datetime.date(2022, 4, 1),
         ),
         (  # Weekly item, with repeat day flags, effective the same day
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 11),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
-                None,
-                _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 11),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+            None,
+            _datetime.date(2022, 3, 11),
         ),
         (  # Weekly item, with repeat day flags, effective in the past
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 1),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
-                None,
-                _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 1),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+            None,
+            _datetime.date(2022, 3, 11),
         ),
         (  # Weekly item, with repeat day flags, effective in the future
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 4, 1),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
-                None,
-                _datetime.date(2022, 4, 1),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 4, 1),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+            None,
+            _datetime.date(2022, 4, 1),
         ),
         (  # Weekly item, with day of week, effective the same day
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 11),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 11),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Weekly item, with day of week, effective in the past
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 1),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 1),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Weekly item, with day of week, effective in the future
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 4, 1),
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 4, 6),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 4, 1),
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 4, 6),
         ),
         (  # Biweekly item, with day of week, effective the same day
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 11),
-                scope.enums.ScheduledItemFrequency.Biweekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 11),
+            scope.enums.ScheduledItemFrequency.Biweekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Biweekly item, with day of week, effective in the past
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 1),
-                scope.enums.ScheduledItemFrequency.Biweekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 1),
+            scope.enums.ScheduledItemFrequency.Biweekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Biweekly item, with day of week, effective in the future
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 4, 1),
-                scope.enums.ScheduledItemFrequency.Biweekly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 4, 13),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 4, 1),
+            scope.enums.ScheduledItemFrequency.Biweekly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 4, 13),
         ),
         (  # Monthly item, with day of week, effective the same day
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 11),
-                scope.enums.ScheduledItemFrequency.Monthly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 11),
+            scope.enums.ScheduledItemFrequency.Monthly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Monthly item, with day of week, effective in the past
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 3, 1),
-                scope.enums.ScheduledItemFrequency.Monthly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 3, 16),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 1),
+            scope.enums.ScheduledItemFrequency.Monthly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 3, 16),
         ),
         (  # Monthly item, with day of week, effective in the future
-                _datetime.date(2022, 3, 11),  # Friday
-                _datetime.date(2022, 4, 1),
-                scope.enums.ScheduledItemFrequency.Monthly.value,
-                None,
-                scope.enums.DayOfWeek.Wednesday.value,
-                _datetime.date(2022, 4, 13),
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 4, 1),
+            scope.enums.ScheduledItemFrequency.Monthly.value,
+            None,
+            scope.enums.DayOfWeek.Wednesday.value,
+            _datetime.date(2022, 4, 13),
         ),
     ]:
         initial_date = scope.database.scheduled_item_utils._initial_date(
@@ -491,12 +498,15 @@ def test_scheduled_item_scheduled_dates_valueerror():
             3,
         ),
         (  # repeat_day_flags is provided, at least one flag must be True
-                _datetime.date(2022, 3, 11),
-                True,
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                {day_of_week_item.value: False for day_of_week_item in scope.enums.DayOfWeek},
-                None,
-                3,
+            _datetime.date(2022, 3, 11),
+            True,
+            scope.enums.ScheduledItemFrequency.Weekly.value,
+            {
+                day_of_week_item.value: False
+                for day_of_week_item in scope.enums.DayOfWeek
+            },
+            None,
+            3,
         ),
     ]:
         with pytest.raises(ValueError):
