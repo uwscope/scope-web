@@ -8,6 +8,7 @@ import pytz
 from typing import Callable
 
 import scope.database.date_utils as date_utils
+import scope.database.patient.assessments
 import scope.database.patient.scheduled_assessments
 import scope.database.patients
 import scope.database.patient_unsafe_utils as patient_unsafe_utils
