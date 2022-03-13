@@ -93,25 +93,149 @@ def test_scheduled_item_localized_datetime():
 
 
 def test_scheduled_item_initial_date():
-    for (date, repeat_day_flags, day_of_week, expected) in [
-        (
+    for (start_date, effective_date, frequency, repeat_day_flags, day_of_week, expected_date) in [
+        (  # Daily item, effective the same day
             _datetime.date(2022, 3, 11),  # Friday
-            scope.enums.DayOfWeek.Friday.value,
+            _datetime.date(2022, 3, 11),
+            scope.enums.ScheduledItemFrequency.Daily.value,
+            None,
+            None,
             _datetime.date(2022, 3, 11),
         ),
-        (
+        (  # Daily item, effective in the past
             _datetime.date(2022, 3, 11),  # Friday
-            scope.enums.DayOfWeek.Monday.value,
-            _datetime.date(2022, 3, 14),  # The following Monday
+            _datetime.date(2022, 3, 1),
+            scope.enums.ScheduledItemFrequency.Daily.value,
+            None,
+            None,
+            _datetime.date(2022, 3, 11),
+        ),
+        (  # Daily item, effective in the future
+            _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 4, 1),
+            scope.enums.ScheduledItemFrequency.Daily.value,
+            None,
+            None,
+            _datetime.date(2022, 4, 1),
+        ),
+        (  # Weekly item, with repeat day flags, effective the same day
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 11),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+                None,
+                _datetime.date(2022, 3, 11),
+        ),
+        (  # Weekly item, with repeat day flags, effective in the past
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 1),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+                None,
+                _datetime.date(2022, 3, 11),
+        ),
+        (  # Weekly item, with repeat day flags, effective in the future
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 4, 1),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                _REPEAT_DAY_FLAGS_TUE_THU_FRI,
+                None,
+                _datetime.date(2022, 4, 1),
+        ),
+        (  # Weekly item, with day of week, effective the same day
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 11),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Weekly item, with day of week, effective in the past
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 1),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Weekly item, with day of week, effective in the future
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 4, 1),
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 4, 6),
+        ),
+        (  # Biweekly item, with day of week, effective the same day
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 11),
+                scope.enums.ScheduledItemFrequency.Biweekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Biweekly item, with day of week, effective in the past
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 1),
+                scope.enums.ScheduledItemFrequency.Biweekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Biweekly item, with day of week, effective in the future
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 4, 1),
+                scope.enums.ScheduledItemFrequency.Biweekly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 4, 13),
+        ),
+        (  # Monthly item, with day of week, effective the same day
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 11),
+                scope.enums.ScheduledItemFrequency.Monthly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Monthly item, with day of week, effective in the past
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 3, 1),
+                scope.enums.ScheduledItemFrequency.Monthly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 3, 16),
+        ),
+        (  # Monthly item, with day of week, effective in the future
+                _datetime.date(2022, 3, 11),  # Friday
+                _datetime.date(2022, 4, 1),
+                scope.enums.ScheduledItemFrequency.Monthly.value,
+                None,
+                scope.enums.DayOfWeek.Wednesday.value,
+                _datetime.date(2022, 4, 13),
         ),
     ]:
-        assert (
-            scope.database.scheduled_item_utils._initial_date(
-                start_date=date,
-                day_of_week=day_of_week,
-            )
-            == expected
+        initial_date = scope.database.scheduled_item_utils._initial_date(
+            start_date=start_date,
+            effective_date=effective_date,
+            frequency=frequency,
+            repeat_day_flags=repeat_day_flags,
+            day_of_week=day_of_week,
         )
+
+        if initial_date != expected_date:
+            pprint.pprint(
+                {
+                    "start_date": start_date,
+                    "effective_date": effective_date,
+                    "frequency": frequency,
+                    "repeat_day_flags": repeat_day_flags,
+                    "day_of_week": day_of_week,
+                    "expected_date": expected_date,
+                }
+            )
+
+            assert initial_date == expected_date
 
 
 def test_scheduled_item_scheduled_dates():
