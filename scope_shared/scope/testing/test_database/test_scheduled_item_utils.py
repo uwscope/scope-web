@@ -4,7 +4,7 @@ import pprint
 import pytest
 import pytz
 
-import scope.database.date_utils
+import scope.database.date_utils as date_utils
 import scope.database.scheduled_item_utils
 import scope.enums
 
@@ -81,7 +81,7 @@ def test_scheduled_item_localized_datetime():
         ),
     ]:
         assert (
-            scope.database.date_utils.format_datetime(
+            date_utils.format_datetime(
                 datetime=scope.database.scheduled_item_utils._localized_datetime(
                     date=date,
                     time_of_day=time_of_day,
@@ -248,6 +248,7 @@ def test_scheduled_item_initial_date():
 def test_scheduled_item_scheduled_dates():
     for (
         start_date,
+        effective_date,
         has_repetition,
         frequency,
         repeat_day_flags,
@@ -257,6 +258,7 @@ def test_scheduled_item_scheduled_dates():
     ) in [
         (  # No repetition
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             False,
             None,
             None,
@@ -266,40 +268,42 @@ def test_scheduled_item_scheduled_dates():
         ),
         (
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Daily.value,
             None,
             None,
             1,
             (
-                [_datetime.date(2022, 3, day) for day in range(11, 31 + 1)]
-                + [_datetime.date(2022, 4, day) for day in range(1, 11 + 1)]
+                [_datetime.date(2022, 3, day) for day in range(18, 31 + 1)]
+                + [_datetime.date(2022, 4, day) for day in range(1, 18 + 1)]
             ),
         ),
         (  # Weekly repetition based on day_of_week
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Weekly.value,
             None,
             scope.enums.DayOfWeek.Monday.value,
             1,
             [
-                _datetime.date(2022, 3, 14),
                 _datetime.date(2022, 3, 21),
                 _datetime.date(2022, 3, 28),
                 _datetime.date(2022, 4, 4),
                 _datetime.date(2022, 4, 11),
+                _datetime.date(2022, 4, 18),
             ],
         ),
         (  # Weekly repetition based on repeat_day_flags
             _datetime.date(2022, 3, 16),  # Wednesday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Weekly.value,
             _REPEAT_DAY_FLAGS_TUE_THU_FRI,
             None,
             1,
             [
-                _datetime.date(2022, 3, 17),
                 _datetime.date(2022, 3, 18),
                 _datetime.date(2022, 3, 22),
                 _datetime.date(2022, 3, 24),
@@ -317,47 +321,51 @@ def test_scheduled_item_scheduled_dates():
         ),
         (
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Biweekly.value,
             None,
             scope.enums.DayOfWeek.Monday.value,
             1,
             [
-                _datetime.date(2022, 3, 14),
                 _datetime.date(2022, 3, 28),
                 _datetime.date(2022, 4, 11),
+                _datetime.date(2022, 4, 25),
             ],
         ),
         (
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Monthly.value,
             None,
             scope.enums.DayOfWeek.Monday.value,
             1,
             [
-                _datetime.date(2022, 3, 14),
                 _datetime.date(2022, 4, 11),
+                _datetime.date(2022, 5, 9),
             ],
         ),
         (
             _datetime.date(2022, 3, 11),  # Friday
+            _datetime.date(2022, 3, 18),
             True,
             scope.enums.ScheduledItemFrequency.Monthly.value,
             None,
             scope.enums.DayOfWeek.Monday.value,
             3,
             [
-                _datetime.date(2022, 3, 14),
                 _datetime.date(2022, 4, 11),
                 _datetime.date(2022, 5, 9),
                 _datetime.date(2022, 6, 6),
+                _datetime.date(2022, 7, 4),
             ],
         ),
     ]:
         assert (
             scope.database.scheduled_item_utils._scheduled_dates(
                 start_date=start_date,
+                effective_date=effective_date,
                 has_repetition=has_repetition,
                 frequency=frequency,
                 repeat_day_flags=repeat_day_flags,
@@ -371,6 +379,7 @@ def test_scheduled_item_scheduled_dates():
 def test_scheduled_item_scheduled_dates_valueerror():
     for (
         start_date,
+        effective_date,
         has_repetition,
         frequency,
         repeat_day_flags,
@@ -378,6 +387,16 @@ def test_scheduled_item_scheduled_dates_valueerror():
         months,
     ) in [
         (  # start_date is not date
+            _datetime.datetime(2022, 3, 11, 0, 0, 7),
+            _datetime.date(2022, 3, 11),
+            False,
+            None,
+            None,
+            None,
+            None,
+        ),
+        (  # effective_date is not date
+            _datetime.date(2022, 3, 11),
             _datetime.datetime(2022, 3, 11, 0, 0, 7),
             False,
             None,
@@ -387,6 +406,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # has_repetition is False, repetition variables must be None
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             False,
             scope.enums.ScheduledItemFrequency.Daily,  # None
             None,
@@ -394,6 +414,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             None,
         ),
         (  # has_repetition is False, repetition variables must be None
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             False,
             None,
@@ -403,6 +424,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # has_repetition is False, repetition variables must be None
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             False,
             None,
             None,
@@ -410,6 +432,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             None,
         ),
         (  # has_repetition is False, repetition variables must be None
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             False,
             None,
@@ -419,6 +442,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # has_repetition is True, must provide frequency
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             None,  # Missing
             None,
@@ -426,6 +450,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             None,
         ),
         (  # has_repetition is True, must provide months
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Daily,
@@ -435,6 +460,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # frequency is Daily, repeat_day_flags and day_of_week must be None
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Daily.value,
             _REPEAT_DAY_FLAGS_TUE_THU_FRI,  # None
@@ -442,6 +468,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             3,
         ),
         (  # frequency is Daily, repeat_day_flags and day_of_week must be None
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Daily.value,
@@ -451,6 +478,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # frequency is Weekly, must provide exactly one of day variables
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Weekly.value,
             None,  # Exactly one
@@ -458,6 +486,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             3,
         ),
         (  # frequency is Weekly, must provide exactly one of day variables
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Weekly.value,
@@ -467,6 +496,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # frequency is Biweekly, repeat_day_flags must be None
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Biweekly.value,
             _REPEAT_DAY_FLAGS_TUE_THU_FRI,  # None
@@ -474,6 +504,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             3,
         ),
         (  # frequency is Biweekly, must provide day_of_week
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Biweekly.value,
@@ -483,6 +514,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # frequency is Monthly, repeat_day_flags must be None
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Monthly.value,
             _REPEAT_DAY_FLAGS_TUE_THU_FRI,  # None
@@ -491,6 +523,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         ),
         (  # frequency is Monthly, must provide day_of_week
             _datetime.date(2022, 3, 11),
+            _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Monthly.value,
             None,
@@ -498,6 +531,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
             3,
         ),
         (  # repeat_day_flags is provided, at least one flag must be True
+            _datetime.date(2022, 3, 11),
             _datetime.date(2022, 3, 11),
             True,
             scope.enums.ScheduledItemFrequency.Weekly.value,
@@ -512,6 +546,7 @@ def test_scheduled_item_scheduled_dates_valueerror():
         with pytest.raises(ValueError):
             scope.database.scheduled_item_utils._scheduled_dates(
                 start_date=start_date,
+                effective_date=effective_date,
                 has_repetition=has_repetition,
                 frequency=frequency,
                 repeat_day_flags=repeat_day_flags,
@@ -534,11 +569,16 @@ def test_scheduled_item_scheduled_dates_valueerror():
 
 def test_scheduled_item_create_scheduled_items_no_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
-        has_repetition=None,
-        repeat_day_flags=None,
-        start_date=_datetime.date(2022, 3, 11),
-        day_of_week=scope.enums.DayOfWeek.Monday.value,
+        start_datetime=pytz.timezone("America/Los_Angeles").localize(
+            _datetime.datetime(2022, 3, 11, 14)
+        ).astimezone(pytz.utc),
+        effective_datetime=pytz.timezone("America/Los_Angeles").localize(
+            _datetime.datetime(2022, 4, 1, 14)
+        ).astimezone(pytz.utc),
+        has_repetition=True,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
+        repeat_day_flags=None,
+        day_of_week=scope.enums.DayOfWeek.Monday.value,
         due_time_of_day=8,
         reminder=False,
         timezone=pytz.timezone("America/Los_Angeles"),
@@ -546,18 +586,6 @@ def test_scheduled_item_create_scheduled_items_no_reminder():
     )
 
     assert scheduled_items == [
-        {
-            "completed": False,
-            "dueDate": "2022-03-14T00:00:00Z",
-            "dueDateTime": "2022-03-14T15:00:00Z",
-            "dueTimeOfDay": 8,
-        },
-        {
-            "completed": False,
-            "dueDate": "2022-03-28T00:00:00Z",
-            "dueDateTime": "2022-03-28T15:00:00Z",
-            "dueTimeOfDay": 8,
-        },
         {
             "completed": False,
             "dueDate": "2022-04-11T00:00:00Z",
@@ -588,16 +616,33 @@ def test_scheduled_item_create_scheduled_items_no_reminder():
             "dueDateTime": "2022-06-06T15:00:00Z",
             "dueTimeOfDay": 8,
         },
+        {
+            "completed": False,
+            "dueDate": "2022-06-20T00:00:00Z",
+            "dueDateTime": "2022-06-20T15:00:00Z",
+            "dueTimeOfDay": 8,
+        },
+        {
+            "completed": False,
+            "dueDate": "2022-07-04T00:00:00Z",
+            "dueDateTime": "2022-07-04T15:00:00Z",
+            "dueTimeOfDay": 8,
+        },
     ]
 
 
 def test_scheduled_item_create_scheduled_items_with_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
-        has_repetition=None,
-        repeat_day_flags=None,
-        start_date=_datetime.date(2022, 3, 11),
-        day_of_week=scope.enums.DayOfWeek.Monday.value,
+        start_datetime=pytz.timezone("America/Los_Angeles").localize(
+            _datetime.datetime(2022, 3, 11, 14)
+        ).astimezone(pytz.utc),
+        effective_datetime=pytz.timezone("America/Los_Angeles").localize(
+            _datetime.datetime(2022, 4, 1, 14)
+        ).astimezone(pytz.utc),
+        has_repetition=True,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
+        repeat_day_flags=None,
+        day_of_week=scope.enums.DayOfWeek.Monday.value,
         due_time_of_day=8,
         reminder=True,
         reminder_time_of_day=6,
@@ -606,24 +651,6 @@ def test_scheduled_item_create_scheduled_items_with_reminder():
     )
 
     assert scheduled_items == [
-        {
-            "completed": False,
-            "dueDate": "2022-03-14T00:00:00Z",
-            "dueDateTime": "2022-03-14T15:00:00Z",
-            "dueTimeOfDay": 8,
-            "reminderDate": "2022-03-14T00:00:00Z",
-            "reminderDateTime": "2022-03-14T13:00:00Z",
-            "reminderTimeOfDay": 6,
-        },
-        {
-            "completed": False,
-            "dueDate": "2022-03-28T00:00:00Z",
-            "dueDateTime": "2022-03-28T15:00:00Z",
-            "dueTimeOfDay": 8,
-            "reminderDate": "2022-03-28T00:00:00Z",
-            "reminderDateTime": "2022-03-28T13:00:00Z",
-            "reminderTimeOfDay": 6,
-        },
         {
             "completed": False,
             "dueDate": "2022-04-11T00:00:00Z",
@@ -667,6 +694,24 @@ def test_scheduled_item_create_scheduled_items_with_reminder():
             "dueTimeOfDay": 8,
             "reminderDate": "2022-06-06T00:00:00Z",
             "reminderDateTime": "2022-06-06T13:00:00Z",
+            "reminderTimeOfDay": 6,
+        },
+        {
+            "completed": False,
+            "dueDate": "2022-06-20T00:00:00Z",
+            "dueDateTime": "2022-06-20T15:00:00Z",
+            "dueTimeOfDay": 8,
+            "reminderDate": "2022-06-20T00:00:00Z",
+            "reminderDateTime": "2022-06-20T13:00:00Z",
+            "reminderTimeOfDay": 6,
+        },
+        {
+            "completed": False,
+            "dueDate": "2022-07-04T00:00:00Z",
+            "dueDateTime": "2022-07-04T15:00:00Z",
+            "dueTimeOfDay": 8,
+            "reminderDate": "2022-07-04T00:00:00Z",
+            "reminderDateTime": "2022-07-04T13:00:00Z",
             "reminderTimeOfDay": 6,
         },
     ]

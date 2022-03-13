@@ -30,9 +30,8 @@ def _calculate_scheduled_assessments_to_create(
 
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
-        start_date=date_utils.parse_datetime(assessment["assignedDateTime"])
-        .astimezone(timezone)
-        .date(),
+        start_datetime=date_utils.parse_datetime(assessment["assignedDateTime"]),
+        effective_datetime=maintenance_datetime,
         has_repetition=True,  # If assigned, assessments are repeating
         frequency=assessment["frequency"],
         repeat_day_flags=None,  # Assessments do not have repeat_day_flags

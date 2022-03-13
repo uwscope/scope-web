@@ -122,8 +122,8 @@ def _initial_date(
 def _scheduled_dates(
     *,
     start_date: _datetime.date,  # Scheduled date of first/only item
-    effective_date: _datetime.date,  # Date from which we want to schedule
     has_repetition: bool,  # Whether to repeat
+    effective_date: _datetime.date,  # Date from which we want to schedule
     frequency: Optional[str],  # Frequency to repeat
     repeat_day_flags: Optional[dict],  # For weekly frequency, days of week to repeat
     day_of_week: Optional[
@@ -131,7 +131,11 @@ def _scheduled_dates(
     ],  # For frequencies beyond weekly, day of week to start/repeat
     months: Optional[int],  # How many months of items to generate
 ) -> List[_datetime.date]:
+    #
+    # Check allowable parameter combinations
+    #
     date_utils.raise_on_not_date(date=start_date)
+    date_utils.raise_on_not_date(date=effective_date)
     if not has_repetition:
         if any(
             [
@@ -181,20 +185,22 @@ def _scheduled_dates(
         if not any(repeat_day_flags.values()):
             raise ValueError("At least one repeat_day_flag must be True")
 
-    # If there was no repetition, the start_date is our one and only date
+    #
+    # If there was no repetition, the start_date is our one and only date.
+    #
     if not has_repetition:
         return [start_date]
 
-    if repeat_day_flags or day_of_week:
-        initial_date: _datetime.date = _initial_date(
-            start_date=start_date,
-            effective_date=effective_date,
-            frequency=frequency,
-            repeat_day_flags=repeat_day_flags,
-            day_of_week=day_of_week,
-        )
-    else:
-        initial_date: _datetime.date = start_date
+    #
+    # Calculate our first occurrence on/after both the start date and the effective date
+    #
+    initial_date: _datetime.date = _initial_date(
+        start_date=start_date,
+        effective_date=effective_date,
+        frequency=frequency,
+        repeat_day_flags=repeat_day_flags,
+        day_of_week=day_of_week,
+    )
 
     until_date: _datetime.date = initial_date + dateutil.relativedelta.relativedelta(
         months=months
@@ -246,7 +252,7 @@ def create_scheduled_items(
     *,
     start_datetime: _datetime.datetime,
     effective_datetime: _datetime.datetime,
-    has_repetition: Optional[bool],
+    has_repetition: bool,
     frequency: str,
     repeat_day_flags: Optional[dict],
     day_of_week: Optional[str],
@@ -271,10 +277,12 @@ def create_scheduled_items(
 
     # Obtain a start date in the patient's scheduling time zone
     start_date = start_datetime.astimezone(timezone).date()
+    effective_date = effective_datetime.astimezone(timezone).date()
     scheduled_dates = _scheduled_dates(
+        start_date=start_date,
+        effective_date=effective_date,
         has_repetition=has_repetition,
         repeat_day_flags=repeat_day_flags,
-        start_date=start_date,
         day_of_week=day_of_week,
         frequency=frequency,
         months=months,
