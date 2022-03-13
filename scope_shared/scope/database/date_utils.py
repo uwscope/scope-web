@@ -91,6 +91,9 @@ def raise_on_not_date(date: _datetime.date) -> None:
     Raise if a provided date is not a date.
     """
 
+    # datetime is also a date
+    if isinstance(date, _datetime.datetime):
+        raise ValueError("date must be date.")
     if not isinstance(date, _datetime.date):
         raise ValueError("date must be date.")
 
