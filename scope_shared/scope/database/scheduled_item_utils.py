@@ -213,8 +213,6 @@ def create_scheduled_items(
             raise ValueError("reminder_time_of_day must be int >=0 and <= 23")
     if timezone.zone not in pytz.all_timezones:
         raise ValueError("timezone must be valid pytz timezone")
-    if repeat_day_flags and day_of_week:
-        raise ValueError("both repeat_day_flags and day_of_week cannot be True")
 
     scheduled_dates = _scheduled_dates(
         has_repetition=has_repetition,
