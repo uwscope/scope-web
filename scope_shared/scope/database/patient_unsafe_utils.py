@@ -4,6 +4,8 @@ from typing import Callable, Optional
 
 import scope.database.collection_utils
 import scope.database.patient
+import scope.database.patient.activities
+import scope.database.patient.assessments
 
 
 def _unsafe_update_set_element(
@@ -101,6 +103,22 @@ def unsafe_update_assessment(
         collection=collection,
         set_id=set_id,
         new_document=assessment,
+    )
+
+
+def unsafe_update_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    activity: dict,
+) -> scope.database.collection_utils.SetPutResult:
+    return _unsafe_update_set_element(
+        database_get_function=scope.database.patient.activities.get_activity,
+        database_put_function=scope.database.patient.activities.put_activity,
+        database_put_document_parameter="activity",
+        collection=collection,
+        set_id=set_id,
+        new_document=activity,
     )
 
 
