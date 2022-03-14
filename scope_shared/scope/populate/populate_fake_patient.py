@@ -281,20 +281,20 @@ def _populate_fake_patient_documents(
                 set_id=fake_assessment_current[
                     scope.database.patient.assessments.SEMANTIC_SET_ID
                 ],
-                assessment=fake_assessment_current,
+                assessment_complete=fake_assessment_current,
             )
 
-            fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
-                faker_factory=faker_factory,
-                assessment=fake_assessment_current,
-            )
-            fake_scheduled_assessments = fake_scheduled_assessments_factory()
-
-            for fake_scheduled_assessment_current in fake_scheduled_assessments:
-                scope.database.patient.scheduled_assessments.post_scheduled_assessment(
-                    collection=patient_collection,
-                    scheduled_assessment=fake_scheduled_assessment_current,
-                )
+            # fake_scheduled_assessments_factory = scope.testing.fake_data.fixtures_fake_scheduled_assessments.fake_scheduled_assessments_factory(
+            #     faker_factory=faker_factory,
+            #     assessment=fake_assessment_current,
+            # )
+            # fake_scheduled_assessments = fake_scheduled_assessments_factory()
+            #
+            # for fake_scheduled_assessment_current in fake_scheduled_assessments:
+            #     scope.database.patient.scheduled_assessments.post_scheduled_assessment(
+            #         collection=patient_collection,
+            #         scheduled_assessment=fake_scheduled_assessment_current,
+            #     )
 
     _assessments_and_scheduled_assessments()
 
