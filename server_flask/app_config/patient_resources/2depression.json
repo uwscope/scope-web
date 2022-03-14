@@ -1,0 +1,14 @@
+{
+  "id": "2depression",
+  "name": "What is Depression",
+  "resources": [
+    {
+      "name": "Facts about Depression",
+      "filename": "Facts_about_Depression.pdf"
+    },
+    {
+      "name": "Depression Cycle",
+      "filename": "Depression_Cycle.pdf"
+    }
+  ]
+}

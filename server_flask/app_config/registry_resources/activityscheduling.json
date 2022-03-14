@@ -1,0 +1,18 @@
+{
+  "id": "Activity scheduling",
+  "name": "Activity scheduling",
+  "resources": [
+    {
+      "name": "Activity Menu: General",
+      "filename": "Actvity_Menu-General.pdf"
+    },
+    {
+      "name": "Activity Menu: COVID",
+      "filename": "Activity_Menu-COVID.pdf"
+    },
+    {
+      "name": "Personal Activity Experiment",
+      "filename": "Personal_Activity_Experiment.pdf"
+    }
+  ]
+}
