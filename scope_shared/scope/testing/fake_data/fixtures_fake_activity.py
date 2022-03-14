@@ -65,6 +65,7 @@ def fake_activity_factory(
             "hasRepetition": random.choice([True, False]),
             "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
             "isActive": random.choice([True, False]),
+            "isDeleted": random.choice([True, False]),
         }
 
     return factory

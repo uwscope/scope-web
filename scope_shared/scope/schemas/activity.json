@@ -53,8 +53,22 @@
 		},
 		"isActive": {
 			"type": "boolean"
+		},
+		"isDeleted": {
+			"type": "boolean"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "name", "value", "lifeareaId", "startDateTime", "timeOfDay", "hasReminder", "hasRepetition"]
+	"required": [
+		"_type",
+		"name",
+		"value",
+		"lifeareaId",
+		"startDateTime",
+		"timeOfDay",
+		"hasReminder",
+		"hasRepetition",
+		"isActive",
+		"isDeleted"
+	]
 }
