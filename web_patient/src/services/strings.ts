@@ -167,7 +167,7 @@ const _strings = {
     Careplan_activity_item_edit: 'Edit',
     Careplan_activity_item_delete: 'Delete',
     Careplan_activity_item_activate: 'Activate',
-    Careplan_activity_item_deactivate: 'Deativate',
+    Careplan_activity_item_deactivate: 'Deactivate',
 
     Careplan_add_activity: 'Add activity',
 
