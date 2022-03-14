@@ -25,7 +25,7 @@ export interface IPatientsStore {
 
     readonly state: IPromiseQueryState;
 
-    load: () => Promise<void>;
+    load: (getToken?: () => string | undefined, onUnauthorized?: () => void) => Promise<void>;
 
     addPatient: (patient: Partial<IPatient>) => void;
     getPatientByRecordId: (recordId: string | undefined) => IPatientStore | undefined;
@@ -108,14 +108,14 @@ export class PatientsStore implements IPatientsStore {
     }
 
     @action.bound
-    public async load() {
+    public async load(getToken?: () => string | undefined, onUnauthorized?: () => void) {
         const { registryService } = useServices();
 
         const getPatientsPromise = () =>
             registryService.getPatients().then((patients) =>
                 patients.map((p) => {
                     const patientStore = new PatientStore(p);
-                    patientStore.load();
+                    patientStore.load(getToken, onUnauthorized);
                     return patientStore;
                 }),
             );
