@@ -31,39 +31,39 @@ import { clearTime } from 'shared/time';
 const EditableFormControl = withTheme(
     styled(FormControl)(
         (props: ThemedStyledProps<FormControlProps & { $editable: boolean }, any>) =>
-            ({
-                minWidth: 160,
-                '>.MuiInput-underline:before': {
-                    border: props.$editable ? undefined : 'none',
-                },
-                '>.MuiFormLabel-root': {
-                    position: 'relative',
-                },
-                '>.MuiFormLabel-root.Mui-focused': {},
-                '>.MuiInput-underline:hover:not(.Mui-disabled):before': {
-                    border: props.$editable ? undefined : 'none',
-                },
-                '>.MuiInput-underline:after': {
-                    border: props.$editable ? undefined : 'none',
-                },
-                '>.MuiFormHelperText-root': {
-                    lineHeight: 1,
-                },
-                '>.MuiInput-root': {
-                    margin: 0,
-                },
-            } as CSSObject),
+        ({
+            minWidth: 160,
+            '>.MuiInput-underline:before': {
+                border: props.$editable ? undefined : 'none',
+            },
+            '>.MuiFormLabel-root': {
+                position: 'relative',
+            },
+            '>.MuiFormLabel-root.Mui-focused': {},
+            '>.MuiInput-underline:hover:not(.Mui-disabled):before': {
+                border: props.$editable ? undefined : 'none',
+            },
+            '>.MuiInput-underline:after': {
+                border: props.$editable ? undefined : 'none',
+            },
+            '>.MuiFormHelperText-root': {
+                lineHeight: 1,
+            },
+            '>.MuiInput-root': {
+                margin: 0,
+            },
+        } as CSSObject),
     ),
 );
 
 const SelectField = withTheme(
     styled(Select)(
         (props: ThemedStyledProps<SelectProps & { $editable: boolean }, any>) =>
-            ({
-                '>.MuiSelect-icon': {
-                    display: props.$editable ? undefined : 'none',
-                },
-            } as CSSObject),
+        ({
+            '>.MuiSelect-icon': {
+                display: props.$editable ? undefined : 'none',
+            },
+        } as CSSObject),
     ),
 );
 
@@ -171,10 +171,10 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
                         inputProps={{ readOnly: !editable }}>
                         {!!options
                             ? options.map((o) => (
-                                  <MenuItem key={o} value={o}>
-                                      {o}
-                                  </MenuItem>
-                              ))
+                                <MenuItem key={o} value={o}>
+                                    {o}
+                                </MenuItem>
+                            ))
                             : null}
                     </SelectField>
                 ) : (
@@ -185,7 +185,7 @@ export const GridDropdownField: FunctionComponent<IGridDropdownFieldProps> = (pr
     );
 };
 
-export interface IGridDateFieldProps extends IGridFieldProps {}
+export interface IGridDateFieldProps extends IGridFieldProps { }
 
 export const GridDateField: FunctionComponent<IGridDateFieldProps> = (props) => {
     const { editable, label, value, onChange, xs, sm, required } = props;
@@ -498,7 +498,7 @@ export const GridMultiOptionsField: FunctionComponent<IGridMultiOptionsFieldProp
                         ))}
                         <FormControl fullWidth>
                             <Input
-                                placeholder="Add other referral"
+                                placeholder="Add other referral (type out the referral then press enter to add)"
                                 margin="none"
                                 multiline={false}
                                 value={other}
