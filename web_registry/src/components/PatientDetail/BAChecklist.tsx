@@ -21,7 +21,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 
 export const BAChecklist: FunctionComponent = observer(() => {
     const {
-        appContentConfig: { resources },
+        appContentConfig: { registryresources },
     } = useStores();
     const currentPatient = usePatient();
 
@@ -38,7 +38,7 @@ export const BAChecklist: FunctionComponent = observer(() => {
             });
         });
 
-    const resourcesMap = Object.assign({}, ...resources.map((r) => ({ [r.id]: r.resources }))) as KeyedMap<
+    const resourcesMap = Object.assign({}, ...registryresources.map((r) => ({ [r.id]: r.resources }))) as KeyedMap<
         IResourceItem[]
     >;
 
@@ -48,6 +48,8 @@ export const BAChecklist: FunctionComponent = observer(() => {
         completedDate: baCompletion[ba],
         resources: resourcesMap[ba],
     }));
+
+    const otherResources = resourcesMap[`Other`]
 
     const getResourceLink = (filename: string) => {
         return `/resources/${filename}`;
@@ -91,8 +93,8 @@ export const BAChecklist: FunctionComponent = observer(() => {
                                         <List dense disablePadding>
                                             {component.resources &&
                                                 component.resources.length > 0 &&
-                                                component.resources.map((resource) => (
-                                                    <ListItem dense disableGutters key={resource.name}>
+                                                component.resources.map((resource, idx) => (
+                                                    <ListItem dense disableGutters key={`${resource.name}-${idx}`}>
                                                         <Link href={getResourceLink(resource.filename)} target="_blank">
                                                             {resource.name}
                                                         </Link>
@@ -103,6 +105,24 @@ export const BAChecklist: FunctionComponent = observer(() => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        <TableRow>
+                            <TableCell component="th" scope="row" style={{ verticalAlign: 'top' }}>
+                                Other
+                            </TableCell>
+                            <TableCell>
+                                <List dense disablePadding>
+                                    {otherResources &&
+                                        otherResources.length > 0 &&
+                                        otherResources.map((resource, idx) => (
+                                            <ListItem dense disableGutters key={`${resource.name}-${idx}`}>
+                                                <Link href={getResourceLink(resource.filename)} target="_blank">
+                                                    {resource.name}
+                                                </Link>
+                                            </ListItem>
+                                        ))}
+                                </List>
+                            </TableCell>
+                        </TableRow>
                     </TableBody>
                 </Table>
             </TableContainer>

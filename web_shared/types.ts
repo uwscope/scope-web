@@ -303,7 +303,8 @@ export interface IAppAuthConfig {
 export interface IAppContentConfig {
     assessments: IAssessmentContent[];
     lifeAreas: ILifeAreaContent[];
-    resources: IResourceContent[];
+    patientresources: IResourceContent[];
+    registryresources: IResourceContent[];
 }
 
 export interface IAssessmentContent {
