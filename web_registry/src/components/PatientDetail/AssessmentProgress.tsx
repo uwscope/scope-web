@@ -11,15 +11,16 @@ import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { AssessmentFrequency, assessmentFrequencyValues, DayOfWeek, daysOfWeekValues } from 'shared/enums';
-import { AssessmentData, IAssessment, IAssessmentLog, IIdentity } from 'shared/types';
+import { IAssessment, IAssessmentLog } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 import { Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
 import { usePatient, useStores } from 'src/stores/stores';
-import { getAssessmentScore, getAssessmentScoreColorName } from 'src/utils/assessment';
+import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 const ScoreCell = withTheme(
@@ -64,6 +65,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const { instruction, questions, options, assessment, assessmentName, assessmentLogs, maxValue, canAdd, useTime } =
         props;
 
+    const maxTotal = maxValue * questions.length;
+
     const configureState = useLocalObservable<{
         openConfigure: boolean;
         frequency: AssessmentFrequency;
@@ -77,22 +80,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const logState = useLocalObservable<{
         openEdit: boolean;
         totalOnly: boolean;
-        scheduledAssessmentId: string;
-        assessmentLogId?: string;
-        recordedDateTime: Date;
-        pointValues: AssessmentData;
-        totalScore: number;
-        comment: string;
-        patientSubmitted: boolean;
+        totalScoreString: string;
+        log: IAssessmentLog;
     }>(() => ({
         openEdit: false,
         totalOnly: false,
-        scheduledAssessmentId: '',
-        recordedDateTime: new Date(),
-        comment: '',
-        pointValues: {},
-        totalScore: -1,
-        patientSubmitted: false,
+        totalScoreString: '-1',
+        log: {
+            assessmentId: assessment.assessmentId,
+            recordedDateTime: new Date(),
+            comment: '',
+            pointValues: {},
+            totalScore: -1,
+        } as IAssessmentLog,
     }));
 
     const handleClose = action(() => {
@@ -103,11 +103,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const handleAddRecord = action(() => {
         logState.openEdit = true;
         logState.totalOnly = false;
-
-        logState.scheduledAssessmentId = '';
-        logState.comment = '';
-        logState.pointValues = {};
-        logState.totalScore = -1;
+        logState.log = {
+            assessmentId: assessment.assessmentId,
+            recordedDateTime: new Date(),
+            comment: '',
+            pointValues: {},
+            totalScore: -1,
+        } as IAssessmentLog;
     });
 
     const handleConfigure = action(() => {
@@ -117,33 +119,27 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onSaveEditRecord = action(() => {
-        const { scheduledAssessmentId, assessmentLogId, recordedDateTime, comment, pointValues, totalScore } = logState;
+        const { totalOnly, log } = logState;
 
-        if (!!assessmentLogId) {
+        if (!!log.assessmentLogId) {
             currentPatient.updateAssessmentLog({
-                assessmentLogId,
-                recordedDateTime: recordedDateTime,
-                comment,
-                scheduledAssessmentId,
+                ...log,
                 assessmentId: assessment.assessmentId,
-                completed: true,
                 patientSubmitted: false,
-                submittedBy: currentUserIdentity as IIdentity,
-                pointValues,
-                totalScore,
-            });
+                submittedByProviderId: currentUserIdentity?.providerId,
+                pointValues: totalOnly ? {} : { ...log.pointValues },
+                totalScore: totalOnly ? log.totalScore : undefined,
+            } as IAssessmentLog);
         } else {
             currentPatient.addAssessmentLog({
-                recordedDateTime: recordedDateTime,
-                comment,
+                ...log,
                 scheduledAssessmentId: 'on-demand',
                 assessmentId: assessment.assessmentId,
-                completed: true,
                 patientSubmitted: false,
-                submittedBy: currentUserIdentity as IIdentity,
-                pointValues,
-                totalScore,
-            });
+                submittedByProviderId: currentUserIdentity?.providerId,
+                pointValues: totalOnly ? {} : { ...log.pointValues },
+                totalScore: totalOnly ? log.totalScore : undefined,
+            } as IAssessmentLog);
         }
         logState.openEdit = false;
     });
@@ -156,15 +152,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onQuestionSelect = action((qid: string, value: number) => {
-        logState.pointValues[qid] = value;
+        logState.log.pointValues[qid] = value;
     });
 
     const onDateChange = action((date: Date) => {
-        logState.recordedDateTime = date;
+        logState.log.recordedDateTime = date;
     });
 
-    const onTotalChange = action((value: number) => {
-        logState.totalScore = value;
+    const onTotalChange = action((value: string) => {
+        logState.totalScoreString = value;
+
+        if (!isNaN(Number(logState.totalScoreString))) {
+            logState.log.totalScore = Number(logState.totalScoreString);
+        }
     });
 
     const onToggleTotalOnly = action((value: boolean) => {
@@ -180,12 +180,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     });
 
     const onCommentChange = action((comment: string) => {
-        logState.comment = comment;
+        logState.log.comment = comment;
     });
 
-    const selectedValues = questions.map((q) => logState.pointValues[q.id]);
+    const selectedValues = questions.map((q) => logState.log.pointValues[q.id]);
+
     const saveDisabled = logState.totalOnly
-        ? logState.totalScore == undefined
+        ? logState.log.totalScore == undefined || logState.log.totalScore < 0 || logState.log.totalScore > maxTotal
         : selectedValues.findIndex((v) => v == undefined) >= 0;
 
     const questionIds = questions.map((q) => q.id);
@@ -196,8 +197,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         .map((a) => {
             return {
                 date: format(a.recordedDateTime, 'MM/dd/yy'),
-                total:
-                    getAssessmentScore(a.pointValues) != undefined ? getAssessmentScore(a.pointValues) : a.totalScore,
+                total: getAssessmentScoreFromAssessmentLog(a),
                 id: a.assessmentLogId,
                 ...a.pointValues,
                 comment: a.comment,
@@ -263,16 +263,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const onRowClick = action((param: GridRowParams) => {
         const id = param.row['id'] as string;
         const data = assessmentLogs.find((a) => a.assessmentLogId == id);
-
         if (!!data) {
             logState.openEdit = true;
-            logState.totalOnly = !!data.totalScore && data.totalScore >= 0;
-            logState.scheduledAssessmentId = data.scheduledAssessmentId;
-            logState.assessmentLogId = data.assessmentLogId;
-            logState.recordedDateTime = data.recordedDateTime;
-            Object.assign(logState.pointValues, data.pointValues);
-            logState.totalScore = data.totalScore || -1;
-            logState.comment = data.comment || '';
+            logState.log = { ...data };
+            logState.log.pointValues = { ...data.pointValues };
+            logState.totalOnly = data.totalScore != undefined && data.totalScore >= 0;
+            logState.log.totalScore = data.totalScore != undefined && data.totalScore >= 0 ? data.totalScore : -1;
+            logState.totalScoreString = `${logState.log.totalScore}`;
+            logState.log.comment = data.comment || '';
         }
     });
 
@@ -281,7 +279,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             id={assessment.assessmentId}
             title={assessmentName}
             inlineTitle={recurrence}
-            loading={currentPatient?.loadAssessmentLogsState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadAssessmentLogsState.pending}
             error={currentPatient?.loadAssessmentLogsState.error}
             actionButtons={[
                 {
@@ -339,7 +337,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 {assessmentLogs.length > 0 && (
                     <Grid item xs={12}>
                         <AssessmentVis
-                            data={assessmentLogs.slice().sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))}
+                            data={assessmentLogs
+                                .slice()
+                                .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))}
                             maxValue={maxValue}
                             useTime={useTime}
                             scaleOrder={questions.map((q) => q.id)}
@@ -353,49 +353,41 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 )}
             </Grid>
 
-            <Dialog open={logState.openEdit} onClose={handleClose} fullWidth maxWidth="lg">
-                <DialogTitle>
-                    {logState.patientSubmitted
+            <StatefulDialog
+                open={logState.openEdit}
+                loading={currentPatient?.loadAssessmentLogsState.pending}
+                error={currentPatient?.loadAssessmentLogsState.error}
+                title={
+                    logState.log.patientSubmitted
                         ? `Patient submitted ${assessmentName} record`
-                        : !!logState.assessmentLogId
+                        : !!logState.log.assessmentLogId
                         ? `Edit ${assessmentName} record`
-                        : `Add ${assessmentName} record`}
-                </DialogTitle>
-                <DialogContent dividers>
+                        : `Add ${assessmentName} record`
+                }
+                content={
                     <Questionnaire
-                        readonly={logState.patientSubmitted}
+                        readonly={logState.log.patientSubmitted}
                         questions={questions}
                         options={options}
                         selectedValues={selectedValues}
-                        selectedDate={logState.recordedDateTime}
+                        selectedDate={logState.log.recordedDateTime}
                         instruction={instruction}
                         onSelect={onQuestionSelect}
                         onDateChange={onDateChange}
                         onTotalChange={onTotalChange}
                         onToggleTotalOnly={onToggleTotalOnly}
                         totalOnly={logState.totalOnly}
-                        totalScore={logState.totalScore}
-                        comment={logState.comment}
+                        totalScore={logState.totalScoreString}
+                        maxTotal={maxTotal}
+                        comment={logState.log.comment}
                         onCommentChange={onCommentChange}
                     />
-                </DialogContent>
-                {logState.patientSubmitted ? (
-                    <DialogActions>
-                        <Button onClick={handleClose} color="primary">
-                            {getString('patient_progress_assessment_dialog_close_button')}
-                        </Button>
-                    </DialogActions>
-                ) : (
-                    <DialogActions>
-                        <Button onClick={handleClose} color="primary">
-                            {getString('patient_progress_assessment_dialog_cancel_button')}
-                        </Button>
-                        <Button onClick={onSaveEditRecord} color="primary" disabled={saveDisabled}>
-                            {getString('patient_progress_assessment_dialog_save_button')}
-                        </Button>
-                    </DialogActions>
-                )}
-            </Dialog>
+                }
+                handleCancel={handleClose}
+                handleSave={onSaveEditRecord}
+                disableSave={saveDisabled}
+            />
+
             <Dialog open={configureState.openConfigure} onClose={handleClose}>
                 <DialogTitle>{getString('patient_progress_assessment_dialog_configure_title')}</DialogTitle>
                 <DialogContent dividers>

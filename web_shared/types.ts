@@ -157,9 +157,8 @@ export interface IAssessmentLog extends ILog {
     scheduledAssessmentId: string;
     assessmentId: string; // NEW
 
-    completed?: boolean;
     patientSubmitted?: boolean; // NEW
-    submittedBy?: IIdentity;
+    submittedByProviderId?: string;
     pointValues: AssessmentData;
     totalScore?: number;
 }

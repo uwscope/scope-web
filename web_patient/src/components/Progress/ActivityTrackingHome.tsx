@@ -22,7 +22,10 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const navigate = useNavigate();
     const { patientStore } = useStores();
 
-    const viewState = useLocalObservable<{ selectedLog?: IActivityLog }>(() => ({}));
+    const viewState = useLocalObservable<{ selectedLog?: IActivityLog; isOpen: boolean }>(() => ({
+        selectedLog: undefined,
+        isOpen: false,
+    }));
 
     const handleGoBack = action(() => {
         navigate(-1);
@@ -43,10 +46,12 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
 
     const handleLogClick = action((log: IActivityLog) => {
         viewState.selectedLog = log;
+        viewState.isOpen = true;
     });
 
     const handleClose = action(() => {
         viewState.selectedLog = undefined;
+        viewState.isOpen = false;
     });
 
     return (
@@ -73,64 +78,67 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                             ))}
                         </TableBody>
                     </Table>
-                    <ProgressDialog
-                        isOpen={!!viewState.selectedLog}
-                        title={viewState.selectedLog?.activityName || 'Activity Log'}
-                        content={
-                            <Table size="small" aria-label="a dense table">
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_date')}
-                                        </TableCell>
-                                        <TableCell>{`${
-                                            viewState.selectedLog?.recordedDateTime &&
-                                            format(viewState.selectedLog.recordedDateTime, 'MM/dd/yyyy h:mm aaa')
-                                        }`}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_lifearea')}
-                                        </TableCell>
-                                        <TableCell>{getString('Activity_tracking_log_lifearea_none')}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_value')}
-                                        </TableCell>
-                                        <TableCell>{getString('Activity_tracking_log_value_none')}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_completed')}
-                                        </TableCell>
-                                        <TableCell>
-                                            {viewState.selectedLog && getSuccessString(viewState.selectedLog.success)}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_pleasure')}
-                                        </TableCell>
-                                        <TableCell>{viewState.selectedLog?.pleasure}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_accomplishment')}
-                                        </TableCell>
-                                        <TableCell>{viewState.selectedLog?.accomplishment}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell component="th" scope="row">
-                                            {getString('Activity_tracking_column_comment')}
-                                        </TableCell>
-                                        <TableCell>{viewState.selectedLog?.comment}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        }
-                        onClose={handleClose}
-                    />
+                    {viewState.selectedLog && (
+                        <ProgressDialog
+                            isOpen={viewState.isOpen}
+                            title={viewState.selectedLog?.activityName || 'Activity Log'}
+                            content={
+                                <Table size="small" aria-label="a dense table">
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_date')}
+                                            </TableCell>
+                                            <TableCell>{`${
+                                                viewState.selectedLog?.recordedDateTime &&
+                                                format(viewState.selectedLog.recordedDateTime, 'MM/dd/yyyy h:mm aaa')
+                                            }`}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_lifearea')}
+                                            </TableCell>
+                                            <TableCell>{getString('Activity_tracking_log_lifearea_none')}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_value')}
+                                            </TableCell>
+                                            <TableCell>{getString('Activity_tracking_log_value_none')}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_completed')}
+                                            </TableCell>
+                                            <TableCell>
+                                                {viewState.selectedLog &&
+                                                    getSuccessString(viewState.selectedLog.success)}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_pleasure')}
+                                            </TableCell>
+                                            <TableCell>{viewState.selectedLog?.pleasure}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_accomplishment')}
+                                            </TableCell>
+                                            <TableCell>{viewState.selectedLog?.accomplishment}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">
+                                                {getString('Activity_tracking_column_comment')}
+                                            </TableCell>
+                                            <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            }
+                            onClose={handleClose}
+                        />
+                    )}
                 </Fragment>
             ) : (
                 <Typography>{getString('Activity_tracking_no_data')}</Typography>

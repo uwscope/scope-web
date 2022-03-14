@@ -25,7 +25,15 @@ export const sortAssessmentContent = (a: IAssessmentContent, b: IAssessmentConte
     return getOrder(a.name) - getOrder(b.name);
 };
 
-export const getAssessmentScore = (pointValues: AssessmentData) => {
+export const getAssessmentScoreFromAssessmentLog = (log: IAssessmentLog) => {
+    if (log.totalScore != undefined && log.totalScore >= 0) {
+        return log.totalScore;
+    } else {
+        return sum(Object.keys(log.pointValues).map((k) => log.pointValues[k] || 0));
+    }
+};
+
+export const getAssessmentScoreFromPointValues = (pointValues: AssessmentData) => {
     return sum(Object.keys(pointValues).map((k) => pointValues[k] || 0));
 };
 
@@ -40,7 +48,7 @@ export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: s
         if (!!latest.totalScore) {
             return latest.totalScore;
         } else {
-            return getAssessmentScore(latest.pointValues);
+            return getAssessmentScoreFromPointValues(latest.pointValues);
         }
     }
 

@@ -51,7 +51,6 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
     const { loading, error } = props;
     const patient = usePatient();
     const { patientsStore } = useStores();
-    const { profile } = patient;
 
     const [openError, setOpenError] = useState(error);
 
@@ -113,35 +112,43 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer((props
 
                 <Grid item>{loading ? <Loading /> : <Divider />}</Grid>
                 <Grid item>
-                    <LabeledField label="mrn" value={profile.MRN} />
-                    <LabeledField label="clinic code" value={profile.clinicCode} />
+                    <LabeledField label="mrn" value={patient.profile.MRN} />
+                    <LabeledField label="clinic code" value={patient.profile.clinicCode} />
                 </Grid>
                 <Grid item>
                     <LabeledField
                         label="dob"
-                        value={!!profile.birthdate ? formatDateOnly(profile.birthdate, 'MM/dd/yyyy') : '--'}
+                        value={
+                            !!patient.profile.birthdate ? formatDateOnly(patient.profile.birthdate, 'MM/dd/yyyy') : '--'
+                        }
                     />
                     <LabeledField label="age" value={patient.age >= 0 ? patient.age : '--'} />
-                    <LabeledField label="sex" value={profile.sex} />
+                    <LabeledField label="sex" value={patient.profile.sex} />
                     <LabeledField
                         label="race"
-                        value={profile.race != undefined ? generateRaceText(profile.race) : 'unknown'}
+                        value={patient.profile.race != undefined ? generateRaceText(patient.profile.race) : 'unknown'}
                     />
-                    <LabeledField label="ethnicity" value={profile.ethnicity} />
-                    <LabeledField label="gender" value={profile.gender} />
-                    <LabeledField label="pronouns" value={profile.pronoun} />
+                    <LabeledField label="ethnicity" value={patient.profile.ethnicity} />
+                    <LabeledField label="gender" value={patient.profile.gender} />
+                    <LabeledField label="pronouns" value={patient.profile.pronoun} />
                 </Grid>
 
                 <Grid item>
-                    <LabeledField label="primary oncology provider" value={profile.primaryOncologyProvider || '--'} />
-                    <LabeledField label="primary social worker" value={profile.primaryCareManager?.name || '--'} />
-                    <LabeledField label="treatment status" value={profile.depressionTreatmentStatus} />
-                    <LabeledField label="follow-up schedule" value={profile.followupSchedule} />
+                    <LabeledField
+                        label="primary oncology provider"
+                        value={patient.profile.primaryOncologyProvider || '--'}
+                    />
+                    <LabeledField
+                        label="primary social worker"
+                        value={patient.profile.primaryCareManager?.name || '--'}
+                    />
+                    <LabeledField label="treatment status" value={patient.profile.depressionTreatmentStatus} />
+                    <LabeledField label="follow-up schedule" value={patient.profile.followupSchedule} />
                 </Grid>
                 {state.open && (
                     <EditPatientProfileDialog
                         careManagers={patientsStore.careManagers}
-                        profile={profile}
+                        profile={patient.profile}
                         open={state.open}
                         onClose={handleClose}
                         onSavePatient={onSave}

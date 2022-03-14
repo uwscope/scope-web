@@ -22,7 +22,7 @@ import {
 } from 'react-vis';
 import { clearTime } from 'shared/time';
 import { AssessmentData } from 'shared/types';
-import { getAssessmentScore } from 'src/utils/assessment';
+import { getAssessmentScoreFromPointValues } from 'src/utils/assessment';
 import { useResize } from 'src/utils/hooks';
 import styled, { ThemedStyledProps } from 'styled-components';
 
@@ -30,13 +30,13 @@ const Container = withTheme(
     styled.div({
         display: 'flex',
         flexDirection: 'column',
-    })
+    }),
 );
 
 const ChartContainer = withTheme(
     styled.div({
         flexGrow: 1,
-    })
+    }),
 );
 
 const Accordion = styled((props) => <MuiAccordion disableGutters elevation={0} square {...props} />)(({ theme }) => ({
@@ -70,7 +70,7 @@ const LegendArea = withTheme(
         flexDirection: 'row',
         justifyContent: 'flex-start',
         flexWrap: 'wrap',
-    }))
+    })),
 );
 
 const CrosshairContainer = withTheme(
@@ -78,7 +78,7 @@ const CrosshairContainer = withTheme(
         margin: props.theme.spacing(1),
         minWidth: 100,
         color: props.theme.palette.text.secondary,
-    }))
+    })),
 );
 
 const getColoredSwitch = (color: string) =>
@@ -93,12 +93,13 @@ const getColoredSwitch = (color: string) =>
             '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                 backgroundColor: color,
             },
-        }))
+        })),
     );
 
 export interface IVisDataPoint {
     recordedDateTime: Date;
     pointValues: AssessmentData;
+    totalScore?: number;
 }
 
 export interface IAssessmentChartProps {
@@ -140,7 +141,7 @@ export const AssessmentVis = withTheme(
                 state.hoveredPoint = point;
                 state.hoveredIndex = index;
             }),
-            500
+            500,
         );
 
         const dataKeys = scaleOrder || (!!data && data.length > 0 ? Object.keys(data[0].pointValues) : []);
@@ -183,16 +184,19 @@ export const AssessmentVis = withTheme(
             }
 
             const filteredData = data.filter(
-                (d) => compareAsc(minDate, d.recordedDateTime) < 0 && compareAsc(maxDate, d.recordedDateTime) > 0
+                (d) => compareAsc(minDate, d.recordedDateTime) < 0 && compareAsc(maxDate, d.recordedDateTime) > 0,
             );
 
             const dailyPoints = filteredData.map(
                 (d) =>
                     ({
                         x: addHours(clearTime(d.recordedDateTime), useTime ? 12 : 0).getTime(),
-                        y: getAssessmentScore(d.pointValues),
+                        y:
+                            d.totalScore != undefined && d.totalScore >= 0
+                                ? d.totalScore
+                                : getAssessmentScoreFromPointValues(d.pointValues),
                         _x: d.recordedDateTime.getTime(),
-                    } as Point)
+                    } as Point),
             );
 
             const reduced = dailyPoints.reduce((m, d) => {
@@ -246,8 +250,8 @@ export const AssessmentVis = withTheme(
                 (d) =>
                     ({
                         x: d.recordedDateTime.getTime(),
-                        y: getAssessmentScore(d.pointValues),
-                    } as Point)
+                        y: getAssessmentScoreFromPointValues(d.pointValues),
+                    } as Point),
             );
 
             const getDataForKey = (key: string) => {
@@ -257,7 +261,7 @@ export const AssessmentVis = withTheme(
                             x: d.recordedDateTime.getTime(),
                             y: d.pointValues[key],
                             name: key,
-                        } as Point)
+                        } as Point),
                 );
             };
 
@@ -350,7 +354,7 @@ export const AssessmentVis = withTheme(
                                                     <div key={p.x.toString()}>
                                                         {`${format(p.x as number, 'hh:mm aaa')}: ${p.y}`}
                                                     </div>
-                                                )
+                                                ),
                                             )}
                                     </CrosshairContainer>
                                 </Crosshair>
@@ -392,5 +396,5 @@ export const AssessmentVis = withTheme(
         } else {
             return null;
         }
-    })
+    }),
 );

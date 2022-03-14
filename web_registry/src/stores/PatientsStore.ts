@@ -112,7 +112,13 @@ export class PatientsStore implements IPatientsStore {
         const { registryService } = useServices();
 
         const getPatientsPromise = () =>
-            registryService.getPatients().then((patients) => patients.map((p) => new PatientStore(p)));
+            registryService.getPatients().then((patients) =>
+                patients.map((p) => {
+                    const patientStore = new PatientStore(p);
+                    patientStore.load();
+                    return patientStore;
+                }),
+            );
 
         await Promise.all([
             this.loadAndLogQuery<IPatientStore[]>(getPatientsPromise, this.loadPatientsQuery),
@@ -168,6 +174,12 @@ export class PatientsStore implements IPatientsStore {
     public getPatientByRecordId(recordId: string | undefined) {
         if (!!recordId) {
             const patient = this.patients.filter((p) => p.recordId == recordId)[0];
+
+            if (!patient) {
+                const newStore = new PatientStore({ identity: { name: 'Unknown', patientId: recordId } } as IPatient);
+                this.patients.push(newStore);
+                return newStore;
+            }
 
             return patient;
         }

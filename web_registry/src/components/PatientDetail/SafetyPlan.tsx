@@ -48,7 +48,7 @@ export const SafetyPlan: FunctionComponent = observer(() => {
             id={getString('patient_detail_subsection_safety_plan_hash')}
             title={getString('patient_detail_subsection_safety_plan_title')}
             inlineTitle={dateStrings.join(', ')}
-            loading={currentPatient?.loadSafetyPlanState.pending}
+            loading={currentPatient?.loadPatientState.pending || currentPatient?.loadSafetyPlanState.pending}
             error={currentPatient?.loadSafetyPlanState.error}
             actionButtons={[
                 {
