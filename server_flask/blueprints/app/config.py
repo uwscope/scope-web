@@ -8,7 +8,8 @@ from pathlib import Path
 
 APP_CONFIG_ASSESSMENTS_PATH = "./app_config/assessments"
 APP_CONFIG_LIFE_AREAS_PATH = "./app_config/life_areas"
-APP_CONFIG_RESOURCES_PATH = "./app_config/resources"
+APP_CONFIG_PATIENT_RESOURCES_PATH = "./app_config/patient_resources"
+APP_CONFIG_REGISTRY_RESOURCES_PATH = "./app_config/registry_resources"
 APP_QUOTES_PATH = "./app_config/quotes.json"
 
 
@@ -44,13 +45,21 @@ def get_app_config():
                 config_json = json.load(config_file)
                 content_life_areas.append(config_json)
 
-    # Load resources configurations
-    content_resources = []
-    for path_current in Path(APP_CONFIG_RESOURCES_PATH).iterdir():
+    # Load patient resources configurations
+    content_patient_resources = []
+    for path_current in Path(APP_CONFIG_PATIENT_RESOURCES_PATH).iterdir():
         if path_current.match("*.json"):
             with open(path_current, encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
-                content_resources.append(config_json)
+                content_patient_resources.append(config_json)
+
+    # Load registry resources configurations
+    content_registry_resources = []
+    for path_current in Path(APP_CONFIG_REGISTRY_RESOURCES_PATH).iterdir():
+        if path_current.match("*.json"):
+            with open(path_current, encoding="utf-8") as config_file:
+                config_json = json.load(config_file)
+                content_registry_resources.append(config_json)
 
     result = {
         "auth": {
@@ -60,7 +69,8 @@ def get_app_config():
         "content": {
             "assessments": content_assessments,
             "lifeAreas": content_life_areas,
-            "resources": content_resources,
+            "patientresources": content_patient_resources,
+            "registryresources": content_registry_resources,
         },
     }
 
