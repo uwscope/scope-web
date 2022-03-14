@@ -149,7 +149,7 @@ def test_assessment_put_maintains_scheduled_assessments(
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
-        assessment=fake_assessment,
+        assessment_complete=fake_assessment,
     )
 
     # Determine what scheduled assessments already exist
@@ -169,12 +169,13 @@ def test_assessment_put_maintains_scheduled_assessments(
                 pytz.utc.localize(datetime.datetime.utcnow())
             ),
             "frequency": scope.enums.ScheduledItemFrequency.Weekly.value,
+            "dayOfWeek": scope.enums.DayOfWeek.Monday.value,
         }
     )
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
-        assessment=fake_assessment,
+        assessment_complete=fake_assessment,
     )
 
     # Ensure we now obtain new scheduled assessments
@@ -202,7 +203,7 @@ def test_assessment_put_maintains_scheduled_assessments(
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
-        assessment=fake_assessment,
+        assessment_complete=fake_assessment,
     )
 
     # Ensure there are no pending scheduled assessments

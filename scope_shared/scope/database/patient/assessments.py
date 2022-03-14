@@ -35,7 +35,7 @@ def _calculate_scheduled_assessments_to_create(
         has_repetition=True,  # If assigned, assessments are repeating
         frequency=assessment["frequency"],
         repeat_day_flags=None,  # Assessments do not have repeat_day_flags
-        day_of_week=assessment["dayOfWeek"],
+        day_of_week=assessment.get("dayOfWeek", None),
         due_time_of_day=8,
         reminder=True,
         reminder_time_of_day=8,
