@@ -291,6 +291,11 @@ export class PatientStore implements IPatientStore {
             this.loadActivityLogsQuery,
             onArrayConflict('activitylog', 'activityLogId', () => this.activityLogs, logger),
         );
+
+        await this.loadAndLogQuery<IScheduledActivity[]>(
+            this.patientService.getScheduledActivities,
+            this.loadScheduledActivitiesQuery,
+        );
     }
 
     @action.bound
