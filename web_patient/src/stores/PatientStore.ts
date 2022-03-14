@@ -78,6 +78,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadPatientQuery: PromiseQuery<IPatient>;
     private readonly loadActivitiesQuery: PromiseQuery<IActivity[]>;
     private readonly loadScheduledActivitiesQuery: PromiseQuery<IScheduledActivity[]>;
+    private readonly loadScheduledAssessmentsQuery: PromiseQuery<IScheduledAssessment[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
@@ -99,6 +100,10 @@ export class PatientStore implements IPatientStore {
         this.loadAndLogQuery = getLoadAndLogQuery(logger, this.patientService);
 
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>([], 'loadScheduledActivitiesQuery');
+        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
+            [],
+            'loadScheduledAssessmentsQuery',
+        );
         this.loadConfigQuery = new PromiseQuery<IPatientConfig>(undefined, 'loadConfigQuery');
         this.loadPatientQuery = new PromiseQuery<IPatient>(undefined, 'loadPatientQuery');
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
@@ -171,7 +176,6 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get config() {
-
         const config = this.loadConfigQuery.value || {
             assignedValuesInventory: true,
             assignedSafetyPlan: true,
@@ -196,7 +200,6 @@ export class PatientStore implements IPatientStore {
         // );
 
         return config;
-
     }
 
     @computed public get activities() {
@@ -244,7 +247,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public getScheduledAssessmentById(scheduleId: string) {
-        return this.config.assignedScheduledAssessments.find((t) => t.scheduledAssessmentId == scheduleId);
+        return this.loadScheduledAssessmentsQuery.value?.find((t) => t.scheduledAssessmentId == scheduleId);
     }
 
     @action.bound
@@ -260,6 +263,7 @@ export class PatientStore implements IPatientStore {
                 this.loadSafetyPlanQuery.fromPromise(Promise.resolve(patient.safetyPlan));
                 this.loadActivitiesQuery.fromPromise(Promise.resolve(patient.activities));
                 this.loadScheduledActivitiesQuery.fromPromise(Promise.resolve(patient.scheduledActivities));
+                this.loadScheduledAssessmentsQuery.fromPromise(Promise.resolve(patient.scheduledAssessments));
                 this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
                 this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
                 this.loadActivityLogsQuery.fromPromise(Promise.resolve(patient.activityLogs));
@@ -287,15 +291,22 @@ export class PatientStore implements IPatientStore {
             this.loadActivityLogsQuery,
             onArrayConflict('activitylog', 'activityLogId', () => this.activityLogs, logger),
         );
+
+        await this.loadAndLogQuery<IScheduledActivity[]>(
+            this.patientService.getScheduledActivities,
+            this.loadScheduledActivitiesQuery,
+        );
     }
 
     @action.bound
     public async saveMoodLog(moodLog: IMoodLog) {
-        const promise = this.patientService.addMoodLog({ ...moodLog, recordedDateTime: new Date() }).then((addedLog) => {
-            const newLogs = this.moodLogs.slice() || [];
-            newLogs.push(addedLog);
-            return newLogs;
-        });
+        const promise = this.patientService
+            .addMoodLog({ ...moodLog, recordedDateTime: new Date() })
+            .then((addedLog) => {
+                const newLogs = this.moodLogs.slice() || [];
+                newLogs.push(addedLog);
+                return newLogs;
+            });
 
         await this.loadAndLogQuery<IMoodLog[]>(
             () => promise,
@@ -319,6 +330,15 @@ export class PatientStore implements IPatientStore {
             this.loadAssessmentLogsQuery,
             onArrayConflict('assessmentlog', 'assessmentLogId', () => this.assessmentLogs, logger),
         );
+
+        const newConfig = await this.patientService.getPatientConfig();
+        await Promise.all([
+            this.loadConfigQuery.fromPromise(Promise.resolve(newConfig)),
+            this.loadAndLogQuery<IScheduledAssessment[]>(
+                this.patientService.getScheduledAssessments,
+                this.loadScheduledAssessmentsQuery,
+            ),
+        ]);
     }
 
     @action.bound
