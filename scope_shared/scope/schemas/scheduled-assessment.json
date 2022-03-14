@@ -18,7 +18,7 @@
 			"type": "number"
 		},
 		"_deleted": {
-			"type": "boolean"
+			"const": true
 		},
 		"scheduledAssessmentId": {
 			"type": "string"
