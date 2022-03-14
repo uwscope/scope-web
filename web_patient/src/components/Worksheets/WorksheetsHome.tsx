@@ -12,7 +12,7 @@ import { useStores } from 'src/stores/stores';
 
 export const WorksheetsHome: FunctionComponent = observer(() => {
     const rootStore = useStores();
-    const { resources } = rootStore.appContentConfig;
+    const { patientresources } = rootStore.appContentConfig;
     const navigate = useNavigate();
 
     const handleGoBack = action(() => {
@@ -21,7 +21,7 @@ export const WorksheetsHome: FunctionComponent = observer(() => {
 
     return (
         <DetailPage title={getString('Resources_title')} onBack={handleGoBack}>
-            {resources.map((r, idx) => (
+            {patientresources.map((r, idx) => (
                 <List
                     key={idx}
                     component="nav"
