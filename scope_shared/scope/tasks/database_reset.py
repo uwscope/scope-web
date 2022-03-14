@@ -75,12 +75,10 @@ def _reset(
         scope.database.initialize.ensure_database_initialized(database=database)
 
     #
-    # Rest the populate configuration
+    # Reset the populate configuration
     #
-    shutil.rmtree(populate_dir_path)
-    shutil.copytree(src=populate_reset_dir_path, dst=populate_dir_path)
-    shutil.move(
-        src=Path(populate_dir_path, "populate.yaml"),
+    shutil.copy(
+        src=Path(populate_reset_dir_path, "populate.yaml"),
         dst=scope.tasks.database_populate.populate_config_generate_path(
             populate_dir_path=populate_dir_path
         ),
