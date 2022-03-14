@@ -1,9 +1,12 @@
 import copy
+
 import pymongo.collection
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 import scope.database.collection_utils
 import scope.database.patient
+import scope.database.patient.activities
+import scope.database.patient.assessments
 
 
 def _unsafe_update_set_element(
@@ -15,7 +18,8 @@ def _unsafe_update_set_element(
     database_put_document_parameter: str,
     collection: pymongo.collection.Collection,
     set_id: str,
-    new_document: dict,
+    new_document_complete: dict,
+    preserve_keys: List[str],
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Update a set element.
@@ -23,6 +27,8 @@ def _unsafe_update_set_element(
     Unsafe because it gets and updates the current document,
     effectively ignoring use of _rev to prevent race conflicts in modifications.
     """
+
+    preserve_keys = ["_type", "_set_id", "_rev"] + preserve_keys
 
     current_document = database_get_function(
         **{
@@ -32,11 +38,14 @@ def _unsafe_update_set_element(
     )
 
     if current_document:
-        updated_document = copy.deepcopy(current_document)
-        updated_document.update(copy.deepcopy(new_document))
-        del updated_document["_id"]
+        updated_document = {}
+        for preserve_key_current in preserve_keys:
+            if preserve_key_current in current_document:
+                updated_document[preserve_key_current] = current_document[preserve_key_current]
+
+        updated_document.update(copy.deepcopy(new_document_complete))
     else:
-        updated_document = new_document
+        updated_document = new_document_complete
 
     return database_put_function(
         **{
@@ -92,7 +101,7 @@ def unsafe_update_assessment(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
-    assessment: dict,
+    assessment_complete: dict,
 ) -> scope.database.collection_utils.SetPutResult:
     return _unsafe_update_set_element(
         database_get_function=scope.database.patient.assessments.get_assessment,
@@ -100,7 +109,25 @@ def unsafe_update_assessment(
         database_put_document_parameter="assessment",
         collection=collection,
         set_id=set_id,
-        new_document=assessment,
+        preserve_keys=[scope.database.patient.assessments.SEMANTIC_SET_ID],
+        new_document_complete=assessment_complete,
+    )
+
+
+def unsafe_update_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    activity_complete: dict,
+) -> scope.database.collection_utils.SetPutResult:
+    return _unsafe_update_set_element(
+        database_get_function=scope.database.patient.activities.get_activity,
+        database_put_function=scope.database.patient.activities.put_activity,
+        database_put_document_parameter="activity",
+        collection=collection,
+        set_id=set_id,
+        preserve_keys=[scope.database.patient.activities.SEMANTIC_SET_ID],
+        new_document_complete=activity_complete,
     )
 
 

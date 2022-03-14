@@ -251,7 +251,7 @@ def test_patient_set_get(
                 **{
                     "collection": temp_patient.collection,
                     "set_id": document["_set_id"],
-                    config.database_document_parameter_name: document,
+                    "{}_complete".format(config.database_document_parameter_name): document,
                 }
             )
             assert result.inserted_count == 1
@@ -666,7 +666,7 @@ def test_patient_set_element_get(
             **{
                 "collection": temp_patient.collection,
                 "set_id": document["_set_id"],
-                config.database_document_parameter_name: document,
+                "{}_complete".format(config.database_document_parameter_name): document,
             }
         )
         assert result.inserted_count == 1
@@ -755,7 +755,7 @@ def test_patient_set_element_get_invalid(
             **{
                 "collection": temp_patient.collection,
                 "set_id": document["_set_id"],
-                config.database_document_parameter_name: document,
+                "{}_complete".format(config.database_document_parameter_name): document,
             }
         )
         assert result.inserted_count == 1
@@ -1087,7 +1087,7 @@ def test_patient_set_element_put_update(
             **{
                 "collection": temp_patient.collection,
                 "set_id": document["_set_id"],
-                config.database_document_parameter_name: document,
+                "{}_complete".format(config.database_document_parameter_name): document,
             }
         )
         assert result.inserted_count == 1
@@ -1188,7 +1188,7 @@ def test_patient_set_element_put_update_invalid(
             **{
                 "collection": temp_patient.collection,
                 "set_id": document["_set_id"],
-                config.database_document_parameter_name: document,
+                "{}_complete".format(config.database_document_parameter_name): document,
             }
         )
         assert result.inserted_count == 1

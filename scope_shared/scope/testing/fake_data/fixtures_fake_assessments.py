@@ -12,8 +12,7 @@ import scope.schema
 import scope.schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
-# TODO: Commenting because either both should exist or both should be removed
-# OPTIONAL_KEYS = ["frequency", "dayOfWeek"]
+# Keys are not naively optional, see allowable_schedules
 OPTIONAL_KEYS = []
 
 
@@ -28,18 +27,52 @@ def _fake_assessment(
         "_set_id": assessment_content["id"],
         scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_content["id"],
         "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
-        "assigned": random.choice([True, False]),
-        "assignedDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                faker_factory.date_time_between(
-                    start_date=datetime.datetime.now(),
-                    end_date=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
-                )
-            )
-        ),
-        "frequency": fake_utils.fake_enum_value(scope.enums.ScheduledItemFrequency),
-        "dayOfWeek": fake_utils.fake_enum_value(scope.enums.DayOfWeek),
     }
+
+    allowable_schedules = [
+        {
+            "assigned": False,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    faker_factory.date_time_between(
+                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        end_date=datetime.datetime.now(),
+                    )
+                )
+            ),
+        },
+        {
+            "assigned": True,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    faker_factory.date_time_between(
+                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        end_date=datetime.datetime.now(),
+                    )
+                )
+            ),
+            "frequency": scope.enums.ScheduledItemFrequency.Daily.value,
+        },
+        {
+            "assigned": True,
+            "assignedDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    faker_factory.date_time_between(
+                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        end_date=datetime.datetime.now(),
+                    )
+                )
+            ),
+            "frequency": random.choice([
+                scope.enums.ScheduledItemFrequency.Weekly.value,
+                scope.enums.ScheduledItemFrequency.Biweekly.value,
+                scope.enums.ScheduledItemFrequency.Monthly.value,
+            ]),
+            "dayOfWeek": fake_utils.fake_enum_value(scope.enums.DayOfWeek),
+        },
+    ]
+
+    fake_assessment.update(random.choice(allowable_schedules))
 
     # Remove a randomly sampled subset of optional parameters.
     fake_assessment = fake_utils.fake_optional(

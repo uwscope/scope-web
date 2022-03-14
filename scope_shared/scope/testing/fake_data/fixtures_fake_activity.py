@@ -53,7 +53,7 @@ def fake_activity_factory(
             "name": activity_name,
             "value": activity_value["name"],
             "lifeareaId": activity_value["lifeareaId"],
-            "startDate": date_utils.format_date(
+            "startDateTime": date_utils.format_date(
                 faker_factory.date_between_dates(
                     date_start=datetime.datetime.now(),
                     date_end=datetime.datetime.now() + datetime.timedelta(days=60),
@@ -65,7 +65,6 @@ def fake_activity_factory(
             "hasRepetition": random.choice([True, False]),
             "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
             "isActive": random.choice([True, False]),
-            "isDeleted": random.choice([True, False]),
         }
 
     return factory

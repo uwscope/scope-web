@@ -17,6 +17,9 @@
 		"_rev": {
 			"type": "number"
 		},
+		"_deleted": {
+			"type": "boolean"
+		},
 		"scheduledActivityId": {
 			"type": "string"
 		},
