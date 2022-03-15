@@ -23,11 +23,17 @@ def abort_document_not_found() -> NoReturn:
     )
 
 
-def abort_not_authorized() -> NoReturn:
+def abort_not_authorized(reason: str = None) -> NoReturn:
+    response = {
+        "message": "Not authorized.",
+    }
+    if reason:
+        response.update({
+            "reason": reason
+        })
+
     _flask_abort(
-        {
-            "message": "Not authorized.",
-        },
+        response,
         http.HTTPStatus.FORBIDDEN,
     )
 
