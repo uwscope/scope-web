@@ -4,7 +4,6 @@ import pymongo.collection
 import pytest
 
 import scope.database.collection_utils
-import scope.database.date_utils as date_utils
 import scope.database.patient.activities
 import scope.schema
 import scope.schema_utils as schema_utils
@@ -19,7 +18,7 @@ def get_scheduled_activities(
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "schedulAactivity" documents.
+    Get list of "scheduledAactivity" documents.
     """
 
     scheduled_activities = scope.database.collection_utils.get_set(
@@ -33,6 +32,7 @@ def get_scheduled_activities(
             for scheduled_activity_current in scheduled_activities
             if not scheduled_activity_current.get("_deleted", False)
         ]
+
     return scheduled_activities
 
 
@@ -68,11 +68,17 @@ def get_scheduled_activity(
     Get "scheduleActivity" document.
     """
 
-    return scope.database.collection_utils.get_set_element(
+    scheduled_activity = scope.database.collection_utils.get_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         set_id=set_id,
     )
+
+    if scheduled_activity:
+        if scheduled_activity.get("_deleted", False):
+            scheduled_activity = None
+
+    return scheduled_activity
 
 
 def post_scheduled_activity(
