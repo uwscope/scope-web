@@ -66,7 +66,7 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                         </li>
                         <li>
                             <Typography variant="body1">
-                                Crisis Text Line - Text "HELLO" to 741741{'  '}
+                                Crisis Text Line - Text "HOME" to 741741{'  '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"

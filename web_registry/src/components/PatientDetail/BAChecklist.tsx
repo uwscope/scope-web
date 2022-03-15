@@ -51,6 +51,8 @@ export const BAChecklist: FunctionComponent = observer(() => {
 
     const otherResources = resourcesMap[`Other`]
 
+    const swResources = resourcesMap[`swresources`]
+
     const getResourceLink = (filename: string) => {
         return `/resources/${filename}`;
     };
@@ -107,13 +109,31 @@ export const BAChecklist: FunctionComponent = observer(() => {
                         ))}
                         <TableRow>
                             <TableCell component="th" scope="row" style={{ verticalAlign: 'top' }}>
-                                Other
+                                Other Patient Resources
                             </TableCell>
                             <TableCell>
                                 <List dense disablePadding>
                                     {otherResources &&
                                         otherResources.length > 0 &&
                                         otherResources.map((resource, idx) => (
+                                            <ListItem dense disableGutters key={`${resource.name}-${idx}`}>
+                                                <Link href={getResourceLink(resource.filename)} target="_blank">
+                                                    {resource.name}
+                                                </Link>
+                                            </ListItem>
+                                        ))}
+                                </List>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell component="th" scope="row" style={{ verticalAlign: 'top' }}>
+                                Social Worker Resources
+                            </TableCell>
+                            <TableCell>
+                                <List dense disablePadding>
+                                    {swResources &&
+                                        swResources.length > 0 &&
+                                        swResources.map((resource, idx) => (
                                             <ListItem dense disableGutters key={`${resource.name}-${idx}`}>
                                                 <Link href={getResourceLink(resource.filename)} target="_blank">
                                                     {resource.name}

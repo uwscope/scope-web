@@ -1,0 +1,22 @@
+{
+    "id": "swresources",
+    "name": "Social Worker Resources",
+    "resources": [
+        {
+            "name": "Collaborative Care Workflow",
+            "filename": "Collaborative_Care_in_Onc_Summary_Workflow.pdf"
+        },
+        {
+            "name": "Psychosocial Questionnaire (PHQ-9 & GAD-7)",
+            "filename": "Psychosocial_Questionnaire_(PHQ-9_GAD-7).pdf"
+        },
+        {
+            "name": "PST Steps Worksheets",
+            "filename": "PST_Steps_Worksheets_021619.pdf"
+        },
+        {
+            "name": "Psychotropic Medications",
+            "filename": "Psychotropic_Medications_122920.pdf"
+        }
+    ]
+}
