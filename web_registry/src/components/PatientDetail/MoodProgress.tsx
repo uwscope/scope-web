@@ -2,6 +2,7 @@ import { Grid, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import { compareAsc, format } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
+import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { IAssessment, IMoodLog } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
@@ -16,7 +17,7 @@ export interface IMoodProgressProps {
     moodLogs: IMoodLog[];
 }
 
-export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
+export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer((props) => {
     const currentPatient = usePatient();
     const rootStore = useStores();
 
@@ -72,6 +73,10 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
         },
     ];
 
+    console.log(
+        `loadpatient=${currentPatient?.loadPatientState.pending}, loadmood=${currentPatient?.loadMoodLogsState.pending}`,
+    );
+
     return (
         <ActionPanel
             id={assessment.assessmentId}
@@ -120,6 +125,6 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = (props) => {
             </Grid>
         </ActionPanel>
     );
-};
+});
 
 export default MoodProgress;

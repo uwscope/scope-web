@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/styles';
 import withTheme from '@mui/styles/withTheme';
-import { format } from 'date-fns';
+import { addDays, addMonths, compareAsc, format } from 'date-fns';
 import React, { FunctionComponent } from 'react';
 import {
     DiscreteColorLegend,
@@ -20,13 +20,13 @@ const Container = withTheme(
     styled.div({
         display: 'flex',
         flexDirection: 'column',
-    })
+    }),
 );
 
 const ChartContainer = withTheme(
     styled.div({
         flexGrow: 1,
-    })
+    }),
 );
 
 export interface IAssessionDataPoint {
@@ -72,6 +72,15 @@ export const SessionProgressVis: FunctionComponent<ISessionProgressVisProps> = (
     const yMax = 28;
     const yDomain = [0, yMax];
 
+    const minStartDate = addMonths(new Date(), -3);
+    const dateMax = addDays(new Date(), 2);
+    const scoreDateMin =
+        phqScores.concat(gadScores).sort((a, b) => compareAsc(a.date, b.date))[0]?.date || minStartDate;
+    const sessionDateMin = sessions.concat(reviews).sort((a, b) => compareAsc(a.date, b.date))[0]?.date || minStartDate;
+    const dateMin = addDays([scoreDateMin, sessionDateMin, minStartDate].sort(compareAsc)[0], -2);
+
+    const xDomain = [dateMin.getTime(), dateMax.getTime()];
+
     const phqData = phqScores.map((ps) => ({ x: ps.date.getTime(), y: ps.score } as LineMarkSeriesPoint));
 
     const gadData = gadScores.map((ps) => ({ x: ps.date.getTime(), y: ps.score } as LineMarkSeriesPoint));
@@ -95,7 +104,13 @@ export const SessionProgressVis: FunctionComponent<ISessionProgressVisProps> = (
     return (
         <Container>
             <ChartContainer ref={ref}>
-                <XYPlot height={300} width={width} xType="time" animation={{ duration: 100 }} yDomain={yDomain}>
+                <XYPlot
+                    height={300}
+                    width={width}
+                    xType="time"
+                    animation={{ duration: 100 }}
+                    yDomain={yDomain}
+                    xDomain={xDomain}>
                     <VerticalGridLines />
                     <HorizontalGridLines />
                     <XAxis
