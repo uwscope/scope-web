@@ -1,6 +1,7 @@
 import datetime
 import faker
 import pytest
+import pytz
 import random
 from typing import Callable
 
@@ -12,6 +13,123 @@ import scope.schema
 import scope.schema_utils
 import scope.schema_utils as schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
+
+
+# Keys are not naively optional, see allowable_schedules
+OPTIONAL_KEYS = []
+
+
+def _fake_activity(
+    *,
+    faker_factory: faker.Faker,
+    values_inventory: dict,
+) -> dict:
+
+    combined_activities = []
+    for value_current in values_inventory["values"]:
+        combined_activities.extend(value_current.get("activities", []))
+
+    if len(combined_activities) > 0 and random.choice([True, False]):
+        # Sample a value with at least one activity
+        values_valid = []
+        for value_current in values_inventory["values"]:
+            if value_current.get("activities", []):
+                values_valid.append(value_current)
+        activity_value = random.choice(values_valid)
+
+        # Sample an activity
+        activity_name = random.choice(activity_value["activities"])["name"]
+    else:
+        # Sample any value
+        activity_value = random.choice(values_inventory["values"])
+
+        # Generate a text-based activity
+        activity_name = faker_factory.text()
+
+    fake_activity = {
+        "_type": scope.database.patient.activities.DOCUMENT_TYPE,
+        "name": activity_name,
+        "value": activity_value["name"],
+        "lifeareaId": activity_value["lifeareaId"],
+        "startDateTime": date_utils.format_datetime(
+            pytz.utc.localize(
+                faker_factory.date_time_between(
+                    start_date=datetime.datetime.now()
+                    - datetime.timedelta(days=1 * 30),
+                    end_date=datetime.datetime.now() + datetime.timedelta(days=1 * 30),
+                )
+            )
+        ),
+        "timeOfDay": random.randrange(0, 24),
+    }
+    allowable_schedules = [
+        {
+            "hasReminder": True,
+            "reminderTimeOfDay": random.randrange(0, 24),
+            "hasRepetition": False,
+            "isActive": True,
+            "isDeleted": False,
+        },
+        {
+            "hasReminder": True,
+            "reminderTimeOfDay": random.randrange(0, 24),
+            "hasRepetition": False,
+            "isActive": False,
+            "isDeleted": True,
+        },
+        {
+            "hasReminder": True,
+            "reminderTimeOfDay": random.randrange(0, 24),
+            "hasRepetition": True,
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+            "isActive": True,
+            "isDeleted": False,
+        },
+        {
+            "hasReminder": True,
+            "reminderTimeOfDay": random.randrange(0, 24),
+            "hasRepetition": True,
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+            "isActive": False,
+            "isDeleted": True,
+        },
+        {
+            "hasReminder": False,
+            "hasRepetition": False,
+            "isActive": True,
+            "isDeleted": False,
+        },
+        {
+            "hasReminder": False,
+            "hasRepetition": False,
+            "isActive": False,
+            "isDeleted": True,
+        },
+        {
+            "hasReminder": False,
+            "hasRepetition": True,
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+            "isActive": True,
+            "isDeleted": False,
+        },
+        {
+            "hasReminder": False,
+            "hasRepetition": True,
+            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+            "isActive": False,
+            "isDeleted": True,
+        },
+    ]
+
+    fake_activity.update(random.choice(allowable_schedules))
+
+    # Remove a randomly sampled subset of optional parameters.
+    fake_activity = fake_utils.fake_optional(
+        document=fake_activity,
+        optional_keys=OPTIONAL_KEYS,
+    )
+
+    return fake_activity
 
 
 def fake_activity_factory(
@@ -27,46 +145,12 @@ def fake_activity_factory(
         raise ValueError("values_inventory must include at least one value.")
 
     def factory() -> dict:
-        combined_activities = []
-        for value_current in values_inventory["values"]:
-            combined_activities.extend(value_current.get("activities", []))
+        fake_activity = _fake_activity(
+            faker_factory=faker_factory,
+            values_inventory=values_inventory,
+        )
 
-        if len(combined_activities) > 0 and random.choice([True, False]):
-            # Sample a value with at least one activity
-            values_valid = []
-            for value_current in values_inventory["values"]:
-                if value_current.get("activities", []):
-                    values_valid.append(value_current)
-            activity_value = random.choice(values_valid)
-
-            # Sample an activity
-            activity_name = random.choice(activity_value["activities"])["name"]
-        else:
-            # Sample any value
-            activity_value = random.choice(values_inventory["values"])
-
-            # Generate a text-based activity
-            activity_name = faker_factory.text()
-
-        return {
-            "_type": scope.database.patient.activities.DOCUMENT_TYPE,
-            "name": activity_name,
-            "value": activity_value["name"],
-            "lifeareaId": activity_value["lifeareaId"],
-            "startDateTime": date_utils.format_date(
-                faker_factory.date_between_dates(
-                    date_start=datetime.datetime.now(),
-                    date_end=datetime.datetime.now() + datetime.timedelta(days=60),
-                )
-            ),
-            "timeOfDay": random.randrange(0, 24),
-            "hasReminder": random.choice([True, False]),
-            "reminderTimeOfDay": random.randrange(0, 24),
-            "hasRepetition": random.choice([True, False]),
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
-            "isActive": random.choice([True, False]),
-            "isDeleted": random.choice([True, False]),
-        }
+        return fake_activity
 
     return factory
 
