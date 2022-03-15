@@ -36,7 +36,7 @@ export class RootStore implements IRootStore {
     public authStore: IAuthStore;
 
     // App metadata
-    public appTitle = 'SCOPE for Patients';
+    public appTitle = 'SCOPE App';
     public appContentConfig: IAppContentConfig;
 
     // UI states
