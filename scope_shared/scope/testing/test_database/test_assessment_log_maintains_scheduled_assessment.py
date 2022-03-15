@@ -13,9 +13,6 @@ import scope.enums
 import scope.testing.fixtures_database_temp_patient
 
 
-# TODO:  create test
-
-
 def test_assessment_log_post_maintains_scheduled_assessment(
     database_temp_patient_factory: Callable[
         [],
@@ -38,32 +35,41 @@ def test_assessment_log_post_maintains_scheduled_assessment(
     fake_scheduled_assessment = data_fake_scheduled_assessment_factory()
 
     # Ensure it is not completed
-    fake_scheduled_assessment.update({
-        "completed": False
-    })
+    fake_scheduled_assessment.update({"completed": False})
 
     # Put the scheduled assessment
-    scheduled_assessment_post_result = scope.database.patient.scheduled_assessments.post_scheduled_assessment(
-        collection=patient_collection,
-        scheduled_assessment=fake_scheduled_assessment,
+    scheduled_assessment_post_result = (
+        scope.database.patient.scheduled_assessments.post_scheduled_assessment(
+            collection=patient_collection,
+            scheduled_assessment=fake_scheduled_assessment,
+        )
     )
     assert scheduled_assessment_post_result.inserted_count == 1
     fake_scheduled_assessment = scheduled_assessment_post_result.document
 
     # Post a corresponding log
     fake_assessment_log = data_fake_assessment_log_factory()
-    fake_assessment_log.update({
-        "scheduledAssessmentId": fake_scheduled_assessment["scheduledAssessmentId"]
-    })
-    assessment_log_post_result = scope.database.patient.assessment_logs.post_assessment_log(
-        collection=patient_collection,
-        assessment_log=fake_assessment_log
+    fake_assessment_log.update(
+        {
+            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID: fake_scheduled_assessment[
+                scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+            ]
+        }
+    )
+    assessment_log_post_result = (
+        scope.database.patient.assessment_logs.post_assessment_log(
+            collection=patient_collection, assessment_log=fake_assessment_log
+        )
     )
     assert assessment_log_post_result.inserted_count == 1
 
     # Confirm the scheduled assessment is now completed
-    updated_scheduled_assessment = scope.database.patient.scheduled_assessments.get_scheduled_assessment(
-        collection=patient_collection,
-        set_id=fake_scheduled_assessment["scheduledAssessmentId"]
+    updated_scheduled_assessment = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessment(
+            collection=patient_collection,
+            set_id=fake_scheduled_assessment[
+                scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+            ],
+        )
     )
     assert updated_scheduled_assessment["completed"]
