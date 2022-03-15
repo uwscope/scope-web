@@ -20,9 +20,9 @@ const _strings = {
 
     Home_quote_title: 'Quote of the day',
     Home_things_title: 'Requested by provider',
-    Home_values_button_text: 'Complete values and activities inventory',
-    Home_safety_button_text: 'Complete safety planning',
-    Home_assessment_button_text: 'Complete ${assessment} assessment',
+    Home_values_button_text: 'Complete Values and Activities Inventory',
+    Home_safety_button_text: 'Complete Safety Plan',
+    Home_assessment_button_text: 'Complete ${assessment} Assessment',
     Home_mood_button_text: 'Log your mood',
     Home_plan_title: 'My plan for today',
     Home_plan_done: 'You are all caught up! Make sure to celebrate your achievement!',
@@ -167,7 +167,7 @@ const _strings = {
     Careplan_activity_item_edit: 'Edit',
     Careplan_activity_item_delete: 'Delete',
     Careplan_activity_item_activate: 'Activate',
-    Careplan_activity_item_deactivate: 'Deativate',
+    Careplan_activity_item_deactivate: 'Deactivate',
 
     Careplan_add_activity: 'Add activity',
 

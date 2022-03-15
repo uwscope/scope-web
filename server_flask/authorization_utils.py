@@ -22,11 +22,11 @@ def authenticated_identities(
 ) -> AuthenticatedIdentities:
     headers = flask.request.headers
     if "Authorization" not in headers:
-        request_utils.abort_not_authorized()
+        request_utils.abort_not_authorized("Authorization header not found.")
 
     authorization_header = flask.request.headers["Authorization"]
     if not re.fullmatch("Bearer ([^\\s]+)", authorization_header):
-        request_utils.abort_not_authorized()
+        request_utils.abort_not_authorized("Authorization Bearer token not found.")
 
     authorization_token = authorization_header.split()[1]
 
@@ -58,7 +58,7 @@ def authenticated_identities(
             },
         )
     except jwt.exceptions.InvalidTokenError:
-        request_utils.abort_not_authorized()
+        request_utils.abort_not_authorized("Invalid token error.")
 
     if authorization_data["token_use"] != "id":
         request_utils.abort_not_authorized()
