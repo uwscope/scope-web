@@ -1,5 +1,18 @@
 {
-	"id": "Positive reinforcement",
-	"name": "Positive reinforcement",
-	"resources": []
+  "id": "Positive reinforcement",
+  "name": "Positive reinforcement",
+  "resources": [
+    {
+      "name": "Personal Activity Experiment",
+      "filename": "Personal_Activity_Experiment.pdf"
+    },
+    {
+      "name": "Activity Diary (General)",
+      "filename": "Activity_Diary_General.pdf"
+    },
+    {
+      "name": "Activity Diary (Hourly)",
+      "filename": "Activity_Diary_Hourly.pdf"
+    }
+  ]
 }
