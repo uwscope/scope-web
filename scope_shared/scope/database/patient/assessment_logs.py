@@ -13,7 +13,9 @@ def _maintain_scheduled_assessment(
     collection: pymongo.collection.Collection,
     assessment_log: dict,
 ):
-    scheduled_assessment_id = assessment_log.get("scheduledAssessmentId", None)
+    scheduled_assessment_id = assessment_log.get(
+        scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID, None
+    )
     if not scheduled_assessment_id:
         return
 
