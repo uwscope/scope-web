@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { action } from 'mobx';
+import { action, observable } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { IContact, ISafetyPlan } from 'shared/types';
@@ -199,11 +199,46 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
     const { patientStore } = rootStore;
     const safetyPlan = patientStore.safetyPlan;
 
-    const dataState = useLocalObservable<ISafetyPlan>(() => ({ ...safetyPlan }));
+    const dataState = useLocalObservable<ISafetyPlan>(() => ({
+        ...safetyPlan,
+        reasonsForLiving: safetyPlan.reasonsForLiving || '',
+        warningSigns: observable.array(safetyPlan.warningSigns || []),
+        copingStrategies: observable.array(safetyPlan.copingStrategies || []),
+        socialDistractions: observable.array(safetyPlan.socialDistractions || []),
+        settingDistractions: observable.array(safetyPlan.settingDistractions || []),
+        supporters: observable.array(safetyPlan.supporters || []),
+        professionals: observable.array(safetyPlan.professionals || []),
+        urgentServices: observable.array(safetyPlan.urgentServices || []),
+        safeEnvironment: observable.array(safetyPlan.safeEnvironment || []),
+    }));
 
     const handleSubmit = action(async () => {
         try {
-            await patientStore.updateSafetyPlan({ ...dataState });
+            // Clean up empty arrays
+            const cleanContacts = (contacts: IContact[] | undefined) => {
+                if (contacts) {
+                    return contacts
+                        .filter((c) => !!c.name || !!c.address || !!c.emergencyNumber || !!c.phoneNumber)
+                        .map((c) => ({
+                            name: c.name,
+                            address: c.address,
+                            phoneNumber: c.phoneNumber,
+                            emergencyNumber: c.emergencyNumber,
+                        }));
+                }
+                return undefined;
+            };
+
+            const combinedPlan = {
+                ...safetyPlan,
+                ...dataState,
+                socialDistractions: cleanContacts(dataState.socialDistractions),
+                supporters: cleanContacts(dataState.supporters),
+                professionals: cleanContacts(dataState.professionals),
+                urgentServices: cleanContacts(dataState.urgentServices),
+            };
+
+            await patientStore.updateSafetyPlan(combinedPlan);
             return !patientStore.loadSafetyPlanState.error;
         } catch {
             return false;
