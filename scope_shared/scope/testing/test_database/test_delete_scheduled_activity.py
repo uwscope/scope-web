@@ -90,6 +90,13 @@ def test_delete_scheduled_activity(
             scheduled_activity_post_result_document
             not in scheduled_activity_get_plural_result
         )
+        for (
+            scheduled_activity_get_plural_result_current
+        ) in scheduled_activity_get_plural_result:
+            assert (
+                scheduled_activity_post_result.inserted_set_id
+                != scheduled_activity_get_plural_result_current["_set_id"]
+            )
 
     scheduled_activities = (
         scope.database.patient.scheduled_activities.get_scheduled_activities(

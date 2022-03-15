@@ -90,6 +90,13 @@ def test_delete_scheduled_assessment(
             scheduled_assessment_post_result_document
             not in scheduled_assessment_get_plural_result
         )
+        for (
+            scheduled_assessment_get_plural_result_current
+        ) in scheduled_assessment_get_plural_result:
+            assert (
+                scheduled_assessment_post_result.inserted_set_id
+                != scheduled_assessment_get_plural_result_current["_set_id"]
+            )
 
     scheduled_assessments = (
         scope.database.patient.scheduled_assessments.get_scheduled_assessments(
