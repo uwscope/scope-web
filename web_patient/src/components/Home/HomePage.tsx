@@ -22,7 +22,7 @@ const CompactList = withTheme(
         'li>.MuiListItemIcon-root': {
             minWidth: 36,
         },
-    }))
+    })),
 );
 
 export const HomePage: FunctionComponent = observer(() => {

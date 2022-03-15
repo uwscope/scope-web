@@ -331,6 +331,7 @@ export class PatientStore implements IPatientStore {
             onArrayConflict('assessmentlog', 'assessmentLogId', () => this.assessmentLogs, logger),
         );
 
+        // Calling it outside of the promise query to avoid updating the flag.
         const newConfig = await this.patientService.getPatientConfig();
         await Promise.all([
             this.loadConfigQuery.fromPromise(Promise.resolve(newConfig)),
@@ -352,6 +353,10 @@ export class PatientStore implements IPatientStore {
             this.loadSafetyPlanQuery,
             onSingletonConflict('safetyplan'),
         );
+
+        // Calling it outside of the promise query to avoid updating the flag.
+        const newConfig = await this.patientService.getPatientConfig();
+        this.loadConfigQuery.fromPromise(Promise.resolve(newConfig));
     }
 
     @action.bound
@@ -405,6 +410,10 @@ export class PatientStore implements IPatientStore {
             this.loadValuesInventoryQuery,
             onSingletonConflict('valuesinventory'),
         );
+
+        // Calling it outside of the promise query to avoid updating the flag.
+        const newConfig = await this.patientService.getPatientConfig();
+        this.loadConfigQuery.fromPromise(Promise.resolve(newConfig));
     }
 
     @action.bound
