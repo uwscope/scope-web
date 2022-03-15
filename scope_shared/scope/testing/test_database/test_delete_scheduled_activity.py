@@ -8,7 +8,7 @@ import scope.enums
 import scope.testing.fixtures_database_temp_patient
 
 
-def test_scheduled_activity_delete_scheduled_activity(
+def test_delete_scheduled_activity(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -34,6 +34,32 @@ def test_scheduled_activity_delete_scheduled_activity(
             )
         )
         assert scheduled_activity_post_result.inserted_count == 1
+        scheduled_activity_post_result_document = (
+            scheduled_activity_post_result.document
+        )
+
+        # Get via singular verb
+        scheduled_activity_get_singular_result = (
+            scope.database.patient.scheduled_activities.get_scheduled_activity(
+                collection=patient_collection,
+                set_id=scheduled_activity_post_result.inserted_set_id,
+            )
+        )
+        assert (
+            scheduled_activity_post_result_document
+            == scheduled_activity_get_singular_result
+        )
+
+        # Get via plural verb
+        scheduled_activity_get_plural_result = (
+            scope.database.patient.scheduled_activities.get_scheduled_activities(
+                collection=patient_collection,
+            )
+        )
+        assert (
+            scheduled_activity_post_result_document
+            in scheduled_activity_get_plural_result
+        )
 
         # Delete them
         scheduled_activity_delete_result = (
@@ -45,6 +71,7 @@ def test_scheduled_activity_delete_scheduled_activity(
         )
         assert scheduled_activity_delete_result.inserted_count == 1
 
+        # Get via singular veb
         scheduled_activity_get_result = (
             scope.database.patient.scheduled_activities.get_scheduled_activity(
                 collection=patient_collection,
@@ -52,6 +79,17 @@ def test_scheduled_activity_delete_scheduled_activity(
             )
         )
         assert not scheduled_activity_get_result  # returns None
+
+        # Get via plural verb
+        scheduled_activity_get_plural_result = (
+            scope.database.patient.scheduled_activities.get_scheduled_activities(
+                collection=patient_collection,
+            )
+        )
+        assert (
+            scheduled_activity_post_result_document
+            not in scheduled_activity_get_plural_result
+        )
 
     scheduled_activities = (
         scope.database.patient.scheduled_activities.get_scheduled_activities(
