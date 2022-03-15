@@ -71,7 +71,7 @@ def test_delete_scheduled_activity(
         )
         assert scheduled_activity_delete_result.inserted_count == 1
 
-        # Get via singular veb
+        # Get via singular verb
         scheduled_activity_get_result = (
             scope.database.patient.scheduled_activities.get_scheduled_activity(
                 collection=patient_collection,
