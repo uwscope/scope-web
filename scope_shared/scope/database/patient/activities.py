@@ -28,11 +28,12 @@ def _calculate_scheduled_activities_to_create(
     if any([not activity["isActive"], activity["isDeleted"]]):
         return []
 
-    # Calculate if frequency is Weekly or None
     if activity["hasRepetition"]:
         frequency = scope.enums.ScheduledItemFrequency.Weekly.value
+        months = 3
     else:
         frequency = None
+        months = None
 
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
@@ -46,7 +47,7 @@ def _calculate_scheduled_activities_to_create(
         reminder=activity["hasReminder"],
         reminder_time_of_day=activity.get("reminderTimeOfDay", None),
         timezone=timezone,
-        months=3,
+        months=months,
     )
 
     # Fill in additional data needed for scheduled activities
