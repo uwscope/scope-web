@@ -1,6 +1,6 @@
 phq9Assessment = {
     "id": "phq-9",
-    "name": "PHQ-9",
+    "name": "Depression",
     "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
     "questions": [
         {"question": "Little interest or pleasure in doing things", "id": "Interest"},
