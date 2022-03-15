@@ -202,10 +202,18 @@ def get_scheduled_activities(
     Get list of "schedulAactivity" documents.
     """
 
-    return scope.database.collection_utils.get_set(
+    scheduled_activities = scope.database.collection_utils.get_set(
         collection=collection,
         document_type=DOCUMENT_TYPE,
     )
+
+    if scheduled_activities:
+        scheduled_activities = [
+            scheduled_activity_current
+            for scheduled_activity_current in scheduled_activities
+            if not scheduled_activity_current.get("_deleted", False)
+        ]
+    return scheduled_activities
 
 
 def delete_scheduled_activity(
