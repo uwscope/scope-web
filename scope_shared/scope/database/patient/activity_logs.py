@@ -2,9 +2,44 @@ from typing import List, Optional
 
 import pymongo.collection
 import scope.database.collection_utils
+import scope.database.patient.scheduled_activities
 
 DOCUMENT_TYPE = "activityLog"
 SEMANTIC_SET_ID = "activityLogId"
+
+
+def _maintain_scheduled_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    activity_log: dict,
+):
+    scheduled_activity_id = activity_log.get(
+        scope.database.patient.scheduled_activities.SEMANTIC_SET_ID, None
+    )
+    if not scheduled_activity_id:
+        return
+
+    scheduled_activity_document = (
+        scope.database.patient.scheduled_activities.get_scheduled_activity(
+            collection=collection,
+            set_id=scheduled_activity_id,
+        )
+    )
+    if not scheduled_activity_document:
+        return
+
+    scheduled_activity_document["completed"] = True
+    del scheduled_activity_document["_id"]
+
+    scheduled_activity_put_result = (
+        scope.database.patient.scheduled_activities.put_scheduled_activity(
+            collection=collection,
+            set_id=scheduled_activity_id,
+            scheduled_activity=scheduled_activity_document,
+        )
+    )
+
+    return scheduled_activity_put_result
 
 
 def get_activity_logs(
@@ -46,12 +81,20 @@ def post_activity_log(
     Post "activityLog" document.
     """
 
-    return scope.database.collection_utils.post_set_element(
+    activity_log_set_post_result = scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         document=activity_log,
     )
+
+    if activity_log_set_post_result.inserted_count == 1:
+        _maintain_scheduled_activity(
+            collection=collection,
+            activity_log=activity_log_set_post_result.document,
+        )
+
+    return activity_log_set_post_result
 
 
 def put_activity_log(

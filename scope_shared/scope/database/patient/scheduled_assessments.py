@@ -17,7 +17,7 @@ def get_scheduled_assessments(
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "scheduleAssessment" documents.
+    Get list of "scheduledAssessment" documents.
     """
 
     scheduled_assessments = scope.database.collection_utils.get_set(
