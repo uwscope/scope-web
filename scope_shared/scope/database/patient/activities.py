@@ -42,7 +42,7 @@ def _calculate_scheduled_activities_to_create(
         has_repetition=activity["hasRepetition"],
         frequency=frequency,
         repeat_day_flags=activity.get("repeatDayFlags", None),
-        day_of_week=None,  # Activities do not have day_of_week
+        day_of_week=None,  # Activities do not have dayOfWeek
         due_time_of_day=activity["timeOfDay"],
         reminder=activity["hasReminder"],
         reminder_time_of_day=activity.get("reminderTimeOfDay", None),
@@ -96,7 +96,9 @@ def _maintain_pending_scheduled_activities(
     maintenance_datetime: datetime.datetime,
     delete_existing: bool,
 ):
-
+    # Delete existing will be False if we are already certain
+    # that no existing scheduled activities need deleted as part of maintenance.
+    # This would be the case in a post of a new activity.
     if delete_existing:
         # Remove existing scheduled activities as necessary
         existing_scheduled_activities = (
@@ -186,7 +188,6 @@ def post_activity(
     )
 
     if activity_set_post_result.inserted_count == 1:
-
         _maintain_pending_scheduled_activities(
             collection=collection,
             activity_id=activity_set_post_result.inserted_set_id,
