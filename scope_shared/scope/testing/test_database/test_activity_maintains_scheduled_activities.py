@@ -197,3 +197,122 @@ def test_activity_calculate_scheduled_activities_to_delete():
             "completed": False,
         },
     ]
+
+
+def test_activity_put_maintains_scheduled_activities(
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_activity_factory: Callable[[], dict],
+):
+    """
+    Test that the scheduled activities are maintained.
+
+    The actual logic of scheduling specific activities is tested elsewhere.
+    This test just ensures that it sees the collection being manipulated.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    patient_collection = temp_patient.collection
+
+    # Obtain fake activity to use as template
+    fake_activity = data_fake_activity_factory()
+    activity_id = collection_utils.generate_set_id()
+    fake_activity[scope.database.patient.activities.SEMANTIC_SET_ID] = activity_id
+    fake_activity["_set_id"] = activity_id
+
+    # Disable the activity
+    fake_activity.update(
+        {
+            "isActive": False,
+            "isDeleted": True,
+            "startDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+        }
+    )
+    patient_unsafe_utils.unsafe_update_activity(
+        collection=patient_collection,
+        set_id=activity_id,
+        activity_complete=fake_activity,
+    )
+
+    # Determine what scheduled activities already exist
+    existing_scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
+    )
+    if not existing_scheduled_activities:
+        existing_scheduled_activities = []
+
+    # Enable the activity
+    fake_activity.update(
+        {
+            "isActive": True,
+            "isDeleted": False,
+            "startDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+        }
+    )
+    patient_unsafe_utils.unsafe_update_activity(
+        collection=patient_collection,
+        set_id=activity_id,
+        activity_complete=fake_activity,
+    )
+
+    # Ensure we now obtain new scheduled activities
+    new_scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
+    )
+    new_scheduled_activities = [
+        scheduled_activity_current
+        for scheduled_activity_current in new_scheduled_activities
+        if scheduled_activity_current not in existing_scheduled_activities
+    ]
+    assert len(new_scheduled_activities) > 0
+
+    # Disable the activity of the activity
+    fake_activity.update(
+        {
+            "isActive": False,
+            "isDeleted": True,
+            "startDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.utcnow())
+            ),
+        }
+    )
+    patient_unsafe_utils.unsafe_update_activity(
+        collection=patient_collection,
+        set_id=activity_id,
+        activity_complete=fake_activity,
+    )
+
+    # Ensure there are no pending scheduled activities
+    # Because pending logic is already tested,
+    # this confirms cancellation while being robust to an item created in this test which is now in the past
+    existing_scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
+    )
+    if not existing_scheduled_activities:
+        existing_scheduled_activities = []
+
+    existing_scheduled_activities = [
+        scheduled_activity_current
+        for scheduled_activity_current in existing_scheduled_activities
+        if scheduled_activity_current[scope.database.patient.activities.SEMANTIC_SET_ID]
+        == activity_id
+    ]
+
+    pending_scheduled_activities = scheduled_item_utils.pending_scheduled_items(
+        scheduled_items=existing_scheduled_activities,
+        after_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
+    )
+
+    assert len(pending_scheduled_activities) == 0
