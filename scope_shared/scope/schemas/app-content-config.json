@@ -11,10 +11,13 @@
 		"lifeAreas": {
 			"$ref": "/schemas/life-area-contents"
 		},
-		"resources": {
+		"patientresources": {
+			"$ref": "/schemas/resource-contents"
+		},
+		"registryresources": {
 			"$ref": "/schemas/resource-contents"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["assessments", "lifeAreas", "resources"]
+	"required": ["assessments", "lifeAreas", "patientresources", "registryresources"]
 }
