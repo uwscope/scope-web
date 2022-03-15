@@ -2,6 +2,13 @@
   "id": "Managing avoidance behaviors",
   "name": "Managing avoidance behaviors",
   "resources": [
-    {}
+    {
+      "name": "TRAP-TRAC Model",
+      "filename": "TRAP-TRAC_Model.pdf"
+    },
+    {
+      "name": "TRAP-TRAC Worksheet",
+      "filename": "TRAP-TRAC_Worksheet.pdf"
+    }
   ]
 }
