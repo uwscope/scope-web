@@ -3,16 +3,16 @@
   "name": "Relaxation",
   "resources": [
     {
+      "name": "Breathing and Muscle Relaxation",
+      "filename": "Breathing_and_Muscle_Relaxation.pdf"
+    },
+    {
       "name": "What is Mindfulness?",
       "filename": "What_is_Mindfulness.pdf"
     },
     {
       "name": "Mindfulness Meditation Practice",
       "filename": "Mindfulness_Meditation_Practice.pdf"
-    },
-    {
-      "name": "Breathing and Muscle Relaxation",
-      "filename": "Breathing_and_Muscle_Relaxation.pdf"
     }
   ]
 }

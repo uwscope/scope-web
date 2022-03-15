@@ -96,7 +96,7 @@ const CrisisContent: FunctionComponent = () => {
                         </li>
                         <li>
                             <BodyText>
-                                Crisis Text Line - Text "HELLO" to 741741{'  '}
+                                Crisis Text Line - Text "HOME" to 741741{'  '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"
