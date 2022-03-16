@@ -27,7 +27,6 @@ def _patient_collection_name(*, patient_id: str) -> str:
 def create_patient(
     *,
     database: pymongo.database.Database,
-    patient_id: str = None,
     patient_name: str,
     patient_mrn: str,
 ) -> dict:
@@ -46,8 +45,7 @@ def create_patient(
     patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
     # Obtain a unique ID for the patient, use that to create a collection name.
-    if patient_id is None:
-        patient_id = scope.database.collection_utils.generate_set_id()
+    patient_id = scope.database.collection_utils.generate_set_id()
     generated_patient_collection_name = _patient_collection_name(patient_id=patient_id)
 
     # Ensure this patient id and collection do not already exist
