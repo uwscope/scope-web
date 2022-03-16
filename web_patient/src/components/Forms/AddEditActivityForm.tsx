@@ -20,10 +20,12 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import { compareAsc } from 'date-fns';
 import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { DayOfWeek, daysOfWeekValues } from 'shared/enums';
+import { clearTime } from 'shared/time';
 import { IActivity, KeyedMap } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
@@ -54,10 +56,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
 
     const viewState = useLocalObservable<{
-        hasData: boolean;
         openActivityDialog: boolean;
     }>(() => ({
-        hasData: false,
         openActivityDialog: false,
     }));
 
@@ -66,7 +66,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         name: activity?.name || '',
         value: activity?.value || '',
         lifeareaId: activity?.lifeareaId || '',
-        startDate: activity?.startDate || new Date(),
+        startDateTime: activity?.startDateTime || new Date(),
         timeOfDay: activity?.timeOfDay || 9,
         hasReminder: activity?.hasReminder || false,
         reminderTimeOfDay: activity?.reminderTimeOfDay || 9,
@@ -107,9 +107,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
         try {
             if (!!activity.activityId) {
-                await patientStore.updateActivity(dataState);
+                await patientStore.updateActivity({
+                    ...dataState,
+                    repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
+                });
             } else {
-                await patientStore.addActivity(dataState);
+                await patientStore.addActivity({
+                    ...dataState,
+                    repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
+                });
             }
 
             return !patientStore.loadActivitiesState.error;
@@ -141,7 +147,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
-        dataState.repeatDayFlags[day] = checked;
+        if (dataState.repeatDayFlags != undefined) {
+            dataState.repeatDayFlags[day] = checked;
+        }
     });
 
     const handleValueChange = action((key: string, value: any) => {
@@ -289,8 +297,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 prompt={getString(!!activity ? 'Form_add_activity_date_label' : 'Form_add_activity_date')}
                 content={
                     <DatePicker
-                        value={dataState.startDate || ''}
-                        onChange={(date: Date | null) => handleValueChange('startDate', date)}
+                        value={dataState.startDateTime || ''}
+                        onChange={(date: Date | null) => handleValueChange('startDateTime', date)}
+                        minDate={activity?.startDateTime || new Date()}
                         renderInput={(params) => (
                             <TextField
                                 variant="outlined"
@@ -425,7 +434,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                         key={day}
                                         control={
                                             <Checkbox
-                                                checked={dataState.repeatDayFlags[day]}
+                                                checked={dataState.repeatDayFlags?.[day]}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                     handleRepeatChange((e.target as HTMLInputElement).checked, day)
                                                 }
@@ -450,11 +459,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         },
         {
             content: schedulePage,
-            canGoNext: true,
+            canGoNext: activity?.startDateTime
+                ? compareAsc(clearTime(activity?.startDateTime), clearTime(dataState.startDateTime)) <= 0
+                : compareAsc(clearTime(new Date()), clearTime(dataState.startDateTime)) <= 0,
         },
         {
             content: repetitionPage,
-            canGoNext: !dataState.hasRepetition || Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0,
+            canGoNext:
+                !dataState.hasRepetition ||
+                (dataState.repeatDayFlags && Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0),
         },
     ];
 
@@ -464,7 +477,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
             }
             isOpen={true}
-            canClose={!viewState.hasData}
+            canClose={false}
+            loading={patientStore.loadActivitiesState.pending}
             pages={pages}
             onSubmit={handleSubmit}
             submitToast={getString('Form_add_activity_submit_success')}></FormDialog>

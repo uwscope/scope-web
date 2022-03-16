@@ -474,6 +474,7 @@ export const SafetyPlanForm: FunctionComponent<ISafetyPlanFormProps> = observer(
             title={getString('Safetyplan_title')}
             isOpen={true}
             canClose={false}
+            loading={patientStore.loadSafetyPlanState.pending}
             pages={pages}
             onSubmit={handleSubmit}
             submitToast={getString('Safetyplan_submit_success')}

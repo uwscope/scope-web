@@ -111,6 +111,7 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
             title={getString('Form_mood_logging_title')}
             isOpen={true}
             canClose={!dataState.mood && !dataState.comment}
+            loading={patientStore.loadMoodLogsState.pending}
             pages={getMoodLoggingPages()}
             onSubmit={handleSubmit}
             submitToast={getString('Form_mood_submit_success')}

@@ -1,9 +1,11 @@
 import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { LoadingButton } from '@mui/lab';
 import {
     Alert,
     AppBar,
+    Box,
     Button,
     Dialog,
     DialogActions,
@@ -35,6 +37,7 @@ export interface IFormDialogProps {
     isOpen: boolean;
     title: string;
     canClose?: boolean;
+    loading?: boolean;
     onClose?: () => void;
     onSubmit?: () => Promise<boolean>;
     onNext?: (prev: number, next: number) => void;
@@ -66,17 +69,17 @@ const PageContent = withTheme(
         [props.theme.breakpoints.up('laptop')]: {
             padding: props.theme.spacing(8),
         },
-    }))
+    })),
 );
 
 const Transition = React.forwardRef(
     (props: TransitionProps & { children: React.ReactElement }, ref: React.Ref<unknown>) => {
         return <Slide direction="up" ref={ref} {...props} />;
-    }
+    },
 );
 
 export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) => {
-    const { isOpen, title, pages, canClose, onClose, onSubmit, onNext, submitToast } = props;
+    const { isOpen, title, pages, canClose, onClose, onSubmit, onNext, submitToast, loading } = props;
     const navigate = useNavigate();
 
     const state = useLocalObservable<{
@@ -159,14 +162,24 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         <Dialog fullScreen open={isOpen} onClose={closeAction} TransitionComponent={Transition}>
             <AppBar>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={closeAction} aria-label="close" size="large">
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={closeAction}
+                        aria-label="close"
+                        size="large"
+                        disabled={loading}>
                         <CloseIcon />
                     </IconButton>
                     <Typography variant="h6">{title}</Typography>
                 </Toolbar>
             </AppBar>
             <ContentContainer>
-                <PageContent>{pages[state.activePage].content}</PageContent>
+                <PageContent>
+                    <Box sx={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? 'none' : 'auto' }}>
+                        {pages[state.activePage].content}
+                    </Box>
+                </PageContent>
                 <MobileStepper
                     sx={{ background: '#eee' }}
                     steps={maxPages}
@@ -174,15 +187,18 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                     variant="text"
                     activeStep={state.activePage}
                     nextButton={
-                        <Button onClick={handleNext} disabled={!pages[state.activePage].canGoNext}>
+                        <LoadingButton
+                            loading={loading}
+                            onClick={handleNext}
+                            disabled={!pages[state.activePage].canGoNext}>
                             {state.activePage === maxPages - 1
                                 ? getString('Form_button_submit')
                                 : getString('Form_button_next')}
                             <KeyboardArrowRight />
-                        </Button>
+                        </LoadingButton>
                     }
                     backButton={
-                        <Button onClick={handleBack} disabled={state.activePage === 0}>
+                        <Button onClick={handleBack} disabled={state.activePage === 0 || loading}>
                             {<KeyboardArrowLeft />}
                             {getString('Form_button_back')}
                         </Button>

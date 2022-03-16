@@ -167,6 +167,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
+        activityId,
         scheduledActivityId: task.scheduledActivityId,
         alternative: '',
         comment: '',
@@ -174,11 +175,12 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         accomplishment: 5,
         activityName: activity.name,
         recordedDateTime: new Date(),
+        success: '',
     }));
 
     const handleSubmit = action(async () => {
         try {
-            await patientStore.completeScheduledActivity(dataState);
+            await patientStore.completeScheduledActivity({ ...dataState });
             return !patientStore.loadActivityLogsState.error;
         } catch {
             return false;
@@ -266,6 +268,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
             title={getString('Form_activity_logging_title')}
             isOpen={true}
             canClose={!viewState.hasData}
+            loading={patientStore.loadActivityLogsState.pending}
             pages={getActivityLogPages()}
             onSubmit={handleSubmit}
             submitToast={getString('Form_activity_log_submit_success')}

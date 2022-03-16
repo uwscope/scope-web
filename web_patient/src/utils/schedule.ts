@@ -16,11 +16,11 @@ export const defaultDateFormat = 'MM/dd/yyyy';
 
 export const isScheduledForDay = (item: IScheduledItem, date: Date) => {
     if (item.dueType == 'Week') {
-        return isSameWeek(item.dueDate, date, {
+        return isSameWeek(item.dueDateTime, date, {
             weekStartsOn: 1,
         });
     } else {
-        return isSameDay(item.dueDate, date);
+        return isSameDay(item.dueDateTime, date);
     }
 };
 
@@ -54,7 +54,7 @@ export const formatDayRelative = (date: Date, referenceDate: Date) => {
 
 export const getTaskItemDueTimeString = (item: IScheduledItem, referenceDate: Date) => {
     if (item.dueType == 'Week') {
-        const weekDiff = differenceInCalendarWeeks(item.dueDate, referenceDate, {
+        const weekDiff = differenceInCalendarWeeks(item.dueDateTime, referenceDate, {
             weekStartsOn: 1,
         });
         if (weekDiff == 0) {
@@ -69,21 +69,21 @@ export const getTaskItemDueTimeString = (item: IScheduledItem, referenceDate: Da
             return `due in ${weekDiff} weeks`;
         }
     } else if (item.dueType == 'Day') {
-        return `due ${formatDayRelative(item.dueDate, referenceDate)}`;
+        return `due ${formatDayRelative(item.dueDateTime, referenceDate)}`;
     } else if (item.dueType == 'ChunkOfDay') {
-        const timeOfDay = getHours(item.dueDate) % 24;
+        const timeOfDay = getHours(item.dueDateTime) % 24;
 
         if (timeOfDay < 6) {
-            return `due ${formatDayRelative(item.dueDate, referenceDate)} before morning`;
+            return `due ${formatDayRelative(item.dueDateTime, referenceDate)} before morning`;
         } else if (timeOfDay < 12) {
-            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the morning`;
+            return `due ${formatDayRelative(item.dueDateTime, referenceDate)} in the morning`;
         } else if (timeOfDay < 18) {
-            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the afternoon`;
+            return `due ${formatDayRelative(item.dueDateTime, referenceDate)} in the afternoon`;
         } else {
-            return `due ${formatDayRelative(item.dueDate, referenceDate)} in the evening`;
+            return `due ${formatDayRelative(item.dueDateTime, referenceDate)} in the evening`;
         }
     } else {
-        return `due ${formatDayRelative(item.dueDate, referenceDate)} at ${format(item.dueDate, 'h:mm aaa')}`;
+        return `due ${formatDayRelative(item.dueDateTime, referenceDate)} at ${format(item.dueDateTime, 'h:mm aaa')}`;
     }
 };
 
@@ -93,14 +93,14 @@ export const groupTaskItemsByDay = (items: IScheduledItem[]) => {
     items.forEach((item) => {
         if (item.dueType == 'Week') {
             // If the item is due during the week, add it to every day of the week
-            const start = startOfWeek(item.dueDate, { weekStartsOn: 1 });
+            const start = startOfWeek(item.dueDateTime, { weekStartsOn: 1 });
             for (var i = 0; i < 7; i++) {
                 const day = format(addDays(start, i), defaultDateFormat);
                 groups[day] = groups[day] || [];
                 groups[day].push(item);
             }
         } else {
-            const day = format(item.dueDate, defaultDateFormat);
+            const day = format(item.dueDateTime, defaultDateFormat);
             groups[day] = groups[day] || [];
             groups[day].push(item);
         }

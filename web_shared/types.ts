@@ -99,18 +99,19 @@ export interface IActivity {
     name: string;
     value: string;
     lifeareaId: string;
-    startDate: Date;
+    startDateTime: Date;
     timeOfDay: number;
     hasReminder: boolean;
     reminderTimeOfDay: number;
     hasRepetition: boolean;
-    repeatDayFlags: DayOfWeekFlags;
+    repeatDayFlags?: DayOfWeekFlags;
     isActive: boolean;
     isDeleted: boolean;
 }
 
 export interface IScheduledItem {
-    dueDate: Date;
+    // dueDate: Date; // Contains only the date with 00 time, not used
+    dueDateTime: Date; // Contains timezone adjusted date time
     dueType: DueType;
 }
 
@@ -142,6 +143,7 @@ export interface IActivityLog extends ILog {
     activityLogId?: string;
 
     scheduledActivityId: string;
+    activityId: string;
     activityName: string;
 
     completed?: boolean;

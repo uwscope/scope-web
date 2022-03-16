@@ -22,7 +22,7 @@ const CompactList = withTheme(
         'li>.MuiListItemIcon-root': {
             minWidth: 36,
         },
-    }))
+    })),
 );
 
 export const HomePage: FunctionComponent = observer(() => {
@@ -136,7 +136,7 @@ export const HomePage: FunctionComponent = observer(() => {
                 {!!rootStore.patientStore.todayItems && rootStore.patientStore.todayItems.length > 0 ? (
                     <CompactList>
                         {rootStore.patientStore.todayItems.map((item, idx) => (
-                            <Fragment key={item.scheduledActivityId}>
+                            <Fragment key={`${item.scheduledActivityId}-${idx}`}>
                                 <ScheduledListItem item={item} onClick={onTaskClick(item)} />
                                 {idx < rootStore.patientStore.todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
