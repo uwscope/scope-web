@@ -7,17 +7,11 @@
 		"patients": {
 			"type": "object",
 			"properties": {
-				"create_fake": {
-					"type": "number"
-				},
 				"create_fake_empty": {
 					"type": "number"
 				},
-				"create_fake_persistent": {
-					"type": "boolean"
-				},
-				"create_fake_persistent_empty": {
-					"type": "boolean"
+				"create_fake_generate": {
+					"type": "number"
 				},
 				"create": {
 					"type": "array",
@@ -32,6 +26,16 @@
 							},
 							"account": {
 								"$ref": "/schemas/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"populate_default",
+										"populate_generated"
+									]
+								}
 							}
 						},
 						"additionalProperties": false,
@@ -55,6 +59,16 @@
 							},
 							"account": {
 								"$ref": "/schemas/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"populate_default",
+										"populate_generated"
+									]
+								}
 							}
 						},
 						"additionalProperties": false,
