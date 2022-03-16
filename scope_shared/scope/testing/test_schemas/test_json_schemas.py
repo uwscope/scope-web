@@ -21,51 +21,76 @@ class ConfigTestJSONSchema:
 TEST_CONFIGS = [
     # activity
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-true-hasReminder-requires-reminderTimeOfDay-valid",
         schema=scope.schema.activity_schema,
         document_path="activity/true-hasReminder-requires-reminderTimeOfDay-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-true-hasReminder-requires-reminderTimeOfDay-invalid",
         schema=scope.schema.activity_schema,
         document_path="activity/true-hasReminder-requires-reminderTimeOfDay-invalid.json",
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-false-hasReminder-disallows-reminderTimeOfDay-valid",
         schema=scope.schema.activity_schema,
         document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-false-hasReminder-disallows-reminderTimeOfDay-invalid",
         schema=scope.schema.activity_schema,
         document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-invalid.json",
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-true-hasRepetition-requires-repeatDayFlags-valid",
         schema=scope.schema.activity_schema,
         document_path="activity/true-hasRepetition-requires-repeatDayFlags-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-true-hasRepetition-requires-repeatDayFlags-invalid",
         schema=scope.schema.activity_schema,
         document_path="activity/true-hasRepetition-requires-repeatDayFlags-invalid.json",
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-false-hasRepetition-disallows-repeatDayFlags-valid",
         schema=scope.schema.activity_schema,
         document_path="activity/false-hasRepetition-disallows-repeatDayFlags-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity",
+        name="activity-false-hasRepetition-disallows-repeatDayFlags-invalid",
         schema=scope.schema.activity_schema,
         document_path="activity/false-hasRepetition-disallows-repeatDayFlags-invalid.json",
+        expected_valid=False,
+    ),
+    # assessment
+    ConfigTestJSONSchema(
+        name="assessment-daily-frequency-disallows-dayOfWeek-valid",
+        schema=scope.schema.assessment_schema,
+        document_path="assessment/daily-frequency-disallows-dayOfWeek-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="assessment-daily-frequency-disallows-dayOfWeek-invalid",
+        schema=scope.schema.assessment_schema,
+        document_path="assessment/daily-frequency-disallows-dayOfWeek-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="assessment-not-daily-frequency-requires-dayOfWeek-valid",
+        schema=scope.schema.assessment_schema,
+        document_path="assessment/not-daily-frequency-requires-dayOfWeek-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="assessment-not-daily-frequency-requires-dayOfWeek-invalid",
+        schema=scope.schema.assessment_schema,
+        document_path="assessment/not-daily-frequency-requires-dayOfWeek-invalid.json",
         expected_valid=False,
     ),
     # clinicalHistory
