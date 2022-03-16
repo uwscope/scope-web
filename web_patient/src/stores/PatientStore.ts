@@ -173,7 +173,7 @@ export class PatientStore implements IPatientStore {
 
         for (var assessmentId in assessmentGroups) {
             const group = assessmentGroups[assessmentId];
-            group.sort((a, b) => compareDesc(a.dueDate, b.dueDate));
+            group.sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
             latestAssessments.push(group[0]);
         }
 
@@ -209,7 +209,6 @@ export class PatientStore implements IPatientStore {
 
     @computed public get activities() {
         return (this.loadActivitiesQuery.value || [])
-            .filter((a) => !a.isDeleted)
             .map(
                 (a) =>
                     ({
@@ -381,7 +380,16 @@ export class PatientStore implements IPatientStore {
             return newActivities;
         });
 
-        await this.loadActivitiesQuery.fromPromise(promise);
+        await this.loadAndLogQuery<IActivity[]>(
+            () => promise,
+            this.loadActivitiesQuery,
+            onArrayConflict('activity', 'activityId', () => this.activities, logger),
+        );
+
+        await this.loadAndLogQuery<IScheduledActivity[]>(
+            this.patientService.getScheduledActivities,
+            this.loadScheduledActivitiesQuery,
+        );
     }
 
     @action.bound
@@ -396,7 +404,17 @@ export class PatientStore implements IPatientStore {
                 prevActivities[found] = updatedActivity;
                 return prevActivities;
             });
-            await this.loadActivitiesQuery.fromPromise(promise);
+
+            await this.loadAndLogQuery<IActivity[]>(
+                () => promise,
+                this.loadActivitiesQuery,
+                onArrayConflict('activity', 'activityId', () => this.activities, logger),
+            );
+
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -438,6 +456,9 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async loadAssessmentLogs() {
-        await this.loadAndLogQuery<IAssessmentLog[]>(this.patientService.getAssessmentLogs, this.loadAssessmentLogsQuery);
+        await this.loadAndLogQuery<IAssessmentLog[]>(
+            this.patientService.getAssessmentLogs,
+            this.loadAssessmentLogsQuery,
+        );
     }
 }

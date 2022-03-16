@@ -95,15 +95,15 @@ export const Calendar: FunctionComponent<ICalendarProps> = observer((props) => {
 
     const getWeekRow = (start: Date) => {
         return (
-            <MonthRowContainer key={start.getDate()}>
-                {Array.from(Array(7).keys()).map((dayId) => {
+            <MonthRowContainer key={start.getTime()}>
+                {Array.from(Array(7).keys()).map((dayId, idx) => {
                     const date = addDays(start, dayId);
                     const day = getDate(date);
                     const offRange = !isSameMonth(date, viewState.currentMonth);
                     const selected = isSameDay(date, selectedDate);
 
                     return (
-                        <MonthRowDateContainer key={dayId}>
+                        <MonthRowDateContainer key={`${dayId}-${idx}`}>
                             <MonthRowDate
                                 onClick={() => onDayClick && onDayClick(date)}
                                 key={dayId}

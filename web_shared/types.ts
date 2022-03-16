@@ -110,7 +110,8 @@ export interface IActivity {
 }
 
 export interface IScheduledItem {
-    dueDate: Date;
+    // dueDate: Date; // Contains only the date with 00 time, not used
+    dueDateTime: Date; // Contains timezone adjusted date time
     dueType: DueType;
 }
 
@@ -142,6 +143,7 @@ export interface IActivityLog extends ILog {
     activityLogId?: string;
 
     scheduledActivityId: string;
+    activityId: string;
     activityName: string;
 
     completed?: boolean;

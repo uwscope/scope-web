@@ -48,7 +48,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         patientStore,
         appContentConfig: { lifeAreas },
     } = rootStore;
-    const { taskItems, activities } = patientStore;
+    const { taskItems } = patientStore;
+    const activities = patientStore.activities.filter((a) => !a.isDeleted);
     const navigate = useNavigate();
     const viewState = useLocalObservable<{
         selectedDate: Date;
@@ -62,7 +63,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         selectedActivity: undefined,
     }));
 
-    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDate, viewState.selectedDate));
+    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate));
     const groupedActivities: KeyedMap<IActivity[]> = {};
     activities.forEach((activity) => {
         const lifearea = activity.lifeareaId || getString('Careplan_activities_uncategorized');

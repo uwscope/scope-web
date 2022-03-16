@@ -23,8 +23,8 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const logs = currentPatient.scheduledActivities
         ?.slice()
-        .filter((a) => isBefore(a.dueDate, new Date()))
-        .sort((a, b) => compareDesc(a.dueDate, b.dueDate))
+        .filter((a) => isBefore(a.dueDateTime, new Date()))
+        .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime))
         .map((scheduledActivity) => ({
             ...scheduledActivity,
             ...logMap.get(scheduledActivity.scheduledActivityId),
@@ -43,9 +43,9 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const tableData = logs?.map((log) => {
         return {
-            id: log.activityLogId,
+            id: log.scheduledActivityId,
             name: log.activityName,
-            dueDate: format(log.dueDate, 'MM/dd/yyyy'),
+            dueDate: format(log.dueDateTime, 'MM/dd/yyyy'),
             recordedDateTime: log.completed && log.recordedDateTime ? format(log.recordedDateTime, 'MM/dd/yyyy') : '--',
             completed: log.completed && log.success ? getCompleted(log.success) : '--',
             alternative: log.alternative || '--',
