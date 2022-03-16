@@ -23,7 +23,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const logs = currentPatient.scheduledActivities
         ?.slice()
-        .filter((a) => isBefore(a.dueDateTime, new Date()))
+        .filter((a) => isBefore(a.dueDateTime, new Date()) || a.completed)
         .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime))
         .map((scheduledActivity) => ({
             ...scheduledActivity,
