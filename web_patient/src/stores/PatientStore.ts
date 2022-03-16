@@ -205,15 +205,18 @@ export class PatientStore implements IPatientStore {
     @computed public get activities() {
         return (this.loadActivitiesQuery.value || [])
             .filter((a) => !a.isDeleted)
-            .map((a) => ({
-                ...a,
-                repeatDayFlags: Object.assign(
-                    {},
-                    ...daysOfWeekValues.map((x) => ({
-                        [x]: !!a?.repeatDayFlags?.[x],
-                    })),
-                ),
-            }));
+            .map(
+                (a) =>
+                    ({
+                        ...a,
+                        repeatDayFlags: Object.assign(
+                            {},
+                            ...daysOfWeekValues.map((x) => ({
+                                [x]: !!a?.repeatDayFlags?.[x],
+                            })),
+                        ),
+                    } as IActivity),
+            );
     }
 
     @computed public get valuesInventory() {
@@ -346,6 +349,7 @@ export class PatientStore implements IPatientStore {
     public async updateSafetyPlan(safetyPlan: ISafetyPlan) {
         const promise = this.patientService.updateSafetyPlan({
             ...toJS(safetyPlan),
+            lastUpdatedDateTime: new Date()
         });
 
         await this.loadAndLogQuery<ISafetyPlan>(
@@ -403,6 +407,7 @@ export class PatientStore implements IPatientStore {
     public async updateValuesInventory(inventory: IValuesInventory) {
         const promise = this.patientService.updateValuesInventory({
             ...toJS(inventory),
+            lastUpdatedDateTime: new Date()
         });
 
         await this.loadAndLogQuery<IValuesInventory>(

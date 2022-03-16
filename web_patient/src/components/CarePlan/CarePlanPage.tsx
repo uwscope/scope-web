@@ -233,7 +233,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                                 <Typography variant="body2" component="span">
                                                                     {`${getString(
                                                                         'Careplan_activity_item_start_date',
-                                                                    )} ${format(activity.startDate, 'MM/dd/yy')}`}
+                                                                    )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
                                                                 </Typography>
                                                                 {activity.hasRepetition && activity.repeatDayFlags && (
                                                                     <Typography variant="body2" component="span">

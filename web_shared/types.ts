@@ -99,12 +99,12 @@ export interface IActivity {
     name: string;
     value: string;
     lifeareaId: string;
-    startDate: Date;
+    startDateTime: Date;
     timeOfDay: number;
     hasReminder: boolean;
     reminderTimeOfDay: number;
     hasRepetition: boolean;
-    repeatDayFlags: DayOfWeekFlags;
+    repeatDayFlags?: DayOfWeekFlags;
     isActive: boolean;
     isDeleted: boolean;
 }
