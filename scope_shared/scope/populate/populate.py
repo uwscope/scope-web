@@ -4,9 +4,9 @@ import pymongo.database
 
 import scope.config
 import scope.populate.cognito.populate_cognito
-import scope.populate.populate_fake.populate_fake
-import scope.populate.populate_patient.populate_patient
-import scope.populate.populate_provider.populate_provider
+import scope.populate.fake.populate_fake
+import scope.populate.patient.populate_patient
+import scope.populate.provider.populate_provider
 
 
 FAKER_INSTANCE = _faker.Faker(locale="la")
@@ -29,7 +29,7 @@ def populate_from_config(
     # Expand any creation of fake patients and providers,
     # then they are populated using the same scripts as "real" patients and providers.
     #
-    populate_config = scope.populate.populate_fake.populate_fake.populate_fake_config(
+    populate_config = scope.populate.fake.populate_fake.populate_fake_config(
         faker_factory=FAKER_INSTANCE,
         populate_config=populate_config,
     )
@@ -66,9 +66,9 @@ def _populate_patients_from_config(
     #
     # Create specified patients
     #
-    created_patients = scope.populate.populate_patient.populate_patient.create_patients(
+    created_patients = scope.populate.patient.populate_patient.create_patients_from_configs(
         database=database,
-        create_patients=populate_config["patients"]["create"],
+        create_patient_configs=populate_config["patients"]["create"],
     )
     populate_config["patients"]["create"] = []
     populate_config["patients"]["existing"].extend(created_patients)
@@ -80,7 +80,7 @@ def _populate_patients_from_config(
         if "account" in patient_current:
             patient_current[
                 "account"
-            ] = scope.populate.populate_account.populate_account_from_config(
+            ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
                 database=database,
                 cognito_config=cognito_config,
                 populate_config_account=patient_current["account"],
@@ -89,7 +89,7 @@ def _populate_patients_from_config(
     #
     # Link patient identities to patient Cognito accounts
     #
-    scope.populate.populate_patient.populate_patient.ensure_patient_identities(
+    scope.populate.patient.populate_patient.ensure_patient_identities(
         database=database,
         patients=populate_config["patients"]["existing"],
     )
@@ -108,7 +108,7 @@ def _populate_providers_from_config(
     #
     # Create specified providers
     #
-    created_providers = scope.populate.populate_provider.populate_provider.create_providers(
+    created_providers = scope.populate.provider.populate_provider.create_providers(
         database=database,
         create_providers=populate_config["providers"]["create"],
     )
@@ -122,7 +122,7 @@ def _populate_providers_from_config(
         if "account" in provider_current:
             provider_current[
                 "account"
-            ] = scope.populate.populate_account.populate_account_from_config(
+            ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
                 database=database,
                 cognito_config=cognito_config,
                 populate_config_account=provider_current["account"],
@@ -131,7 +131,7 @@ def _populate_providers_from_config(
     #
     # Link provider identities to provider Cognito accounts
     #
-    scope.populate.populate_provider.populate_provider.ensure_provider_identities(
+    scope.populate.provider.populate_provider.ensure_provider_identities(
         database=database,
         providers=populate_config["providers"]["existing"],
     )

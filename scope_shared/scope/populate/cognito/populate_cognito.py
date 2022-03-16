@@ -52,6 +52,9 @@ def _get_cognito_users_existing(
     boto_userpool,
     cognito_config: scope.config.CognitoClientConfig,
 ) -> List[dict]:
+    """
+    Obtain a complete list of existing Cognito users.
+    """
 
     user_paginator = boto_userpool.get_paginator("list_users")
     user_pages = user_paginator.paginate(UserPoolId=cognito_config.poolid)

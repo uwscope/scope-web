@@ -7,14 +7,14 @@ import scope.schema
 import scope.schema_utils
 
 
-def create_patients(
+def create_patients_from_configs(
     *,
     database: pymongo.database.Database,
-    create_patients: List[dict],
+    create_patient_configs: List[dict],
 ) -> List[dict]:
     result: List[dict] = []
-    for create_patient_current in create_patients:
-        created_patient = _create_patient(
+    for create_patient_current in create_patient_configs:
+        created_patient = _create_patient_from_config(
             database=database,
             name=create_patient_current["name"],
             mrn=create_patient_current["MRN"],
@@ -26,7 +26,7 @@ def create_patients(
     return result
 
 
-def _create_patient(
+def _create_patient_from_config(
     *,
     database: pymongo.database.Database,
     name: str,
