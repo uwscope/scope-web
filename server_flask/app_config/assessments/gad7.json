@@ -1,6 +1,6 @@
 {
   "id": "gad-7",
-  "name": "GAD-7",
+  "name": "Anxiety",
   "instruction": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
   "questions": [
     {
@@ -52,25 +52,25 @@
   ],
   "interpretationName": "Anxiety severity",
   "interpretationTable": [
-      {
-          "score": "0-4",
-          "max": 4,
-          "interpretation": "You have minimal or no symptoms – keep up the good work!"
-      },
-      {
-          "score": "5-9",
-          "max": 9,
-          "interpretation": "Your symptoms are relatively mild. Keep up the good work as you and your Clinical Social Worker collaborate to decrease them even more!"
-      },
-      {
-          "score": "10-14",
-          "max": 14,
-          "interpretation": "Your symptoms are in the moderate severity range. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
-      },
-      {
-          "score": "15+",
-          "max": 27,
-          "interpretation": "You still have significant symptoms that could benefit from more treatment. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
-      }
+    {
+      "score": "0-4",
+      "max": 4,
+      "interpretation": "You have minimal or no symptoms – keep up the good work!"
+    },
+    {
+      "score": "5-9",
+      "max": 9,
+      "interpretation": "Your symptoms are relatively mild. Keep up the good work as you and your Clinical Social Worker collaborate to decrease them even more!"
+    },
+    {
+      "score": "10-14",
+      "max": 14,
+      "interpretation": "Your symptoms are in the moderate severity range. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
+    },
+    {
+      "score": "15+",
+      "max": 27,
+      "interpretation": "You still have significant symptoms that could benefit from more treatment. Please keep working with your Clinical Social Worker and the rest of your team to help you feel better."
+    }
   ]
 }

@@ -120,8 +120,8 @@ const _strings = {
 
     Resources_title: 'Worksheets',
 
-    Progress_phq_assessment_title: 'PHQ-9 Assessments',
-    Progress_gad_assessment_title: 'GAD-7 Assessments',
+    Progress_phq_assessment_title: 'Depression Assessments',
+    Progress_gad_assessment_title: 'Anxiety Assessments',
     Progress_activity_tracking_title: 'Activity Tracking',
     Progress_mood_tracking_title: 'Mood Tracking',
 
@@ -153,8 +153,8 @@ const _strings = {
     Assessment_progress_column_comment: 'Note',
     Assessment_progress_no_data: 'There are no submitted data for this assessment.',
 
-    Progress_phq_assessment_detail_title: 'PHQ-9 Assessment',
-    Progress_gad_assessment_detail_title: 'GAD-7 Assessment',
+    Progress_phq_assessment_detail_title: 'Depression Assessment',
+    Progress_gad_assessment_detail_title: 'Anxiety Assessment',
 
     Careplan_no_tasks: 'There are no planned activities for this day.',
     Careplan_view_calendar: 'Calendar view',
