@@ -35,7 +35,8 @@ def _fake_assessment(
             "assignedDateTime": date_utils.format_datetime(
                 pytz.utc.localize(
                     faker_factory.date_time_between(
-                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        start_date=datetime.datetime.now()
+                        - datetime.timedelta(days=1 * 30),
                         end_date=datetime.datetime.now(),
                     )
                 )
@@ -46,7 +47,8 @@ def _fake_assessment(
             "assignedDateTime": date_utils.format_datetime(
                 pytz.utc.localize(
                     faker_factory.date_time_between(
-                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        start_date=datetime.datetime.now()
+                        - datetime.timedelta(days=1 * 30),
                         end_date=datetime.datetime.now(),
                     )
                 )
@@ -58,16 +60,19 @@ def _fake_assessment(
             "assignedDateTime": date_utils.format_datetime(
                 pytz.utc.localize(
                     faker_factory.date_time_between(
-                        start_date=datetime.datetime.now() - datetime.timedelta(days=1 * 30),
+                        start_date=datetime.datetime.now()
+                        - datetime.timedelta(days=1 * 30),
                         end_date=datetime.datetime.now(),
                     )
                 )
             ),
-            "frequency": random.choice([
-                scope.enums.ScheduledItemFrequency.Weekly.value,
-                scope.enums.ScheduledItemFrequency.Biweekly.value,
-                scope.enums.ScheduledItemFrequency.Monthly.value,
-            ]),
+            "frequency": random.choice(
+                [
+                    scope.enums.ScheduledItemFrequency.Weekly.value,
+                    scope.enums.ScheduledItemFrequency.Biweekly.value,
+                    scope.enums.ScheduledItemFrequency.Monthly.value,
+                ]
+            ),
             "dayOfWeek": fake_utils.fake_enum_value(scope.enums.DayOfWeek),
         },
     ]
