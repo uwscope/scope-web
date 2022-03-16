@@ -28,7 +28,7 @@ def compute_patient_summary(
         # assignedValuesInventory <- True, if assigned is True, and not a single activity exists in values inventory singleton
         assignedValuesInventory: boolean;
 
-        # assignedSafetyPlan <- True, if assigned is True, and lastUpdatedDate < assignedDate in safety plan singleton
+        # assignedSafetyPlan <- True, if assigned is True, and lastUpdatedDateTime < assignedDateTime in safety plan singleton
         assignedSafetyPlan: boolean;
 
         # scheduledAssessments that are not completed and dueDate <= today.

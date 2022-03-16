@@ -31,9 +31,11 @@ def _calculate_scheduled_activities_to_create(
     if activity["hasRepetition"]:
         frequency = scope.enums.ScheduledItemFrequency.Weekly.value
         months = 3
+        repeat_day_flags = activity["repeatDayFlags"]
     else:
         frequency = None
         months = None
+        repeat_day_flags = None
 
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
@@ -41,7 +43,7 @@ def _calculate_scheduled_activities_to_create(
         effective_datetime=maintenance_datetime,
         has_repetition=activity["hasRepetition"],
         frequency=frequency,
-        repeat_day_flags=activity.get("repeatDayFlags", None),
+        repeat_day_flags=repeat_day_flags,
         day_of_week=None,  # Activities do not have dayOfWeek
         due_time_of_day=activity["timeOfDay"],
         reminder=activity["hasReminder"],
