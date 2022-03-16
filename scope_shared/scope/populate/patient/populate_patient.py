@@ -2,151 +2,58 @@ import copy
 import pymongo.database
 from typing import List
 
+import scope.config
 import scope.database.patients
+import scope.populate.cognito.populate_cognito
+import scope.populate.patient.create_patient
+import scope.populate.patient.update_identity_cognito_account_from_config
 import scope.schema
 import scope.schema_utils
 
 
-def create_patients_from_configs(
+def populate_patients_from_config(
     *,
     database: pymongo.database.Database,
-    create_patient_configs: List[dict],
-) -> List[dict]:
-    result: List[dict] = []
-    for create_patient_current in create_patient_configs:
-        created_patient = _create_patient_from_config(
-            database=database,
-            name=create_patient_current["name"],
-            mrn=create_patient_current["MRN"],
-            create_patient=create_patient_current,
-        )
-
-        result.append(created_patient)
-
-    return result
-
-
-def _create_patient_from_config(
-    *,
-    database: pymongo.database.Database,
-    name: str,
-    mrn: str,
-    create_patient: dict,
+    cognito_config: scope.config.CognitoClientConfig,
+    populate_config: dict,
 ) -> dict:
-    # Consistency check:
-    # - All patient creates should include name and MRN per schema
-    if not all(
-        [
-            name == create_patient["name"],
-            mrn == create_patient["MRN"],
-        ]
-    ):
-        raise ValueError()
+    populate_config = copy.deepcopy(populate_config)
 
-    # Create the patient
-    patient_identity_document = scope.database.patients.create_patient(
-        database=database,
-        patient_name=name,
-        patient_mrn=mrn,
-    )
-
-    # Update the patient object
-    created_patient = copy.deepcopy(create_patient)
-    created_patient.update(
-        {
-            "patientId": patient_identity_document[
-                scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
-            ],
-        }
-    )
-
-    return created_patient
-
-
-def ensure_patient_identities(
-    *,
-    database: pymongo.database.Database,
-    patients: List[dict],
-) -> None:
-    for patient_current in patients:
-        # Consistency check:
-        # - Should only be called with existing patients
-        # - All patients should include patientId per schema
-        if not all(
-            [
-                "patientId" in patient_current,
-            ]
-        ):
-            raise ValueError()
-
-        # Only ensure identities for patients that have an account
-        if "account" in patient_current:
-            _ensure_patient_identity(database=database, patient=patient_current)
-
-
-def _ensure_patient_identity(
-    *,
-    database: pymongo.database.Database,
-    patient: dict,
-) -> None:
-    # Consistency check:
-    # - Should only be called for patients with an account
-    # - Should only be called after account creation
-    # - Account should include cognitoId and email per schema
-    if not all(
-        [
-            "account" in patient,
-            "create" not in patient["account"],
-            "existing" in patient["account"],
-            "cognitoId" in patient["account"]["existing"],
-            "email" in patient["account"]["existing"],
-        ]
-    ):
-        raise ValueError()
-
-    patient_identity_document = scope.database.patients.get_patient_identity(
-        database=database,
-        patient_id=patient["patientId"],
-    )
-
-    # Check for a need to update the identity document
-    update_identity_document = False
-    if not update_identity_document:
-        update_identity_document = "cognitoAccount" not in patient_identity_document
-    if not update_identity_document:
-        update_identity_document = (
-            patient_identity_document["cognitoAccount"]["cognitoId"]
-            != patient["account"]["existing"]["cognitoId"]
-        )
-    if not update_identity_document:
-        update_identity_document = (
-            patient_identity_document["cognitoAccount"]["email"]
-            != patient["account"]["existing"]["email"]
-        )
-
-    # Perform the update if needed
-    if update_identity_document:
-        patient_identity_document = copy.deepcopy(patient_identity_document)
-
-        del patient_identity_document["_id"]
-        patient_identity_document.update(
-            {
-                "cognitoAccount": {
-                    "cognitoId": patient["account"]["existing"]["cognitoId"],
-                    "email": patient["account"]["existing"]["email"],
-                }
-            }
-        )
-
-        scope.schema_utils.raise_for_invalid_schema(
-            data=patient_identity_document,
-            schema=scope.schema.patient_identity_schema,
-        )
-
-        result = scope.database.patients.put_patient_identity(
+    #
+    # Create specified patients
+    #
+    created_patient_configs = (
+        scope.populate.patient.create_patient.create_patients_from_configs(
             database=database,
-            patient_id=patient["patientId"],
-            patient_identity=patient_identity_document,
+            create_patient_configs=populate_config["patients"]["create"],
         )
-        if not result.inserted_count == 1:
-            raise RuntimeError()
+    )
+    populate_config["patients"]["create"] = []
+    populate_config["patients"]["existing"].extend(created_patient_configs)
+
+    #
+    # Apply populate actions to each patient
+    #
+    for patient_config_current in populate_config["patients"]["existing"]:
+        #
+        #
+        #
+        if "account" in patient_config_current:
+            patient_config_current[
+                "account"
+            ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
+                database=database,
+                cognito_config=cognito_config,
+                populate_config_account=patient_config_current["account"],
+            )
+
+        #
+        # Update patient identity based on account config containing Cognito account
+        #
+        if scope.populate.patient.update_identity_document_from_account_config.ACTION_NAME in patient_config_current.get("actions", []):
+            scope.populate.patient.update_identity_document_from_account_config.update_identity_document_from_account_config(
+                database=database,
+                patient_config=patient_config_current,
+            )
+
+    return populate_config

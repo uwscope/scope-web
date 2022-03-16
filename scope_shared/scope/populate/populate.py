@@ -37,10 +37,12 @@ def populate_from_config(
     #
     # Execute population of patients
     #
-    populate_config = _populate_patients_from_config(
-        database=database,
-        cognito_config=cognito_config,
-        populate_config=populate_config,
+    populate_config = (
+        scope.populate.patient.populate_patient.populate_patients_from_config(
+            database=database,
+            cognito_config=cognito_config,
+            populate_config=populate_config,
+        )
     )
 
     #
@@ -50,48 +52,6 @@ def populate_from_config(
         database=database,
         cognito_config=cognito_config,
         populate_config=populate_config,
-    )
-
-    return populate_config
-
-
-def _populate_patients_from_config(
-    *,
-    database: pymongo.database.Database,
-    cognito_config: scope.config.CognitoClientConfig,
-    populate_config: dict,
-) -> dict:
-    populate_config = copy.deepcopy(populate_config)
-
-    #
-    # Create specified patients
-    #
-    created_patients = scope.populate.patient.populate_patient.create_patients_from_configs(
-        database=database,
-        create_patient_configs=populate_config["patients"]["create"],
-    )
-    populate_config["patients"]["create"] = []
-    populate_config["patients"]["existing"].extend(created_patients)
-
-    #
-    # Populate patient Cognito accounts
-    #
-    for patient_current in populate_config["patients"]["existing"]:
-        if "account" in patient_current:
-            patient_current[
-                "account"
-            ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
-                database=database,
-                cognito_config=cognito_config,
-                populate_config_account=patient_current["account"],
-            )
-
-    #
-    # Link patient identities to patient Cognito accounts
-    #
-    scope.populate.patient.populate_patient.ensure_patient_identities(
-        database=database,
-        patients=populate_config["patients"]["existing"],
     )
 
     return populate_config

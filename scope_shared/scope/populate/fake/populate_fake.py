@@ -22,9 +22,7 @@ def populate_fake_config(
         created_patient_configs = scope.populate.fake.populate_fake_patient_config.create_fake_patient_configs(
             faker_factory=faker_factory,
             create_fake=populate_config["patients"]["create_fake_empty"],
-            actions=[
-                "populate_default",
-            ],
+            actions=[],
         )
         del populate_config["patients"]["create_fake_empty"]
 
@@ -38,8 +36,7 @@ def populate_fake_config(
             faker_factory=faker_factory,
             create_fake=populate_config["patients"]["create_fake_generated"],
             actions=[
-                "populate_default",
-                "populate_generated",
+                "populate_generated_data",
             ],
         )
         del populate_config["patients"]["create_fake_generated"]
@@ -54,7 +51,7 @@ def populate_fake_config(
             faker_factory=faker_factory,
             create_fake=populate_config["providers"]["create_fake_psychiatrist"],
             role=scope.enums.ProviderRole.Psychiatrist.value,
-            actions=[]
+            actions=[],
         )
         del populate_config["providers"]["create_fake_psychiatrist"]
 
@@ -68,7 +65,7 @@ def populate_fake_config(
             faker_factory=faker_factory,
             create_fake=populate_config["providers"]["create_fake_social_worker"],
             role=scope.enums.ProviderRole.SocialWorker.value,
-            actions=[]
+            actions=[],
         )
         del populate_config["providers"]["create_fake_social_worker"]
 
@@ -82,7 +79,7 @@ def populate_fake_config(
             faker_factory=faker_factory,
             create_fake=populate_config["providers"]["create_fake_study_staff"],
             role=scope.enums.ProviderRole.StudyStaff.value,
-            actions=[]
+            actions=[],
         )
         del populate_config["providers"]["create_fake_study_staff"]
 
