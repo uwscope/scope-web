@@ -54,7 +54,7 @@ def create_fake_patient_configs(
     for _ in range(create_fake):
         created_patient_config = create_fake_patient_config(
             faker_factory=faker_factory,
-            actions=actions
+            actions=actions,
         )
         created_patient_configs.append(created_patient_config)
 

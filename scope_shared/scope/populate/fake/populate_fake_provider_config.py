@@ -18,7 +18,7 @@ def create_fake_provider_configs(
         created_provider_config = create_fake_provider_config(
             faker_factory=faker_factory,
             role=role,
-            actions=actions
+            actions=actions,
         )
         created_provider_configs.append(created_provider_config)
 
