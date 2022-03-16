@@ -5,7 +5,5 @@
 	"type": "array",
 	"items": {
 		"$ref": "/schemas/patient-identity"
-	},
-	"additionalProperties": false,
-	"required": []
+	}
 }

@@ -7,7 +7,5 @@
 	"items": {
 		"$ref": "/schemas/life-area-content",
 		"$comment": "Should $ref be life-area-content?"
-	},
-	"additionalProperties": false,
-	"required": []
+	}
 }
