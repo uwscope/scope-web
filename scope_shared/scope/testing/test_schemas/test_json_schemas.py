@@ -19,6 +19,55 @@ class ConfigTestJSONSchema:
 
 
 TEST_CONFIGS = [
+    # activity
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/true-hasReminder-requires-reminderTimeOfDay-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/true-hasReminder-requires-reminderTimeOfDay-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/true-hasRepetition-requires-repeatDayFlags-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/true-hasRepetition-requires-repeatDayFlags-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/false-hasRepetition-disallows-repeatDayFlags-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity",
+        schema=scope.schema.activity_schema,
+        document_path="activity/false-hasRepetition-disallows-repeatDayFlags-invalid.json",
+        expected_valid=False,
+    ),
     # clinicalHistory
     ConfigTestJSONSchema(
         name="clinical-history",

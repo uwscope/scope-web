@@ -1,0 +1,22 @@
+{
+	"name": "Clean the house",
+	"value": "Being a loving partner",
+	"lifeareaId": "education",
+	"startDateTime": "2022-03-16T04:16:52.563Z",
+	"timeOfDay": 9,
+	"hasReminder": true,
+	"reminderTimeOfDay": 9,
+	"hasRepetition": true,
+	"repeatDayFlags": {
+		"Monday": false,
+		"Tuesday": false,
+		"Wednesday": false,
+		"Thursday": false,
+		"Friday": false,
+		"Saturday": false,
+		"Sunday": false
+	},
+	"isActive": true,
+	"isDeleted": false,
+	"_type": "activity"
+}
