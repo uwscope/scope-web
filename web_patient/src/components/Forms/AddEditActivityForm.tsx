@@ -56,10 +56,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
 
     const viewState = useLocalObservable<{
-        hasData: boolean;
         openActivityDialog: boolean;
     }>(() => ({
-        hasData: false,
         openActivityDialog: false,
     }));
 
@@ -479,7 +477,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
             }
             isOpen={true}
-            canClose={!viewState.hasData}
+            canClose={false}
+            loading={patientStore.loadActivitiesState.pending}
             pages={pages}
             onSubmit={handleSubmit}
             submitToast={getString('Form_add_activity_submit_success')}></FormDialog>

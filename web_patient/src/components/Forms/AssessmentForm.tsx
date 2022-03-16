@@ -307,6 +307,7 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
             title={`${assessmentContent.name} ${getString('Form_assessment_checkin_title')}`}
             isOpen={true}
             canClose={!viewState.hasData}
+            loading={patientStore.loadAssessmentLogsState.pending}
             pages={getAssessmentPages()}
             onSubmit={handleSubmit}
             submitToast={getString('Form_assessment_submit_success')}

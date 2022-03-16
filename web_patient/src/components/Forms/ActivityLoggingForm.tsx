@@ -266,6 +266,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
             title={getString('Form_activity_logging_title')}
             isOpen={true}
             canClose={!viewState.hasData}
+            loading={patientStore.loadActivityLogsState.pending}
             pages={getActivityLogPages()}
             onSubmit={handleSubmit}
             submitToast={getString('Form_activity_log_submit_success')}

@@ -5,6 +5,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
 import { IAssessmentLog } from 'shared/types';
+import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
@@ -56,89 +57,94 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
 
     return (
         <DetailPage title={getString(title)} onBack={handleGoBack}>
-            {logs.length > 0 ? (
-                <Fragment>
-                    <Table size="small" aria-label="a dense table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{getString('Assessment_progress_column_date')}</TableCell>
-                                <TableCell>{getString('Assessment_progress_column_total')}</TableCell>
-                                <TableCell>{getString('Assessment_progress_column_comment')}</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {logs.map((log, idx) => (
-                                <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
-                                    <TableCell component="th" scope="row">
-                                        {`${format(log.recordedDateTime, 'MM/dd')}`}
-                                    </TableCell>
-                                    <TableCell>
-                                        {log.totalScore != undefined && log.totalScore >= 0
-                                            ? log.totalScore
-                                            : getAssessmentScore(log.pointValues)}
-                                    </TableCell>
-                                    <TableCell>{log.comment}</TableCell>
+            <ContentLoader
+                state={patientStore.loadAssessmentLogsState}
+                name={`${assessmentContent?.name} logs`}
+                onRetry={() => patientStore.loadAssessmentLogs()}>
+                {logs.length > 0 ? (
+                    <Fragment>
+                        <Table size="small" aria-label="a dense table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>{getString('Assessment_progress_column_date')}</TableCell>
+                                    <TableCell>{getString('Assessment_progress_column_total')}</TableCell>
+                                    <TableCell>{getString('Assessment_progress_column_comment')}</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    {viewState.selectedLog && (
-                        <ProgressDialog
-                            isOpen={viewState.isOpen}
-                            title={getString(detail_title)}
-                            content={
-                                <Table size="small" aria-label="a dense table">
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Assessment_progress_column_date')}
-                                            </TableCell>
-                                            <TableCell>{`${
-                                                viewState.selectedLog?.recordedDateTime &&
-                                                format(viewState.selectedLog.recordedDateTime, 'MM/dd')
-                                            }`}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Assessment_progress_column_total')}
-                                            </TableCell>
-                                            <TableCell>
-                                                {viewState.selectedLog?.totalScore != undefined &&
-                                                viewState.selectedLog?.totalScore >= 0
-                                                    ? viewState?.selectedLog.totalScore
-                                                    : !!viewState.selectedLog?.pointValues
-                                                    ? getAssessmentScore(viewState.selectedLog?.pointValues)
-                                                    : -1}
-                                            </TableCell>
-                                        </TableRow>
-                                        {viewState.selectedLog &&
-                                            viewState.selectedLog.pointValues &&
-                                            Object.keys(viewState.selectedLog.pointValues).map((key) => (
-                                                <TableRow key={key}>
-                                                    <TableCell component="th" scope="row">
-                                                        {key}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {getValueString(viewState.selectedLog?.pointValues[key])}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        <TableRow>
-                                            <TableCell component="th" scope="row">
-                                                {getString('Assessment_progress_column_comment')}
-                                            </TableCell>
-                                            <TableCell>{viewState.selectedLog?.comment}</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            }
-                            onClose={handleClose}
-                        />
-                    )}
-                </Fragment>
-            ) : (
-                <Typography>{getString('Assessment_progress_no_data')}</Typography>
-            )}
+                            </TableHead>
+                            <TableBody>
+                                {logs.map((log, idx) => (
+                                    <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
+                                        <TableCell component="th" scope="row">
+                                            {`${format(log.recordedDateTime, 'MM/dd')}`}
+                                        </TableCell>
+                                        <TableCell>
+                                            {log.totalScore != undefined && log.totalScore >= 0
+                                                ? log.totalScore
+                                                : getAssessmentScore(log.pointValues)}
+                                        </TableCell>
+                                        <TableCell>{log.comment}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        {viewState.selectedLog && (
+                            <ProgressDialog
+                                isOpen={viewState.isOpen}
+                                title={getString(detail_title)}
+                                content={
+                                    <Table size="small" aria-label="a dense table">
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Assessment_progress_column_date')}
+                                                </TableCell>
+                                                <TableCell>{`${
+                                                    viewState.selectedLog?.recordedDateTime &&
+                                                    format(viewState.selectedLog.recordedDateTime, 'MM/dd')
+                                                }`}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Assessment_progress_column_total')}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {viewState.selectedLog?.totalScore != undefined &&
+                                                    viewState.selectedLog?.totalScore >= 0
+                                                        ? viewState?.selectedLog.totalScore
+                                                        : !!viewState.selectedLog?.pointValues
+                                                        ? getAssessmentScore(viewState.selectedLog?.pointValues)
+                                                        : -1}
+                                                </TableCell>
+                                            </TableRow>
+                                            {viewState.selectedLog &&
+                                                viewState.selectedLog.pointValues &&
+                                                Object.keys(viewState.selectedLog.pointValues).map((key) => (
+                                                    <TableRow key={key}>
+                                                        <TableCell component="th" scope="row">
+                                                            {key}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {getValueString(viewState.selectedLog?.pointValues[key])}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Assessment_progress_column_comment')}
+                                                </TableCell>
+                                                <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                }
+                                onClose={handleClose}
+                            />
+                        )}
+                    </Fragment>
+                ) : (
+                    <Typography>{getString('Assessment_progress_no_data')}</Typography>
+                )}
+            </ContentLoader>
         </DetailPage>
     );
 });
