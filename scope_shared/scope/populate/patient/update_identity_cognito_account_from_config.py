@@ -27,7 +27,7 @@ def _ensure_valid(
         raise ValueError('patient_config["account"]["existing"]["email"] not found', patient_config)
 
 
-def update_identity_document_from_account_config(
+def update_identity_cognito_account_from_config(
     *,
     database: pymongo.database.Database,
     patient_config: dict,

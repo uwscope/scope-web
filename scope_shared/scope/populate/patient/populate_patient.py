@@ -36,7 +36,7 @@ def populate_patients_from_config(
     #
     for patient_config_current in populate_config["patients"]["existing"]:
         #
-        #
+        # Create any Cognito account
         #
         if "account" in patient_config_current:
             patient_config_current[
@@ -50,10 +50,15 @@ def populate_patients_from_config(
         #
         # Update patient identity based on account config containing Cognito account
         #
-        if scope.populate.patient.update_identity_document_from_account_config.ACTION_NAME in patient_config_current.get("actions", []):
-            scope.populate.patient.update_identity_document_from_account_config.update_identity_document_from_account_config(
+        if scope.populate.patient.update_identity_cognito_account_from_config.ACTION_NAME in patient_config_current.get("actions", []):
+            scope.populate.patient.update_identity_cognito_account_from_config.update_identity_cognito_account_from_config(
                 database=database,
                 patient_config=patient_config_current,
             )
+
+        #
+        # Populate default data
+        #
+        
 
     return populate_config

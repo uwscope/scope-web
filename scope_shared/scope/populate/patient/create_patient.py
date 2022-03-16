@@ -58,7 +58,9 @@ def _create_patient_from_config(
         }
     )
 
+    #
     # Specify follow-up actions
+    #
     actions = created_patient_config.get("actions", [])
     actions = actions + [
         # All new patients require default data
@@ -67,10 +69,9 @@ def _create_patient_from_config(
     if "account" in created_patient_config:
         # New patients with an account must have identity updated for that account
         actions = actions + [
-            scope.populate.patient.update_identity_document_from_account_config.ACTION_NAME
+            scope.populate.patient.update_identity_cognito_account_from_config.ACTION_NAME
         ]
 
     created_patient_config["actions"] = actions
-
 
     return created_patient_config
