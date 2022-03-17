@@ -5,7 +5,6 @@ import scope.database.patient
 import scope.database.patients
 import scope.enums
 import scope.schema
-import scope.schema_utils as schema_utils
 
 ACTION_NAME = "populate_default_data"
 
