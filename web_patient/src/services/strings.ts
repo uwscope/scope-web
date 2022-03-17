@@ -65,7 +65,7 @@ const _strings = {
     Form_activity_log_rating_high: 'High',
     Form_activity_log_comment_prompt: 'Do you have any other notes?',
     Form_activity_log_comment_help:
-        'You can use the space below to add a note to remind yourself about anything related to this activity. This information will be available to your psychosocial care team.',
+        'You can use this space to make some notes about how things went with this activity. This information will be available to your clinical social worker.',
     Form_activity_log_submit_success:
         'Thank you for checking in. Your responses will be available to your psychosocial care team.',
 
