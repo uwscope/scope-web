@@ -5,6 +5,7 @@ from typing import List
 import scope.database.patients
 import scope.populate.patient.update_identity_cognito_account_from_config
 
+
 def create_patients_from_configs(
     *,
     database: pymongo.database.Database,

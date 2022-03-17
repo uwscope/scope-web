@@ -102,10 +102,11 @@ def create_patient(
         pytz.utc.localize(datetime.datetime.utcnow())
     )
 
-    # Create the initial safety plan document
+    # Create an initial empty safety plan document
+    # Intentionally minimal, more complex defaults should be created in populate
     safety_plan_document = {
         "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
-        "assigned": True,
+        "assigned": False,
         "assignedDateTime": datetime_assigned,
     }
     schema_utils.raise_for_invalid_schema(
@@ -117,10 +118,11 @@ def create_patient(
         safety_plan=safety_plan_document,
     )
 
-    # Create the initial values inventory document
+    # Create an initial empty values inventory document
+    # Intentionally minimal, more complex defaults should be created in populate
     values_inventory_document = {
         "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
-        "assigned": True,
+        "assigned": False,
         "assignedDateTime": datetime_assigned,
     }
     schema_utils.raise_for_invalid_schema(
@@ -133,6 +135,7 @@ def create_patient(
     )
 
     # Create initial assessments
+    # Intentionally minimal, more complex defaults should be created in populate
     for assessment_current in [
         scope.enums.AssessmentType.GAD7.value,
         scope.enums.AssessmentType.Medication.value,
@@ -142,10 +145,8 @@ def create_patient(
             "_type": scope.database.patient.assessments.DOCUMENT_TYPE,
             "_set_id": assessment_current,
             scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
-            "assigned": True,
+            "assigned": False,
             "assignedDateTime": datetime_assigned,
-            "frequency": "Every 2 weeks",
-            "dayOfWeek": "Monday",
         }
         schema_utils.raise_for_invalid_schema(
             data=assessment_document,

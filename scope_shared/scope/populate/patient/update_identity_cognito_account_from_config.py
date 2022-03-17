@@ -15,16 +15,23 @@ def _ensure_valid(
     if "actions" not in patient_config:
         raise ValueError('patient_config["actions"] not found', patient_config)
     if ACTION_NAME not in patient_config["actions"]:
-        raise ValueError('ACTION_NAME not found in patient_config["actions"]', patient_config)
+        raise ValueError(
+            'ACTION_NAME not found in patient_config["actions"]', patient_config
+        )
 
     if "account" not in patient_config:
         raise ValueError('patient_config["account"] not found', patient_config)
     if "existing" not in patient_config["account"]:
         raise ValueError('patient_config["account"]["existing"] not found')
     if "cognitoId" not in patient_config["account"]["existing"]:
-        raise ValueError('patient_config["account"]["existing"]["cognitoId"] not found', patient_config)
+        raise ValueError(
+            'patient_config["account"]["existing"]["cognitoId"] not found',
+            patient_config,
+        )
     if "email" not in patient_config["account"]["existing"]:
-        raise ValueError('patient_config["account"]["existing"]["email"] not found', patient_config)
+        raise ValueError(
+            'patient_config["account"]["existing"]["email"] not found', patient_config
+        )
 
 
 def update_identity_cognito_account_from_config(
@@ -32,12 +39,10 @@ def update_identity_cognito_account_from_config(
     database: pymongo.database.Database,
     patient_config: dict,
 ) -> dict:
-    patient_config = copy.deepcopy(patient_config)
-
     # Ensure a valid setup
     _ensure_valid(patient_config=patient_config)
 
-    # Get the current identity document
+    # Get the patient identity document
     patient_identity_document = scope.database.patients.get_patient_identity(
         database=database,
         patient_id=patient_config["patientId"],
@@ -89,6 +94,8 @@ def update_identity_cognito_account_from_config(
         if not result.inserted_count == 1:
             raise RuntimeError()
 
-    patient_config["actions"].remove(ACTION_NAME)
+    # Mark the action complete
+    updated_patient_config = copy.deepcopy(patient_config)
+    updated_patient_config["actions"].remove(ACTION_NAME)
 
-    return patient_config
+    return updated_patient_config
