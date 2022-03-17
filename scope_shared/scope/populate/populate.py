@@ -30,7 +30,7 @@ def populate_from_config(
     # then they are populated using the same scripts as "real" patients and providers.
     #
     populate_config = scope.populate.fake.populate_fake.populate_fake_config(
-        faker_factory=FAKER_INSTANCE,
+        faker=FAKER_INSTANCE,
         populate_config=populate_config,
     )
 
@@ -39,6 +39,7 @@ def populate_from_config(
     #
     populate_config = (
         scope.populate.patient.populate_patient.populate_patients_from_config(
+            faker=FAKER_INSTANCE,
             database=database,
             cognito_config=cognito_config,
             populate_config=populate_config,

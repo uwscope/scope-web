@@ -1,4 +1,5 @@
 import copy
+import faker as _faker
 import pymongo.database
 from typing import List
 
@@ -15,6 +16,7 @@ import scope.schema_utils
 
 def populate_patients_from_config(
     *,
+    faker: _faker.Faker,
     database: pymongo.database.Database,
     cognito_config: scope.config.CognitoClientConfig,
     populate_config: dict,
@@ -81,6 +83,7 @@ def populate_patients_from_config(
             in patient_config_current.get("actions", [])
         ):
             scope.populate.patient.populate_generated_data.populate_generated_data(
+                faker=faker,
                 database=database,
                 patient_config=patient_config_current,
             )
