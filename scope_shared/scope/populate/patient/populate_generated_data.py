@@ -104,11 +104,13 @@ def _populate_generated_data(
         )
         fake_patient_profile = fake_patient_profile_factory()
 
-        fake_patient_profile.update({
-            "_rev": existing_profile["_rev"],
-            "name": existing_profile["name"],
-            "MRN": existing_profile["MRN"],
-        })
+        fake_patient_profile.update(
+            {
+                "_rev": existing_profile["_rev"],
+                "name": existing_profile["name"],
+                "MRN": existing_profile["MRN"],
+            }
+        )
 
         scope.database.patient.put_patient_profile(
             database=database,
@@ -281,10 +283,8 @@ def _populate_generated_data(
         life_area_contents = fake_life_area_contents_factory()
 
         # Create and store values inventory
-        existing_values_inventory = (
-            scope.database.patient.get_values_inventory(
-                collection=patient_collection
-            )
+        existing_values_inventory = scope.database.patient.get_values_inventory(
+            collection=patient_collection
         )
 
         fake_values_inventory_factory = scope.testing.fake_data.fixtures_fake_values_inventory.fake_values_inventory_factory(
