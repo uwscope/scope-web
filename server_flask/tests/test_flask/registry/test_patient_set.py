@@ -251,7 +251,9 @@ def test_patient_set_get(
                 **{
                     "collection": temp_patient.collection,
                     "set_id": document["_set_id"],
-                    "{}_complete".format(config.database_document_parameter_name): document,
+                    "{}_complete".format(
+                        config.database_document_parameter_name
+                    ): document,
                 }
             )
             assert result.inserted_count == 1

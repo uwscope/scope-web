@@ -28,9 +28,11 @@ def abort_not_authorized(reason: str = None) -> NoReturn:
         "message": "Not authorized.",
     }
     if reason:
-        response.update({
-            "reason": reason
-        })
+        response.update(
+            {
+                "reason": reason,
+            }
+        )
 
     _flask_abort(
         response,

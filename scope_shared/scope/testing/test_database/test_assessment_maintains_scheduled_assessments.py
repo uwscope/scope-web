@@ -18,18 +18,18 @@ import scope.testing.fixtures_database_temp_patient
 
 
 def test_assessment_calculate_scheduled_assessments_to_create():
-    scheduled_assessments = scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
-        assessment_id="testAssessmentId",
-        assessment={
-            "assigned": True,
-            "assignedDateTime": date_utils.format_datetime(
-                pytz.utc.localize(
-                    datetime.datetime(2022, 3, 12, 6)
-                )
-            ),
-            "frequency": scope.enums.ScheduledItemFrequency.Daily.value,
-        },
-        maintenance_datetime=pytz.utc.localize(datetime.datetime(2022, 3, 14, 10))
+    scheduled_assessments = (
+        scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
+            assessment_id="testAssessmentId",
+            assessment={
+                "assigned": True,
+                "assignedDateTime": date_utils.format_datetime(
+                    pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
+                ),
+                "frequency": scope.enums.ScheduledItemFrequency.Daily.value,
+            },
+            maintenance_datetime=pytz.utc.localize(datetime.datetime(2022, 3, 14, 10)),
+        )
     )
 
     scheduled_dates = []
@@ -45,12 +45,28 @@ def test_assessment_calculate_scheduled_assessments_to_create():
             "completed": False,
             "dueDate": date_utils.format_date(scheduled_date_current),
             "dueTimeOfDay": 8,
-            "dueDateTime": date_utils.format_datetime(pytz.utc.localize(datetime.datetime(scheduled_date_current.year, scheduled_date_current.month, scheduled_date_current.day, 15))),
+            "dueDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    datetime.datetime(
+                        scheduled_date_current.year,
+                        scheduled_date_current.month,
+                        scheduled_date_current.day,
+                        15,
+                    )
+                )
+            ),
             "reminderDate": date_utils.format_date(scheduled_date_current),
             "reminderTimeOfDay": 8,
-            "reminderDateTime": date_utils.format_datetime(pytz.utc.localize(
-                datetime.datetime(scheduled_date_current.year, scheduled_date_current.month, scheduled_date_current.day,
-                                  15)))
+            "reminderDateTime": date_utils.format_datetime(
+                pytz.utc.localize(
+                    datetime.datetime(
+                        scheduled_date_current.year,
+                        scheduled_date_current.month,
+                        scheduled_date_current.day,
+                        15,
+                    )
+                )
+            ),
         }
         for scheduled_date_current in scheduled_dates
     ]

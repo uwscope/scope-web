@@ -41,7 +41,9 @@ def _unsafe_update_set_element(
         updated_document = {}
         for preserve_key_current in preserve_keys:
             if preserve_key_current in current_document:
-                updated_document[preserve_key_current] = current_document[preserve_key_current]
+                updated_document[preserve_key_current] = current_document[
+                    preserve_key_current
+                ]
 
         updated_document.update(copy.deepcopy(new_document_complete))
     else:

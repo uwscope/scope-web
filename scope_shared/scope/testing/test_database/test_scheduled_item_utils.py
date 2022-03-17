@@ -569,12 +569,12 @@ def test_scheduled_item_scheduled_dates_valueerror():
 
 def test_scheduled_item_create_scheduled_items_no_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
-        start_datetime=pytz.timezone("America/Los_Angeles").localize(
-            _datetime.datetime(2022, 3, 11, 14)
-        ).astimezone(pytz.utc),
-        effective_datetime=pytz.timezone("America/Los_Angeles").localize(
-            _datetime.datetime(2022, 4, 1, 14)
-        ).astimezone(pytz.utc),
+        start_datetime=pytz.timezone("America/Los_Angeles")
+        .localize(_datetime.datetime(2022, 3, 11, 14))
+        .astimezone(pytz.utc),
+        effective_datetime=pytz.timezone("America/Los_Angeles")
+        .localize(_datetime.datetime(2022, 4, 1, 14))
+        .astimezone(pytz.utc),
         has_repetition=True,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
         repeat_day_flags=None,
@@ -633,12 +633,12 @@ def test_scheduled_item_create_scheduled_items_no_reminder():
 
 def test_scheduled_item_create_scheduled_items_with_reminder():
     scheduled_items = scope.database.scheduled_item_utils.create_scheduled_items(
-        start_datetime=pytz.timezone("America/Los_Angeles").localize(
-            _datetime.datetime(2022, 3, 11, 14)
-        ).astimezone(pytz.utc),
-        effective_datetime=pytz.timezone("America/Los_Angeles").localize(
-            _datetime.datetime(2022, 4, 1, 14)
-        ).astimezone(pytz.utc),
+        start_datetime=pytz.timezone("America/Los_Angeles")
+        .localize(_datetime.datetime(2022, 3, 11, 14))
+        .astimezone(pytz.utc),
+        effective_datetime=pytz.timezone("America/Los_Angeles")
+        .localize(_datetime.datetime(2022, 4, 1, 14))
+        .astimezone(pytz.utc),
         has_repetition=True,
         frequency=scope.enums.ScheduledItemFrequency.Biweekly.value,
         repeat_day_flags=None,
