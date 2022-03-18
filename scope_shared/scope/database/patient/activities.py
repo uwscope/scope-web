@@ -37,6 +37,11 @@ def _calculate_scheduled_activities_to_create(
         months = None
         repeat_day_flags = None
 
+    if activity["hasReminder"]:
+        reminder_time_of_day = activity["reminderTimeOfDay"]
+    else:
+        reminder_time_of_day = None
+
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
         start_datetime=date_utils.parse_datetime(activity["startDateTime"]),
@@ -47,7 +52,7 @@ def _calculate_scheduled_activities_to_create(
         day_of_week=None,  # Activities do not have dayOfWeek
         due_time_of_day=activity["timeOfDay"],
         reminder=activity["hasReminder"],
-        reminder_time_of_day=activity.get("reminderTimeOfDay", None),
+        reminder_time_of_day=reminder_time_of_day,
         timezone=timezone,
         months=months,
     )
