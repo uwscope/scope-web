@@ -36,17 +36,17 @@ const _strings = {
     Form_mood_logging_mood_good: 'High',
     Form_mood_logging_comment_prompt: 'Do you have any other notes?',
     Form_mood_logging_comment_help:
-        'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your psychosocial care team.',
+        'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your clinical social worker.',
     Form_mood_submit_success:
-        'Thank you for checking in. Your responses will be available to your psychosocial care team.',
+        'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
     Form_assessment_checkin_title: 'Check-In',
     Form_assessment_score_column_name: 'Score',
     Form_assessment_comment_prompt: 'Do you have any other notes?',
     Form_assessment_comment_help:
-        'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your psychosocial care team.',
+        'You can use this space to make some notes about anything that may have contributed to your symptoms. This information will be available to your clinical social worker.',
     Form_assessment_submit_success:
-        'Thank you for checking in. Your responses will be available to your psychosocial care team.',
+        'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
     Form_confirm_close: 'Are you sure you want to close without submitting?',
 
@@ -67,7 +67,7 @@ const _strings = {
     Form_activity_log_comment_help:
         'You can use this space to make some notes about how things went with this activity. This information will be available to your clinical social worker.',
     Form_activity_log_submit_success:
-        'Thank you for checking in. Your responses will be available to your psychosocial care team.',
+        'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
     Resources_inventory_title: 'Values & Activities Inventory',
     Resources_inventory_subtitle: 'Values and activities that align with your life goals',
@@ -255,7 +255,7 @@ const _strings = {
     Safetyplan_environment_title: 'Safe environment',
     Safetyplan_environment_description: 'What are some ways I can make the environment safe?',
     Safetyplan_submit_success:
-        'Thank you for updating your safety plan. Your responses will be available to your psychosocial care team.',
+        'Thank you for updating your safety plan. Your responses will be available to your clinical social worker.',
 };
 
 type Strings = typeof _strings;
