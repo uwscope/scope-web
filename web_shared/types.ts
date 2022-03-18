@@ -102,7 +102,7 @@ export interface IActivity {
     startDateTime: Date;
     timeOfDay: number;
     hasReminder: boolean;
-    reminderTimeOfDay: number;
+    reminderTimeOfDay?: number;
     hasRepetition: boolean;
     repeatDayFlags?: DayOfWeekFlags;
     isActive: boolean;
