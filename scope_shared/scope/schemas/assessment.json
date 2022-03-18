@@ -24,9 +24,9 @@
 		"assigned": {
 			"type": "boolean"
 		},
-        "assignedDateTime": {
-            "$ref": "/schemas/datetime#/properties/datetime"
-        },
+		"assignedDateTime": {
+			"$ref": "/schemas/datetime#/properties/datetime"
+		},
 		"dayOfWeek": {
 			"$ref": "/schemas/enums#/properties/dayOfWeek"
 		},
@@ -35,5 +35,52 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"]
+	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"],
+	"allOf": [
+		{
+			"$ref": "#/$defs/daily-frequency-disallows-dayOfWeek"
+		},
+		{
+			"$ref": "#/$defs/not-daily-frequency-requires-dayOfWeek"
+		}
+	],
+	"$defs": {
+		"daily-frequency-disallows-dayOfWeek": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/frequency-is-daily" }
+				},
+				{
+					"not": { "required": ["dayOfWeek"] }
+				}
+			]
+		},
+		"not-daily-frequency-requires-dayOfWeek": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/frequency-is-not-daily" }
+				},
+				{
+					"required": ["dayOfWeek"]
+				}
+			]
+		},
+		"frequency-is-daily": {
+			"properties": {
+				"frequency": {
+					"const": "Daily"
+				}
+			},
+			"required": ["frequency"]
+		},
+		"frequency-is-not-daily": {
+			"properties": {
+				"frequency": {
+					"type": "string",
+					"enum": ["Once a week", "Every 2 weeks", "Every 4 weeks"]
+				}
+			},
+			"required": ["frequency"]
+		}
+	}
 }
