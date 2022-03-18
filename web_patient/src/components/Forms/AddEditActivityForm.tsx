@@ -110,11 +110,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 await patientStore.updateActivity({
                     ...dataState,
                     repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
+                    reminderTimeOfDay: dataState.hasReminder ? dataState.reminderTimeOfDay : undefined,
                 });
             } else {
                 await patientStore.addActivity({
                     ...dataState,
                     repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
+                    reminderTimeOfDay: dataState.hasReminder ? dataState.reminderTimeOfDay : undefined,
                 });
             }
 
