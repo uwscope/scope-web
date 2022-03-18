@@ -14,15 +14,15 @@ const _strings = {
     Form_error_text: 'Sorry, there was an error processing your request. Please try again.',
 
     Navigation_home: 'Home',
-    Navigation_careplan: 'Care plan',
+    Navigation_careplan: 'Activities',
     Navigation_progress: 'Progress',
-    Navigation_resources: 'Resources',
+    Navigation_resources: 'Tools',
 
     Home_quote_title: 'Quote of the day',
     Home_things_title: 'Requested by provider',
     Home_values_button_text: 'Complete Values and Activities Inventory',
     Home_safety_button_text: 'Complete Safety Plan',
-    Home_assessment_button_text: 'Complete ${assessment} Assessment',
+    Home_assessment_button_text: 'Complete ${assessment} Check-In',
     Home_mood_button_text: 'Log your mood',
     Home_plan_title: 'My plan for today',
     Home_plan_done: 'You are all caught up! Make sure to celebrate your achievement!',
@@ -115,13 +115,13 @@ const _strings = {
     Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',
     Values_inventory_dialog_add_activity_importance: 'Importance (0-10)',
 
-    Resources_resources_title: 'Worksheets',
+    Resources_resources_title: 'Library',
     Resources_resources_subtitle: 'Shared documents and learning resources',
 
-    Resources_title: 'Worksheets',
+    Resources_title: 'Library',
 
-    Progress_phq_assessment_title: 'Depression Assessments',
-    Progress_gad_assessment_title: 'Anxiety Assessments',
+    Progress_phq_assessment_title: 'Depression Check-In',
+    Progress_gad_assessment_title: 'Anxiety Check-In',
     Progress_activity_tracking_title: 'Activity Tracking',
     Progress_mood_tracking_title: 'Mood Tracking',
 
@@ -216,7 +216,7 @@ const _strings = {
     Resources_safety_plan_subtitle: 'Emergency contacts and resources',
     Resources_about_us_title: 'About Us',
     Resources_about_us_subtitle: 'Learn about the study',
-    Resources_crisis_resources_title: 'Crisis Resources',
+    Resources_crisis_resources_title: 'Crisis Help',
     Resources_crisis_resources_subtitle: 'Crisis resources and hotlines',
     Resources_logout_title: 'Log out',
     Resources_logout_subtitle: 'Log out of the app',
@@ -229,7 +229,7 @@ const _strings = {
         'What are some thoughts, images, mood, situation, or behavior that might trigger a crisis?',
     Safetyplan_coping_strategies_title: 'Internal coping strategies',
     Safetyplan_coping_strategies_description:
-        'What are some things I can do to take my mine off my problems without contacting another person (relaxation techniques, physical activities)?',
+        'What are some things I can do to take my mind off my problems without contacting another person (relaxation techniques, physical activities)?',
     Safetyplan_social_distraction_person_title: 'Social distraction',
     Safetyplan_social_distraction_person_description: 'Who are the people that provide positive distraction?',
     Safetyplan_social_distraction_setting_title: 'Social settings',
