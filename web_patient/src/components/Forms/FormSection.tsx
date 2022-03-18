@@ -25,16 +25,17 @@ export const ContentContainer = withTheme(
 
 export const HeaderText = withTheme(
     styled.div((props) => ({
-        fontSize: props.theme.typography.h6.fontSize,
+        fontSize: props.theme.typography.h5.fontSize,
         fontWeight: props.theme.typography.fontWeightBold,
-        lineHeight: 1,
+        lineHeight: 1.1,
     })),
 );
 
 export const SubHeaderText = withTheme(
     styled.div((props) => ({
         fontSize: props.theme.typography.body1.fontSize,
-        lineHeight: 1,
+        fontWeight: props.theme.typography.fontWeightBold,
+        lineHeight: 1.1,
         color: props.theme.palette.primary.dark,
     })),
 );

@@ -49,6 +49,10 @@ export default function createAppTheme() {
     return createTheme({
         palette: { primary: teal, secondary: amber },
         typography: {
+            h5: {
+                fontSize: '1.1rem',
+                lineHeight: 1.1,
+            },
             fontSize: 16,
         },
         customPalette: {
