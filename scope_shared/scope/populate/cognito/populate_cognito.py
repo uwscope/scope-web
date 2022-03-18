@@ -26,11 +26,12 @@ def _generate_temporary_password() -> str:
     uppercase = string.ascii_uppercase
     numbers = string.digits
     symbols = "!@#$%^&*"
+    combined_not_symbols = lowercase + uppercase + numbers
 
-    # Limit to 1 symbol for readability
-    combined = lowercase + uppercase + numbers
-
+    # List to build up a sequence of password characters
     characters = []
+
+    # Include 1 of each class of character
     characters.extend(
         [
             random.choice(lowercase),
@@ -39,9 +40,15 @@ def _generate_temporary_password() -> str:
             random.choice(symbols),
         ]
     )
-    characters.extend(random.sample(combined, 4))
+
+    # Include 3 characters that are not symbols
+    characters.extend(random.sample(combined_not_symbols, 3))
     random.shuffle(characters)
 
+    # Prefix with a character that is not a symbol
+    characters = random.choice(combined_not_symbols) + characters
+
+    # Convert the list into a string
     temporary_password = "".join(characters)
 
     return temporary_password
