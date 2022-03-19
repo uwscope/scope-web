@@ -71,9 +71,11 @@ def populate_patients_from_config(
             scope.populate.patient.populate_default_data.ACTION_NAME
             in patient_config_current.get("actions", [])
         ):
-            patient_config_current = scope.populate.patient.populate_default_data.populate_default_data(
-                database=database,
-                patient_config=patient_config_current,
+            patient_config_current = (
+                scope.populate.patient.populate_default_data.populate_default_data(
+                    database=database,
+                    patient_config=patient_config_current,
+                )
             )
 
         #
@@ -83,10 +85,12 @@ def populate_patients_from_config(
             scope.populate.patient.populate_generated_data.ACTION_NAME
             in patient_config_current.get("actions", [])
         ):
-            patient_config_current = scope.populate.patient.populate_generated_data.populate_generated_data(
-                faker=faker,
-                database=database,
-                patient_config=patient_config_current,
+            patient_config_current = (
+                scope.populate.patient.populate_generated_data.populate_generated_data(
+                    faker=faker,
+                    database=database,
+                    patient_config=patient_config_current,
+                )
             )
 
         #
