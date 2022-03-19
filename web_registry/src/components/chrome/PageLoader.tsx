@@ -45,9 +45,9 @@ export const PageLoader: FunctionComponent<{
                 </ProgressContainer>
             )}
             {hasValue && (
-                <Stack spacing={0}>
+                <Stack spacing={0} sx={{ height: '100%' }}>
                     <Box sx={{ height: 4 }}>{state.pending && <LinearProgress />}</Box>
-                    <Box>{children}</Box>
+                    <Box sx={{ height: '100%' }}>{children}</Box>
                 </Stack>
             )}
             <Snackbar

@@ -1,6 +1,6 @@
 import { FormControl, MenuItem, Select } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { action, runInAction } from 'mobx';
+import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -58,15 +58,6 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     const onPatientClick = (recordId: string) => {
         history.push(`/patient/${recordId}`);
     };
-
-    React.useEffect(() => {
-        runInAction(() =>
-            rootStore.patientsStore.load(
-                () => rootStore.authStore.getToken(),
-                () => rootStore.authStore.refreshToken(),
-            ),
-        );
-    }, []);
 
     return (
         <Page>
