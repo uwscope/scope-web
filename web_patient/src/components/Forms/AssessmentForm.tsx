@@ -239,7 +239,7 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
             content: (
                 <Stack spacing={4}>
                     <FormSection
-                        prompt={`Your total ${assessmentContent.name} score is`}
+                        prompt={`Your ${assessmentContent.name} score is`}
                         content={
                             <div>
                                 <TotalScoreText>{`${total}`}</TotalScoreText>
