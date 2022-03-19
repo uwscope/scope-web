@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { handleDates } from 'shared/time';
+import { handleRequestDates, handleResponseDates } from 'shared/time';
 import { KeyedMap } from 'shared/types';
 
 export interface IServiceBase {
@@ -36,7 +36,7 @@ export class ServiceBase implements IServiceBase {
         };
 
         const handleResponse = (response: AxiosResponse) => {
-            handleDates(response.data);
+            handleResponseDates(response.data);
             handleDocuments(response.data);
 
             return response;
@@ -44,7 +44,7 @@ export class ServiceBase implements IServiceBase {
 
         const handleError = (error: AxiosError) => {
             if (error.response?.status == 409 && error.response != undefined) {
-                handleDates(error.response?.data);
+                handleResponseDates(error.response?.data);
                 handleDocuments(error.response?.data);
             }
 
@@ -62,6 +62,9 @@ export class ServiceBase implements IServiceBase {
                     delete request.data[docName]._id;
                 }
             }
+
+            handleRequestDates(request.data);
+
             return request;
         };
 
