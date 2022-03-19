@@ -155,6 +155,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             headerAlign: 'center',
         },
         {
+            field: 'site',
+            headerName: 'Site',
+            minWidth: 120,
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'initialSession',
             headerName: 'Initial Session',
             minWidth: 80,
