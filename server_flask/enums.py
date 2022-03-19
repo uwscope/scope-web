@@ -61,10 +61,10 @@ class PatientPronoun(Enum):
 
 class DepressionTreatmentStatus(Enum):
     CoCM = "CoCM"
-    CoCMRelapse = "CoCM Relapse Prevention"
-    Discharged = "Discharged"
-    Pending = "Pending"
+    CoCMRelapse = "CoCM RP"
+    Discharged = "D/C"
     Other = "Other"
+    End = "End"
 
 
 class FollowupSchedule(Enum):

@@ -53,13 +53,7 @@ export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const depressionTreatmentStatusValues = [
-    'CoCM',
-    'CoCM Relapse Prevention',
-    'Discharged',
-    'Pending',
-    'Other',
-] as const;
+export const depressionTreatmentStatusValues = ['CoCM', 'CoCM RP', 'D/C', 'Other', 'End'] as const;
 export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number];
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;
