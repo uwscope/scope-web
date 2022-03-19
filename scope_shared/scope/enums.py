@@ -191,3 +191,11 @@ class DueType(Enum):
     ChunkOfDay = "ChunkOfDay"
     Day = "Day"
     Week = "Week"
+
+
+class Site(Enum):
+    SCCASLU = "SCCA – SLU"
+    SCCAUWNW = "SCCA – UW-NW"
+    SCCAPEN = "SCCA – PEN"
+    MultiCareTacoma = "MultiCare – Tacoma"
+    MultiCareGigHarbor = "MultiCare – Gig Harbor"
