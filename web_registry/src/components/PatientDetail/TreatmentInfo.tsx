@@ -21,7 +21,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
     const latestGadScore = getLatestScore(currentPatient?.assessmentLogs, 'gad-7');
 
     const latestSessionDate = currentPatient.latestSession?.date;
-    const currentMedications = currentPatient.latestSession?.currentMedications;
+    const currentMedications = currentPatient.latestSession?.currentMedications || '';
     const behavioralStrategiesUsedFlags: BehavioralStrategyChecklistFlags = {
         'Behavioral Activation': false,
         'Motivational Interviewing': false,
@@ -49,9 +49,10 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
 
     const behavioralStrategiesUsed = behavioralStrategiesUsedList.join('\n');
 
-    const referrals = currentPatient.latestSession?.referrals
-        .map((ref) => `${ref.referralType} - ${ref.referralStatus}`)
-        .join('\n');
+    const referrals =
+        currentPatient.latestSession?.referrals
+            .map((ref) => `${ref.referralType} - ${ref.referralStatus}`)
+            .join('\n') || '';
 
 
     const loading =
