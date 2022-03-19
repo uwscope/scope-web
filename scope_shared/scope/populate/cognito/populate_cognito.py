@@ -46,7 +46,7 @@ def _generate_temporary_password() -> str:
     random.shuffle(characters)
 
     # Prefix with a character that is not a symbol
-    characters = random.choice(combined_not_symbols) + characters
+    characters = [random.choice(combined_not_symbols)] + characters
 
     # Convert the list into a string
     temporary_password = "".join(characters)
