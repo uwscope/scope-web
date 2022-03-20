@@ -126,9 +126,10 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                     text: assessment.assigned
                         ? getString('patient_progress_assessment_assigned_button')
                         : getString('patient_progress_assessment_assign_button'),
-                    onClick: assessment.assigned
-                        ? undefined
-                        : () => currentPatient?.assignAssessment(assessment.assessmentId),
+                    // Temporarily disable assignment
+                    // onClick: assessment.assigned
+                    //     ? undefined
+                    //     : () => currentPatient?.assignAssessment(assessment.assessmentId),
                 } as IActionButton,
             ].concat(
                 assessment.assigned
@@ -136,7 +137,8 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                           {
                               icon: <SettingsIcon />,
                               text: getString('patient_progress_assessment_action_configure'),
-                              onClick: handleConfigure,
+                              // Temporarily disable assignment
+                              //   onClick: handleConfigure,
                           } as IActionButton,
                       ]
                     : [],
