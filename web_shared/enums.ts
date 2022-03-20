@@ -40,7 +40,6 @@ export const clinicCodeValues = [
     'Immunotherapy',
     'Melanoma/Renal',
     'Neuro',
-    'NW Hospital',
     'Sarcoma',
     'Transplant – Auto',
     'Transplant – Allo',
@@ -53,13 +52,7 @@ export type ClinicCode = typeof clinicCodeValues[number];
 
 export type AllClinicCode = 'All Clinics';
 
-export const depressionTreatmentStatusValues = [
-    'CoCM',
-    'CoCM Relapse Prevention',
-    'Discharged',
-    'Pending',
-    'Other',
-] as const;
+export const depressionTreatmentStatusValues = ['CoCM', 'CoCM RP', 'D/C', 'Other', 'End'] as const;
 export type DepressionTreatmentStatus = typeof depressionTreatmentStatusValues[number];
 
 export const followupScheduleValues = ['1-week follow-up', '2-week follow-up', '4-week follow-up'] as const;
@@ -181,3 +174,6 @@ export type DueType = typeof dueTypeValues[number];
 
 export const providerRoleValues = ['studyStaff', 'psychiatrist', 'socialWorker'];
 export type ProviderRole = typeof providerRoleValues[number];
+
+export const siteValues = ['SCCA – SLU', 'SCCA – UW-NW', 'SCCA – PEN', 'MultiCare – Tacoma', 'MultiCare – Gig Harbor'];
+export type Site = typeof siteValues[number];

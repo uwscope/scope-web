@@ -57,6 +57,9 @@
         },
         "depressionTreatmentStatus": {
             "$ref": "/schemas/enums#/properties/depressionTreatmentStatus"
+        },
+        "site": {
+            "$ref": "/schemas/enums#/properties/site"
         }
     },
 	"additionalProperties": false,

@@ -7,12 +7,20 @@
 		"activitySuccessType": {
 			"type": "string",
 			"description": "ActivitySuccessType Type",
-			"enum": ["Yes", "SomethingElse", "No"]
+			"enum": [
+				"Yes",
+				"SomethingElse",
+				"No"
+			]
 		},
 		"assessmentFrequency": {
 			"type": "string",
 			"description": "AssessmentFrequency Type",
-			"enum": ["Once a week", "Every 2 weeks", "Every 4 weeks"]
+			"enum": [
+				"Once a week",
+				"Every 2 weeks",
+				"Every 4 weeks"
+			]
 		},
 		"bAChecklistFlags": {
 			"type": "object",
@@ -76,7 +84,9 @@
 				"Supportive Therapy": {
 					"type": "boolean"
 				},
-				"Other": { "type": "boolean" }
+				"Other": {
+					"type": "boolean"
+				}
 			},
 			"required": [
 				"Behavioral Activation",
@@ -134,32 +144,39 @@
 			"type": "string",
 			"description": "ClinicCode Type",
 			"enum": [
-				"Breast",
-				"Endocrine",
-				"GI",
-				"GI – Pancreatic",
-				"GU",
-				"GYN",
-				"HEME",
-				"HEME – Sickle Cell",
-				"HNL",
-				"Immunotherapy",
-				"Melanoma/Renal",
-				"Neuro",
-				"NW Hospital",
-				"Sarcoma",
-				"Transplant – Auto",
-				"Transplant – Allo",
-				"Transplant – CAR-T",
-				"Transplant – LTFU",
-				"Transplant – TTC",
-				"Other"
-			]
+                "Breast",
+                "Endocrine",
+                "GI",
+                "GI – Pancreatic",
+                "GU",
+                "GYN",
+                "HEME",
+                "HEME – Sickle Cell",
+                "HNL",
+                "Immunotherapy",
+                "Melanoma/Renal",
+                "Neuro",
+                "Sarcoma",
+                "Transplant – Auto",
+                "Transplant – Allo",
+                "Transplant – CAR-T",
+                "Transplant – LTFU",
+                "Transplant – TTC",
+                "Other"
+            ]
 		},
 		"dayOfWeek": {
 			"type": "string",
 			"description": "DayOfWeek Type",
-			"enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			"enum": [
+				"Monday",
+				"Tuesday",
+				"Wednesday",
+				"Thursday",
+				"Friday",
+				"Saturday",
+				"Sunday"
+			]
 		},
 		"dayOfWeekFlags": {
 			"type": "object",
@@ -187,12 +204,26 @@
 					"type": "boolean"
 				}
 			},
-			"required": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			"required": [
+				"Monday",
+				"Tuesday",
+				"Wednesday",
+				"Thursday",
+				"Friday",
+				"Saturday",
+				"Sunday"
+			]
 		},
 		"depressionTreatmentStatus": {
 			"type": "string",
 			"description": "DepressionTreatmentStatus Type",
-			"enum": ["CoCM", "CoCM Relapse Prevention", "Discharged", "Pending", "Other"]
+			"enum": [
+				"CoCM",
+				"CoCM RP",
+				"D/C",
+				"Other",
+				"End"
+			]
 		},
 		"discussionFlags": {
 			"type": "object",
@@ -206,37 +237,67 @@
 					"type": "boolean"
 				}
 			},
-			"required": ["Flag as safety risk", "Flag for discussion"]
+			"required": [
+				"Flag as safety risk",
+				"Flag for discussion"
+			]
 		},
 		"dueType": {
 			"type": "string",
 			"description": "DueType Type",
-			"enum": ["Exact", "ChunkOfDay", "Day", "Week"]
+			"enum": [
+				"Exact",
+				"ChunkOfDay",
+				"Day",
+				"Week"
+			]
 		},
 		"ethnicity": {
 			"type": "string",
 			"description": "PatientEthnicity Type",
-			"enum": ["Hispanic or Latino/Latina/Latinx", "Not Hispanic or Latino/Latina/Latinx", "Unknown"]
+			"enum": [
+				"Hispanic or Latino/Latina/Latinx",
+				"Not Hispanic or Latino/Latina/Latinx",
+				"Unknown"
+			]
 		},
 		"followupSchedule": {
 			"type": "string",
 			"description": "FollowupSchedule Type",
-			"enum": ["1-week follow-up", "2-week follow-up", "4-week follow-up"]
+			"enum": [
+				"1-week follow-up",
+				"2-week follow-up",
+				"4-week follow-up"
+			]
 		},
 		"gender": {
 			"type": "string",
 			"description": "PatientGender Type",
-			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
+			"enum": [
+				"Male",
+				"Female",
+				"Transgender",
+				"Non-binary/Non-conforming",
+				"Other"
+			]
 		},
 		"pronoun": {
 			"type": "string",
 			"description": "PatientPronoun Type",
-			"enum": ["He/Him", "She/Her", "They/Them"]
+			"enum": [
+				"He/Him",
+				"She/Her",
+				"They/Them"
+			]
 		},
 		"providerRole": {
 			"type": "string",
 			"description": "ProviderRole Type",
-			"enum": ["psychiatrist", "socialWorker", "studyStaff"]
+			"enum": [
+				"psychiatrist",
+				"socialWorker",
+				"studyStaff"
+			]
 		},
 		"race": {
 			"type": "object",
@@ -286,17 +347,44 @@
 		"referralStatus": {
 			"type": "string",
 			"description": "ReferralStatus Type",
-			"enum": ["Not Referred", "Pending", "Active", "Completed"]
+			"enum": [
+				"Not Referred",
+				"Pending",
+				"Active",
+				"Completed"
+			]
 		},
 		"sessionType": {
 			"type": "string",
 			"description": "SessionType Type",
-			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
+			"enum": [
+				"In person",
+				"Telehealth",
+				"Phone",
+				"Group",
+				"Home",
+				"Other"
+			]
 		},
 		"sex": {
 			"type": "string",
 			"description": "PatientSex Type",
-			"enum": ["Male", "Female", "Intersex"]
+			"enum": [
+				"Male",
+				"Female",
+				"Intersex"
+			]
+		},
+		"site": {
+			"type": "string",
+			"description": "Site Type",
+			"enum": [
+				"SCCA – SLU",
+				"SCCA – UW-NW",
+				"SCCA – PEN",
+				"MultiCare – Tacoma",
+				"MultiCare – Gig Harbor"
+			]
 		}
 	}
 }

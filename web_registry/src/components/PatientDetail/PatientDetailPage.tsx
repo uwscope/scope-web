@@ -1,9 +1,9 @@
 import { Divider, Grid, Paper, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useParams } from 'react-router';
+import PageLoader from 'src/components/chrome/PageLoader';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
 import BehavioralInformation from 'src/components/PatientDetail/BehavioralInformation';
 import PatientCard from 'src/components/PatientDetail/PatientCard';
@@ -23,7 +23,7 @@ const DetailPageContainer = withTheme(
         alignItems: 'stretch',
         height: '100%',
         overflow: 'hidden',
-    })
+    }),
 );
 
 const LeftPaneContainer = withTheme(
@@ -35,7 +35,7 @@ const LeftPaneContainer = withTheme(
         overflowY: 'auto',
         overflowX: 'hidden',
         width: props.theme.customSizes.contentsMenuWidth,
-    }))
+    })),
 );
 
 const ContentContainer = withTheme(
@@ -44,13 +44,13 @@ const ContentContainer = withTheme(
         padding: props.theme.spacing(3),
         overflowX: 'hidden',
         overflowY: 'auto',
-    }))
+    })),
 );
 
 const Section = withTheme(
     styled.div((props) => ({
         marginBottom: props.theme.spacing(12),
-    }))
+    })),
 );
 
 const SectionTitle = withTheme(
@@ -59,7 +59,7 @@ const SectionTitle = withTheme(
         marginBottom: props.theme.spacing(4),
         textTransform: 'uppercase',
         fontWeight: 600,
-    }))
+    })),
 );
 
 type IContent = IContentItem & { content?: React.ReactNode };
@@ -69,18 +69,6 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     const { recordId } = useParams<{ recordId: string | undefined }>();
     const currentPatient = rootStore.patientsStore.getPatientByRecordId(recordId);
     const validAssessments = rootStore.appContentConfig.assessments;
-
-    React.useEffect(
-        action(() => {
-            if (currentPatient) {
-                currentPatient.load(
-                    () => rootStore.authStore.getToken(),
-                    () => rootStore.authStore.refreshToken(),
-                );
-            }
-        }),
-        []
-    );
 
     const contentMenu: IContent[] = [];
 
@@ -135,8 +123,8 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                     ({
                         hash: a.id,
                         label: a.name,
-                    } as IContent)
-            )
+                    } as IContent),
+            ),
     );
 
     progressMenu.push({
@@ -168,49 +156,59 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     ] as IContent[];
     contentMenu.push.apply(contentMenu, baMenu);
 
-    if (!!currentPatient) {
-        return (
-            <PatientStoreProvider patient={currentPatient}>
-                <DetailPageContainer>
-                    <LeftPaneContainer elevation={3} square>
-                        <Grid container spacing={1} direction="column" justifyContent="flex-start" alignItems="stretch">
-                            <Grid item>
-                                <PatientCard
-                                    loading={currentPatient.loadPatientState.pending ||  currentPatient.loadProfileState.pending}
-                                    error={currentPatient.loadProfileState.error}
-                                />
+    return (
+        <PageLoader
+            state={rootStore.patientsStore.state}
+            name="the registry"
+            hasValue={rootStore.patientsStore.patients.length > 0}>
+            {currentPatient && (
+                <PatientStoreProvider patient={currentPatient}>
+                    <DetailPageContainer>
+                        <LeftPaneContainer elevation={3} square>
+                            <Grid
+                                container
+                                spacing={1}
+                                direction="column"
+                                justifyContent="flex-start"
+                                alignItems="stretch">
+                                <Grid item>
+                                    <PatientCard
+                                        loading={
+                                            currentPatient.loadPatientState.pending ||
+                                            currentPatient.loadProfileState.pending
+                                        }
+                                        error={currentPatient.loadProfileState.error}
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <Divider variant="middle" />
+                                </Grid>
+                                <Grid item>
+                                    <PatientCardExtended />
+                                </Grid>
+                                <Grid item>
+                                    <Divider variant="middle" />
+                                </Grid>
+                                <Grid item>
+                                    <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <Divider variant="middle" />
-                            </Grid>
-                            <Grid item>
-                                <PatientCardExtended />
-                            </Grid>
-                            <Grid item>
-                                <Divider variant="middle" />
-                            </Grid>
-                            <Grid item>
-                                <ContentsMenu contents={contentMenu} contentId="#scroll-content" />
-                            </Grid>
-                        </Grid>
-                    </LeftPaneContainer>
-                    <ContentContainer id="scroll-content">
-                        {contentMenu
-                            .filter((c) => c.top)
-                            .map((c) => (
-                                <Section id={c.hash} key={c.hash}>
-                                    <SectionTitle variant="h4">{c.label}</SectionTitle>
-                                    {c.content ? c.content : null}
-                                </Section>
-                            ))}
-                    </ContentContainer>
-                </DetailPageContainer>
-            </PatientStoreProvider>
-        );
-    } else {
-        console.log('no patient store');
-        return null;
-    }
+                        </LeftPaneContainer>
+                        <ContentContainer id="scroll-content">
+                            {contentMenu
+                                .filter((c) => c.top)
+                                .map((c) => (
+                                    <Section id={c.hash} key={c.hash}>
+                                        <SectionTitle variant="h4">{c.label}</SectionTitle>
+                                        {c.content ? c.content : null}
+                                    </Section>
+                                ))}
+                        </ContentContainer>
+                    </DetailPageContainer>
+                </PatientStoreProvider>
+            )}
+        </PageLoader>
+    );
 });
 
 export default PatientDetailPage;

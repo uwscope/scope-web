@@ -31,7 +31,6 @@ import scope.testing.fake_data.fixtures_fake_scheduled_activities
 import scope.testing.fake_data.fixtures_fake_scheduled_assessments
 import scope.testing.fake_data.fixtures_fake_values_inventory
 
-
 ACTION_NAME = "populate_generated_data"
 
 

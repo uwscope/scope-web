@@ -38,6 +38,7 @@ def populate_patients_from_config(
     #
     # Apply populate actions to each patient
     #
+    existing_patient_configs = []
     for patient_config_current in populate_config["patients"]["existing"]:
         #
         # Create any Cognito account
@@ -58,7 +59,7 @@ def populate_patients_from_config(
             scope.populate.patient.update_identity_cognito_account_from_config.ACTION_NAME
             in patient_config_current.get("actions", [])
         ):
-            scope.populate.patient.update_identity_cognito_account_from_config.update_identity_cognito_account_from_config(
+            patient_config_current = scope.populate.patient.update_identity_cognito_account_from_config.update_identity_cognito_account_from_config(
                 database=database,
                 patient_config=patient_config_current,
             )
@@ -70,9 +71,11 @@ def populate_patients_from_config(
             scope.populate.patient.populate_default_data.ACTION_NAME
             in patient_config_current.get("actions", [])
         ):
-            scope.populate.patient.populate_default_data.populate_default_data(
-                database=database,
-                patient_config=patient_config_current,
+            patient_config_current = (
+                scope.populate.patient.populate_default_data.populate_default_data(
+                    database=database,
+                    patient_config=patient_config_current,
+                )
             )
 
         #
@@ -82,10 +85,26 @@ def populate_patients_from_config(
             scope.populate.patient.populate_generated_data.ACTION_NAME
             in patient_config_current.get("actions", [])
         ):
-            scope.populate.patient.populate_generated_data.populate_generated_data(
-                faker=faker,
-                database=database,
-                patient_config=patient_config_current,
+            patient_config_current = (
+                scope.populate.patient.populate_generated_data.populate_generated_data(
+                    faker=faker,
+                    database=database,
+                    patient_config=patient_config_current,
+                )
             )
+
+        #
+        # If a patient has no remaining actions, simplify their config
+        #
+        if "actions" in patient_config_current:
+            if patient_config_current["actions"] == []:
+                del patient_config_current["actions"]
+
+        #
+        # Store the updated patient
+        #
+        existing_patient_configs.append(patient_config_current)
+
+    populate_config["patients"]["existing"] = existing_patient_configs
 
     return populate_config

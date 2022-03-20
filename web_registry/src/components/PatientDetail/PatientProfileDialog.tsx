@@ -11,6 +11,7 @@ import {
     patientPronounValues,
     patientRaceValues,
     patientSexValues,
+    siteValues,
 } from 'shared/enums';
 import { toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IPatientProfile, IProviderIdentity } from 'shared/types';
@@ -39,6 +40,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         primaryOncologyProvider,
         primaryCareManager,
         availableCareManagerNames,
+        site,
         onValueChange,
         onCareManagerChange,
     } = props;
@@ -68,6 +70,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
             {getTextField('Patient Name', name, 'name', true)}
             {getTextField('MRN', MRN, 'MRN', true)}
             {getDropdownField('Clinic Code', clinicCode || '', clinicCodeValues, 'clinicCode')}
+            {getDropdownField('Site', site || '', siteValues, 'site')}
             <GridDateField
                 editable
                 label="Date of Birth"
@@ -119,6 +122,7 @@ const emptyProfile = {
     primaryCareManager: undefined,
     depressionTreatmentStatus: undefined,
     followupSchedule: undefined,
+    site: undefined,
 } as IPatientProfile;
 
 interface IDialogProps {

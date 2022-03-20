@@ -21,6 +21,7 @@ import {
     Referral,
     ReferralStatus,
     SessionType,
+    Site,
 } from './enums';
 
 export type KeyedMap<T> = { [key: string]: T };
@@ -102,7 +103,7 @@ export interface IActivity {
     startDateTime: Date;
     timeOfDay: number;
     hasReminder: boolean;
-    reminderTimeOfDay: number;
+    reminderTimeOfDay?: number;
     hasRepetition: boolean;
     repeatDayFlags?: DayOfWeekFlags;
     isActive: boolean;
@@ -186,6 +187,7 @@ export interface IPatientProfile {
     discussionFlag?: DiscussionFlags;
     followupSchedule?: FollowupSchedule;
     depressionTreatmentStatus?: DepressionTreatmentStatus;
+    site?: Site;
 }
 
 export interface IClinicalHistory {

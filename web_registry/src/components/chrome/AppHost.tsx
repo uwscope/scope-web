@@ -132,6 +132,10 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 );
 
                 state.ready = true;
+                state.store?.patientsStore.load(
+                    () => state.store?.authStore.getToken(),
+                    () => state.store?.authStore.refreshToken(),
+                );
             }
 
             if (!state.store?.authStore.isAuthenticated) {

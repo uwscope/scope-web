@@ -140,7 +140,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         if (!!viewState.selectedActivity) {
             const activityCopy = viewState.selectedActivity;
             activityCopy.isActive = !activityCopy.isActive;
-            patientStore.updateActivity(activityCopy);
+            patientStore.updateActivity({
+                ...activityCopy,
+                repeatDayFlags: activityCopy.hasRepetition ? activityCopy.repeatDayFlags : undefined,
+                reminderTimeOfDay: activityCopy.hasReminder ? activityCopy.reminderTimeOfDay : undefined,
+            });
             handleMoreClose();
         }
     });
@@ -149,7 +153,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         if (!!viewState.selectedActivity) {
             const activityCopy = viewState.selectedActivity;
             activityCopy.isDeleted = true;
-            patientStore.updateActivity(activityCopy);
+            patientStore.updateActivity({
+                ...activityCopy,
+                repeatDayFlags: activityCopy.hasRepetition ? activityCopy.repeatDayFlags : undefined,
+                reminderTimeOfDay: activityCopy.hasReminder ? activityCopy.reminderTimeOfDay : undefined,
+            });
             handleMoreClose();
         }
     });

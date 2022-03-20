@@ -175,12 +175,6 @@ export class PatientsStore implements IPatientsStore {
         if (!!recordId) {
             const patient = this.patients.filter((p) => p.recordId == recordId)[0];
 
-            if (!patient) {
-                const newStore = new PatientStore({ identity: { name: 'Unknown', patientId: recordId } } as IPatient);
-                this.patients.push(newStore);
-                return newStore;
-            }
-
             return patient;
         }
 

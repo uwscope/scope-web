@@ -20,7 +20,6 @@ class ClinicCode(Enum):
     Immunotherapy = "Immunotherapy"
     MelanomaRenal = "Melanoma/Renal"
     Neuro = "Neuro"
-    NWHospital = "NW Hospital"
     Sarcoma = "Sarcoma"
     TransplantAuto = "Transplant – Auto"
     TransplantAllo = "Transplant – Allo"
@@ -67,10 +66,10 @@ class PatientPronoun(Enum):
 
 class DepressionTreatmentStatus(Enum):
     CoCM = "CoCM"
-    CoCMRelapse = "CoCM Relapse Prevention"
-    Discharged = "Discharged"
-    Pending = "Pending"
+    CoCMRelapse = "CoCM RP"
+    Discharged = "D/C"
     Other = "Other"
+    End = "End"
 
 
 class FollowupSchedule(Enum):
@@ -191,3 +190,11 @@ class DueType(Enum):
     ChunkOfDay = "ChunkOfDay"
     Day = "Day"
     Week = "Week"
+
+
+class Site(Enum):
+    SCCASLU = "SCCA – SLU"
+    SCCAUWNW = "SCCA – UW-NW"
+    SCCAPEN = "SCCA – PEN"
+    MultiCareTacoma = "MultiCare – Tacoma"
+    MultiCareGigHarbor = "MultiCare – Gig Harbor"

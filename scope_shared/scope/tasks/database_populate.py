@@ -86,9 +86,9 @@ def task_populate(
         )
 
         print('Using config "{}".'.format(populate_config_path.name))
-        populate_config = yaml.load(
-            populate_config_current_path(populate_dir_path=populate_dir_path)
-        )
+        with open(populate_config_path, "r", encoding="utf-8") as f:
+            populate_config_yaml = f.read()
+            populate_config = yaml.load(populate_config_yaml)
 
         # Verify the config schema
         scope.schema_utils.raise_for_invalid_schema(
@@ -120,7 +120,7 @@ def task_populate(
         populate_config_update_path = populate_config_generate_path(
             populate_dir_path=populate_dir_path
         )
-        with open(populate_config_update_path, "w") as f:
+        with open(populate_config_update_path, "w", encoding="utf-8") as f:
             yaml.dump(populate_config_update, f)
 
         # Verify the config schema after storing it
