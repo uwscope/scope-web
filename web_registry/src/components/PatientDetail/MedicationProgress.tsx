@@ -43,11 +43,11 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         state.openConfigure = false;
     });
 
-    const handleConfigure = action(() => {
-        state.openConfigure = true;
-        state.frequency = assessment.frequency || 'Every 2 weeks';
-        state.dayOfWeek = assessment.dayOfWeek || 'Monday';
-    });
+    // const handleConfigure = action(() => {
+    //     state.openConfigure = true;
+    //     state.frequency = assessment.frequency || 'Every 2 weeks';
+    //     state.dayOfWeek = assessment.dayOfWeek || 'Monday';
+    // });
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = state;
