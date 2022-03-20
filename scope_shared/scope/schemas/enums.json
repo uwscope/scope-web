@@ -17,7 +17,6 @@
 			"type": "string",
 			"description": "AssessmentFrequency Type",
 			"enum": [
-				"Daily",
 				"Once a week",
 				"Every 2 weeks",
 				"Every 4 weeks"
