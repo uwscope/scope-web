@@ -277,29 +277,31 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
             canGoNext: true,
         };
 
-        return [
-            ...questionPages,
-            scorePage,
-            {
-                content: (
-                    <FormSection
-                        prompt={getString('Form_assessment_comment_prompt')}
-                        help={getString('Form_assessment_comment_help')}
-                        content={
-                            <TextField
-                                fullWidth
-                                value={dataState.comment}
-                                onChange={handleCommentChange}
-                                variant="outlined"
-                                multiline
-                                rows={10}
-                            />
-                        }
-                    />
-                ),
-                canGoNext: true,
-            },
-        ];
+        const commentPage = {
+            content: (
+                <FormSection
+                    prompt={getString('Form_assessment_comment_prompt')}
+                    help={getString('Form_assessment_comment_help')}
+                    content={
+                        <TextField
+                            fullWidth
+                            value={dataState.comment}
+                            onChange={handleCommentChange}
+                            variant="outlined"
+                            multiline
+                            rows={10}
+                        />
+                    }
+                />
+            ),
+            canGoNext: true,
+        };
+
+        if (assessmentContent.questions.length > 1) {
+            return [...questionPages, scorePage, commentPage];
+        } else {
+            return [...questionPages, commentPage];
+        }
     };
 
     return (
