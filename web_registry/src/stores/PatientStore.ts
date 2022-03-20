@@ -297,6 +297,11 @@ export class PatientStore implements IPatientStore {
             this.patientService.applyAuth(getToken, onUnauthorized);
         }
 
+        // Don't load if it's already loading
+        if (this.loadProfileState.pending) {
+            return;
+        }
+
         // Use this to make a single patient call to load everything
         const initialLoad = () =>
             this.patientService.getPatient().then((patient) => {

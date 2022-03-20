@@ -1,8 +1,8 @@
 import { FormControl, MenuItem, Select } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AllClinicCode, ClinicCode } from 'shared/enums';
 import CaseloadTable from 'src/components/caseload/CaseloadTable';
@@ -40,6 +40,15 @@ const SelectInput = withTheme(
 export const CaseloadPage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const history = useHistory();
+
+    useEffect(() => {
+        runInAction(() => {
+            rootStore.patientsStore.load(
+                () => rootStore.authStore.getToken(),
+                () => rootStore.authStore.refreshToken(),
+            );
+        });
+    }, []);
 
     const onCareManagerSelect = action((event: React.ChangeEvent<{ name?: string; value: string }>) => {
         const careManager = event.target.value;
