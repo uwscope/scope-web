@@ -69,30 +69,18 @@ TEST_CONFIGS = [
         expected_valid=False,
     ),
     # assessment
-    ConfigTestJSONSchema(
-        name="assessment-daily-frequency-disallows-dayOfWeek-valid",
-        schema=scope.schema.assessment_schema,
-        document_path="assessment/daily-frequency-disallows-dayOfWeek-valid.json",
-        expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="assessment-daily-frequency-disallows-dayOfWeek-invalid",
-        schema=scope.schema.assessment_schema,
-        document_path="assessment/daily-frequency-disallows-dayOfWeek-invalid.json",
-        expected_valid=False,
-    ),
-    ConfigTestJSONSchema(
-        name="assessment-not-daily-frequency-requires-dayOfWeek-valid",
-        schema=scope.schema.assessment_schema,
-        document_path="assessment/not-daily-frequency-requires-dayOfWeek-valid.json",
-        expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="assessment-not-daily-frequency-requires-dayOfWeek-invalid",
-        schema=scope.schema.assessment_schema,
-        document_path="assessment/not-daily-frequency-requires-dayOfWeek-invalid.json",
-        expected_valid=False,
-    ),
+    # ConfigTestJSONSchema(
+    #     name="assessment-not-daily-frequency-requires-dayOfWeek-valid",
+    #     schema=scope.schema.assessment_schema,
+    #     document_path="assessment/not-daily-frequency-requires-dayOfWeek-valid.json",
+    #     expected_valid=True,
+    # ),
+    # ConfigTestJSONSchema(
+    #     name="assessment-not-daily-frequency-requires-dayOfWeek-invalid",
+    #     schema=scope.schema.assessment_schema,
+    #     document_path="assessment/not-daily-frequency-requires-dayOfWeek-invalid.json",
+    #     expected_valid=False,
+    # ),
     # clinicalHistory
     ConfigTestJSONSchema(
         name="clinical-history",
