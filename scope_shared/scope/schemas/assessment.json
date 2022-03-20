@@ -56,16 +56,6 @@
 				{ "required": ["dayOfWeek", "frequency"] }
 			]
 		},
-		"false-assigned-disallows-dayOfWeek-and-frequency": {
-			"anyOf": [
-				{
-					"not": { "$ref": "#/$defs/assigned-is-false" }
-				},
-				{
-					"not": { "required": ["dayOfWeek", "frequency"] }
-				}
-			]
-		},
 		"false-assigned-disallows-dayOfWeek": {
 			"anyOf": [
 				{
