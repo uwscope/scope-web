@@ -111,6 +111,11 @@ export class PatientsStore implements IPatientsStore {
     public async load(getToken?: () => string | undefined, onUnauthorized?: () => void) {
         const { registryService } = useServices();
 
+        // Don't load if it's already loading
+        if (this.loadPatientsQuery.pending) {
+            return;
+        }
+
         const getPatientsPromise = () =>
             registryService.getPatients().then((patients) =>
                 patients.map((p) => {

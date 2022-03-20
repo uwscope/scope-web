@@ -1,7 +1,8 @@
 import { Divider, Grid, Paper, Typography } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { observer } from 'mobx-react';
-import React, { FunctionComponent } from 'react';
+import { runInAction } from 'mobx';
+import React, { FunctionComponent, useEffect } from 'react';
 import { useParams } from 'react-router';
 import PageLoader from 'src/components/chrome/PageLoader';
 import { ContentsMenu, IContentItem } from 'src/components/common/ContentsMenu';
@@ -69,6 +70,15 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     const { recordId } = useParams<{ recordId: string | undefined }>();
     const currentPatient = rootStore.patientsStore.getPatientByRecordId(recordId);
     const validAssessments = rootStore.appContentConfig.assessments;
+
+    useEffect(() => {
+        runInAction(() => {
+            currentPatient?.load(
+                () => rootStore.authStore.getToken(),
+                () => rootStore.authStore.refreshToken(),
+            );
+        });
+    }, [currentPatient]);
 
     const contentMenu: IContent[] = [];
 
