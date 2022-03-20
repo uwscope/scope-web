@@ -20,7 +20,6 @@ class ClinicCode(Enum):
     Immunotherapy = "Immunotherapy"
     MelanomaRenal = "Melanoma/Renal"
     Neuro = "Neuro"
-    NWHospital = "NW Hospital"
     Sarcoma = "Sarcoma"
     TransplantAuto = "Transplant – Auto"
     TransplantAllo = "Transplant – Allo"

@@ -40,7 +40,6 @@ export const clinicCodeValues = [
     'Immunotherapy',
     'Melanoma/Renal',
     'Neuro',
-    'NW Hospital',
     'Sarcoma',
     'Transplant – Auto',
     'Transplant – Allo',
