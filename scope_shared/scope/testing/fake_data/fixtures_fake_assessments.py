@@ -42,19 +42,20 @@ def _fake_assessment(
                 )
             ),
         },
-        {
-            "assigned": True,
-            "assignedDateTime": date_utils.format_datetime(
-                pytz.utc.localize(
-                    faker_factory.date_time_between(
-                        start_date=datetime.datetime.now()
-                        - datetime.timedelta(days=1 * 30),
-                        end_date=datetime.datetime.now(),
-                    )
-                )
-            ),
-            "frequency": scope.enums.ScheduledItemFrequency.Daily.value,
-        },
+        # Remove Daily from schema
+        # {
+        #     "assigned": True,
+        #     "assignedDateTime": date_utils.format_datetime(
+        #         pytz.utc.localize(
+        #             faker_factory.date_time_between(
+        #                 start_date=datetime.datetime.now()
+        #                 - datetime.timedelta(days=1 * 30),
+        #                 end_date=datetime.datetime.now(),
+        #             )
+        #         )
+        #     ),
+        #     "frequency": scope.enums.ScheduledItemFrequency.Daily.value,
+        # },
         {
             "assigned": True,
             "assignedDateTime": date_utils.format_datetime(
