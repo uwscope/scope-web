@@ -35,5 +35,72 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"]
+	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"],
+	"allOf": [
+		{
+			"$ref": "#/$defs/true-assigned-requires-dayOfWeek-and-frequency"
+		},
+		{
+			"$ref": "#/$defs/false-assigned-disallows-dayOfWeek"
+		},
+		{
+			"$ref": "#/$defs/false-assigned-disallows-frequency"
+		}
+	],
+	"$defs": {
+		"true-assigned-requires-dayOfWeek-and-frequency": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-true" }
+				},
+				{ "required": ["dayOfWeek", "frequency"] }
+			]
+		},
+		"false-assigned-disallows-dayOfWeek-and-frequency": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-false" }
+				},
+				{
+					"not": { "required": ["dayOfWeek", "frequency"] }
+				}
+			]
+		},
+		"false-assigned-disallows-dayOfWeek": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-false" }
+				},
+				{
+					"not": { "required": ["dayOfWeek"] }
+				}
+			]
+		},
+		"false-assigned-disallows-frequency": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-false" }
+				},
+				{
+					"not": { "required": ["frequency"] }
+				}
+			]
+		},
+		"assigned-is-true": {
+			"properties": {
+				"assigned": {
+					"const": true
+				}
+			},
+			"required": ["assigned"]
+		},
+		"assigned-is-false": {
+			"properties": {
+				"assigned": {
+					"const": false
+				}
+			},
+			"required": ["assigned"]
+		}
+	}
 }
