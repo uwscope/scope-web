@@ -69,11 +69,11 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     };
 
     return (
-        <Page>
-            <PageLoader
-                state={rootStore.patientsStore.state}
-                name="the registry"
-                hasValue={rootStore.patientsStore.patients.length > 0}>
+        <PageLoader
+            state={rootStore.patientsStore.state}
+            name="the registry"
+            hasValue={rootStore.patientsStore.patients.length > 0}>
+            <Page>
                 <PageHeaderContainer>
                     <TitleSelectContainer>
                         <PageHeaderTitle>Caseload for</PageHeaderTitle>
@@ -111,8 +111,8 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                     </TitleSelectContainer>
                 </PageHeaderContainer>
                 <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
-            </PageLoader>
-        </Page>
+            </Page>
+        </PageLoader>
     );
 });
 
