@@ -85,7 +85,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     }>(() => ({
         openEdit: false,
         totalOnly: false,
-        totalScoreString: '-1',
+        totalScoreString: '',
         log: {
             assessmentId: assessment.assessmentId,
             recordedDateTime: new Date(),
@@ -207,9 +207,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const recurrence =
         assessment.assigned && assessment.assignedDateTime
             ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-                  assessment.assignedDateTime,
-                  'MM/dd/yyyy',
-              )}`
+                assessment.assignedDateTime,
+                'MM/dd/yyyy',
+            )}`
             : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
@@ -242,14 +242,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         },
         ...questionIds.map(
             (q) =>
-                ({
-                    field: q,
-                    headerName: q,
-                    width: 60,
-                    align: 'center',
-                    headerAlign: 'center',
-                    renderCell: q == 'Suicide' ? renderSuicideCell : undefined,
-                } as GridColDef),
+            ({
+                field: q,
+                headerName: q,
+                width: 60,
+                align: 'center',
+                headerAlign: 'center',
+                renderCell: q == 'Suicide' ? renderSuicideCell : undefined,
+            } as GridColDef),
         ),
         {
             field: 'comment',
@@ -295,23 +295,23 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 .concat(
                     assessment.assigned
                         ? [
-                              {
-                                  icon: <SettingsIcon />,
-                                  text: getString('patient_progress_assessment_action_configure'),
-                                  onClick: handleConfigure,
-                              } as IActionButton,
-                          ]
+                            {
+                                icon: <SettingsIcon />,
+                                text: getString('patient_progress_assessment_action_configure'),
+                                onClick: handleConfigure,
+                            } as IActionButton,
+                        ]
                         : [],
                 )
                 .concat(
                     canAdd
                         ? [
-                              {
-                                  icon: <AddIcon />,
-                                  text: getString('patient_progress_assessment_action_add'),
-                                  onClick: handleAddRecord,
-                              } as IActionButton,
-                          ]
+                            {
+                                icon: <AddIcon />,
+                                text: getString('patient_progress_assessment_action_add'),
+                                onClick: handleAddRecord,
+                            } as IActionButton,
+                        ]
                         : [],
                 )}>
             <Grid container alignItems="stretch">
@@ -361,8 +361,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     logState.log.patientSubmitted
                         ? `Patient submitted ${assessmentName} record`
                         : !!logState.log.assessmentLogId
-                        ? `Edit ${assessmentName} record`
-                        : `Add ${assessmentName} record`
+                            ? `Edit ${assessmentName} record`
+                            : `Add ${assessmentName} record`
                 }
                 content={
                     <Questionnaire
