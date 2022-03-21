@@ -13,7 +13,6 @@ import {
     patientSexValues,
     siteValues,
 } from 'shared/enums';
-import { toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IPatientProfile, IProviderIdentity } from 'shared/types';
 import { GridDateField, GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 import StatefulDialog from 'src/components/common/StatefulDialog';
@@ -191,28 +190,14 @@ export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialog
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> = observer((props) => {
     const { profile, open, error, loading, onClose, onSavePatient, careManagers } = props;
 
-    const state = useLocalObservable<IPatientProfile>(() => {
-        const existingProfile = { ...profile };
-
-        if (profile.birthdate != undefined) {
-            existingProfile.birthdate = toLocalDateOnly(profile.birthdate);
-        }
-
-        return existingProfile;
-    });
+    const state = useLocalObservable<IPatientProfile>(() => ({ ...profile }));
 
     const onValueChange = action((key: string, value: any) => {
         (state as any)[key] = value;
     });
 
     const onSave = action(() => {
-        const updatedProfile = { ...state };
-
-        if (state.birthdate != undefined) {
-            updatedProfile.birthdate = toUTCDateOnly(state.birthdate);
-        }
-
-        onSavePatient(updatedProfile);
+        onSavePatient({ ...state });
     });
 
     const onCareManagerChange = action((name: string) => {

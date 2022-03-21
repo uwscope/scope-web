@@ -14,7 +14,7 @@ import {
     referralStatusValues,
     sessionTypeValues,
 } from 'shared/enums';
-import { toLocalDateOnly, toUTCDateOnly, clearTime } from 'shared/time';
+import { clearTime } from 'shared/time';
 import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview, KeyedMap } from 'shared/types';
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import {
@@ -406,9 +406,6 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.open = true;
         state.isNew = false;
         state.entryType = 'Session';
-        if (!!session && session.date) {
-            state.session.date = toLocalDateOnly(session.date);
-        }
 
         _copySessionToState(session);
     });
@@ -420,9 +417,6 @@ export const SessionInfo: FunctionComponent = observer(() => {
         state.open = true;
         state.isNew = false;
         state.entryType = 'Case Review';
-        if (!!review && review.date) {
-            state.review.date = toLocalDateOnly(review.date);
-        }
     });
 
     const onSave = action(async () => {
@@ -451,7 +445,6 @@ export const SessionInfo: FunctionComponent = observer(() => {
                 )
                 .filter((rs) => rs.referralStatus != 'Not Referred');
 
-            updatedSession.date = toUTCDateOnly(session.date);
             updatedSession.billableMinutes = Number(session.billableMinutes);
 
             if (isNew) {
@@ -461,7 +454,6 @@ export const SessionInfo: FunctionComponent = observer(() => {
             }
         } else if (entryType == 'Case Review') {
             const updatedReview = { ...review };
-            updatedReview.date = toUTCDateOnly(review.date);
 
             if (isNew) {
                 await currentPatient.addCaseReview(updatedReview);
