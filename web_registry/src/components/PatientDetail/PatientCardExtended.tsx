@@ -1,9 +1,9 @@
 import withTheme from '@mui/styles/withTheme';
-import { format } from 'date-fns';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { DiscussionFlag } from 'shared/enums';
+import { formatDateOnly } from 'shared/time';
 import LabeledField, { FlaggedField } from 'src/components/common/LabeledField';
 import { usePatient } from 'src/stores/stores';
 import styled from 'styled-components';
@@ -11,7 +11,7 @@ import styled from 'styled-components';
 const Container = withTheme(
     styled.div((props) => ({
         padding: props.theme.spacing(2.5),
-    }))
+    })),
 );
 
 const state = observable<{ open: boolean }>({
@@ -36,8 +36,8 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
     });
 
     const sessionCount = patient.sessions.length;
-    const firstSession = sessionCount > 0 ? format(patient.sessions[0].date, 'MM/dd/yyyy') : '--';
-    const lastSession = sessionCount > 0 ? format(patient.sessions[sessionCount - 1].date, 'MM/dd/yyyy') : '--';
+    const firstSession = sessionCount > 0 ? formatDateOnly(patient.sessions[0].date, 'MM/dd/yyyy') : '--';
+    const lastSession = sessionCount > 0 ? formatDateOnly(patient.sessions[sessionCount - 1].date, 'MM/dd/yyyy') : '--';
 
     const flaggedForDiscussion = !!profile.discussionFlag?.['Flag for discussion'];
     const flaggedForSafety = !!profile.discussionFlag?.['Flag as safety risk'];

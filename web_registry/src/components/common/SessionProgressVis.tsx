@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/styles';
 import withTheme from '@mui/styles/withTheme';
-import { addDays, addMonths, compareAsc, format } from 'date-fns';
+import { addDays, addMonths, compareAsc } from 'date-fns';
 import React, { FunctionComponent } from 'react';
 import {
     DiscreteColorLegend,
@@ -13,6 +13,7 @@ import {
     XYPlot,
     YAxis,
 } from 'react-vis';
+import { formatDateOnly } from 'shared/time';
 import { useResize } from 'src/utils/hooks';
 import styled from 'styled-components';
 
@@ -116,7 +117,7 @@ export const SessionProgressVis: FunctionComponent<ISessionProgressVisProps> = (
                     <XAxis
                         title="Date"
                         on0={true}
-                        tickFormat={(tick: number) => format(tick, 'MMM d')}
+                        tickFormat={(tick: number) => formatDateOnly(tick, 'MMM d')}
                         tickLabelAngle={-45}
                     />
                     <YAxis title="Score" />

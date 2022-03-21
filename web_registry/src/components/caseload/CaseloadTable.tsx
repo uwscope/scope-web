@@ -7,9 +7,9 @@ import {
     GridColumnHeaderParams,
     GridRowParams,
 } from '@mui/x-data-grid';
-import { addWeeks, compareAsc, differenceInWeeks, format } from 'date-fns';
+import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
 import React, { FunctionComponent } from 'react';
-import { getFollowupWeeks } from 'shared/time';
+import { formatDateOnly, getFollowupWeeks } from 'shared/time';
 import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
 import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
@@ -300,11 +300,14 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             ...p,
             ...p.profile,
             id: p.profile.MRN,
-            initialSession: initialSessionDate ? format(initialSessionDate, 'MM/dd/yy') : NA,
-            recentSession: recentSessionDate ? format(recentSessionDate, 'MM/dd/yy') : NA,
+            initialSession: initialSessionDate ? formatDateOnly(initialSessionDate, 'MM/dd/yy') : NA,
+            recentSession: recentSessionDate ? formatDateOnly(recentSessionDate, 'MM/dd/yy') : NA,
             nextSessionDue:
                 recentSessionDate && p.profile.followupSchedule
-                    ? format(addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)), 'MM/dd/yy')
+                    ? formatDateOnly(
+                          addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)),
+                          'MM/dd/yy',
+                      )
                     : NA,
             totalSessions: p.sessions ? p.sessions.length : 0,
             treatmentWeeks:
@@ -321,7 +324,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                               100,
                       )
                     : NA,
-            lastPHQDate: phq9 && phq9?.length > 0 ? format(phq9[phq9.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
+            lastPHQDate:
+                phq9 && phq9?.length > 0 ? formatDateOnly(phq9[phq9.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
 
             initialGAD: gad7 && gad7.length > 0 ? initialGADScore : NA,
             lastGAD: gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) : NA,
@@ -333,7 +337,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                               100,
                       )
                     : NA,
-            lastGADDate: gad7 && gad7.length > 0 ? format(gad7[gad7.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
+            lastGADDate:
+                gad7 && gad7.length > 0 ? formatDateOnly(gad7[gad7.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
             initialAtRisk,
             lastAtRisk,
         };

@@ -7,12 +7,12 @@ export const clearTime = (date: Date) => {
 };
 
 // Takes the "date" type from service and converts it to a formatted date only string
-export const formatDateOnly = (date: Date, formatter: string = 'MM/dd/yy') => {
+export const formatDateOnly = (date: Date | number, formatter: string = 'MM/dd/yy') => {
     return format(toLocalDateOnly(date), formatter);
 };
 
 // Takes the "date" type from service and converts it to a local date only object
-export const toLocalDateOnly = (date: Date) => {
+export const toLocalDateOnly = (date: Date | number) => {
     return utcToZonedTime(date, '+00');
 };
 
