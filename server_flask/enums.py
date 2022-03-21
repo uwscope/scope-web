@@ -69,7 +69,10 @@ class DepressionTreatmentStatus(Enum):
 class FollowupSchedule(Enum):
     OneWeek = "1-week follow-up"
     TwoWeeks = "2-week follow-up"
+    ThreeWeeks = "3-week follow-up"
     FourWeeks = "4-week follow-up"
+    SixWeeks = "6-week follow-up"
+    EightWeeks = "8-week follow-up"
 
 
 class DiscussionFlag(Enum):
