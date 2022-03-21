@@ -144,26 +144,26 @@
 			"type": "string",
 			"description": "ClinicCode Type",
 			"enum": [
-                "Breast",
-                "Endocrine",
-                "GI",
-                "GI – Pancreatic",
-                "GU",
-                "GYN",
-                "HEME",
-                "HEME – Sickle Cell",
-                "HNL",
-                "Immunotherapy",
-                "Melanoma/Renal",
-                "Neuro",
-                "Sarcoma",
-                "Transplant – Auto",
-                "Transplant – Allo",
-                "Transplant – CAR-T",
-                "Transplant – LTFU",
-                "Transplant – TTC",
-                "Other"
-            ]
+				"Breast",
+				"Endocrine",
+				"GI",
+				"GI – Pancreatic",
+				"GU",
+				"GYN",
+				"HEME",
+				"HEME – Sickle Cell",
+				"HNL",
+				"Immunotherapy",
+				"Melanoma/Renal",
+				"Neuro",
+				"Sarcoma",
+				"Transplant – Auto",
+				"Transplant – Allo",
+				"Transplant – CAR-T",
+				"Transplant – LTFU",
+				"Transplant – TTC",
+				"Other"
+			]
 		},
 		"dayOfWeek": {
 			"type": "string",
@@ -267,7 +267,10 @@
 			"enum": [
 				"1-week follow-up",
 				"2-week follow-up",
-				"4-week follow-up"
+				"3-week follow-up",
+				"4-week follow-up",
+				"6-week follow-up",
+				"8-week follow-up"
 			]
 		},
 		"gender": {

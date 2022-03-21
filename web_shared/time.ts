@@ -53,8 +53,14 @@ export const getFollowupWeeks = (schedule: FollowupSchedule) => {
             return 1;
         case '2-week follow-up':
             return 2;
+        case '3-week follow-up':
+            return 3;
         case '4-week follow-up':
             return 4;
+        case '6-week follow-up':
+            return 6;
+        case '8-week follow-up':
+            return 8;
         default:
             return 0;
     }
