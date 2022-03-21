@@ -128,13 +128,13 @@ export type AssessmentFrequency = typeof assessmentFrequencyValues[number];
 
 export const phq9ItemValues = [
     'Interest',
-    'Feeling',
+    'Mood',
     'Sleep',
-    'Tired',
+    'Energy',
     'Appetite',
-    'Failure',
+    'Guilt',
     'Concentrating',
-    'Slowness',
+    'Motor',
     'Suicide',
 ] as const;
 export type PHQ9Item = typeof phq9ItemValues[number];
