@@ -3,6 +3,7 @@ import { compareDesc, format } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { BehavioralStrategyChecklistFlags, BehavioralStrategyChecklistItem } from 'shared/enums';
+import { formatDateOnly } from 'shared/time';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { GridTextField } from 'src/components/common/GridField';
 import { usePatient } from 'src/stores/stores';
@@ -53,7 +54,6 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
         .map((ref) => `${ref.referralType} - ${ref.referralStatus}`)
         .join('\n');
 
-
     const loading =
         currentPatient?.loadPatientState.pending ||
         currentPatient?.loadSessionsState.pending ||
@@ -83,21 +83,27 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     sm={12}
                     label="Current medications"
                     value={currentMedications}
-                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                    helperText={
+                        !!latestSessionDate ? `Updated: ${formatDateOnly(latestSessionDate, 'MM/dd/yyyy')}` : undefined
+                    }
                 />
                 <GridTextField
                     sm={12}
                     label="Behavioral Strategies Used"
                     value={behavioralStrategiesUsed}
                     multiline={true}
-                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                    helperText={
+                        !!latestSessionDate ? `Updated: ${formatDateOnly(latestSessionDate, 'MM/dd/yyyy')}` : undefined
+                    }
                 />
                 <GridTextField
                     sm={12}
                     label="Referrals"
                     value={referrals}
                     multiline={true}
-                    helperText={!!latestSessionDate ? `Updated: ${format(latestSessionDate, 'MM/dd/yyyy')}` : undefined}
+                    helperText={
+                        !!latestSessionDate ? `Updated: ${formatDateOnly(latestSessionDate, 'MM/dd/yyyy')}` : undefined
+                    }
                 />
             </Grid>
         </ActionPanel>

@@ -10,10 +10,11 @@ import {
     TableHead,
     TableRow,
 } from '@mui/material';
-import { compareAsc, format } from 'date-fns';
+import { compareAsc } from 'date-fns';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { BehavioralActivationChecklistItem, behavioralActivationChecklistValues } from 'shared/enums';
+import { formatDateOnly } from 'shared/time';
 import { IResourceItem, ISession, KeyedMap } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { getString } from 'src/services/strings';
@@ -49,9 +50,9 @@ export const BAChecklist: FunctionComponent = observer(() => {
         resources: resourcesMap[ba],
     }));
 
-    const otherResources = resourcesMap[`Other`]
+    const otherResources = resourcesMap[`Other`];
 
-    const swResources = resourcesMap[`swresources`]
+    const swResources = resourcesMap[`swresources`];
 
     const getResourceLink = (filename: string) => {
         return `/resources/${filename}`;
@@ -79,7 +80,7 @@ export const BAChecklist: FunctionComponent = observer(() => {
                                     <Fragment>
                                         <div>{component.name}</div>
                                         {component.completedDate ? (
-                                            <FormHelperText>{`Last performed on ${format(
+                                            <FormHelperText>{`Last performed on ${formatDateOnly(
                                                 component.completedDate as Date,
                                                 'MM/dd/yyyy',
                                             )}`}</FormHelperText>
