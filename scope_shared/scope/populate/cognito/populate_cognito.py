@@ -82,7 +82,6 @@ def populate_account_from_config(
     populate_config_account = copy.deepcopy(populate_config_account)
 
     if "create" in populate_config_account:
-        # Obtain an authorization token.
         # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
         # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
         boto_session = boto3.Session()
