@@ -32,6 +32,7 @@
 								"items": {
 									"type": "string",
 									"enum": [
+										"reset_cognito_password",
 										"populate_default_data",
 										"populate_generated_data",
 										"update_identity_cognito_account_from_config"
@@ -66,6 +67,7 @@
 								"items": {
 									"type": "string",
 									"enum": [
+										"reset_cognito_password",
 										"populate_default_data",
 										"populate_generated_data",
 										"update_identity_cognito_account_from_config"

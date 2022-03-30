@@ -6,6 +6,7 @@ from typing import List
 import scope.config
 import scope.database.patients
 import scope.populate.cognito.populate_cognito
+import scope.populate.cognito.populate_reset_cognito_password
 import scope.populate.patient.create_patient
 import scope.populate.patient.populate_default_data
 import scope.populate.patient.populate_generated_data
@@ -42,7 +43,7 @@ def populate_patients_from_config(
     for patient_config_current in populate_config["patients"]["existing"]:
         #
         # Create any Cognito account
-        #
+        # - Should be first, as other actions generally assume the account exists
         if "account" in patient_config_current:
             patient_config_current[
                 "account"
@@ -53,8 +54,24 @@ def populate_patients_from_config(
             )
 
         #
-        # Update patient identity based on account config containing Cognito account
+        # Reset a Cognito password
         #
+        if (
+            scope.populate.cognito.populate_reset_cognito_password.ACTION_NAME
+            in patient_config_current.get("actions", [])
+        ):
+            patient_config_current = scope.populate.cognito.populate_reset_cognito_password.reset_cognito_password(
+                database=database,
+                cognito_config=cognito_config,
+                patient_config=patient_config_current,
+            )
+
+        #
+        # Update patient identity based on account config containing an existing Cognito account
+        # - Within a patient identity document,
+        #   will update the "cognitoAccount" field,
+        #   including its "cognitoId" and "email" fields
+        # - Therefore there is no order relationship between this and a password reset
         if (
             scope.populate.patient.update_identity_cognito_account_from_config.ACTION_NAME
             in patient_config_current.get("actions", [])
