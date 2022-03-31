@@ -43,14 +43,15 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         state.openConfigure = false;
     });
 
-    // const handleConfigure = action(() => {
-    //     state.openConfigure = true;
-    //     state.frequency = assessment.frequency || 'Every 2 weeks';
-    //     state.dayOfWeek = assessment.dayOfWeek || 'Monday';
-    // });
+    const handleConfigure = action(() => {
+        state.openConfigure = true;
+        state.frequency = assessment.frequency || 'Every 2 weeks';
+        state.dayOfWeek = assessment.dayOfWeek || 'Monday';
+    });
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = state;
+        assessment.assignedDateTime = new Date();
         var newAssessment = { ...assessment, frequency, dayOfWeek };
         currentPatient.updateAssessment(newAssessment);
         state.openConfigure = false;
@@ -126,10 +127,9 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                     text: assessment.assigned
                         ? getString('patient_progress_assessment_assigned_button')
                         : getString('patient_progress_assessment_assign_button'),
-                    // Temporarily disable assignment
-                    // onClick: assessment.assigned
-                    //     ? undefined
-                    //     : () => currentPatient?.assignAssessment(assessment.assessmentId),
+                    onClick: assessment.assigned
+                        ? undefined
+                        : () => currentPatient?.assignAssessment(assessment.assessmentId),
                 } as IActionButton,
             ].concat(
                 assessment.assigned
@@ -137,8 +137,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                           {
                               icon: <SettingsIcon />,
                               text: getString('patient_progress_assessment_action_configure'),
-                              // Temporarily disable assignment
-                              //   onClick: handleConfigure,
+                              onClick: handleConfigure,
                           } as IActionButton,
                       ]
                     : [],
