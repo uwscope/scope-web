@@ -435,10 +435,12 @@ export class PatientStore implements IPatientStore {
         console.assert(!!found, 'Assessment not found');
 
         if (found) {
+
             return this.updateAssessment({
                 ...toJS(found),
                 assessmentId,
                 assigned: true,
+                assignedDateTime: new Date(),
                 frequency: found.frequency || 'Every 2 weeks',
                 dayOfWeek: found.dayOfWeek || 'Monday',
             });
