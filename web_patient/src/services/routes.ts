@@ -24,11 +24,12 @@ export const Parameters = {
 
 export const ParameterValues = {
     form: {
-        moodLog: 'log-mood',
-        assessmentLog: 'log-assessment',
         activityLog: 'log-activity',
         addActivity: 'add-activity',
+        assessmentLog: 'log-assessment',
         editActivity: 'edit-activity',
+        medicationLog: 'log-medication',
+        moodLog: 'log-mood',
         safetyPlan: 'safety-plan',
     },
 };
