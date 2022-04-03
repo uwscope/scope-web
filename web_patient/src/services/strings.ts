@@ -40,6 +40,11 @@ const _strings = {
     Form_mood_submit_success:
         'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
+    Form_medication_logging_medication_question_prompt: 'Do you have questions for your psychosocial care team about any of the medications you are taking?',
+    Form_medication_logging_medication_note_prompt: 'What question about your medications would you like to ask your phsychosocial team?',
+    Form_medication_logging_medication_note_subprompt: '(If this is an emergency, please contact your medical team, call 911, or go to the nearest emergency room)',
+    Form_medication_logging_medication_note_subprompt_helper_text: 'This is a place you can remind yourself of any side effects or other medication questions you would like to discuss with your psychosocial team.',
+
     Form_assessment_checkin_title: 'Check-In',
     Form_assessment_score_column_name: 'Score',
     Form_assessment_comment_prompt: 'Do you have any other notes?',
