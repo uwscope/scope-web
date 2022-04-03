@@ -129,7 +129,7 @@ const _strings = {
     Progress_gad_assessment_title: 'Anxiety Check-In',
     Progress_activity_tracking_title: 'Activity Tracking',
     Progress_mood_tracking_title: 'Mood Tracking',
-    Progress_medication_tracking_title: 'Medication Tracking',
+    Progress_medication_tracking_title: 'Medication Check-in',
 
     Activity_tracking_column_date: 'Date',
     Activity_tracking_column_name: 'Activity Name',
@@ -159,8 +159,12 @@ const _strings = {
     Assessment_progress_column_comment: 'Note',
     Assessment_progress_no_data: 'There are no submitted data for this assessment.',
 
+    Medication_progress_adherence: 'Took all meds for last 7 days',
+    Medication_progress_note: 'Question or Comment for Care Team',
+
     Progress_phq_assessment_detail_title: 'Depression Assessment',
     Progress_gad_assessment_detail_title: 'Anxiety Assessment',
+    Progress_medication_assessment_detail_title: 'Medication Assessment',
 
     Careplan_no_tasks: 'There are no planned activities for this day.',
     Careplan_view_calendar: 'Calendar view',
