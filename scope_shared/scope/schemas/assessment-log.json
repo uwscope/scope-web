@@ -40,13 +40,21 @@
 			"type": "string"
 		},
 		"pointValues": {
-			"type": "object",
-			"$comment": "TODO"
+			"type": "object"
 		},
 		"totalScore": {
 			"type": "number"
+		},
+		"adherence": {
+			"type": "number"
+		},
+		"medicationQuestion": {
+			"type": "boolean"
+		},
+		"medicationNote": {
+			"type": "string"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId", "pointValues"]
+	"required": ["_type", "recordedDateTime", "scheduledAssessmentId", "assessmentId"]
 }
