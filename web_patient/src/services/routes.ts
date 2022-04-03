@@ -13,6 +13,7 @@ export const Routes = {
     gadProgress: 'gad',
     activityProgress: 'activities',
     moodProgress: 'mood',
+    medicationProgress: 'medication',
 };
 
 export const Parameters = {

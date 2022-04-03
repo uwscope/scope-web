@@ -6,6 +6,7 @@ import Chrome from 'src/components/Chrome/Chrome';
 import HomePage from 'src/components/Home/HomePage';
 import ActivityTrackingHome from 'src/components/Progress/ActivityTrackingHome';
 import AssessmentHome from 'src/components/Progress/AssessmentHome';
+import MedicationTrackingHome from 'src/components/Progress/MedicationTrackingHome';
 import MoodTrackingHome from 'src/components/Progress/MoodTrackingHome';
 import ProgressPage from 'src/components/Progress/ProgressPage';
 import AboutUsPage from 'src/components/Resources/AboutUsPage';
@@ -42,6 +43,7 @@ export const App: FunctionComponent = () => {
                             path={`/${Routes.progress}/*`}
                             element={
                                 <RouterSwitch>
+                                    <Route path={`/${Routes.medicationProgress}`} element={<MedicationTrackingHome assessmentType="medication" />} />
                                     <Route path={`/${Routes.moodProgress}`} element={<MoodTrackingHome />} />
                                     <Route path={`/${Routes.activityProgress}`} element={<ActivityTrackingHome />} />
                                     <Route

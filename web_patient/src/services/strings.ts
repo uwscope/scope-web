@@ -129,6 +129,7 @@ const _strings = {
     Progress_gad_assessment_title: 'Anxiety Check-In',
     Progress_activity_tracking_title: 'Activity Tracking',
     Progress_mood_tracking_title: 'Mood Tracking',
+    Progress_medication_tracking_title: 'Medication Tracking',
 
     Activity_tracking_column_date: 'Date',
     Activity_tracking_column_name: 'Activity Name',

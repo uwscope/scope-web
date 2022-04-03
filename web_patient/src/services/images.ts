@@ -8,6 +8,7 @@ import AboutUsImageSrc from 'src/assets/about_us_icon.png';
 import CrisisResourcesImageSrc from 'src/assets/crisis_resources_icon.png';
 import PhqAssessmentImageSrc from 'src/assets/assessment_phq9_depression.png';
 import GadAssessmentImageSrc from 'src/assets/assessment_gad7_anxiety.png';
+import MedicationAssessmentImageSrc from 'src/assets/medication_pill.png';
 import LogoutImageSrc from 'src/assets/log_out_icon.png';
 
 const _images = {
@@ -23,6 +24,7 @@ const _images = {
     Progress_activity_button_image: ActivityProgressImageSrc,
     Progress_assessment_phq_button_image: PhqAssessmentImageSrc,
     Progress_assessment_gad_button_image: GadAssessmentImageSrc,
+    Progress_assessment_medication_button_image: MedicationAssessmentImageSrc,
     Progress_mood_button_image: MoodLoggingImageSrc,
 };
 
