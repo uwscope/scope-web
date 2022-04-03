@@ -10,7 +10,6 @@ import { DetailPage } from 'src/components/common/DetailPage';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
 
 export const ClickableTableRow = styled(TableRow)({
@@ -45,7 +44,6 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
     });
 
     const title = 'Progress_medication_tracking_title';
-    const detail_title = 'Progress_medication_tracking_title';
     const assessmentContent = rootStore.getAssessmentContent(assessmentType);
 
     const logs = patientStore.assessmentLogs.filter((a) => a.assessmentId.toLowerCase() == assessmentType);
@@ -63,8 +61,8 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
                             <TableHead>
                                 <TableRow>
                                     <TableCell>{getString('Assessment_progress_column_date')}</TableCell>
-                                    <TableCell>Took all meds for last 7 days</TableCell>
-                                    <TableCell>Question or Comment for Care Team</TableCell>
+                                    <TableCell>{getString('Medication_progress_adherence')}</TableCell>
+                                    <TableCell>{getString('Medication_progress_note')}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -83,6 +81,42 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
                                 ))}
                             </TableBody>
                         </Table>
+                        {viewState.selectedLog && (
+                            <ProgressDialog
+                                isOpen={viewState.isOpen}
+                                title={getString('Progress_medication_assessment_detail_title')}
+                                content={
+                                    <Table size="small" aria-label="a dense table">
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Assessment_progress_column_date')}
+                                                </TableCell>
+                                                <TableCell>{`${viewState.selectedLog?.recordedDateTime &&
+                                                    format(
+                                                        viewState.selectedLog.recordedDateTime,
+                                                        'MM/dd/yyyy h:mm aaa',
+                                                    )
+                                                    }`}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Medication_progress_adherence')}
+                                                </TableCell>
+                                                <TableCell>{viewState.selectedLog?.adherence}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell component="th" scope="row">
+                                                    {getString('Medication_progress_note')}
+                                                </TableCell>
+                                                <TableCell>{viewState.selectedLog?.medicationNote}</TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                }
+                                onClose={handleClose}
+                            />
+                        )}
                     </Fragment>
                 ) : (
                     <Typography>{getString('Assessment_progress_no_data')}</Typography>
