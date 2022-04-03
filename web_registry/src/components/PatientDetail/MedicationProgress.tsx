@@ -67,15 +67,16 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const sortedLogs = assessmentLogs?.slice().sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
+
     const tableData = sortedLogs?.map((a) => {
         return {
             date: format(a.recordedDateTime, 'MM/dd/yy'),
             adherence:
-                a.pointValues['Adherence'] == 1
+                a.adherence == 1
                     ? getString('patient_progress_medication_adherence_yes')
                     : getString('patient_progress_medication_adherence_no'),
             id: a.assessmentLogId,
-            comment: a.comment,
+            medicationNote: a.medicationQuestion ? a.medicationNote : undefined,
         };
     });
 
@@ -97,7 +98,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             headerAlign: 'center',
         },
         {
-            field: 'comment',
+            field: 'medicationNote',
             headerName: getString('patient_progress_medication_header_comment'),
             width: 300,
             flex: 1,
@@ -109,9 +110,9 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
     const recurrence =
         assessment.assigned && assessment.assignedDateTime
             ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-                  assessment.assignedDateTime,
-                  'MM/dd/yyyy',
-              )}`
+                assessment.assignedDateTime,
+                'MM/dd/yyyy',
+            )}`
             : 'Not assigned';
 
     return (
@@ -134,12 +135,12 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             ].concat(
                 assessment.assigned
                     ? [
-                          {
-                              icon: <SettingsIcon />,
-                              text: getString('patient_progress_assessment_action_configure'),
-                              onClick: handleConfigure,
-                          } as IActionButton,
-                      ]
+                        {
+                            icon: <SettingsIcon />,
+                            text: getString('patient_progress_assessment_action_configure'),
+                            onClick: handleConfigure,
+                        } as IActionButton,
+                    ]
                     : [],
             )}>
             <Grid container alignItems="stretch">
