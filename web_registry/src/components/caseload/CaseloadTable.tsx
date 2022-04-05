@@ -127,13 +127,6 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: renderFlagCell,
         },
         {
-            field: 'MRN',
-            headerName: 'MRN',
-            minWidth: 50,
-            align: 'center',
-            headerAlign: 'center',
-        },
-        {
             field: 'depressionTreatmentStatus',
             headerName: 'Tx Status',
             minWidth: 120,
@@ -173,6 +166,14 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             field: 'recentSession',
             headerName: 'Last Session',
             minWidth: 80,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
+        },
+        {
+            field: 'recentCaseReview',
+            headerName: 'Last Case Review',
+            minWidth: 120,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
@@ -276,6 +277,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
     const data = patients.map((p) => {
         const initialSessionDate = p.sessions?.length > 0 ? p.sessions[0].date : null;
         const recentSessionDate = p.sessions?.length > 0 ? p.sessions[p.sessions.length - 1].date : null;
+        const recentReviewDate = p.caseReviews?.length > 0 ? p.caseReviews[p.caseReviews.length - 1].date : null;
+
         const phq9 = p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'phq-9')
             .slice()
@@ -302,6 +305,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             id: p.profile.MRN,
             initialSession: initialSessionDate ? formatDateOnly(initialSessionDate, 'MM/dd/yy') : NA,
             recentSession: recentSessionDate ? formatDateOnly(recentSessionDate, 'MM/dd/yy') : NA,
+            recentCaseReview: recentReviewDate ? formatDateOnly(recentReviewDate, 'MM/dd/yy') : NA,
             nextSessionDue:
                 recentSessionDate && p.profile.followupSchedule
                     ? formatDateOnly(
