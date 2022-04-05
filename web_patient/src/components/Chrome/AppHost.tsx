@@ -13,8 +13,8 @@ import AppLoader from 'src/components/Chrome/AppLoader';
 
 const LoginContainer = withTheme(
     styled.div((props) => ({
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        height: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

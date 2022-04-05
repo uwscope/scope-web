@@ -18,7 +18,7 @@ import styled from 'styled-components';
 const Centered = styled.div({
     display: 'flex',
     justifyContent: 'center',
-    height: '100vh',
+    height: '100%',
 });
 
 const ResponsiveContainer = styled.div({
