@@ -1,13 +1,13 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Bug Report
+about: Create a bug report
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-**Describe the bug**
+**Describe the Bug**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
@@ -17,22 +17,22 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
+**Expected Behavior**
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Desktop (provide the following if potentially relevant):**
  - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
+ - Browser [e.g. Chrome, Safari]
  - Version [e.g. 22]
 
-**Smartphone (please complete the following information):**
+**Phone (provide the following if potentially relevant):**
  - Device: [e.g. iPhone6]
  - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
+ - Browser [e.g. Stock Browser, Safari]
  - Version [e.g. 22]
 
-**Additional context**
+**Additional Context**
 Add any other context about the problem here.
