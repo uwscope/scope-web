@@ -50,7 +50,7 @@ def task_populate(
             )
 
             # Perform the populate
-            scope.populate.populate(
+            scope.populate.populate_from_dir(
                 database=database,
                 cognito_config=cognito_config,
                 populate_dir_path=populate_dir_path,

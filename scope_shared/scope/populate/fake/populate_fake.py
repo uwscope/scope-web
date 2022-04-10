@@ -4,7 +4,6 @@ import faker as _faker
 import scope.database.patients
 import scope.database.providers
 import scope.enums
-import scope.populate.fake.populate_fake_patient_config
 import scope.populate.fake.populate_fake_provider_config
 
 
@@ -14,34 +13,6 @@ def populate_fake_config(
     populate_config: dict,
 ) -> dict:
     populate_config = copy.deepcopy(populate_config)
-
-    #
-    # Create any fake patients
-    #
-    if "create_fake_empty" in populate_config["patients"]:
-        created_patient_configs = scope.populate.fake.populate_fake_patient_config.create_fake_patient_configs(
-            faker_factory=faker,
-            create_fake=populate_config["patients"]["create_fake_empty"],
-            actions=[],
-        )
-        del populate_config["patients"]["create_fake_empty"]
-
-        populate_config["patients"]["create"].extend(created_patient_configs)
-
-    #
-    # Create any fake patients that will additionally be populated with generated fake data
-    #
-    if "create_fake_generated" in populate_config["patients"]:
-        created_patient_configs = scope.populate.fake.populate_fake_patient_config.create_fake_patient_configs(
-            faker_factory=faker,
-            create_fake=populate_config["patients"]["create_fake_generated"],
-            actions=[
-                "populate_generated_data",
-            ],
-        )
-        del populate_config["patients"]["create_fake_generated"]
-
-        populate_config["patients"]["create"].extend(created_patient_configs)
 
     #
     # Create any fake pyschiatrists

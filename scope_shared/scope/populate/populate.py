@@ -12,41 +12,12 @@ from typing import List, Optional
 import scope.config
 import scope.populate.cognito.populate_cognito
 import scope.populate.fake.populate_fake
+import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.patient.populate_patient
 import scope.populate.provider.populate_provider
+from scope.populate.types import PopulateAction, PopulateRule
 import scope.schema
 import scope.schema_utils
-
-
-class PopulateAction(abc.ABC):
-    @abc.abstractmethod
-    def prompt(self) -> List[str]:
-        """
-        Provide a short string describing the action to be performed.
-        This will be displayed as the confirmation prompt.
-        """
-        pass
-
-
-    @abc.abstractmethod
-    def perform(self, *, populate_config: dict) -> dict:
-        """
-        Perform the action.
-        Return a new state of the populate config.
-        """
-        pass
-
-
-class PopulateRule(abc.ABC):
-    """
-    A rule that can be matched against a current populate config.
-
-    If the rule matches, it will provide a PopulateAction that can be performed.
-    """
-
-    @abc.abstractmethod
-    def match(self, *, populate_config: dict) -> PopulateAction:
-        pass
 
 
 def _prompt_to_continue(
@@ -66,7 +37,7 @@ def _prompt_to_continue(
         print(prompt_current)
 
     # Final line is augmented before prompting
-    prompt = '{} [Y/n]: '.format(prompt[-1])
+    prompt = "{} [Y/n]: ".format(prompt[-1])
     while True:
         response = input(prompt)
         response = response.casefold()
@@ -77,9 +48,7 @@ def _prompt_to_continue(
             return False
 
 
-def _populate_config_path_sort_key(
-    config_path: Path
-) -> datetime.datetime:
+def _populate_config_path_sort_key(config_path: Path) -> datetime.datetime:
     """
     Sort key for populate config paths.
 
@@ -87,8 +56,10 @@ def _populate_config_path_sort_key(
     """
 
     return datetime.datetime.strptime(
-        re.fullmatch(r"populate_(\d\d\d\d_\d\d_\d\d_\d\d_\d\d_\d\dZ)\.yaml", config_path.name).group(1),
-        "%Y_%m_%d_%H_%M_%SZ"
+        re.fullmatch(
+            r"populate_(\d\d\d\d_\d\d_\d\d_\d\d_\d\d_\d\dZ)\.yaml", config_path.name
+        ).group(1),
+        "%Y_%m_%d_%H_%M_%SZ",
     )
 
 
@@ -116,15 +87,14 @@ def _populate_config_path_current(
     config_paths = filtered_config_paths
 
     # Sort them
-    config_paths = sorted(config_paths, key=_populate_config_path_sort_key, reverse=True)
+    config_paths = sorted(
+        config_paths, key=_populate_config_path_sort_key, reverse=True
+    )
 
     return config_paths[0]
 
 
-def _populate_config_path_update(
-    *,
-    populate_dir_path: Path
-) -> Path:
+def _populate_config_path_update(*, populate_dir_path: Path) -> Path:
     """
     Generate a path for storing an update to a populate config.
     """
@@ -137,9 +107,7 @@ def _populate_config_path_update(
     )
 
 
-def _populate_config_working_path_sort_key(
-    config_working_path: Path
-) -> int:
+def _populate_config_working_path_sort_key(config_working_path: Path) -> int:
     """
     Sort key for working dir populate config paths.
 
@@ -172,27 +140,24 @@ def _populate_config_working_path_current(
     config_working_paths = filtered_config_working_paths
 
     # Sort them
-    config_working_paths = sorted(config_working_paths, key=_populate_config_working_path_sort_key, reverse=True)
+    config_working_paths = sorted(
+        config_working_paths, key=_populate_config_working_path_sort_key, reverse=True
+    )
 
     return config_working_paths[0]
 
 
-def _populate_config_working_path_update(
-    *,
-    config_working_path: Path
-) -> Path:
+def _populate_config_working_path_update(*, config_working_path: Path) -> Path:
     """
     Generate a path for storing an update to a working config.
     """
 
     # Increment the integer embedded in the filename
-    existing_value = int(re.fullmatch(r"(\d+)\.yaml", config_working_path.name).group(1))
-
-    return config_working_path.parent.joinpath(
-        "{}.yaml".format(
-             existing_value + 1
-        )
+    existing_value = int(
+        re.fullmatch(r"(\d+)\.yaml", config_working_path.name).group(1)
     )
+
+    return config_working_path.parent.joinpath("{}.yaml".format(existing_value + 1))
 
 
 def _working_dir_create(
@@ -219,33 +184,38 @@ def _working_dir_path(
     """
     return Path(
         "{}_work".format(
-            populate_config_path.parent.joinpath(
-                populate_config_path.stem
-            )
+            populate_config_path.parent.joinpath(populate_config_path.stem)
         )
     )
 
 
-def _populate_rules_create() -> List[PopulateRule]:
+def _populate_rules_create(
+    *,
+    faker: _faker.Faker,
+) -> List[PopulateRule]:
     return [
-
+        scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(
+            faker=faker,
+        )
     ]
 
 
-def _populate_rules_match(*, populate_rules: List[PopulateRule], populate_config: dict) -> Optional[PopulateAction]:
+def _populate_rules_match(
+    *, populate_rules: List[PopulateRule], populate_config: dict
+) -> Optional[PopulateAction]:
     """
     Match our ordered list of rules, returning the first match found.
     """
 
     for populate_rule_current in populate_rules:
         action = populate_rule_current.match(populate_config=populate_config)
-        if action:
+        if action is not None:
             return action
 
     return None
 
 
-def populate(
+def populate_from_dir(
     *,
     database: pymongo.database.Database,
     cognito_config: scope.config.CognitoClientConfig,
@@ -265,13 +235,17 @@ def populate(
     faker = _faker.Faker(locale="la")
 
     # Create populate rules
-    populate_rules = _populate_rules_create()
+    populate_rules = _populate_rules_create(
+        faker=faker,
+    )
 
     # Track confirmation throughout populate
     populate_continue_confirmed: bool = True
 
     # Identify the current config from which to start
-    populate_config_path: Path = _populate_config_path_current(populate_dir_path=populate_dir_path)
+    populate_config_path: Path = _populate_config_path_current(
+        populate_dir_path=populate_dir_path
+    )
 
     # Confirm the configuration
     populate_continue_confirmed = _prompt_to_continue(
@@ -282,14 +256,18 @@ def populate(
         return
 
     # Ensure a working directory exists
-    working_dir_path: Path = _working_dir_path(populate_config_path=populate_config_path)
+    working_dir_path: Path = _working_dir_path(
+        populate_config_path=populate_config_path
+    )
     _working_dir_create(
         populate_config_path=populate_config_path,
         working_dir_path=working_dir_path,
     )
 
     # If this is a resumption, obtain confirmation
-    populate_config_working_path = _populate_config_working_path_current(working_dir_path=working_dir_path)
+    populate_config_working_path = _populate_config_working_path_current(
+        working_dir_path=working_dir_path
+    )
     if _populate_config_working_path_sort_key(populate_config_working_path) != 0:
         populate_continue_confirmed = _prompt_to_continue(
             prompt=["Resuming from '{}'".format(populate_config_working_path)],
@@ -302,7 +280,9 @@ def populate(
     populate_continue_work_remains: bool = True
     while populate_continue_work_remains and populate_continue_confirmed:
         # Obtain the path of the current working config
-        populate_config_working_path = _populate_config_working_path_current(working_dir_path=working_dir_path)
+        populate_config_working_path = _populate_config_working_path_current(
+            working_dir_path=working_dir_path
+        )
 
         # Load the current working config
         with open(populate_config_working_path, "r", encoding="utf-8") as f:
@@ -318,7 +298,7 @@ def populate(
         # Match our first rule
         populate_action_current = _populate_rules_match(
             populate_rules=populate_rules,
-            populate_config=copy.deepcopy(populate_config)
+            populate_config=copy.deepcopy(populate_config),
         )
         populate_continue_work_remains = populate_action_current is not None
 
@@ -330,7 +310,9 @@ def populate(
 
         if populate_continue_work_remains and populate_continue_confirmed:
             # Perform the action
-            populate_config_updated = populate_action_current.perform(populate_config=populate_config)
+            populate_config_updated = populate_action_current.perform(
+                populate_config=populate_config
+            )
 
             # Store the updated working config
             populate_config_working_updated_path = _populate_config_working_path_update(
@@ -349,10 +331,15 @@ def populate(
     # If we completed all work, store an updated config
     if populate_continue_confirmed:
         if not populate_continue_work_remains:
-            populate_config_working_path = _populate_config_working_path_current(working_dir_path=working_dir_path)
-            populate_config_update_path = _populate_config_path_update(populate_dir_path=populate_dir_path)
-            shutil.copy(src=populate_config_working_path, dst=populate_config_update_path)
-
+            populate_config_working_path = _populate_config_working_path_current(
+                working_dir_path=working_dir_path
+            )
+            populate_config_update_path = _populate_config_path_update(
+                populate_dir_path=populate_dir_path
+            )
+            shutil.copy(
+                src=populate_config_working_path, dst=populate_config_update_path
+            )
 
     # populate_config = copy.deepcopy(populate_config)
     #
