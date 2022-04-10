@@ -1,3 +1,4 @@
+import abc
 import copy
 import datetime
 import faker as _faker
@@ -6,7 +7,7 @@ import pymongo.database
 import re
 import ruamel.yaml
 import shutil
-from typing import List
+from typing import List, Optional
 
 import scope.config
 import scope.populate.cognito.populate_cognito
@@ -17,7 +18,35 @@ import scope.schema
 import scope.schema_utils
 
 
-FAKER_INSTANCE = _faker.Faker(locale="la")
+class PopulateAction(abc.ABC):
+    @abc.abstractmethod
+    def prompt(self) -> List[str]:
+        """
+        Provide a short string describing the action to be performed.
+        This will be displayed as the confirmation prompt.
+        """
+        pass
+
+
+    @abc.abstractmethod
+    def perform(self, *, populate_config: dict) -> dict:
+        """
+        Perform the action.
+        Return a new state of the populate config.
+        """
+        pass
+
+
+class PopulateRule(abc.ABC):
+    """
+    A rule that can be matched against a current populate config.
+
+    If the rule matches, it will provide a PopulateAction that can be performed.
+    """
+
+    @abc.abstractmethod
+    def match(self, *, populate_config: dict) -> PopulateAction:
+        pass
 
 
 def _prompt_to_continue(
@@ -197,6 +226,25 @@ def _working_dir_path(
     )
 
 
+def _populate_rules_create() -> List[PopulateRule]:
+    return [
+
+    ]
+
+
+def _populate_rules_match(*, populate_rules: List[PopulateRule], populate_config: dict) -> Optional[PopulateAction]:
+    """
+    Match our ordered list of rules, returning the first match found.
+    """
+
+    for populate_rule_current in populate_rules:
+        action = populate_rule_current.match(populate_config=populate_config)
+        if action:
+            return action
+
+    return None
+
+
 def populate(
     *,
     database: pymongo.database.Database,
@@ -212,6 +260,12 @@ def populate(
     # Configure a YAML object
     yaml = ruamel.yaml.YAML(typ="rt", pure=True)
     yaml.default_flow_style = False
+
+    # Configure a faker instance
+    faker = _faker.Faker(locale="la")
+
+    # Create populate rules
+    populate_rules = _populate_rules_create()
 
     # Track confirmation throughout populate
     populate_continue_confirmed: bool = True
@@ -246,7 +300,7 @@ def populate(
 
     # Process the working directory
     populate_continue_work_remains: bool = True
-    while populate_continue_confirmed and populate_continue_work_remains:
+    while populate_continue_work_remains and populate_continue_confirmed:
         # Obtain the path of the current working config
         populate_config_working_path = _populate_config_working_path_current(working_dir_path=working_dir_path)
 
@@ -261,20 +315,22 @@ def populate(
             schema=scope.schema.populate_config_schema,
         )
 
-        populate_continue_confirmed = _prompt_to_continue(
-            prompt=["Processing from '{}'".format(populate_config_working_path)]
+        # Match our first rule
+        populate_action_current = _populate_rules_match(
+            populate_rules=populate_rules,
+            populate_config=copy.deepcopy(populate_config)
         )
-        if populate_continue_confirmed:
-            # Temp do-nothing
-            # Temp do-nothing
-            # Temp do-nothing
-            # Temp do-nothing
-            populate_config_updated = copy.deepcopy(populate_config)
-            populate_continue_work_remains = _populate_config_working_path_sort_key(populate_config_working_path) < 10
-            # Temp do-nothing
-            # Temp do-nothing
-            # Temp do-nothing
-            # Temp do-nothing
+        populate_continue_work_remains = populate_action_current is not None
+
+        # Prompt for confirmation
+        if populate_continue_work_remains:
+            populate_continue_confirmed = _prompt_to_continue(
+                prompt=populate_action_current.prompt()
+            )
+
+        if populate_continue_work_remains and populate_continue_confirmed:
+            # Perform the action
+            populate_config_updated = populate_action_current.perform(populate_config=populate_config)
 
             # Store the updated working config
             populate_config_working_updated_path = _populate_config_working_path_update(
