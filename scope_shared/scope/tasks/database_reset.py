@@ -79,8 +79,11 @@ def _reset(
     #
     shutil.copy(
         src=Path(populate_reset_dir_path, "populate.yaml"),
-        dst=scope.tasks.database_populate.populate_config_generate_path(
-            populate_dir_path=populate_dir_path
+        dst=Path(
+            populate_dir_path,
+            "populate_{}.yaml".format(
+                datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%SZ")
+            ),
         ),
     )
 
