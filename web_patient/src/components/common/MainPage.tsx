@@ -23,7 +23,7 @@ const PageHeader = withTheme(
             fontSize: '2.5em',
             padding: props.theme.spacing(4, 20),
         },
-    }))
+    })),
 );
 
 const PageHeaderText = styled.div({
