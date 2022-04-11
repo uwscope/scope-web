@@ -7,7 +7,9 @@ import scope.database.patients
 import scope.schema
 import scope.schema_utils as schema_utils
 
-from scope.populate.cognito.populate_cognito import _generate_temporary_password as generate_temporary_password
+from scope.populate.cognito.populate_cognito import (
+    _generate_temporary_password as generate_temporary_password,
+)
 
 ACTION_NAME = "reset_cognito_password"
 
@@ -62,7 +64,9 @@ def reset_cognito_password(
     updated_patient_config = copy.deepcopy(patient_config)
 
     # Put the temporary password in the config
-    updated_patient_config["account"]["existing"]["temporaryPassword"] = reset_temporary_password
+    updated_patient_config["account"]["existing"][
+        "temporaryPassword"
+    ] = reset_temporary_password
 
     # Mark the action complete
     updated_patient_config["actions"].remove(ACTION_NAME)

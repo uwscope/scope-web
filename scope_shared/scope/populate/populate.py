@@ -197,7 +197,6 @@ def _populate_rules_create() -> List[PopulateRule]:
         #
         scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(),
         scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(),
-
         #
         # Rule to create a patient
         #
@@ -328,7 +327,7 @@ def populate_from_dir(
             # Perform the action
             populate_config_updated = populate_action_current.perform(
                 populate_context=populate_context,
-                populate_config=populate_config
+                populate_config=populate_config,
             )
 
             # Store the updated working config

@@ -25,7 +25,7 @@ class PopulateAction(abc.ABC):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         """
         Perform the action.

@@ -43,7 +43,7 @@ class _CreatePatientAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Get the patient config
         patient_config = populate_config["patients"]["create"][0]

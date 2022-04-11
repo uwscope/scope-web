@@ -29,7 +29,7 @@ class _ExpandCreateFakeEmptyAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["patients"]["create_fake_empty"]
@@ -69,7 +69,7 @@ class _ExpandCreateFakeGeneratedAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["patients"]["create_fake_generated"]

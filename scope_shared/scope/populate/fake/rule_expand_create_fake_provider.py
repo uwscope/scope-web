@@ -33,7 +33,7 @@ class _ExpandCreateFakePsychiatristAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
@@ -75,7 +75,7 @@ class _ExpandCreateFakeSocialWorkerAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
@@ -117,7 +117,7 @@ class _ExpandCreateFakeStudyStaffAction(PopulateAction):
         self,
         *,
         populate_context: PopulateContext,
-        populate_config: dict
+        populate_config: dict,
     ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
