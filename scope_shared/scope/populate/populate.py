@@ -10,12 +10,12 @@ import shutil
 from typing import List, Optional
 
 import scope.config
-import scope.populate.cognito.populate_cognito
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.rule_create_patient
+import scope.populate.patient.rule_populate_default_data
 import scope.populate.patient.populate_patient
-import scope.populate.provider.populate_provider
+import scope.populate.provider.rule_create_provider
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.schema
 import scope.schema_utils
@@ -198,9 +198,14 @@ def _populate_rules_create() -> List[PopulateRule]:
         scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(),
         scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(),
         #
-        # Rule to create a patient
+        # Patient creation rules
         #
+        scope.populate.patient.rule_populate_default_data.PopulateDefaultData(),
         scope.populate.patient.rule_create_patient.CreatePatient(),
+        #
+        # Rule to create a provider
+        #
+        scope.populate.provider.rule_create_provider.CreateProvider(),
     ]
 
 
@@ -383,43 +388,43 @@ def populate_from_dir(
     # return populate_config
 
 
-def _populate_providers_from_config(
-    *,
-    database: pymongo.database.Database,
-    cognito_config: scope.config.CognitoClientConfig,
-    populate_config: dict,
-) -> dict:
-    populate_config = copy.deepcopy(populate_config)
-
-    #
-    # Create specified providers
-    #
-    created_providers = scope.populate.provider.populate_provider.create_providers(
-        database=database,
-        create_providers=populate_config["providers"]["create"],
-    )
-    populate_config["providers"]["create"] = []
-    populate_config["providers"]["existing"].extend(created_providers)
-
-    #
-    # Populate provider Cognito accounts
-    #
-    for provider_current in populate_config["providers"]["existing"]:
-        if "account" in provider_current:
-            provider_current[
-                "account"
-            ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
-                database=database,
-                cognito_config=cognito_config,
-                populate_config_account=provider_current["account"],
-            )
-
-    #
-    # Link provider identities to provider Cognito accounts
-    #
-    scope.populate.provider.populate_provider.ensure_provider_identities(
-        database=database,
-        providers=populate_config["providers"]["existing"],
-    )
-
-    return populate_config
+# def _populate_providers_from_config(
+#     *,
+#     database: pymongo.database.Database,
+#     cognito_config: scope.config.CognitoClientConfig,
+#     populate_config: dict,
+# ) -> dict:
+#     populate_config = copy.deepcopy(populate_config)
+#
+#     #
+#     # Create specified providers
+#     #
+#     created_providers = scope.populate.provider.populate_provider.create_providers(
+#         database=database,
+#         create_providers=populate_config["providers"]["create"],
+#     )
+#     populate_config["providers"]["create"] = []
+#     populate_config["providers"]["existing"].extend(created_providers)
+#
+#     #
+#     # Populate provider Cognito accounts
+#     #
+#     for provider_current in populate_config["providers"]["existing"]:
+#         if "account" in provider_current:
+#             provider_current[
+#                 "account"
+#             ] = scope.populate.cognito.populate_cognito.populate_account_from_config(
+#                 database=database,
+#                 cognito_config=cognito_config,
+#                 populate_config_account=provider_current["account"],
+#             )
+#
+#     #
+#     # Link provider identities to provider Cognito accounts
+#     #
+#     scope.populate.provider.populate_provider.ensure_provider_identities(
+#         database=database,
+#         providers=populate_config["providers"]["existing"],
+#     )
+#
+#     return populate_config

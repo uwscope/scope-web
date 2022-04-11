@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import scope.enums
 import scope.database.patients
-import scope.populate.patient.populate_default_data
+import scope.populate.patient.rule_populate_default_data
 import scope.populate.patient.update_identity_cognito_account
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.testing.fake_data.fixtures_fake_provider_identity
