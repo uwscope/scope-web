@@ -83,6 +83,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
                     sm={12}
                     label="Current medications"
                     value={currentMedications}
+                    multiline={true}
                     helperText={
                         !!latestSessionDate ? `Updated: ${formatDateOnly(latestSessionDate, 'MM/dd/yyyy')}` : undefined
                     }
