@@ -1,56 +1,40 @@
 import copy
-import faker as _faker
 from typing import List, Optional
 
 import scope.enums
-from scope.populate.types import PopulateAction, PopulateRule
+from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.testing.fake_data.fixtures_fake_provider_identity
 
 
 class ExpandCreateFakeProvider(PopulateRule):
-    faker: _faker.Faker  # Used for faking
-
-    def __init__(
+    def match(
         self,
         *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
-    def match(self, *, populate_config: dict) -> Optional[PopulateAction]:
+        populate_context: PopulateContext,
+        populate_config: dict,
+    ) -> Optional[PopulateAction]:
         if "create_fake_psychiatrist" in populate_config["providers"]:
-            return _ExpandCreateFakePsychiatristAction(
-                faker=self.faker,
-            )
+            return _ExpandCreateFakePsychiatristAction()
 
         if "create_fake_social_worker" in populate_config["providers"]:
-            return _ExpandCreateFakeSocialWorkerAction(
-                faker=self.faker,
-            )
+            return _ExpandCreateFakeSocialWorkerAction()
 
         if "create_fake_study_staff" in populate_config["providers"]:
-            return _ExpandCreateFakeStudyStaffAction(
-                faker=self.faker,
-            )
+            return _ExpandCreateFakeStudyStaffAction()
 
         return None
 
 
 class _ExpandCreateFakePsychiatristAction(PopulateAction):
-    faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure
-
-    def __init__(
-        self,
-        *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
     def prompt(self) -> List[str]:
         return ["Expand create_fake_psychiatrist"]
 
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
             "create_fake_psychiatrist"
@@ -64,7 +48,7 @@ class _ExpandCreateFakePsychiatristAction(PopulateAction):
         for _ in range(number_create_fake):
             # Obtain a fake provider identity, from which we can take necessary fields
             fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
-                faker_factory=self.faker,
+                faker_factory=populate_context.faker,
             )
             fake_provider_identity = fake_provider_identity_factory()
 
@@ -84,20 +68,15 @@ class _ExpandCreateFakePsychiatristAction(PopulateAction):
 
 
 class _ExpandCreateFakeSocialWorkerAction(PopulateAction):
-    faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure
-
-    def __init__(
-        self,
-        *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
     def prompt(self) -> List[str]:
         return ["Expand create_fake_social_worker"]
 
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
             "create_fake_social_worker"
@@ -111,7 +90,7 @@ class _ExpandCreateFakeSocialWorkerAction(PopulateAction):
         for _ in range(number_create_fake):
             # Obtain a fake provider identity, from which we can take necessary fields
             fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
-                faker_factory=self.faker,
+                faker_factory=populate_context.faker,
             )
             fake_provider_identity = fake_provider_identity_factory()
 
@@ -131,20 +110,15 @@ class _ExpandCreateFakeSocialWorkerAction(PopulateAction):
 
 
 class _ExpandCreateFakeStudyStaffAction(PopulateAction):
-    faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure
-
-    def __init__(
-        self,
-        *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
     def prompt(self) -> List[str]:
         return ["Expand create_fake_study_staff"]
 
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["providers"][
             "create_fake_study_staff"
@@ -158,7 +132,7 @@ class _ExpandCreateFakeStudyStaffAction(PopulateAction):
         for _ in range(number_create_fake):
             # Obtain a fake provider identity, from which we can take necessary fields
             fake_provider_identity_factory = scope.testing.fake_data.fixtures_fake_provider_identity.fake_provider_identity_factory(
-                faker_factory=self.faker,
+                faker_factory=populate_context.faker,
             )
             fake_provider_identity = fake_provider_identity_factory()
 

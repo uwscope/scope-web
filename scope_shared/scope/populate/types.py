@@ -1,5 +1,14 @@
 import abc
+from dataclasses import dataclass
+import faker as _faker
+import pymongo.database
 from typing import List, Optional
+
+
+@dataclass(frozen=True)
+class PopulateContext:
+    database: pymongo.database.Database
+    faker: _faker.Faker
 
 
 class PopulateAction(abc.ABC):
@@ -12,7 +21,12 @@ class PopulateAction(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         """
         Perform the action.
         Return a new state of the populate config.
@@ -28,5 +42,10 @@ class PopulateRule(abc.ABC):
     """
 
     @abc.abstractmethod
-    def match(self, *, populate_config: dict) -> Optional[PopulateAction]:
+    def match(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict,
+    ) -> Optional[PopulateAction]:
         pass

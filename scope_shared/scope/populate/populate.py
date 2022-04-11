@@ -13,9 +13,10 @@ import scope.config
 import scope.populate.cognito.populate_cognito
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
+import scope.populate.patient.rule_create_patient
 import scope.populate.patient.populate_patient
 import scope.populate.provider.populate_provider
-from scope.populate.types import PopulateAction, PopulateRule
+from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.schema
 import scope.schema_utils
 
@@ -189,29 +190,36 @@ def _working_dir_path(
     )
 
 
-def _populate_rules_create(
-    *,
-    faker: _faker.Faker,
-) -> List[PopulateRule]:
+def _populate_rules_create() -> List[PopulateRule]:
     return [
-        scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(
-            faker=faker,
-        ),
-        scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(
-            faker=faker,
-        ),
+        #
+        # Simple rules that expand fake patient and provider creation
+        #
+        scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(),
+        scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(),
+
+        #
+        # Rule to create a patient
+        #
+        scope.populate.patient.rule_create_patient.CreatePatient(),
     ]
 
 
 def _populate_rules_match(
-    *, populate_rules: List[PopulateRule], populate_config: dict
+    *,
+    populate_rules: List[PopulateRule],
+    populate_context: PopulateContext,
+    populate_config: dict,
 ) -> Optional[PopulateAction]:
     """
     Match our ordered list of rules, returning the first match found.
     """
 
     for populate_rule_current in populate_rules:
-        action = populate_rule_current.match(populate_config=populate_config)
+        action = populate_rule_current.match(
+            populate_context=populate_context,
+            populate_config=populate_config,
+        )
         if action is not None:
             return action
 
@@ -237,10 +245,14 @@ def populate_from_dir(
     # Configure a faker instance
     faker = _faker.Faker(locale="la")
 
-    # Create populate rules
-    populate_rules = _populate_rules_create(
+    # Assemble populate_context
+    populate_context = PopulateContext(
+        database=database,
         faker=faker,
     )
+
+    # Create populate rules
+    populate_rules = _populate_rules_create()
 
     # Track confirmation throughout populate
     populate_continue_confirmed: bool = True
@@ -301,6 +313,7 @@ def populate_from_dir(
         # Match our first rule
         populate_action_current = _populate_rules_match(
             populate_rules=populate_rules,
+            populate_context=populate_context,
             populate_config=copy.deepcopy(populate_config),
         )
         populate_continue_work_remains = populate_action_current is not None
@@ -314,6 +327,7 @@ def populate_from_dir(
         if populate_continue_work_remains and populate_continue_confirmed:
             # Perform the action
             populate_config_updated = populate_action_current.perform(
+                populate_context=populate_context,
                 populate_config=populate_config
             )
 

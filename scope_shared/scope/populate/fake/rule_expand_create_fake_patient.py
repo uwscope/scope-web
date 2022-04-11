@@ -1,50 +1,36 @@
 import copy
-import faker as _faker
 from typing import List, Optional
 
-from scope.populate.types import PopulateAction, PopulateRule
+from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.testing.fake_data.fixtures_fake_patient_profile
 
 
 class ExpandCreateFakePatient(PopulateRule):
-    faker: _faker.Faker  # Used for faking
-
-    def __init__(
+    def match(
         self,
         *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
-    def match(self, *, populate_config: dict) -> Optional[PopulateAction]:
+        populate_context: PopulateContext,
+        populate_config: dict,
+    ) -> Optional[PopulateAction]:
         if "create_fake_empty" in populate_config["patients"]:
-            return _ExpandCreateFakeEmptyAction(
-                faker=self.faker,
-            )
+            return _ExpandCreateFakeEmptyAction()
 
         if "create_fake_generated" in populate_config["patients"]:
-            return _ExpandCreateFakeGeneratedAction(
-                faker=self.faker,
-            )
+            return _ExpandCreateFakeGeneratedAction()
 
         return None
 
 
 class _ExpandCreateFakeEmptyAction(PopulateAction):
-    faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure
-
-    def __init__(
-        self,
-        *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
     def prompt(self) -> List[str]:
         return ["Expand create_fake_empty"]
 
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["patients"]["create_fake_empty"]
 
@@ -56,7 +42,7 @@ class _ExpandCreateFakeEmptyAction(PopulateAction):
         for _ in range(number_create_fake):
             # Obtain a fake profile, from which we can take necessary fields
             fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
-                faker_factory=self.faker,
+                faker_factory=populate_context.faker,
             )
             fake_patient_profile = fake_patient_profile_factory()
 
@@ -76,20 +62,15 @@ class _ExpandCreateFakeEmptyAction(PopulateAction):
 
 
 class _ExpandCreateFakeGeneratedAction(PopulateAction):
-    faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure
-
-    def __init__(
-        self,
-        *,
-        faker: _faker.Faker,
-    ):
-        self.faker = faker
-
     def prompt(self) -> List[str]:
         return ["Expand create_fake_generated"]
 
-    def perform(self, *, populate_config: dict) -> dict:
+    def perform(
+        self,
+        *,
+        populate_context: PopulateContext,
+        populate_config: dict
+    ) -> dict:
         # Retrieve the number we are to create
         number_create_fake: int = populate_config["patients"]["create_fake_generated"]
 
@@ -101,7 +82,7 @@ class _ExpandCreateFakeGeneratedAction(PopulateAction):
         for _ in range(number_create_fake):
             # Obtain a fake profile, from which we can take necessary fields
             fake_patient_profile_factory = scope.testing.fake_data.fixtures_fake_patient_profile.fake_patient_profile_factory(
-                faker_factory=self.faker,
+                faker_factory=populate_context.faker,
             )
             fake_patient_profile = fake_patient_profile_factory()
 
