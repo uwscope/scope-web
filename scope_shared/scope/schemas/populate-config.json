@@ -109,6 +109,14 @@
 							},
 							"account": {
 								"$ref": "/schemas/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+									]
+								}
 							}
 						},
 						"additionalProperties": false,
@@ -132,6 +140,14 @@
 							},
 							"account": {
 								"$ref": "/schemas/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+									]
+								}
 							}
 						},
 						"required": ["name", "providerId", "role"]

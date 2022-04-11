@@ -13,6 +13,7 @@ import scope.config
 import scope.populate.cognito.populate_cognito
 import scope.populate.fake.populate_fake
 import scope.populate.fake.rule_expand_create_fake_patient
+import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.populate_patient
 import scope.populate.provider.populate_provider
 from scope.populate.types import PopulateAction, PopulateRule
@@ -196,7 +197,10 @@ def _populate_rules_create(
     return [
         scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(
             faker=faker,
-        )
+        ),
+        scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(
+            faker=faker,
+        ),
     ]
 
 
