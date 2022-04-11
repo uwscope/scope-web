@@ -52,7 +52,9 @@ class _ExpandCreateFakePsychiatristAction(PopulateAction):
 
     def perform(self, *, populate_config: dict) -> dict:
         # Retrieve the number we are to create
-        number_create_fake: int = populate_config["providers"]["create_fake_psychiatrist"]
+        number_create_fake: int = populate_config["providers"][
+            "create_fake_psychiatrist"
+        ]
 
         # Remove our flag from the configuration
         del populate_config["providers"]["create_fake_psychiatrist"]
@@ -97,7 +99,9 @@ class _ExpandCreateFakeSocialWorkerAction(PopulateAction):
 
     def perform(self, *, populate_config: dict) -> dict:
         # Retrieve the number we are to create
-        number_create_fake: int = populate_config["providers"]["create_fake_social_worker"]
+        number_create_fake: int = populate_config["providers"][
+            "create_fake_social_worker"
+        ]
 
         # Remove our flag from the configuration
         del populate_config["providers"]["create_fake_social_worker"]
@@ -142,7 +146,9 @@ class _ExpandCreateFakeStudyStaffAction(PopulateAction):
 
     def perform(self, *, populate_config: dict) -> dict:
         # Retrieve the number we are to create
-        number_create_fake: int = populate_config["providers"]["create_fake_study_staff"]
+        number_create_fake: int = populate_config["providers"][
+            "create_fake_study_staff"
+        ]
 
         # Remove our flag from the configuration
         del populate_config["providers"]["create_fake_study_staff"]

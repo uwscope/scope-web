@@ -1,5 +1,4 @@
 import copy
-
 import faker as _faker
 from typing import List, Optional
 
@@ -33,7 +32,7 @@ class ExpandCreateFakePatient(PopulateRule):
 
 class _ExpandCreateFakeEmptyAction(PopulateAction):
     faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure for the fake patient
+    actions: List[str]  # List of actions to configure
 
     def __init__(
         self,
@@ -78,7 +77,7 @@ class _ExpandCreateFakeEmptyAction(PopulateAction):
 
 class _ExpandCreateFakeGeneratedAction(PopulateAction):
     faker: _faker.Faker  # Used for faking
-    actions: List[str]  # List of actions to configure for the fake patient
+    actions: List[str]  # List of actions to configure
 
     def __init__(
         self,

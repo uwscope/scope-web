@@ -11,7 +11,6 @@ from typing import List, Optional
 
 import scope.config
 import scope.populate.cognito.populate_cognito
-import scope.populate.fake.populate_fake
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.populate_patient
@@ -346,15 +345,6 @@ def populate_from_dir(
             )
 
     # populate_config = copy.deepcopy(populate_config)
-    #
-    # #
-    # # Expand any creation of fake patients and providers,
-    # # then they are populated using the same scripts as "real" patients and providers.
-    # #
-    # populate_config = scope.populate.fake.populate_fake.populate_fake_config(
-    #     faker=FAKER_INSTANCE,
-    #     populate_config=populate_config,
-    # )
     #
     # #
     # # Execute population of patients
