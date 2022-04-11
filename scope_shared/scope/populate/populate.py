@@ -14,6 +14,7 @@ import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.rule_create_patient
 import scope.populate.patient.rule_populate_default_data
+import scope.populate.patient.rule_populate_generated_data
 import scope.populate.patient.populate_patient
 import scope.populate.provider.rule_create_provider
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
@@ -199,7 +200,8 @@ def _populate_rules_create() -> List[PopulateRule]:
         scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(),
         #
         # Patient creation rules
-        #
+        # - These are in reverse order so creation will be depth-first.
+        scope.populate.patient.rule_populate_generated_data.PopulateGeneratedData(),
         scope.populate.patient.rule_populate_default_data.PopulateDefaultData(),
         scope.populate.patient.rule_create_patient.CreatePatient(),
         #

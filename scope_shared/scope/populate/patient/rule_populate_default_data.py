@@ -80,13 +80,17 @@ def _populate_default_data(
     Populate the specific documents we want in a "new" patient.
     """
 
+    # Get the patient ID
+    patient_id = patient_config["patientId"]
+
     # Get the patient identity document
     patient_identity_document = scope.database.patients.get_patient_identity(
         database=database,
-        patient_id=patient_config["patientId"],
+        patient_id=patient_id,
     )
+
     # Get the patient collection
-    collection = database.get_collection(
+    patient_collection = database.get_collection(
         name=patient_identity_document["collection"]
     )
 
