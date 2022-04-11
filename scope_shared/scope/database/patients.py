@@ -48,7 +48,7 @@ def create_patient(
     patient_id = scope.database.collection_utils.generate_set_id()
     generated_patient_collection_name = _patient_collection_name(patient_id=patient_id)
 
-    # Ensure this patient id and collection do not already exist
+    # Ensure this patient id and collection do not already exist.
     if get_patient_identity(database=database, patient_id=patient_id) is not None:
         raise ValueError('Patient "{}" already exists'.format(patient_id))
     if generated_patient_collection_name in database.list_collection_names():
@@ -56,7 +56,7 @@ def create_patient(
             'Collection "{}" already exists'.format(generated_patient_collection_name)
         )
 
-    # Create the patient collection with a sentinel document
+    # Create the patient collection with a sentinel document.
     patient_collection = database.get_collection(generated_patient_collection_name)
     result = scope.database.collection_utils.put_singleton(
         collection=patient_collection,
@@ -64,10 +64,12 @@ def create_patient(
         document={},
     )
 
-    # Create the index on the patient collection
+    # Create the index on the patient collection.
     scope.database.collection_utils.ensure_index(collection=patient_collection)
 
-    # Create the initial profile document
+    # Create the initial profile document.
+    # Intentionally minimal,
+    # any more complex defaults should be created in populate.
     patient_profile_document = {
         "_type": scope.database.patient.patient_profile.DOCUMENT_TYPE,
         "name": patient_name,
@@ -84,7 +86,9 @@ def create_patient(
         patient_profile=patient_profile_document,
     )
 
-    # Create the initial clinical history document
+    # Create the initial clinical history document.
+    # Intentionally minimal,
+    # any more complex defaults should be created in populate.
     clinical_history_document = {
         "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
     }
@@ -97,13 +101,14 @@ def create_patient(
         clinical_history=clinical_history_document,
     )
 
-    # Use a uniform datetime for the new assignments for this patient
+    # Use a uniform datetime for the new assignments for this patient.
     datetime_assigned = scope.database.date_utils.format_datetime(
         pytz.utc.localize(datetime.datetime.utcnow())
     )
 
-    # Create an initial empty safety plan document
-    # Intentionally minimal, more complex defaults should be created in populate
+    # Create an initial empty safety plan document.
+    # Intentionally minimal and not assigned,
+    # any more complex defaults should be created in populate.
     safety_plan_document = {
         "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
         "assigned": False,
@@ -118,8 +123,9 @@ def create_patient(
         safety_plan=safety_plan_document,
     )
 
-    # Create an initial empty values inventory document
-    # Intentionally minimal, more complex defaults should be created in populate
+    # Create an initial empty values inventory document.
+    # Intentionally minimal and not assigned,
+    # any more complex defaults should be created in populate.
     values_inventory_document = {
         "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
         "assigned": False,
@@ -134,8 +140,9 @@ def create_patient(
         values_inventory=values_inventory_document,
     )
 
-    # Create initial assessments
-    # Intentionally minimal, more complex defaults should be created in populate
+    # Create initial assessments.
+    # Intentionally minimal and not assigned,
+    # any more complex defaults should be created in populate.
     for assessment_current in [
         scope.enums.AssessmentType.GAD7.value,
         scope.enums.AssessmentType.Medication.value,

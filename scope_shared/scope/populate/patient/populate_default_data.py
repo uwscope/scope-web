@@ -54,81 +54,91 @@ def _populate_default_data(
     collection: pymongo.collection.Collection,
 ):
     """
-    Populate the specific documents we want.
+    Populate the specific documents we want in a "new" patient.
     """
 
     #
     # Default safety plan
+    # - Removed 4/2022 because no default is desired
     #
-    default_safety_plan_document = scope.database.patient.get_safety_plan(
-        collection=collection,
-    )
-    default_safety_plan_document.update(
-        {
-            "assigned": True,
-            # Preserve original assignedDateTime
-        }
-    )
-    del default_safety_plan_document["_id"]
-    scope.database.patient.put_safety_plan(
-        collection=collection,
-        safety_plan=default_safety_plan_document,
-    )
+    # default_safety_plan_document = scope.database.patient.get_safety_plan(
+    #     collection=collection,
+    # )
+    # default_safety_plan_document.update(
+    #     {
+    #         "assigned": True,
+    #         # Preserve original assignedDateTime
+    #     }
+    # )
+    # del default_safety_plan_document["_id"]
+    # scope.database.patient.put_safety_plan(
+    #     collection=collection,
+    #     safety_plan=default_safety_plan_document,
+    # )
 
     #
     # Default values inventory
+    # - Removed 4/2022 because no default is desired
     #
-    default_values_inventory = scope.database.patient.get_values_inventory(
-        collection=collection,
-    )
-    default_values_inventory.update(
-        {
-            "assigned": True,
-            # Preserve original assignedDateTime
-        }
-    )
-    del default_values_inventory["_id"]
-    scope.database.patient.put_values_inventory(
-        collection=collection,
-        values_inventory=default_values_inventory,
-    )
+    # default_values_inventory = scope.database.patient.get_values_inventory(
+    #     collection=collection,
+    # )
+    # default_values_inventory.update(
+    #     {
+    #         "assigned": True,
+    #         # Preserve original assignedDateTime
+    #     }
+    # )
+    # del default_values_inventory["_id"]
+    # scope.database.patient.put_values_inventory(
+    #     collection=collection,
+    #     values_inventory=default_values_inventory,
+    # )
 
+    #
     # Default assignment of GAD-7 assessment
-    default_assessment_gad7 = scope.database.patient.get_assessment(
-        collection=collection,
-        set_id=scope.enums.AssessmentType.GAD7.value,
-    )
-    default_assessment_gad7.update(
-        {
-            "assigned": True,
-            # Preserve original assignedDateTime
-            "frequency": "Every 2 weeks",
-            "dayOfWeek": "Monday",
-        }
-    )
-    del default_assessment_gad7["_id"]
-    scope.database.patient.put_assessment(
-        collection=collection,
-        set_id=scope.enums.AssessmentType.GAD7.value,
-        assessment=default_assessment_gad7,
-    )
+    # - Removed 4/2022 because no default is desired
+    #
+    # default_assessment_gad7 = scope.database.patient.get_assessment(
+    #     collection=collection,
+    #     set_id=scope.enums.AssessmentType.GAD7.value,
+    # )
+    # default_assessment_gad7.update(
+    #     {
+    #         "assigned": True,
+    #         # Preserve original assignedDateTime
+    #         "frequency": "Every 2 weeks",
+    #         "dayOfWeek": "Monday",
+    #     }
+    # )
+    # del default_assessment_gad7["_id"]
+    # scope.database.patient.put_assessment(
+    #     collection=collection,
+    #     set_id=scope.enums.AssessmentType.GAD7.value,
+    #     assessment=default_assessment_gad7,
+    # )
 
+    #
     # Default assignment of PHQ-9 assessment
-    default_assessment_phq9 = scope.database.patient.get_assessment(
-        collection=collection,
-        set_id=scope.enums.AssessmentType.PHQ9.value,
-    )
-    default_assessment_phq9.update(
-        {
-            "assigned": True,
-            # Preserve original assignedDateTime
-            "frequency": "Every 2 weeks",
-            "dayOfWeek": "Monday",
-        }
-    )
-    del default_assessment_phq9["_id"]
-    scope.database.patient.put_assessment(
-        collection=collection,
-        set_id=scope.enums.AssessmentType.PHQ9.value,
-        assessment=default_assessment_phq9,
-    )
+    # - Removed 4/2022 because no default is desired
+    #
+    # default_assessment_phq9 = scope.database.patient.get_assessment(
+    #     collection=collection,
+    #     set_id=scope.enums.AssessmentType.PHQ9.value,
+    # )
+    # default_assessment_phq9.update(
+    #     {
+    #         "assigned": True,
+    #         # Preserve original assignedDateTime
+    #         "frequency": "Every 2 weeks",
+    #         "dayOfWeek": "Monday",
+    #     }
+    # )
+    # del default_assessment_phq9["_id"]
+    # scope.database.patient.put_assessment(
+    #     collection=collection,
+    #     set_id=scope.enums.AssessmentType.PHQ9.value,
+    #     assessment=default_assessment_phq9,
+    # )
+
+    pass
