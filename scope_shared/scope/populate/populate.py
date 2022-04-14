@@ -16,7 +16,6 @@ import scope.populate.patient.rule_create_patient
 import scope.populate.patient.rule_populate_default_data
 import scope.populate.patient.rule_populate_generated_data
 import scope.populate.patient.rule_update_patient_identity_cognito_account
-import scope.populate.patient.populate_patient
 import scope.populate.provider.rule_create_provider
 import scope.populate.provider.rule_update_provider_identity_cognito_account
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule

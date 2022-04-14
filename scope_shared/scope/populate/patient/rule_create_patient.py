@@ -84,7 +84,7 @@ class _CreatePatientAction(PopulateAction):
         # but queue up the action and rely on rules to create the account first.
         if "account" in patient_config:
             actions = actions + [
-                scope.populate.patient.rule_update_identity_cognito_account.ACTION_NAME
+                scope.populate.patient.rule_update_patient_identity_cognito_account.ACTION_NAME
             ]
 
         # Store the updated actions
