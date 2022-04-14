@@ -366,10 +366,10 @@ export class PatientStore implements IPatientStore {
             ),
             primaryCareManager: patientProfile.primaryCareManager
                 ? {
-                      name: patientProfile.primaryCareManager?.name,
-                      providerId: patientProfile.primaryCareManager?.providerId,
-                      role: patientProfile.primaryCareManager?.role,
-                  }
+                    name: patientProfile.primaryCareManager?.name,
+                    providerId: patientProfile.primaryCareManager?.providerId,
+                    role: patientProfile.primaryCareManager?.role,
+                }
                 : undefined,
         });
 
@@ -439,6 +439,7 @@ export class PatientStore implements IPatientStore {
                 ...toJS(found),
                 assessmentId,
                 assigned: true,
+                assignedDateTime: new Date(),
                 frequency: found.frequency || 'Every 2 weeks',
                 dayOfWeek: found.dayOfWeek || 'Monday',
             });
