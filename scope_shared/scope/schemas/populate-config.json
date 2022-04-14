@@ -35,7 +35,7 @@
 										"reset_cognito_password",
 										"populate_default_data",
 										"populate_generated_data",
-										"update_identity_cognito_account_from_config"
+										"update_patient_identity_cognito_account"
 									]
 								}
 							}
@@ -70,7 +70,7 @@
 										"reset_cognito_password",
 										"populate_default_data",
 										"populate_generated_data",
-										"update_identity_cognito_account"
+										"update_patient_identity_cognito_account"
 									]
 								}
 							}
@@ -116,7 +116,7 @@
 									"type": "string",
 									"enum": [
 										"reset_cognito_password",
-										"update_identity_cognito_account"
+										"update_provider_identity_cognito_account"
 									]
 								}
 							}
@@ -149,7 +149,7 @@
 									"type": "string",
 									"enum": [
 										"reset_cognito_password",
-										"update_identity_cognito_account"
+										"update_provider_identity_cognito_account"
 									]
 								}
 							}

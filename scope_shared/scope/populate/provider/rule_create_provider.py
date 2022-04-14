@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import scope.enums
 import scope.database.providers
-import scope.populate.provider.update_identity_cognito_account
+import scope.populate.provider.rule_update_provider_identity_cognito_account
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.testing.fake_data.fixtures_fake_provider_identity
 
@@ -78,7 +78,7 @@ class _CreateProviderAction(PopulateAction):
         # but queue up the action and rely on rules to create the account first.
         if "account" in provider_config:
             actions = actions + [
-                scope.populate.provider.update_identity_cognito_account.ACTION_NAME
+                scope.populate.provider.rule_update_provider_identity_cognito_account.ACTION_NAME
             ]
 
         # Store the updated actions

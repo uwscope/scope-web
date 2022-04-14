@@ -15,8 +15,10 @@ import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.rule_create_patient
 import scope.populate.patient.rule_populate_default_data
 import scope.populate.patient.rule_populate_generated_data
+import scope.populate.patient.rule_update_patient_identity_cognito_account
 import scope.populate.patient.populate_patient
 import scope.populate.provider.rule_create_provider
+import scope.populate.provider.rule_update_provider_identity_cognito_account
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.schema
 import scope.schema_utils
@@ -203,10 +205,12 @@ def _populate_rules_create() -> List[PopulateRule]:
         # - These are in reverse order so creation will be depth-first.
         scope.populate.patient.rule_populate_generated_data.PopulateGeneratedData(),
         scope.populate.patient.rule_populate_default_data.PopulateDefaultData(),
+        scope.populate.patient.rule_update_patient_identity_cognito_account.UpdatePatientIdentityCognitoAccount(),
         scope.populate.patient.rule_create_patient.CreatePatient(),
         #
-        # Rule to create a provider
-        #
+        # Provider creation rules
+        # - These are in reverse order so creation will be depth-first.
+        scope.populate.provider.rule_update_provider_identity_cognito_account.UpdateProviderIdentityCognitoAccount(),
         scope.populate.provider.rule_create_provider.CreateProvider(),
     ]
 

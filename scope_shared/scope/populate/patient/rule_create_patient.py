@@ -4,7 +4,7 @@ from typing import List, Optional
 import scope.enums
 import scope.database.patients
 import scope.populate.patient.rule_populate_default_data
-import scope.populate.patient.update_identity_cognito_account
+import scope.populate.patient.rule_update_patient_identity_cognito_account
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 import scope.testing.fake_data.fixtures_fake_provider_identity
 
@@ -76,7 +76,7 @@ class _CreatePatientAction(PopulateAction):
 
         # All new patients require default data
         actions = actions + [
-            scope.populate.patient.populate_default_data.ACTION_NAME,
+            scope.populate.patient.rule_populate_default_data.ACTION_NAME,
         ]
 
         # New patients with an account must have identity updated for that account.
@@ -84,7 +84,7 @@ class _CreatePatientAction(PopulateAction):
         # but queue up the action and rely on rules to create the account first.
         if "account" in patient_config:
             actions = actions + [
-                scope.populate.patient.update_identity_cognito_account_from_config.ACTION_NAME
+                scope.populate.patient.rule_update_identity_cognito_account.ACTION_NAME
             ]
 
         # Store the updated actions
