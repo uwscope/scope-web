@@ -4,10 +4,13 @@ import faker as _faker
 import pymongo.database
 from typing import List, Optional
 
+import scope.config
+
 
 @dataclass(frozen=True)
 class PopulateContext:
     database: pymongo.database.Database
+    cognito_config: scope.config.CognitoClientConfig
     faker: _faker.Faker
 
 

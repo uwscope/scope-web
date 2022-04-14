@@ -21,7 +21,7 @@ class UpdateProviderIdentityCognitoAccount(PopulateRule):
         for provider_config_current in populate_config["providers"]["existing"]:
             actions = provider_config_current.get("actions", [])
             if ACTION_NAME in actions:
-                return _UpdateProviderIdentityCognitoAccount(
+                return _UpdateProviderIdentityCognitoAccountAction(
                     provider_id=provider_config_current["providerId"],
                     provider_name=provider_config_current["name"],
                 )
@@ -29,7 +29,7 @@ class UpdateProviderIdentityCognitoAccount(PopulateRule):
         return None
 
 
-class _UpdateProviderIdentityCognitoAccount(PopulateAction):
+class _UpdateProviderIdentityCognitoAccountAction(PopulateAction):
     provider_id: str
     provider_name: str
 

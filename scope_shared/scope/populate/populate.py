@@ -10,6 +10,7 @@ import shutil
 from typing import List, Optional
 
 import scope.config
+import scope.populate.cognito.rule_reset_cognito_password
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.rule_create_patient
@@ -211,6 +212,10 @@ def _populate_rules_create() -> List[PopulateRule]:
         # - These are in reverse order so creation will be depth-first.
         scope.populate.provider.rule_update_provider_identity_cognito_account.UpdateProviderIdentityCognitoAccount(),
         scope.populate.provider.rule_create_provider.CreateProvider(),
+        #
+        # Cognito rules
+        #
+        scope.populate.cognito.rule_reset_cognito_password.ResetCognitoPassword(),
     ]
 
 
@@ -257,6 +262,7 @@ def populate_from_dir(
     # Assemble populate_context
     populate_context = PopulateContext(
         database=database,
+        cognito_config=cognito_config,
         faker=faker,
     )
 

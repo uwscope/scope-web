@@ -21,7 +21,7 @@ class UpdatePatientIdentityCognitoAccount(PopulateRule):
         for patient_config_current in populate_config["patients"]["existing"]:
             actions = patient_config_current.get("actions", [])
             if ACTION_NAME in actions:
-                return _UpdatePatientIdentityCognitoAccount(
+                return _UpdatePatientIdentityCognitoAccountAction(
                     patient_id=patient_config_current["patientId"],
                     patient_name=patient_config_current["name"],
                 )
@@ -29,7 +29,7 @@ class UpdatePatientIdentityCognitoAccount(PopulateRule):
         return None
 
 
-class _UpdatePatientIdentityCognitoAccount(PopulateAction):
+class _UpdatePatientIdentityCognitoAccountAction(PopulateAction):
     patient_id: str
     patient_name: str
 
