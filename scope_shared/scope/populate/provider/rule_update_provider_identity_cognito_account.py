@@ -43,7 +43,12 @@ class _UpdateProviderIdentityCognitoAccount(PopulateAction):
         self.provider_name = provider_name
 
     def prompt(self) -> List[str]:
-        return ["Update provider identity cognito account for '{}' ({})".format(self.provider_name, self.provider_id)]
+        return [
+            "Update provider identity cognito account for '{}' ({})".format(
+                self.provider_name,
+                self.provider_id,
+            )
+        ]
 
     def perform(
         self,
@@ -96,14 +101,14 @@ def _update_provider_identity_cognito_account(
     if not trigger_update:
         # Trigger update if the cognitoId is incorrect
         trigger_update = (
-                provider_identity_document["cognitoAccount"].get("cognitoId", None)
-                != provider_config["account"]["existing"]["cognitoId"]
+            provider_identity_document["cognitoAccount"].get("cognitoId", None)
+            != provider_config["account"]["existing"]["cognitoId"]
         )
     if not trigger_update:
         # Trigger update if the email is incorrect
         trigger_update = (
-                provider_identity_document["cognitoAccount"].get("email", None)
-                != provider_config["account"]["existing"]["email"]
+            provider_identity_document["cognitoAccount"].get("email", None)
+            != provider_config["account"]["existing"]["email"]
         )
 
     # Perform the update if needed

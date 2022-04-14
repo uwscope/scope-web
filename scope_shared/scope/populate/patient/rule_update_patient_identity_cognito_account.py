@@ -43,7 +43,12 @@ class _UpdatePatientIdentityCognitoAccount(PopulateAction):
         self.patient_name = patient_name
 
     def prompt(self) -> List[str]:
-        return ["Update patient identity cognito account for '{}' ({})".format(self.patient_name, self.patient_id)]
+        return [
+            "Update patient identity cognito account for '{}' ({})".format(
+                self.patient_name,
+                self.patient_id,
+            )
+        ]
 
     def perform(
         self,

@@ -40,7 +40,12 @@ class _PopulateDefaultDataAction(PopulateAction):
         self.patient_name = patient_name
 
     def prompt(self) -> List[str]:
-        return ["Populate default data for patient '{}' ({})".format(self.patient_name, self.patient_id)]
+        return [
+            "Populate default data for patient '{}' ({})".format(
+                self.patient_name,
+                self.patient_id,
+            )
+        ]
 
     def perform(
         self,

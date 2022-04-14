@@ -68,7 +68,12 @@ class _PopulateGeneratedDataAction(PopulateAction):
         self.patient_name = patient_name
 
     def prompt(self) -> List[str]:
-        return ["Populate generated data for patient '{}' ({})".format(self.patient_name, self.patient_id)]
+        return [
+            "Populate generated data for patient '{}' ({})".format(
+                self.patient_name,
+                self.patient_id,
+            )
+        ]
 
     def perform(
         self,
