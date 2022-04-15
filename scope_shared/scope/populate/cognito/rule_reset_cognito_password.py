@@ -54,7 +54,7 @@ class _PatientResetCognitoPasswordAction(PopulateAction):
 
     def prompt(self) -> List[str]:
         return [
-            "Reset patient cognito password for '{}' ({})".format(
+            "Reset Cognito password for '{}' ({})".format(
                 self.patient_name,
                 self.patient_id,
             )
@@ -105,7 +105,7 @@ class _ProviderResetCognitoPasswordAction(PopulateAction):
 
     def prompt(self) -> List[str]:
         return [
-            "Reset provider cognito password for '{}' ({})".format(
+            "Reset Cognito password for '{}' ({})".format(
                 self.provider_name,
                 self.provider_id,
             )

@@ -44,7 +44,7 @@ class _UpdateProviderIdentityCognitoAccountAction(PopulateAction):
 
     def prompt(self) -> List[str]:
         return [
-            "Update provider identity cognito account for '{}' ({})".format(
+            "Update provider identity Cognito account for '{}' ({})".format(
                 self.provider_name,
                 self.provider_id,
             )

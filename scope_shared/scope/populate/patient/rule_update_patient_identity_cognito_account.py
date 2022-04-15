@@ -19,12 +19,21 @@ class UpdatePatientIdentityCognitoAccount(PopulateRule):
     ) -> Optional[PopulateAction]:
         # Search for any existing patient who has the desired action pending
         for patient_config_current in populate_config["patients"]["existing"]:
-            actions = patient_config_current.get("actions", [])
-            if ACTION_NAME in actions:
-                return _UpdatePatientIdentityCognitoAccountAction(
-                    patient_id=patient_config_current["patientId"],
-                    patient_name=patient_config_current["name"],
-                )
+            if "actions" not in patient_config_current:
+                continue
+            if ACTION_NAME not in patient_config_current["actions"]:
+                continue
+
+            # Must also have an existing account
+            if "account" not in patient_config_current:
+                continue
+            if "existing" not in patient_config_current["account"]:
+                continue
+
+            return _UpdatePatientIdentityCognitoAccountAction(
+                patient_id=patient_config_current["patientId"],
+                patient_name=patient_config_current["name"],
+            )
 
         return None
 
@@ -44,7 +53,7 @@ class _UpdatePatientIdentityCognitoAccountAction(PopulateAction):
 
     def prompt(self) -> List[str]:
         return [
-            "Update patient identity cognito account for '{}' ({})".format(
+            "Update patient identity Cognito account for '{}' ({})".format(
                 self.patient_name,
                 self.patient_id,
             )

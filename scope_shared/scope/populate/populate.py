@@ -10,6 +10,7 @@ import shutil
 from typing import List, Optional
 
 import scope.config
+import scope.populate.cognito.rule_create_cognito_account
 import scope.populate.cognito.rule_reset_cognito_password
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
@@ -201,6 +202,12 @@ def _populate_rules_create() -> List[PopulateRule]:
         scope.populate.fake.rule_expand_create_fake_patient.ExpandCreateFakePatient(),
         scope.populate.fake.rule_expand_create_fake_provider.ExpandCreateFakeProvider(),
         #
+        # Cognito rules
+        # - Placing before patient/provider creation allows those to proceed depth-first
+        #
+        scope.populate.cognito.rule_create_cognito_account.CreateCognitoAccount(),
+        scope.populate.cognito.rule_reset_cognito_password.ResetCognitoPassword(),
+        #
         # Patient creation rules
         # - These are in reverse order so creation will be depth-first.
         scope.populate.patient.rule_populate_generated_data.PopulateGeneratedData(),
@@ -212,10 +219,6 @@ def _populate_rules_create() -> List[PopulateRule]:
         # - These are in reverse order so creation will be depth-first.
         scope.populate.provider.rule_update_provider_identity_cognito_account.UpdateProviderIdentityCognitoAccount(),
         scope.populate.provider.rule_create_provider.CreateProvider(),
-        #
-        # Cognito rules
-        #
-        scope.populate.cognito.rule_reset_cognito_password.ResetCognitoPassword(),
     ]
 
 
