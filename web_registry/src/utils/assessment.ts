@@ -22,7 +22,7 @@ export const sortAssessmentIds = (a: string, b: string) => {
 };
 
 export const sortAssessmentContent = (a: IAssessmentContent, b: IAssessmentContent) => {
-    return getOrder(a.name) - getOrder(b.name);
+    return getOrder(a.id) - getOrder(b.id);
 };
 
 export const getAssessmentScoreFromAssessmentLog = (log: IAssessmentLog) => {
