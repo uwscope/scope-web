@@ -5,7 +5,7 @@ const _strings = {
 
     patient_detail_section_behavior_strategies_title: 'Behavioral Strategies',
     patient_detail_section_behavior_strategies_hash: 'behavioral',
-    patient_detail_subsection_values_inventory_title: 'Values Inventory',
+    patient_detail_subsection_values_inventory_title: 'Values & Activities Inventory',
     patient_detail_subsection_values_inventory_hash: 'values',
     patient_detail_subsection_checklist_title: 'Behavioral Activation',
     patient_detail_subsection_checklist_hash: 'checklist',
