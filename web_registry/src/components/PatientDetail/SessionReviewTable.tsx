@@ -1,11 +1,10 @@
 import { Grid } from '@mui/material';
-import withTheme from '@mui/styles/withTheme';
-import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
+import { GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import React, { FunctionComponent } from 'react';
 import { CaseReviewEntryType, SessionType } from 'shared/enums';
 import { formatDateOnly } from 'shared/time';
 import { ICaseReview, IReferralStatus, ISession, ISessionOrCaseReview, isSession, KeyedMap } from 'shared/types';
-import { Table } from 'src/components/common/Table';
+import { renderMultilineCell, Table } from 'src/components/common/Table';
 import styled from 'styled-components';
 
 const ColumnHeader = styled.div({
@@ -15,21 +14,7 @@ const ColumnHeader = styled.div({
     textAlign: 'center',
 });
 
-const MultilineCell = withTheme(
-    styled.div<{ score: number }>((props) => ({
-        whiteSpace: 'initial',
-        lineHeight: '1rem',
-        overflowY: 'auto',
-        height: '100%',
-        padding: props.theme.spacing(1, 0),
-    })),
-);
-
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
-
-const renderMultilineCell = (props: GridCellParams) => (
-    <MultilineCell score={props.value as number}>{props.value}</MultilineCell>
-);
 
 const NA = '--';
 
