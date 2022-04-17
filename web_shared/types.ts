@@ -79,6 +79,7 @@ export interface ICaseReview {
     date: Date;
     consultingPsychiatrist: IProviderIdentity;
 
+    billableMinutes: number;
     medicationChange: string;
     behavioralStrategyChange: string;
     referralsChange: string;

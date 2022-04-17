@@ -16,8 +16,6 @@ const ColumnHeader = styled.div({
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
-const NA = '--';
-
 interface ISessionTableData {
     id: string;
     date: string;
@@ -161,7 +159,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
         id: review.caseReviewId || '--',
         date: `${formatDateOnly(review.date, 'MM/dd/yy')}`,
         type: 'Case Review',
-        billableMinutes: NA,
+        billableMinutes: review.billableMinutes,
         flag: 'TBD',
         medications: review.medicationChange,
         behavioralStrategies: review.behavioralStrategyChange,
