@@ -49,8 +49,8 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             recordedDateTime: log.completed && log.recordedDateTime ? format(log.recordedDateTime, 'MM/dd/yyyy') : '--',
             completed: log.completed && log.success ? getCompleted(log.success) : '--',
             alternative: log.alternative || '--',
-            pleasure: log.completed ? log.pleasure : '--',
-            accomplishment: log.completed ? log.accomplishment : '--',
+            pleasure: log.completed && log.success != 'No' ? log.pleasure : '--',
+            accomplishment: log.completed && log.success != 'No' ? log.accomplishment : '--',
             comment: log.completed ? log.comment : '--',
         };
     });
