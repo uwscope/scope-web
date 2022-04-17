@@ -68,6 +68,7 @@ const getDefaultReview = () =>
     ({
         date: clearTime(new Date()),
         consultingPsychiatrist: { providerId: '', name: '' },
+        billableMinutes: 0,
         medicationChange: '',
         behavioralStrategyChange: '',
         referralsChange: '',
@@ -261,6 +262,12 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 value={review.consultingPsychiatrist.name}
                 options={availablePsychiatristNames}
                 onChange={(text) => onConsultingPsychiatristChange(`${text}`)}
+            />
+            <GridTextField
+                editable={true}
+                label="Billable Minutes"
+                value={review.billableMinutes}
+                onChange={(text) => onReviewValueChange('billableMinutes', Number.isNaN(Number(text)) ? 0 : text)}
             />
             <GridTextField
                 sm={12}
@@ -462,6 +469,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         } else if (entryType == 'Case Review') {
             const updatedReview = { ...review };
             updatedReview.date = toUTCDateOnly(review.date);
+            updatedReview.billableMinutes = Number(review.billableMinutes);
 
             if (isNew) {
                 await currentPatient.addCaseReview(updatedReview);
