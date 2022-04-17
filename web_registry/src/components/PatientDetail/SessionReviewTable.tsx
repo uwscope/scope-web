@@ -113,7 +113,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
         {
             field: 'otherRecommendations',
             headerName: 'Other Rec / Action Items',
-            width: 150,
+            width: 300,
             renderHeader,
             renderCell: renderMultilineCell,
             headerAlign: 'center',
