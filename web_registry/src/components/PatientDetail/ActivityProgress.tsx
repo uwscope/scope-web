@@ -7,7 +7,7 @@ import React, { FunctionComponent } from 'react';
 import { ActivitySuccessType } from 'shared/enums';
 import { IActivityLog } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
-import { Table } from 'src/components/common/Table';
+import { renderMultilineCell, Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
 import { usePatient } from 'src/stores/stores';
 
@@ -74,6 +74,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             field: 'name',
             headerName: getString('patient_progress_activity_header_activity'),
             width: 300,
+            renderCell: renderMultilineCell,
         },
         {
             field: 'completed',
@@ -88,6 +89,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             width: 200,
             sortable: false,
             hideSortIcons: false,
+            renderCell: renderMultilineCell,
         },
         {
             field: 'pleasure',
@@ -103,6 +105,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             field: 'comment',
             headerName: getString('patient_progress_activity_header_comment'),
             width: 200,
+            renderCell: renderMultilineCell,
         },
     ];
 
@@ -124,8 +127,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        headerHeight={28}
-                        rowHeight={24}
+                        headerHeight={36}
                         autoHeight={true}
                         isRowSelectable={() => false}
                         pagination
