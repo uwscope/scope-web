@@ -8,16 +8,10 @@ import { ActivitySuccessType } from 'shared/enums';
 import { IActivityLog } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
+import { WordBreakTableCell } from 'src/components/common/Table';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import styled from 'styled-components';
-
-export const ClickableTableRow = styled(TableRow)({
-    '&:hover': {
-        cursor: 'pointer',
-    },
-});
 
 export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const navigate = useNavigate();
@@ -105,8 +99,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <TableCell>{log.activityName}</TableCell>
-                                        <TableCell>{getSuccessStringShort(log.success)}</TableCell>
+                                        <WordBreakTableCell>{log.activityName}</WordBreakTableCell>
+                                        <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -122,41 +116,43 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_date')}
                                                 </TableCell>
-                                                <TableCell>{`${
+                                                <WordBreakTableCell>{`${
                                                     viewState.selectedLog?.recordedDateTime &&
                                                     format(
                                                         viewState.selectedLog.recordedDateTime,
                                                         'MM/dd/yyyy h:mm aaa',
                                                     )
-                                                }`}</TableCell>
+                                                }`}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_lifearea')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLifearea}</TableCell>
+                                                <WordBreakTableCell>{viewState.selectedLifearea}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_value')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedValue}</TableCell>
+                                                <WordBreakTableCell>{viewState.selectedValue}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_completed')}
                                                 </TableCell>
-                                                <TableCell>
+                                                <WordBreakTableCell>
                                                     {viewState.selectedLog &&
                                                         getSuccessString(viewState.selectedLog.success)}
-                                                </TableCell>
+                                                </WordBreakTableCell>
                                             </TableRow>
                                             {viewState.selectedLog.success != 'No' && (
                                                 <TableRow>
                                                     <TableCell component="th" scope="row">
                                                         {getString('Activity_tracking_column_pleasure')}
                                                     </TableCell>
-                                                    <TableCell>{viewState.selectedLog?.pleasure}</TableCell>
+                                                    <WordBreakTableCell>
+                                                        {viewState.selectedLog?.pleasure}
+                                                    </WordBreakTableCell>
                                                 </TableRow>
                                             )}
                                             {viewState.selectedLog.success != 'No' && (
@@ -164,14 +160,18 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                                     <TableCell component="th" scope="row">
                                                         {getString('Activity_tracking_column_accomplishment')}
                                                     </TableCell>
-                                                    <TableCell>{viewState.selectedLog?.accomplishment}</TableCell>
+                                                    <WordBreakTableCell>
+                                                        {viewState.selectedLog?.accomplishment}
+                                                    </WordBreakTableCell>
                                                 </TableRow>
                                             )}
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_comment')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                                <WordBreakTableCell>
+                                                    {viewState.selectedLog?.comment}
+                                                </WordBreakTableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>

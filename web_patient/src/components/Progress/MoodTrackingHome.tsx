@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router';
 import { IMoodLog } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
+import { WordBreakTableCell } from 'src/components/common/Table';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
@@ -63,8 +64,8 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <TableCell>{log.mood}</TableCell>
-                                        <TableCell>{log.comment}</TableCell>
+                                        <WordBreakTableCell>{log.mood}</WordBreakTableCell>
+                                        <WordBreakTableCell>{log.comment}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -80,25 +81,27 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                                                 <TableCell component="th" scope="row">
                                                     {getString('Mood_tracking_column_date')}
                                                 </TableCell>
-                                                <TableCell>{`${
+                                                <WordBreakTableCell>{`${
                                                     viewState.selectedLog?.recordedDateTime &&
                                                     format(
                                                         viewState.selectedLog.recordedDateTime,
                                                         'MM/dd/yyyy h:mm aaa',
                                                     )
-                                                }`}</TableCell>
+                                                }`}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Mood_tracking_column_mood')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLog?.mood}</TableCell>
+                                                <WordBreakTableCell>{viewState.selectedLog?.mood}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Mood_tracking_column_comment')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                                <WordBreakTableCell>
+                                                    {viewState.selectedLog?.comment}
+                                                </WordBreakTableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
