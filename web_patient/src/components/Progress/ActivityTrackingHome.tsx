@@ -145,6 +145,16 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                                         getSuccessString(viewState.selectedLog.success)}
                                                 </WordBreakTableCell>
                                             </TableRow>
+                                            {viewState.selectedLog.success == 'SomethingElse' && (
+                                                <TableRow>
+                                                    <TableCell component="th" scope="row">
+                                                        {getString('Activity_tracking_column_alternative')}
+                                                    </TableCell>
+                                                    <WordBreakTableCell>
+                                                        {viewState.selectedLog?.alternative}
+                                                    </WordBreakTableCell>
+                                                </TableRow>
+                                            )}
                                             {viewState.selectedLog.success != 'No' && (
                                                 <TableRow>
                                                     <TableCell component="th" scope="row">
