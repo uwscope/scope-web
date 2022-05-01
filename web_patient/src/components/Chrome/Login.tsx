@@ -230,7 +230,7 @@ const PasswordUpdateForm: FunctionComponent<{
                     }}
                 />
                 <TextField
-                    label="Password-retype"
+                    label="Retype password"
                     placeholder="Retype password"
                     type={showPassword ? 'text' : 'password'}
                     fullWidth
