@@ -146,6 +146,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = configureState;
+        assessment.assignedDateTime = new Date();
         var newAssessment = { ...assessment, frequency, dayOfWeek };
         currentPatient.updateAssessment(newAssessment);
         configureState.openConfigure = false;
