@@ -213,7 +213,7 @@ const _strings = {
     Form_submit_error_retry: 'Retry',
 
     Resources_safety_plan_title: 'Safety Plan',
-    Resources_safety_plan_subtitle: 'Emergency contacts and resources',
+    Resources_safety_plan_subtitle: 'Coping strategies and support to help during crisis or high distress',
     Resources_about_us_title: 'About Us',
     Resources_about_us_subtitle: 'Learn about the study',
     Resources_crisis_resources_title: 'Crisis Help',
