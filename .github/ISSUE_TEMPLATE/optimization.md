@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Need for Optimization**
-A clear and concise description of why is this optimziation needed.
+A clear and concise description of why is this optimization needed.
 
 **Describe Desired Optimization**
 A clear and concise description of what you want to happen.
