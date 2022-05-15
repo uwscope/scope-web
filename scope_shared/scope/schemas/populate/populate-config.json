@@ -1,0 +1,162 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/populate/populate-config",
+	"title": "PopulateConfig",
+	"type": "object",
+	"properties": {
+		"patients": {
+			"type": "object",
+			"properties": {
+				"create_fake_empty": {
+					"type": "number"
+				},
+				"create_fake_generated": {
+					"type": "number"
+				},
+				"create": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"MRN": {
+								"type": "string"
+							},
+							"account": {
+								"$ref": "/schemas/populate/utils/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"reset_cognito_password",
+										"populate_default_data",
+										"populate_generated_data",
+										"update_patient_identity_cognito_account"
+									]
+								}
+							}
+						},
+						"additionalProperties": false,
+						"required": ["name", "MRN"]
+					},
+					"minItems": 0
+				},
+				"existing": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"patientId": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"MRN": {
+								"type": "string"
+							},
+							"account": {
+								"$ref": "/schemas/populate/utils/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"reset_cognito_password",
+										"populate_default_data",
+										"populate_generated_data",
+										"update_patient_identity_cognito_account"
+									]
+								}
+							}
+						},
+						"additionalProperties": false,
+						"required": ["name", "MRN", "patientId"]
+					},
+					"minItems": 0
+				}
+			},
+			"additionalProperties": false,
+			"required": ["create", "existing"]
+		},
+		"providers": {
+			"type": "object",
+			"properties": {
+				"create_fake_psychiatrist": {
+					"type": "number"
+				},
+				"create_fake_social_worker": {
+					"type": "number"
+				},
+				"create_fake_study_staff": {
+					"type": "number"
+				},
+				"create": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"role": {
+								"$ref": "/schemas/utils/enums#/properties/providerRole"
+							},
+							"account": {
+								"$ref": "/schemas/populate/utils/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": ["reset_cognito_password", "update_provider_identity_cognito_account"]
+								}
+							}
+						},
+						"additionalProperties": false,
+						"required": ["name", "role"]
+					},
+					"minItems": 0
+				},
+				"existing": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"providerId": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"role": {
+								"$ref": "/schemas/utils/enums#/properties/providerRole"
+							},
+							"account": {
+								"$ref": "/schemas/populate/utils/populate-config-account"
+							},
+							"actions": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": ["reset_cognito_password", "update_provider_identity_cognito_account"]
+								}
+							}
+						},
+						"required": ["name", "providerId", "role"]
+					},
+					"minItems": 0
+				}
+			},
+			"additionalProperties": false,
+			"required": ["create", "existing"]
+		}
+	},
+	"additionalProperties": false,
+	"required": ["patients", "providers"]
+}

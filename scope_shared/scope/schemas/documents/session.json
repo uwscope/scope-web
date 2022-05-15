@@ -1,0 +1,76 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/session",
+	"title": "ISession",
+	"description": "ISession Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "session"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"sessionId": {
+			"type": "string"
+		},
+		"date": {
+			"$ref": "/schemas/utils/datetime#/properties/date"
+		},
+		"sessionType": {
+			"$ref": "/schemas/utils/enums#/properties/sessionType"
+		},
+		"billableMinutes": {
+			"type": "number"
+		},
+		"medicationChange": {
+			"type": "string"
+		},
+		"currentMedications": {
+			"type": "string"
+		},
+		"behavioralStrategyChecklist": {
+			"$ref": "/schemas/utils/enums#/properties/behavioralStrategyChecklistFlags"
+		},
+		"behavioralStrategyOther": {
+			"type": "string"
+		},
+		"behavioralActivationChecklist": {
+			"$ref": "/schemas/utils/enums#/properties/bAChecklistFlags"
+		},
+		"referrals": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/documents/utils/referral-status"
+			},
+			"minItems": 0
+		},
+		"otherRecommendations": {
+			"type": "string"
+		},
+		"sessionNote": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"_type",
+		"date",
+		"sessionType",
+		"billableMinutes",
+		"medicationChange",
+		"currentMedications",
+		"behavioralStrategyChecklist",
+		"behavioralStrategyOther",
+		"behavioralActivationChecklist",
+		"referrals",
+		"otherRecommendations",
+		"sessionNote"
+	]
+}

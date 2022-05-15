@@ -1,0 +1,58 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/case-review",
+	"title": "ICaseReview",
+	"description": "ICaseReview Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "caseReview"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"caseReviewId": {
+			"type": "string"
+		},
+		"date": {
+			"$ref": "/schemas/utils/datetime#/properties/date"
+		},
+		"consultingPsychiatrist": {
+			"type": "object",
+			"description": "IProviderIdentity schema",
+			"$ref": "/schemas/documents/provider-identity"
+		},
+		"medicationChange": {
+			"type": "string"
+		},
+		"behavioralStrategyChange": {
+			"type": "string"
+		},
+		"referralsChange": {
+			"type": "string"
+		},
+		"otherRecommendations": {
+			"type": "string"
+		},
+		"reviewNote": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"$comment": "consultingPsychiatrist is required. Removed it from the required list because identity fixture isn't clear yet.",
+	"required": [
+		"_type",
+		"date",
+		"medicationChange",
+		"behavioralStrategyChange",
+		"referralsChange",
+		"otherRecommendations",
+		"reviewNote"
+	]
+}

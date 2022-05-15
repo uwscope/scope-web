@@ -1,0 +1,23 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/api/app-content-config",
+	"title": "IAppContentConfig",
+	"description": "IAppContentConfig Type",
+	"type": "object",
+	"properties": {
+		"assessments": {
+			"$ref": "/schemas/config/assessment-contents"
+		},
+		"lifeAreas": {
+			"$ref": "/schemas/config/life-area-contents"
+		},
+		"patientresources": {
+			"$ref": "/schemas/config/resource-contents"
+		},
+		"registryresources": {
+			"$ref": "/schemas/config/resource-contents"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["assessments", "lifeAreas", "patientresources", "registryresources"]
+}

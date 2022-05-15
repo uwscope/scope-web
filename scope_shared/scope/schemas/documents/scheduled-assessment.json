@@ -1,0 +1,53 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/scheduled-assessment",
+	"title": "IScheduledAssessment",
+	"description": "IScheduledAssessment Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "scheduledAssessment"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"_deleted": {
+			"const": true
+		},
+		"scheduledAssessmentId": {
+			"type": "string"
+		},
+		"assessmentId": {
+			"type": "string"
+		},
+		"dueDate": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDate"
+		},
+		"dueTimeOfDay": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueTimeOfDay"
+		},
+		"dueDateTime": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDateTime"
+		},
+		"reminderDate": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDate"
+		},
+		"reminderTimeOfDay": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderTimeOfDay"
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDateTime"
+		},
+		"completed": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/completed"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "assessmentId", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
+}

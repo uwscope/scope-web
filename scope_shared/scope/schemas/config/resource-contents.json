@@ -1,0 +1,9 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/config/resource-contents",
+	"title": "IResourceContent[]",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/config/resource-content"
+	}
+}

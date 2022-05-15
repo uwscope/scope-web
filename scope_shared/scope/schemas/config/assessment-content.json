@@ -1,0 +1,54 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/config/assessment-content",
+	"title": "IAssessmentContent",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": { "type": "string" },
+		"instruction": { "type": "string" },
+		"questions": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"question": { "type": "string" },
+					"id": { "type": "string" }
+				},
+				"additionalProperties": false,
+				"required": ["question", "id"]
+			}
+		},
+		"options": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"text": { "type": "string" },
+					"value": { "type": "number" }
+				},
+				"additionalProperties": false,
+				"required": ["text", "value"]
+			}
+		},
+		"interpretationName": { "type": "string" },
+		"interpretationTable": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"score": { "type": "string" },
+					"max": { "type": "number" },
+					"interpretation": { "type": "string" }
+				},
+				"additionalProperties": false,
+				"required": ["score", "max", "interpretation"]
+			},
+			"minItems": 0
+		}
+	},
+	"additionalProperties": false,
+	"required": ["id", "name", "questions", "options"]
+}

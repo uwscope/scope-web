@@ -1,0 +1,36 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/config/life-area-content",
+	"title": "ILifeAreaContent",
+	"description": "ILifeAreaContent Type",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": { "type": "string" },
+		"examples": {
+			"$comment": "Is this subset of ILifeAreaValue[]?",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": { "type": "string" },
+					"activities": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": { "name": { "type": "string" } },
+							"additionalProperties": false,
+							"required": ["name"]
+						}
+					}
+				},
+				"additionalProperties": false,
+				"required": ["name", "activities"]
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["id", "name", "examples"]
+}

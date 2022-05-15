@@ -1,0 +1,56 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/scheduled-activity",
+	"title": "IScheduledActivity",
+	"description": "IScheduledActivity Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "scheduledActivity"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"_deleted": {
+			"const": true
+		},
+		"scheduledActivityId": {
+			"type": "string"
+		},
+		"activityId": {
+			"type": "string"
+		},
+		"activityName": {
+			"type": "string"
+		},
+		"dueDate": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDate"
+		},
+		"dueTimeOfDay": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueTimeOfDay"
+		},
+		"dueDateTime": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDateTime"
+		},
+		"reminderDate": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDate"
+		},
+		"reminderTimeOfDay": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderTimeOfDay"
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDateTime"
+		},
+		"completed": {
+			"$ref": "/schemas/documents/utils/scheduled-item#/properties/completed"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "activityId", "activityName", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
+}

@@ -1,0 +1,48 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/clinical-history",
+	"title": "IClinicalHistory",
+	"description": "IClinicalHistory Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "clinicalHistory"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"primaryCancerDiagnosis": {
+			"type": "string"
+		},
+		"dateOfCancerDiagnosis": {
+			"type": "string"
+		},
+		"currentTreatmentRegimen": {
+			"$ref": "/schemas/utils/enums#/properties/cancerTreatmentRegimenFlags"
+		},
+		"currentTreatmentRegimenOther": {
+			"type": "string"
+		},
+		"currentTreatmentRegimenNotes": {
+			"type": "string"
+		},
+		"psychDiagnosis": {
+			"type": "string"
+		},
+		"pastPsychHistory": {
+			"type": "string"
+		},
+		"pastSubstanceUse": {
+			"type": "string"
+		},
+		"psychSocialBackground": {
+			"type": "string"
+		}
+	},
+	"additionalProperties": false,
+	"$comment": "None of the fields are required.",
+	"required": ["_type"]
+}

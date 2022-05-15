@@ -1,0 +1,20 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/api/patient-summary",
+	"title": "IPatientConfig",
+	"description": "IPatientConfig Type",
+	"type": "object",
+	"properties": {
+		"assignedValuesInventory": {
+			"type": "boolean"
+		},
+		"assignedSafetyPlan": {
+			"type": "boolean"
+		},
+		"assignedScheduledAssessments": {
+			"$ref": "/schemas/documents/scheduled-assessments"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["assignedValuesInventory", "assignedSafetyPlan", "assignedScheduledAssessments"]
+}

@@ -1,0 +1,96 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/assessment",
+	"title": "IAssessment",
+	"description": "IAssessment Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "assessment"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"assessmentId": {
+			"type": "string",
+			"enum": ["gad-7", "medication", "mood", "phq-9"]
+		},
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"dayOfWeek": {
+			"$ref": "/schemas/utils/enums#/properties/dayOfWeek"
+		},
+		"frequency": {
+			"$ref": "/schemas/utils/enums#/properties/assessmentFrequency"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "_set_id", "assessmentId", "assigned", "assignedDateTime"],
+	"allOf": [
+		{
+			"$ref": "#/$defs/true-assigned-requires-dayOfWeek-and-frequency"
+		},
+		{
+			"$ref": "#/$defs/false-assigned-disallows-dayOfWeek"
+		},
+		{
+			"$ref": "#/$defs/false-assigned-disallows-frequency"
+		}
+	],
+	"$defs": {
+		"true-assigned-requires-dayOfWeek-and-frequency": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-true" }
+				},
+				{ "required": ["dayOfWeek", "frequency"] }
+			]
+		},
+		"false-assigned-disallows-dayOfWeek": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-false" }
+				},
+				{
+					"not": { "required": ["dayOfWeek"] }
+				}
+			]
+		},
+		"false-assigned-disallows-frequency": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/assigned-is-false" }
+				},
+				{
+					"not": { "required": ["frequency"] }
+				}
+			]
+		},
+		"assigned-is-true": {
+			"properties": {
+				"assigned": {
+					"const": true
+				}
+			},
+			"required": ["assigned"]
+		},
+		"assigned-is-false": {
+			"properties": {
+				"assigned": {
+					"const": false
+				}
+			},
+			"required": ["assigned"]
+		}
+	}
+}
