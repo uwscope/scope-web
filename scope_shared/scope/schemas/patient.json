@@ -47,7 +47,7 @@
 			"$ref": "/schemas/assessment-logs"
 		},
 		"activities": {
-			"$ref": "/schemas/activities"
+			"$ref": "/schemas/documents/activities"
 		},
 		"scheduledActivities": {
 			"$ref": "/schemas/scheduled-activities"

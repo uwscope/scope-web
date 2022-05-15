@@ -56,8 +56,8 @@ values_inventory_schema: Optional[jschon.JSONSchema] = None
 # Declare files from which to populate each schema
 SCHEMA_DIR_PATH = Path(Path(__file__).parent, "./schemas")
 SCHEMAS = {
-    "activity_schema": "activity.json",
-    "activities_schema": "activities.json",
+    "activity_schema": "documents/activity.json",
+    "activities_schema": "documents/activities.json",
     "activity_log_schema": "activity-log.json",
     "activity_logs_schema": "activity-logs.json",
     "app_config_schema": "app-config.json",
