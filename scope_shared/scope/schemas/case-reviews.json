@@ -1,9 +1,0 @@
-{
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://uwscope.org/schemas/case-reviews",
-	"title": "ICaseReview[]",
-	"type": "array",
-	"items": {
-		"$ref": "/schemas/case-review"
-	}
-}
