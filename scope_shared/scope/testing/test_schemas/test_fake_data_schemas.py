@@ -396,6 +396,12 @@ def test_fake_data_schema(
                 schema=config.schema,
             )
 
+            # Test against the document schema
+            schema_utils.assert_schema(
+                data=document_normalized,
+                schema=scope.schema.document_schema,
+            )
+
             # A document can have schema fields added or removed.
             # It should accept or reject those fields based on expectations.
 
