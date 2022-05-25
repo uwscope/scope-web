@@ -130,6 +130,7 @@ const _strings = {
     Activity_tracking_column_completed: 'Completed',
     Activity_tracking_column_lifearea: 'Life Area',
     Activity_tracking_column_value: 'Value',
+    Activity_tracking_column_alternative: 'Alternative',
     Activity_tracking_column_pleasure: 'Pleasure',
     Activity_tracking_column_accomplishment: 'Accomplishment',
     Activity_tracking_column_comment: 'Note',

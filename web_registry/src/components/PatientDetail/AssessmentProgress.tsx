@@ -17,7 +17,7 @@ import { AssessmentVis } from 'src/components/common/AssessmentVis';
 import { GridDropdownField } from 'src/components/common/GridField';
 import Questionnaire from 'src/components/common/Questionnaire';
 import StatefulDialog from 'src/components/common/StatefulDialog';
-import { Table } from 'src/components/common/Table';
+import { renderMultilineCell, Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
 import { usePatient, useStores } from 'src/stores/stores';
 import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
@@ -26,6 +26,10 @@ import styled from 'styled-components';
 const ScoreCell = withTheme(
     styled.div<{ score: number; assessmentId: string }>((props) => ({
         width: 'calc(100% + 16px)',
+        display: 'flex',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
         marginLeft: -8,
         marginRight: -8,
         textAlign: 'center',
@@ -38,6 +42,10 @@ const ScoreCell = withTheme(
 const SuicideCell = withTheme(
     styled.div<{ score: number }>((props) => ({
         width: 'calc(100% + 16px)',
+        display: 'flex',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
         textAlign: 'center',
         padding: props.theme.spacing(0.5),
         border: props.score > 0 ? `2px solid ${props.theme.customPalette.flagColors['safety']}` : 'none',
@@ -208,9 +216,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
     const recurrence =
         assessment.assigned && assessment.assignedDateTime
             ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-                assessment.assignedDateTime,
-                'MM/dd/yyyy',
-            )}`
+                  assessment.assignedDateTime,
+                  'MM/dd/yyyy',
+              )}`
             : 'Not assigned';
 
     const renderScoreCell = (props: GridCellParams) => (
@@ -243,14 +251,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         },
         ...questionIds.map(
             (q) =>
-            ({
-                field: q,
-                headerName: q,
-                width: 60,
-                align: 'center',
-                headerAlign: 'center',
-                renderCell: q == 'Suicide' ? renderSuicideCell : undefined,
-            } as GridColDef),
+                ({
+                    field: q,
+                    headerName: q,
+                    width: 60,
+                    align: 'center',
+                    headerAlign: 'center',
+                    renderCell: q == 'Suicide' ? renderSuicideCell : undefined,
+                } as GridColDef),
         ),
         {
             field: 'comment',
@@ -258,6 +266,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
             minWidth: 300,
             flex: 1,
             headerAlign: 'center',
+            renderCell: renderMultilineCell,
         },
     ];
 
@@ -296,23 +305,23 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                 .concat(
                     assessment.assigned
                         ? [
-                            {
-                                icon: <SettingsIcon />,
-                                text: getString('patient_progress_assessment_action_configure'),
-                                onClick: handleConfigure,
-                            } as IActionButton,
-                        ]
+                              {
+                                  icon: <SettingsIcon />,
+                                  text: getString('patient_progress_assessment_action_configure'),
+                                  onClick: handleConfigure,
+                              } as IActionButton,
+                          ]
                         : [],
                 )
                 .concat(
                     canAdd
                         ? [
-                            {
-                                icon: <AddIcon />,
-                                text: getString('patient_progress_assessment_action_add'),
-                                onClick: handleAddRecord,
-                            } as IActionButton,
-                        ]
+                              {
+                                  icon: <AddIcon />,
+                                  text: getString('patient_progress_assessment_action_add'),
+                                  onClick: handleAddRecord,
+                              } as IActionButton,
+                          ]
                         : [],
                 )}>
             <Grid container alignItems="stretch">
@@ -327,10 +336,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        headerHeight={28}
-                        rowHeight={24}
-                        onRowClick={onRowClick}
+                        headerHeight={36}
                         autoHeight={true}
+                        onRowClick={onRowClick}
                         isRowSelectable={() => false}
                         pagination
                     />
@@ -362,8 +370,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
                     logState.log.patientSubmitted
                         ? `Patient submitted ${assessmentName} record`
                         : !!logState.log.assessmentLogId
-                            ? `Edit ${assessmentName} record`
-                            : `Add ${assessmentName} record`
+                        ? `Edit ${assessmentName} record`
+                        : `Add ${assessmentName} record`
                 }
                 content={
                     <Questionnaire

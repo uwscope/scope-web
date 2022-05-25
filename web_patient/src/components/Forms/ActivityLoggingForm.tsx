@@ -180,7 +180,16 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
 
     const handleSubmit = action(async () => {
         try {
-            await patientStore.completeScheduledActivity({ ...dataState });
+            // Some cleaning up of the log data based on completion state
+            if (dataState.success == 'No') {
+                const { pleasure, accomplishment, ...logData } = dataState;
+                await patientStore.completeScheduledActivity({ ...logData });
+            } else if (dataState.success == 'Yes') {
+                const { alternative, ...logData } = dataState;
+                await patientStore.completeScheduledActivity({ ...logData });
+            } else {
+                await patientStore.completeScheduledActivity({ ...dataState });
+            }
             return !patientStore.loadActivityLogsState.error;
         } catch {
             return false;

@@ -1,6 +1,7 @@
 import { TableRow } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridCellParams } from '@mui/x-data-grid';
+import React from 'react';
 import styled from 'styled-components';
 
 export const ClickableTableRow = styled(TableRow)({
@@ -37,5 +38,17 @@ export const Table = withTheme(
             backgroundColor: 'rgba(0,0,0,0.05)',
             overflow: 'hidden',
         },
-    }))
+    })),
 );
+
+export const MultilineCell = withTheme(
+    styled.div((props) => ({
+        whiteSpace: 'initial',
+        lineHeight: '1rem',
+        overflowY: 'auto',
+        height: '100%',
+        padding: props.theme.spacing(1, 0),
+    })),
+);
+
+export const renderMultilineCell = (props: GridCellParams) => <MultilineCell>{props.value}</MultilineCell>;

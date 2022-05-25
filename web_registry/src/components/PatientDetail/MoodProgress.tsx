@@ -7,7 +7,7 @@ import React, { FunctionComponent } from 'react';
 import { IAssessment, IMoodLog } from 'shared/types';
 import ActionPanel from 'src/components/common/ActionPanel';
 import { AssessmentVis } from 'src/components/common/AssessmentVis';
-import { Table } from 'src/components/common/Table';
+import { renderMultilineCell, Table } from 'src/components/common/Table';
 import { getString } from 'src/services/strings';
 import { usePatient, useStores } from 'src/stores/stores';
 
@@ -70,6 +70,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer((pro
             flex: 1,
             align: 'left',
             headerAlign: 'center',
+            renderCell: renderMultilineCell,
         },
     ];
 
@@ -95,8 +96,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer((pro
                             disableColumnMenu: true,
                             ...c,
                         }))}
-                        headerHeight={28}
-                        rowHeight={24}
+                        headerHeight={36}
                         autoHeight={true}
                         isRowSelectable={() => false}
                         pagination
