@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router';
 import { IAssessmentLog } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
+import { WordBreakTableCell } from 'src/components/common/Table';
 import ProgressDialog from 'src/components/Progress/ProgressDialog';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
@@ -77,12 +78,12 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <TableCell>
+                                        <WordBreakTableCell>
                                             {log.totalScore != undefined && log.totalScore >= 0
                                                 ? log.totalScore
                                                 : getAssessmentScore(log.pointValues)}
-                                        </TableCell>
-                                        <TableCell>{log.comment}</TableCell>
+                                        </WordBreakTableCell>
+                                        <WordBreakTableCell>{log.comment}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -98,23 +99,23 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                                                 <TableCell component="th" scope="row">
                                                     {getString('Assessment_progress_column_date')}
                                                 </TableCell>
-                                                <TableCell>{`${
+                                                <WordBreakTableCell>{`${
                                                     viewState.selectedLog?.recordedDateTime &&
                                                     format(viewState.selectedLog.recordedDateTime, 'MM/dd')
-                                                }`}</TableCell>
+                                                }`}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Assessment_progress_column_total')}
                                                 </TableCell>
-                                                <TableCell>
+                                                <WordBreakTableCell>
                                                     {viewState.selectedLog?.totalScore != undefined &&
                                                     viewState.selectedLog?.totalScore >= 0
                                                         ? viewState?.selectedLog.totalScore
                                                         : !!viewState.selectedLog?.pointValues
                                                         ? getAssessmentScore(viewState.selectedLog?.pointValues)
                                                         : -1}
-                                                </TableCell>
+                                                </WordBreakTableCell>
                                             </TableRow>
                                             {viewState.selectedLog &&
                                                 viewState.selectedLog.pointValues &&
@@ -123,16 +124,18 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                                                         <TableCell component="th" scope="row">
                                                             {key}
                                                         </TableCell>
-                                                        <TableCell>
+                                                        <WordBreakTableCell>
                                                             {getValueString(viewState.selectedLog?.pointValues[key])}
-                                                        </TableCell>
+                                                        </WordBreakTableCell>
                                                     </TableRow>
                                                 ))}
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Assessment_progress_column_comment')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLog?.comment}</TableCell>
+                                                <WordBreakTableCell>
+                                                    {viewState.selectedLog?.comment}
+                                                </WordBreakTableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>

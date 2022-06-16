@@ -1,10 +1,12 @@
-import { Avatar, Button, FormControl, FormHelperText, TextField, Typography } from '@mui/material';
+import { Avatar, Button, FormControl, FormHelperText, InputAdornment, TextField, Typography } from '@mui/material';
 import { observer } from 'mobx-react';
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import { AuthState } from 'shared/authStoreBase';
 import Logo from 'src/assets/scope-logo.png';
 import { IAuthStore } from 'src/stores/AuthStore';
 import styled, { withTheme } from 'styled-components';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const Container = withTheme(
     styled.div((props) => ({
@@ -32,16 +34,21 @@ const LoginForm: FunctionComponent<{
     const { onLogin, error } = props;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = () => {
         onLogin && onLogin(email, password);
+    };
+
+    const togglePassword = () => {
+        setShowPassword(!showPassword);
     };
 
     const canLogin = !!email && !!password;
 
     return (
         <Fragment>
-            <Avatar alt="Scope logo" src={Logo} />
+            <Avatar alt="Scope logo" src={Logo} sx={{ width: 64, height: 64 }} variant="square" />
             <h2>Welcome!</h2>
             <FormControl error={!!error} fullWidth>
                 <TextField
@@ -65,11 +72,11 @@ const LoginForm: FunctionComponent<{
                 <TextField
                     label="Password"
                     placeholder="Enter password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     fullWidth
                     required
-                    margin="normal"
                     variant="standard"
+                    margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     InputLabelProps={{
@@ -79,6 +86,17 @@ const LoginForm: FunctionComponent<{
                         if (e.key === 'Enter' && canLogin) {
                             onSubmit();
                         }
+                    }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                {showPassword ? (
+                                    <VisibilityIcon sx={{ cursor: 'pointer' }} onClick={togglePassword} />
+                                ) : (
+                                    <VisibilityOffIcon sx={{ cursor: 'pointer' }} onClick={togglePassword} />
+                                )}
+                            </InputAdornment>
+                        ),
                     }}
                 />
                 {error && (
@@ -102,10 +120,18 @@ const PasswordUpdateForm: FunctionComponent<{
 }> = (props) => {
     const { onUpdate, error } = props;
     const [password, setPassword] = useState('');
+    const [passwordRepeat, setPasswordRepeat] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = () => {
         onUpdate && onUpdate(password);
     };
+
+    const togglePassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const canSubmit = !!password && password === passwordRepeat;
 
     return (
         <Fragment>
@@ -133,7 +159,7 @@ const PasswordUpdateForm: FunctionComponent<{
                 <TextField
                     label="Password"
                     placeholder="Enter password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     fullWidth
                     required
                     variant="standard"
@@ -143,11 +169,37 @@ const PasswordUpdateForm: FunctionComponent<{
                     InputLabelProps={{
                         shrink: true,
                     }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                {showPassword ? (
+                                    <VisibilityIcon sx={{ cursor: 'pointer' }} onClick={togglePassword} />
+                                ) : (
+                                    <VisibilityOffIcon sx={{ cursor: 'pointer' }} onClick={togglePassword} />
+                                )}
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TextField
+                    label="Password-retype"
+                    placeholder="Retype password"
+                    type="password"
+                    fullWidth
+                    required
+                    variant="standard"
+                    margin="normal"
+                    value={passwordRepeat}
+                    onChange={(e) => setPasswordRepeat(e.target.value)}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
                     onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !!password) {
+                        if (e.key === 'Enter' && canSubmit) {
                             onSubmit();
                         }
                     }}
+                    error={!canSubmit}
                 />
                 {error && (
                     <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
@@ -155,13 +207,7 @@ const PasswordUpdateForm: FunctionComponent<{
                     </FormHelperText>
                 )}
                 <ButtonContainer>
-                    <Button
-                        type="submit"
-                        color="primary"
-                        variant="contained"
-                        fullWidth
-                        onClick={onSubmit}
-                        disabled={!password}>
+                    <Button type="submit" color="primary" variant="contained" onClick={onSubmit} disabled={!canSubmit}>
                         Update password
                     </Button>
                 </ButtonContainer>
