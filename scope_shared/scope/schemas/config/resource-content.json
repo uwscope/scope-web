@@ -1,0 +1,32 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/config/resource-content",
+	"title": "IResourceContent",
+	"description": "IResourceContent Type",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"name": { "type": "string" },
+		"resources": {
+			"description": "IResourceItem[]",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false,
+				"required": ["name", "filename"]
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["id", "name", "resources"]
+}

@@ -1,0 +1,26 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/api/app-config",
+	"title": "IAppConfig",
+	"description": "IAppConfig Type",
+	"type": "object",
+	"properties": {
+		"auth": {
+			"type": "object",
+			"description": "IAppAuthConfig Type",
+			"properties": {
+				"poolid": {
+					"type": "string"
+				},
+				"clientid": {
+					"type": "string"
+				}
+			}
+		},
+		"content": {
+			"$ref": "/schemas/api/app-content-config"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["auth", "content"]
+}

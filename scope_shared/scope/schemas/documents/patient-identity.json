@@ -1,0 +1,48 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/patient-identity",
+	"title": "IPatientIdentity",
+	"description": "IPatientIdentity Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "patientIdentity"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"patientId": {
+			"type": "string"
+		},
+		"collection": {
+			"type": "string"
+		},
+		"MRN": {
+			"type": "string"
+		},
+		"name": {
+			"type": "string"
+		},
+		"cognitoAccount": {
+			"type": "object",
+			"properties": {
+				"cognitoId": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["cognitoId", "email"]
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "collection", "MRN", "name"]
+}

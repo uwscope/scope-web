@@ -1,0 +1,35 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/mood-log",
+	"title": "IMoodLog",
+	"description": "IMoodLog Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "moodLog"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"moodLogId": {
+			"type": "string"
+		},
+		"recordedDateTime": {
+			"$ref": "/schemas/documents/utils/log#/properties/recordedDateTime"
+		},
+		"comment": {
+			"$ref": "/schemas/documents/utils/log#/properties/comment"
+		},
+		"mood": {
+			"type": "number"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "recordedDateTime", "mood"]
+}

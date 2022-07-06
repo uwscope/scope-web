@@ -1,0 +1,41 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/populate/utils/populate-config-account",
+	"title": "PopulateConfigAccount",
+	"type": "object",
+	"properties": {
+		"create": {
+			"type": "object",
+			"properties": {
+				"accountName": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["accountName", "email"]
+		},
+		"existing": {
+			"type": "object",
+			"properties": {
+				"cognitoId": {
+					"type": "string"
+				},
+				"accountName": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				},
+				"temporaryPassword": {
+					"type": "string"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["accountName", "email"]
+		}
+	},
+	"additionalProperties": false
+}

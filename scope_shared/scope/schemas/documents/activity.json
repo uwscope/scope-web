@@ -1,0 +1,162 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/activity",
+	"title": "IActivity",
+	"description": "IActivity Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "activity"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"activityId": {
+			"type": "string"
+		},
+		"name": {
+			"type": "string"
+		},
+		"value": {
+			"type": "string"
+		},
+		"lifeareaId": {
+			"type": "string"
+		},
+		"startDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"timeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"hasReminder": {
+			"type": "boolean"
+		},
+		"reminderTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"hasRepetition": {
+			"type": "boolean"
+		},
+		"repeatDayFlags": {
+			"$ref": "/schemas/utils/enums#/properties/dayOfWeekFlags"
+		},
+		"isActive": {
+			"type": "boolean"
+		},
+		"isDeleted": {
+			"type": "boolean"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"_type",
+		"name",
+		"value",
+		"lifeareaId",
+		"startDateTime",
+		"timeOfDay",
+		"hasReminder",
+		"hasRepetition",
+		"isActive",
+		"isDeleted"
+	],
+	"allOf": [
+		{
+			"$ref": "#/$defs/true-hasReminder-requires-reminderTimeOfDay"
+		},
+		{
+			"$ref": "#/$defs/false-hasReminder-disallows-reminderTimeOfDay"
+		},
+		{
+			"$ref": "#/$defs/true-hasRepetition-requires-repeatDayFlags"
+		},
+		{
+			"$ref": "#/$defs/false-hasRepetition-disallows-repeatDayFlags"
+		}
+	],
+	"$defs": {
+		"true-hasReminder-requires-reminderTimeOfDay": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/hasReminder-is-true" }
+				},
+				{
+					"required": ["reminderTimeOfDay"]
+				}
+			]
+		},
+		"false-hasReminder-disallows-reminderTimeOfDay": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/hasReminder-is-false" }
+				},
+				{
+					"not": { "required": ["reminderTimeOfDay"] }
+				}
+			]
+		},
+		"true-hasRepetition-requires-repeatDayFlags": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/hasRepetition-is-true" }
+				},
+				{
+					"required": ["repeatDayFlags"]
+				}
+			]
+		},
+		"false-hasRepetition-disallows-repeatDayFlags": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/hasRepetition-is-false" }
+				},
+				{
+					"not": { "required": ["repeatDayFlags"] }
+				}
+			]
+		},
+		"hasReminder-is-true": {
+			"properties": {
+				"hasReminder": {
+					"const": true
+				}
+			},
+			"required": ["hasReminder"]
+		},
+		"hasReminder-is-false": {
+			"properties": {
+				"hasReminder": {
+					"const": false
+				}
+			},
+			"required": ["hasReminder"]
+		},
+		"hasRepetition-is-true": {
+			"properties": {
+				"hasRepetition": {
+					"const": true
+				}
+			},
+			"required": ["hasRepetition"]
+		},
+		"hasRepetition-is-false": {
+			"properties": {
+				"hasRepetition": {
+					"const": false
+				}
+			},
+			"required": ["hasRepetition"]
+		}
+	}
+}

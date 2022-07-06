@@ -1,0 +1,67 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/patient-profile",
+	"title": "IPatientProfile",
+	"description": "IPatientProfile Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "profile"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"name": {
+			"type": "string"
+		},
+		"MRN": {
+			"type": "string"
+		},
+		"clinicCode": {
+			"$ref": "/schemas/utils/enums#/properties/clinicCode"
+		},
+		"birthdate": {
+			"$ref": "/schemas/utils/datetime#/properties/date"
+		},
+		"sex": {
+			"$ref": "/schemas/utils/enums#/properties/sex"
+		},
+		"gender": {
+			"$ref": "/schemas/utils/enums#/properties/gender"
+		},
+		"pronoun": {
+			"$ref": "/schemas/utils/enums#/properties/pronoun"
+		},
+		"race": {
+			"$ref": "/schemas/utils/enums#/properties/race"
+		},
+		"ethnicity": {
+			"$ref": "/schemas/utils/enums#/properties/ethnicity"
+		},
+		"primaryOncologyProvider": {
+			"type": "string"
+		},
+		"primaryCareManager": {
+			"type": "object",
+			"description": "IProviderIdentity schema",
+			"$ref": "/schemas/documents/provider-identity"
+		},
+		"discussionFlag": {
+			"$ref": "/schemas/utils/enums#/properties/discussionFlags"
+		},
+		"followupSchedule": {
+			"$ref": "/schemas/utils/enums#/properties/followupSchedule"
+		},
+		"depressionTreatmentStatus": {
+			"$ref": "/schemas/utils/enums#/properties/depressionTreatmentStatus"
+		},
+		"site": {
+			"$ref": "/schemas/utils/enums#/properties/site"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "name", "MRN"]
+}

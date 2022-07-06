@@ -1,0 +1,64 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/api/patient",
+	"title": "IPatient",
+	"description": "Holds all the patient data",
+	"type": "object",
+	"properties": {
+		"_type": { "const": "patient" },
+		"identity": {
+			"type": "object",
+			"description": "IPatientIdentity schema",
+			"$ref": "/schemas/documents/patient-identity"
+		},
+		"profile": {
+			"type": "object",
+			"description": "IPatientProfile schema",
+			"$ref": "/schemas/documents/patient-profile"
+		},
+		"clinicalHistory": {
+			"type": "object",
+			"description": "IClinicalHistory schema",
+			"$ref": "/schemas/documents/clinical-history"
+		},
+		"valuesInventory": {
+			"type": "object",
+			"description": "IValuesInventory schema",
+			"$ref": "/schemas/documents/values-inventory"
+		},
+		"safetyPlan": {
+			"type": "object",
+			"description": "ISafetyPlan schema",
+			"$ref": "/schemas/documents/safety-plan"
+		},
+		"sessions": {
+			"$ref": "/schemas/documents/sessions"
+		},
+		"caseReviews": {
+			"$ref": "/schemas/documents/case-reviews"
+		},
+		"assessments": {
+			"$ref": "/schemas/documents/assessments"
+		},
+		"scheduledAssessments": {
+			"$ref": "/schemas/documents/scheduled-assessments"
+		},
+		"assessmentLogs": {
+			"$ref": "/schemas/documents/assessment-logs"
+		},
+		"activities": {
+			"$ref": "/schemas/documents/activities"
+		},
+		"scheduledActivities": {
+			"$ref": "/schemas/documents/scheduled-activities"
+		},
+		"activityLogs": {
+			"$ref": "/schemas/documents/activity-logs"
+		},
+		"moodLogs": {
+			"$ref": "/schemas/documents/mood-logs"
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "identity", "profile"]
+}

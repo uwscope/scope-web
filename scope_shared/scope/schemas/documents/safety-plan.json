@@ -1,0 +1,72 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/safety-plan",
+	"title": "ISafetyPlan",
+	"description": "ISafetyPlan Type",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"const": "safetyPlan"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"assigned": {
+			"type": "boolean"
+		},
+		"assignedDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"lastUpdatedDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"reasonsForLiving": {
+			"type": "string"
+		},
+		"warningSigns": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"copingStrategies": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"socialDistractions": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/documents/utils/contact"
+			}
+		},
+		"settingDistractions": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"supporters": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/documents/utils/contact"
+			}
+		},
+		"professionals": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/documents/utils/contact"
+			}
+		},
+		"urgentServices": {
+			"type": "array",
+			"items": {
+				"$ref": "/schemas/documents/utils/contact"
+			}
+		},
+		"safeEnvironment": {
+			"type": "array",
+			"items": { "type": "string" }
+		}
+	},
+	"additionalProperties": false,
+	"required": ["_type", "assigned", "assignedDateTime"]
+}

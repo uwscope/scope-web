@@ -1,0 +1,35 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/utils/scheduled-item",
+	"title": "IScheduledItem",
+	"description": "IScheduledItem Type",
+	"type": "object",
+	"properties": {
+		"dueDate": {
+			"$ref": "/schemas/utils/datetime#/properties/date"
+		},
+		"dueTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"dueDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"reminderDate": {
+			"$ref": "/schemas/utils/datetime#/properties/date"
+		},
+		"reminderTimeOfDay": {
+			"type": "number",
+			"minimum": 0,
+			"exclusiveMaximum": 24
+		},
+		"reminderDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"completed": {
+			"type": "boolean"
+		}
+	},
+	"required": ["dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
+}
