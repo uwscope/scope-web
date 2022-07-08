@@ -390,16 +390,16 @@ def test_fake_data_schema(
             # A document can be normalized
             document_normalized = document_utils.normalize_document(document=data)
 
-            # Test against the schema
-            schema_utils.assert_schema(
-                data=document_normalized,
-                schema=config.schema,
-            )
-
             # Test against the document schema
             schema_utils.assert_schema(
                 data=document_normalized,
                 schema=scope.schema.document_schema,
+            )
+
+            # Test against the provided schema
+            schema_utils.assert_schema(
+                data=document_normalized,
+                schema=config.schema,
             )
 
             # A document can have schema fields added or removed.
