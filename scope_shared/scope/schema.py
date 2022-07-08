@@ -20,6 +20,7 @@ case_review_schema: Optional[jschon.JSONSchema] = None
 case_reviews_schema: Optional[jschon.JSONSchema] = None
 clinical_history_schema: Optional[jschon.JSONSchema] = None
 contact_schema: Optional[jschon.JSONSchema] = None
+document_schema: Optional[jschon.JSONSchema] = None
 enums_schema: Optional[jschon.JSONSchema] = None
 life_area_content_schema: Optional[jschon.JSONSchema] = None
 life_area_contents_schema: Optional[jschon.JSONSchema] = None
@@ -117,6 +118,7 @@ SCHEMAS = {
     # Contains helper enums and regexes used by other json schemas
     "enums_schema": "utils/enums.json",
     "regexes": "utils/datetime.json",
+    "document_schema": "document.json",
 }
 
 
