@@ -145,7 +145,10 @@ while progress:
                 schema_json,
                 catalog=CATALOG,
             )
-        except:
+        except (
+            jschon.exceptions.CatalogError,
+            TypeError
+        ):
             # Schema construction failed, try again in the next generation
 
             # Although construction of the schema failed,
@@ -159,3 +162,21 @@ while progress:
 
             progress = True
             schemas_remaining.remove(schema_current)
+
+# If schemas remain, they failed to parse
+if len(schemas_remaining) > 0:
+    for schema_current in schemas_remaining:
+        schema_path = Path(SCHEMA_DIR_PATH, SCHEMAS[schema_current])
+        with open(schema_path, encoding="utf-8") as f:
+            schema_json = json.loads(f.read())
+
+        try:
+            schema = jschon.JSONSchema(
+                schema_json,
+                catalog=CATALOG,
+            )
+        except Exception as e:
+            print("Error in schema: {}".format(schema_path))
+            print(e)
+
+    raise ValueError("Invalid schema detected")
