@@ -4,6 +4,22 @@
 	"title": "PopulateConfig",
 	"type": "object",
 	"properties": {
+		"actions": {
+			"type": "array",
+			"items": {
+				"oneOf": [
+					{
+						"type": "object",
+						"properties": {
+							"action": {
+								"type": "string",
+								"const": "export_database"
+							}
+						}
+					}
+				]
+			}
+		},
 		"patients": {
 			"type": "object",
 			"properties": {
