@@ -18,6 +18,8 @@ setuptools.setup(
         "pyjwt",
         "pymongo",
         "pytz",
+        # pyzipper is used in populate scripts
+        "pyzipper",
         "requests",
         "ruamel.yaml",
         # jschon is active and < 1.0,
