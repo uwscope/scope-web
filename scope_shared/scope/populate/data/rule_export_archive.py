@@ -65,11 +65,17 @@ class _ExportDatabaseAction(PopulateAction):
         # Remove the action from the pending list
         populate_config["actions"].remove(action)
 
+        # Prompt for a password
+        password = input("Enter archive password: ")
+        password_confirm = input("Confirm archive password: ")
+        if password != password_confirm:
+            raise ValueError("Password mismatch.")
+
         # Perform the export
         _export_database(
             database=populate_context.database,
             archive=Path(action["archive"]),
-            password=action["password"],
+            password=password,
         )
 
         return populate_config
