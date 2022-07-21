@@ -1,16 +1,16 @@
 import json
 from pathlib import Path
 import pymongo.database
+import pyzipper
 from typing import List, Optional
-import zipfile
 
 import scope.database.document_utils as document_utils
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
-ACTION_NAME = "export_database"
+ACTION_NAME = "export_archive"
 
 
-class ExportDatabase(PopulateRule):
+class ExportArchive(PopulateRule):
     def match(
         self,
         *,
@@ -18,15 +18,28 @@ class ExportDatabase(PopulateRule):
         populate_config: dict,
     ) -> Optional[PopulateAction]:
         for action_current in populate_config["actions"]:
-            if action_current.get("action", None) == ACTION_NAME:
-                return _ExportDatabaseAction()
+            if action_current["action"] != ACTION_NAME:
+                continue
+
+            return _ExportDatabaseAction(
+                archive=action_current["archive"]
+            )
 
         return None
 
 
 class _ExportDatabaseAction(PopulateAction):
+    archive: str
+
+    def __init__(
+        self,
+        *,
+        archive: str,
+    ):
+        self.archive = archive
+
     def prompt(self) -> List[str]:
-        return ["Export database"]
+        return ["Export archive to {}".format(self.archive)]
 
     def perform(
         self,
@@ -35,14 +48,28 @@ class _ExportDatabaseAction(PopulateAction):
         populate_config: dict,
     ) -> dict:
         # Retrieve and remove our action
+        action = None
         for action_current in populate_config["actions"]:
-            if action_current.get("action", None) == ACTION_NAME:
-                populate_config["actions"].remove(action_current)
-                break
+            if action_current["action"] != ACTION_NAME:
+                continue
+            if action_current["archive"] != self.archive:
+                continue
+
+            action = action_current
+            break
+
+        # Confirm we found the action
+        if not action:
+            raise ValueError("populate_config was modified")
+
+        # Remove the action from the pending list
+        populate_config["actions"].remove(action)
 
         # Perform the export
         _export_database(
             database=populate_context.database,
+            archive=Path(action["archive"]),
+            password=action["password"],
         )
 
         return populate_config
@@ -51,13 +78,23 @@ class _ExportDatabaseAction(PopulateAction):
 def _export_database(
     *,
     database: pymongo.database.Database,
+    archive: Path,
+    password: str,
 ):
+    # Ensure archive directory exists
+    if archive.parent:
+        archive.parent.mkdir(parents=True, exist_ok=True)
+
     # The export is stored in a single zip file
-    with zipfile.ZipFile(
-        "export.zip",
+    with pyzipper.AESZipFile(
+        archive,
         mode="x",
-        compression=zipfile.ZIP_LZMA,
+        compression=pyzipper.ZIP_LZMA,
+        encryption=pyzipper.WZ_AES,
     ) as zipfile_export:
+        # Set the password
+        zipfile_export.setpassword(password.encode("utf-8"))
+
         # Each collection is stored as a directory
         collection_names = database.list_collection_names()
         for collection_name_current in collection_names:
@@ -75,6 +112,9 @@ def _export_database(
                 document_bytes = document_string.encode("utf-8")
 
                 zipfile_export.writestr(
-                    str(Path(collection_name_current, "{}.json".format(document_current["_id"]))),
+                    str(Path(
+                        collection_name_current,
+                        "{}.json".format(document_current["_id"])
+                    )),
                     data=document_bytes,
                 )

@@ -13,7 +13,13 @@
 						"properties": {
 							"action": {
 								"type": "string",
-								"const": "export_database"
+								"const": "export_archive"
+							},
+							"archive": {
+								"type": "string"
+							},
+							"password": {
+								"type": "string"
 							}
 						}
 					}
