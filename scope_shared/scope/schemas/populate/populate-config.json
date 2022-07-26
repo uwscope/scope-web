@@ -19,6 +19,18 @@
 								"type": "string"
 							}
 						}
+					},
+					{
+						"type": "object",
+						"properties": {
+							"action": {
+								"type": "string",
+								"const": "validate_archive"
+							},
+							"archive": {
+								"type": "string"
+							}
+						}
 					}
 				]
 			}
