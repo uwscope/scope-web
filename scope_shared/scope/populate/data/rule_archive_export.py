@@ -5,14 +5,12 @@ import pyzipper
 from typing import List, Optional
 
 import scope.database.document_utils as document_utils
-import scope.schema
-import scope.schema_utils
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
-ACTION_NAME = "validate_archive"
+ACTION_NAME = "archive_export"
 
 
-class ValidateArchive(PopulateRule):
+class ArchiveExport(PopulateRule):
     def match(
         self,
         *,
@@ -23,14 +21,14 @@ class ValidateArchive(PopulateRule):
             if action_current["action"] != ACTION_NAME:
                 continue
 
-            return _ValidateArchiveAction(
+            return _ArchiveExportAction(
                 archive=action_current["archive"]
             )
 
         return None
 
 
-class _ValidateArchiveAction(PopulateAction):
+class _ArchiveExportAction(PopulateAction):
     archive: str
 
     def __init__(
@@ -41,7 +39,7 @@ class _ValidateArchiveAction(PopulateAction):
         self.archive = archive
 
     def prompt(self) -> List[str]:
-        return ["Validate archive: {}".format(self.archive)]
+        return ["Export archive: {}".format(self.archive)]
 
     def perform(
         self,
@@ -65,17 +63,21 @@ class _ValidateArchiveAction(PopulateAction):
             raise ValueError("populate_config was modified")
 
         # Remove the action from the pending list
-        # populate_config["actions"].remove(action)
+        populate_config["actions"].remove(action)
 
         # Prompt for a password
         password = input("Enter archive password: ")
+        password_confirm = input("Confirm archive password: ")
+        if password != password_confirm:
+            raise ValueError("Password mismatch.")
 
-        # Ensure archive exists
-        if not Path(self.archive).exists():
+        # Ensure archive does not already exist
+        if Path(self.archive).exists():
             raise ValueError("Archive does not exist")
 
         # Perform the export
-        _validate_archive(
+        _archive_export(
+            database=populate_context.database,
             archive=Path(self.archive),
             password=password,
         )
@@ -83,33 +85,46 @@ class _ValidateArchiveAction(PopulateAction):
         return populate_config
 
 
-def _validate_archive(
+def _archive_export(
     *,
+    database: pymongo.database.Database,
     archive: Path,
     password: str,
 ):
+    # Ensure archive directory exists
+    if archive.parent:
+        archive.parent.mkdir(parents=True, exist_ok=True)
+
     # The export is stored in a single zip file
     with pyzipper.AESZipFile(
         archive,
-        mode="r",
+        mode="x",
         compression=pyzipper.ZIP_LZMA,
         encryption=pyzipper.WZ_AES,
-    ) as zipfile_validate:
+    ) as zipfile_export:
         # Set the password
-        zipfile_validate.setpassword(password.encode("utf-8"))
+        zipfile_export.setpassword(password.encode("utf-8"))
 
-        # Test the archive
-        if zipfile_validate.testzip():
-            raise ValueError("Invalid archive or password")
+        # Each collection is stored as a directory
+        collection_names = database.list_collection_names()
+        for collection_name_current in collection_names:
+            collection_current = database[collection_name_current]
 
-        # Each file is a document, validate each document
-        for info_current in zipfile_validate.infolist():
-            document_bytes = zipfile_validate.read(info_current)
-            document_string = document_bytes.decode("utf-8")
-            document_current = json.loads(document_string)
+            # Each document is stored as a file
+            for document_current in collection_current.find():
+                document_current = document_utils.normalize_document(
+                    document=document_current
+                )
+                document_string = json.dumps(
+                    document_current,
+                    indent=2,
+                )
+                document_bytes = document_string.encode("utf-8")
 
-            # Assert the document schema
-            scope.schema_utils.assert_schema(
-                data=document_current,
-                schema=scope.schema.document_schema,
-            )
+                zipfile_export.writestr(
+                    str(Path(
+                        collection_name_current,
+                        "{}.json".format(document_current["_id"])
+                    )),
+                    data=document_bytes,
+                )
