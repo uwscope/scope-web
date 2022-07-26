@@ -43,6 +43,9 @@
 			"$ref": "/schemas/documents/scheduled-assessment"
 		},
 		{
+			"$ref": "/schemas/documents/sentinel"
+		},
+		{
 			"$ref": "/schemas/documents/session"
 		},
 		{

@@ -49,6 +49,7 @@ scheduled_activities_schema: Optional[jschon.JSONSchema] = None
 scheduled_assessments_schema: Optional[jschon.JSONSchema] = None
 scheduled_assessment_schema: Optional[jschon.JSONSchema] = None
 scheduled_item_schema: Optional[jschon.JSONSchema] = None
+sentinel_schema: Optional[jschon.JSONSchema] = None
 session_schema: Optional[jschon.JSONSchema] = None
 sessions_schema: Optional[jschon.JSONSchema] = None
 values_inventory_schema: Optional[jschon.JSONSchema] = None
@@ -97,6 +98,7 @@ SCHEMAS = {
     "scheduled_activities_schema": "documents/scheduled-activities.json",
     "scheduled_assessments_schema": "documents/scheduled-assessments.json",
     "scheduled_assessment_schema": "documents/scheduled-assessment.json",
+    "sentinel_schema": "documents/sentinel.json",
     "session_schema": "documents/session.json",
     "sessions_schema": "documents/sessions.json",
     "values_inventory_schema": "documents/values-inventory.json",
