@@ -13,7 +13,19 @@
 						"properties": {
 							"action": {
 								"type": "string",
-								"const": "export_archive"
+								"const": "archive_export"
+							},
+							"archive": {
+								"type": "string"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"properties": {
+							"action": {
+								"type": "string",
+								"const": "archive_validate"
 							},
 							"archive": {
 								"type": "string"

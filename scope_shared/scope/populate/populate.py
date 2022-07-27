@@ -12,7 +12,8 @@ from typing import List, Optional
 import scope.config
 import scope.populate.cognito.rule_create_cognito_account
 import scope.populate.cognito.rule_reset_cognito_password
-import scope.populate.data.rule_export_archive
+import scope.populate.data.rule_archive_export
+import scope.populate.data.rule_archive_validate
 import scope.populate.fake.rule_expand_create_fake_patient
 import scope.populate.fake.rule_expand_create_fake_provider
 import scope.populate.patient.rule_create_patient
@@ -198,9 +199,10 @@ def _working_dir_path(
 def _populate_rules_create() -> List[PopulateRule]:
     return [
         #
-        # Database export
+        # Archive management
         #
-        scope.populate.data.rule_export_archive.ExportArchive(),
+        scope.populate.data.rule_archive_export.ArchiveExport(),
+        scope.populate.data.rule_archive_validate.ArchiveValidate(),
         #
         # Simple rules that expand fake patient and provider creation
         #

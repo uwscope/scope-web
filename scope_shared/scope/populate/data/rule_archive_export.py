@@ -7,10 +7,10 @@ from typing import List, Optional
 import scope.database.document_utils as document_utils
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
-ACTION_NAME = "export_archive"
+ACTION_NAME = "archive_export"
 
 
-class ExportArchive(PopulateRule):
+class ArchiveExport(PopulateRule):
     def match(
         self,
         *,
@@ -21,14 +21,14 @@ class ExportArchive(PopulateRule):
             if action_current["action"] != ACTION_NAME:
                 continue
 
-            return _ExportDatabaseAction(
-                archive=action_current["archive"]
+            return _ArchiveExportAction(
+                archive=action_current["archive"],
             )
 
         return None
 
 
-class _ExportDatabaseAction(PopulateAction):
+class _ArchiveExportAction(PopulateAction):
     archive: str
 
     def __init__(
@@ -39,7 +39,7 @@ class _ExportDatabaseAction(PopulateAction):
         self.archive = archive
 
     def prompt(self) -> List[str]:
-        return ["Export archive to {}".format(self.archive)]
+        return ["Export archive: {}".format(self.archive)]
 
     def perform(
         self,
@@ -71,17 +71,21 @@ class _ExportDatabaseAction(PopulateAction):
         if password != password_confirm:
             raise ValueError("Password mismatch.")
 
+        # Ensure archive does not already exist
+        if Path(self.archive).exists():
+            raise ValueError("Archive does not exist")
+
         # Perform the export
-        _export_database(
+        _archive_export(
             database=populate_context.database,
-            archive=Path(action["archive"]),
+            archive=Path(self.archive),
             password=password,
         )
 
         return populate_config
 
 
-def _export_database(
+def _archive_export(
     *,
     database: pymongo.database.Database,
     archive: Path,
@@ -118,9 +122,11 @@ def _export_database(
                 document_bytes = document_string.encode("utf-8")
 
                 zipfile_export.writestr(
-                    str(Path(
-                        collection_name_current,
-                        "{}.json".format(document_current["_id"])
-                    )),
+                    str(
+                        Path(
+                            collection_name_current,
+                            "{}.json".format(document_current["_id"]),
+                        )
+                    ),
                     data=document_bytes,
                 )
