@@ -149,7 +149,7 @@ while progress:
             )
         except (
             jschon.exceptions.CatalogError,
-            TypeError
+            TypeError,
         ):
             # Schema construction failed, try again in the next generation
 

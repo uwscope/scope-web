@@ -22,7 +22,7 @@ class ArchiveExport(PopulateRule):
                 continue
 
             return _ArchiveExportAction(
-                archive=action_current["archive"]
+                archive=action_current["archive"],
             )
 
         return None
@@ -122,9 +122,11 @@ def _archive_export(
                 document_bytes = document_string.encode("utf-8")
 
                 zipfile_export.writestr(
-                    str(Path(
-                        collection_name_current,
-                        "{}.json".format(document_current["_id"])
-                    )),
+                    str(
+                        Path(
+                            collection_name_current,
+                            "{}.json".format(document_current["_id"]),
+                        )
+                    ),
                     data=document_bytes,
                 )

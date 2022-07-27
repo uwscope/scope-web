@@ -22,7 +22,7 @@ class ArchiveValidate(PopulateRule):
                 continue
 
             return _ArchiveValidateAction(
-                archive=action_current["archive"]
+                archive=action_current["archive"],
             )
 
         return None
