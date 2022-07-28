@@ -123,7 +123,8 @@ def _maintain_pending_scheduled_assessments(
             )
 
             scope.database.patient.scheduled_assessments.post_scheduled_assessment(
-                collection=collection, scheduled_assessment=create_item_current
+                collection=collection,
+                scheduled_assessment=create_item_current,
             )
 
 
