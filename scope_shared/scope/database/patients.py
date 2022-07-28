@@ -173,33 +173,41 @@ def delete_patient(
 ):
     """
     Delete a patient identity and collection.
+    Delete any of an identity of a collection, in case database is in an incomplete state.
     """
 
     if not destructive:
         raise NotImplementedError()
 
-    patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
+    exists: bool = False
 
-    # Confirm the patient exists.
-    patient_identity_document = scope.database.collection_utils.get_set_element(
-        collection=patient_identity_collection,
-        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
-        set_id=patient_id,
-    )
-    if patient_identity_document is None:
-        return False
-
-    # Atomically delete the identity first, then delete all other traces of the patient.
-    scope.database.collection_utils.delete_set_element(
-        collection=patient_identity_collection,
-        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
-        set_id=patient_id,
-        destructive=destructive,
+    # If the patient identity exists, delete it.
+    patient_identity_document = get_patient_identity(
+        database=database,
+        patient_id=patient_id,
     )
 
-    database.drop_collection(patient_identity_document["collection"])
+    if patient_identity_document:
+        exists = True
+        scope.database.collection_utils.delete_set_element(
+            collection=database.get_collection(PATIENT_IDENTITY_COLLECTION),
+            document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
+            set_id=patient_id,
+            destructive=destructive,
+        )
 
-    return True
+    # If the patient collection exists, delete it.
+    if patient_identity_document:
+        patient_collection_name: str = patient_identity_document["collection"]
+    else:
+        patient_collection_name: str = _patient_collection_name(patient_id=patient_id)
+
+    if patient_collection_name in database.list_collection_names():
+        exists = True
+        database.drop_collection(name_or_collection=patient_collection_name)
+
+    return exists
+
 
 
 def get_patient_identity(
