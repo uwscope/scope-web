@@ -167,6 +167,13 @@ def put_assessment(
     Put "assessment" document.
     """
 
+    # Enforce the schema
+    schema_utils.raise_for_invalid_schema(
+        data=assessment,
+        schema=scope.schema.assessment_schema,
+    )
+
+    # Put the document
     assessment_set_put_result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,

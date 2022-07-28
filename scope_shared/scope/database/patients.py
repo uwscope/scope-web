@@ -75,10 +75,6 @@ def create_patient(
         "name": patient_name,
         "MRN": patient_mrn,
     }
-    schema_utils.raise_for_invalid_schema(
-        schema=scope.schema.patient_profile_schema,
-        data=patient_profile_document,
-    )
     result = scope.database.patient.patient_profile.put_patient_profile(
         database=database,
         collection=patient_collection,
@@ -92,10 +88,6 @@ def create_patient(
     clinical_history_document = {
         "_type": scope.database.patient.clinical_history.DOCUMENT_TYPE,
     }
-    schema_utils.raise_for_invalid_schema(
-        schema=scope.schema.clinical_history_schema,
-        data=clinical_history_document,
-    )
     result = scope.database.patient.clinical_history.put_clinical_history(
         collection=patient_collection,
         clinical_history=clinical_history_document,
@@ -114,10 +106,6 @@ def create_patient(
         "assigned": False,
         "assignedDateTime": datetime_assigned,
     }
-    schema_utils.raise_for_invalid_schema(
-        schema=scope.schema.safety_plan_schema,
-        data=safety_plan_document,
-    )
     result = scope.database.patient.safety_plan.put_safety_plan(
         collection=patient_collection,
         safety_plan=safety_plan_document,
@@ -131,10 +119,6 @@ def create_patient(
         "assigned": False,
         "assignedDateTime": datetime_assigned,
     }
-    schema_utils.raise_for_invalid_schema(
-        schema=scope.schema.values_inventory_schema,
-        data=values_inventory_document,
-    )
     result = scope.database.patient.values_inventory.put_values_inventory(
         collection=patient_collection,
         values_inventory=values_inventory_document,
@@ -155,10 +139,6 @@ def create_patient(
             "assigned": False,
             "assignedDateTime": datetime_assigned,
         }
-        schema_utils.raise_for_invalid_schema(
-            data=assessment_document,
-            schema=scope.schema.assessment_schema,
-        )
         result = scope.database.patient.assessments.put_assessment(
             collection=patient_collection,
             set_id=assessment_current,
@@ -173,17 +153,13 @@ def create_patient(
         "MRN": patient_mrn,
         "collection": generated_patient_collection_name,
     }
-    schema_utils.raise_for_invalid_schema(
-        schema=scope.schema.patient_identity_schema,
-        data=patient_identity_document,
+    result = put_patient_identity(
+        database=database,
+        patient_id=patient_id,
+        patient_identity=patient_identity_document,
     )
-    result = scope.database.collection_utils.put_set_element(
-        collection=patient_identity_collection,
-        document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
-        semantic_set_id=PATIENT_IDENTITY_SEMANTIC_SET_ID,
-        set_id=patient_id,
-        document=patient_identity_document,
-    )
+
+    # Return the created patient identity
     patient_identity_document = result.document
 
     return patient_identity_document
@@ -254,6 +230,13 @@ def put_patient_identity(
     Put a patient identity document.
     """
 
+    # Enforce the schema
+    schema_utils.raise_for_invalid_schema(
+        schema=scope.schema.patient_identity_schema,
+        data=patient_identity,
+    )
+
+    # Put the document
     patient_identity_collection = database.get_collection(PATIENT_IDENTITY_COLLECTION)
 
     return scope.database.collection_utils.put_set_element(

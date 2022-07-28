@@ -4,6 +4,8 @@ from typing import Optional
 import pymongo.database
 import scope.database.collection_utils
 import scope.database.patients
+import scope.schema
+import scope.schema_utils as schema_utils
 
 DOCUMENT_TYPE = "profile"
 
@@ -25,6 +27,13 @@ def put_patient_profile(
     patient_id: str,
     patient_profile: dict,
 ) -> scope.database.collection_utils.PutResult:
+    # Enforce the schema
+    schema_utils.raise_for_invalid_schema(
+        schema=scope.schema.patient_profile_schema,
+        data=patient_profile,
+    )
+
+    # Put the document
     result = scope.database.collection_utils.put_singleton(
         collection=collection,
         document_type=DOCUMENT_TYPE,
