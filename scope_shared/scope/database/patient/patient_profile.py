@@ -42,13 +42,16 @@ def put_patient_profile(
 
     # Determine whether we need to also maintain the patient identity
     if result.inserted_count:
+        # If a patient identity already exists,
+        # it must be maintained to match the profile.
+        # If no patient identity exists yet,
+        # (e.g., if this profile is put in the midst of patient creation),
+        # then a patient identity will not yet exist to be maintained.
         patient_identity = scope.database.patients.get_patient_identity(
             database=database,
             patient_id=patient_id,
         )
 
-        # If this profile is being put in the midst of patient creation,
-        # then a patient identity will not yet exist to be maintained.
         if patient_identity:
             updated_identity = copy.deepcopy(patient_identity)
             updated_identity["MRN"] = result.document["MRN"]
