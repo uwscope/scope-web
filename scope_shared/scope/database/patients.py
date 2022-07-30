@@ -47,7 +47,9 @@ def create_patient(
         raise ValueError('Patient identity "{}" already exists'.format(patient_id))
     if generated_patient_collection_name in database.list_collection_names():
         raise ValueError(
-            'Patient collection "{}" already exists'.format(generated_patient_collection_name)
+            'Patient collection "{}" already exists'.format(
+                generated_patient_collection_name
+            )
         )
 
     # Create the patient collection
@@ -175,8 +177,10 @@ def ensure_patient_documents(
     )
 
     # Minimal patient profile
-    patient_profile_document = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection,
+    patient_profile_document = (
+        scope.database.patient.patient_profile.get_patient_profile(
+            collection=patient_collection,
+        )
     )
     if patient_profile_document is None:
         patient_profile_document = {
@@ -192,8 +196,10 @@ def ensure_patient_documents(
         )
 
     # Minimal clinical history
-    clinical_history_document = scope.database.patient.clinical_history.get_clinical_history(
-        collection=patient_collection,
+    clinical_history_document = (
+        scope.database.patient.clinical_history.get_clinical_history(
+            collection=patient_collection,
+        )
     )
     if clinical_history_document is None:
         clinical_history_document = {
@@ -220,8 +226,10 @@ def ensure_patient_documents(
         )
 
     # Minimal values inventory
-    values_inventory_document = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection,
+    values_inventory_document = (
+        scope.database.patient.values_inventory.get_values_inventory(
+            collection=patient_collection,
+        )
     )
     if values_inventory_document is None:
         values_inventory_document = {

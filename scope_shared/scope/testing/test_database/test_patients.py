@@ -89,7 +89,9 @@ def test_patient_ensure_collection_delete(
     """
 
     patient_id = "invalid"
-    patient_collection_name = scope.database.patients._patient_collection_name(patient_id=patient_id)
+    patient_collection_name = scope.database.patients._patient_collection_name(
+        patient_id=patient_id
+    )
 
     # Confirm the collection does not already exist
     assert patient_collection_name not in database_client.list_collection_names()
@@ -162,12 +164,14 @@ def test_patient_ensure_reentrant(
 
             # Create the patient identity document.
             for _ in range(3):
-                patient_identity_document = scope.database.patients.ensure_patient_identity(
-                    database=database_client,
-                    patient_collection=patient_collection,
-                    patient_id=patient_id,
-                    patient_name=patient_name,
-                    patient_mrn=patient_mrn,
+                patient_identity_document = (
+                    scope.database.patients.ensure_patient_identity(
+                        database=database_client,
+                        patient_collection=patient_collection,
+                        patient_id=patient_id,
+                        patient_name=patient_name,
+                        patient_mrn=patient_mrn,
+                    )
                 )
     finally:
         # Delete patient
