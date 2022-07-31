@@ -3,6 +3,7 @@ from pathlib import Path
 import pyzipper
 from typing import List, Optional
 
+import scope.populate.data.archive
 import scope.schema
 import scope.schema_utils
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
@@ -74,7 +75,7 @@ class _ArchiveValidateAction(PopulateAction):
 
         # Perform the export
         _archive_validate(
-            archive=Path(self.archive),
+            archive_path=Path(self.archive),
             password=password,
         )
 
@@ -83,29 +84,15 @@ class _ArchiveValidateAction(PopulateAction):
 
 def _archive_validate(
     *,
-    archive: Path,
+    archive_path: Path,
     password: str,
 ):
-    # The export is stored in a single zip file
-    with pyzipper.AESZipFile(
-        archive,
-        mode="r",
-        compression=pyzipper.ZIP_LZMA,
-        encryption=pyzipper.WZ_AES,
-    ) as zipfile_validate:
-        # Set the password
-        zipfile_validate.setpassword(password.encode("utf-8"))
-
-        # Test the archive
-        if zipfile_validate.testzip():
-            raise ValueError("Invalid archive or password")
-
-        # Each file is a document, validate each document
-        for info_current in zipfile_validate.infolist():
-            document_bytes = zipfile_validate.read(info_current)
-            document_string = document_bytes.decode("utf-8")
-            document_current = json.loads(document_string)
-
+    with scope.populate.data.archive.Archive(
+        archive_path=archive_path,
+        password=password,
+    ) as archive:
+        # Verify every document matches the document schema
+        for document_current in archive.documents.values():
             # Assert the document schema
             scope.schema_utils.assert_schema(
                 data=document_current,

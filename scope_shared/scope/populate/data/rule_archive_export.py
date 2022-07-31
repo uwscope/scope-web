@@ -78,7 +78,7 @@ class _ArchiveExportAction(PopulateAction):
         # Perform the export
         _archive_export(
             database=populate_context.database,
-            archive=Path(self.archive),
+            archive_path=Path(self.archive),
             password=password,
         )
 
@@ -88,16 +88,16 @@ class _ArchiveExportAction(PopulateAction):
 def _archive_export(
     *,
     database: pymongo.database.Database,
-    archive: Path,
+    archive_path: Path,
     password: str,
 ):
     # Ensure archive directory exists
-    if archive.parent:
-        archive.parent.mkdir(parents=True, exist_ok=True)
+    if archive_path.parent:
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
 
     # The export is stored in a single zip file
     with pyzipper.AESZipFile(
-        archive,
+        archive_path,
         mode="x",
         compression=pyzipper.ZIP_LZMA,
         encryption=pyzipper.WZ_AES,
