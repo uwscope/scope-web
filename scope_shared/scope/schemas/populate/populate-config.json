@@ -25,6 +25,18 @@
 						"properties": {
 							"action": {
 								"type": "string",
+								"const": "archive_restore"
+							},
+							"archive": {
+								"type": "string"
+							}
+						}
+					},
+					{
+						"type": "object",
+						"properties": {
+							"action": {
+								"type": "string",
 								"const": "archive_validate"
 							},
 							"archive": {
