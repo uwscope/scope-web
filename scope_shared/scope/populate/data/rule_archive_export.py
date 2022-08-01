@@ -65,15 +65,15 @@ class _ArchiveExportAction(PopulateAction):
         # Remove the action from the pending list
         populate_config["actions"].remove(action)
 
+        # Ensure archive does not already exist
+        if Path(self.archive).exists():
+            raise ValueError("Archive already exists")
+
         # Prompt for a password
         password = input("Enter archive password: ")
         password_confirm = input("Confirm archive password: ")
         if password != password_confirm:
             raise ValueError("Password mismatch.")
-
-        # Ensure archive does not already exist
-        if Path(self.archive).exists():
-            raise ValueError("Archive does not exist")
 
         # Perform the export
         _archive_export(

@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-import pyzipper
 from typing import List, Optional
 
 import scope.populate.data.archive
@@ -66,12 +65,12 @@ class _ArchiveValidateAction(PopulateAction):
         # Remove the action from the pending list
         populate_config["actions"].remove(action)
 
-        # Prompt for a password
-        password = input("Enter archive password: ")
-
         # Ensure archive exists
         if not Path(self.archive).exists():
             raise ValueError("Archive does not exist")
+
+        # Prompt for a password
+        password = input("Enter archive password: ")
 
         # Perform the export
         _archive_validate(
