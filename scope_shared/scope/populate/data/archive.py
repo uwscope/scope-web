@@ -64,9 +64,8 @@ class Archive(contextlib.AbstractContextManager):
         for (group_key_current, group_current) in grouped_documents.items():
             document_most_recent = None
             for document_current in group_current:
-                if (
-                        (document_most_recent is None) or
-                        (document_current["_rev"] > document_most_recent["_rev"])
+                if (document_most_recent is None) or (
+                    document_current["_rev"] > document_most_recent["_rev"]
                 ):
                     document_most_recent = document_current
 
@@ -90,9 +89,8 @@ class Archive(contextlib.AbstractContextManager):
             key_most_recent = None
             document_most_recent = None
             for (key_current, document_current) in group_current.entries():
-                if (
-                        (document_most_recent is None) or
-                        (document_current["_rev"] > document_most_recent["_rev"])
+                if (document_most_recent is None) or (
+                    document_current["_rev"] > document_most_recent["_rev"]
                 ):
                     key_most_recent = key_current
                     document_most_recent = document_current
@@ -133,8 +131,7 @@ class Archive(contextlib.AbstractContextManager):
         for (key_current, document_current) in self.entries.items():
             parents_current = [
                 str(parent_current)
-                for parent_current
-                in key_current.parents
+                for parent_current in key_current.parents
                 if str(parent_current) not in ["."]
             ]
 
@@ -145,8 +142,7 @@ class Archive(contextlib.AbstractContextManager):
         if ignore_sentinel:
             collection_entries = {
                 key_current: document_current
-                for (key_current, document_current)
-                in collection_entries.items()
+                for (key_current, document_current) in collection_entries.items()
                 if document_current["_type"] != "sentinel"
             }
 
@@ -175,8 +171,8 @@ class Archive(contextlib.AbstractContextManager):
 
     @staticmethod
     def group_document_revisions(
-            *,
-            documents: List[dict],
+        *,
+        documents: List[dict],
     ) -> Dict[Union[Tuple[str], Tuple[str, str]], List[dict]]:
         """
         Group documents according to a tuple created from
@@ -186,9 +182,12 @@ class Archive(contextlib.AbstractContextManager):
         grouped_documents: Dict[Union[Tuple[str], Tuple[str, str]], List[dict]] = {}
         for document_current in documents:
             # Singletons have only a _type, while set elements also have a _set_id
-            group_key_current = (document_current["_type"])
+            group_key_current = document_current["_type"]
             if "_set_id" in document_current:
-                group_key_current = (document_current["_type"], document_current["_set_id"])
+                group_key_current = (
+                    document_current["_type"],
+                    document_current["_set_id"],
+                )
 
             # Ensure we have a group for this key
             if group_key_current not in grouped_documents:
@@ -212,9 +211,12 @@ class Archive(contextlib.AbstractContextManager):
         grouped_entries: Dict[Union[Tuple[str], Tuple[str, str]], Dict[Path, dict]] = {}
         for (key_current, document_current) in entries.items():
             # Singletons have only a _type, while set elements also have a _set_id
-            group_key_current = (document_current["_type"])
+            group_key_current = document_current["_type"]
             if "_set_id" in document_current:
-                group_key_current = (document_current["_type"], document_current["_set_id"])
+                group_key_current = (
+                    document_current["_type"],
+                    document_current["_set_id"],
+                )
 
             # Ensure we have a group for this key
             if group_key_current not in grouped_entries:

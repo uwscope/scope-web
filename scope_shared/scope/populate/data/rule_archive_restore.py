@@ -162,7 +162,7 @@ def _archive_restore(
             _collection_restore(
                 collection=patient_collection,
                 restore_documents=restore_patient_current_documents,
-                delete_existing_sentinel=True
+                delete_existing_sentinel=True,
             )
 
             # Ensure minimal documents.
@@ -172,7 +172,7 @@ def _archive_restore(
                 patient_collection=patient_collection,
                 patient_id=patient_id,
                 patient_name=patient_name,
-                patient_mrn=patient_mrn
+                patient_mrn=patient_mrn,
             )
 
             # Ensure a patient identity documents.
@@ -182,7 +182,7 @@ def _archive_restore(
                 patient_collection=patient_collection,
                 patient_id=patient_id,
                 patient_name=patient_name,
-                patient_mrn=patient_mrn
+                patient_mrn=patient_mrn,
             )
 
 
@@ -195,11 +195,15 @@ def _collection_restore(
     if delete_existing_sentinel:
         result = collection.delete_one(
             filter={
-                "_type": "sentinel"
+                "_type": "sentinel",
             }
         )
         if result.deleted_count != 1:
-            raise RuntimeError("Failed to delete existing sentinel in collection: {}".format(collection.name))
+            raise RuntimeError(
+                "Failed to delete existing sentinel in collection: {}".format(
+                    collection.name
+                )
+            )
 
     result = collection.insert_many(
         documents=restore_documents,
