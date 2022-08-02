@@ -90,10 +90,12 @@ def _archive_validate(
         archive_path=archive_path,
         password=password,
     ) as archive:
-        # Verify every document matches the document schema
-        for document_current in archive.documents.values():
+        # Validate every document matches the document schema
+        for document_current in archive.entries.values():
             # Assert the document schema
             scope.schema_utils.assert_schema(
                 data=document_current,
                 schema=scope.schema.document_schema,
             )
+
+        # TODO: A more complete validation, shared with rule_archive_restore

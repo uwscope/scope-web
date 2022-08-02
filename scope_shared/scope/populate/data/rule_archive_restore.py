@@ -94,8 +94,9 @@ def _archive_restore(
         archive_path=archive_path,
         password=password,
     ) as archive:
-        # Verify every document matches the document schema
-        for document_current in archive.documents.values():
+        # Validate every document matches the document schema
+        # TODO: A more complete validation, shared with rule_archive_validate
+        for document_current in archive.entries.values():
             # Assert the document schema
             scope.schema_utils.assert_schema(
                 data=document_current,
@@ -109,59 +110,41 @@ def _archive_restore(
         restore_providers_documents = archive.providers_documents(
             ignore_sentinel=False,
             collapsed=False,
-        ).values()
-        providers_collection = database["providers"]
-        result = providers_collection.delete_one(
-            filter={
-                "_type": "sentinel"
-            }
         )
-        if result.deleted_count != 1:
-            raise RuntimeError("Failed to delete existing sentinel in providers collection")
-        result = providers_collection.insert_many(
-            documents=restore_providers_documents,
-            ordered=False,
+        _collection_restore(
+            collection=database["providers"],
+            restore_documents=restore_providers_documents,
+            delete_existing_sentinel=True,
         )
-        if not result.acknowledged:
-            raise RuntimeError("Failed to restore providers collection")
 
-        # Patients each have a document in "patients" and then a dedicated document.
+        # Patients each have a document in "patients" and then a dedicated collection.
         # Database initialization will ensure "patients" collection exists.
         # But it will have an existing "sentinel" that needs to be deleted.
         # First restore the "patients" collection.
-        # Then each patient collection needs to be created.
+        # Then restore each patient collection.
         # Restore patients by ensuring each step in patient creation.
 
         # Restore the "patients" collection
         restore_patients_documents = archive.patients_documents(
             ignore_sentinel=False,
             collapsed=False,
-        ).values()
-        patients_collection = database["patients"]
-        result = patients_collection.delete_one(
-            filter={
-                "_type": "sentinel"
-            }
         )
-        if result.deleted_count != 1:
-            raise RuntimeError("Failed to delete existing sentinel in patients collection")
-        result = patients_collection.insert_many(
-            documents=restore_patients_documents,
-            ordered=False,
+        _collection_restore(
+            collection=database["patients"],
+            restore_documents=restore_patients_documents,
+            delete_existing_sentinel=True,
         )
-        if not result.acknowledged:
-            raise RuntimeError("Failed to restore patients collection")
 
         # Iterate over each patient, restore its collection and documents
-        for restore_patient_document_current in archive.patients_documents(
+        for patient_current_document in archive.patients_documents(
             ignore_sentinel=True,
             collapsed=True,
-        ).values():
+        ):
             # Recover fields we need from the patient document
-            patient_id = restore_patient_document_current["patientId"]
-            patient_collection_name = restore_patient_document_current["collection"]
-            patient_name = restore_patient_document_current["name"]
-            patient_mrn = restore_patient_document_current["MRN"]
+            patient_id = patient_current_document["patientId"]
+            patient_collection_name = patient_current_document["collection"]
+            patient_name = patient_current_document["name"]
+            patient_mrn = patient_current_document["MRN"]
 
             # Ensure the patient collection
             patient_collection = scope.database.patients.ensure_patient_collection(
@@ -172,23 +155,15 @@ def _archive_restore(
                 raise RuntimeError("Patient collection name changed")
 
             # Restore patient documents, including the sentinel
-            restore_patient_documents = archive.documents_in_collection(
+            restore_patient_current_documents = archive.collection_documents(
                 collection=patient_collection_name,
                 ignore_sentinel=False,
-                collapsed=False,
-            ).values()
-            result = patient_collection.delete_one(
-                filter={
-                    "_type": "sentinel"
-                }
             )
-            if result.deleted_count != 1:
-                raise RuntimeError("Failed to delete existing sentinel in patient collection")
-            result = patient_collection.insert_many(
-                documents=restore_patient_documents
+            _collection_restore(
+                collection=patient_collection,
+                restore_documents=restore_patient_current_documents,
+                delete_existing_sentinel=True
             )
-            if not result.acknowledged:
-                raise RuntimeError("Failed to restore patient collection: {}".format(patient_collection_name))
 
             # Ensure minimal documents.
             # This will usually do nothing, as the existing documents were already restored.
@@ -209,3 +184,26 @@ def _archive_restore(
                 patient_name=patient_name,
                 patient_mrn=patient_mrn
             )
+
+
+def _collection_restore(
+    *,
+    collection: pymongo.collection.Collection,
+    restore_documents: List[dict],
+    delete_existing_sentinel: bool,
+):
+    if delete_existing_sentinel:
+        result = collection.delete_one(
+            filter={
+                "_type": "sentinel"
+            }
+        )
+        if result.deleted_count != 1:
+            raise RuntimeError("Failed to delete existing sentinel in collection: {}".format(collection.name))
+
+    result = collection.insert_many(
+        documents=restore_documents,
+        ordered=False,
+    )
+    if not result.acknowledged:
+        raise RuntimeError("Failed to restore collection: {}".format(collection.name))
