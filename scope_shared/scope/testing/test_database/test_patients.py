@@ -1,6 +1,7 @@
 import copy
 import pymongo.database
 
+import scope.database.collection_utils
 import scope.database.patient.patient_profile
 import scope.database.patients
 import scope.schema
@@ -78,6 +79,108 @@ def test_patient_create_get_delete(
     )
     if patient_identities:
         assert created_patient_identity not in patient_identities
+
+
+def test_patient_ensure_collection_delete(
+    database_client: pymongo.database.Database,
+):
+    """
+    Test creation of a patient collection then deletion without ever creating an identity.
+    """
+
+    patient_id = "invalid"
+    patient_collection_name = scope.database.patients._patient_collection_name(
+        patient_id=patient_id
+    )
+
+    # Confirm the collection does not already exist
+    assert patient_collection_name not in database_client.list_collection_names()
+
+    # Create the collection underlying a patient
+    patient_collection = scope.database.patients.ensure_patient_collection(
+        database=database_client,
+        patient_id=patient_id,
+    )
+
+    try:
+        # Confirm the collection now exists
+        assert patient_collection_name in database_client.list_collection_names()
+
+        # Confirm patient collection sentinel document now exists
+        sentinel_document = scope.database.collection_utils.get_singleton(
+            collection=patient_collection,
+            document_type="sentinel",
+        )
+        assert sentinel_document is not None
+    finally:
+        # Delete patient
+        result = scope.database.patients.delete_patient(
+            database=database_client,
+            patient_id=patient_id,
+            destructive=True,
+        )
+        assert result
+
+    # Confirm the collection no longer exists
+    assert patient_collection_name not in database_client.list_collection_names()
+
+
+def test_patient_ensure_reentrant(
+    database_client: pymongo.database.Database,
+):
+    """
+    Test that each step in patient creation is reentrant.
+    """
+
+    patient_id = "invalid"
+    patient_name = "invalid"
+    patient_mrn = "invalid"
+
+    try:
+        # Do each step multiple times in multiple passes
+        patient_collection = scope.database.patients.ensure_patient_collection(
+            database=database_client,
+            patient_id=patient_id,
+        )
+
+        # Outer loop over steps
+        for _ in range(3):
+            # Create the patient collection
+            for _ in range(3):
+                patient_collection = scope.database.patients.ensure_patient_collection(
+                    database=database_client,
+                    patient_id=patient_id,
+                )
+
+            # Ensure necessary documents
+            for _ in range(3):
+                scope.database.patients.ensure_patient_documents(
+                    database=database_client,
+                    patient_collection=patient_collection,
+                    patient_id=patient_id,
+                    patient_name=patient_name,
+                    patient_mrn=patient_mrn,
+                )
+
+            # Create the patient identity document.
+            for _ in range(3):
+                patient_identity_document = (
+                    scope.database.patients.ensure_patient_identity(
+                        database=database_client,
+                        patient_collection=patient_collection,
+                        patient_id=patient_id,
+                        patient_name=patient_name,
+                        patient_mrn=patient_mrn,
+                    )
+                )
+    finally:
+        # Delete patient
+        result = scope.database.patients.delete_patient(
+            database=database_client,
+            patient_id=patient_id,
+            destructive=True,
+        )
+        assert result
 
 
 def test_patient_delete_nonexistent(

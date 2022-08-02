@@ -201,6 +201,10 @@ def test_assessment_put_maintains_scheduled_assessments(
             ),
         }
     )
+    if "dayOfWeek" in fake_assessment:
+        del fake_assessment["dayOfWeek"]
+    if "frequency" in fake_assessment:
+        del fake_assessment["frequency"]
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
@@ -255,6 +259,10 @@ def test_assessment_put_maintains_scheduled_assessments(
             ),
         }
     )
+    if "dayOfWeek" in fake_assessment:
+        del fake_assessment["dayOfWeek"]
+    if "frequency" in fake_assessment:
+        del fake_assessment["frequency"]
     patient_unsafe_utils.unsafe_update_assessment(
         collection=patient_collection,
         set_id=assessment_id,
