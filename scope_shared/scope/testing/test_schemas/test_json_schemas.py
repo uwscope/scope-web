@@ -4,8 +4,10 @@ from pprint import pprint
 from typing import Union
 
 import jschon
+import json
 import pytest
 import scope.schema
+import scope.schema_utils
 
 JSON_DATA_PATH = Path(Path(__file__).parent, "json")
 
@@ -259,14 +261,11 @@ def test_json_schema(config: ConfigTestJSONSchema):
         pytest.xfail("Schema failed to parse")
 
     with open(Path(JSON_DATA_PATH, config.document_path), encoding="utf-8") as f:
-        json = f.read()
+        data = f.read()
+        data = json.loads(data)
 
-    result = config.schema.evaluate(jschon.JSON.loads(json)).output("detailed")
-
-    if result["valid"] != config.expected_valid:
-        if not result["valid"]:
-            pprint(json)
-            print()
-            pprint(result)
-
-    assert result["valid"] == config.expected_valid
+    scope.schema_utils.assert_schema(
+        data=data,
+        schema=config.schema,
+        expected_valid=config.expected_valid,
+    )
