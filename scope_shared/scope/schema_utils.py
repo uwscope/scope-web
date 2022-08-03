@@ -14,6 +14,10 @@ def assert_schema(
     schema: jschon.JSONSchema,
     expected_valid: bool = True,
 ):
+    """
+    Assert a document matches a schema.
+    """
+
     result = schema.evaluate(jschon.JSON(data))
     if result.valid != expected_valid:
         schema_output = result.output("detailed")

@@ -36,6 +36,7 @@ def fake_optional(*, document: dict, optional_keys: List[str]) -> dict:
 
     fake_optional_document = copy.deepcopy(document)
     for key in missing_keys:
-        del fake_optional_document[key]
+        if key in fake_optional_document:
+            del fake_optional_document[key]
 
     return fake_optional_document
