@@ -70,6 +70,25 @@ TEST_CONFIGS = [
         document_path="activity/false-hasRepetition-disallows-repeatDayFlags-invalid.json",
         expected_valid=False,
     ),
+    # activity-log
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-accomplishment-and-pleasure-valid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-accomplishment-and-pleasure-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-accomplishment-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-accomplishment-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-pleasure-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-pleasure-invalid.json",
+        expected_valid=False,
+    ),
     # assessment
     ConfigTestJSONSchema(
         name="false-assigned-disallows-dayOfWeek-and-frequency-invalid",
