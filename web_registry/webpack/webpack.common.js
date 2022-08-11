@@ -58,5 +58,8 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [{ from: 'src/assets/resources', to: 'resources' }],
         }),
+        new CopyWebpackPlugin({
+            patterns: [{ from: 'src/assets/pwa', to: '' }],
+        }),
     ],
 };
