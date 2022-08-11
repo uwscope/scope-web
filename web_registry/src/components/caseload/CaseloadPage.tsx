@@ -1,4 +1,4 @@
-import { FormControl, MenuItem, Select } from '@mui/material';
+import { Checkbox, FormControl, FormControlLabel, MenuItem, Select, Stack } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { action, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
@@ -68,6 +68,10 @@ export const CaseloadPage: FunctionComponent = observer(() => {
         history.push(`/patient/${recordId}`);
     };
 
+    const onToggleFilterPatients = (_: React.ChangeEvent<HTMLInputElement>) => {
+        rootStore.patientsStore.filterStudyPatients(!rootStore.patientsStore.filteredStudyPatients);
+    };
+
     return (
         <PageLoader
             state={rootStore.patientsStore.state}
@@ -75,40 +79,51 @@ export const CaseloadPage: FunctionComponent = observer(() => {
             hasValue={rootStore.patientsStore.patients.length > 0}>
             <Page>
                 <PageHeaderContainer>
-                    <TitleSelectContainer>
-                        <PageHeaderTitle>Caseload for</PageHeaderTitle>
-                        <SelectForm>
-                            <SelectInput
-                                value={rootStore.patientsStore.filteredCareManager}
-                                onChange={onCareManagerSelect}
-                                inputProps={{
-                                    name: 'caremanager',
-                                    id: 'caremanager',
-                                }}>
-                                {rootStore.patientsStore.filterableCareManagers.map((cm) => (
-                                    <MenuItem key={cm} value={cm}>
-                                        {cm}
-                                    </MenuItem>
-                                ))}
-                            </SelectInput>
-                        </SelectForm>
-                        <PageHeaderTitle>in</PageHeaderTitle>
-                        <SelectForm>
-                            <SelectInput
-                                value={rootStore.patientsStore.filteredClinic}
-                                onChange={onClinicSelect}
-                                inputProps={{
-                                    name: 'clinic',
-                                    id: 'clinic',
-                                }}>
-                                {rootStore.patientsStore.filterableClinics.map((c) => (
-                                    <MenuItem key={c} value={c}>
-                                        {c}
-                                    </MenuItem>
-                                ))}
-                            </SelectInput>
-                        </SelectForm>
-                    </TitleSelectContainer>
+                    <Stack direction="row" spacing={4}>
+                        <TitleSelectContainer>
+                            <PageHeaderTitle>Caseload for</PageHeaderTitle>
+                            <SelectForm>
+                                <SelectInput
+                                    value={rootStore.patientsStore.filteredCareManager}
+                                    onChange={onCareManagerSelect}
+                                    inputProps={{
+                                        name: 'caremanager',
+                                        id: 'caremanager',
+                                    }}>
+                                    {rootStore.patientsStore.filterableCareManagers.map((cm) => (
+                                        <MenuItem key={cm} value={cm}>
+                                            {cm}
+                                        </MenuItem>
+                                    ))}
+                                </SelectInput>
+                            </SelectForm>
+                            <PageHeaderTitle>in</PageHeaderTitle>
+                            <SelectForm>
+                                <SelectInput
+                                    value={rootStore.patientsStore.filteredClinic}
+                                    onChange={onClinicSelect}
+                                    inputProps={{
+                                        name: 'clinic',
+                                        id: 'clinic',
+                                    }}>
+                                    {rootStore.patientsStore.filterableClinics.map((c) => (
+                                        <MenuItem key={c} value={c}>
+                                            {c}
+                                        </MenuItem>
+                                    ))}
+                                </SelectInput>
+                            </SelectForm>
+                        </TitleSelectContainer>
+                        <FormControlLabel
+                            label="Filter out patients who are no longer in the study"
+                            control={
+                                <Checkbox
+                                    checked={rootStore.patientsStore.filteredStudyPatients}
+                                    onChange={onToggleFilterPatients}
+                                />
+                            }
+                        />
+                    </Stack>
                 </PageHeaderContainer>
                 <CaseloadTable patients={rootStore.patientsStore.filteredPatients} onPatientClick={onPatientClick} />
             </Page>
