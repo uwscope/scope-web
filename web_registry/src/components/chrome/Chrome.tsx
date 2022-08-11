@@ -12,7 +12,6 @@ import Toolbar from '@mui/material/Toolbar';
 import withTheme from '@mui/styles/withTheme';
 import { default as React, FunctionComponent, useEffect, useState } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
-import Footer from 'src/components/chrome/Footer';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 
@@ -26,7 +25,6 @@ const MainContainer = withTheme(
     styled.main((props) => ({
         flexGrow: 1,
         marginTop: props.theme.customSizes.headerHeight,
-        marginBottom: props.theme.customSizes.footerHeight,
         overflowY: 'hidden',
         overflowX: 'scroll',
         minWidth: 1200,
@@ -103,7 +101,6 @@ export const Chrome: FunctionComponent<IChromeProps> = (props) => {
                 <Toolbar variant="dense">{props.headerContent}</Toolbar>
             </AppBarContainer>
             <MainContainer>{props.children}</MainContainer>
-            <Footer></Footer>
             <Dialog maxWidth="xs" open={open}>
                 <DialogTitle>{'Session timeout'}</DialogTitle>
                 <DialogContent>
