@@ -1,7 +1,7 @@
 {
     "short_name": "UW Scope",
-    "name": "UW Scope App",
-    "description": "Application for UW Scope study participants",
+    "name": "UW Scope Registry",
+    "description": "Registry for UW Scope study",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
