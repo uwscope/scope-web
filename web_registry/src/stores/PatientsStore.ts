@@ -21,6 +21,8 @@ export interface IPatientsStore {
 
     readonly filteredCareManager: string;
     readonly filteredClinic: ClinicCode | AllClinicCode;
+    readonly filteredStudyPatients: boolean;
+
     readonly filteredPatients: ReadonlyArray<IPatientStore>;
 
     readonly state: IPromiseQueryState;
@@ -32,6 +34,7 @@ export interface IPatientsStore {
 
     filterCareManager: (careManager: string) => void;
     filterClinic: (clinic: ClinicCode | AllClinicCode) => void;
+    filterStudyPatients: (filter: boolean) => void;
 }
 
 export const AllCareManagers = 'All Social Workers';
@@ -40,6 +43,8 @@ export const AllClinics = 'All Clinics';
 export class PatientsStore implements IPatientsStore {
     @observable public filteredCareManager: string;
     @observable public filteredClinic: ClinicCode | AllClinicCode;
+    // Default to filtering patients who are no longer in the study
+    @observable public filteredStudyPatients: boolean = true;
 
     private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
     private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
@@ -160,6 +165,11 @@ export class PatientsStore implements IPatientsStore {
         }
     }
 
+    @action.bound
+    public filterStudyPatients(filter: boolean) {
+        this.filteredStudyPatients = filter;
+    }
+
     @computed
     public get filteredPatients() {
         var filteredPatients = this.patients.map((p) => p);
@@ -171,6 +181,10 @@ export class PatientsStore implements IPatientsStore {
 
         if (this.filteredClinic != 'All Clinics') {
             filteredPatients = filteredPatients.filter((p) => p.profile?.clinicCode == this.filteredClinic);
+        }
+
+        if (this.filteredStudyPatients) {
+            filteredPatients = filteredPatients.filter((p) => p.profile.depressionTreatmentStatus != 'End');
         }
 
         return filteredPatients;
