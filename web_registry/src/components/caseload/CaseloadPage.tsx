@@ -115,7 +115,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
                             </SelectForm>
                         </TitleSelectContainer>
                         <FormControlLabel
-                            label="Filter out patients who are no longer in the study"
+                            label="Hide patients who are no longer in the study"
                             control={
                                 <Checkbox
                                     checked={rootStore.patientsStore.filteredStudyPatients}
