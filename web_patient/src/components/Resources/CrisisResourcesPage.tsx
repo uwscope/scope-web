@@ -44,7 +44,14 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                     <ListDiv>
                         <li>
                             <Typography variant="body1">
-                                Call {'  '}
+                                Suicide & Crisis Lifeline - Call {' '}
+                                <Link
+                                    href="tel:988/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    988
+                                </Link>
+                                {' '} or {' '}
                                 <Link
                                     href="tel:18002738255/"
                                     target="_blank"
@@ -55,7 +62,7 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                         </li>
                         <li>
                             <Typography variant="body1">
-                                Lifeline Web Chat{'  '}
+                                Lifeline Web Chat - {' '}
                                 <Link
                                     href="https://suicidepreventionlifeline.org/chat/"
                                     target="_blank"
@@ -66,12 +73,26 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                         </li>
                         <li>
                             <Typography variant="body1">
-                                Crisis Text Line - Text "HOME" to 741741{'  '}
+                                Crisis Text Line - {' '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     https://www.crisistextline.org/
+                                </Link>
+                                {' '} - Text {' '}
+                                <Link
+                                    href="sms:988/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    988
+                                </Link>
+                                {' '} or Text "HOME" to {' '}
+                                <Link
+                                    href="sms:741741/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    741741
                                 </Link>
                             </Typography>
                         </li>

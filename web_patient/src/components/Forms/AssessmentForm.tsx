@@ -74,9 +74,16 @@ const CrisisContent: FunctionComponent = () => {
                     <ListDiv>
                         <li>
                             <BodyText>
-                                Call National Suicide Prevention Hotline by phone:{'  '}
+                                Suicide & Crisis Lifeline - Call {' '}
                                 <Link
-                                    href="tel:18002738255"
+                                    href="tel:988/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    988
+                                </Link>
+                                {' '} or {' '}
+                                <Link
+                                    href="tel:18002738255/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     1-800-273-TALK (8255)
@@ -85,7 +92,7 @@ const CrisisContent: FunctionComponent = () => {
                         </li>
                         <li>
                             <BodyText>
-                                National Suicide Prevention Web Chat{'  '}
+                                Lifeline Web Chat - {' '}
                                 <Link
                                     href="https://suicidepreventionlifeline.org/chat/"
                                     target="_blank"
@@ -96,12 +103,26 @@ const CrisisContent: FunctionComponent = () => {
                         </li>
                         <li>
                             <BodyText>
-                                Crisis Text Line - Text "HOME" to 741741{'  '}
+                                Crisis Text Line - {' '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     https://www.crisistextline.org/
+                                </Link>
+                                {' '} - Text {' '}
+                                <Link
+                                    href="sms:988/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    988
+                                </Link>
+                                {' '} or Text "HOME" to {' '}
+                                <Link
+                                    href="sms:741741/"
+                                    target="_blank"
+                                    sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
+                                    741741
                                 </Link>
                             </BodyText>
                         </li>
