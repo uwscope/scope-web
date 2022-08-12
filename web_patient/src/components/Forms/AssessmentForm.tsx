@@ -64,7 +64,7 @@ const BodyText = withTheme(
 const CrisisContent: FunctionComponent = () => {
     return (
         <FormSection
-            prompt={'Crisis resouces'}
+            prompt={'Crisis resources'}
             content={
                 <Stack spacing={2}>
                     <BodyText>
