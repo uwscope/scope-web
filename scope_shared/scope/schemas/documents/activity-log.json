@@ -52,5 +52,43 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "scheduledActivityId", "activityId", "activityName", "recordedDateTime"]
+	"required": ["_type", "scheduledActivityId", "activityId", "activityName", "recordedDateTime"],
+	"allOf": [
+		{
+			"$ref": "#/$defs/no-success-disallows-accomplishment"
+		},
+		{
+			"$ref": "#/$defs/no-success-disallows-pleasure"
+		}
+	],
+	"$defs": {
+		"no-success-disallows-accomplishment": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/no-success" }
+				},
+				{
+					"not": { "required": ["accomplishment"] }
+				}
+			]
+		},
+		"no-success-disallows-pleasure": {
+			"anyOf": [
+				{
+					"not": { "$ref": "#/$defs/no-success" }
+				},
+				{
+					"not": { "required": ["pleasure"] }
+				}
+			]
+		},
+		"no-success": {
+			"properties": {
+				"success": {
+					"const": "No"
+				}
+			},
+			"required": ["success"]
+		}
+	}
 }

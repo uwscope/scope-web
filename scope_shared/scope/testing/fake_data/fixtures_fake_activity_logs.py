@@ -49,9 +49,14 @@ def _fake_activity_logs(
             "completed": random.choice([True, False]),
             "success": fake_utils.fake_enum_value(scope.enums.ActivitySuccessType),
             "alternative": faker_factory.text(),
-            "pleasure": random.randint(1, 10),
-            "accomplishment": random.randint(1, 10),
         }
+        if fake_activity_log["success"] != scope.enums.ActivitySuccessType.No.value:
+            fake_activity_log.update(
+                {
+                    "pleasure": random.randint(1, 10),
+                    "accomplishment": random.randint(1, 10),
+                }
+            )
         # Remove a randomly sampled subset of optional parameters.
         fake_activity_log = fake_utils.fake_optional(
             document=fake_activity_log,
