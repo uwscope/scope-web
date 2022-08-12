@@ -43,7 +43,8 @@ export const AllClinics = 'All Clinics';
 export class PatientsStore implements IPatientsStore {
     @observable public filteredCareManager: string;
     @observable public filteredClinic: ClinicCode | AllClinicCode;
-    @observable public filteredStudyPatients: boolean = false;
+    // Default to filtering patients who are no longer in the study
+    @observable public filteredStudyPatients: boolean = true;
 
     private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
     private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
