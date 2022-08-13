@@ -1,10 +1,8 @@
-import json
 from pathlib import Path
 import pymongo.database
-import pyzipper
-from typing import List, Optional
+from typing import Dict, List, Optional
 
-import scope.database.document_utils as document_utils
+import scope.populate.data.archive
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
 ACTION_NAME = "archive_export"
@@ -91,42 +89,25 @@ def _archive_export(
     archive_path: Path,
     password: str,
 ):
-    # Ensure archive directory exists
-    if archive_path.parent:
-        archive_path.parent.mkdir(parents=True, exist_ok=True)
+    entries: Dict[Path, dict] = {}
 
-    # The export is stored in a single zip file
-    with pyzipper.AESZipFile(
-        archive_path,
-        mode="x",
-        compression=pyzipper.ZIP_LZMA,
-        encryption=pyzipper.WZ_AES,
-    ) as zipfile_export:
-        # Set the password
-        zipfile_export.setpassword(password.encode("utf-8"))
+    # Each collection is stored as a directory
+    collection_names = database.list_collection_names()
+    for collection_name_current in collection_names:
+        collection_current = database[collection_name_current]
 
-        # Each collection is stored as a directory
-        collection_names = database.list_collection_names()
-        for collection_name_current in collection_names:
-            collection_current = database[collection_name_current]
-
-            # Each document is stored as a file
-            for document_current in collection_current.find():
-                document_current = document_utils.normalize_document(
-                    document=document_current
+        # Each document is stored as a file in that directory
+        for document_current in collection_current.find():
+            entries[
+                Path(
+                    collection_name_current,
+                    "{}.json".format(document_current["_id"]),
                 )
-                document_string = json.dumps(
-                    document_current,
-                    indent=2,
-                )
-                document_bytes = document_string.encode("utf-8")
+            ] = document_current
 
-                zipfile_export.writestr(
-                    str(
-                        Path(
-                            collection_name_current,
-                            "{}.json".format(document_current["_id"]),
-                        )
-                    ),
-                    data=document_bytes,
-                )
+    # Store the collection of entries to an archive
+    scope.populate.data.archive.Archive.write_archive(
+        archive=scope.populate.data.archive.Archive(entries=entries),
+        archive_path=archive_path,
+        password=password,
+    )
