@@ -4,7 +4,7 @@ import aws_infrastructure.tasks.ssh
 import contextlib
 from invoke import task
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 import shutil
 
 import scope.config
@@ -18,8 +18,9 @@ def _reset(
     instance_ssh_config: aws_infrastructure.tasks.ssh.SSHConfig,
     documentdb_config: scope.config.DocumentDBConfig,
     database_config: scope.config.DatabaseConfig,
-    populate_dir_path: Path,
-    populate_reset_dir_path: Path,
+    populate_reset: bool,
+    populate_dir_path: Optional[Path] = None,
+    populate_reset_dir_path: Optional[Path] = None,
 ):
     """
     Reset a database by:
@@ -75,17 +76,18 @@ def _reset(
         scope.database.initialize.ensure_database_initialized(database=database)
 
     #
-    # Reset the populate configuration
+    # If requested, reset the populate configuration
     #
-    shutil.copy(
-        src=Path(populate_reset_dir_path, "populate.yaml"),
-        dst=Path(
-            populate_dir_path,
-            "populate_{}.yaml".format(
-                datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%SZ")
+    if populate_reset:
+        shutil.copy(
+            src=Path(populate_reset_dir_path, "populate.yaml"),
+            dst=Path(
+                populate_dir_path,
+                "populate_{}.yaml".format(
+                    datetime.datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%SZ")
+                ),
             ),
-        ),
-    )
+        )
 
 
 def task_reset(
@@ -93,9 +95,16 @@ def task_reset(
     instance_ssh_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
-    populate_dir_path: Union[Path, str],
-    populate_reset_dir_path: Union[Path, str],
+    populate_reset: bool,
+    populate_dir_path: Optional[Union[Path, str]] = None,
+    populate_reset_dir_path: Optional[Union[Path, str]] = None,
 ):
+    if populate_reset:
+        if populate_dir_path is None:
+            raise ValueError("populate_reset requires populate_dir_path")
+        if populate_reset_dir_path is None:
+            raise ValueError("populate_reset requires populate_reset_dir_path")
+
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
         instance_ssh_config_path
     )
@@ -118,6 +127,7 @@ def task_reset(
             instance_ssh_config=instance_ssh_config,
             documentdb_config=documentdb_config,
             database_config=database_config,
+            populate_reset=populate_reset,
             populate_dir_path=populate_dir_path,
             populate_reset_dir_path=populate_reset_dir_path,
         )
