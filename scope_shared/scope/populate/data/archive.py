@@ -36,7 +36,10 @@ class Archive:
             raise ValueError("Archive does not exist")
 
         # Open the file
-        with open(archive_path, mode="rb",) as archive_file:
+        with open(
+            archive_path,
+            mode="rb",
+        ) as archive_file:
             # Process it as an encrypted zipfile
             with pyzipper.AESZipFile(
                 archive_file,
@@ -86,7 +89,10 @@ class Archive:
             archive_path.parent.mkdir(parents=True, exist_ok=True)
 
         # The export is stored in a single zip file
-        with open(archive_path, mode="xb",) as archive_file:
+        with open(
+            archive_path,
+            mode="xb",
+        ) as archive_file:
             with pyzipper.AESZipFile(
                 archive_file,
                 "w",
