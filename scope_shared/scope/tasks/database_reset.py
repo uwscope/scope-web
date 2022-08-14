@@ -110,8 +110,10 @@ def task_reset(
     )
     documentdb_config = scope.config.DocumentDBConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseConfig.load(database_config_path)
-    populate_dir_path = Path(populate_dir_path)
-    populate_reset_dir_path = Path(populate_reset_dir_path)
+    if populate_dir_path:
+        populate_dir_path = Path(populate_dir_path)
+    if populate_reset_dir_path:
+        populate_reset_dir_path = Path(populate_reset_dir_path)
 
     @task
     def reset(context):
