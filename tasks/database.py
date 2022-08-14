@@ -35,6 +35,7 @@ if Path(DATABASE_DEV_CONFIG_PATH).exists():
         instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
         documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
         database_config_path=DATABASE_DEV_CONFIG_PATH,
+        populate_reset=True,
         populate_dir_path=POPULATE_DEV_DIR_PATH,
         populate_reset_dir_path=POPULATE_RESET_DEV_DIR_PATH,
     ), "reset")
