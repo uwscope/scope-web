@@ -110,6 +110,10 @@ def task_reset(
         Reset and initialize the {} database.
         """
 
+        database_confirm = input("Confirm database name to reset: ")
+        if database_confirm != database_config.name:
+            raise ValueError("Database name mismatch.")
+
         _reset(
             instance_ssh_config=instance_ssh_config,
             documentdb_config=documentdb_config,
