@@ -25,6 +25,26 @@
 						"properties": {
 							"action": {
 								"type": "string",
+								"const": "archive_migrate"
+							},
+							"archive": {
+								"type": "string"
+							},
+							"archive_destination": {
+								"type": "string"
+							},
+							"migration": {
+								"enum": [
+									"v0.5.0"
+								]
+							}
+						}
+					},
+					{
+						"type": "object",
+						"properties": {
+							"action": {
+								"type": "string",
 								"const": "archive_restore"
 							},
 							"archive": {

@@ -1,4 +1,9 @@
-import contextlib
+# Allow typing to forward reference
+# TODO: Not necessary with Python 3.11
+from __future__ import annotations
+
+import scope.database.document_utils as document_utils
+
 import copy
 import json
 from pathlib import Path
@@ -6,48 +11,112 @@ import pyzipper
 from typing import Dict, List, Optional, Tuple, Union
 
 
-class Archive(contextlib.AbstractContextManager):
-    _archive_path: Path
-    _password: str
-
-    _zipfile: Optional[pyzipper.AESZipFile]
-    _entries: Optional[Dict[Path, dict]]
+class Archive:
+    # Entries contained in this archive
+    _entries: Dict[Path, dict]
 
     def __init__(
         self,
+        entries: Dict[Path, dict],
+    ):
+        self._entries = entries
+
+    @classmethod
+    def read_archive(
+        cls,
+        *,
         archive_path: Path,
         password: str,
-    ):
-        self._archive_path = archive_path
-        self._password = password
-        self._zipfile = None
-        self._entries = None
-
-    def __enter__(self):
+    ) -> Archive:
         """
-        Open the archive and confirm it is valid.
+        Read an archive from an encrypted zipfile.
         """
 
-        # Open the archive
-        self._zipfile = pyzipper.AESZipFile(
-            self._archive_path,
-            mode="r",
-            compression=pyzipper.ZIP_LZMA,
-            encryption=pyzipper.WZ_AES,
-        )
-        self._zipfile.setpassword(self._password.encode("utf-8"))
+        if not archive_path.is_file():
+            raise ValueError("Archive does not exist")
 
-        # Confirm the archive is valid
-        if self._zipfile.testzip():
-            raise ValueError("Invalid archive or password")
+        # Open the file
+        with open(
+            archive_path,
+            mode="rb",
+        ) as archive_file:
+            # Process it as an encrypted zipfile
+            with pyzipper.AESZipFile(
+                archive_file,
+                "r",
+                compression=pyzipper.ZIP_LZMA,
+                encryption=pyzipper.WZ_AES,
+            ) as archive_zipfile:
+                # Set the zipfile password
+                archive_zipfile.setpassword(password.encode("utf-8"))
 
-        return self
+                # Confirm the zipfile is valid
+                if archive_zipfile.testzip():
+                    raise ValueError("Invalid archive or password")
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+                # Load the entries, each item in the zipfile is a document
+                entries: Dict[Path, dict] = {}
+                for info_current in archive_zipfile.infolist():
+                    document_bytes = archive_zipfile.read(info_current)
+                    document_string = document_bytes.decode("utf-8")
+                    document_current = json.loads(document_string)
+                    document_normalized = document_utils.normalize_document(
+                        document=document_current
+                    )
+
+                    entries[Path(info_current.filename)] = document_normalized
+
+                # Create and return the archive
+                return Archive(entries=entries)
+
+    @classmethod
+    def write_archive(
+        cls,
+        *,
+        archive: Archive,
+        archive_path: Path,
+        password: str,
+    ) -> None:
         """
-        Close the archive.
+        Write an archive to an encrypted zipfile.
         """
-        self._zipfile.close()
+
+        if archive_path.exists():
+            raise ValueError("Archive already exists")
+
+        # Ensure archive directory exists
+        if archive_path.parent:
+            archive_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # The export is stored in a single zip file
+        with open(
+            archive_path,
+            mode="xb",
+        ) as archive_file:
+            with pyzipper.AESZipFile(
+                archive_file,
+                "w",
+                compression=pyzipper.ZIP_LZMA,
+                encryption=pyzipper.WZ_AES,
+            ) as archive_zipfile:
+                # Set the password
+                archive_zipfile.setpassword(password.encode("utf-8"))
+
+                # Write each entry
+                for (path_current, document_current) in archive.entries.items():
+                    document_normalized = document_utils.normalize_document(
+                        document=document_current
+                    )
+                    document_string = json.dumps(
+                        document_normalized,
+                        indent=2,
+                    )
+                    document_bytes = document_string.encode("utf-8")
+
+                    archive_zipfile.writestr(
+                        str(path_current),
+                        data=document_bytes,
+                    )
 
     @staticmethod
     def collapse_document_revisions(
@@ -153,19 +222,8 @@ class Archive(contextlib.AbstractContextManager):
         """
         All entries in the archive.
 
-        Always returns a deepcopy, so all uses of entries property are independent.
+        Always returns a deepcopy, so all uses of this property are independent.
         """
-
-        if self._entries is None:
-            self._entries = {}
-
-            # Each file in the archive is a document
-            for info_current in self._zipfile.infolist():
-                document_bytes = self._zipfile.read(info_current)
-                document_string = document_bytes.decode("utf-8")
-                document_current = json.loads(document_string)
-
-                self._entries[Path(info_current.filename)] = document_current
 
         return copy.deepcopy(self._entries)
 
