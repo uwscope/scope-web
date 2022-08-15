@@ -21,7 +21,7 @@ const _strings = {
     patient_values_inventory_activity_lifearea_header: 'Life area',
     patient_values_inventory_activity_enjoyment_header: 'Enjoyment',
     patient_values_inventory_activity_importance_header: 'Importance',
-    patient_values_inventory_empty: 'There are no activities defined in the values inventory.',
+    patient_values_inventory_empty: 'There are no activities defined in the values & activities inventory.',
 
     patient_safety_plan_assign_button: 'Assign',
     patient_safety_plan_assigned_button: 'Reassign',
