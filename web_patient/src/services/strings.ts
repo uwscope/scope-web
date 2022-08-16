@@ -183,9 +183,9 @@ const _strings = {
     Form_add_activity_describe_name_label: 'Name',
     Form_add_activity_describe_name_help:
         'Write a descriptive name of the activity that helps you recognize what it is. You can choose an activity that you already identified from the values inventory.',
-    Form_add_activity_describe_name_import_button: 'Choose from the values inventory',
+    Form_add_activity_describe_name_import_button: 'Choose from the values & activities inventory',
 
-    Form_add_activity_describe_name_import_dialog_title: 'Choose from the values inventory',
+    Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
     Form_add_activity_describe_value: 'Which value is this activity best associated with?',
     Form_add_activity_describe_value_label: 'Value',
