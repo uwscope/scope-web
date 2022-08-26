@@ -11,7 +11,7 @@ class AppService implements IAppService {
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
-            timeout: 15000,
+            timeout: 1000 * 60 * 2,
         });
     }
 
