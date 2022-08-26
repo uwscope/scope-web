@@ -15,7 +15,7 @@ export class ServiceBase implements IServiceBase {
     constructor(baseUrl: string) {
         this.axiosInstance = axios.create({
             baseURL: baseUrl,
-            timeout: 15000,
+            timeout: 1000 * 60 * 2,
         });
 
         const handleDocuments = (body: any) => {
