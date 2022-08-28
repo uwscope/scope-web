@@ -136,7 +136,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'name',
             headerName: 'Name',
-            minWidth: 120,
+            minWidth: 240,
             align: 'center',
             headerAlign: 'center',
         },
@@ -157,7 +157,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'initialSession',
             headerName: 'Initial Session',
-            minWidth: 80,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
@@ -165,7 +166,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'recentSession',
             headerName: 'Last Session',
-            minWidth: 80,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
@@ -173,7 +175,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'recentCaseReview',
             headerName: 'Last Case Review',
-            minWidth: 120,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
@@ -181,7 +184,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'nextSessionDue',
             headerName: 'Follow-up Due',
-            minWidth: 80,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
@@ -234,7 +238,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'lastPHQDate',
             headerName: 'Last PHQ-9 Date',
-            minWidth: 120,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
         },
@@ -268,7 +273,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         {
             field: 'lastGADDate',
             headerName: 'Last GAD-7 Date',
-            minWidth: 120,
+            width: 85,
+            renderHeader,
             align: 'center',
             headerAlign: 'center',
         },
