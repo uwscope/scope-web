@@ -23,51 +23,53 @@ class ConfigTestJSONSchema:
 TEST_CONFIGS = [
     # activity
     ConfigTestJSONSchema(
-        name="activity-true-hasReminder-requires-reminderTimeOfDay-valid",
+        name="activity-hasReminder-is-true-requires-reminderTimeOfDay-valid",
         schema=scope.schema.activity_schema,
-        document_path="activity/true-hasReminder-requires-reminderTimeOfDay-valid.json",
-        expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="activity-true-hasReminder-requires-reminderTimeOfDay-invalid",
-        schema=scope.schema.activity_schema,
-        document_path="activity/true-hasReminder-requires-reminderTimeOfDay-invalid.json",
+        document_path="activity/hasReminder-is-true-requires-reminderTimeOfDay-valid.json",
+        # expected_valid=True,
+        # False until reminders are implemented
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity-false-hasReminder-disallows-reminderTimeOfDay-valid",
+        name="activity-hasReminder-is-true-requires-reminderTimeOfDay-invalid",
         schema=scope.schema.activity_schema,
-        document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-valid.json",
-        expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="activity-false-hasReminder-disallows-reminderTimeOfDay-invalid",
-        schema=scope.schema.activity_schema,
-        document_path="activity/false-hasReminder-disallows-reminderTimeOfDay-invalid.json",
+        document_path="activity/hasReminder-is-true-requires-reminderTimeOfDay-invalid.json",
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity-true-hasRepetition-requires-repeatDayFlags-valid",
+        name="activity-hasReminder-is-false-disallows-reminderTimeOfDay-valid",
         schema=scope.schema.activity_schema,
-        document_path="activity/true-hasRepetition-requires-repeatDayFlags-valid.json",
+        document_path="activity/hasReminder-is-false-disallows-reminderTimeOfDay-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity-true-hasRepetition-requires-repeatDayFlags-invalid",
+        name="activity-hasReminder-is-false-disallows-reminderTimeOfDay-invalid",
         schema=scope.schema.activity_schema,
-        document_path="activity/true-hasRepetition-requires-repeatDayFlags-invalid.json",
+        document_path="activity/hasReminder-is-false-disallows-reminderTimeOfDay-invalid.json",
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
-        name="activity-false-hasRepetition-disallows-repeatDayFlags-valid",
+        name="activity-hasRepetition-is-true-requires-repeatDayFlags-valid",
         schema=scope.schema.activity_schema,
-        document_path="activity/false-hasRepetition-disallows-repeatDayFlags-valid.json",
+        document_path="activity/hasRepetition-is-true-requires-repeatDayFlags-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
-        name="activity-false-hasRepetition-disallows-repeatDayFlags-invalid",
+        name="activity-hasRepetition-is-true-requires-repeatDayFlags-invalid",
         schema=scope.schema.activity_schema,
-        document_path="activity/false-hasRepetition-disallows-repeatDayFlags-invalid.json",
+        document_path="activity/hasRepetition-is-true-requires-repeatDayFlags-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-hasRepetition-is-false-disallows-repeatDayFlags-valid",
+        schema=scope.schema.activity_schema,
+        document_path="activity/hasRepetition-is-false-disallows-repeatDayFlags-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-hasRepetition-is-false-disallows-repeatDayFlags-invalid",
+        schema=scope.schema.activity_schema,
+        document_path="activity/hasRepetition-is-false-disallows-repeatDayFlags-invalid.json",
         expected_valid=False,
     ),
     # activity-log
