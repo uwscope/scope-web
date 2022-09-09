@@ -4,6 +4,18 @@
 	"title": "IActivity",
 	"description": "IActivity Type",
 	"type": "object",
+	"$comment": [
+		"---------------------------------------",
+		"Removed Pending Reminder Implementation",
+		"---------------------------------------",
+		{
+			"reminderTimeOfDay": {
+				"type": "number",
+				"minimum": 0,
+				"exclusiveMaximum": 24
+			}
+		}
+	],
 	"properties": {
 		"_id": {
 			"type": "string"
@@ -40,11 +52,6 @@
 		"hasReminder": {
 			"type": "boolean"
 		},
-		"reminderTimeOfDay": {
-			"type": "number",
-			"minimum": 0,
-			"exclusiveMaximum": 24
-		},
 		"hasRepetition": {
 			"type": "boolean"
 		},
@@ -71,69 +78,78 @@
 		"isActive",
 		"isDeleted"
 	],
+	"$comment": [
+		"---------------------------------------",
+		"Removed Pending Reminder Implementation",
+		"---------------------------------------",
+		[
+			{
+				"$ref": "#/$defs/hasReminder-is-true-requires-reminderTimeOfDay"
+			},
+			{
+				"$ref": "#/$defs/hasReminder-is-false-disallows-reminderTimeOfDay"
+			}
+		]
+	],
 	"allOf": [
 		{
-			"$ref": "#/$defs/true-hasReminder-requires-reminderTimeOfDay"
+			"$ref": "#/$defs/hasReminder-is-false"
 		},
 		{
-			"$ref": "#/$defs/false-hasReminder-disallows-reminderTimeOfDay"
+			"$ref": "#/$defs/hasRepetition-is-true-requires-repeatDayFlags"
 		},
 		{
-			"$ref": "#/$defs/true-hasRepetition-requires-repeatDayFlags"
-		},
+			"$ref": "#/$defs/hasRepetition-is-false-disallows-repeatDayFlags"
+		}
+	],
+	"$comment": [
+		"---------------------------------------",
+		"Removed Pending Reminder Implementation",
+		"---------------------------------------",
 		{
-			"$ref": "#/$defs/false-hasRepetition-disallows-repeatDayFlags"
+			"hasReminder-is-true": {
+				"properties": {
+					"hasReminder": {
+						"const": true
+					}
+				},
+				"required": [
+					"hasReminder"
+				]
+			},
+			"hasReminder-is-false-disallows-reminderTimeOfDay": {
+				"anyOf": [
+					{
+						"not": {
+							"$ref": "#/$defs/hasReminder-is-false"
+						}
+					},
+					{
+						"not": {
+							"required": [
+								"reminderTimeOfDay"
+							]
+						}
+					}
+				]
+			},
+			"hasReminder-is-true-requires-reminderTimeOfDay": {
+				"anyOf": [
+					{
+						"not": {
+							"$ref": "#/$defs/hasReminder-is-true"
+						}
+					},
+					{
+						"required": [
+							"reminderTimeOfDay"
+						]
+					}
+				]
+			}
 		}
 	],
 	"$defs": {
-		"true-hasReminder-requires-reminderTimeOfDay": {
-			"anyOf": [
-				{
-					"not": { "$ref": "#/$defs/hasReminder-is-true" }
-				},
-				{
-					"required": ["reminderTimeOfDay"]
-				}
-			]
-		},
-		"false-hasReminder-disallows-reminderTimeOfDay": {
-			"anyOf": [
-				{
-					"not": { "$ref": "#/$defs/hasReminder-is-false" }
-				},
-				{
-					"not": { "required": ["reminderTimeOfDay"] }
-				}
-			]
-		},
-		"true-hasRepetition-requires-repeatDayFlags": {
-			"anyOf": [
-				{
-					"not": { "$ref": "#/$defs/hasRepetition-is-true" }
-				},
-				{
-					"required": ["repeatDayFlags"]
-				}
-			]
-		},
-		"false-hasRepetition-disallows-repeatDayFlags": {
-			"anyOf": [
-				{
-					"not": { "$ref": "#/$defs/hasRepetition-is-false" }
-				},
-				{
-					"not": { "required": ["repeatDayFlags"] }
-				}
-			]
-		},
-		"hasReminder-is-true": {
-			"properties": {
-				"hasReminder": {
-					"const": true
-				}
-			},
-			"required": ["hasReminder"]
-		},
 		"hasReminder-is-false": {
 			"properties": {
 				"hasReminder": {
@@ -142,21 +158,55 @@
 			},
 			"required": ["hasReminder"]
 		},
-		"hasRepetition-is-true": {
-			"properties": {
-				"hasRepetition": {
-					"const": true
-				}
-			},
-			"required": ["hasRepetition"]
-		},
 		"hasRepetition-is-false": {
 			"properties": {
 				"hasRepetition": {
 					"const": false
 				}
 			},
-			"required": ["hasRepetition"]
+			"required": [
+				"hasRepetition"
+			]
+		},
+		"hasRepetition-is-true": {
+			"properties": {
+				"hasRepetition": {
+					"const": true
+				}
+			},
+			"required": [
+				"hasRepetition"
+			]
+		},
+		"hasRepetition-is-false-disallows-repeatDayFlags": {
+			"anyOf": [
+				{
+					"not": {
+						"$ref": "#/$defs/hasRepetition-is-false"
+					}
+				},
+				{
+					"not": {
+						"required": [
+							"repeatDayFlags"
+						]
+					}
+				}
+			]
+		},
+		"hasRepetition-is-true-requires-repeatDayFlags": {
+			"anyOf": [
+				{
+					"not": {
+						"$ref": "#/$defs/hasRepetition-is-true"
+					}
+				},
+				{
+					"required": [
+						"repeatDayFlags"
+					]
+				}
+			]
 		}
 	}
 }
