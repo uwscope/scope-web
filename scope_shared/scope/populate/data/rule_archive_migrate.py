@@ -144,6 +144,17 @@ def _archive_migrate(
                 # Remove any "reminderTimeOfDay"
                 if "reminderTimeOfDay" in document_current:
                     del document_current["reminderTimeOfDay"]
+            # #354 migration applies to scheduledActivity documents
+            if document_current["_type"] == "scheduledActivity":
+                # Remove any "reminderDate"
+                if "reminderDate" in document_current:
+                    del document_current["reminderDate"]
+                # Remove any "reminderDateTime"
+                if "reminderDateTime" in document_current:
+                    del document_current["reminderDateTime"]
+                # Remove any "reminderTimeOfDay"
+                if "reminderTimeOfDay" in document_current:
+                    del document_current["reminderTimeOfDay"]
 
             migrated_entries[path_current] = document_current
 
