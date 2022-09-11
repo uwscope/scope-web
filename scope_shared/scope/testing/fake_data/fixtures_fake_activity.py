@@ -63,36 +63,38 @@ def _fake_activity(
         "timeOfDay": random.randrange(0, 24),
     }
     allowable_schedules = [
-        {
-            "hasReminder": True,
-            "reminderTimeOfDay": random.randrange(0, 24),
-            "hasRepetition": False,
-            "isActive": True,
-            "isDeleted": False,
-        },
-        {
-            "hasReminder": True,
-            "reminderTimeOfDay": random.randrange(0, 24),
-            "hasRepetition": False,
-            "isActive": False,
-            "isDeleted": True,
-        },
-        {
-            "hasReminder": True,
-            "reminderTimeOfDay": random.randrange(0, 24),
-            "hasRepetition": True,
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
-            "isActive": True,
-            "isDeleted": False,
-        },
-        {
-            "hasReminder": True,
-            "reminderTimeOfDay": random.randrange(0, 24),
-            "hasRepetition": True,
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
-            "isActive": False,
-            "isDeleted": True,
-        },
+        #  hasReminder currently must be false
+        #
+        # {
+        #     "hasReminder": True,
+        #     "reminderTimeOfDay": random.randrange(0, 24),
+        #     "hasRepetition": False,
+        #     "isActive": True,
+        #     "isDeleted": False,
+        # },
+        # {
+        #     "hasReminder": True,
+        #     "reminderTimeOfDay": random.randrange(0, 24),
+        #     "hasRepetition": False,
+        #     "isActive": False,
+        #     "isDeleted": True,
+        # },
+        # {
+        #     "hasReminder": True,
+        #     "reminderTimeOfDay": random.randrange(0, 24),
+        #     "hasRepetition": True,
+        #     "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+        #     "isActive": True,
+        #     "isDeleted": False,
+        # },
+        # {
+        #     "hasReminder": True,
+        #     "reminderTimeOfDay": random.randrange(0, 24),
+        #     "hasRepetition": True,
+        #     "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
+        #     "isActive": False,
+        #     "isDeleted": True,
+        # },
         {
             "hasReminder": False,
             "hasRepetition": False,

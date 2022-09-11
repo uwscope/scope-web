@@ -107,7 +107,7 @@ def _archive_migrate(
     # First simple migration, structure can be added for later migrations
     if migration == "v0.5.0":
         #
-        # Migration for schema enhancements in #335
+        # Migration for schema modifications in #335
         # https://github.com/uwscope/scope-web/pull/335
         #
         migrated_entries: Dict[Path, dict] = {}
@@ -115,7 +115,7 @@ def _archive_migrate(
             path_current = copy.deepcopy(path_current)
             document_current = copy.deepcopy(document_current)
 
-            # Migration applies only to activityLog documents
+            # #335 migration applies to activityLog documents
             if document_current["_type"] == "activityLog":
                 # If "success" is "No", remove any "accomplishment" or "pleasure"
                 if document_current["success"] == "No":
@@ -123,6 +123,38 @@ def _archive_migrate(
                         del document_current["accomplishment"]
                     if "pleasure" in document_current:
                         del document_current["pleasure"]
+
+            migrated_entries[path_current] = document_current
+
+        entries = migrated_entries
+    elif migration == "v0.7.0":
+        #
+        # Migration for schema modifications in #354
+        # https://github.com/uwscope/scope-web/pull/354
+        #
+        migrated_entries: Dict[Path, dict] = {}
+        for (path_current, document_current) in entries.items():
+            path_current = copy.deepcopy(path_current)
+            document_current = copy.deepcopy(document_current)
+
+            # #354 migration applies to activity documents
+            if document_current["_type"] == "activity":
+                # Ensure "hasReminder" is always False
+                document_current["hasReminder"] = False
+                # Remove any "reminderTimeOfDay"
+                if "reminderTimeOfDay" in document_current:
+                    del document_current["reminderTimeOfDay"]
+            # #354 migration applies to scheduledActivity documents
+            if document_current["_type"] == "scheduledActivity":
+                # Remove any "reminderDate"
+                if "reminderDate" in document_current:
+                    del document_current["reminderDate"]
+                # Remove any "reminderDateTime"
+                if "reminderDateTime" in document_current:
+                    del document_current["reminderDateTime"]
+                # Remove any "reminderTimeOfDay"
+                if "reminderTimeOfDay" in document_current:
+                    del document_current["reminderTimeOfDay"]
 
             migrated_entries[path_current] = document_current
 

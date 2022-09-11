@@ -4,6 +4,22 @@
 	"title": "IScheduledActivity",
 	"description": "IScheduledActivity Type",
 	"type": "object",
+	"$comment": [
+		"---------------------------------------",
+		"Removed Pending Reminder Implementation",
+		"---------------------------------------",
+		{
+			"reminderDate": {
+				"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDate"
+			},
+			"reminderTimeOfDay": {
+				"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderTimeOfDay"
+			},
+			"reminderDateTime": {
+				"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDateTime"
+			}
+		}
+	],
 	"properties": {
 		"_id": {
 			"type": "string"
@@ -37,15 +53,6 @@
 		},
 		"dueDateTime": {
 			"$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDateTime"
-		},
-		"reminderDate": {
-			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDate"
-		},
-		"reminderTimeOfDay": {
-			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderTimeOfDay"
-		},
-		"reminderDateTime": {
-			"$ref": "/schemas/documents/utils/scheduled-item#/properties/reminderDateTime"
 		},
 		"completed": {
 			"$ref": "/schemas/documents/utils/scheduled-item#/properties/completed"

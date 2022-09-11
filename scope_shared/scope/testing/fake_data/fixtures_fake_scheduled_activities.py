@@ -41,21 +41,23 @@ def _fake_scheduled_activity(
                 )
             )
         ),
-        "reminderDate": date_utils.format_date(
-            faker_factory.date_between(
-                start_date=datetime.date.today() - datetime.timedelta(days=10),
-                end_date=datetime.date.today() + datetime.timedelta(days=10),
-            )
-        ),
-        "reminderTimeOfDay": random.randint(0, 23),
-        "reminderDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                faker_factory.date_time_between(
-                    start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
-                    end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
-                )
-            )
-        ),
+        #  hasReminder currently must be false
+        #
+        # "reminderDate": date_utils.format_date(
+        #     faker_factory.date_between(
+        #         start_date=datetime.date.today() - datetime.timedelta(days=10),
+        #         end_date=datetime.date.today() + datetime.timedelta(days=10),
+        #     )
+        # ),
+        # "reminderTimeOfDay": random.randint(0, 23),
+        # "reminderDateTime": date_utils.format_datetime(
+        #     pytz.utc.localize(
+        #         faker_factory.date_time_between(
+        #             start_date=datetime.datetime.utcnow() - datetime.timedelta(days=10),
+        #             end_date=datetime.datetime.utcnow() + datetime.timedelta(days=10),
+        #         )
+        #     )
+        # ),
         "completed": random.choice([True, False]),
     }
 
