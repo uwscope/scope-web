@@ -236,6 +236,11 @@
 			"description": "PatientGender Type",
 			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
 		},
+		"lifeareaId": {
+			"type": "string",
+			"description": "",
+			"enum": ["education", "mindbody", "recreation", "relationship", "responsibilities"]
+		},
 		"pronoun": {
 			"type": "string",
 			"description": "PatientPronoun Type",

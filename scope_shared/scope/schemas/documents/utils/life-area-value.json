@@ -15,7 +15,7 @@
 			"$ref": "/schemas/utils/datetime#/properties/datetime"
 		},
 		"lifeareaId": {
-			"type": "string"
+			"$ref": "/schemas/utils/enums#/properties/lifeareaId"
 		},
 		"activities": {
 			"type": "array",
