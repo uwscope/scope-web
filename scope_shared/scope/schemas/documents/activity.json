@@ -39,7 +39,7 @@
 			"type": "string"
 		},
 		"lifeareaId": {
-			"type": "string"
+			"$ref": "/schemas/utils/enums#/properties/lifeareaId"
 		},
 		"startDateTime": {
 			"$ref": "/schemas/utils/datetime#/properties/datetime"
