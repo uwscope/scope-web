@@ -4,6 +4,12 @@
 	"title": "IValuesInventory",
 	"description": "IValuesInventory Type",
 	"type": "object",
+	"$comment": [
+		"assigned:",
+		"  - Whether the valuesInventory has been assigned.",
+		"assignedDateTime:",
+		"  - DateTime when assigned was last modified."
+	],
 	"properties": {
 		"_id": {
 			"type": "string"
@@ -19,15 +25,6 @@
 		},
 		"assignedDateTime": {
 			"$ref": "/schemas/utils/datetime#/properties/datetime"
-		},
-		"lastUpdatedDateTime": {
-			"$ref": "/schemas/utils/datetime#/properties/datetime"
-		},
-		"values": {
-			"type": "array",
-			"items": {
-				"$ref": "/schemas/documents/utils/life-area-value"
-			}
 		}
 	},
 	"additionalProperties": false,
