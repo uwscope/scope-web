@@ -24,8 +24,6 @@ document_schema: Optional[jschon.JSONSchema] = None
 enums_schema: Optional[jschon.JSONSchema] = None
 life_area_content_schema: Optional[jschon.JSONSchema] = None
 life_area_contents_schema: Optional[jschon.JSONSchema] = None
-life_area_value_schema: Optional[jschon.JSONSchema] = None
-life_area_value_activity_schema: Optional[jschon.JSONSchema] = None
 log_schema: Optional[jschon.JSONSchema] = None
 mood_log_schema: Optional[jschon.JSONSchema] = None
 mood_logs_schema: Optional[jschon.JSONSchema] = None
@@ -52,6 +50,7 @@ scheduled_item_schema: Optional[jschon.JSONSchema] = None
 sentinel_schema: Optional[jschon.JSONSchema] = None
 session_schema: Optional[jschon.JSONSchema] = None
 sessions_schema: Optional[jschon.JSONSchema] = None
+value_schema: Optional[jschon.JSONSchema] = None
 values_inventory_schema: Optional[jschon.JSONSchema] = None
 
 
@@ -101,12 +100,11 @@ SCHEMAS = {
     "sentinel_schema": "documents/sentinel.json",
     "session_schema": "documents/session.json",
     "sessions_schema": "documents/sessions.json",
+    "value_schema": "documents/value.json",
     "values_inventory_schema": "documents/values-inventory.json",
     # documents/utils,
     # Contains subschemas referenced (using $ref) by schemas in documents
     "contact_schema": "documents/utils/contact.json",
-    "life_area_value_schema": "documents/utils/life-area-value.json",
-    "life_area_value_activity_schema": "documents/utils/life-area-value-activity.json",
     "log_schema": "documents/utils/log.json",
     "referral_status_schema": "documents/utils/referral-status.json",
     "scheduled_item_schema": "documents/utils/scheduled-item.json",
