@@ -17,6 +17,7 @@ import scope.database.patient.sessions
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
+import scope.database.patient.values
 import scope.database.providers
 import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
@@ -43,6 +44,7 @@ import scope.testing.fake_data.fixtures_fake_session
 import scope.testing.fake_data.fixtures_fake_sessions
 import scope.testing.fake_data.fixtures_fake_scheduled_activities
 import scope.testing.fake_data.fixtures_fake_scheduled_assessments
+import scope.testing.fake_data.fixtures_fake_value
 import scope.testing.fake_data.fixtures_fake_values_inventory
 
 
@@ -326,6 +328,16 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=False,
         expected_semantic_set_id=None,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="value",
+        schema=scope.schema.value_schema,
+        data_factory_fixture="data_fake_value_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.values.SEMANTIC_SET_ID,
         expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
