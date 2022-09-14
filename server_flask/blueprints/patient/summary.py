@@ -1,5 +1,4 @@
 import datetime
-
 import flask
 import flask_json
 from typing import List
@@ -9,6 +8,7 @@ import request_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
+import scope.database.patient.values
 import scope.database.patient.values_inventory
 
 
@@ -100,6 +100,10 @@ def get_patient_summary(patient_id):
         )
     )
     scheduled_assessment_documents = scheduled_assessment_documents or []
+    value_documents = scope.database.patient.values.get_values(
+        collection=patient_collection,
+    )
+    value_documents = value_documents or []
     values_inventory_document = (
         scope.database.patient.values_inventory.get_values_inventory(
             collection=patient_collection,
@@ -117,5 +121,6 @@ def get_patient_summary(patient_id):
     return compute_patient_summary(
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
+        value_documents=value_documents,
         values_inventory_document=values_inventory_document,
     )
