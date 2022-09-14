@@ -22,6 +22,7 @@ def compute_patient_summary(
     safety_plan_document: dict,
     scheduled_assessment_documents: List[dict],
     values_inventory_document: dict,
+    value_documents: List[dict],
 ) -> dict:
     """
     {
@@ -38,13 +39,12 @@ def compute_patient_summary(
     # assignedValuesInventory
     assigned_values_inventory: bool = values_inventory_document["assigned"]
     if assigned_values_inventory:
-        for value_current in values_inventory_document.get("values", []):
-            # If any activity is defined, then assignedValuesInventory becomes False
-            assigned_values_inventory = (
-                assigned_values_inventory
-                and len(value_current.get("activities", [])) == 0
-            )
-            if not assigned_values_inventory:
+        assigned_values_inventory_datetime = date_utils.parse_datetime(values_inventory_document["assignedDateTime"])
+
+        for value_current in value_documents:
+            # If a value was created after the assignment, the assignment is resolved
+            if date_utils.parse_datetime(value_current["editedDateTime"]) > assigned_values_inventory_datetime:
+                assigned_values_inventory = False
                 break
 
     # assignedSafetyPlan
