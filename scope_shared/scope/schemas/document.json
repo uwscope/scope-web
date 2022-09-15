@@ -49,6 +49,9 @@
 			"$ref": "/schemas/documents/session"
 		},
 		{
+			"$ref": "/schemas/documents/value"
+		},
+		{
 			"$ref": "/schemas/documents/values-inventory"
 		},
 		{

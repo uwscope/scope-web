@@ -10,7 +10,7 @@
 		"---------------------------------------",
 		{
 			"reminderTimeOfDay": {
-				"type": "number",
+				"type": "integer",
 				"minimum": 0,
 				"exclusiveMaximum": 24
 			}
@@ -35,17 +35,30 @@
 		"name": {
 			"type": "string"
 		},
-		"value": {
-			"type": "string"
+		"editedDateTime": {
+			"$ref": "/schemas/utils/datetime#/properties/datetime"
+		},
+		"enjoyment": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"importance": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 10
 		},
 		"lifeareaId": {
 			"$ref": "/schemas/utils/enums#/properties/lifeareaId"
+		},
+		"valueId": {
+			"type": "string"
 		},
 		"startDateTime": {
 			"$ref": "/schemas/utils/datetime#/properties/datetime"
 		},
 		"timeOfDay": {
-			"type": "number",
+			"type": "integer",
 			"minimum": 0,
 			"exclusiveMaximum": 24
 		},
@@ -69,8 +82,7 @@
 	"required": [
 		"_type",
 		"name",
-		"value",
-		"lifeareaId",
+		"editedDateTime",
 		"startDateTime",
 		"timeOfDay",
 		"hasReminder",
@@ -92,6 +104,9 @@
 		]
 	],
 	"allOf": [
+		{
+			"$ref": "#/$defs/definedTogether-lifeareaId-valueId"
+		},
 		{
 			"$ref": "#/$defs/hasReminder-is-false"
 		},
@@ -176,6 +191,44 @@
 			},
 			"required": [
 				"hasRepetition"
+			]
+		},
+		"lifeareaId-defined": {
+			"required": [
+				"lifeareaId"
+			]
+		},
+		"valueId-defined": {
+			"required": [
+				"valueId"
+			]
+		},
+		"definedTogether-lifeareaId-valueId": {
+			"anyOf": [
+				{
+					"allOf": [
+						{
+							"$ref": "#/$defs/lifeareaId-defined"
+						},
+						{
+							"$ref": "#/$defs/valueId-defined"
+						}
+					]
+				},
+				{
+					"allOf": [
+						{
+							"not": {
+								"$ref": "#/$defs/lifeareaId-defined"
+							}
+						},
+						{
+							"not": {
+								"$ref": "#/$defs/valueId-defined"
+							}
+						}
+					]
+				}
 			]
 		},
 		"hasRepetition-is-false-disallows-repeatDayFlags": {

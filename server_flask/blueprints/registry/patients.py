@@ -17,6 +17,7 @@ import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
+import scope.database.patient.values
 import scope.database.patient.values_inventory
 import scope.database.patients
 
@@ -132,6 +133,13 @@ def _construct_patient_document(
     )
     if mood_logs:
         patient_document["moodLogs"] = mood_logs
+
+    # Values
+    values = scope.database.patient.values.get_values(
+        collection=patient_collection
+    )
+    if values:
+        patient_document["values"] = values
 
     return patient_document
 

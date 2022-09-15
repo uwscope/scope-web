@@ -23,6 +23,24 @@ class ConfigTestJSONSchema:
 TEST_CONFIGS = [
     # activity
     ConfigTestJSONSchema(
+        name="activity-definedTogether-lifeareaId-valueId-invalid-no-lifeareaId",
+        schema=scope.schema.activity_schema,
+        document_path="activity/definedTogether-lifeareaId-valueId-invalid-no-lifeareaId.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-definedTogether-lifeareaId-valueId-invalid-no-valueId",
+        schema=scope.schema.activity_schema,
+        document_path="activity/definedTogether-lifeareaId-valueId-invalid-no-valueId.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-definedTogether-lifeareaId-valueId-valid",
+        schema=scope.schema.activity_schema,
+        document_path="activity/definedTogether-lifeareaId-valueId-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
         name="activity-hasReminder-is-true-requires-reminderTimeOfDay-valid",
         schema=scope.schema.activity_schema,
         document_path="activity/hasReminder-is-true-requires-reminderTimeOfDay-valid.json",

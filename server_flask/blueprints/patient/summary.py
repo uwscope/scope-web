@@ -1,5 +1,4 @@
 import datetime
-
 import flask
 import flask_json
 from typing import List
@@ -9,6 +8,7 @@ import request_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
+import scope.database.patient.values
 import scope.database.patient.values_inventory
 
 
@@ -22,6 +22,7 @@ def compute_patient_summary(
     safety_plan_document: dict,
     scheduled_assessment_documents: List[dict],
     values_inventory_document: dict,
+    value_documents: List[dict],
 ) -> dict:
     """
     {
@@ -38,13 +39,12 @@ def compute_patient_summary(
     # assignedValuesInventory
     assigned_values_inventory: bool = values_inventory_document["assigned"]
     if assigned_values_inventory:
-        for value_current in values_inventory_document.get("values", []):
-            # If any activity is defined, then assignedValuesInventory becomes False
-            assigned_values_inventory = (
-                assigned_values_inventory
-                and len(value_current.get("activities", [])) == 0
-            )
-            if not assigned_values_inventory:
+        assigned_values_inventory_datetime = date_utils.parse_datetime(values_inventory_document["assignedDateTime"])
+
+        for value_current in value_documents:
+            # If a value was created after the assignment, the assignment is resolved
+            if date_utils.parse_datetime(value_current["editedDateTime"]) > assigned_values_inventory_datetime:
+                assigned_values_inventory = False
                 break
 
     # assignedSafetyPlan
@@ -100,6 +100,10 @@ def get_patient_summary(patient_id):
         )
     )
     scheduled_assessment_documents = scheduled_assessment_documents or []
+    value_documents = scope.database.patient.values.get_values(
+        collection=patient_collection,
+    )
+    value_documents = value_documents or []
     values_inventory_document = (
         scope.database.patient.values_inventory.get_values_inventory(
             collection=patient_collection,
@@ -117,5 +121,6 @@ def get_patient_summary(patient_id):
     return compute_patient_summary(
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
+        value_documents=value_documents,
         values_inventory_document=values_inventory_document,
     )

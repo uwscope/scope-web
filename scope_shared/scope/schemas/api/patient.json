@@ -57,6 +57,9 @@
 		},
 		"moodLogs": {
 			"$ref": "/schemas/documents/mood-logs"
+		},
+		"values": {
+			"$ref": "/schemas/documents/values"
 		}
 	},
 	"additionalProperties": false,

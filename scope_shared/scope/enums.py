@@ -201,3 +201,11 @@ class Site(Enum):
     SCCAPEN = "SCCA – PEN"
     MultiCareTacoma = "MultiCare – Tacoma"
     MultiCareGigHarbor = "MultiCare – Gig Harbor"
+
+
+class LifeAreaID(Enum):
+    Education = "education"
+    MindBody = "mindbody"
+    Recreation = "recreation"
+    Relationship = "relationship"
+    Responsibilities = "responsibilities"

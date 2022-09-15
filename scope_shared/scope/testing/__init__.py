@@ -23,6 +23,8 @@ PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_sessions",
     "scope.testing.fake_data.fixtures_fake_scheduled_activities",
     "scope.testing.fake_data.fixtures_fake_scheduled_assessments",
+    "scope.testing.fake_data.fixtures_fake_value",
+    "scope.testing.fake_data.fixtures_fake_values",
     "scope.testing.fake_data.fixtures_fake_values_inventory",
     "scope.testing.fixtures_config",
     "scope.testing.fixtures_database",

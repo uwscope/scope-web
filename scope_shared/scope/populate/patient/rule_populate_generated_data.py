@@ -346,7 +346,7 @@ def _populate_generated_data(
         if len(values_inventory.get("values", [])) > 1:
             fake_activities_factory = scope.testing.fake_data.fixtures_fake_activities.fake_activities_factory(
                 fake_activity_factory=scope.testing.fake_data.fixtures_fake_activity.fake_activity_factory(
-                    faker_factory=faker,
+                    faker=faker,
                     values_inventory=values_inventory,
                 )
             )
