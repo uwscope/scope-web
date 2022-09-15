@@ -51,6 +51,7 @@ sentinel_schema: Optional[jschon.JSONSchema] = None
 session_schema: Optional[jschon.JSONSchema] = None
 sessions_schema: Optional[jschon.JSONSchema] = None
 value_schema: Optional[jschon.JSONSchema] = None
+values_schema: Optional[jschon.JSONSchema] = None
 values_inventory_schema: Optional[jschon.JSONSchema] = None
 
 
@@ -101,6 +102,7 @@ SCHEMAS = {
     "session_schema": "documents/session.json",
     "sessions_schema": "documents/sessions.json",
     "value_schema": "documents/value.json",
+    "values_schema": "documents/values.json",
     "values_inventory_schema": "documents/values-inventory.json",
     # documents/utils,
     # Contains subschemas referenced (using $ref) by schemas in documents
