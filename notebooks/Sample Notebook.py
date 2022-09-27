@@ -18,7 +18,7 @@
 import pandas as pd
 import pathlib
 
-paths = Path("./data/patients").glob("*.json")
+paths = pathlib.Path("./data/patients").glob("*.json")
 patients_df = pd.DataFrame([pd.read_json(p, typ="series") for p in paths])
 
 patients_df.head()
