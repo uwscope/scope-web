@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "https://uwscope.org/schemas/documents/activities",
-	"title": "IActivity[]",
+	"title": "Activity Template[]",
 	"type": "array",
 	"items": {
 		"$ref": "/schemas/documents/activity"
