@@ -19,7 +19,7 @@
 			"type": "string"
 		},
 		"_type": {
-			"const": "activity"
+			"const": "activitySchedule"
 		},
 		"_set_id": {
 			"type": "string"
