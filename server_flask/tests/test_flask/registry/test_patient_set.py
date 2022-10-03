@@ -12,6 +12,7 @@ import scope.database.collection_utils as collection_utils
 import scope.database.document_utils as document_utils
 import scope.database.patient.activities
 import scope.database.patient.activity_logs
+import scope.database.patient.activity_schedules
 import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
@@ -87,6 +88,21 @@ TEST_CONFIGS = [
         flask_document_set_key="activitylogs",
         flask_query_set_element_type="activitylog",
         flask_document_set_element_key="activitylog",
+    ),
+    ConfigTestPatientSet(
+        name="activityschedules",
+        semantic_set_id=scope.database.patient.activity_schedules.SEMANTIC_SET_ID,
+        document_factory_fixture_set="data_fake_activity_schedules_factory",
+        document_factory_fixture_set_element="data_fake_activity_schedule_factory",
+        database_get_set_function=scope.database.patient.activity_schedules.get_activity_schedules,
+        database_get_function=scope.database.patient.activity_schedules.get_activity_schedule,
+        database_post_function=scope.database.patient.activity_schedules.post_activity_schedule,
+        database_unsafe_update_function=None,
+        database_document_parameter_name="activity_schedule",
+        flask_query_set_type="activityschedules",
+        flask_document_set_key="activityschedules",
+        flask_query_set_element_type="activityschedule",
+        flask_document_set_element_key="activityschedule",
     ),
     ConfigTestPatientSet(
         name="assessments",

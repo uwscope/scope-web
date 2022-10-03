@@ -10,6 +10,7 @@ import blueprints.app.config
 import blueprints.patient.summary
 import blueprints.registry.activities
 import blueprints.registry.activity_logs
+import blueprints.registry.activity_schedules
 import blueprints.registry.assessments
 import blueprints.registry.assessment_logs
 import blueprints.registry.case_reviews
@@ -114,6 +115,10 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.activities.activities_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.activity_schedules.activity_schedules_blueprint,
         url_prefix="/patient/",
     )
     app.register_blueprint(
