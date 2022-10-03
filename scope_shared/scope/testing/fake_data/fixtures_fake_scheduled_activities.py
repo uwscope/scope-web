@@ -80,7 +80,7 @@ def _fake_scheduled_activities(
 def fake_scheduled_activity_factory(
     *,
     faker_factory: faker.Faker,
-    activities: List[dict],
+    activity_schedules: List[dict],
 ) -> Callable[[], dict]:
     """
     Obtain a factory that will generate fake scheduled activity document.
@@ -89,7 +89,7 @@ def fake_scheduled_activity_factory(
     def factory() -> dict:
         fake_scheduled_activities = fake_scheduled_activities_factory(
             faker_factory=faker_factory,
-            activities=activities,
+            activity_schedules=activity_schedules,
         )()
 
         fake_scheduled_activity = random.choice(fake_scheduled_activities)
@@ -163,7 +163,7 @@ def fixture_data_fake_scheduled_activities_factory(
     data_fake_activity_schedules_factory: Callable[[], List[dict]],
 ) -> Callable[[], List[dict]]:
     """
-    Fixture for data_fake_scheduled_activity_factory.
+    Fixture for data_fake_scheduled_activities_factory.
     """
 
     # activities may randomly not include any elements.
