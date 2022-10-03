@@ -23,6 +23,9 @@
 		"scheduledActivityId": {
 			"type": "string"
 		},
+		"activityName": {
+			"type": "string"
+		},
 		"recordedDateTime": {
 			"$ref": "/schemas/documents/utils/log#/properties/recordedDateTime"
 		},
@@ -46,7 +49,7 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "scheduledActivityId", "recordedDateTime"],
+	"required": ["_type", "scheduledActivityId", "activityName", "recordedDateTime"],
 	"allOf": [
 		{
 			"$ref": "#/$defs/no-success-disallows-accomplishment"
