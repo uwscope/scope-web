@@ -56,5 +56,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "activityScheduleId", "activityName", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
+	"required": ["_type", "activityScheduleId", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }
