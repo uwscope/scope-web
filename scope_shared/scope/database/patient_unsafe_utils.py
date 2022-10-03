@@ -6,6 +6,7 @@ from typing import Callable, List, Optional
 import scope.database.collection_utils
 import scope.database.patient
 import scope.database.patient.activities
+import scope.database.patient.activity_schedules
 import scope.database.patient.assessments
 
 
@@ -116,20 +117,20 @@ def unsafe_update_assessment(
     )
 
 
-def unsafe_update_activity(
+def unsafe_update_activity_schedule(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
-    activity_complete: dict,
+    activity_schedule_complete: dict,
 ) -> scope.database.collection_utils.SetPutResult:
     return _unsafe_update_set_element(
-        database_get_function=scope.database.patient.activities.get_activity,
-        database_put_function=scope.database.patient.activities.put_activity,
-        database_put_document_parameter="activity",
+        database_get_function=scope.database.patient.activity_schedules.get_activity_schedule,
+        database_put_function=scope.database.patient.activity_schedules.put_activity_schedule,
+        database_put_document_parameter="activity_schedule",
         collection=collection,
         set_id=set_id,
-        preserve_keys=[scope.database.patient.activities.SEMANTIC_SET_ID],
-        new_document_complete=activity_complete,
+        preserve_keys=[scope.database.patient.activity_schedules.SEMANTIC_SET_ID],
+        new_document_complete=activity_schedule_complete,
     )
 
 

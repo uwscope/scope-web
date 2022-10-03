@@ -18,40 +18,40 @@ SEMANTIC_SET_ID = "activityScheduleId"
 
 
 def _calculate_scheduled_activities_to_create(
-    activity_id: str,
-    activity: dict,
+    activity_schedule_id: str,
+    activity_schedule: dict,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
     # Temporarily assume everybody is always in local timezone
     timezone = pytz.timezone("America/Los_Angeles")
 
-    if any([not activity["isActive"], activity["isDeleted"]]):
+    if any([not activity_schedule["isActive"], activity_schedule["isDeleted"]]):
         return []
 
-    if activity["hasRepetition"]:
+    if activity_schedule["hasRepetition"]:
         frequency = scope.enums.ScheduledItemFrequency.Weekly.value
         months = 3
-        repeat_day_flags = activity["repeatDayFlags"]
+        repeat_day_flags = activity_schedule["repeatDayFlags"]
     else:
         frequency = None
         months = None
         repeat_day_flags = None
 
-    if activity["hasReminder"]:
-        reminder_time_of_day = activity["reminderTimeOfDay"]
+    if activity_schedule["hasReminder"]:
+        reminder_time_of_day = activity_schedule["reminderTimeOfDay"]
     else:
         reminder_time_of_day = None
 
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
-        start_datetime=date_utils.parse_datetime(activity["startDateTime"]),
+        start_datetime=date_utils.parse_datetime(activity_schedule["startDateTime"]),
         effective_datetime=maintenance_datetime,
-        has_repetition=activity["hasRepetition"],
+        has_repetition=activity_schedule["hasRepetition"],
         frequency=frequency,
         repeat_day_flags=repeat_day_flags,
         day_of_week=None,  # Activities do not have dayOfWeek
-        due_time_of_day=activity["timeOfDay"],
-        reminder=activity["hasReminder"],
+        due_time_of_day=activity_schedule["timeOfDay"],
+        reminder=activity_schedule["hasReminder"],
         reminder_time_of_day=reminder_time_of_day,
         timezone=timezone,
         months=months,
@@ -65,8 +65,8 @@ def _calculate_scheduled_activities_to_create(
         new_scheduled_activity_current.update(
             {
                 "_type": scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
-                SEMANTIC_SET_ID: activity_id,
-                "activityName": activity["name"],
+                SEMANTIC_SET_ID: activity_schedule_id,
+                # "activityName": activity_schedule["name"],
             }
         )
 
@@ -77,7 +77,7 @@ def _calculate_scheduled_activities_to_create(
 
 def _calculate_scheduled_activities_to_delete(
     scheduled_activities: List[dict],
-    activity_id: str,
+    activity_schedule_id: str,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
     date_utils.raise_on_not_datetime_utc_aware(maintenance_datetime)
@@ -85,7 +85,7 @@ def _calculate_scheduled_activities_to_delete(
     current_scheduled_items = [
         scheduled_activity_current
         for scheduled_activity_current in scheduled_activities
-        if scheduled_activity_current[SEMANTIC_SET_ID] == activity_id
+        if scheduled_activity_current[SEMANTIC_SET_ID] == activity_schedule_id
     ]
 
     pending_scheduled_items = scheduled_item_utils.pending_scheduled_items(
@@ -98,8 +98,8 @@ def _calculate_scheduled_activities_to_delete(
 
 def _maintain_pending_scheduled_activities(
     collection: pymongo.collection.Collection,
-    activity_id: str,
-    activity: dict,
+    activity_schedule_id: str,
+    activity_schedule: dict,
     maintenance_datetime: datetime.datetime,
     delete_existing: bool,
 ):
@@ -116,7 +116,7 @@ def _maintain_pending_scheduled_activities(
         if existing_scheduled_activities:
             delete_items = _calculate_scheduled_activities_to_delete(
                 scheduled_activities=existing_scheduled_activities,
-                activity_id=activity_id,
+                activity_schedule_id=activity_schedule_id,
                 maintenance_datetime=maintenance_datetime,
             )
 
@@ -132,8 +132,8 @@ def _maintain_pending_scheduled_activities(
 
     # Create new scheduled activities as necessary
     create_items = _calculate_scheduled_activities_to_create(
-        activity_id=activity_id,
-        activity=activity,
+        activity_schedule_id=activity_schedule_id,
+        activity_schedule=activity_schedule,
         maintenance_datetime=maintenance_datetime,
     )
     if create_items:
@@ -148,12 +148,12 @@ def _maintain_pending_scheduled_activities(
             )
 
 
-def get_activities(
+def get_activity_schedules(
     *,
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "activity" documents.
+    Get list of "activity-schedule" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -162,13 +162,13 @@ def get_activities(
     )
 
 
-def get_activity(
+def get_activity_schedule(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
 ) -> Optional[dict]:
     """
-    Get "activity" document.
+    Get "activity-schedule" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -178,63 +178,65 @@ def get_activity(
     )
 
 
-def post_activity(
+def post_activity_schedule(
     *,
     collection: pymongo.collection.Collection,
-    activity: dict,
+    activity_schedule: dict,
 ) -> scope.database.collection_utils.SetPostResult:
     """
-    Post "activity" document.
+    Post "activity-schedule" document.
     """
 
-    activity_set_post_result = scope.database.collection_utils.post_set_element(
-        collection=collection,
-        document_type=DOCUMENT_TYPE,
-        semantic_set_id=SEMANTIC_SET_ID,
-        document=activity,
+    activity_schedule_set_post_result = (
+        scope.database.collection_utils.post_set_element(
+            collection=collection,
+            document_type=DOCUMENT_TYPE,
+            semantic_set_id=SEMANTIC_SET_ID,
+            document=activity_schedule,
+        )
     )
 
-    if activity_set_post_result.inserted_count == 1:
+    if activity_schedule_set_post_result.inserted_count == 1:
         _maintain_pending_scheduled_activities(
             collection=collection,
-            activity_id=activity_set_post_result.inserted_set_id,
-            activity=activity_set_post_result.document,
+            activity_schedule_id=activity_schedule_set_post_result.inserted_set_id,
+            activity_schedule=activity_schedule_set_post_result.document,
             maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
             delete_existing=False,
         )
 
-    return activity_set_post_result
+    return activity_schedule_set_post_result
 
 
-def put_activity(
+def put_activity_schedule(
     *,
     collection: pymongo.collection.Collection,
-    activity: dict,
+    activity_schedule: dict,
     set_id: str,
 ) -> scope.database.collection_utils.SetPutResult:
     """
-    Put "activity" document.
+    Put "activity-schedule" document.
     """
 
-    activity_set_put_result = scope.database.collection_utils.put_set_element(
+    activity_schedule_set_put_result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
-        document=activity,
+        document=activity_schedule,
     )
 
     #
     # Update the corresponding scheduled activities
     #
 
-    if activity_set_put_result.inserted_count == 1:
+    if activity_schedule_set_put_result.inserted_count == 1:
         _maintain_pending_scheduled_activities(
             collection=collection,
-            activity_id=set_id,
-            activity=activity_set_put_result.document,
+            activity_schedule_id=set_id,
+            activity_schedule=activity_schedule_set_put_result.document,
             maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
             delete_existing=True,
         )
 
-    return activity_set_put_result
+    return activity_schedule_set_put_result
