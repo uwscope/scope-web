@@ -13,17 +13,26 @@
 #     name: python3
 # ---
 
-# Extract the `archive_{}_{release}_{date}.zip` folder in data folder.
+# Provide full path to encrypted archive
+archive_path = input()
 
+# Provide password to encrypted archive
+password = input()
+
+# +
 import pandas as pd
 import pathlib
 
-paths = pathlib.Path("./data/patients").glob("*.json")
-patients_df = pd.DataFrame([pd.read_json(p, typ="series") for p in paths])
+from scope.populate.data.archive import Archive
+# -
+
+archive = Archive.read_archive(archive_path=pathlib.Path(archive_path), password=password)
+
+all_documents_df = pd.DataFrame.from_dict(archive.entries, orient="index")
+
+patients_df = all_documents_df[all_documents_df["_type"] == "patientIdentity"]
 
 patients_df.head()
 
 # Number of patients
 patients_df["patientId"].nunique()
-
-
