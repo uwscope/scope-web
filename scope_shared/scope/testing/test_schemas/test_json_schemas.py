@@ -21,6 +21,25 @@ class ConfigTestJSONSchema:
 
 
 TEST_CONFIGS = [
+    # activity-log
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-accomplishment-and-pleasure-valid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-accomplishment-and-pleasure-valid.json",
+        expected_valid=True,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-accomplishment-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-accomplishment-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-pleasure-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-pleasure-invalid.json",
+        expected_valid=False,
+    ),
     # activity-schedule
     ConfigTestJSONSchema(
         name="activity-schedule-hasReminder-is-true-requires-reminderTimeOfDay-valid",
@@ -70,25 +89,6 @@ TEST_CONFIGS = [
         name="activity-schedule-hasRepetition-is-false-disallows-repeatDayFlags-invalid",
         schema=scope.schema.activity_schedule_schema,
         document_path="activity-schedule/hasRepetition-is-false-disallows-repeatDayFlags-invalid.json",
-        expected_valid=False,
-    ),
-    # activity-log
-    ConfigTestJSONSchema(
-        name="activity-log-no-success-disallows-accomplishment-and-pleasure-valid",
-        schema=scope.schema.activity_log_schema,
-        document_path="activity-log/no-success-disallows-accomplishment-and-pleasure-valid.json",
-        expected_valid=True,
-    ),
-    ConfigTestJSONSchema(
-        name="activity-log-no-success-disallows-accomplishment-invalid",
-        schema=scope.schema.activity_log_schema,
-        document_path="activity-log/no-success-disallows-accomplishment-invalid.json",
-        expected_valid=False,
-    ),
-    ConfigTestJSONSchema(
-        name="activity-log-no-success-disallows-pleasure-invalid",
-        schema=scope.schema.activity_log_schema,
-        document_path="activity-log/no-success-disallows-pleasure-invalid.json",
         expected_valid=False,
     ),
     # assessment
