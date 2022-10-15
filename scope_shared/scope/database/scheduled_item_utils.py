@@ -253,7 +253,7 @@ def create_scheduled_items(
     start_datetime: _datetime.datetime,
     effective_datetime: _datetime.datetime,
     has_repetition: bool,
-    frequency: str,
+    frequency: Optional[str],
     repeat_day_flags: Optional[dict],
     day_of_week: Optional[str],
     due_time_of_day: int,

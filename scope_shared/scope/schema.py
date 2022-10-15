@@ -8,6 +8,8 @@ activity_schema: Optional[jschon.JSONSchema] = None
 activities_schema: Optional[jschon.JSONSchema] = None
 activity_log_schema: Optional[jschon.JSONSchema] = None
 activity_logs_schema: Optional[jschon.JSONSchema] = None
+activity_schedule_schema: Optional[jschon.JSONSchema] = None
+activity_schedules_schema: Optional[jschon.JSONSchema] = None
 app_config_schema: Optional[jschon.JSONSchema] = None
 app_content_config_schema: Optional[jschon.JSONSchema] = None
 assessment_schema: Optional[jschon.JSONSchema] = None
@@ -79,6 +81,8 @@ SCHEMAS = {
     "activities_schema": "documents/activities.json",
     "activity_log_schema": "documents/activity-log.json",
     "activity_logs_schema": "documents/activity-logs.json",
+    "activity_schedule_schema": "documents/activity-schedule.json",
+    "activity_schedules_schema": "documents/activity-schedules.json",
     "assessment_schema": "documents/assessment.json",
     "assessments_schema": "documents/assessments.json",
     "assessment_log_schema": "documents/assessment-log.json",

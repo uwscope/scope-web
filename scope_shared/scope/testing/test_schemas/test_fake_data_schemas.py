@@ -1,7 +1,6 @@
 import bson.objectid
 import copy
 from dataclasses import dataclass
-import faker
 import jschon
 import pytest
 import random
@@ -9,6 +8,7 @@ from typing import List, Optional
 
 import scope.database.patient.activities
 import scope.database.patient.activity_logs
+import scope.database.patient.activity_schedules
 import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
@@ -98,6 +98,26 @@ TEST_CONFIGS = [
         name="activity-logs",
         schema=scope.schema.activity_logs_schema,
         data_factory_fixture="data_fake_activity_logs_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="activity-schedule",
+        schema=scope.schema.activity_schedule_schema,
+        data_factory_fixture="data_fake_activity_schedule_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.activity_schedules.SEMANTIC_SET_ID,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="activity-schedules",
+        schema=scope.schema.activity_schedules_schema,
+        data_factory_fixture="data_fake_activity_schedules_factory",
         expected_document=False,
         expected_singleton=False,
         expected_set_element=False,

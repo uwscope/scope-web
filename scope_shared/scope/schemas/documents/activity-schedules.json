@@ -1,0 +1,8 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/activity-schedules",
+	"type": "array",
+	"items": {
+		"$ref": "/schemas/documents/activity-schedule"
+	}
+}

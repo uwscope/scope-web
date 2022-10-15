@@ -32,17 +32,9 @@ def _fake_activity(
                 datetime_now,
             )
         ),
+        "valueId": "valueId Placeholder",
         "enjoyment": random.randint(0, 10),
         "importance": random.randint(0, 10),
-        "startDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                faker.date_time_between(
-                    start_date=datetime_now - datetime.timedelta(days=1 * 30),
-                    end_date=datetime_now + datetime.timedelta(days=1 * 30),
-                )
-            )
-        ),
-        "timeOfDay": random.randrange(0, 24),
         "isActive": random.choice([False, True]),
         "isDeleted": random.choice([False, True]),
     }
@@ -55,41 +47,6 @@ def _fake_activity(
             "importance",
         ],
     )
-
-    # Apply fields with complex relationships
-    value_choices = [
-        {
-        },
-        {
-            "lifeareaId": fake_utils.fake_enum_value(scope.enums.LifeAreaID),
-            "valueId": "valueId Placeholder",
-        },
-    ]
-    fake_activity.update(random.choice(value_choices))
-
-    reminder_choices = [
-        {
-            "hasReminder": False,
-        },
-        #  hasReminder currently must be False
-        #
-        # {
-        #     "hasReminder": True,
-        #     "reminderTimeOfDay": random.randint(0, 23),
-        # },
-    ]
-    fake_activity.update(random.choice(reminder_choices))
-
-    repetition_choices = [
-        {
-            "hasRepetition": False,
-        },
-        {
-            "hasRepetition": True,
-            "repeatDayFlags": fake_utils.fake_enum_flag_values(scope.enums.DayOfWeek),
-        },
-    ]
-    fake_activity.update(random.choice(repetition_choices))
 
     return fake_activity
 
@@ -121,9 +78,7 @@ def fixture_data_fake_activity_factory(
     """
 
     def factory() -> dict:
-        unvalidated_factory = fake_activity_factory(
-            faker=faker
-        )
+        unvalidated_factory = fake_activity_factory(faker=faker)
 
         fake_activity = unvalidated_factory()
 

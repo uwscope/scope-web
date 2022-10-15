@@ -39,10 +39,7 @@
 		"scheduledActivityId": {
 			"type": "string"
 		},
-		"activityId": {
-			"type": "string"
-		},
-		"activityName": {
+		"activityScheduleId": {
 			"type": "string"
 		},
 		"dueDate": {
@@ -59,5 +56,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "activityId", "activityName", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
+	"required": ["_type", "activityScheduleId", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }
