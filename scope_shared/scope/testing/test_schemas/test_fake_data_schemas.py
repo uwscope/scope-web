@@ -104,7 +104,6 @@ TEST_CONFIGS = [
         expected_semantic_set_id=None,
         expected_set_ids=None,
     ),
-    # TODO: Confirm activity-schedule(s) test configuration w/ James.
     ConfigTestFakeDataSchema(
         name="activity-schedule",
         schema=scope.schema.activity_schedule_schema,

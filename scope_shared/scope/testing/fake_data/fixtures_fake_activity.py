@@ -32,6 +32,7 @@ def _fake_activity(
                 datetime_now,
             )
         ),
+        "valueId": "valueId Placeholder",
         "enjoyment": random.randint(0, 10),
         "importance": random.randint(0, 10),
         "isActive": random.choice([False, True]),
@@ -46,15 +47,6 @@ def _fake_activity(
             "importance",
         ],
     )
-
-    # Apply fields with complex relationships
-    value_choices = [
-        {},
-        {
-            "valueId": "valueId Placeholder",
-        },
-    ]
-    fake_activity.update(random.choice(value_choices))
 
     return fake_activity
 

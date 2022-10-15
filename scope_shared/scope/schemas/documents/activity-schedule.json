@@ -162,40 +162,6 @@
 			},
 			"required": ["hasRepetition"]
 		},
-		"lifeareaId-defined": {
-			"required": ["lifeareaId"]
-		},
-		"valueId-defined": {
-			"required": ["valueId"]
-		},
-		"definedTogether-lifeareaId-valueId": {
-			"anyOf": [
-				{
-					"allOf": [
-						{
-							"$ref": "#/$defs/lifeareaId-defined"
-						},
-						{
-							"$ref": "#/$defs/valueId-defined"
-						}
-					]
-				},
-				{
-					"allOf": [
-						{
-							"not": {
-								"$ref": "#/$defs/lifeareaId-defined"
-							}
-						},
-						{
-							"not": {
-								"$ref": "#/$defs/valueId-defined"
-							}
-						}
-					]
-				}
-			]
-		},
 		"hasRepetition-is-false-disallows-repeatDayFlags": {
 			"anyOf": [
 				{
