@@ -12,7 +12,6 @@ import scope.database.patient.scheduled_activities
 import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def _fake_scheduled_activity(

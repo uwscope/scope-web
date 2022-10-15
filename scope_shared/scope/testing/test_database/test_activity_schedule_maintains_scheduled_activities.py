@@ -4,7 +4,6 @@ a put or post to scope.database.patient.activities must maintain the scheduled a
 """
 
 import datetime
-import pytest
 import pytz
 from typing import Callable
 

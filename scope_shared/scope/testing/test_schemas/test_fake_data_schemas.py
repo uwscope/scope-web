@@ -1,7 +1,6 @@
 import bson.objectid
 import copy
 from dataclasses import dataclass
-import faker
 import jschon
 import pytest
 import random

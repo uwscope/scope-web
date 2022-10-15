@@ -1,16 +1,11 @@
 import copy
-import datetime
 from typing import List, Optional
 import pymongo.collection
-import pytz
 
 import scope.database.collection_utils
-import scope.database.date_utils as date_utils
 import scope.database.patient.scheduled_activities
-import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.enums
 import scope.schema
-import scope.schema_utils as schema_utils
 
 
 DOCUMENT_TYPE = "activity"
