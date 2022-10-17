@@ -14,10 +14,6 @@ import scope.schema_utils as schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
-# Keys are not naively optional, see allowable_schedules
-OPTIONAL_KEYS = []
-
-
 def _fake_activity(
     *,
     faker: _faker.Faker,
@@ -45,6 +41,7 @@ def _fake_activity(
         optional_keys=[
             "enjoyment",
             "importance",
+            "valueId",
         ],
     )
 
