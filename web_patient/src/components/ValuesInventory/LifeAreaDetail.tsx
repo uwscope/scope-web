@@ -31,7 +31,7 @@ import { useStores } from 'src/stores/stores';
 interface IValueEditFormSection {
     error: boolean;
     loading: boolean;
-    value: ILifeAreaValue;
+    value: IValue;
     activityExamples: string[];
     handleEditValue: () => void;
     handleCancelEditActivity: () => void;
@@ -383,7 +383,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         return null;
     }
 
-    const values = patientStore.valuesInventory?.values || [];
+    const values = patientStore.values || [];
 
     interface IViewStateModeNone {
         mode: 'none';
@@ -416,20 +416,39 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleAddValue = action(() => {
-        viewState.openAddValue = true;
-        viewState.newValue = '';
-        viewState.editValueIdx = -1;
+        // Open AddEditValueDialog to Add value.
+
+        viewState.openAddEditValue = true;
+        viewState.name = '';
+        viewState.modeState = {
+            mode: 'add',
+        };
     });
 
-    const handleEditValue = (idx: number) =>
+    const handleEditValue = (valueId: string) =>
+        // Open AddEditValueDialog to Edit value.
+
+        // valueId is sufficient for creating this interface callback,
+        // but upon activation our viewState takes a copy of the value that is being edited.
         action(() => {
-            viewState.openAddValue = true;
-            viewState.editValueIdx = idx;
-            viewState.newValue = values[idx].name;
+            const value = patientStore.values.find((value) => valueId == value.valueId);
+
+            console.assert(value, `Value to edit not found: ${valueId}`);
+
+            if (value) {
+                viewState.openAddEditValue = true;
+                viewState.name = value.name;
+                viewState.modeState = {
+                    mode: 'edit',
+                    editValue: {
+                        ...toJS(value)
+                    },
+                };
+            }
         });
 
     const handleCancelValue = action(() => {
-        viewState.openAddValue = false;
+        viewState.openAddEditValue = false;
         patientStore.loadValuesInventoryState.resetState();
     });
 
@@ -438,39 +457,35 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleChangeValue = action((change: string) => {
-        viewState.newValue = change;
+        viewState.name = change;
     });
 
     const handleSaveValue = action(async () => {
-        const { valuesInventory } = patientStore;
-        const clonedInventory = toJS(valuesInventory);
+        if (viewState.modeState.mode == 'add') {
+            // TODO Activity Refactor: check that our 'add' is valid
+            // is a unique value
 
-        const newValues = clonedInventory.values || [];
-
-        if (viewState.editValueIdx >= 0) {
-            newValues[viewState.editValueIdx].name = viewState.newValue;
-            newValues[viewState.editValueIdx].editedDateTime = new Date();
-        } else {
-            newValues.push({
-                name: viewState.newValue,
+            await patientStore.addValue({
+                name: viewState.name,
                 lifeareaId: lifeareaId,
-                activities: [],
-                createdDateTime: new Date(),
                 editedDateTime: new Date(),
-            } as ILifeAreaValue);
+            });
+        } else if (viewState.modeState.mode == 'edit') {
+            // TODO Activity Refactor: check that our 'edit' is valid
+            // the value still exists
+            // is a unique value
+            // the value changed
+
+            await patientStore.updateValue({
+                ...toJS(viewState.modeState.editValue),
+                name: viewState.name,
+                editedDateTime: new Date(),
+            });
         }
 
-        const newValuesInventory = {
-            ...clonedInventory,
-            lastUpdatedDateTime: new Date(),
-            values: newValues,
-        } as IValuesInventory;
-
-        await patientStore.updateValuesInventory(newValuesInventory);
-
         runInAction(() => {
-            if (!patientStore.loadValuesInventoryState.error) {
-                viewState.openAddValue = false;
+            if (!patientStore.loadValuesState.error) {
+                viewState.openAddEditValue = false;
             }
         });
     });
@@ -516,7 +531,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         */
 
         if (!patientStore.loadValuesInventoryState.error) {
-            viewState.openAddValue = false;
+            viewState.openAddEditValue = false;
         }
     });
 
@@ -547,7 +562,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         <Stack spacing={0}>
                             <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
                             <Stack spacing={4}>
-                                {values.map((value, idx) => {
+                                {values.map((value) => {
                                     if (value.lifeareaId == lifeareaId) {
                                         return (
                                             <ValueEditFormSection
@@ -555,10 +570,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                                 loading={patientStore.loadValuesInventoryState.pending}
                                                 value={value}
                                                 activityExamples={activityExamples}
-                                                handleEditValue={handleEditValue(idx)}
+                                                // TODO James: Prefer to not need such as cast
+                                                handleEditValue={handleEditValue(value.valueId as string)}
                                                 handleCancelEditActivity={handleCancelEditActivity}
-                                                handleSaveValueActivities={handleSaveValueActivities(idx)}
-                                                key={idx}
+                                                // handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                                key={value.valueId}
                                             />
                                         );
                                     }
@@ -585,17 +601,17 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     />
                 </Stack>
                 <AddEditValueDialog
-                    open={viewState.openAddValue}
-                    isEdit={viewState.editValueIdx >= 0}
+                    open={viewState.openAddEditValue}
+                    isEdit={viewState.modeState.mode == 'edit'}
                     lifearea={lifeareaContent.name}
-                    value={viewState.newValue}
+                    value={viewState.name}
                     examples={valueExamples}
                     error={patientStore.loadValuesInventoryState.error}
                     loading={patientStore.loadValuesInventoryState.pending}
                     handleCancel={handleCancelValue}
                     handleChange={handleChangeValue}
                     handleSave={handleSaveValue}
-                    handleDelete={viewState.editValueIdx >= 0 ? handleDeleteValue : undefined}
+                    handleDelete={viewState.modeState.mode == 'edit' ? handleDeleteValue : undefined}
                 />
             </ContentLoader>
         </DetailPage>
