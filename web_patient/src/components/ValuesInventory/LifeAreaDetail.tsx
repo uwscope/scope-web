@@ -62,11 +62,16 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         viewState.editActivityIdx = -1;
     });
 
+    // TODO Activity Refactor
+    /*
     const handleEditActivityItem = action((idx: number) => {
         viewState.openAddActivity = true;
         viewState.editActivityIdx = idx;
     });
+    */
 
+    // TODO Activity Refactor
+    /*
     const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
         const newValue = { ...toJS(value) };
         newValue.activities = newValue.activities?.slice() || [];
@@ -85,7 +90,10 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             }
         });
     });
+    */
 
+    // TODO Activity Refactor
+    /*
     const handleDeleteActivity = action(async () => {
         const newValue = { ...toJS(value) };
         newValue.activities = newValue.activities?.slice() || [];
@@ -101,11 +109,15 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             }
         });
     });
+    */
 
+    // TODO Activity Refactor
+    /*
     const handleCancelActivity = action(() => {
         handleCancelEditActivity();
         viewState.openAddActivity = false;
     });
+    */
 
     return (
         <Stack spacing={0}>
@@ -116,6 +128,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
+                { /* TODO Activity Refactor
                 {value.activities.map((activity, idx) => (
                     <Grid container direction="row" alignItems="flex-start" key={idx} flexWrap="nowrap">
                         <Grid item>
@@ -136,8 +149,11 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         </IconButton>
                     </Grid>
                 ))}
+                */ }
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    { /* TODO Activity Refactor
                     <Typography sx={{ paddingRight: 1 }}>{`${value.activities.length + 1}.`}</Typography>
+                    */ }
                     <Button
                         variant="contained"
                         color="primary"
@@ -148,6 +164,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     </Button>
                 </Box>
             </Stack>
+            { /* TODO Activity Refactor
             {viewState.openAddActivity && (
                 <AddEditActivityDialog
                     error={error}
@@ -161,6 +178,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     handleDelete={viewState.editActivityIdx >= 0 ? handleDeleteActivity : undefined}
                 />
             )}
+            */ }
         </Stack>
     );
 });
@@ -224,6 +242,7 @@ const AddEditValueDialog: FunctionComponent<{
     );
 };
 
+/* TODO Activity Refactor
 const AddEditActivityDialog: FunctionComponent<{
     open: boolean;
     error: boolean;
@@ -337,6 +356,7 @@ const AddEditActivityDialog: FunctionComponent<{
         />
     );
 });
+*/
 
 const Examples: FunctionComponent<{ title: string; examples: string[] }> = (props) => {
     const { title, examples } = props;
@@ -441,6 +461,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         });
     });
 
+    /* TODO Activity Refactor
     const handleSaveValueActivities = (idx: number) =>
         action(async (newValue: ILifeAreaValue) => {
             const { valuesInventory } = patientStore;
@@ -457,8 +478,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
             await patientStore.updateValuesInventory(newValuesInventory);
         });
+    */
 
     const handleDeleteValue = action(async () => {
+        // TODO Activity Refactor
+        /*
         const { valuesInventory } = patientStore;
         const clonedInventory = toJS(valuesInventory);
 
@@ -475,6 +499,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         } as IValuesInventory;
 
         await patientStore.updateValuesInventory(newValuesInventory);
+        */
 
         if (!patientStore.loadValuesInventoryState.error) {
             viewState.openAddValue = false;
