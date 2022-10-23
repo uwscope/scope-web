@@ -430,7 +430,6 @@ export class PatientStore implements IPatientStore {
     public async updateValuesInventory(inventory: IValuesInventory) {
         const promise = this.patientService.updateValuesInventory({
             ...toJS(inventory),
-            lastUpdatedDateTime: new Date(),
         });
 
         await this.loadAndLogQuery<IValuesInventory>(
