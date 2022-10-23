@@ -229,8 +229,14 @@ export interface ISafetyPlan {
 export interface IValuesInventory {
     assigned: boolean;
     assignedDateTime?: Date;
-    lastUpdatedDateTime?: Date;
-    values?: ILifeAreaValue[];
+}
+
+export interface IValue {
+    valueId?: string;
+
+    name: string;
+    lifeareaId: string;
+    editedDateTime: Date;
 }
 
 export interface ILifeAreaContent {
@@ -265,6 +271,9 @@ export interface IPatient {
     // Values inventory and safety plan
     valuesInventory: IValuesInventory;
     safetyPlan: ISafetyPlan;
+
+    // Values
+    values: IValue[];
 
     // Sessions
     sessions: ISession[];
