@@ -1,4 +1,3 @@
-import { compareAsc } from 'date-fns';
 import _ from 'lodash';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
@@ -162,9 +161,7 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async getValuesInventory(): Promise<IValuesInventory> {
         const response = await this.axiosInstance.get<IValuesInventoryResponse>(`/valuesinventory`);
-        const inventory = response.data?.valuesinventory;
-        inventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
-        return inventory;
+        return response.data?.valuesinventory;
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
@@ -177,9 +174,7 @@ class PatientService extends ServiceBase implements IPatientService {
         const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, {
             valuesinventory: inventory,
         } as IValuesInventoryRequest);
-        const updatedInventory = response.data?.valuesinventory;
-        updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
-        return updatedInventory;
+        return response.data?.valuesinventory;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
