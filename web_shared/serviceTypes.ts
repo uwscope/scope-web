@@ -14,6 +14,7 @@ import {
     IScheduledActivity,
     IScheduledAssessment,
     ISession,
+    IValue,
     IValuesInventory,
 } from 'shared/types';
 
@@ -165,4 +166,16 @@ export interface IActivityLogRequest extends IServiceResponse {
 export interface IIdentityResponse extends IServiceResponse {
     providerIdentity: IProviderIdentity;
     patientIdentity: IPatientIdentity;
+}
+
+export interface IValueRequest {
+    value: IValue;
+}
+
+export interface IValueResponse extends IServiceResponse {
+    value: IValue;
+}
+
+export interface IValueListResponse extends IServiceResponse {
+    values: IValue[];
 }
