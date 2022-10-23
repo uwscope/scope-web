@@ -3,28 +3,28 @@ import EditIcon from '@mui/icons-material/Edit';
 import {
     Box,
     Button,
-    FormControl,
-    Grid,
+    // FormControl,
+    // Grid,
     IconButton,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
+    // InputLabel,
+    // MenuItem,
+    // Select,
+    // SelectChangeEvent,
     Stack,
     TextField,
-    Typography,
+    // Typography,
 } from '@mui/material';
 import { random } from 'lodash';
 import { action, runInAction, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ILifeAreaValue, ILifeAreaValueActivity, IValuesInventory } from 'shared/types';
+import { IValue } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
-import { getActivityDetailText } from 'src/components/ValuesInventory/values';
+// import { getActivityDetailText } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
@@ -35,18 +35,18 @@ interface IValueEditFormSection {
     activityExamples: string[];
     handleEditValue: () => void;
     handleCancelEditActivity: () => void;
-    handleSaveValueActivities: (newValue: ILifeAreaValue) => Promise<void>;
+    // handleSaveValueActivities: (newValue: IValue) => Promise<void>;
 }
 
 const ValueEditFormSection = observer((props: IValueEditFormSection) => {
     const {
-        error,
-        loading,
+        // error,
+        // loading,
         value,
-        activityExamples,
+        // activityExamples,
         handleEditValue,
-        handleCancelEditActivity,
-        handleSaveValueActivities,
+        // handleCancelEditActivity,
+        // handleSaveValueActivities,
     } = props;
 
     const viewState = useLocalObservable<{
