@@ -385,14 +385,28 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const values = patientStore.valuesInventory?.values || [];
 
-    const viewState = useLocalObservable<{
-        openAddValue: boolean;
-        newValue: string;
-        editValueIdx: number;
-    }>(() => ({
-        openAddValue: false,
-        newValue: '',
-        editValueIdx: -1,
+    interface IViewStateModeNone {
+        mode: 'none';
+    }
+    interface IViewStateModeAdd {
+        mode: 'add';
+    }
+    interface IViewStateModeEdit {
+        mode: 'edit';
+        editValue: IValue;
+    }
+    interface IViewState {
+        openAddEditValue: boolean;
+        name: string;
+        modeState: IViewStateModeNone | IViewStateModeAdd | IViewStateModeEdit;
+    }
+
+    const viewState = useLocalObservable<IViewState>(() => ({
+        openAddEditValue: false,
+        name: '',
+        modeState: {
+            mode: 'none',
+        },
     }));
 
     const navigate = useNavigate();
