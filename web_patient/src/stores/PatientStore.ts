@@ -9,6 +9,7 @@ import {
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
+    IValue,
     IValuesInventory,
 } from 'shared/types';
 import { IPatientService } from 'shared/patientService';
@@ -27,6 +28,7 @@ export interface IPatientStore {
 
     readonly config: IPatientConfig;
     readonly activities: IActivity[];
+    readonly values: IValue[];
     readonly valuesInventory: IValuesInventory;
     readonly safetyPlan: ISafetyPlan;
 
@@ -43,6 +45,7 @@ export interface IPatientStore {
     loadAssessmentLogsState: IPromiseQueryState;
 
     loadMoodLogsState: IPromiseQueryState;
+    loadValuesState: IPromiseQueryState;
     loadValuesInventoryState: IPromiseQueryState;
     loadActivitiesState: IPromiseQueryState;
 
@@ -68,6 +71,10 @@ export interface IPatientStore {
     loadValuesInventory: () => Promise<void>;
     updateValuesInventory: (inventory: IValuesInventory) => Promise<void>;
 
+    // Values
+    addValue: (value: IValue) => Promise<void>;
+    updateValue: (value: IValue) => Promise<void>;
+
     // Mood logs
     loadMoodLogs: () => Promise<void>;
     saveMoodLog: (moodLog: IMoodLog) => Promise<void>;
@@ -85,6 +92,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadScheduledActivitiesQuery: PromiseQuery<IScheduledActivity[]>;
     private readonly loadScheduledAssessmentsQuery: PromiseQuery<IScheduledAssessment[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
+    private readonly loadValuesQuery: PromiseQuery<IValue[]>;
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
     private readonly loadActivityLogsQuery: PromiseQuery<IActivityLog[]>;
@@ -112,6 +120,7 @@ export class PatientStore implements IPatientStore {
         this.loadConfigQuery = new PromiseQuery<IPatientConfig>(undefined, 'loadConfigQuery');
         this.loadPatientQuery = new PromiseQuery<IPatient>(undefined, 'loadPatientQuery');
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
+        this.loadValuesQuery = new PromiseQuery<IValue[]>([], 'loadValuesQuery');
         this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'loadValuesInventoryQuery');
         this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(undefined, 'loadSafetyPlan');
         this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>([], 'loadActivityLogsQuery');
@@ -131,6 +140,10 @@ export class PatientStore implements IPatientStore {
 
     @computed public get loadActivitiesState() {
         return this.loadActivitiesQuery;
+    }
+
+    @computed public get loadValuesState() {
+        return this.loadValuesQuery;
     }
 
     @computed public get loadScheduledActivitiesState() {
@@ -223,6 +236,10 @@ export class PatientStore implements IPatientStore {
             );
     }
 
+    @computed public get values() {
+        return this.loadValuesQuery.value || [];
+    }
+
     @computed public get valuesInventory() {
         return (
             this.loadValuesInventoryQuery.value || {
@@ -274,6 +291,7 @@ export class PatientStore implements IPatientStore {
                 this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
                 this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
                 this.loadActivityLogsQuery.fromPromise(Promise.resolve(patient.activityLogs));
+                this.loadValuesQuery.fromPromise(Promise.resolve(patient.values));
                 return patient;
             });
 
@@ -441,6 +459,44 @@ export class PatientStore implements IPatientStore {
         // Calling it outside of the promise query to avoid updating the flag.
         const newConfig = await this.patientService.getPatientConfig();
         this.loadConfigQuery.fromPromise(Promise.resolve(newConfig));
+    }
+
+    @action.bound
+    public async addValue(value: IValue) {
+        const promise = this.patientService.addValue(value).
+        then((addedValue) => {
+            const newValues = this.values.slice() || [];
+            newValues.push(addedValue);
+            return newValues;
+        });
+
+        await this.loadAndLogQuery<IValue[]>(
+            () => promise,
+            this.loadValuesQuery,
+            onArrayConflict('value', 'valueId', () => this.values, logger),
+        );
+    }
+
+    @action.bound
+    public async updateValue(value: IValue) {
+        const prevValues = this.values.slice() || [];
+        const foundIdx = prevValues.findIndex((v) => v.valueId == value.valueId);
+
+        console.assert(foundIdx >= 0, `Value to update not found: ${value.valueId}`);
+
+        if (foundIdx >= 0) {
+            const promise = this.patientService.updateValue(value).then((updatedValue: IValue) => {
+                prevValues[foundIdx] = updatedValue;
+
+                return prevValues;
+            });
+
+            await this.loadAndLogQuery<IValue[]>(
+                () => promise,
+                this.loadValuesQuery,
+                onArrayConflict('value', 'valueId', () => this.values, logger),
+            );
+        }
     }
 
     @action.bound
