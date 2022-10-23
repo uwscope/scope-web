@@ -26,7 +26,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { DayOfWeek, daysOfWeekValues } from 'shared/enums';
 import { clearTime } from 'shared/time';
-import { IActivity, KeyedMap } from 'shared/types';
+import {IActivity, ILifeAreaValue, KeyedMap} from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
@@ -45,7 +45,7 @@ interface ImportableActivity {
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
-    const { valuesInventory } = patientStore;
+    // const { valuesInventory } = patientStore;
     const { lifeAreas } = appContentConfig;
 
     const activityId = getRouteParameter(Parameters.activityId);
@@ -81,26 +81,29 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         isDeleted: activity?.isDeleted || false,
     }));
 
-    const values = valuesInventory?.values || [];
+    // TODO Activity Refactor: Replace with loading values
+    // const values = valuesInventory?.values || [];
     const groupedActivities: KeyedMap<ImportableActivity[]> = {};
     let activityCount = 0;
 
-    values.forEach((value) => {
-        const lifearea = value.lifeareaId;
-        if (!groupedActivities[lifearea]) {
-            groupedActivities[lifearea] = [];
-        }
-
-        value.activities.forEach((activity) => {
-            groupedActivities[lifearea].push({
-                activity: activity.name,
-                value: value.name,
-                lifeareaId: lifearea,
-            });
-
-            activityCount += groupedActivities[lifearea].length;
-        });
-    });
+    // TODO Activity Refactor: Replace with loading values
+    const values: ILifeAreaValue[] = [];
+    // values.forEach((value) => {
+    //     const lifearea = value.lifeareaId;
+    //     if (!groupedActivities[lifearea]) {
+    //         groupedActivities[lifearea] = [];
+    //     }
+    //
+    //     value.activities.forEach((activity) => {
+    //         groupedActivities[lifearea].push({
+    //             activity: activity.name,
+    //             value: value.name,
+    //             lifeareaId: lifearea,
+    //         });
+    //
+    //         activityCount += groupedActivities[lifearea].length;
+    //     });
+    // });
 
     const handleSubmit = action(async () => {
         const activity = toJS(dataState);
