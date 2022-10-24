@@ -98,16 +98,10 @@ export interface IAssessment {
 export interface IActivity {
     activityId?: string;
     name: string;
-    value: string;
-    lifeareaId: string;
-    startDateTime: Date;
-    timeOfDay: number;
-    hasReminder: boolean;
-    reminderTimeOfDay?: number;
-    hasRepetition: boolean;
-    repeatDayFlags?: DayOfWeekFlags;
-    isActive: boolean;
-    isDeleted: boolean;
+    editedDateTime: Date;
+    enjoyment?: number;
+    importance?: number;
+    valueId?: string;
 }
 
 export interface IScheduledItem {
