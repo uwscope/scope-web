@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://uwscope.org/schemas/documents/set-tombstone",
+	"type": "object",
+	"properties": {
+		"_id": {
+			"type": "string"
+		},
+		"_type": {
+			"$ref": "/schemas/utils/enums#/properties/documentType"
+		},
+		"_set_id": {
+			"type": "string"
+		},
+		"_rev": {
+			"type": "number"
+		},
+		"_deleted": {
+			"const": true
+		}
+	},
+	"required": ["_type", "_set_id", "_rev", "_deleted"],
+	"additionalProperties": false
+}
