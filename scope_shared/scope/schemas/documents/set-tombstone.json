@@ -7,7 +7,7 @@
 			"type": "string"
 		},
 		"_type": {
-			"$ref": "/schemas/utils/enums#/properties/documentType"
+			"$ref": "/schemas/utils/enums#/properties/setType"
 		},
 		"_set_id": {
 			"type": "string"
