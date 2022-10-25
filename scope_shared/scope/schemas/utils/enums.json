@@ -209,6 +209,22 @@
 			},
 			"required": ["Flag as safety risk", "Flag for discussion"]
 		},
+		"documentType": {
+			"type": "string",
+			"enum": [
+				"activityLog",
+				"activitySchedule",
+				"activity",
+				"assessmentLog",
+				"assessment",
+				"caseReview",
+				"moodLog",
+				"scheduledActivity",
+				"scheduledAssessment",
+				"session",
+				"value"
+			]
+		},
 		"dueType": {
 			"type": "string",
 			"description": "DueType Type",
