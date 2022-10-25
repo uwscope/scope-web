@@ -3,10 +3,12 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
-from typing import List, Optional
+from typing import List, Optional, Union
 import uuid
 
 import scope.database.document_utils as document_utils
+import scope.schema
+import scope.schema_utils as schema_utils
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
@@ -65,22 +67,41 @@ def delete_set_element(
     collection: pymongo.collection.Collection,
     document_type: str,
     set_id: str,
+    rev: Optional[int],  # TODO: Check w/ James. Made this `Optional` for tests.
     destructive: bool,
-) -> bool:
-    # TODO: define semantics of this method, in place now so we're forced to use it
+) -> Union[bool, SetPutResult]:
 
-    if not destructive:
-        raise NotImplementedError()
+    if destructive and rev != None:
+        raise ValueError(
+            '"rev" {} should b3e None when "destructive" is {}'.format(rev, destructive)
+        )
 
-    # There is likely a race condition here, but our semantics for destructive deletion are weak.
-    result = collection.delete_many(
-        {
-            "_type": document_type,
-            "_set_id": set_id,
-        }
+    # Old code
+    if destructive:
+        # There is likely a race condition here, but our semantics for destructive deletion are weak.
+        result = collection.delete_many(
+            {
+                "_type": document_type,
+                "_set_id": set_id,
+            }
+        )
+        return result.deleted_count > 0
+
+    tombstone_document = set_tombstone(
+        document_type=document_type,
+        set_id=set_id,
+        rev=rev,
     )
 
-    return result.deleted_count > 0
+    set_put_result = put_set_element(
+        collection=collection,
+        document_type=document_type,
+        semantic_set_id=None,
+        set_id=set_id,
+        document=tombstone_document,
+    )
+
+    return set_put_result
 
 
 def ensure_index(
@@ -153,6 +174,7 @@ def get_set(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        {"$match": {"_deleted": {"$exists": False}}},
     ]
 
     # Execute pipeline, obtain list of results
@@ -201,6 +223,7 @@ def get_set_element(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        {"$match": {"_deleted": {"$exists": False}}},
     ]
 
     # Execute pipeline, obtain single result
@@ -454,3 +477,22 @@ def put_singleton(
         inserted_id=str(result.inserted_id),
         document=document,
     )
+
+
+def set_tombstone(
+    *,
+    document_type: str,
+    set_id: str,
+    rev: int,
+) -> dict:
+    tombstone_document = {
+        "_type": document_type,
+        "_set_id": set_id,
+        "_rev": rev,
+        "_deleted": True,
+    }
+    schema_utils.raise_for_invalid_schema(
+        data=tombstone_document,
+        schema=scope.schema.set_tombstone_schema,
+    )
+    return tombstone_document
