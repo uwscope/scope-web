@@ -83,6 +83,7 @@ def delete_provider(
         collection=provider_identity_collection,
         document_type=PROVIDER_IDENTITY_DOCUMENT_TYPE,
         set_id=provider_id,
+        rev=None,
         destructive=destructive,
     )
 

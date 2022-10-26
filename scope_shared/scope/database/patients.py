@@ -4,7 +4,7 @@ import pytz
 from typing import List, Optional
 
 import scope.database.date_utils as date_utils
-import scope.database.collection_utils as collection_utils
+import scope.database.collection_utils
 import scope.database.patient.assessments
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
@@ -108,6 +108,7 @@ def delete_patient(
             collection=database.get_collection(PATIENT_IDENTITY_COLLECTION),
             document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
             set_id=patient_id,
+            rev=None,
             destructive=destructive,
         )
 
