@@ -208,13 +208,13 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                         <MenuItem onClick={handleDelete}>{getString('Careplan_activity_item_delete')}</MenuItem>
                     </Menu>
                     {activities.length > 0 ? (
-                        Object.keys(groupedActivities).map((lifeareaId) => {
-                            const activities = groupedActivities[lifeareaId];
-                            const lifearea =
-                                lifeAreas.find((la) => la.id == lifeareaId)?.name ||
+                        Object.keys(groupedActivities).map((lifeAreaId) => {
+                            const activities = groupedActivities[lifeAreaId];
+                            const lifeArea =
+                                lifeAreas.find((la) => la.id == lifeAreaId)?.name ||
                                 getString('Careplan_activities_uncategorized');
                             return (
-                                <Section title={lifearea} key={lifearea}>
+                                <Section title={lifeArea} key={lifeArea}>
                                     <CompactList aria-labelledby="nested-list-subheader">
                                         {activities.map((activity, idx) => (
                                             <Fragment key={activity.activityId}>

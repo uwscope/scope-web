@@ -21,12 +21,12 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const viewState = useLocalObservable<{
         selectedLog?: IActivityLog;
         isOpen: boolean;
-        selectedLifearea?: string;
+        selectedLifeArea?: string;
         selectedValue?: string;
     }>(() => ({
         selectedLog: undefined,
         isOpen: false,
-        selectedLifearea: undefined,
+        selectedLifeArea: undefined,
         selectedValue: undefined,
     }));
 
@@ -73,7 +73,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const handleClose = action(() => {
         viewState.selectedLog = undefined;
         viewState.isOpen = false;
-        viewState.selectedLifearea = undefined;
+        viewState.selectedLifeArea = undefined;
         viewState.selectedValue = undefined;
     });
 
@@ -128,7 +128,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_lifearea')}
                                                 </TableCell>
-                                                <WordBreakTableCell>{viewState.selectedLifearea}</WordBreakTableCell>
+                                                <WordBreakTableCell>{viewState.selectedLifeArea}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">

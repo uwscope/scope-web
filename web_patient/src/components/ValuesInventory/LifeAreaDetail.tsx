@@ -186,7 +186,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
 const AddEditValueDialog: FunctionComponent<{
     open: boolean;
     isEdit: boolean;
-    lifearea: string;
+    lifeArea: string;
     value: string;
     examples: string[];
     error?: boolean;
@@ -199,7 +199,7 @@ const AddEditValueDialog: FunctionComponent<{
     const {
         open,
         isEdit,
-        lifearea,
+        lifeArea,
         value,
         examples,
         error,
@@ -221,7 +221,7 @@ const AddEditValueDialog: FunctionComponent<{
             }
             content={
                 <Stack spacing={2}>
-                    <SubHeaderText>{lifearea}</SubHeaderText>
+                    <SubHeaderText>{lifeArea}</SubHeaderText>
                     <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
                     <TextField
                         autoFocus
@@ -371,15 +371,15 @@ const Examples: FunctionComponent<{ title: string; examples: string[] }> = (prop
 };
 
 export const LifeAreaDetail: FunctionComponent = observer(() => {
-    const { lifeareaId } = useParams<{ lifeareaId: string }>();
-    if (!lifeareaId) {
+    const { lifeAreaId } = useParams<{ lifeAreaId: string }>();
+    if (!lifeAreaId) {
         return null;
     }
     const rootStore = useStores();
     const { patientStore } = rootStore;
-    const lifeareaContent = rootStore.getLifeAreaContent(lifeareaId);
+    const lifeAreaContent = rootStore.getLifeAreaContent(lifeAreaId);
 
-    if (!lifeareaContent) {
+    if (!lifeAreaContent) {
         return null;
     }
 
@@ -467,7 +467,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
             await patientStore.addValue({
                 name: viewState.name,
-                lifeareaId: lifeareaId,
+                lifeAreaId: lifeAreaId,
                 editedDateTime: new Date(),
             });
         } else if (viewState.modeState.mode == 'edit') {
@@ -535,19 +535,19 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
     });
 
-    const valueExamples = lifeareaContent.examples.map((e) => e.name);
-    const activityExamples = lifeareaContent.examples[
-        random(lifeareaContent.examples.length - 1, false)
+    const valueExamples = lifeAreaContent.examples.map((e) => e.name);
+    const activityExamples = lifeAreaContent.examples[
+        random(lifeAreaContent.examples.length - 1, false)
     ].activities.map((a) => a.name);
 
     return (
-        <DetailPage title={lifeareaContent.name} onBack={handleGoBack}>
+        <DetailPage title={lifeAreaContent.name} onBack={handleGoBack}>
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
-                    {values?.filter((v) => v.lifeareaId == lifeareaId).length == 0 ? (
+                    {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                         <FormSection
                             prompt={getString('Values_inventory_values_existing_title')}
                             subPrompt={getString('Values_inventory_values_empty_subprompt')}
@@ -584,7 +584,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     )}
                     <FormSection
                         prompt={
-                            values?.filter((v) => v.lifeareaId == lifeareaId).length > 0
+                            patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
                                 ? getString('Values_inventory_values_more_title')
                                 : ''
                         }
@@ -603,7 +603,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 <AddEditValueDialog
                     open={viewState.openAddEditValue}
                     isEdit={viewState.modeState.mode == 'edit'}
-                    lifearea={lifeareaContent.name}
+                    lifeArea={lifeAreaContent.name}
                     value={viewState.name}
                     examples={valueExamples}
                     error={patientStore.loadValuesInventoryState.error}

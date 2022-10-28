@@ -229,7 +229,7 @@ export interface IValue {
     valueId?: string;
 
     name: string;
-    lifeareaId: string;
+    lifeAreaId: string;
     editedDateTime: Date;
 }
 
@@ -243,7 +243,7 @@ export interface ILifeAreaValue {
     name: string;
     createdDateTime: Date;
     editedDateTime: Date;
-    lifeareaId: string;
+    lifeAreaId: string;
     activities: ILifeAreaValueActivity[];
 }
 

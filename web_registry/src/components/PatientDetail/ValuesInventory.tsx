@@ -24,7 +24,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
             return v.activities.map((a) => {
                 return {
                     value: v.name,
-                    lifearea: lifeareaMap[v.lifeareaId],
+                    lifearea: lifeareaMap[v.lifeAreaId],
                     name: a.name,
                     enjoyment: a.enjoyment,
                     importance: a.importance,

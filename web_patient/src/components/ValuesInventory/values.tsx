@@ -7,8 +7,8 @@ import WorkIcon from '@mui/icons-material/Work';
 import React from 'react';
 import { getString } from 'src/services/strings';
 
-export const getLifeAreaIcon = (lifeareaId: string) => {
-    switch (lifeareaId) {
+export const getLifeAreaIcon = (lifeAreaId: string) => {
+    switch (lifeAreaId) {
         case 'relationship':
             return <SupervisorAccountIcon fontSize="large" />;
         case 'education':

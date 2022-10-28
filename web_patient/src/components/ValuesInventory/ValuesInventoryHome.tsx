@@ -37,8 +37,8 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <List>
                     {lifeAreas.map((la, idx) => {
-                        const lifeareaValues =
-                            patientStore.values?.filter((v) => v.lifeareaId == la.id) || [];
+                        const lifeAreaValues =
+                            patientStore.values?.filter((v) => v.lifeAreaId == la.id) || [];
                         const activitiesCount = 0;
                             // TODO Activity Refactor: Query activities
                             // lifeareaValues
@@ -51,7 +51,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                                     <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
                                     <ListItemText
                                         primary={la.name}
-                                        secondary={`${getValuesString(lifeareaValues.length)}; ${getActivitiesString(
+                                        secondary={`${getValuesString(lifeAreaValues.length)}; ${getActivitiesString(
                                             activitiesCount,
                                         )}`}
                                     />
