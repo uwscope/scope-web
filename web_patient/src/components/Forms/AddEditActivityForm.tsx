@@ -137,21 +137,18 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // });
 
     const handleSubmit = action(async () => {
-        const activity = toJS(dataState);
-
         try {
-            if (!!activity.activityId) {
-                await patientStore.updateActivity({
-                    ...dataState,
-                    repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
-                    reminderTimeOfDay: dataState.hasReminder ? dataState.reminderTimeOfDay : undefined,
-                });
-            } else {
-                await patientStore.addActivity({
-                    ...dataState,
-                    repeatDayFlags: dataState.hasRepetition ? dataState.repeatDayFlags : undefined,
-                    reminderTimeOfDay: dataState.hasReminder ? dataState.reminderTimeOfDay : undefined,
-                });
+            if (viewState.modeState.mode == 'addActivity') {
+                const createActivity = {
+                    name: viewState.name,
+                    enjoyment: viewState.enjoyment >= 0 ? viewState.enjoyment : undefined,
+                    importance: viewState.importance >= 0 ? viewState.importance : undefined,
+                    valueId: viewState.valueId ? viewState.valueId : undefined,
+
+                    editedDateTime: new Date(),
+                };
+
+                await patientStore.addActivity(createActivity);
             }
 
             return !patientStore.loadActivitiesState.error;
