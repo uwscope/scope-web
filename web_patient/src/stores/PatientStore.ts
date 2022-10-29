@@ -53,6 +53,8 @@ export interface IPatientStore {
     getActivityById: (activityId: string) => IActivity | undefined;
     getScheduledAssessmentById: (schedulId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
+    getValueById: (valueId: string) => IValue | undefined;
+    getValuesByLifeAreaId: (lifeAreaId: string) => IValue[];
 
     // Data load/save
     load: () => Promise<void>;
@@ -262,6 +264,16 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public getActivityById(activityId: string) {
         return this.activities.find((a) => a.activityId == activityId);
+    }
+
+    @action.bound getValueById(valueId: string) {
+        return this.values.find((v) => v.valueId == valueId);
+    }
+
+    @action.bound getValuesByLifeAreaId(lifeAreaId: string) {
+        return this.values.filter((v) => {
+            return v.lifeAreaId == lifeAreaId;
+        });
     }
 
     @action
