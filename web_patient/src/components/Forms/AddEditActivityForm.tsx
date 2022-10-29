@@ -55,10 +55,36 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         activity = patientStore.getActivityById(activityId);
     }
 
-    const viewState = useLocalObservable<{
-        openActivityDialog: boolean;
-    }>(() => ({
-        openActivityDialog: false,
+    interface IViewStateModeNone {
+        mode: 'none';
+    }
+    interface IViewStateModeAddActivity {
+        mode: 'addActivity';
+    }
+    interface IViewStateModeEditActivity {
+        mode: 'editActivity';
+        editActivity: IActivity;
+    }
+    interface IViewState {
+        openAddEditActivity: boolean;
+        name: string;
+        lifeAreaId: string;
+        valueId: string;
+        enjoyment: number;
+        importance: number;
+        modeState: IViewStateModeNone | IViewStateModeAddActivity | IViewStateModeEditActivity;
+    }
+
+    const viewState = useLocalObservable<IViewState>(() => ({
+        openAddEditActivity: false,
+        name: '',
+        lifeAreaId: '',
+        valueId: '',
+        enjoyment: -1,
+        importance: -1,
+        modeState: {
+            mode: 'none',
+        },
     }));
 
     const dataState = useLocalObservable<IActivity>(() => ({
@@ -157,82 +183,121 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
+    const handleAddValueOpen = action(() => {
+        // TODO Activity Refactor
+    });
+
+    const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        viewState.name = event.target.value;
+    });
+
+    const handleSelectEnjoyment = action((event: SelectChangeEvent<number>) => {
+        viewState.enjoyment = Number(event.target.value);
+    });
+
+    const handleSelectImportance = action((event: SelectChangeEvent<number>) => {
+        viewState.importance = Number(event.target.value);
+    });
+
+    const handleSelectLifeArea = action((event: SelectChangeEvent<string>) => {
+        viewState.lifeAreaId = event.target.value as string;
+        viewState.valueId = '';
+    });
+
+    const handleSelectValue = action((event: SelectChangeEvent<string>) => {
+        viewState.valueId = event.target.value as string;
+    });
     const handleValueChange = action((key: string, value: any) => {
         (dataState as any)[key] = value;
     });
 
     const namePage = (
+    const activityPage = (
         <Stack spacing={4}>
             <FormSection
-                prompt={getString('Form_add_activity_describe_name')}
-                help={getString('Form_add_activity_describe_name_help')}
+                prompt={getString('form_add_edit_activity_name_prompt')}
+                help={getString('form_add_edit_activity_name_help')}
                 content={
                     <Fragment>
                         <TextField
                             fullWidth
-                            value={dataState.name}
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                handleValueChange('name', event.target.value)
-                            }
+                            value={viewState.name}
+                            onChange={handleChangeName}
                             variant="outlined"
                             multiline
                         />
-                        {activityCount > 0 && (
-                            <Grid container justifyContent="flex-end">
-                                <Chip
-                                    sx={{ marginTop: 1 }}
-                                    variant="outlined"
-                                    color="primary"
-                                    size="small"
-                                    label={getString('Form_add_activity_describe_name_import_button')}
-                                    onClick={handleOpenImportActivity}
-                                />
-                                <Dialog
-                                    maxWidth="phone"
-                                    open={viewState.openActivityDialog}
-                                    onClose={() => handleImportActivityItemClick(undefined)}>
-                                    <DialogTitle>
-                                        {getString('Form_add_activity_describe_name_import_dialog_title')}
-                                    </DialogTitle>
-
-                                    <DialogContent dividers>
-                                        <List disablePadding>
-                                            {Object.keys(groupedActivities).map((lifearea) => {
-                                                const lifeareaName =
-                                                    lifeAreas.find((l) => l.id == lifearea)?.name || lifearea;
-                                                return (
-                                                    <Fragment key={lifearea}>
-                                                        <ListSubheader disableGutters>{lifeareaName}</ListSubheader>
-                                                        {groupedActivities[lifearea].map((activity, idx) => (
-                                                            <ListItem
-                                                                disableGutters
-                                                                button
-                                                                onClick={() => handleImportActivityItemClick(activity)}
-                                                                key={idx}>
-                                                                <ListItemText primary={activity.activity} />
-                                                            </ListItem>
-                                                        ))}
-                                                    </Fragment>
-                                                );
-                                            })}
-                                        </List>
-                                    </DialogContent>
-                                </Dialog>
-                            </Grid>
-                        )}
                     </Fragment>
                 }
             />
 
             <FormSection
                 addPaddingTop
-                prompt={getString('Form_add_activity_describe_value')}
-                help={getString('Form_add_activity_describe_value_help')}
+                prompt={getString('form_add_edit_activity_life_area_value_prompt')}
+                help={getString('form_add_edit_activity_life_area_value_help')}
                 content={
-                    <Select variant="outlined" value={dataState.value || ''} onChange={handleSelectValue} fullWidth>
-                        {values.map((value, idx) => (
-                            <MenuItem key={idx} value={value.name}>
-                                {value.name}
+                    <Fragment>
+                        <SubHeaderText>{getString('form_add_edit_activity_life_area_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_life_area_help')}</HelperText>
+                        <Select
+                            variant="outlined"
+                            value={viewState.lifeAreaId}
+                            onChange={handleSelectLifeArea}
+                            fullWidth
+                        >
+                            <MenuItem key='' value=''></MenuItem>
+                            {lifeAreas.map((lifeArea) => (
+                                <MenuItem key={lifeArea.id} value={lifeArea.id}>
+                                    {lifeArea.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <SubHeaderText>{getString('form_add_edit_activity_value_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
+                        <Select
+                            variant="outlined"
+                            value={viewState.valueId}
+                            onChange={handleSelectValue}
+                            fullWidth
+                            disabled={!viewState.lifeAreaId}
+                        >
+                            <MenuItem key='' value=''></MenuItem>
+                            {viewState.lifeAreaId && (
+                                patientStore.getValuesByLifeAreaId(viewState.lifeAreaId).map((value, idx) => (
+                                    <MenuItem key={idx} value={value.name}>
+                                        {value.name}
+                                    </MenuItem>
+                                ))
+                            )}
+                        </Select>
+                        <Grid container justifyContent="flex-end">
+                            <Chip
+                                sx={{ marginTop: 1 }}
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                label={getString('form_add_edit_activity_add_value_button')}
+                                onClick={handleAddValueOpen}
+                            />
+                        </Grid>
+                    </Fragment>
+                }
+            />
+
+            <FormSection
+                addPaddingTop
+                prompt={getString('form_add_edit_activity_enjoyment_prompt')}
+                help={getString('form_add_edit_activity_enjoyment_help')}
+                content={
+                    <Select
+                        labelId="activity-enjoyment-label"
+                        id="activity-enjoyment"
+                        value={viewState.enjoyment}
+                        onChange={handleSelectEnjoyment}
+                    >
+                        <MenuItem key='' value='-1'></MenuItem>
+                        {[...Array(11).keys()].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
                             </MenuItem>
                         ))}
                     </Select>
@@ -241,16 +306,19 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
             <FormSection
                 addPaddingTop
-                prompt={getString('Form_add_activity_describe_lifearea')}
+                prompt={getString('form_add_edit_activity_importance_prompt')}
+                help={getString('form_add_edit_activity_importance_help')}
                 content={
                     <Select
-                        variant="outlined"
-                        value={dataState.lifeareaId || ''}
-                        onChange={handleSelectLifearea}
-                        fullWidth>
-                        {lifeAreas.map((lifearea) => (
-                            <MenuItem key={lifearea.id} value={lifearea.id}>
-                                {lifearea.name}
+                        labelId="activity-importance-label"
+                        id="activity-importance"
+                        value={viewState.importance}
+                        onChange={handleSelectImportance}
+                    >
+                        <MenuItem key='' value='-1'></MenuItem>
+                        {[...Array(11).keys()].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
                             </MenuItem>
                         ))}
                     </Select>
@@ -473,6 +541,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             canGoNext:
                 !dataState.hasRepetition ||
                 (dataState.repeatDayFlags && Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0),
+            content: activityPage,
+            canGoNext: true,
+            // TODO Activity Refactor
+            // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
         },
     ];
 
