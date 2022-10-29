@@ -265,7 +265,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             <MenuItem key='' value=''></MenuItem>
                             {viewState.lifeAreaId && (
                                 patientStore.getValuesByLifeAreaId(viewState.lifeAreaId).map((value, idx) => (
-                                    <MenuItem key={idx} value={value.name}>
+                                    <MenuItem key={idx} value={value.valueId}>
                                         {value.name}
                                     </MenuItem>
                                 ))
