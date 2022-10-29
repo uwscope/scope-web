@@ -99,8 +99,9 @@ const _strings = {
 
     Values_inventory_value_item_example_activities: 'Example activities',
     Values_inventory_value_item_activities_none: 'List one or more activities associated with this value.',
-    Values_inventory_value_item_activities_enjoyment: 'Enjoyment',
-    Values_inventory_value_item_activities_importance: 'Importance',
+
+    values_inventory_value_activity_enjoyment: 'Enjoyment',
+    values_inventory_value_activity_importance: 'Importance',
 
     Values_inventory_dialog_add_value: 'Add value',
     Values_inventory_dialog_add_value_label: 'Name your value',

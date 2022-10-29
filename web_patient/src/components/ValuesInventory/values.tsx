@@ -39,9 +39,9 @@ export const getActivitiesString = (activityCount: number) => {
 };
 
 export const getActivityDetailText = (enjoyment: number | undefined, importance: number | undefined) => {
-    return `${getString('Values_inventory_value_item_activities_enjoyment')}: ${
+    return `${getString('values_inventory_value_activity_enjoyment')}: ${
         enjoyment != undefined ? enjoyment : -1
-    } / ${getString('Values_inventory_value_item_activities_importance')}: ${
+    } / ${getString('values_inventory_value_activity_importance')}: ${
         importance != undefined ? importance : -1
     }`;
 };
