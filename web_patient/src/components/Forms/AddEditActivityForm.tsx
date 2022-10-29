@@ -48,12 +48,19 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // const { valuesInventory } = patientStore;
     const { lifeAreas } = appContentConfig;
 
-    const activityId = getRouteParameter(Parameters.activityId);
+    const routeForm = getRouteParameter(Parameters.form);
 
-    let activity: IActivity | undefined = undefined;
-    if (!!activityId) {
-        activity = patientStore.getActivityById(activityId);
-    }
+    const initialModeState: IViewModeState = (() => {
+        if (routeForm == ParameterValues.form.addActivity) {
+            return {
+                mode: 'addActivity',
+            }
+        } else {
+            return {
+                mode: 'none',
+            };
+        }
+    })();
 
     interface IViewStateModeNone {
         mode: 'none';
@@ -65,13 +72,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         mode: 'editActivity';
         editActivity: IActivity;
     }
+    type IViewModeState = IViewStateModeNone | IViewStateModeAddActivity | IViewStateModeEditActivity;
+
     interface IViewState {
         name: string;
         lifeAreaId: string;
         valueId: string;
         enjoyment: number;
         importance: number;
-        modeState: IViewStateModeNone | IViewStateModeAddActivity | IViewStateModeEditActivity;
+        modeState: IViewModeState;
     }
 
     const viewState = useLocalObservable<IViewState>(() => ({
@@ -80,9 +89,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         valueId: '',
         enjoyment: -1,
         importance: -1,
-        modeState: {
-            mode: 'none',
-        },
+        modeState: initialModeState,
     }));
 
     const dataState = useLocalObservable<IActivity>(() => ({
