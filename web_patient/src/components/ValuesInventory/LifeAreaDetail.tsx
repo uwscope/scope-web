@@ -119,6 +119,57 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
     });
     */
 
+    const renderActivityDetail = (activity: IActivity): ReactNode => {
+        // TODO Activity Refactor: Enhance this with ActivitySchedule data
+        return (
+            (activity.enjoyment || activity.importance) && (
+                <HelperText>
+                    { (activity.enjoyment) &&
+                        <Fragment>
+                            { getString('values_inventory_value_activity_enjoyment') } { activity.enjoyment }
+                        </Fragment>
+                    }
+                    { (activity.enjoyment || activity.importance) &&
+                        ' / '
+                    }
+                    { (activity.importance) &&
+                        <Fragment>
+                            { getString('values_inventory_value_activity_importance') } { activity.importance }
+                        </Fragment>
+                    }
+                </HelperText>
+            )
+        )
+    }
+
+    const renderActivities = (activities: IActivity[]): ReactNode => {
+        const sortedActivities = activities.slice().sort(
+            (a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase())
+        );
+
+        return sortedActivities.map((activity, idx) => (
+            <Grid container direction="row" alignItems="flex-start" key={value.valueId as string} flexWrap="nowrap">
+                <Grid item>
+                    <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
+                </Grid>
+                <Grid item flexGrow={1} overflow="hidden">
+                    <Stack spacing={0}>
+                        <Typography variant="body1" noWrap>
+                            {activity.name}
+                        </Typography>
+                        { renderActivityDetail(activity) }
+                    </Stack>
+                </Grid>
+                <IconButton size="small" aria-label="edit" onClick={() => handleEditActivity(activity.activityId as string)}>
+                    <EditIcon fontSize="small" />
+                </IconButton>
+            </Grid>
+        ));
+    }
+
+    // TODO Prefer to not need such cast to string
+    const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
+
     return (
         <Stack spacing={0}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -128,32 +179,10 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
-                { /* TODO Activity Refactor
-                {value.activities.map((activity, idx) => (
-                    <Grid container direction="row" alignItems="flex-start" key={idx} flexWrap="nowrap">
-                        <Grid item>
-                            <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
-                        </Grid>
-                        <Grid item flexGrow={1} overflow="hidden">
-                            <Stack spacing={0}>
-                                <Typography variant="body1" noWrap>
-                                    {activity.name}
-                                </Typography>
-                                <HelperText>
-                                    {getActivityDetailText(activity.enjoyment, activity.importance)}
-                                </HelperText>
-                            </Stack>
-                        </Grid>
-                        <IconButton size="small" aria-label="edit" onClick={() => handleEditActivityItem(idx)}>
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Grid>
-                ))}
-                */ }
+                { renderActivities(valueActivities) }
+
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    { /* TODO Activity Refactor
-                    <Typography sx={{ paddingRight: 1 }}>{`${value.activities.length + 1}.`}</Typography>
-                    */ }
+                    <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
                     <Button
                         variant="contained"
                         color="primary"
