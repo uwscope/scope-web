@@ -66,7 +66,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         editActivity: IActivity;
     }
     interface IViewState {
-        openAddEditActivity: boolean;
         name: string;
         lifeAreaId: string;
         valueId: string;
@@ -76,7 +75,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
 
     const viewState = useLocalObservable<IViewState>(() => ({
-        openAddEditActivity: false,
         name: '',
         lifeAreaId: '',
         valueId: '',
@@ -156,7 +154,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const handleOpenImportActivity = action(() => {
-        viewState.openActivityDialog = true;
+        viewState.openImportActivity = true;
     });
 
     const handleImportActivityItemClick = action((activity: ImportableActivity | undefined) => {
