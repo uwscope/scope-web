@@ -148,7 +148,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         );
 
         return sortedActivities.map((activity, idx) => (
-            <Grid container direction="row" alignItems="flex-start" key={value.valueId as string} flexWrap="nowrap">
+            <Grid container direction="row" alignItems="flex-start" key={activity.activityId as string} flexWrap="nowrap">
                 <Grid item>
                     <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
                 </Grid>
