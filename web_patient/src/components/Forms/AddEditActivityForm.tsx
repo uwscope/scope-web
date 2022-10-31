@@ -50,16 +50,71 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const routeForm = getRouteParameter(Parameters.form);
 
-    const initialModeState: IViewModeState = (() => {
+    const initialViewState: IViewState = (() => {
+        const defaultViewState: IViewState = {
+            name: '',
+            lifeAreaId: '',
+            valueId: '',
+            enjoyment: -1,
+            importance: -1,
+            modeState: {
+                mode: 'none',
+            },
+        };
+
         if (routeForm == ParameterValues.form.addActivity) {
             return {
-                mode: 'addActivity',
-            }
-        } else {
-            return {
-                mode: 'none',
+                ...defaultViewState,
+                modeState: {
+                    mode: 'addActivity',
+                },
             };
+        } else if (routeForm == ParameterValues.form.editActivity) {
+            const routeActivityId = getRouteParameter(Parameters.activityId);
+            console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
+            if (!routeActivityId) {
+                return defaultViewState;
+            }
+
+            const editActivity = patientStore.getActivityById(routeActivityId);
+            console.assert(!!editActivity, 'editActivity activity not found');
+            if (!editActivity) {
+                return defaultViewState;
+            }
+
+            const valueIdAndLifeAreaId = (() => {
+                if (!editActivity.valueId) {
+                    return {};
+                }
+
+                const editValue = patientStore.getValueById(editActivity.valueId);
+                console.assert(!!editValue, 'editActivity value not found');
+                if (!editValue) {
+                    return {};
+                }
+
+                return {
+                    valueId: editActivity.valueId,
+                    lifeAreaId: editValue.lifeAreaId,
+                }
+            })();
+
+            return {
+                ...defaultViewState,
+                name: editActivity.name,
+                ...valueIdAndLifeAreaId,
+                enjoyment: editActivity.enjoyment ? editActivity.enjoyment : defaultViewState.enjoyment,
+                importance: editActivity.importance ? editActivity.importance : defaultViewState.importance,
+                modeState: {
+                    mode: 'editActivity',
+                    editActivity: {
+                        ...toJS(editActivity)
+                    }
+                },
+            }
         }
+
+        return defaultViewState;
     })();
 
     interface IViewStateModeNone {
@@ -83,14 +138,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         modeState: IViewModeState;
     }
 
-    const viewState = useLocalObservable<IViewState>(() => ({
-        name: '',
-        lifeAreaId: '',
-        valueId: '',
-        enjoyment: -1,
-        importance: -1,
-        modeState: initialModeState,
-    }));
+    const viewState = useLocalObservable<IViewState>(() => initialViewState);
 
     const dataState = useLocalObservable<IActivity>(() => ({
         ...activity,
