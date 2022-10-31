@@ -4,7 +4,7 @@ import {
     Box,
     Button,
     // FormControl,
-    // Grid,
+    Grid,
     IconButton,
     // InputLabel,
     // MenuItem,
@@ -12,21 +12,22 @@ import {
     // SelectChangeEvent,
     Stack,
     TextField,
-    // Typography,
+    Typography,
 } from '@mui/material';
 import { random } from 'lodash';
 import { action, runInAction, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
-import React, { FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent, ReactNode} from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { IValue } from 'shared/types';
+import { Link } from 'react-router-dom';
+import { IActivity, IValue } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
-// import { getActivityDetailText } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
+import { getFormLink, Parameters, ParameterValues } from 'src/services/routes';
 
 interface IValueEditFormSection {
     error: boolean;
