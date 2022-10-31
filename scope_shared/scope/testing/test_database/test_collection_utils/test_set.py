@@ -24,53 +24,22 @@ def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
     # Populate some documents
     result = collection.insert_many(
         [
-            {"_type": "singleton", "_rev": "1"},
-            {"_type": "singleton", "_rev": "2"},
-            {"_type": "other singleton", "_rev": "1"},
-            {"_type": "other singleton", "_rev": "2"},
-            {"_type": "set", "_set_id": "1", "_rev": "1"},
-            {"_type": "set", "_set_id": "1", "_rev": "2"},
-            {"_type": "set", "_set_id": "2", "_rev": "1"},
-            {"_type": "set", "_set_id": "2", "_rev": "2"},
-            {"_type": "other set", "_set_id": "1", "_rev": "1"},
-            {"_type": "other set", "_set_id": "1", "_rev": "2"},
-            {"_type": "other set", "_set_id": "2", "_rev": "1"},
-            {"_type": "other set", "_set_id": "2", "_rev": "2"},
-            {"_type": "other set", "_set_id": "2", "_rev": "3", "_deleted": True},
+            {"_type": "singleton", "_rev": 1},
+            {"_type": "singleton", "_rev": 2},
+            {"_type": "other singleton", "_rev": 1},
+            {"_type": "other singleton", "_rev": 2},
+            {"_type": "set", "_set_id": "1", "_rev": 1},
+            {"_type": "set", "_set_id": "1", "_rev": 2},
+            {"_type": "set", "_set_id": "2", "_rev": 1},
+            {"_type": "set", "_set_id": "2", "_rev": 2},
+            {"_type": "other set", "_set_id": "1", "_rev": 1},
+            {"_type": "other set", "_set_id": "1", "_rev": 2},
+            {"_type": "other set", "_set_id": "2", "_rev": 1},
+            {"_type": "other set", "_set_id": "2", "_rev": 2},
+            {"_type": "other set", "_set_id": "2", "_rev": 3, "_deleted": True},
         ]
     )
     assert len(result.inserted_ids) == 13
-
-
-def _configure_collection_delete_set_element(
-    *, collection: pymongo.collection.Collection
-) -> None:
-    # Index structure based on test_index.py
-    collection.create_index(
-        [
-            ("_type", pymongo.ASCENDING),
-            ("_set_id", pymongo.ASCENDING),
-            ("_rev", pymongo.DESCENDING),
-        ],
-        unique=True,
-        name="index",
-    )
-
-    # Populate some documents
-    result = collection.insert_many(
-        [
-            {"_type": "activity", "_set_id": "1", "_rev": 1},
-            {"_type": "activity", "_set_id": "1", "_rev": 2},
-            {"_type": "activity", "_set_id": "2", "_rev": 1},
-            {"_type": "activity", "_set_id": "2", "_rev": 2},
-            {"_type": "activitySchedule", "_set_id": "1", "_rev": 1},
-            {"_type": "activitySchedule", "_set_id": "1", "_rev": 2},
-            {"_type": "activitySchedule", "_set_id": "2", "_rev": 1},
-            {"_type": "activitySchedule", "_set_id": "2", "_rev": 2},
-            {"_type": "activitySchedule", "_set_id": "2", "_rev": 3, "_deleted": True},
-        ]
-    )
-    assert len(result.inserted_ids) == 9
 
 
 def test_delete_set_element(
@@ -80,11 +49,11 @@ def test_delete_set_element(
     Test deletion of a set .
     """
     collection = database_temp_collection_factory()
-    _configure_collection_delete_set_element(collection=collection)
+    _configure_collection(collection=collection)
 
     result = scope.database.collection_utils.get_set(
         collection=collection,
-        document_type="activity",
+        document_type="set",
     )
 
     # Remove the "_id" field that was created upon insertion
@@ -92,22 +61,21 @@ def test_delete_set_element(
         del result_current["_id"]
 
     assert result == [
-        {"_type": "activity", "_set_id": "1", "_rev": 2},
-        {"_type": "activity", "_set_id": "2", "_rev": 2},
+        {"_type": "set", "_set_id": "1", "_rev": 2},
+        {"_type": "set", "_set_id": "2", "_rev": 2},
     ]
 
     # Delete the set element
     deleted_set_element = scope.database.collection_utils.delete_set_element(
         collection=collection,
-        document_type="activity",
+        document_type="set",
         set_id="2",
         rev=2,
-        destructive=False,
     )
     deleted_set_element_document = deleted_set_element.document
     del deleted_set_element_document["_id"]
     assert deleted_set_element_document == {
-        "_type": "activity",
+        "_type": "set",
         "_set_id": "2",
         "_rev": 3,
         "_deleted": True,
@@ -140,8 +108,8 @@ def test_get_set(
         del result_current["_id"]
 
     assert result == [
-        {"_type": "set", "_set_id": "1", "_rev": "2"},
-        {"_type": "set", "_set_id": "2", "_rev": "2"},
+        {"_type": "set", "_set_id": "1", "_rev": 2},
+        {"_type": "set", "_set_id": "2", "_rev": 2},
     ]
 
 
@@ -164,9 +132,9 @@ def test_get_deleted_set(
         del result_current["_id"]
 
     assert result == [
-        {"_type": "other set", "_set_id": "1", "_rev": "2"},
+        {"_type": "other set", "_set_id": "1", "_rev": 2},
         # Below document should not be returned.
-        # {"_type": "other set", "_set_id": "2", "_rev": "3", "_deleted": True},
+        # {"_type": "other set", "_set_id": "2", "_rev": 3, "_deleted": True},
     ]
 
 
@@ -226,7 +194,7 @@ def test_get_set_element(
     assert result == {
         "_type": "set",
         "_set_id": "1",
-        "_rev": "2",
+        "_rev": 2,
     }
 
 
