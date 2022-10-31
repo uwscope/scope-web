@@ -16,7 +16,8 @@ import { IPatientService } from 'shared/patientService';
 import { IPromiseQueryState, PromiseQuery } from 'shared/promiseQuery';
 import { getLogger } from 'shared/logger';
 import { isScheduledForDay } from 'src/utils/schedule';
-import { daysOfWeekValues } from 'shared/enums';
+// TODO Activity Refactor
+// import { daysOfWeekValues } from 'shared/enums';
 import { getLoadAndLogQuery, onArrayConflict, onSingletonConflict } from 'shared/stores';
 import _ from 'lodash';
 import { compareDesc } from 'date-fns';
@@ -211,7 +212,12 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get activities() {
-        return (this.loadActivitiesQuery.value || [])
+        return this.loadActivitiesQuery.value || [];
+    }
+
+    /* TODO Activity Refactor
+    @computed public get activitySchedules() {
+        return (this.loadActivitySchedulesQuery.value || [])
             .map(
                 (a) =>
                     ({
@@ -225,6 +231,7 @@ export class PatientStore implements IPatientStore {
                     } as IActivity),
             );
     }
+    */
 
     @computed public get values() {
         return this.loadValuesQuery.value || [];
