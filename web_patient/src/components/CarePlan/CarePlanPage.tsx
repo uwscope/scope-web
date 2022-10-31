@@ -21,7 +21,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
-import { DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
+// import { DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
 import { IActivity, IScheduledActivity, KeyedMap } from 'shared/types';
 import Calendar from 'src/components/CarePlan/Calendar';
 import { MainPage } from 'src/components/common/MainPage';
@@ -49,7 +49,9 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         appContentConfig: { lifeAreas },
     } = rootStore;
     const { taskItems } = patientStore;
-    const activities = patientStore.activities.filter((a) => !a.isDeleted);
+    // TODO Activity Refactor
+    // const activities = patientStore.activities.filter((a) => !a.isDeleted);
+    const activities = patientStore.activities;
     const navigate = useNavigate();
     const viewState = useLocalObservable<{
         selectedDate: Date;
@@ -65,6 +67,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
     const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate));
     const groupedActivities: KeyedMap<IActivity[]> = {};
+    /* TODO Activity Refactor
     activities.forEach((activity) => {
         const lifearea = activity.lifeareaId || getString('Careplan_activities_uncategorized');
         if (!groupedActivities[lifearea]) {
@@ -73,6 +76,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
         groupedActivities[lifearea].push(activity);
     });
+    */
 
     const handleDayClick = action((date: Date) => {
         viewState.selectedDate = date;
@@ -91,6 +95,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         );
     });
 
+    /* TODO Activity Refactor
     const getRepeatDateText = (days: DayOfWeekFlags) => {
         if (Object.values(days).filter((v) => v).length == daysOfWeekValues.length) {
             return 'Everyday';
@@ -125,6 +130,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             return dayStrings.join(', ');
         }
     };
+     */
 
     const handleMoreClick = action((activity: IActivity, event: React.MouseEvent<HTMLElement>) => {
         viewState.selectedActivity = activity;
@@ -136,6 +142,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.moreTargetEl = undefined;
     });
 
+    /* TODO Activity Refactor
     const handleActivate = action(() => {
         if (!!viewState.selectedActivity) {
             const activityCopy = viewState.selectedActivity;
@@ -148,9 +155,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             handleMoreClose();
         }
     });
+    */
 
     const handleDelete = action(() => {
         if (!!viewState.selectedActivity) {
+            /* TODO Activity Refactor
             const activityCopy = viewState.selectedActivity;
             activityCopy.isDeleted = true;
             patientStore.updateActivity({
@@ -158,6 +167,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 repeatDayFlags: activityCopy.hasRepetition ? activityCopy.repeatDayFlags : undefined,
                 reminderTimeOfDay: activityCopy.hasReminder ? activityCopy.reminderTimeOfDay : undefined,
             });
+            */
             handleMoreClose();
         }
     });
@@ -166,7 +176,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         <MainPage
             title={getString('Navigation_careplan')}
             action={
-                <Button startIcon={<AddIcon />} component={Link} to={getFormLink(ParameterValues.form.addActivity)}>
+                <Button
+                    startIcon={<AddIcon />}
+                    component={Link}
+                    to={getFormLink(ParameterValues.form.addActivity)}
+                >
                     {getString('Careplan_add_activity')}
                 </Button>
             }>
@@ -198,6 +212,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                         keepMounted
                         open={Boolean(viewState.moreTargetEl)}
                         onClose={handleMoreClose}>
+                        {/* TODO Activity Refactor
                         <MenuItem onClick={handleActivate}>
                             {getString(
                                 viewState.selectedActivity?.isActive
@@ -205,6 +220,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                     : 'Careplan_activity_item_activate',
                             )}
                         </MenuItem>
+                        */}
                         <MenuItem onClick={handleDelete}>{getString('Careplan_activity_item_delete')}</MenuItem>
                     </Menu>
                     {activities.length > 0 ? (
@@ -227,13 +243,17 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                             activity.activityId as string,
                                                     })}>
                                                     <ListItemText
-                                                        style={{ opacity: activity.isActive ? 1 : 0.5 }}
+                                                        style={{
+                                                            // TODO Activity Refactor
+                                                            // opacity: activity.isActive ? 1 : 0.5
+                                                        }}
                                                         secondaryTypographyProps={{
                                                             component: 'div',
                                                         }}
                                                         primary={<Typography noWrap>{activity.name}</Typography>}
                                                         secondary={
                                                             <Fragment>
+                                                                {/* TODO Activity Refactor
                                                                 <Typography variant="body2" component="div">
                                                                     {`${getString('Careplan_activity_item_value')}: ${
                                                                         activity.value
@@ -253,6 +273,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                                         )}`}
                                                                     </Typography>
                                                                 )}
+                                                                */}
                                                             </Fragment>
                                                         }
                                                     />
