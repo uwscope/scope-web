@@ -49,75 +49,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         // handleSaveValueActivities,
     } = props;
 
-    const viewState = useLocalObservable<{
-        openAddActivity: boolean;
-        editActivityIdx: number;
-    }>(() => ({
-        openAddActivity: false,
-        editActivityIdx: -1,
-    }));
-
-    const handleAddActivityItem = action(() => {
-        viewState.openAddActivity = true;
-        viewState.editActivityIdx = -1;
-    });
-
-    // TODO Activity Refactor
-    /*
-    const handleEditActivityItem = action((idx: number) => {
-        viewState.openAddActivity = true;
-        viewState.editActivityIdx = idx;
-    });
-    */
-
-    // TODO Activity Refactor
-    /*
-    const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
-        const newValue = { ...toJS(value) };
-        newValue.activities = newValue.activities?.slice() || [];
-
-        if (viewState.editActivityIdx >= 0) {
-            newValue.activities[viewState.editActivityIdx] = newActivity;
-        } else {
-            newValue.activities.push(newActivity);
-        }
-
-        await handleSaveValueActivities(newValue);
-
-        runInAction(() => {
-            if (!error) {
-                viewState.openAddActivity = false;
-            }
-        });
-    });
-    */
-
-    // TODO Activity Refactor
-    /*
-    const handleDeleteActivity = action(async () => {
-        const newValue = { ...toJS(value) };
-        newValue.activities = newValue.activities?.slice() || [];
-
-        if (viewState.editActivityIdx >= 0) {
-            newValue.activities.splice(viewState.editActivityIdx, 1);
-            await handleSaveValueActivities(newValue);
-        }
-
-        runInAction(() => {
-            if (!error) {
-                viewState.openAddActivity = false;
-            }
-        });
-    });
-    */
-
-    // TODO Activity Refactor
-    /*
-    const handleCancelActivity = action(() => {
-        handleCancelEditActivity();
-        viewState.openAddActivity = false;
-    });
-    */
     const rootStore = useStores();
     const { patientStore } = rootStore;
 
@@ -207,21 +138,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     </Button>
                 </Box>
             </Stack>
-            { /* TODO Activity Refactor
-            {viewState.openAddActivity && (
-                <AddEditActivityDialog
-                    error={error}
-                    loading={loading}
-                    open={viewState.openAddActivity}
-                    value={value.name}
-                    activity={viewState.editActivityIdx >= 0 ? value.activities[viewState.editActivityIdx] : undefined}
-                    examples={activityExamples}
-                    handleCancel={handleCancelActivity}
-                    handleSave={handleSaveActivity}
-                    handleDelete={viewState.editActivityIdx >= 0 ? handleDeleteActivity : undefined}
-                />
-            )}
-            */ }
         </Stack>
     );
 });
@@ -284,122 +200,6 @@ const AddEditValueDialog: FunctionComponent<{
         />
     );
 };
-
-/* TODO Activity Refactor
-const AddEditActivityDialog: FunctionComponent<{
-    open: boolean;
-    error: boolean;
-    loading: boolean;
-    value: string;
-    activity?: ILifeAreaValueActivity;
-    examples: string[];
-    handleCancel: () => void;
-    handleDelete?: () => void;
-    handleSave: (newActivity: ILifeAreaValueActivity) => void;
-}> = observer((props) => {
-    const { open, error, loading, value, activity, examples, handleCancel, handleDelete, handleSave } = props;
-    const isEdit = !!activity;
-
-    const viewState = useLocalObservable<{
-        name: string;
-        enjoyment: number;
-        importance: number;
-    }>(() => ({
-        name: activity?.name || '',
-        enjoyment: activity?.enjoyment || 0,
-        importance: activity?.importance || 0,
-    }));
-
-    const canSave =
-        !!viewState.name &&
-        (viewState.name != activity?.name ||
-            viewState.enjoyment != activity?.enjoyment ||
-            viewState.importance != activity?.importance);
-
-    const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
-        viewState.name = event.target.value;
-    });
-
-    const handleChangeEnjoyment = action((event: SelectChangeEvent<number>) => {
-        viewState.enjoyment = Number(event.target.value);
-    });
-
-    const handleChangeImportance = action((event: SelectChangeEvent<number>) => {
-        viewState.importance = Number(event.target.value);
-    });
-
-    return (
-        <StatefulDialog
-            open={open}
-            error={error}
-            loading={loading}
-            title={
-                isEdit
-                    ? getString('Values_inventory_dialog_edit_activity')
-                    : getString('Values_inventory_dialog_add_activity')
-            }
-            content={
-                <Stack spacing={2}>
-                    <SubHeaderText>{value}</SubHeaderText>
-                    <Examples title={getString('Values_inventory_value_item_example_activities')} examples={examples} />
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        variant="outlined"
-                        label={getString('Values_inventory_dialog_add_activity_label')}
-                        value={viewState.name}
-                        onChange={handleChangeName}
-                        fullWidth
-                    />
-                    <HelperText>{getString('Values_inventory_dialog_add_activity_prompt')}</HelperText>
-                    <FormControl fullWidth>
-                        <InputLabel id="activity-enjoyment">
-                            {getString('Values_inventory_dialog_add_activity_enjoyment')}
-                        </InputLabel>
-                        <Select
-                            labelId="activity-enjoyment-label"
-                            id="activity-enjoyment"
-                            value={viewState.enjoyment}
-                            onChange={handleChangeEnjoyment}>
-                            {[...Array(11).keys()].map((v) => (
-                                <MenuItem key={v} value={v}>
-                                    {v}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <InputLabel id="activity-importance-label">
-                            {getString('Values_inventory_dialog_add_activity_importance')}
-                        </InputLabel>
-                        <Select
-                            labelId="activity-importance-label"
-                            id="activity-importance"
-                            value={viewState.importance}
-                            onChange={handleChangeImportance}>
-                            {[...Array(11).keys()].map((v) => (
-                                <MenuItem key={v} value={v}>
-                                    {v}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Stack>
-            }
-            handleCancel={handleCancel}
-            handleDelete={handleDelete}
-            handleSave={() =>
-                handleSave({
-                    ...toJS(viewState),
-                    createdDateTime: activity?.createdDateTime || new Date(),
-                    editedDateTime: new Date(),
-                })
-            }
-            disableSave={!canSave}
-        />
-    );
-});
-*/
 
 const Examples: FunctionComponent<{ title: string; examples: string[] }> = (props) => {
     const { title, examples } = props;
@@ -531,25 +331,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         });
     });
 
-    /* TODO Activity Refactor
-    const handleSaveValueActivities = (idx: number) =>
-        action(async (newValue: ILifeAreaValue) => {
-            const { valuesInventory } = patientStore;
-            const clonedInventory = toJS(valuesInventory);
-
-            const newValues = clonedInventory.values?.slice() || [];
-            newValues[idx] = newValue;
-
-            const newValuesInventory = {
-                ...clonedInventory,
-                lastUpdatedDateTime: new Date(),
-                values: newValues,
-            } as IValuesInventory;
-
-            await patientStore.updateValuesInventory(newValuesInventory);
-        });
-    */
-
     const handleDeleteValue = action(async () => {
         // TODO Activity Refactor
         /*
@@ -657,3 +438,153 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 });
 
 export default LifeAreaDetail;
+
+/* TODO Activity Refactor: Abandoned AddEditActivityDialog Code
+
+const handleEditActivity = (activityId: string) =>
+    // activityId is sufficient for creating this interface callback.
+    action(() => {
+        console.log(activityId);
+        // const value = patientStore.values.find((value) => valueId == value.valueId);
+        //
+        // console.assert(value, `Value to edit not found: ${valueId}`);
+        //
+        // if (value) {
+        //     viewState.openAddEditValue = true;
+        //     viewState.name = value.name;
+        //     viewState.modeState = {
+        //         mode: 'edit',
+        //         editValue: {
+        //             ...toJS(value)
+        //         },
+        //     };
+        // }
+    });
+
+const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
+    const newValue = { ...toJS(value) };
+    newValue.activities = newValue.activities?.slice() || [];
+
+    if (viewState.editActivityIdx >= 0) {
+        newValue.activities[viewState.editActivityIdx] = newActivity;
+    } else {
+        newValue.activities.push(newActivity);
+    }
+
+    await handleSaveValueActivities(newValue);
+
+    runInAction(() => {
+        if (!error) {
+            viewState.openAddActivity = false;
+        }
+    });
+});
+
+const handleDeleteActivity = action(async () => {
+    const newValue = { ...toJS(value) };
+    newValue.activities = newValue.activities?.slice() || [];
+
+    if (viewState.editActivityIdx >= 0) {
+        newValue.activities.splice(viewState.editActivityIdx, 1);
+        await handleSaveValueActivities(newValue);
+    }
+
+    runInAction(() => {
+        if (!error) {
+            viewState.openAddActivity = false;
+        }
+    });
+});
+
+const handleCancelActivity = action(() => {
+    handleCancelEditActivity();
+    viewState.openAddActivity = false;
+});
+
+{viewState.openAddActivity && (
+    <AddEditActivityDialog
+        error={error}
+        loading={loading}
+        open={viewState.openAddActivity}
+        value={value.name}
+        activity={viewState.editActivityIdx >= 0 ? value.activities[viewState.editActivityIdx] : undefined}
+        examples={activityExamples}
+        handleCancel={handleCancelActivity}
+        handleSave={handleSaveActivity}
+        handleDelete={viewState.editActivityIdx >= 0 ? handleDeleteActivity : undefined}
+    />
+)}
+
+const AddEditActivityDialog: FunctionComponent<{
+    open: boolean;
+    error: boolean;
+    loading: boolean;
+    value: string;
+    activity?: ILifeAreaValueActivity;
+    examples: string[];
+    handleCancel: () => void;
+    handleDelete?: () => void;
+    handleSave: (newActivity: ILifeAreaValueActivity) => void;
+}> = observer((props) => {
+    const { open, error, loading, value, activity, examples, handleCancel, handleDelete, handleSave } = props;
+    const isEdit = !!activity;
+
+    const viewState = useLocalObservable<{
+        name: string;
+        enjoyment: number;
+        importance: number;
+    }>(() => ({
+        name: activity?.name || '',
+        enjoyment: activity?.enjoyment || 0,
+        importance: activity?.importance || 0,
+    }));
+
+    const canSave =
+        !!viewState.name &&
+        (viewState.name != activity?.name ||
+            viewState.enjoyment != activity?.enjoyment ||
+            viewState.importance != activity?.importance);
+
+    const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        viewState.name = event.target.value;
+    });
+
+    return (
+        <StatefulDialog
+            open={open}
+            error={error}
+            loading={loading}
+            title={
+                isEdit
+                    ? getString('Values_inventory_dialog_edit_activity')
+                    : getString('Values_inventory_dialog_add_activity')
+            }
+            content={
+                <Stack spacing={2}>
+                    <SubHeaderText>{value}</SubHeaderText>
+                    <Examples title={getString('Values_inventory_value_item_example_activities')} examples={examples} />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        variant="outlined"
+                        label={getString('Values_inventory_dialog_add_activity_label')}
+                        value={viewState.name}
+                        onChange={handleChangeName}
+                        fullWidth
+                    />
+                </Stack>
+            }
+            handleCancel={handleCancel}
+            handleDelete={handleDelete}
+            handleSave={() =>
+                handleSave({
+                    ...toJS(viewState),
+                    createdDateTime: activity?.createdDateTime || new Date(),
+                    editedDateTime: new Date(),
+                })
+            }
+            disableSave={!canSave}
+        />
+    );
+});
+*/
