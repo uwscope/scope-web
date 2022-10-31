@@ -160,7 +160,17 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         { renderActivityDetail(activity) }
                     </Stack>
                 </Grid>
-                <IconButton size="small" aria-label="edit" onClick={() => handleEditActivity(activity.activityId as string)}>
+                <IconButton
+                    size="small"
+                    aria-label="edit"
+                    component={Link}
+                    to={getFormLink(
+                        ParameterValues.form.editActivity,
+                        {
+                            [Parameters.activityId]: activity.activityId as string,
+                        }
+                    )}
+                >
                     <EditIcon fontSize="small" />
                 </IconButton>
             </Grid>
@@ -188,8 +198,10 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         color="primary"
                         size="small"
                         startIcon={<AddIcon />}
-                        onClick={handleAddActivityItem}>
-                        {getString('Values_inventory_add_activity')}
+                        component={Link}
+                        to={getFormLink(ParameterValues.form.addActivity)}
+                    >
+                        {getString('values_inventory_add_activity')}
                     </Button>
                 </Box>
             </Stack>
