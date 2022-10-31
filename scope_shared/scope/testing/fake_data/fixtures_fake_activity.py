@@ -31,8 +31,6 @@ def _fake_activity(
         "valueId": "valueId Placeholder",
         "enjoyment": random.randint(0, 10),
         "importance": random.randint(0, 10),
-        "isActive": random.choice([False, True]),
-        "isDeleted": random.choice([False, True]),
     }
 
     # Remove a randomly sampled subset of independently optional parameters
