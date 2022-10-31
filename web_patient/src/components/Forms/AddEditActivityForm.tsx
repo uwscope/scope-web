@@ -157,6 +157,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleSubmit = action(async () => {
         try {
             if (viewState.modeState.mode == 'addActivity') {
+                // TODO Activity Refactor: check that our 'add' is valid
+                // is a unique name
+
                 const createActivity = {
                     name: viewState.name,
                     enjoyment: viewState.enjoyment >= 0 ? viewState.enjoyment : undefined,
@@ -167,13 +170,32 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 };
 
                 await patientStore.addActivity(createActivity);
+            } else if (viewState.modeState.mode == 'editActivity') {
+                // TODO Activity Refactor: check that our 'edit' is valid
+                // the value still exists
+                // - update should fail due to rev conflict if it does not?
+                // - what does the client actually do?
+                // is a unique name
+                // the value changed?
+
+                const editActivity = {
+                    ...viewState.modeState.editActivity,
+
+                    name: viewState.name,
+                    enjoyment: viewState.enjoyment >= 0 ? viewState.enjoyment : undefined,
+                    importance: viewState.importance >= 0 ? viewState.importance : undefined,
+                    valueId: viewState.valueId ? viewState.valueId : undefined,
+
+                    editedDateTime: new Date(),
+                }
+
+                await patientStore.updateActivity(editActivity);
             }
 
             return !patientStore.loadActivitiesState.error;
         } catch {
             return false;
         }
-
     });
 
     const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
