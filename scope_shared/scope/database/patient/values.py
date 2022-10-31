@@ -23,7 +23,6 @@ def delete_value(
         document_type=DOCUMENT_TYPE,
         set_id=set_id,
         rev=rev,
-        destructive=False,
     )
 
 
