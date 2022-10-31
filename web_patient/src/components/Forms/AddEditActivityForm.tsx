@@ -422,43 +422,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         </Stack>
     );
 
-    const editPage = (
-        <Stack spacing={4}>
-            <FormSection
-                prompt={getString('Form_add_activity_describe_name_label')}
-                content={
-                    <TextField
-                        fullWidth
-                        value={dataState.name}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                            handleValueChange('name', event.target.value)
-                        }
-                        variant="outlined"
-                        multiline
-                    />
-                }
-            />
-            <FormSection
-                addPaddingTop
-                prompt={getString('Form_add_activity_describe_value_label')}
-                content={<TextField fullWidth value={dataState.value} disabled variant="outlined" multiline />}
-            />
-            <FormSection
-                addPaddingTop
-                prompt={getString('Form_add_activity_describe_lifearea_label')}
-                content={
-                    <TextField
-                        fullWidth
-                        value={lifeAreas.find((la) => la.id == dataState.lifeareaId)?.name}
-                        disabled
-                        variant="outlined"
-                        multiline
-                    />
-                }
-            />
-        </Stack>
-    );
-
     const schedulePage = (
         <Stack spacing={4}>
             <FormSection
