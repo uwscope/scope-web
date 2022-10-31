@@ -6,7 +6,8 @@ import {
     CancerTreatmentRegimenFlags,
     ClinicCode,
     DayOfWeek,
-    DayOfWeekFlags,
+    // TODO Activity Refactor
+    // DayOfWeekFlags,
     DepressionTreatmentStatus,
     DiscussionFlags,
     DueType,
@@ -103,6 +104,17 @@ export interface IActivity {
     importance?: number;
     valueId?: string;
 }
+
+// TODO Activity Refactor: for IActivitySchedule
+// lifeareaId: string;
+// startDateTime: Date;
+// timeOfDay: number;
+// hasReminder: boolean;
+// reminderTimeOfDay?: number;
+// hasRepetition: boolean;
+// repeatDayFlags?: DayOfWeekFlags;
+// isActive: boolean;
+// isDeleted: boolean;
 
 export interface IScheduledItem {
     // dueDate: Date; // Contains only the date with 00 time, not used
