@@ -614,14 +614,18 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     return (
         <FormDialog
             title={
-                !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
+                'TODO Activity Refactor Form Title'
+                // !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
             }
             isOpen={true}
             canClose={false}
             loading={patientStore.loadActivitiesState.pending}
             pages={pages}
             onSubmit={handleSubmit}
-            submitToast={getString('Form_add_activity_submit_success')}></FormDialog>
+            // TODO Activity Refactor
+            // submitToast={getString('Form_add_activity_submit_success')}>
+            submitToast={"TODO Activity Refactor"}
+        />
     );
 });
 
