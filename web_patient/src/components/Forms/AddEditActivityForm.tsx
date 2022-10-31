@@ -194,12 +194,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
-    const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
-        if (dataState.repeatDayFlags != undefined) {
-            dataState.repeatDayFlags[day] = checked;
-        }
-    });
-
     const handleAddValueOpen = action(() => {
         // TODO Activity Refactor
     });
@@ -422,6 +416,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         </Stack>
     );
 
+    { /* TODO Activity Refactor: Abandoned Schedule and Notification Code
+    const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
+        if (dataState.repeatDayFlags != undefined) {
+            dataState.repeatDayFlags[day] = checked;
+        }
+    });
+
     const schedulePage = (
         <Stack spacing={4}>
             <FormSection
@@ -583,22 +584,26 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         </Stack>
     );
 
+    // {
+    //     content: schedulePage,
+    //     canGoNext: true,
+    //     // TODO Activity Refactor
+    //     // activity?.startDateTime
+    //     //     ? compareAsc(clearTime(activity?.startDateTime), clearTime(dataState.startDateTime)) <= 0
+    //     //     : compareAsc(clearTime(new Date()), clearTime(dataState.startDateTime)) <= 0,
+    // },
+    // {
+    //     content: repetitionPage,
+    //     canGoNext: true,
+    //     // TODO Activity Refactor
+    //     // !dataState.hasRepetition ||
+    //     // (dataState.repeatDayFlags && Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0),
+    // },
+
+    */ }
+
     const pages = [
         {
-            content: !!activity ? editPage : namePage,
-            canGoNext: !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
-        },
-        {
-            content: schedulePage,
-            canGoNext: activity?.startDateTime
-                ? compareAsc(clearTime(activity?.startDateTime), clearTime(dataState.startDateTime)) <= 0
-                : compareAsc(clearTime(new Date()), clearTime(dataState.startDateTime)) <= 0,
-        },
-        {
-            content: repetitionPage,
-            canGoNext:
-                !dataState.hasRepetition ||
-                (dataState.repeatDayFlags && Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0),
             content: activityPage,
             canGoNext: true,
             // TODO Activity Refactor
