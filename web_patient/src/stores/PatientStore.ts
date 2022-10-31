@@ -51,6 +51,9 @@ export interface IPatientStore {
 
     // Helpers
     getActivityById: (activityId: string) => IActivity | undefined;
+    getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
+    getActivitiesByValueId: (valueId: string) => IActivity[];
+    getActivitiesWithoutValueId: () => IActivity[];
     getScheduledAssessmentById: (schedulId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
@@ -264,6 +267,40 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public getActivityById(activityId: string) {
         return this.activities.find((a) => a.activityId == activityId);
+    }
+
+    @action.bound
+    public getActivitiesByLifeAreaId(lifeAreaId: string) {
+        return this.activities.filter((a) => {
+            if (!a.valueId) {
+                return false;
+            }
+
+            const value = this.getValueById(a.valueId);
+            if (!value) {
+                return false;
+            }
+
+            return value.lifeAreaId == lifeAreaId;
+        });
+    }
+
+    @action.bound
+    public getActivitiesByValueId(valueId: string) {
+        return this.activities.filter((a) => {
+            if (!a.valueId) {
+                return false;
+            }
+
+            return a.valueId == valueId;
+        });
+    }
+
+    @action.bound
+    public getActivitiesWithoutValueId() {
+        return this.activities.filter((a) => {
+            return (!a.valueId);
+        });
     }
 
     @action.bound getValueById(valueId: string) {
