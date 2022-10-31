@@ -304,7 +304,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     const handleSaveValue = action(async () => {
         if (viewState.modeState.mode == 'add') {
             // TODO Activity Refactor: check that our 'add' is valid
-            // is a unique value
+            // is a unique name
 
             await patientStore.addValue({
                 name: viewState.name,
@@ -314,8 +314,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         } else if (viewState.modeState.mode == 'edit') {
             // TODO Activity Refactor: check that our 'edit' is valid
             // the value still exists
-            // is a unique value
-            // the value changed
+            // - update should fail due to rev conflict if it does not?
+            // - what does the client actually do?
+            // is a unique name
+            // the value changed?
 
             await patientStore.updateValue({
                 ...toJS(viewState.modeState.editValue),
@@ -332,7 +334,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleDeleteValue = action(async () => {
-        // TODO Activity Refactor
+        // TODO Activity Refactor: Implement Value Deletion
         /*
         const { valuesInventory } = patientStore;
         const clonedInventory = toJS(valuesInventory);
