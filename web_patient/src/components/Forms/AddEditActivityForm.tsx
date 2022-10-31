@@ -195,7 +195,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const handleAddValueOpen = action(() => {
-        // TODO Activity Refactor
+        // TODO Activity Refactor: Create and Select Value During Activity Editing
     });
 
     const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
