@@ -21,12 +21,12 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const viewState = useLocalObservable<{
         selectedLog?: IActivityLog;
         isOpen: boolean;
-        selectedLifearea?: string;
+        selectedLifeArea?: string;
         selectedValue?: string;
     }>(() => ({
         selectedLog: undefined,
         isOpen: false,
-        selectedLifearea: undefined,
+        selectedLifeArea: undefined,
         selectedValue: undefined,
     }));
 
@@ -63,17 +63,21 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const handleLogClick = action((log: IActivityLog) => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
-        const activity = patientStore.getActivityById(log.activityId);
-        viewState.selectedValue = activity?.value || getString('Activity_tracking_log_value_none');
+        // TODO Activity Refactor: Activity Tracking
+        // const activity = patientStore.getActivityById(log.activityId);
+        // viewState.selectedValue = activity?.value || getString('Activity_tracking_log_value_none');
+        viewState.selectedValue = getString('Activity_tracking_log_value_none');
 
-        const lifearea = activity && rootStore.getLifeAreaContent(activity?.lifeareaId);
-        viewState.selectedLifearea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
+        // TODO Activity Refactor: Activity Tracking
+        // const lifearea = activity && rootStore.getLifeAreaContent(activity?.lifeareaId);
+        // viewState.selectedLifearea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
+        viewState.selectedLifeArea = getString('Activity_tracking_log_lifearea_none');
     });
 
     const handleClose = action(() => {
         viewState.selectedLog = undefined;
         viewState.isOpen = false;
-        viewState.selectedLifearea = undefined;
+        viewState.selectedLifeArea = undefined;
         viewState.selectedValue = undefined;
     });
 
@@ -128,7 +132,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                                 <TableCell component="th" scope="row">
                                                     {getString('Activity_tracking_column_lifearea')}
                                                 </TableCell>
-                                                <WordBreakTableCell>{viewState.selectedLifearea}</WordBreakTableCell>
+                                                <WordBreakTableCell>{viewState.selectedLifeArea}</WordBreakTableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">

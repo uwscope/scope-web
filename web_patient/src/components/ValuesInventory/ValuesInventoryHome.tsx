@@ -37,11 +37,13 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <List>
                     {lifeAreas.map((la, idx) => {
-                        const lifeareaValues =
-                            patientStore.valuesInventory?.values?.filter((v) => v.lifeareaId == la.id) || [];
-                        const activitiesCount = lifeareaValues
-                            .map((v) => v.activities.length)
-                            .reduce((l, r) => l + r, 0);
+                        const lifeAreaValues =
+                            patientStore.values?.filter((v) => v.lifeAreaId == la.id) || [];
+                        const activitiesCount = 0;
+                            // TODO Activity Refactor: Query activities
+                            // lifeareaValues
+                            // .map((v) => v.activities.length)
+                            // .reduce((l, r) => l + r, 0);
 
                         return (
                             <Fragment key={la.id}>
@@ -49,7 +51,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                                     <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
                                     <ListItemText
                                         primary={la.name}
-                                        secondary={`${getValuesString(lifeareaValues.length)}; ${getActivitiesString(
+                                        secondary={`${getValuesString(lifeAreaValues.length)}; ${getActivitiesString(
                                             activitiesCount,
                                         )}`}
                                     />

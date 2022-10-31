@@ -14,10 +14,6 @@ import scope.schema_utils as schema_utils
 import scope.testing.fake_data.fake_utils as fake_utils
 
 
-# Keys are not naively optional, see allowable_schedules
-OPTIONAL_KEYS = []
-
-
 def _fake_activity(
     *,
     faker: _faker.Faker,
@@ -35,8 +31,6 @@ def _fake_activity(
         "valueId": "valueId Placeholder",
         "enjoyment": random.randint(0, 10),
         "importance": random.randint(0, 10),
-        "isActive": random.choice([False, True]),
-        "isDeleted": random.choice([False, True]),
     }
 
     # Remove a randomly sampled subset of independently optional parameters
@@ -45,6 +39,7 @@ def _fake_activity(
         optional_keys=[
             "enjoyment",
             "importance",
+            "valueId",
         ],
     )
 

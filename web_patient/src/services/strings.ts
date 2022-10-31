@@ -92,28 +92,29 @@ const _strings = {
     Values_inventory_activity_singular: 'activity',
     Values_inventory_activity_plural: 'activities',
 
-    Values_inventory_add_activity: 'Add activity',
     Values_inventory_add_value: 'Add value',
 
     Values_inventory_values_example_values: 'Example values',
 
     Values_inventory_value_item_example_activities: 'Example activities',
     Values_inventory_value_item_activities_none: 'List one or more activities associated with this value.',
-    Values_inventory_value_item_activities_enjoyment: 'Enjoyment',
-    Values_inventory_value_item_activities_importance: 'Importance',
+
+    values_inventory_add_activity: 'Add activity',
+    values_inventory_value_activity_enjoyment: 'Enjoyment',
+    values_inventory_value_activity_importance: 'Importance',
 
     Values_inventory_dialog_add_value: 'Add value',
     Values_inventory_dialog_add_value_label: 'Name your value',
 
     Values_inventory_dialog_edit_value: 'Edit value',
 
-    Values_inventory_dialog_add_activity: 'Add activity',
-    Values_inventory_dialog_edit_activity: 'Edit activity',
-    Values_inventory_dialog_add_activity_label: 'Name your activity',
-    Values_inventory_dialog_add_activity_prompt:
-        'For this activity, rate how much you enjoy doing it and how important it is for you to do it. 0 being low and 10 being high.',
-    Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',
-    Values_inventory_dialog_add_activity_importance: 'Importance (0-10)',
+    // Values_inventory_dialog_add_activity: 'Add activity',
+    // Values_inventory_dialog_edit_activity: 'Edit activity',
+    // Values_inventory_dialog_add_activity_label: 'Name your activity',
+    // Values_inventory_dialog_add_activity_prompt:
+    //     'For this activity, rate how much you enjoy doing it and how important it is for you to do it. 0 being low and 10 being high.',
+    // Values_inventory_dialog_add_activity_enjoyment: 'Enjoyment (0-10)',
+    // Values_inventory_dialog_add_activity_importance: 'Importance (0-10)',
 
     Resources_resources_title: 'Library',
     Resources_resources_subtitle: 'Shared documents and learning resources',
@@ -174,41 +175,60 @@ const _strings = {
 
     Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
-    Form_add_activity_title: 'Add activity',
-    Form_edit_activity_title: 'Edit activity',
-    Form_add_activity_choose_or: 'OR',
-    Form_add_activity_describe: 'Describe the activity',
+    // Form_add_activity_title: 'Add activity',
+    // Form_edit_activity_title: 'Edit activity',
+    // Form_add_activity_choose_or: 'OR',
+    // Form_add_activity_describe: 'Describe the activity',
+    //
+    form_add_edit_activity_name_prompt: 'What is the name of the activity?',
+    // Form_add_activity_describe_name_label: 'Name',
+    form_add_edit_activity_name_help:
+        'Write a descriptive name of the activity that helps you recognize what it is.',
+        // 'Write a descriptive name of the activity that helps you recognize what it is. You can choose an activity that you already identified from the values inventory.',
 
-    Form_add_activity_describe_name: 'What is the name of the activity?',
-    Form_add_activity_describe_name_label: 'Name',
-    Form_add_activity_describe_name_help:
-        'Write a descriptive name of the activity that helps you recognize what it is. You can choose an activity that you already identified from the values inventory.',
-    Form_add_activity_describe_name_import_button: 'Choose from the values & activities inventory',
+    // Form_add_activity_describe_name_import_button: 'Choose from the values & activities inventory',
+    // Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
-    Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
+    form_add_edit_activity_life_area_value_prompt:
+        'Which life area and value are best associated with this activity?',
+    form_add_edit_activity_life_area_value_help:
+        'You can also identify values in the Values & Activity Inventory.',
+    form_add_edit_activity_life_area_label: 'Life Area',
+    form_add_edit_activity_life_area_help:
+        'Choose a life area.',
+    form_add_edit_activity_value_label: 'Value',
+    form_add_edit_activity_value_help:
+        'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_add_value_button: 'Add Value',
+    form_add_edit_activity_enjoyment_prompt:
+        'How much do you enjoy doing this activity?',
+    form_add_edit_activity_enjoyment_help:
+        '0 is low enjoyment and 10 is high enjoyment.',
+    form_add_edit_activity_importance_prompt:
+        'How important it is for you to do this activity?',
+    form_add_edit_activity_importance_help:
+        '0 is low importance and 10 is high importance.',
 
-    Form_add_activity_describe_value: 'Which value is this activity best associated with?',
-    Form_add_activity_describe_value_label: 'Value',
-    Form_add_activity_describe_value_help:
-        'If the value does not appear in this list, you can add them from the values inventory.',
-
-    Form_add_activity_describe_lifearea: 'Which life area is this activity best associated with?',
-    Form_add_activity_describe_lifearea_label: 'Life area',
-
-    Form_add_activity_date: 'What date would you like to do/start this activity?',
-    Form_add_activity_date_label: 'Activity start date',
-    Form_add_activity_time: 'What time would you like to do this activity?',
-    Form_add_activity_time_label: 'Activity time',
-    Form_add_activity_reminder_section: 'Set reminder',
-    Form_add_activity_reminder: 'Would you like a reminder for this activity?',
-    Form_add_activity_reminder_time: 'When would you like to be reminded?',
-    Form_add_activity_reminder_time_label: 'Reminder time',
-    Form_add_activity_repetition_section: 'Set repetition',
-    Form_add_activity_repetition: 'Would you like to repeat this activity?',
-    Form_add_activity_repetition_days: 'On what days would you like to repeat this activity?',
-    Form_add_activity_repetition_days_label: 'Repetition days',
-
-    Form_add_activity_submit_success: 'Great! Your activity is saved.',
+    // Form_add_activity_describe_lifearea: 'Which life area is this activity best associated with?',
+    // Form_add_activity_describe_value: 'Which value is this activity best associated with?',
+    // Form_add_activity_describe_value_help:
+    //     'If the value does not appear in this list, you can add them from the values inventory.',
+    //
+    //
+    // Form_add_activity_date: 'What date would you like to do/start this activity?',
+    // Form_add_activity_date_label: 'Activity start date',
+    // Form_add_activity_time: 'What time would you like to do this activity?',
+    // Form_add_activity_time_label: 'Activity time',
+    // Form_add_activity_reminder_section: 'Set reminder',
+    // Form_add_activity_reminder: 'Would you like a reminder for this activity?',
+    // Form_add_activity_reminder_time: 'When would you like to be reminded?',
+    // Form_add_activity_reminder_time_label: 'Reminder time',
+    // Form_add_activity_repetition_section: 'Set repetition',
+    // Form_add_activity_repetition: 'Would you like to repeat this activity?',
+    // Form_add_activity_repetition_days: 'On what days would you like to repeat this activity?',
+    // Form_add_activity_repetition_days_label: 'Repetition days',
+    //
+    // Form_add_activity_submit_success: 'Great! Your activity is saved.',
 
     Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
     Form_submit_error_retry: 'Retry',

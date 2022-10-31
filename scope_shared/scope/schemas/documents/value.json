@@ -7,11 +7,11 @@
 	"$comment": [
 		"name:",
 		"  - Display text of the value.",
+		"lifeAreaId:",
+		"  - ID of associated life area.",
 		"editedDateTime:",
 		"  - DateTime when this value was created or edited.",
-		"  - Used for determining when an overall values inventory was last edited.",
-		"lifeareaId:",
-		"  - ID of associated life area."
+		"  - Used for determining when an overall values inventory was last edited."
 	],
 	"properties": {
 		"_id": {
@@ -32,13 +32,13 @@
 		"name": {
 			"type": "string"
 		},
+		"lifeAreaId": {
+			"$ref": "/schemas/utils/enums#/properties/lifeAreaId"
+		},
 		"editedDateTime": {
 			"$ref": "/schemas/utils/datetime#/properties/datetime"
-		},
-		"lifeareaId": {
-			"$ref": "/schemas/utils/enums#/properties/lifeareaId"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "name", "editedDateTime", "lifeareaId"]
+	"required": ["_type", "name", "editedDateTime", "lifeAreaId"]
 }

@@ -1,4 +1,3 @@
-import { compareAsc } from 'date-fns';
 import _ from 'lodash';
 import { getLogger } from 'shared/logger';
 import { IServiceBase, ServiceBase } from 'shared/serviceBase';
@@ -29,6 +28,9 @@ import {
     IActivityLogResponse,
     IActivityLogRequest,
     IScheduledAssessmentListResponse,
+    IValueRequest,
+    IValueResponse,
+    IValueListResponse,
 } from 'shared/serviceTypes';
 import {
     IActivity,
@@ -45,6 +47,7 @@ import {
     IScheduledActivity,
     IScheduledAssessment,
     ISession,
+    IValue,
     IValuesInventory,
 } from 'shared/types';
 import {
@@ -104,6 +107,10 @@ export interface IPatientService extends IServiceBase {
 
     getMoodLogs(): Promise<IMoodLog[]>;
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
+
+    getValues(): Promise<IValue[]>;
+    addValue(value: IValue): Promise<IValue>;
+    updateValue(value: IValue): Promise<IValue>;
 }
 
 const logger = getLogger('patientService');
@@ -162,9 +169,7 @@ class PatientService extends ServiceBase implements IPatientService {
 
     public async getValuesInventory(): Promise<IValuesInventory> {
         const response = await this.axiosInstance.get<IValuesInventoryResponse>(`/valuesinventory`);
-        const inventory = response.data?.valuesinventory;
-        inventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
-        return inventory;
+        return response.data?.valuesinventory;
     }
 
     public async updateValuesInventory(inventory: IValuesInventory): Promise<IValuesInventory> {
@@ -177,9 +182,7 @@ class PatientService extends ServiceBase implements IPatientService {
         const response = await this.axiosInstance.put<IValuesInventoryResponse>(`/valuesinventory`, {
             valuesinventory: inventory,
         } as IValuesInventoryRequest);
-        const updatedInventory = response.data?.valuesinventory;
-        updatedInventory?.values?.sort((a, b) => compareAsc(a.createdDateTime, b.createdDateTime));
-        return updatedInventory;
+        return response.data?.valuesinventory;
     }
 
     public async getSafetyPlan(): Promise<ISafetyPlan> {
@@ -374,6 +377,39 @@ class PatientService extends ServiceBase implements IPatientService {
             moodlog: moodLog,
         } as IMoodLogRequest);
         return response.data?.moodlog;
+    }
+
+    public async getValues(): Promise<IValue[]> {
+        const response = await this.axiosInstance.get<IValueListResponse>(`/values`);
+        return response.data?.values;
+    }
+
+    public async addValue(value: IValue): Promise<IValue> {
+        (value as any)._type = 'value';
+        // TODO Activity Refactor: Who/where should maintained edited time?
+
+        logger.assert((value as any)._rev == undefined, '_rev should not be in the request data');
+        logger.assert((value as any)._set_id == undefined, '_set_id should not be in the request data');
+
+        const response = await this.axiosInstance.post<IValueResponse>(`/values`, { value } as IValueRequest);
+        return response.data?.value;
+    }
+
+    public async updateValue(value: IValue): Promise<IValue> {
+        (value as any)._type = 'value';
+        // TODO Activity Refactor: Who/where should maintained edited time?
+
+        logger.assert((value as any)._rev != undefined, '_rev should be in the request data');
+        logger.assert((value as any)._set_id != undefined, '_set_id should be in the request data');
+
+        const response = await this.axiosInstance.put<IValueResponse>(
+            `/value/${value.valueId}`,
+            {
+                value: value,
+            } as IValueRequest,
+        );
+
+        return response.data?.value;
     }
 }
 

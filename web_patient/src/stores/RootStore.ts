@@ -23,7 +23,7 @@ export interface IRootStore {
 
     // Helpers
     getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
-    getLifeAreaContent: (lifearea: string) => ILifeAreaContent | undefined;
+    getLifeAreaContent: (lifeArea: string) => ILifeAreaContent | undefined;
 
     // Data load/save
     load: () => void;

@@ -6,7 +6,8 @@ import {
     CancerTreatmentRegimenFlags,
     ClinicCode,
     DayOfWeek,
-    DayOfWeekFlags,
+    // TODO Activity Refactor
+    // DayOfWeekFlags,
     DepressionTreatmentStatus,
     DiscussionFlags,
     DueType,
@@ -97,18 +98,25 @@ export interface IAssessment {
 
 export interface IActivity {
     activityId?: string;
+
     name: string;
-    value: string;
-    lifeareaId: string;
-    startDateTime: Date;
-    timeOfDay: number;
-    hasReminder: boolean;
-    reminderTimeOfDay?: number;
-    hasRepetition: boolean;
-    repeatDayFlags?: DayOfWeekFlags;
-    isActive: boolean;
-    isDeleted: boolean;
+    enjoyment?: number;
+    importance?: number;
+    valueId?: string;
+
+    editedDateTime: Date;
 }
+
+// TODO Activity Refactor: for IActivitySchedule
+// lifeareaId: string;
+// startDateTime: Date;
+// timeOfDay: number;
+// hasReminder: boolean;
+// reminderTimeOfDay?: number;
+// hasRepetition: boolean;
+// repeatDayFlags?: DayOfWeekFlags;
+// isActive: boolean;
+// isDeleted: boolean;
 
 export interface IScheduledItem {
     // dueDate: Date; // Contains only the date with 00 time, not used
@@ -229,8 +237,15 @@ export interface ISafetyPlan {
 export interface IValuesInventory {
     assigned: boolean;
     assignedDateTime?: Date;
-    lastUpdatedDateTime?: Date;
-    values?: ILifeAreaValue[];
+}
+
+export interface IValue {
+    valueId?: string;
+
+    name: string;
+    lifeAreaId: string;
+
+    editedDateTime: Date;
 }
 
 export interface ILifeAreaContent {
@@ -242,17 +257,19 @@ export interface ILifeAreaContent {
 export interface ILifeAreaValue {
     name: string;
     createdDateTime: Date;
-    editedDateTime: Date;
-    lifeareaId: string;
+    lifeAreaId: string;
     activities: ILifeAreaValueActivity[];
+
+    editedDateTime: Date;
 }
 
 export interface ILifeAreaValueActivity {
     name: string;
     createdDateTime: Date;
-    editedDateTime: Date;
     enjoyment?: number;
     importance?: number;
+
+    editedDateTime: Date;
 }
 
 export interface IPatient {
@@ -265,6 +282,9 @@ export interface IPatient {
     // Values inventory and safety plan
     valuesInventory: IValuesInventory;
     safetyPlan: ISafetyPlan;
+
+    // Values
+    values: IValue[];
 
     // Sessions
     sessions: ISession[];
