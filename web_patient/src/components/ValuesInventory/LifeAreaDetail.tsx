@@ -118,6 +118,8 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         viewState.openAddActivity = false;
     });
     */
+    const rootStore = useStores();
+    const { patientStore } = rootStore;
 
     const renderActivityDetail = (activity: IActivity): ReactNode => {
         // TODO Activity Refactor: Enhance this with ActivitySchedule data
@@ -424,8 +426,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         return null;
     }
 
-    const values = patientStore.values || [];
-
     interface IViewStateModeNone {
         mode: 'none';
     }
@@ -603,22 +603,19 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         <Stack spacing={0}>
                             <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
                             <Stack spacing={4}>
-                                {values.map((value) => {
-                                    if (value.lifeareaId == lifeareaId) {
-                                        return (
-                                            <ValueEditFormSection
-                                                error={patientStore.loadValuesInventoryState.error}
-                                                loading={patientStore.loadValuesInventoryState.pending}
-                                                value={value}
-                                                activityExamples={activityExamples}
-                                                // TODO James: Prefer to not need such as cast
-                                                handleEditValue={handleEditValue(value.valueId as string)}
-                                                handleCancelEditActivity={handleCancelEditActivity}
-                                                // handleSaveValueActivities={handleSaveValueActivities(idx)}
-                                                key={value.valueId}
-                                            />
-                                        );
-                                    }
+                                {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
+                                    return (
+                                        <ValueEditFormSection
+                                            error={patientStore.loadValuesInventoryState.error}
+                                            loading={patientStore.loadValuesInventoryState.pending}
+                                            value={value}
+                                            activityExamples={activityExamples}
+                                            handleEditValue={handleEditValue(value.valueId as string)}
+                                            handleCancelEditActivity={handleCancelEditActivity}
+                                            // handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                            key={value.valueId}
+                                        />
+                                    );
                                 })}
                             </Stack>
                         </Stack>
