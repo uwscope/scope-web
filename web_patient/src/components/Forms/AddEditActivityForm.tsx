@@ -134,11 +134,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const viewState = useLocalObservable<IViewState>(() => initialViewState);
 
+    /* TODO Activity Refactor: Pending additions to ViewState
     const dataState = useLocalObservable<IActivity>(() => ({
-        ...activity,
-        name: activity?.name || '',
-        value: activity?.value || '',
-        lifeareaId: activity?.lifeareaId || '',
         startDateTime: activity?.startDateTime || new Date(),
         timeOfDay: activity?.timeOfDay || 9,
         hasReminder: activity?.hasReminder || false,
@@ -150,9 +147,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 [x]: !!activity?.repeatDayFlags?.[x],
             })),
         ),
-        isActive: activity?.isActive || true,
-        isDeleted: activity?.isDeleted || false,
     }));
+    */
 
     const handleSubmit = action(async () => {
         try {
