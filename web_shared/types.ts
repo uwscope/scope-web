@@ -98,11 +98,13 @@ export interface IAssessment {
 
 export interface IActivity {
     activityId?: string;
+
     name: string;
-    editedDateTime: Date;
     enjoyment?: number;
     importance?: number;
     valueId?: string;
+
+    editedDateTime: Date;
 }
 
 // TODO Activity Refactor: for IActivitySchedule
@@ -242,6 +244,7 @@ export interface IValue {
 
     name: string;
     lifeAreaId: string;
+
     editedDateTime: Date;
 }
 
@@ -254,17 +257,19 @@ export interface ILifeAreaContent {
 export interface ILifeAreaValue {
     name: string;
     createdDateTime: Date;
-    editedDateTime: Date;
     lifeAreaId: string;
     activities: ILifeAreaValueActivity[];
+
+    editedDateTime: Date;
 }
 
 export interface ILifeAreaValueActivity {
     name: string;
     createdDateTime: Date;
-    editedDateTime: Date;
     enjoyment?: number;
     importance?: number;
+
+    editedDateTime: Date;
 }
 
 export interface IPatient {
