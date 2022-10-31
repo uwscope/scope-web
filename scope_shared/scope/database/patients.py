@@ -104,12 +104,10 @@ def delete_patient(
 
     if patient_identity_document:
         exists = True
-        scope.database.collection_utils.delete_set_element(
+        scope.database.collection_utils.unsafe_delete_set_element_destructive(
             collection=database.get_collection(PATIENT_IDENTITY_COLLECTION),
             document_type=PATIENT_IDENTITY_DOCUMENT_TYPE,
             set_id=patient_id,
-            rev=None,
-            destructive=destructive,
         )
 
     # If the patient collection exists, delete it.

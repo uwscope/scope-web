@@ -67,31 +67,15 @@ def delete_set_element(
     collection: pymongo.collection.Collection,
     document_type: str,
     set_id: str,
-    rev: Optional[int],  # TODO: Check w/ James. Made this `Optional` for tests.
-    destructive: bool,
-) -> Union[bool, SetPutResult]:
+    rev: int,
+) -> SetPutResult:
 
-    if destructive and rev != None:
-        raise ValueError(
-            '"rev" {} should b3e None when "destructive" is {}'.format(rev, destructive)
-        )
-
-    # Old code
-    if destructive:
-        # There is likely a race condition here, but our semantics for destructive deletion are weak.
-        result = collection.delete_many(
-            {
-                "_type": document_type,
-                "_set_id": set_id,
-            }
-        )
-        return result.deleted_count > 0
-
-    tombstone_document = set_tombstone(
-        document_type=document_type,
-        set_id=set_id,
-        rev=rev,
-    )
+    tombstone_document = {
+        "_type": document_type,
+        "_set_id": set_id,
+        "_rev": rev,
+        "_deleted": True,
+    }
 
     set_put_result = put_set_element(
         collection=collection,
@@ -479,20 +463,18 @@ def put_singleton(
     )
 
 
-def set_tombstone(
+def unsafe_delete_set_element_destructive(
     *,
+    collection: pymongo.collection.Collection,
     document_type: str,
     set_id: str,
-    rev: int,
-) -> dict:
-    tombstone_document = {
-        "_type": document_type,
-        "_set_id": set_id,
-        "_rev": rev,
-        "_deleted": True,
-    }
-    schema_utils.raise_for_invalid_schema(
-        data=tombstone_document,
-        schema=scope.schema.set_tombstone_schema,
+) -> bool:
+
+    # There is likely a race condition here, but our semantics for destructive deletion are weak.
+    result = collection.delete_many(
+        {
+            "_type": document_type,
+            "_set_id": set_id,
+        }
     )
-    return tombstone_document
+    return result.deleted_count > 0

@@ -79,12 +79,10 @@ def delete_provider(
         return False
 
     # Atomically delete the identity first, then delete all other traces of the provider.
-    scope.database.collection_utils.delete_set_element(
+    scope.database.collection_utils.unsafe_delete_set_element_destructive(
         collection=provider_identity_collection,
         document_type=PROVIDER_IDENTITY_DOCUMENT_TYPE,
         set_id=provider_id,
-        rev=None,
-        destructive=destructive,
     )
 
     return True
