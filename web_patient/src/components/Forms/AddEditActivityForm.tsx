@@ -36,12 +36,6 @@ import { useStores } from 'src/stores/stores';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
-interface ImportableActivity {
-    activity: string;
-    value: string;
-    lifeareaId: string;
-}
-
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
@@ -160,30 +154,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         isDeleted: activity?.isDeleted || false,
     }));
 
-    // TODO Activity Refactor: Replace with loading values
-    // const values = valuesInventory?.values || [];
-    const groupedActivities: KeyedMap<ImportableActivity[]> = {};
-    let activityCount = 0;
-
-    // TODO Activity Refactor: Replace with loading values
-    const values: ILifeAreaValue[] = [];
-    // values.forEach((value) => {
-    //     const lifearea = value.lifeareaId;
-    //     if (!groupedActivities[lifearea]) {
-    //         groupedActivities[lifearea] = [];
-    //     }
-    //
-    //     value.activities.forEach((activity) => {
-    //         groupedActivities[lifearea].push({
-    //             activity: activity.name,
-    //             value: value.name,
-    //             lifeareaId: lifearea,
-    //         });
-    //
-    //         activityCount += groupedActivities[lifearea].length;
-    //     });
-    // });
-
     const handleSubmit = action(async () => {
         try {
             if (viewState.modeState.mode == 'addActivity') {
@@ -203,28 +173,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         } catch {
             return false;
         }
-    });
 
-    const handleOpenImportActivity = action(() => {
-        viewState.openImportActivity = true;
-    });
-
-    const handleImportActivityItemClick = action((activity: ImportableActivity | undefined) => {
-        viewState.openActivityDialog = false;
-
-        if (!!activity) {
-            dataState.name = activity.activity;
-            dataState.value = activity.value;
-            dataState.lifeareaId = activity.lifeareaId;
-        }
-    });
-
-    const handleSelectValue = action((event: SelectChangeEvent<string>) => {
-        dataState.value = event.target.value as string;
-    });
-
-    const handleSelectLifearea = action((event: SelectChangeEvent<string>) => {
-        dataState.lifeareaId = event.target.value as string;
     });
 
     const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
@@ -257,11 +206,89 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleSelectValue = action((event: SelectChangeEvent<string>) => {
         viewState.valueId = event.target.value as string;
     });
-    const handleValueChange = action((key: string, value: any) => {
-        (dataState as any)[key] = value;
+
+    {/* TODO Activity Refactor: Abandoned Activity Import Code
+    // const values = valuesInventory?.values || [];
+    // const groupedActivities: KeyedMap<ImportableActivity[]> = {};
+    // let activityCount = 0;
+
+    // const values: ILifeAreaValue[] = [];
+    // values.forEach((value) => {
+    //     const lifearea = value.lifeareaId;
+    //     if (!groupedActivities[lifearea]) {
+    //         groupedActivities[lifearea] = [];
+    //     }
+    //
+    //     value.activities.forEach((activity) => {
+    //         groupedActivities[lifearea].push({
+    //             activity: activity.name,
+    //             value: value.name,
+    //             lifeareaId: lifearea,
+    //         });
+    //
+    //         activityCount += groupedActivities[lifearea].length;
+    //     });
+    // });
+
+    const handleOpenImportActivity = action(() => {
+        viewState.openImportActivity = true;
     });
 
-    const namePage = (
+    const handleImportActivityItemClick = action((activity: ImportableActivity | undefined) => {
+        viewState.openActivityDialog = false;
+
+        if (!!activity) {
+            dataState.name = activity.activity;
+            dataState.value = activity.value;
+            dataState.lifeareaId = activity.lifeareaId;
+        }
+    });
+
+    {activityCount > 0 && (
+        <Grid container justifyContent="flex-end">
+            <Chip
+                sx={{ marginTop: 1 }}
+                variant="outlined"
+                color="primary"
+                size="small"
+                label={getString('Form_add_activity_describe_name_import_button')}
+                onClick={handleOpenImportActivity}
+            />
+            <Dialog
+                maxWidth="phone"
+                open={viewState.openActivityDialog}
+                onClose={() => handleImportActivityItemClick(undefined)}>
+                <DialogTitle>
+                    {getString('Form_add_activity_describe_name_import_dialog_title')}
+                </DialogTitle>
+
+                <DialogContent dividers>
+                    <List disablePadding>
+                        {Object.keys(groupedActivities).map((lifearea) => {
+                            const lifeareaName =
+                                lifeAreas.find((l) => l.id == lifearea)?.name || lifearea;
+                            return (
+                                <Fragment key={lifearea}>
+                                    <ListSubheader disableGutters>{lifeareaName}</ListSubheader>
+                                    {groupedActivities[lifearea].map((activity, idx) => (
+                                        <ListItem
+                                            disableGutters
+                                            button
+                                            onClick={() => handleImportActivityItemClick(activity)}
+                                            key={idx}>
+                                            <ListItemText primary={activity.activity} />
+                                        </ListItem>
+                                    ))}
+                                </Fragment>
+                            );
+                        })}
+                    </List>
+                </DialogContent>
+            </Dialog>
+        </Grid>
+    )}
+    */}
+
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
