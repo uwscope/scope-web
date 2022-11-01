@@ -63,7 +63,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                             { getString('values_inventory_value_activity_enjoyment') } { activity.enjoyment }
                         </Fragment>
                     }
-                    { (activity.enjoyment || activity.importance) &&
+                    { (activity.enjoyment && activity.importance) &&
                         ' / '
                     }
                     { (activity.importance) &&
