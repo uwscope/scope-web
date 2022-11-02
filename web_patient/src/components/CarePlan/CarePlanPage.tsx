@@ -18,11 +18,11 @@ import withTheme from '@mui/styles/withTheme';
 import { format, isSameDay } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 // import { DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
-import { IActivity, IScheduledActivity, KeyedMap } from 'shared/types';
+import { IActivity, IScheduledActivity } from 'shared/types';
 import Calendar from 'src/components/CarePlan/Calendar';
 import { MainPage } from 'src/components/common/MainPage';
 import ScheduledListItem from 'src/components/common/ScheduledListItem';
@@ -49,9 +49,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         appContentConfig: { lifeAreas },
     } = rootStore;
     const { taskItems } = patientStore;
-    // TODO Activity Refactor
-    // const activities = patientStore.activities.filter((a) => !a.isDeleted);
-    const activities = patientStore.activities;
+
     const navigate = useNavigate();
     const viewState = useLocalObservable<{
         selectedDate: Date;
@@ -66,17 +64,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     }));
 
     const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate));
-    const groupedActivities: KeyedMap<IActivity[]> = {};
-    /* TODO Activity Refactor
-    activities.forEach((activity) => {
-        const lifearea = activity.lifeareaId || getString('Careplan_activities_uncategorized');
-        if (!groupedActivities[lifearea]) {
-            groupedActivities[lifearea] = [];
-        }
-
-        groupedActivities[lifearea].push(activity);
-    });
-    */
 
     const handleDayClick = action((date: Date) => {
         viewState.selectedDate = date;
@@ -142,21 +129,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.moreTargetEl = undefined;
     });
 
-    /* TODO Activity Refactor
-    const handleActivate = action(() => {
-        if (!!viewState.selectedActivity) {
-            const activityCopy = viewState.selectedActivity;
-            activityCopy.isActive = !activityCopy.isActive;
-            patientStore.updateActivity({
-                ...activityCopy,
-                repeatDayFlags: activityCopy.hasRepetition ? activityCopy.repeatDayFlags : undefined,
-                reminderTimeOfDay: activityCopy.hasReminder ? activityCopy.reminderTimeOfDay : undefined,
-            });
-            handleMoreClose();
-        }
-    });
-    */
-
     const handleDelete = action(() => {
         if (!!viewState.selectedActivity) {
             /* TODO Activity Refactor
@@ -171,6 +143,114 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             handleMoreClose();
         }
     });
+
+    const renderActivitiesSection = (lifeAreaName: string, lifeAreaId: string, activities: IActivity[]): ReactNode => {
+        const sortedActivities = activities.slice();
+
+        return (activities.length > 0) && (
+            <Section title={lifeAreaName} key={lifeAreaId}>
+                <CompactList aria-labelledby="nested-list-subheader">
+                    {sortedActivities.map((activity, idx) => (
+                        <Fragment key={activity.activityId}>
+                            <ListItem
+                                alignItems="flex-start"
+                                button
+                                component={Link}
+                                to={getFormLink(ParameterValues.form.editActivity, {
+                                    [Parameters.activityId as string]:
+                                        activity.activityId as string,
+                                })}
+                            >
+                                <ListItemText
+                                    style={{
+                                        // TODO Activity Refactor
+                                        // opacity: activity.isActive ? 1 : 0.5
+                                    }}
+                                    secondaryTypographyProps={{
+                                        component: 'div',
+                                    }}
+                                    primary={<Typography noWrap>{activity.name}</Typography>}
+                                    secondary={
+                                        <Fragment>
+                                            {/* TODO Activity Refactor
+                                            <Typography variant="body2" component="div">
+                                                {`${getString('Careplan_activity_item_value')}: ${
+                                                    activity.value
+                                                }`}
+                                            </Typography>
+                                            <Typography variant="body2" component="span">
+                                                {`${getString(
+                                                    'Careplan_activity_item_start_date',
+                                                )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
+                                            </Typography>
+                                            {activity.hasRepetition && activity.repeatDayFlags && (
+                                                <Typography variant="body2" component="span">
+                                                    {`; ${getString(
+                                                        'Careplan_activity_item_repeat',
+                                                    )} ${getRepeatDateText(
+                                                        activity.repeatDayFlags,
+                                                    )}`}
+                                                </Typography>
+                                            )}
+                                            */}
+                                        </Fragment>
+                                    }
+                                />
+
+                                <ListItemSecondaryAction>
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="more"
+                                        onClick={(e) => handleMoreClick(activity, e)}
+                                        size="large">
+                                        <MoreVertIcon />
+                                    </IconButton>
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                            {idx < activities.length - 1 && <Divider variant="middle" />}
+                        </Fragment>
+                    ))}
+                </CompactList>
+            </Section>
+        )
+    }
+
+    const renderActivities = (): ReactNode => {
+        return <Fragment>
+            <Menu
+                id="activity-menu"
+                anchorEl={viewState.moreTargetEl}
+                keepMounted
+                open={Boolean(viewState.moreTargetEl)}
+                onClose={handleMoreClose}>
+                <MenuItem onClick={handleDelete}>{getString('careplan_activity_item_delete')}</MenuItem>
+            </Menu>
+            {patientStore.activities.length > 0 ? (
+                <Fragment>
+                    {
+                        lifeAreas.map((lifeArea) =>
+                            renderActivitiesSection(
+                                lifeArea.name,
+                                lifeArea.id,
+                                patientStore.getActivitiesByLifeAreaId(lifeArea.id)
+                            )
+                        )
+                    }
+                    {
+                        renderActivitiesSection(
+                            getString('careplan_activities_other'),
+                            'other',
+                            patientStore.getActivitiesWithoutValueId()
+                        )
+                    }
+                </Fragment>
+            ) : (
+                <Section title={getString('Careplan_add_activity')}>
+                    <Typography variant="body2">{getString('Careplan_no_activities')}</Typography>
+                </Section>
+            )}
+        </Fragment>
+    }
 
     return (
         <MainPage
@@ -206,100 +286,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             </Grid>
             {viewState.showActivities ? (
                 <div>
-                    <Menu
-                        id="activity-menu"
-                        anchorEl={viewState.moreTargetEl}
-                        keepMounted
-                        open={Boolean(viewState.moreTargetEl)}
-                        onClose={handleMoreClose}>
-                        {/* TODO Activity Refactor
-                        <MenuItem onClick={handleActivate}>
-                            {getString(
-                                viewState.selectedActivity?.isActive
-                                    ? 'Careplan_activity_item_deactivate'
-                                    : 'Careplan_activity_item_activate',
-                            )}
-                        </MenuItem>
-                        */}
-                        <MenuItem onClick={handleDelete}>{getString('Careplan_activity_item_delete')}</MenuItem>
-                    </Menu>
-                    {activities.length > 0 ? (
-                        Object.keys(groupedActivities).map((lifeAreaId) => {
-                            const activities = groupedActivities[lifeAreaId];
-                            const lifeArea =
-                                lifeAreas.find((la) => la.id == lifeAreaId)?.name ||
-                                getString('Careplan_activities_uncategorized');
-                            return (
-                                <Section title={lifeArea} key={lifeArea}>
-                                    <CompactList aria-labelledby="nested-list-subheader">
-                                        {activities.map((activity, idx) => (
-                                            <Fragment key={activity.activityId}>
-                                                <ListItem
-                                                    alignItems="flex-start"
-                                                    button
-                                                    component={Link}
-                                                    to={getFormLink(ParameterValues.form.editActivity, {
-                                                        [Parameters.activityId as string]:
-                                                            activity.activityId as string,
-                                                    })}>
-                                                    <ListItemText
-                                                        style={{
-                                                            // TODO Activity Refactor
-                                                            // opacity: activity.isActive ? 1 : 0.5
-                                                        }}
-                                                        secondaryTypographyProps={{
-                                                            component: 'div',
-                                                        }}
-                                                        primary={<Typography noWrap>{activity.name}</Typography>}
-                                                        secondary={
-                                                            <Fragment>
-                                                                {/* TODO Activity Refactor
-                                                                <Typography variant="body2" component="div">
-                                                                    {`${getString('Careplan_activity_item_value')}: ${
-                                                                        activity.value
-                                                                    }`}
-                                                                </Typography>
-                                                                <Typography variant="body2" component="span">
-                                                                    {`${getString(
-                                                                        'Careplan_activity_item_start_date',
-                                                                    )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
-                                                                </Typography>
-                                                                {activity.hasRepetition && activity.repeatDayFlags && (
-                                                                    <Typography variant="body2" component="span">
-                                                                        {`; ${getString(
-                                                                            'Careplan_activity_item_repeat',
-                                                                        )} ${getRepeatDateText(
-                                                                            activity.repeatDayFlags,
-                                                                        )}`}
-                                                                    </Typography>
-                                                                )}
-                                                                */}
-                                                            </Fragment>
-                                                        }
-                                                    />
-
-                                                    <ListItemSecondaryAction>
-                                                        <IconButton
-                                                            edge="end"
-                                                            aria-label="more"
-                                                            onClick={(e) => handleMoreClick(activity, e)}
-                                                            size="large">
-                                                            <MoreVertIcon />
-                                                        </IconButton>
-                                                    </ListItemSecondaryAction>
-                                                </ListItem>
-                                                {idx < activities.length - 1 && <Divider variant="middle" />}
-                                            </Fragment>
-                                        ))}
-                                    </CompactList>
-                                </Section>
-                            );
-                        })
-                    ) : (
-                        <Section title={getString('Careplan_add_activity')}>
-                            <Typography variant="body2">{getString('Careplan_no_activities')}</Typography>
-                        </Section>
-                    )}
+                    { renderActivities() }
                 </div>
             ) : (
                 <div>

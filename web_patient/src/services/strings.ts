@@ -161,15 +161,13 @@ const _strings = {
     Careplan_no_tasks: 'There are no planned activities for this day.',
     Careplan_view_calendar: 'Calendar view',
     Careplan_view_activity: 'Activity view',
-    Careplan_activities_uncategorized: 'Uncategorized',
+    careplan_activities_other: 'Other Activities',
     Careplan_activity_item_value: 'Value',
     Careplan_activity_item_start_date: 'Starts',
     Careplan_activity_item_repeat: 'Repeats',
 
     Careplan_activity_item_edit: 'Edit',
-    Careplan_activity_item_delete: 'Delete',
-    Careplan_activity_item_activate: 'Activate',
-    Careplan_activity_item_deactivate: 'Deactivate',
+    careplan_activity_item_delete: 'Delete',
 
     Careplan_add_activity: 'Add activity',
 
