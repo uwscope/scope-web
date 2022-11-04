@@ -19,7 +19,7 @@ import {
 import { random } from 'lodash';
 import { action, runInAction, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
-import React, { Fragment, FunctionComponent, ReactNode } from 'react';
+import React, { Fragment, FunctionComponent, ReactNode} from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { IActivity, IValue } from 'shared/types';
@@ -29,7 +29,7 @@ import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-// NOTE: Commented to avoid `Parameters` not being used compile error.
+// NOTE: Comment this to avoid `Parameters` not being used compile error.
 //import { getFormLink, Parameters, ParameterValues } from 'src/services/routes';
 import { getFormLink, ParameterValues } from 'src/services/routes';
 
@@ -62,26 +62,28 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         return (
             (activity.enjoyment || activity.importance) && (
                 <HelperText>
-                    {activity.enjoyment && (
+                    { (activity.enjoyment) &&
                         <Fragment>
-                            {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
+                            { getString('values_inventory_value_activity_enjoyment') } { activity.enjoyment }
                         </Fragment>
-                    )}
-                    {activity.enjoyment && activity.importance && ' / '}
-                    {activity.importance && (
+                    }
+                    { (activity.enjoyment && activity.importance) &&
+                        ' / '
+                    }
+                    { (activity.importance) &&
                         <Fragment>
-                            {getString('values_inventory_value_activity_importance')} {activity.importance}
+                            { getString('values_inventory_value_activity_importance') } { activity.importance }
                         </Fragment>
-                    )}
+                    }
                 </HelperText>
             )
-        );
-    };
+        )
+    }
 
     const renderActivities = (activities: IActivity[]): ReactNode => {
-        const sortedActivities = activities
-            .slice()
-            .sort((a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()));
+        const sortedActivities = activities.slice().sort(
+            (a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase())
+        );
 
         return sortedActivities.map((activity, idx) => (
             <Fragment key={activity.activityId as string}>
@@ -97,17 +99,15 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                             {renderActivityDetail(activity)}
                         </Stack>
                     </Grid>
-                    {/*
-                        <IconButton
-                            size="small"
-                            aria-label="edit"
-                            component={Link}
-                            to={getFormLink(ParameterValues.form.editActivity, {
-                                [Parameters.activityId]: activity.activityId as string,
-                            })}>
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    */}
+                    {/* <IconButton
+                    size="small"
+                    aria-label="edit"
+                    component={Link}
+                    to={getFormLink(ParameterValues.form.editActivity, {
+                        [Parameters.activityId]: activity.activityId as string,
+                    })}>
+                    <EditIcon fontSize="small" />
+                </IconButton> */}
                     <IconButton
                         edge="end"
                         aria-label="more"
@@ -116,10 +116,12 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         <MoreVertIcon />
                     </IconButton>
                 </Grid>
-                {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
+                {idx < sortedActivities.length - 1 && (
+                    <Divider variant="middle" />
+                )}
             </Fragment>
         ));
-    };
+    }
 
     // TODO Prefer to not need such cast to string
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
@@ -133,7 +135,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
-                {renderActivities(valueActivities)}
+                { renderActivities(valueActivities) }
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
@@ -143,7 +145,8 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         size="small"
                         startIcon={<AddIcon />}
                         component={Link}
-                        to={getFormLink(ParameterValues.form.addActivity)}>
+                        to={getFormLink(ParameterValues.form.addActivity)}
+                    >
                         {getString('values_inventory_add_activity')}
                     </Button>
                 </Box>
@@ -292,7 +295,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 viewState.modeState = {
                     mode: 'edit',
                     editValue: {
-                        ...toJS(value),
+                        ...toJS(value)
                     },
                 };
             }
