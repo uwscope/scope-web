@@ -12,11 +12,11 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
 const InstructionText = styled(Typography)({
-	lineHeight: 1,
+    lineHeight: 1,
 });
 
 export const ValuesInventoryHome: FunctionComponent = observer(() => {
-	const rootStore = useStores();
+    const rootStore = useStores();
 	const { lifeAreas } = rootStore.appContentConfig;
 	const navigate = useNavigate();
 	const { patientStore } = rootStore;
