@@ -1,6 +1,7 @@
 import {
     IActivity,
     IActivityLog,
+    IActivitySchedule,
     IAssessment,
     IAssessmentLog,
     ICaseReview,
@@ -105,6 +106,18 @@ export interface IActivityResponse extends IServiceResponse {
 
 export interface IActivityRequest {
     activity: IActivity;
+}
+
+export interface IActivityScheduleListResponse extends IServiceResponse {
+    activitySchedules: IActivitySchedule[];
+}
+
+export interface IActivityScheduleResponse extends IServiceResponse {
+    activitySchedule: IActivitySchedule;
+}
+
+export interface IActivityScheduleRequest {
+    activitySchedule: IActivitySchedule;
 }
 
 export interface IProviderIdentityListResponse extends IServiceResponse {
