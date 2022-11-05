@@ -95,6 +95,10 @@ export interface IPatientService extends IServiceBase {
     addActivity(activity: IActivity): Promise<IActivity>;
     updateActivity(activity: IActivity): Promise<IActivity>;
 
+    getActivitySchedules(): Promise<IActivitySchedule[]>;
+    addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
+    updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
+
     getActivityLogs(): Promise<IActivityLog[]>;
     addActivityLog(activityLog: IActivityLog): Promise<IActivityLog>;
 
@@ -294,6 +298,30 @@ class PatientService extends ServiceBase implements IPatientService {
             activity,
         } as IActivityRequest);
         return response.data?.activity;
+    }
+
+    public async getActivitySchedules(): Promise<IActivitySchedule[]> {
+        const response = await this.axiosInstance.get<IActivityScheduleListResponse>(`/activitySchedules`);
+        return response.data?.activitySchedules;
+    }
+
+    public async addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
+        (activitySchedule as any)._type = 'activitySchedule';
+
+        const response = await this.axiosInstance.post<IActivityScheduleResponse>(`/activitySchedules`, {
+            activitySchedule,
+        } as IActivityScheduleRequest);
+        return response.data?.activitySchedule;
+    }
+
+    public async updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
+        logger.assert((activitySchedule as any)._type === 'activitySchedule', `invalid _type for activitySchedule: ${(activitySchedule as any)._type}`);
+
+        (activitySchedule as any)._type = 'activitySchedule';
+        const response = await this.axiosInstance.put<IActivityScheduleResponse>(`/activitySchedules/${activitySchedule.activityScheduleId}`, {
+            activitySchedule,
+        } as IActivityScheduleRequest);
+        return response.data?.activitySchedule;
     }
 
     public async getPatientConfig(): Promise<IPatientConfig> {
