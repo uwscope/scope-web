@@ -55,7 +55,7 @@ export interface IPatientStore {
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
     getActivitiesWithoutValueId: () => IActivity[];
-    getScheduledAssessmentById: (schedulId: string) => IScheduledAssessment | undefined;
+    getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
     getValuesByLifeAreaId: (lifeAreaId: string) => IValue[];
