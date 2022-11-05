@@ -306,6 +306,22 @@
 			"description": "SessionType Type",
 			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
 		},
+		"setType": {
+			"type": "string",
+			"enum": [
+				"activityLog",
+				"activitySchedule",
+				"activity",
+				"assessmentLog",
+				"assessment",
+				"caseReview",
+				"moodLog",
+				"scheduledActivity",
+				"scheduledAssessment",
+				"session",
+				"value"
+			]
+		},
 		"sex": {
 			"type": "string",
 			"description": "PatientSex Type",

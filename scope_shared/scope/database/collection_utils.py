@@ -65,22 +65,31 @@ def delete_set_element(
     collection: pymongo.collection.Collection,
     document_type: str,
     set_id: str,
-    destructive: bool,
-) -> bool:
-    # TODO: define semantics of this method, in place now so we're forced to use it
+    rev: int,
+) -> SetPutResult:
+    """
+    Delete a set element.
 
-    if not destructive:
-        raise NotImplementedError()
+    Implemented by putting a tombstone document with "_deleted".
+    The put operation will increment the "_rev", ensuring no race conflict.
+    """
 
-    # There is likely a race condition here, but our semantics for destructive deletion are weak.
-    result = collection.delete_many(
-        {
-            "_type": document_type,
-            "_set_id": set_id,
-        }
+    tombstone_document = {
+        "_type": document_type,
+        "_set_id": set_id,
+        "_rev": rev,
+        "_deleted": True,
+    }
+
+    set_put_result = put_set_element(
+        collection=collection,
+        document_type=document_type,
+        semantic_set_id=None,
+        set_id=set_id,
+        document=tombstone_document,
     )
 
-    return result.deleted_count > 0
+    return set_put_result
 
 
 def ensure_index(
@@ -144,7 +153,11 @@ def get_set(
 
     # Query pipeline
     pipeline = [
+        # Obtain all documents of the desired "_type"
         {"$match": {"_type": query_document_type}},
+        # Sort by "_rev",
+        # store the most recent "_rev" in "result",
+        # move forward with that version
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -153,6 +166,8 @@ def get_set(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        # Filter any document with "_deleted"
+        {"$match": {"_deleted": {"$exists": False}}},
     ]
 
     # Execute pipeline, obtain list of results
@@ -187,12 +202,16 @@ def get_set_element(
 
     # Query pipeline
     pipeline = [
+        # Obtain all documents of the desired "_type"
         {
             "$match": {
                 "_type": query_document_type,
                 "_set_id": query_set_id,
             }
         },
+        # Sort by "_rev",
+        # store the most recent "_rev" in "result",
+        # move forward with that version
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -201,6 +220,8 @@ def get_set_element(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        # Filter any document with "_deleted"
+        {"$match": {"_deleted": {"$exists": False}}},
     ]
 
     # Execute pipeline, obtain single result
@@ -454,3 +475,25 @@ def put_singleton(
         inserted_id=str(result.inserted_id),
         document=document,
     )
+
+
+def unsafe_delete_set_element_destructive(
+    *,
+    collection: pymongo.collection.Collection,
+    document_type: str,
+    set_id: str,
+) -> bool:
+    """
+    Delete a set element destructively,
+    completely removing the document and its history of revisions.
+    """
+
+    # There is likely a race condition here, but our semantics for destructive deletion are weak.
+    result = collection.delete_many(
+        {
+            "_type": document_type,
+            "_set_id": set_id,
+        }
+    )
+
+    return result.deleted_count > 0

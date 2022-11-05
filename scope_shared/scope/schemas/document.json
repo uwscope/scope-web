@@ -52,6 +52,9 @@
 			"$ref": "/schemas/documents/session"
 		},
 		{
+			"$ref": "/schemas/documents/set-tombstone"
+		},
+		{
 			"$ref": "/schemas/documents/value"
 		},
 		{

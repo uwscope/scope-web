@@ -52,6 +52,7 @@ scheduled_item_schema: Optional[jschon.JSONSchema] = None
 sentinel_schema: Optional[jschon.JSONSchema] = None
 session_schema: Optional[jschon.JSONSchema] = None
 sessions_schema: Optional[jschon.JSONSchema] = None
+set_tombstone_schema: Optional[jschon.JSONSchema] = None
 value_schema: Optional[jschon.JSONSchema] = None
 values_schema: Optional[jschon.JSONSchema] = None
 values_inventory_schema: Optional[jschon.JSONSchema] = None
@@ -105,6 +106,7 @@ SCHEMAS = {
     "sentinel_schema": "documents/sentinel.json",
     "session_schema": "documents/session.json",
     "sessions_schema": "documents/sessions.json",
+    "set_tombstone_schema": "documents/set-tombstone.json",
     "value_schema": "documents/value.json",
     "values_schema": "documents/values.json",
     "values_inventory_schema": "documents/values-inventory.json",
