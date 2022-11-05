@@ -24,9 +24,18 @@ import {
     ISafetyPlanResponse,
     ISafetyPlanRequest,
     IScheduledActivityListResponse,
+    IActivityRequest,
+    IActivityResponse,
+    IActivityListResponse,
     IActivityLogListResponse,
     IActivityLogResponse,
     IActivityLogRequest,
+    IActivityScheduleRequest,
+    IActivityScheduleResponse,
+    IActivityScheduleListResponse,
+    IMoodLogRequest,
+    IMoodLogResponse,
+    IMoodLogListResponse,
     IScheduledAssessmentListResponse,
     IValueRequest,
     IValueResponse,
@@ -35,6 +44,7 @@ import {
 import {
     IActivity,
     IActivityLog,
+    IActivitySchedule,
     IAssessment,
     IAssessmentLog,
     ICaseReview,
@@ -50,14 +60,6 @@ import {
     IValue,
     IValuesInventory,
 } from 'shared/types';
-import {
-    IActivityListResponse,
-    IActivityRequest,
-    IActivityResponse,
-    IMoodLogListResponse,
-    IMoodLogRequest,
-    IMoodLogResponse,
-} from './serviceTypes';
 
 export interface IPatientService extends IServiceBase {
     // Dynamic
