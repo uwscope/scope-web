@@ -3,12 +3,10 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
-from typing import List, Optional, Union
+from typing import List, Optional
 import uuid
 
 import scope.database.document_utils as document_utils
-import scope.schema
-import scope.schema_utils as schema_utils
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),

@@ -1,5 +1,4 @@
 import copy
-from xml.dom.minidom import Document
 
 import pymongo.collection
 import pymongo.errors
