@@ -5,8 +5,9 @@ import pymongo.collection
 
 import request_utils
 import request_context
-import scope.database.patient.activity_logs
 import scope.database.patient.activities
+import scope.database.patient.activity_logs
+import scope.database.patient.activity_schedules
 import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
@@ -50,6 +51,12 @@ def _construct_patient_document(
         collection=patient_collection
     )
     patient_document["activityLogs"] = activity_logs
+
+    # Activity Schedules
+    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(
+        collection=patient_collection
+    )
+    patient_document["activitySchedules"] = activity_schedules
 
     # Assessments
     assessments = scope.database.patient.assessments.get_assessments(

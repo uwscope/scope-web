@@ -13,6 +13,9 @@
 		"activityLogs": {
 			"$ref": "/schemas/documents/activity-logs"
 		},
+		"activitySchedules": {
+			"$ref": "/schemas/documents/activity-schedules"
+		},
 		"assessments": {
 			"$ref": "/schemas/documents/assessments"
 		},
@@ -68,6 +71,7 @@
 		"_type",
 		"activities",
 		"activityLogs",
+		"activitySchedules",
 		"assessments",
 		"assessmentLogs",
 		"caseReviews",
