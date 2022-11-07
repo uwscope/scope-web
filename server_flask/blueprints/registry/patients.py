@@ -39,71 +39,11 @@ def _construct_patient_document(
     # Identity
     patient_document["identity"] = copy.deepcopy(patient_identity)
 
-    # Profile
-    profile = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
-    )
-    patient_document["profile"] = profile
-
-    # Clinical history
-    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
-        collection=patient_collection
-    )
-    patient_document["clinicalHistory"] = clinical_history
-
-    # Values inventory
-    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection
-    )
-    patient_document["valuesInventory"] = values_inventory
-
-    # Safety plan
-    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
-        collection=patient_collection
-    )
-    patient_document["safetyPlan"] = safety_plan
-
-    # Sessions
-    sessions = scope.database.patient.sessions.get_sessions(
-        collection=patient_collection
-    )
-    patient_document["sessions"] = sessions
-
-    # Case reviews
-    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
-        collection=patient_collection
-    )
-    patient_document["caseReviews"] = case_reviews
-
-    # Assessments
-    assessments = scope.database.patient.assessments.get_assessments(
-        collection=patient_collection
-    )
-    patient_document["assessments"] = assessments
-
-    # Scheduled Assessments
-    scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
-    )
-    patient_document["scheduledAssessments"] = scheduled_assessments
-
-    # Assessment Logs
-    assessment_logs = scope.database.patient.assessment_logs.get_assessment_logs(
-        collection=patient_collection
-    )
-    patient_document["assessmentLogs"] = assessment_logs
-
     # Activities
     activities = scope.database.patient.activities.get_activities(
         collection=patient_collection
     )
     patient_document["activities"] = activities
-
-    # Schedule activities
-    scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities(
-        collection=patient_collection
-    )
-    patient_document["scheduledActivities"] = scheduled_activities
 
     # Activity Logs
     activity_logs = scope.database.patient.activity_logs.get_activity_logs(
@@ -111,17 +51,77 @@ def _construct_patient_document(
     )
     patient_document["activityLogs"] = activity_logs
 
-    # Mood logs
+    # Assessments
+    assessments = scope.database.patient.assessments.get_assessments(
+        collection=patient_collection
+    )
+    patient_document["assessments"] = assessments
+
+    # Assessment Logs
+    assessment_logs = scope.database.patient.assessment_logs.get_assessment_logs(
+        collection=patient_collection
+    )
+    patient_document["assessmentLogs"] = assessment_logs
+
+    # Case Reviews
+    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
+        collection=patient_collection
+    )
+    patient_document["caseReviews"] = case_reviews
+
+    # Clinical History
+    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
+        collection=patient_collection
+    )
+    patient_document["clinicalHistory"] = clinical_history
+
+    # Mood Logs
     mood_logs = scope.database.patient.mood_logs.get_mood_logs(
         collection=patient_collection
     )
     patient_document["moodLogs"] = mood_logs
+
+    # Profile
+    profile = scope.database.patient.patient_profile.get_patient_profile(
+        collection=patient_collection
+    )
+    patient_document["profile"] = profile
+
+    # Safety Plan
+    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+        collection=patient_collection
+    )
+    patient_document["safetyPlan"] = safety_plan
+
+    # Scheduled Assessments
+    scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+        collection=patient_collection
+    )
+    patient_document["scheduledAssessments"] = scheduled_assessments
+
+    # Scheduled Activities
+    scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities(
+        collection=patient_collection
+    )
+    patient_document["scheduledActivities"] = scheduled_activities
+
+    # Sessions
+    sessions = scope.database.patient.sessions.get_sessions(
+        collection=patient_collection
+    )
+    patient_document["sessions"] = sessions
 
     # Values
     values = scope.database.patient.values.get_values(
         collection=patient_collection
     )
     patient_document["values"] = values
+
+    # Values Inventory
+    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
+        collection=patient_collection
+    )
+    patient_document["valuesInventory"] = values_inventory
 
     return patient_document
 
