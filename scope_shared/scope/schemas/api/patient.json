@@ -64,5 +64,22 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "identity", "profile"]
+	"required": [
+		"_type",
+		"activities",
+		"activityLogs",
+		"assessments",
+		"assessmentLogs",
+		"caseReviews",
+		"clinicalHistory",
+		"identity",
+		"moodLogs",
+		"profile",
+		"safetyPlan",
+		"scheduledActivities",
+		"scheduledAssessments",
+		"sessions",
+		"values",
+		"valuesInventory"
+	]
 }
