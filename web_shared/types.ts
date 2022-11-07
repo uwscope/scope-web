@@ -302,6 +302,7 @@ export interface IPatient {
 
     // Activities
     activities: IActivity[];
+    activitySchedules: IActivitySchedule[];
     scheduledActivities: IScheduledActivity[];
     activityLogs: IActivityLog[];
 
