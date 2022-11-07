@@ -156,11 +156,11 @@ def test_get_deleted_set_element(
     assert result is None
 
 
-def test_get_set_not_found(
+def test_get_set_empty(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
-    Test retrieval of a set that does not exist.
+    Test retrieval of a set that does not contain any documents.
     """
     collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
@@ -170,7 +170,7 @@ def test_get_set_not_found(
         document_type="nothing",
     )
 
-    assert result is None
+    assert result == []
 
 
 def test_get_set_element(
