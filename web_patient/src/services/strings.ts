@@ -108,6 +108,10 @@ const _strings = {
 
     Values_inventory_dialog_edit_value: 'Edit value',
 
+    Values_inventory_activity_item_delete: 'Delete',
+    Values_inventory_activity_item_edit: 'Edit',
+    Values_inventory_activity_item_schedule: 'Schedule',
+
     // Values_inventory_dialog_add_activity: 'Add activity',
     // Values_inventory_dialog_edit_activity: 'Edit activity',
     // Values_inventory_dialog_add_activity_label: 'Name your activity',
@@ -180,32 +184,23 @@ const _strings = {
     //
     form_add_edit_activity_name_prompt: 'What is the name of the activity?',
     // Form_add_activity_describe_name_label: 'Name',
-    form_add_edit_activity_name_help:
-        'Write a descriptive name of the activity that helps you recognize what it is.',
-        // 'Write a descriptive name of the activity that helps you recognize what it is. You can choose an activity that you already identified from the values inventory.',
+    form_add_edit_activity_name_help: 'Write a descriptive name of the activity that helps you recognize what it is.',
+    // 'Write a descriptive name of the activity that helps you recognize what it is. You can choose an activity that you already identified from the values inventory.',
 
     // Form_add_activity_describe_name_import_button: 'Choose from the values & activities inventory',
     // Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
-    form_add_edit_activity_life_area_value_prompt:
-        'Which life area and value are best associated with this activity?',
-    form_add_edit_activity_life_area_value_help:
-        'You can also identify values in the Values & Activity Inventory.',
+    form_add_edit_activity_life_area_value_prompt: 'Which life area and value are best associated with this activity?',
+    form_add_edit_activity_life_area_value_help: 'You can also identify values in the Values & Activity Inventory.',
     form_add_edit_activity_life_area_label: 'Life Area',
-    form_add_edit_activity_life_area_help:
-        'Choose a life area.',
+    form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
-    form_add_edit_activity_value_help:
-        'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_value_help: 'Then choose a value you have identified, or add a new value.',
     form_add_edit_activity_add_value_button: 'Add Value',
-    form_add_edit_activity_enjoyment_prompt:
-        'How much do you enjoy doing this activity?',
-    form_add_edit_activity_enjoyment_help:
-        '0 is low enjoyment and 10 is high enjoyment.',
-    form_add_edit_activity_importance_prompt:
-        'How important it is for you to do this activity?',
-    form_add_edit_activity_importance_help:
-        '0 is low importance and 10 is high importance.',
+    form_add_edit_activity_enjoyment_prompt: 'How much do you enjoy doing this activity?',
+    form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',
+    form_add_edit_activity_importance_prompt: 'How important it is for you to do this activity?',
+    form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
 
     // Form_add_activity_describe_lifearea: 'Which life area is this activity best associated with?',
     // Form_add_activity_describe_value: 'Which value is this activity best associated with?',

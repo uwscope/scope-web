@@ -9,7 +9,8 @@ import {
     Grid,
     IconButton,
     // InputLabel,
-    // MenuItem,
+    Menu,
+    MenuItem,
     // Select,
     // SelectChangeEvent,
     Stack,
@@ -41,6 +42,7 @@ interface IValueEditFormSection {
     handleEditValue: () => void;
     handleCancelEditActivity: () => void;
     // handleSaveValueActivities: (newValue: IValue) => Promise<void>;
+    handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const ValueEditFormSection = observer((props: IValueEditFormSection) => {
@@ -52,10 +54,12 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         handleEditValue,
         // handleCancelEditActivity,
         // handleSaveValueActivities,
+        handleMoreClickActivity,
     } = props;
 
     const rootStore = useStores();
     const { patientStore } = rootStore;
+
 
     const renderActivityDetail = (activity: IActivity): ReactNode => {
         // TODO Activity Refactor: Enhance this with ActivitySchedule data
@@ -111,14 +115,12 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     <IconButton
                         edge="end"
                         aria-label="more"
-                        onClick={(e) => console.log(e, 'More Clicked')}
+                        onClick={(e) => handleMoreClickActivity(activity, e)}
                         size="small">
                         <MoreVertIcon />
                     </IconButton>
                 </Grid>
-                {idx < sortedActivities.length - 1 && (
-                    <Divider variant="middle" />
-                )}
+                {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
             </Fragment>
         ));
     }
@@ -135,7 +137,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
-                { renderActivities(valueActivities) }
+                {renderActivities(valueActivities)}
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
@@ -145,8 +147,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         size="small"
                         startIcon={<AddIcon />}
                         component={Link}
-                        to={getFormLink(ParameterValues.form.addActivity)}
-                    >
+                        to={getFormLink(ParameterValues.form.addActivity)}>
                         {getString('values_inventory_add_activity')}
                     </Button>
                 </Box>
@@ -253,6 +254,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         openAddEditValue: boolean;
         name: string;
         modeState: IViewStateModeNone | IViewStateModeAdd | IViewStateModeEdit;
+        moreTargetEl: (EventTarget & HTMLElement) | undefined;
+        selectedActivity: IActivity | undefined;
     }
 
     const viewState = useLocalObservable<IViewState>(() => ({
@@ -261,6 +264,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         modeState: {
             mode: 'none',
         },
+        moreTargetEl: undefined,
+        selectedActivity: undefined,
     }));
 
     const navigate = useNavigate();
@@ -372,6 +377,28 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
     });
 
+    const handleMoreClickActivity = action((activity: IActivity, event: React.MouseEvent<HTMLElement>) => {
+        viewState.selectedActivity = activity;
+        viewState.moreTargetEl = event.currentTarget;
+    });
+
+    const handleMoreCloseActivity = action(() => {
+        viewState.selectedActivity = undefined;
+        viewState.moreTargetEl = undefined;
+    });
+
+    const handleEditActivity = action(() => {
+        alert('Edit this activity');
+    });
+
+    const handleDeleteActivity = action(() => {
+        alert("Delete this activity");
+    });
+
+    const handleScheduleActivity = action(() => {
+        alert('Schedule this activity');
+    });
+
     const valueExamples = lifeAreaContent.examples.map((e) => e.name);
     const activityExamples = lifeAreaContent.examples[
         random(lifeAreaContent.examples.length - 1, false)
@@ -384,6 +411,22 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 name="values & activities inventory"
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
+                    <Menu
+                        id="activity-menu"
+                        anchorEl={viewState.moreTargetEl}
+                        keepMounted
+                        open={Boolean(viewState.moreTargetEl)}
+                        onClose={handleMoreCloseActivity}>
+                        <MenuItem onClick={handleEditActivity}>
+                            {getString('Values_inventory_activity_item_edit')}
+                        </MenuItem>
+                        <MenuItem onClick={handleScheduleActivity}>
+                            {getString('Values_inventory_activity_item_schedule')}
+                        </MenuItem>
+                        <MenuItem onClick={handleDeleteActivity}>
+                            {getString('Values_inventory_activity_item_delete')}
+                        </MenuItem>
+                    </Menu>
                     {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                         <FormSection
                             prompt={getString('Values_inventory_values_existing_title')}
@@ -409,6 +452,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                             handleEditValue={handleEditValue(value.valueId as string)}
                                             handleCancelEditActivity={handleCancelEditActivity}
                                             // handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                            handleMoreClickActivity={handleMoreClickActivity}
                                             key={value.valueId}
                                         />
                                     );
