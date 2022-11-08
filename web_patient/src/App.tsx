@@ -27,7 +27,7 @@ export const App: FunctionComponent = () => {
                             element={
                                 <RouterSwitch>
                                     <Route
-                                        path={`/${Routes.valuesInventory}/:lifeareaId`}
+                                        path={`/${Routes.valuesInventory}/:lifeAreaId`}
                                         element={<LifeAreaDetail />}
                                     />
                                     <Route path={`/${Routes.valuesInventory}`} element={<ValuesInventoryHome />} />

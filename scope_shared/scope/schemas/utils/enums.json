@@ -236,7 +236,7 @@
 			"description": "PatientGender Type",
 			"enum": ["Male", "Female", "Transgender", "Non-binary/Non-conforming", "Other"]
 		},
-		"lifeareaId": {
+		"lifeAreaId": {
 			"type": "string",
 			"description": "",
 			"enum": ["education", "mindbody", "recreation", "relationship", "responsibilities"]

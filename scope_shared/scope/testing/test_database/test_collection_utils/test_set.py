@@ -1,5 +1,4 @@
 import copy
-from xml.dom.minidom import Document
 
 import pymongo.collection
 import pymongo.errors
@@ -46,7 +45,7 @@ def test_delete_set_element(
     database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
 ):
     """
-    Test deletion of a set .
+    Test deletion of a set element.
     """
     collection = database_temp_collection_factory()
     _configure_collection(collection=collection)
@@ -62,6 +61,7 @@ def test_delete_set_element(
 
     assert result == [
         {"_type": "set", "_set_id": "1", "_rev": 2},
+        # Below document is to be deleted
         {"_type": "set", "_set_id": "2", "_rev": 2},
     ]
 
@@ -86,7 +86,7 @@ def test_delete_set_element(
         document_type="set",
         set_id="2",
     )
-    assert result == None
+    assert result is None
 
 
 def test_get_set(
@@ -133,7 +133,7 @@ def test_get_deleted_set(
 
     assert result == [
         {"_type": "other set", "_set_id": "1", "_rev": 2},
-        # Below document should not be returned.
+        # Below document should not be returned
         # {"_type": "other set", "_set_id": "2", "_rev": 3, "_deleted": True},
     ]
 
@@ -153,7 +153,7 @@ def test_get_deleted_set_element(
         set_id="2",
     )
 
-    assert result == None
+    assert result is None
 
 
 def test_get_set_not_found(
@@ -254,7 +254,7 @@ def test_post_set_element(
     collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
-    # Initial insert should generate "_rev" 1
+    # Initial insert should generate "_rev" of 1
     result = scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type="set",

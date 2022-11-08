@@ -3,12 +3,10 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
-from typing import List, Optional, Union
+from typing import List, Optional
 import uuid
 
 import scope.database.document_utils as document_utils
-import scope.schema
-import scope.schema_utils as schema_utils
 
 PRIMARY_COLLECTION_INDEX = [
     ("_type", pymongo.ASCENDING),
@@ -69,6 +67,12 @@ def delete_set_element(
     set_id: str,
     rev: int,
 ) -> SetPutResult:
+    """
+    Delete a set element.
+
+    Implemented by putting a tombstone document with "_deleted".
+    The put operation will increment the "_rev", ensuring no race conflict.
+    """
 
     tombstone_document = {
         "_type": document_type,
@@ -149,7 +153,11 @@ def get_set(
 
     # Query pipeline
     pipeline = [
+        # Obtain all documents of the desired "_type"
         {"$match": {"_type": query_document_type}},
+        # Sort by "_rev",
+        # store the most recent "_rev" in "result",
+        # move forward with that version
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -158,6 +166,7 @@ def get_set(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        # Filter any document with "_deleted"
         {"$match": {"_deleted": {"$exists": False}}},
     ]
 
@@ -193,12 +202,16 @@ def get_set_element(
 
     # Query pipeline
     pipeline = [
+        # Obtain all documents of the desired "_type"
         {
             "$match": {
                 "_type": query_document_type,
                 "_set_id": query_set_id,
             }
         },
+        # Sort by "_rev",
+        # store the most recent "_rev" in "result",
+        # move forward with that version
         {"$sort": {"_rev": pymongo.DESCENDING}},
         {
             "$group": {
@@ -207,6 +220,7 @@ def get_set_element(
             }
         },
         {"$replaceRoot": {"newRoot": "$result"}},
+        # Filter any document with "_deleted"
         {"$match": {"_deleted": {"$exists": False}}},
     ]
 
@@ -469,6 +483,10 @@ def unsafe_delete_set_element_destructive(
     document_type: str,
     set_id: str,
 ) -> bool:
+    """
+    Delete a set element destructively,
+    completely removing the document and its history of revisions.
+    """
 
     # There is likely a race condition here, but our semantics for destructive deletion are weak.
     result = collection.delete_many(
@@ -477,4 +495,5 @@ def unsafe_delete_set_element_destructive(
             "_set_id": set_id,
         }
     )
+
     return result.deleted_count > 0

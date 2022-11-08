@@ -32,7 +32,7 @@ def fake_value_factory(
                     datetime_now,
                 )
             ),
-            "lifeareaId": fake_utils.fake_enum_value(scope.enums.LifeAreaID),
+            "lifeAreaId": fake_utils.fake_enum_value(scope.enums.LifeAreaID),
         }
 
         return fake_value
