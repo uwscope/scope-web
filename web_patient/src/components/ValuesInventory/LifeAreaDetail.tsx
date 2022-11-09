@@ -388,14 +388,17 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleEditActivity = action(() => {
+        // TODO Activity Refactor: Implement Activity Edit
         alert('Edit this activity');
     });
 
     const handleDeleteActivity = action(() => {
-        alert("Delete this activity");
+        // TODO Activity Refactor: Implement Activity Deletion
+        alert('Delete this activity');
     });
 
     const handleScheduleActivity = action(() => {
+        // TODO Activity Refactor: Implement Activity Scheduling
         alert('Schedule this activity');
     });
 
