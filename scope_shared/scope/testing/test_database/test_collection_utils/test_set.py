@@ -23,19 +23,70 @@ def _configure_collection(*, collection: pymongo.collection.Collection) -> None:
     # Populate some documents
     result = collection.insert_many(
         [
-            {"_type": "singleton", "_rev": "1"},
-            {"_type": "singleton", "_rev": "2"},
-            {"_type": "other singleton", "_rev": "1"},
-            {"_type": "other singleton", "_rev": "2"},
-            {"_type": "set", "_set_id": "1", "_rev": "1"},
-            {"_type": "set", "_set_id": "1", "_rev": "2"},
-            {"_type": "set", "_set_id": "2", "_rev": "1"},
-            {"_type": "set", "_set_id": "2", "_rev": "2"},
-            {"_type": "other set", "_set_id": "1", "_rev": "1"},
-            {"_type": "other set", "_set_id": "1", "_rev": "2"},
+            {"_type": "singleton", "_rev": 1},
+            {"_type": "singleton", "_rev": 2},
+            {"_type": "other singleton", "_rev": 1},
+            {"_type": "other singleton", "_rev": 2},
+            {"_type": "set", "_set_id": "1", "_rev": 1},
+            {"_type": "set", "_set_id": "1", "_rev": 2},
+            {"_type": "set", "_set_id": "2", "_rev": 1},
+            {"_type": "set", "_set_id": "2", "_rev": 2},
+            {"_type": "other set", "_set_id": "1", "_rev": 1},
+            {"_type": "other set", "_set_id": "1", "_rev": 2},
+            {"_type": "other set", "_set_id": "2", "_rev": 1},
+            {"_type": "other set", "_set_id": "2", "_rev": 2},
+            {"_type": "other set", "_set_id": "2", "_rev": 3, "_deleted": True},
         ]
     )
-    assert len(result.inserted_ids) == 10
+    assert len(result.inserted_ids) == 13
+
+
+def test_delete_set_element(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Test deletion of a set element.
+    """
+    collection = database_temp_collection_factory()
+    _configure_collection(collection=collection)
+
+    result = scope.database.collection_utils.get_set(
+        collection=collection,
+        document_type="set",
+    )
+
+    # Remove the "_id" field that was created upon insertion
+    for result_current in result:
+        del result_current["_id"]
+
+    assert result == [
+        {"_type": "set", "_set_id": "1", "_rev": 2},
+        # Below document is to be deleted
+        {"_type": "set", "_set_id": "2", "_rev": 2},
+    ]
+
+    # Delete the set element
+    deleted_set_element = scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="2",
+        rev=2,
+    )
+    deleted_set_element_document = deleted_set_element.document
+    del deleted_set_element_document["_id"]
+    assert deleted_set_element_document == {
+        "_type": "set",
+        "_set_id": "2",
+        "_rev": 3,
+        "_deleted": True,
+    }
+
+    result = scope.database.collection_utils.get_set_element(
+        collection=collection,
+        document_type="set",
+        set_id="2",
+    )
+    assert result is None
 
 
 def test_get_set(
@@ -57,9 +108,52 @@ def test_get_set(
         del result_current["_id"]
 
     assert result == [
-        {"_type": "set", "_set_id": "1", "_rev": "2"},
-        {"_type": "set", "_set_id": "2", "_rev": "2"},
+        {"_type": "set", "_set_id": "1", "_rev": 2},
+        {"_type": "set", "_set_id": "2", "_rev": 2},
     ]
+
+
+def test_get_deleted_set(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Test retrieval of a deleted set.
+    """
+    collection = database_temp_collection_factory()
+    _configure_collection(collection=collection)
+
+    result = scope.database.collection_utils.get_set(
+        collection=collection,
+        document_type="other set",
+    )
+
+    # Remove the "_id" field that was created upon insertion
+    for result_current in result:
+        del result_current["_id"]
+
+    assert result == [
+        {"_type": "other set", "_set_id": "1", "_rev": 2},
+        # Below document should not be returned
+        # {"_type": "other set", "_set_id": "2", "_rev": 3, "_deleted": True},
+    ]
+
+
+def test_get_deleted_set_element(
+    database_temp_collection_factory: Callable[[], pymongo.collection.Collection],
+):
+    """
+    Test retrieval of a deleted set element.
+    """
+    collection = database_temp_collection_factory()
+    _configure_collection(collection=collection)
+
+    result = scope.database.collection_utils.get_set_element(
+        collection=collection,
+        document_type="other set",
+        set_id="2",
+    )
+
+    assert result is None
 
 
 def test_get_set_not_found(
@@ -100,7 +194,7 @@ def test_get_set_element(
     assert result == {
         "_type": "set",
         "_set_id": "1",
-        "_rev": "2",
+        "_rev": 2,
     }
 
 
@@ -160,7 +254,7 @@ def test_post_set_element(
     collection = database_temp_collection_factory()
     scope.database.collection_utils.ensure_index(collection=collection)
 
-    # Initial insert should generate "_rev" 1
+    # Initial insert should generate "_rev" of 1
     result = scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type="set",
