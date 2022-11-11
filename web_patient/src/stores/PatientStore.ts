@@ -54,6 +54,7 @@ export interface IPatientStore {
     getActivityById: (activityId: string) => IActivity | undefined;
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
+    getActivitiesCountByLifeAreaValues: (lifeAreaValues: IValue[]) => number;
     getActivitiesWithoutValueId: () => IActivity[];
     getScheduledAssessmentById: (schedulId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
@@ -129,7 +130,10 @@ export class PatientStore implements IPatientStore {
         this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>([], 'loadMoodLogsQuery');
         this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(undefined, 'loadSafetyPlan');
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>([], 'loadScheduledActivitiesQuery');
-        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>([], 'loadScheduledAssessmentsQuery');
+        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
+            [],
+            'loadScheduledAssessmentsQuery',
+        );
         this.loadValuesQuery = new PromiseQuery<IValue[]>([], 'loadValuesQuery');
         this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'loadValuesInventoryQuery');
 
@@ -200,8 +204,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get config() {
-        const config = this.loadConfigQuery.value
-        || {
+        const config = this.loadConfigQuery.value || {
             // Default value before initial load
             assignedValuesInventory: true,
             assignedSafetyPlan: true,
@@ -304,9 +307,19 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
+    public getActivitiesCountByLifeAreaValues(lifeAreaValues: IValue[]) {
+        return lifeAreaValues.reduce((accumulator, lifeAreaValue) => {
+            if (lifeAreaValue.valueId) {
+                return accumulator + this.getActivitiesByValueId(lifeAreaValue.valueId).length;
+            }
+            return accumulator + 0;
+        }, 0);
+    }
+
+    @action.bound
     public getActivitiesWithoutValueId() {
         return this.activities.filter((a) => {
-            return (!a.valueId);
+            return !a.valueId;
         });
     }
 
@@ -499,8 +512,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async addValue(value: IValue) {
-        const promise = this.patientService.addValue(value).
-        then((addedValue) => {
+        const promise = this.patientService.addValue(value).then((addedValue) => {
             const newValues = this.values.slice() || [];
             newValues.push(addedValue);
             return newValues;
@@ -537,18 +549,12 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async loadActivities() {
-        await this.loadAndLogQuery<IActivity[]>(
-            this.patientService.getActivities,
-            this.loadActivitiesQuery
-        );
+        await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
     }
 
     @action.bound
     public async loadActivityLogs() {
-        await this.loadAndLogQuery<IActivityLog[]>(
-            this.patientService.getActivityLogs,
-            this.loadActivityLogsQuery
-        );
+        await this.loadAndLogQuery<IActivityLog[]>(this.patientService.getActivityLogs, this.loadActivityLogsQuery);
     }
 
     @action.bound
@@ -561,9 +567,6 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async loadMoodLogs() {
-        await this.loadAndLogQuery<IMoodLog[]>(
-            this.patientService.getMoodLogs,
-            this.loadMoodLogsQuery
-        );
+        await this.loadAndLogQuery<IMoodLog[]>(this.patientService.getMoodLogs, this.loadMoodLogsQuery);
     }
 }
