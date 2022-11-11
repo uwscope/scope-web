@@ -25,6 +25,8 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
         navigate(-1);
     });
 
+    // TODO: Add "Other Activities".
+
     return (
         <DetailPage title={getString('Values_inventory_title')} onBack={handleGoBack}>
             <InstructionText paragraph>{getString('Values_inventory_instruction1')}</InstructionText>
@@ -37,15 +39,8 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <List>
                     {lifeAreas.map((la, idx) => {
-                        //const lifeAreaValues = patientStore.values?.filter((v) => v.lifeAreaId == la.id) || [];
-                        // TODO: Ask James why not get lifeAreaValues using below call.
                         const lifeAreaValues = patientStore.getValuesByLifeAreaId(la.id);
-                        const activitiesCount = lifeAreaValues.reduce((accumulator, lifeAreaValue) => {
-                            if (lifeAreaValue.valueId) {
-                                return accumulator + patientStore.getActivitiesByValueId(lifeAreaValue.valueId).length;
-                            }
-                            return accumulator + 0;
-                        }, 0);
+                        const activitiesCount = patientStore.getActivitiesCountByLifeAreaValues(lifeAreaValues);
 
                         return (
                             <Fragment key={la.id}>
@@ -63,7 +58,6 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                         );
                     })}
                 </List>
-                // TODO: Other Activities Placeholder.
             </ContentLoader>
         </DetailPage>
     );

@@ -1,10 +1,29 @@
-from typing import List, Optional
+from typing import List, Optional, Union
+from numpy import integer
 
 import pymongo.collection
 import scope.database.collection_utils
 
 DOCUMENT_TYPE = "value"
 SEMANTIC_SET_ID = "valueId"
+
+
+def delete_value(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: integer,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "value" document.
+    """
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
 
 
 def get_values(
