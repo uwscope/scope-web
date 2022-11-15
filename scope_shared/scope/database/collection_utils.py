@@ -141,6 +141,7 @@ def get_set(
     *,
     collection: pymongo.collection.Collection,
     document_type: str,
+    **optional_match_query: Optional[dict],
 ) -> Optional[List[dict]]:
     """
     Retrieve all elements of set with "_type" of document_type.
@@ -149,12 +150,15 @@ def get_set(
     """
 
     # Parameters in query pipeline
-    query_document_type = document_type
+    if optional_match_query:
+        match_query = {"_type": document_type} | optional_match_query
+    else:
+        match_query = {"_type": document_type}
 
     # Query pipeline
     pipeline = [
         # Obtain all documents of the desired "_type"
-        {"$match": {"_type": query_document_type}},
+        {"$match": match_query},
         # Sort by "_rev",
         # store the most recent "_rev" in "result",
         # move forward with that version
