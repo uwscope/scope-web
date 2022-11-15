@@ -3,6 +3,7 @@ from numpy import integer
 
 import pymongo.collection
 import scope.database.collection_utils
+import scope.database.patient.activities
 
 DOCUMENT_TYPE = "value"
 SEMANTIC_SET_ID = "valueId"
@@ -17,10 +18,19 @@ def delete_value(
     """
     Delete "value" document.
     """
-
-    """
-    TODO: Get associated activity.json(s) and update them after removing "valueId" from them.
-    """
+    all_activities = scope.database.patient.activities.get_activities(
+        collection=collection
+    )
+    if all_activities:
+        for activity in all_activities:
+            if activity.get(SEMANTIC_SET_ID) == set_id:
+                del activity["_id"]
+                del activity[SEMANTIC_SET_ID]
+                scope.database.patient.activities.put_activity(
+                    collection=collection,
+                    activity=activity,
+                    set_id=activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+                )
 
     return scope.database.collection_utils.delete_set_element(
         collection=collection,
