@@ -18,6 +18,10 @@ def delete_value(
     Delete "value" document.
     """
 
+    """
+    TODO: Get associated activity.json(s) and update them after removing "valueId" from them.
+    """
+
     return scope.database.collection_utils.delete_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
