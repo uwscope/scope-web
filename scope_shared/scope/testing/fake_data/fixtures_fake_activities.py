@@ -16,7 +16,7 @@ def fake_activities_factory(
     """
 
     def factory() -> List[dict]:
-        fake_activities = [fake_activity_factory() for _ in range(random.randint(0, 5))]
+        fake_activities = [fake_activity_factory() for _ in range(random.randint(1, 5))]
 
         return fake_activities
 
