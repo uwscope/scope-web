@@ -116,6 +116,7 @@ def test_delete_value_stress_testing(
     # Obtain more fake activities and insert them into db.
     fake_activities = data_fake_activities_factory()
     for _fake_activity in fake_activities:
+        _fake_activity.update({"valueId": "some valueId"})
         _fake_activity_post_result = scope.database.patient.activities.post_activity(
             collection=patient_collection, activity=_fake_activity
         )
