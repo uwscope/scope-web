@@ -409,13 +409,13 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         open={Boolean(viewState.moreTargetEl)}
                         onClose={handleMoreCloseActivity}>
                         <MenuItem onClick={handleEditActivity}>
-                            {getString('Values_inventory_activity_item_edit')}
+                            {getString('values_inventory_activity_menu_edit')}
                         </MenuItem>
                         <MenuItem onClick={handleScheduleActivity}>
-                            {getString('Values_inventory_activity_item_schedule')}
+                            {getString('values_inventory_activity_menu_schedule')}
                         </MenuItem>
                         <MenuItem onClick={handleDeleteActivity}>
-                            {getString('Values_inventory_activity_item_delete')}
+                            {getString('values_inventory_activity_menu_delete')}
                         </MenuItem>
                     </Menu>
                     {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
