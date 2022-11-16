@@ -30,8 +30,6 @@ import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-// NOTE: Comment this to avoid `Parameters` not being used compile error.
-//import { getFormLink, Parameters, ParameterValues } from 'src/services/routes';
 import { getFormLink, ParameterValues } from 'src/services/routes';
 
 interface IValueEditFormSection {
@@ -59,7 +57,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
 
     const rootStore = useStores();
     const { patientStore } = rootStore;
-
 
     const renderActivityDetail = (activity: IActivity): ReactNode => {
         // TODO Activity Refactor: Enhance this with ActivitySchedule data
@@ -103,15 +100,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                             {renderActivityDetail(activity)}
                         </Stack>
                     </Grid>
-                    {/* <IconButton
-                    size="small"
-                    aria-label="edit"
-                    component={Link}
-                    to={getFormLink(ParameterValues.form.editActivity, {
-                        [Parameters.activityId]: activity.activityId as string,
-                    })}>
-                    <EditIcon fontSize="small" />
-                </IconButton> */}
                     <IconButton
                         edge="end"
                         aria-label="more"
@@ -125,7 +113,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         ));
     }
 
-    // TODO Prefer to not need such cast to string
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
 
     return (
@@ -147,7 +134,8 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         size="small"
                         startIcon={<AddIcon />}
                         component={Link}
-                        to={getFormLink(ParameterValues.form.addActivity)}>
+                        to={getFormLink(ParameterValues.form.addActivity)}
+                    >
                         {getString('values_inventory_add_activity')}
                     </Button>
                 </Box>

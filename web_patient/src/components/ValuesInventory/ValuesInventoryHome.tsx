@@ -37,8 +37,6 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <List>
                     {lifeAreas.map((la, idx) => {
-                        //const lifeAreaValues = patientStore.values?.filter((v) => v.lifeAreaId == la.id) || [];
-                        // TODO: Ask James why not get lifeAreaValues using below call.
                         const lifeAreaValues = patientStore.getValuesByLifeAreaId(la.id);
                         const activitiesCount = lifeAreaValues.reduce((accumulator, lifeAreaValue) => {
                             if (lifeAreaValue.valueId) {
@@ -63,7 +61,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                         );
                     })}
                 </List>
-                // TODO: Other Activities Placeholder.
+                // TODO: Activity Refactor: Other Activities Placeholder.
             </ContentLoader>
         </DetailPage>
     );
