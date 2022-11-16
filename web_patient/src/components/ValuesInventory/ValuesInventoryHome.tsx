@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import DetailPage from 'src/components/common/DetailPage';
-import { getActivitiesString, getLifeAreaIcon, getValuesString } from 'src/components/ValuesInventory/values';
+import { getActivitiesCountString, getLifeAreaIcon, getValuesCountString } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 
@@ -37,13 +37,8 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <List>
                     {lifeAreas.map((la, idx) => {
+                        const lifeAreaActivities = patientStore.getActivitiesByLifeAreaId(la.id);
                         const lifeAreaValues = patientStore.getValuesByLifeAreaId(la.id);
-                        const activitiesCount = lifeAreaValues.reduce((accumulator, lifeAreaValue) => {
-                            if (lifeAreaValue.valueId) {
-                                return accumulator + patientStore.getActivitiesByValueId(lifeAreaValue.valueId).length;
-                            }
-                            return accumulator + 0;
-                        }, 0);
 
                         return (
                             <Fragment key={la.id}>
@@ -51,9 +46,11 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                                     <ListItemIcon>{getLifeAreaIcon(la.id)}</ListItemIcon>
                                     <ListItemText
                                         primary={la.name}
-                                        secondary={`${getValuesString(lifeAreaValues.length)}; ${getActivitiesString(
-                                            activitiesCount,
-                                        )}`}
+                                        secondary={
+                                            getValuesCountString(lifeAreaValues.length) +
+                                            '; ' +
+                                            getActivitiesCountString(lifeAreaActivities.length)
+                                        }
                                     />
                                 </ListItem>
                                 {idx < lifeAreas.length - 1 && <Divider variant="middle" />}

@@ -24,17 +24,19 @@ export const getLifeAreaIcon = (lifeAreaId: string) => {
     }
 };
 
-export const getValuesString = (valueCount: number) => {
+export const getValuesCountString = (valueCount: number) => {
     return `${valueCount} ${
-        valueCount == 1 ? getString('Values_inventory_value_singular') : getString('Values_inventory_value_plural')
+        valueCount == 1 
+            ? getString('values_inventory_value_count_singular') 
+            : getString('values_inventory_value_count_plural')
     }`;
 };
 
-export const getActivitiesString = (activityCount: number) => {
+export const getActivitiesCountString = (activityCount: number) => {
     return `${activityCount} ${
         activityCount == 1
-            ? getString('Values_inventory_activity_singular')
-            : getString('Values_inventory_activity_plural')
+            ? getString('values_inventory_activity_count_singular')
+            : getString('values_inventory_activity_count_plural')
     }`;
 };
 

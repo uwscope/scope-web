@@ -87,10 +87,10 @@ const _strings = {
     Values_inventory_values_more_title: 'List additional values',
 
     Values_inventory_lifearea: 'Life area',
-    Values_inventory_value_singular: 'value',
-    Values_inventory_value_plural: 'values',
-    Values_inventory_activity_singular: 'activity',
-    Values_inventory_activity_plural: 'activities',
+    values_inventory_value_count_singular: 'value',
+    values_inventory_value_count_plural: 'values',
+    values_inventory_activity_count_singular: 'activity',
+    values_inventory_activity_count_plural: 'activities',
 
     Values_inventory_add_value: 'Add value',
 
