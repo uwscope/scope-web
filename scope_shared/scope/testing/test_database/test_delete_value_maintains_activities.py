@@ -3,16 +3,12 @@ A delete to scope.database.patient.values must "other" the associated activities
 """
 
 import datetime
-import pprint
-import pytz
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
-import scope.database.date_utils as date_utils
 import scope.database.patient.values
 import scope.database.patient.activities
 import scope.database.patients
-import scope.database.patient_unsafe_utils as patient_unsafe_utils
 import scope.enums
 import scope.schema
 import scope.schema_utils

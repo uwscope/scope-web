@@ -4,7 +4,6 @@ from typing import Callable, List
 
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def fake_activities_factory(
