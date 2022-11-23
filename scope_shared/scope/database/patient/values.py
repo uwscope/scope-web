@@ -1,8 +1,9 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 from numpy import integer
 
 import pymongo.collection
 import scope.database.collection_utils
+import scope.database.patient.activities
 
 DOCUMENT_TYPE = "value"
 SEMANTIC_SET_ID = "valueId"
@@ -16,7 +17,22 @@ def delete_value(
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Delete "value" document.
+
+    - Any existing activities with the deleted value must be modified to have no value.
     """
+    existing_activities = scope.database.patient.activities.get_activities(
+        collection=collection
+    )
+    if existing_activities:
+        for activity in existing_activities:
+            if activity.get(SEMANTIC_SET_ID) == set_id:
+                del activity["_id"]
+                del activity[SEMANTIC_SET_ID]
+                scope.database.patient.activities.put_activity(
+                    collection=collection,
+                    activity=activity,
+                    set_id=activity[scope.database.patient.activities.SEMANTIC_SET_ID],
+                )
 
     return scope.database.collection_utils.delete_set_element(
         collection=collection,
