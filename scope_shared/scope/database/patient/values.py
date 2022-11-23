@@ -17,12 +17,14 @@ def delete_value(
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Delete "value" document.
+
+    - Any existing activities with the deleted value must be modified to have no value.
     """
-    all_activities = scope.database.patient.activities.get_activities(
+    existing_activities = scope.database.patient.activities.get_activities(
         collection=collection
     )
-    if all_activities:
-        for activity in all_activities:
+    if existing_activities:
+        for activity in existing_activities:
             if activity.get(SEMANTIC_SET_ID) == set_id:
                 del activity["_id"]
                 del activity[SEMANTIC_SET_ID]

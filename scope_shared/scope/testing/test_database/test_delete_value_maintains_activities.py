@@ -33,7 +33,8 @@ def test_delete_value(
     # Obtain fake value
     fake_value = data_fake_value_factory()
     fake_value_post_result = scope.database.patient.values.post_value(
-        collection=patient_collection, value=fake_value
+        collection=patient_collection,
+        value=fake_value,
     )
     assert fake_value_post_result.inserted_count == 1
     inserted_fake_value = fake_value_post_result.document
@@ -43,7 +44,8 @@ def test_delete_value(
     for _fake_activity in fake_activities_with_value_id:
         _fake_activity.update({"valueId": inserted_fake_value["valueId"]})
         _fake_activity_post_result = scope.database.patient.activities.post_activity(
-            collection=patient_collection, activity=_fake_activity
+            collection=patient_collection,
+            activity=_fake_activity,
         )
         assert _fake_activity_post_result.inserted_count == 1
 
@@ -52,7 +54,8 @@ def test_delete_value(
     for _fake_activity in fake_activities:
         _fake_activity.update({"valueId": "some valueId"})
         _fake_activity_post_result = scope.database.patient.activities.post_activity(
-            collection=patient_collection, activity=_fake_activity
+            collection=patient_collection,
+            activity=_fake_activity,
         )
         assert _fake_activity_post_result.inserted_count == 1
 
