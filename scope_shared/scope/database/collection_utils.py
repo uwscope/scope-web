@@ -3,6 +3,7 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import pymongo.collection
+import pymongo.errors
 from typing import List, Optional
 import uuid
 
@@ -14,6 +15,30 @@ PRIMARY_COLLECTION_INDEX = [
     ("_rev", pymongo.DESCENDING),
 ]
 PRIMARY_COLLECTION_INDEX_NAME = "_primary"
+
+
+class DocumentModifiedException(Exception):
+    """
+    Raised if a request that should increment _rev fails due a DuplicateKeyError,
+    which implies somebody else has already modified the document.
+    """
+
+    document_existing: dict
+    """
+    Current version of the document.
+    """
+
+    def __init__(self, document_existing: dict):
+        self.document_existing = document_existing
+        super().__init__()
+
+
+class DocumentNotFoundException(Exception):
+    """
+    Raised if a request implies existence of a document which is not found.
+    """
+
+    pass
 
 
 @dataclass(frozen=True)
@@ -74,6 +99,18 @@ def delete_set_element(
     The put operation will increment the "_rev", ensuring no race conflict.
     """
 
+    # TODO: An improved put operation would verify this document and _rev exist.
+    #       Pending such an operation, we'll hack it via extra operations.
+    document_existing = get_set_element(
+        collection=collection,
+        document_type=document_type,
+        set_id=set_id,
+    )
+    if document_existing is None:
+        raise DocumentNotFoundException()
+    if document_existing["_rev"] != rev:
+        raise DocumentModifiedException(document_existing)
+
     tombstone_document = {
         "_type": document_type,
         "_set_id": set_id,
@@ -81,13 +118,22 @@ def delete_set_element(
         "_deleted": True,
     }
 
-    set_put_result = put_set_element(
-        collection=collection,
-        document_type=document_type,
-        semantic_set_id=None,
-        set_id=set_id,
-        document=tombstone_document,
-    )
+    try:
+        set_put_result = put_set_element(
+            collection=collection,
+            document_type=document_type,
+            semantic_set_id=None,
+            set_id=set_id,
+            document=tombstone_document,
+        )
+    except pymongo.errors.DuplicateKeyError:
+        document_existing = get_set_element(
+            collection=collection,
+            document_type=document_type,
+            set_id=set_id,
+        )
+
+        raise DocumentModifiedException(document_existing=document_existing)
 
     return set_put_result
 
@@ -398,6 +444,13 @@ def put_set_element(
     if "_rev" in document:
         if not isinstance(document["_rev"], int):
             raise ValueError('document["_rev"] must be int')
+
+        # TODO: We could check to ensure the previous _rev actually exists.
+        #       This is only relevant if the client has skipped ahead to some false future _rev.
+        #       An ordered bulk operation could findUpdate the previous _rev to update an ignored field,
+        #       then insert the new _rev (i.e., findUpdate would fail if the previous _rev did not exist,
+        #       insert would fail if somebody else has already created the new _rev).
+        #       If that field were to have actual meaning, this would need to be done in a transaction.
 
         document["_rev"] += 1
     else:
