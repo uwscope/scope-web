@@ -316,15 +316,13 @@ def test_patient_set_get(
         del document_retrieved["_rev"]
 
         assert "_set_id" in document_retrieved
-        if config.semantic_set_id:
-            assert config.semantic_set_id in document_retrieved
+        assert config.semantic_set_id in document_retrieved
 
         # If the provided documents already included set_id,
         # then we must preserve that for the set comparison
         if not config.options.set_id_will_already_exist:
             del document_retrieved["_set_id"]
-            if config.semantic_set_id:
-                del document_retrieved[config.semantic_set_id]
+            del document_retrieved[config.semantic_set_id]
 
     # Other documents may already be present, so check those present include ours
     for document_stored_current in documents_stored:
@@ -479,10 +477,9 @@ def test_patient_set_post(
     assert "_rev" in document_stored
     del document_stored["_rev"]
 
-    if config.semantic_set_id:
-        assert document_stored[config.semantic_set_id] == document_stored_set_id
-        assert config.semantic_set_id in document_stored
-        del document_stored[config.semantic_set_id]
+    assert document_stored[config.semantic_set_id] == document_stored_set_id
+    assert config.semantic_set_id in document_stored
+    del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -503,9 +500,8 @@ def test_patient_set_post(
     assert "_rev" in document_retrieved
     del document_retrieved["_rev"]
 
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
-        del document_retrieved[config.semantic_set_id]
+    assert config.semantic_set_id in document_retrieved
+    del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -606,17 +602,16 @@ def test_patient_set_post_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes a semantic id
-    if config.semantic_set_id:
-        document = document_factory()
-        document[config.semantic_set_id] = "invalid"
-        response = session.post(
-            url=urljoin(
-                flask_client_config.baseurl,
-                query,
-            ),
-            json={config.flask_document_set_element_key: document},
-        )
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+    document = document_factory()
+    document[config.semantic_set_id] = "invalid"
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={config.flask_document_set_element_key: document},
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -731,15 +726,13 @@ def test_patient_set_element_get(
     del document_retrieved["_rev"]
 
     assert "_set_id" in document_retrieved
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
+    assert config.semantic_set_id in document_retrieved
 
     # If the provided documents already included set_id,
     # then we must preserve that for the set comparison
     if not config.options.set_id_will_already_exist:
         del document_retrieved["_set_id"]
-        if config.semantic_set_id:
-            del document_retrieved[config.semantic_set_id]
+        del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -946,10 +939,9 @@ def test_patient_set_element_put(
     assert "_set_id" in document_stored
     assert document_stored["_set_id"] == document_set_id
     del document_stored["_set_id"]
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_stored
-        assert document_stored[config.semantic_set_id] == document_set_id
-        del document_stored[config.semantic_set_id]
+    assert config.semantic_set_id in document_stored
+    assert document_stored[config.semantic_set_id] == document_set_id
+    del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -971,10 +963,9 @@ def test_patient_set_element_put(
     assert "_set_id" in document_retrieved
     assert document_retrieved["_set_id"] == document_set_id
     del document_retrieved["_set_id"]
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
-        assert document_retrieved[config.semantic_set_id] == document_set_id
-        del document_retrieved[config.semantic_set_id]
+    assert config.semantic_set_id in document_retrieved
+    assert document_retrieved[config.semantic_set_id] == document_set_id
+    del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -1062,19 +1053,18 @@ def test_patient_set_element_put_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes a mismatched semantic id
-    if config.semantic_set_id:
-        document = document_factory()
-        document[config.semantic_set_id] = "invalid"
-        response = session.put(
-            url=urljoin(
-                flask_client_config.baseurl,
-                query,
-            ),
-            json={
-                config.flask_document_set_element_key: document,
-            },
-        )
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+    document = document_factory()
+    document[config.semantic_set_id] = "invalid"
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={
+            config.flask_document_set_element_key: document,
+        },
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -1159,11 +1149,10 @@ def test_patient_set_element_put_update(
     assert document_stored["_rev"] != document_updated["_rev"]
     assert document_stored["_rev"] + 1 == document_updated["_rev"]
 
-    if config.semantic_set_id:
-        assert (
-            document_stored[config.semantic_set_id]
-            == document_updated[config.semantic_set_id]
-        )
+    assert (
+        document_stored[config.semantic_set_id]
+        == document_updated[config.semantic_set_id]
+    )
 
     # Retrieve the document
     document_retrieved = config.database_get_function(
