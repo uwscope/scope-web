@@ -36,7 +36,8 @@ class ConfigTestPatientSetOptions:
     # When a test executes, provided set elements will already exist.
     # This will impact expectation that an initial get would fail.
     set_element_will_already_exist: bool = False
-
+    # Whether a set supports deletion
+    set_supports_deletion: bool = False
 
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
@@ -247,6 +248,9 @@ TEST_CONFIGS = [
         flask_document_set_key="values",
         flask_query_set_element_type="value",
         flask_document_set_element_key="value",
+        options=ConfigTestPatientSetOptions(
+            set_supports_deletion=True,
+        )
     ),
 ]
 
