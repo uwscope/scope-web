@@ -40,21 +40,37 @@ class ConfigTestPatientSetOptions:
 
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
+    # Name displayed for test
     name: str
+    # Name of field that will contain semantic set id
     semantic_set_id: str
-    document_factory_fixture_set: str
+    # Name of fixture for obtaining a set element
     document_factory_fixture_set_element: str
+    # Name of fixture for obtaining a set of multiple elements
+    document_factory_fixture_set: str
+    # Database-layer function to get the full set
     database_get_set_function: Callable[[...], List[dict]]
+    # Database-layer function to get a set element
     database_get_function: Callable[[...], dict]
+    # Optional database-layer function to post a new set element
+    # - Generally expected but optional because some types have a fixed set of ids
     database_post_function: Optional[Callable[[...], collection_utils.SetPostResult]]
+    # Optional convenience for an unsafe update
+    # - Used as an alternative if post is not available
     database_unsafe_update_function: Optional[
         Callable[[...], scope.database.collection_utils.PutResult]
     ]
+    # For database functions, name of the function parameter that will receive the document
     database_document_parameter_name: str
+    # With QUERY_SET, the type of set to query
     flask_query_set_type: str
+    # With QUERY_SET, the key of the response document to obtain the set
     flask_document_set_key: str
+    # With QUERY_SET_ELEMENT, the type of set element to query
     flask_query_set_element_type: str
+    # With QUERY_SET_ELEMENT, the key of the response document to obtain the set element
     flask_document_set_element_key: str
+    # Additional options from above, separate so that defaults are limited to above
     options: ConfigTestPatientSetOptions = ConfigTestPatientSetOptions()
 
 
@@ -62,8 +78,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activities",
         semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activities_factory",
         document_factory_fixture_set_element="data_fake_activity_factory",
+        document_factory_fixture_set="data_fake_activities_factory",
         database_get_set_function=scope.database.patient.activities.get_activities,
         database_get_function=scope.database.patient.activities.get_activity,
         database_post_function=scope.database.patient.activities.post_activity,
@@ -77,8 +93,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activitylogs",
         semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activity_logs_factory",
         document_factory_fixture_set_element="data_fake_activity_log_factory",
+        document_factory_fixture_set="data_fake_activity_logs_factory",
         database_get_set_function=scope.database.patient.activity_logs.get_activity_logs,
         database_get_function=scope.database.patient.activity_logs.get_activity_log,
         database_post_function=scope.database.patient.activity_logs.post_activity_log,
@@ -92,8 +108,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activityschedules",
         semantic_set_id=scope.database.patient.activity_schedules.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activity_schedules_factory",
         document_factory_fixture_set_element="data_fake_activity_schedule_factory",
+        document_factory_fixture_set="data_fake_activity_schedules_factory",
         database_get_set_function=scope.database.patient.activity_schedules.get_activity_schedules,
         database_get_function=scope.database.patient.activity_schedules.get_activity_schedule,
         database_post_function=scope.database.patient.activity_schedules.post_activity_schedule,
@@ -107,8 +123,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="assessments",
         semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_assessments_factory",
         document_factory_fixture_set_element="data_fake_assessment_factory",
+        document_factory_fixture_set="data_fake_assessments_factory",
         database_get_set_function=scope.database.patient.assessments.get_assessments,
         database_get_function=scope.database.patient.assessments.get_assessment,
         database_post_function=None,  # Assessments have fixed set IDs
@@ -126,8 +142,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="assessmentlogs",
         semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_assessment_logs_factory",
         document_factory_fixture_set_element="data_fake_assessment_log_factory",
+        document_factory_fixture_set="data_fake_assessment_logs_factory",
         database_get_set_function=scope.database.patient.assessment_logs.get_assessment_logs,
         database_get_function=scope.database.patient.assessment_logs.get_assessment_log,
         database_post_function=scope.database.patient.assessment_logs.post_assessment_log,
@@ -141,8 +157,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="casereviews",
         semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_case_reviews_factory",
         document_factory_fixture_set_element="data_fake_case_review_factory",
+        document_factory_fixture_set="data_fake_case_reviews_factory",
         database_get_set_function=scope.database.patient.case_reviews.get_case_reviews,
         database_get_function=scope.database.patient.case_reviews.get_case_review,
         database_post_function=scope.database.patient.case_reviews.post_case_review,
@@ -156,8 +172,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="moodlogs",
         semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_mood_logs_factory",
         document_factory_fixture_set_element="data_fake_mood_log_factory",
+        document_factory_fixture_set="data_fake_mood_logs_factory",
         database_get_set_function=scope.database.patient.mood_logs.get_mood_logs,
         database_get_function=scope.database.patient.mood_logs.get_mood_log,
         database_post_function=scope.database.patient.mood_logs.post_mood_log,
@@ -171,8 +187,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="sessions",
         semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_sessions_factory",
         document_factory_fixture_set_element="data_fake_session_factory",
+        document_factory_fixture_set="data_fake_sessions_factory",
         database_get_set_function=scope.database.patient.sessions.get_sessions,
         database_get_function=scope.database.patient.sessions.get_session,
         database_post_function=scope.database.patient.sessions.post_session,
@@ -186,8 +202,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="scheduledactivities",
         semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_scheduled_activities_factory",
         document_factory_fixture_set_element="data_fake_scheduled_activity_factory",
+        document_factory_fixture_set="data_fake_scheduled_activities_factory",
         database_get_set_function=scope.database.patient.scheduled_activities.get_scheduled_activities,
         database_get_function=scope.database.patient.scheduled_activities.get_scheduled_activity,
         database_post_function=scope.database.patient.scheduled_activities.post_scheduled_activity,
@@ -201,8 +217,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="scheduledassessments",
         semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
         document_factory_fixture_set_element="data_fake_scheduled_assessment_factory",
+        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
         database_get_set_function=scope.database.patient.scheduled_assessments.get_scheduled_assessments,
         database_get_function=scope.database.patient.scheduled_assessments.get_scheduled_assessment,
         database_post_function=scope.database.patient.scheduled_assessments.post_scheduled_assessment,
@@ -220,8 +236,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="values",
         semantic_set_id=scope.database.patient.values.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_values_factory",
         document_factory_fixture_set_element="data_fake_value_factory",
+        document_factory_fixture_set="data_fake_values_factory",
         database_get_set_function=scope.database.patient.values.get_values,
         database_get_function=scope.database.patient.values.get_value,
         database_post_function=scope.database.patient.values.post_value,
