@@ -1292,3 +1292,181 @@ def test_patient_set_element_put_update_invalid(
     # Contents of the response should indicate that current "_rev" is the incremented rev
     document_conflict = response.json()[config.flask_document_set_element_key]
     assert document_conflict["_rev"] == document_updated_stored["_rev"]
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_set_element_delete_not_allowed(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test deleting an element in set is not allowed.
+    """
+
+    if config.options.set_supports_deletion:
+        # This set supports deletion, this test does not apply
+        return
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Most set elements expect to be post.
+    #
+    # If elements already include a set ID, they expect to be put.
+    document = document_factory()
+    if not config.options.set_id_will_already_exist:
+        result = config.database_post_function(
+            **{
+                "collection": temp_patient.collection,
+                config.database_document_parameter_name: document,
+            }
+        )
+        assert result.inserted_count == 1
+    else:
+        assert "_set_id" in document
+
+        result = config.database_unsafe_update_function(
+            **{
+                "collection": temp_patient.collection,
+                "set_id": document["_set_id"],
+                "{}_complete".format(config.database_document_parameter_name): document,
+            }
+        )
+        assert result.inserted_count == 1
+
+    document_stored = result.document
+    document_stored_set_id = result.inserted_set_id
+
+    # Attempt to delete via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_set_element_delete(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test deleting an element in set.
+    """
+
+    if not config.options.set_supports_deletion:
+        # This set does not support deletion, this test does not apply
+        return
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Post a document
+    document = document_factory()
+    result = config.database_post_function(
+        **{
+            "collection": temp_patient.collection,
+            config.database_document_parameter_name: document,
+        }
+    )
+    assert result.inserted_count == 1
+
+    document_stored = result.document
+    document_stored_set_id = result.inserted_set_id
+
+    # Retrieve the document
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+            "set_id": document_stored_set_id,
+        }
+    )
+
+    # Confirm it matches expected document
+    assert document_retrieved is not None
+    del document_retrieved["_id"]
+    del document_retrieved["_rev"]
+    del document_retrieved["_set_id"]
+    del document_retrieved[config.semantic_set_id]
+    assert document == document_retrieved
+
+    # Attempt to delete via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.OK
+
+    # Attempt to retrieve the document, confirm not found
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+            "set_id": document_stored_set_id,
+        }
+    )
+
+    # Confirm it matches expected document
+    assert document_retrieved is None
+
+    # Attempt to delete via Flask, confirm not found
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
