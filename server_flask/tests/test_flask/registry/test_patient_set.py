@@ -9,7 +9,6 @@ from urllib.parse import urljoin
 import scope.config
 import scope.database.patient_unsafe_utils
 import scope.database.collection_utils as collection_utils
-import scope.database.document_utils as document_utils
 import scope.database.patient.activities
 import scope.database.patient.activity_logs
 import scope.database.patient.activity_schedules
@@ -39,6 +38,7 @@ class ConfigTestPatientSetOptions:
     # Whether a set supports deletion
     set_supports_deletion: bool = False
 
+
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
     # Name displayed for test
@@ -59,7 +59,7 @@ class ConfigTestPatientSet:
     # Optional convenience for an unsafe update
     # - Used as an alternative if post is not available
     database_unsafe_update_function: Optional[
-        Callable[[...], scope.database.collection_utils.PutResult]
+        Callable[[...], collection_utils.PutResult]
     ]
     # For database functions, name of the function parameter that will receive the document
     database_document_parameter_name: str
@@ -250,7 +250,7 @@ TEST_CONFIGS = [
         flask_document_set_element_key="value",
         options=ConfigTestPatientSetOptions(
             set_supports_deletion=True,
-        )
+        ),
     ),
 ]
 
@@ -1362,8 +1362,8 @@ def test_patient_set_element_delete_not_allowed(
             query,
         ),
         headers={
-            "If-Match": str(document_stored["_rev"])
-        }
+            "If-Match": str(document_stored["_rev"]),
+        },
     )
     assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
 
@@ -1438,8 +1438,8 @@ def test_patient_set_element_delete(
             query,
         ),
         headers={
-            "If-Match": str(document_stored["_rev"])
-        }
+            "If-Match": str(document_stored["_rev"]),
+        },
     )
     assert response.status_code == http.HTTPStatus.OK
 
@@ -1466,7 +1466,7 @@ def test_patient_set_element_delete(
             query,
         ),
         headers={
-            "If-Match": str(document_stored["_rev"])
-        }
+            "If-Match": str(document_stored["_rev"]),
+        },
     )
     assert response.status_code == http.HTTPStatus.NOT_FOUND
