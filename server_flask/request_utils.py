@@ -54,7 +54,7 @@ def abort_delete_without_if_match_header() -> NoReturn:
         {
             "message": 'DELETE must include "If-Match" header.',
         },
-        http.HTTPStatus.NO_CONTENT,
+        http.HTTPStatus.BAD_REQUEST,
     )
 
 

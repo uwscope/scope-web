@@ -4,7 +4,7 @@ import pymongo.errors
 
 import request_context
 import request_utils
-import scope.database
+from scope.database import collection_utils
 import scope.database.patient.values
 import scope.schema
 
@@ -168,32 +168,29 @@ def delete_value(patient_id, value_id):
     context = request_context.authorized_for_patient(patient_id=patient_id)
     patient_collection = context.patient_collection(patient_id=patient_id)
 
+    # Obtain the _rev being deleted
     if_match_header = flask.request.headers.get("If-Match")
     if if_match_header is None:
         request_utils.abort_delete_without_if_match_header()
+    rev = int(if_match_header)
 
     # Delete the document
     try:
         result = scope.database.patient.values.delete_value(
-            collection=patient_collection, set_id=value_id, rev=int(if_match_header)
+            collection=patient_collection,
+            set_id=value_id,
+            rev=rev,
         )
-    except pymongo.errors.DuplicateKeyError:
-        # NOTE: Possible reasons to arrive here:
-        # (1): document with (_rev == if_match_header + 1) already exists in which case current "value" document will be returned with 409.
-        # (2): deleted document with (_rev == if_match_header + 1) already exists in which case null "value" document will be returned with 409.
-
+    except collection_utils.DocumentNotFoundException:
+        # The document may have never existed or may have already been deleted
+        request_utils.abort_document_not_found()
+    except collection_utils.DocumentModifiedException as e:
         # Indicates a revision race condition, return error with current revision
-        document_conflict = scope.database.patient.values.get_value(
-            collection=patient_collection, set_id=value_id
-        )
-        # Validate and normalize the response
-        document_conflict = request_utils.singleton_put_response_validate(
-            document=document_conflict
-        )
+        document_existing = e.document_existing
 
         request_utils.abort_revision_conflict(
             document={
-                "value": document_conflict,
+                "value": document_existing,
             }
         )
     else:

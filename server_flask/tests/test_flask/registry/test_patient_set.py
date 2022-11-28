@@ -36,25 +36,42 @@ class ConfigTestPatientSetOptions:
     # When a test executes, provided set elements will already exist.
     # This will impact expectation that an initial get would fail.
     set_element_will_already_exist: bool = False
-
+    # Whether a set supports deletion
+    set_supports_deletion: bool = False
 
 @dataclass(frozen=True)
 class ConfigTestPatientSet:
+    # Name displayed for test
     name: str
+    # Name of field that will contain semantic set id
     semantic_set_id: str
-    document_factory_fixture_set: str
+    # Name of fixture for obtaining a set element
     document_factory_fixture_set_element: str
+    # Name of fixture for obtaining a set of multiple elements
+    document_factory_fixture_set: str
+    # Database-layer function to get the full set
     database_get_set_function: Callable[[...], List[dict]]
+    # Database-layer function to get a set element
     database_get_function: Callable[[...], dict]
+    # Optional database-layer function to post a new set element
+    # - Generally expected but optional because some types have a fixed set of ids
     database_post_function: Optional[Callable[[...], collection_utils.SetPostResult]]
+    # Optional convenience for an unsafe update
+    # - Used as an alternative if post is not available
     database_unsafe_update_function: Optional[
         Callable[[...], scope.database.collection_utils.PutResult]
     ]
+    # For database functions, name of the function parameter that will receive the document
     database_document_parameter_name: str
+    # With QUERY_SET, the type of set to query
     flask_query_set_type: str
+    # With QUERY_SET, the key of the response document to obtain the set
     flask_document_set_key: str
+    # With QUERY_SET_ELEMENT, the type of set element to query
     flask_query_set_element_type: str
+    # With QUERY_SET_ELEMENT, the key of the response document to obtain the set element
     flask_document_set_element_key: str
+    # Additional options from above, separate so that defaults are limited to above
     options: ConfigTestPatientSetOptions = ConfigTestPatientSetOptions()
 
 
@@ -62,8 +79,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activities",
         semantic_set_id=scope.database.patient.activities.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activities_factory",
         document_factory_fixture_set_element="data_fake_activity_factory",
+        document_factory_fixture_set="data_fake_activities_factory",
         database_get_set_function=scope.database.patient.activities.get_activities,
         database_get_function=scope.database.patient.activities.get_activity,
         database_post_function=scope.database.patient.activities.post_activity,
@@ -77,8 +94,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activitylogs",
         semantic_set_id=scope.database.patient.activity_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activity_logs_factory",
         document_factory_fixture_set_element="data_fake_activity_log_factory",
+        document_factory_fixture_set="data_fake_activity_logs_factory",
         database_get_set_function=scope.database.patient.activity_logs.get_activity_logs,
         database_get_function=scope.database.patient.activity_logs.get_activity_log,
         database_post_function=scope.database.patient.activity_logs.post_activity_log,
@@ -92,8 +109,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="activityschedules",
         semantic_set_id=scope.database.patient.activity_schedules.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_activity_schedules_factory",
         document_factory_fixture_set_element="data_fake_activity_schedule_factory",
+        document_factory_fixture_set="data_fake_activity_schedules_factory",
         database_get_set_function=scope.database.patient.activity_schedules.get_activity_schedules,
         database_get_function=scope.database.patient.activity_schedules.get_activity_schedule,
         database_post_function=scope.database.patient.activity_schedules.post_activity_schedule,
@@ -107,8 +124,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="assessments",
         semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_assessments_factory",
         document_factory_fixture_set_element="data_fake_assessment_factory",
+        document_factory_fixture_set="data_fake_assessments_factory",
         database_get_set_function=scope.database.patient.assessments.get_assessments,
         database_get_function=scope.database.patient.assessments.get_assessment,
         database_post_function=None,  # Assessments have fixed set IDs
@@ -126,8 +143,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="assessmentlogs",
         semantic_set_id=scope.database.patient.assessment_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_assessment_logs_factory",
         document_factory_fixture_set_element="data_fake_assessment_log_factory",
+        document_factory_fixture_set="data_fake_assessment_logs_factory",
         database_get_set_function=scope.database.patient.assessment_logs.get_assessment_logs,
         database_get_function=scope.database.patient.assessment_logs.get_assessment_log,
         database_post_function=scope.database.patient.assessment_logs.post_assessment_log,
@@ -141,8 +158,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="casereviews",
         semantic_set_id=scope.database.patient.case_reviews.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_case_reviews_factory",
         document_factory_fixture_set_element="data_fake_case_review_factory",
+        document_factory_fixture_set="data_fake_case_reviews_factory",
         database_get_set_function=scope.database.patient.case_reviews.get_case_reviews,
         database_get_function=scope.database.patient.case_reviews.get_case_review,
         database_post_function=scope.database.patient.case_reviews.post_case_review,
@@ -156,8 +173,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="moodlogs",
         semantic_set_id=scope.database.patient.mood_logs.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_mood_logs_factory",
         document_factory_fixture_set_element="data_fake_mood_log_factory",
+        document_factory_fixture_set="data_fake_mood_logs_factory",
         database_get_set_function=scope.database.patient.mood_logs.get_mood_logs,
         database_get_function=scope.database.patient.mood_logs.get_mood_log,
         database_post_function=scope.database.patient.mood_logs.post_mood_log,
@@ -171,8 +188,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="sessions",
         semantic_set_id=scope.database.patient.sessions.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_sessions_factory",
         document_factory_fixture_set_element="data_fake_session_factory",
+        document_factory_fixture_set="data_fake_sessions_factory",
         database_get_set_function=scope.database.patient.sessions.get_sessions,
         database_get_function=scope.database.patient.sessions.get_session,
         database_post_function=scope.database.patient.sessions.post_session,
@@ -186,8 +203,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="scheduledactivities",
         semantic_set_id=scope.database.patient.scheduled_activities.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_scheduled_activities_factory",
         document_factory_fixture_set_element="data_fake_scheduled_activity_factory",
+        document_factory_fixture_set="data_fake_scheduled_activities_factory",
         database_get_set_function=scope.database.patient.scheduled_activities.get_scheduled_activities,
         database_get_function=scope.database.patient.scheduled_activities.get_scheduled_activity,
         database_post_function=scope.database.patient.scheduled_activities.post_scheduled_activity,
@@ -201,8 +218,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="scheduledassessments",
         semantic_set_id=scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
         document_factory_fixture_set_element="data_fake_scheduled_assessment_factory",
+        document_factory_fixture_set="data_fake_scheduled_assessments_factory",
         database_get_set_function=scope.database.patient.scheduled_assessments.get_scheduled_assessments,
         database_get_function=scope.database.patient.scheduled_assessments.get_scheduled_assessment,
         database_post_function=scope.database.patient.scheduled_assessments.post_scheduled_assessment,
@@ -220,8 +237,8 @@ TEST_CONFIGS = [
     ConfigTestPatientSet(
         name="values",
         semantic_set_id=scope.database.patient.values.SEMANTIC_SET_ID,
-        document_factory_fixture_set="data_fake_values_factory",
         document_factory_fixture_set_element="data_fake_value_factory",
+        document_factory_fixture_set="data_fake_values_factory",
         database_get_set_function=scope.database.patient.values.get_values,
         database_get_function=scope.database.patient.values.get_value,
         database_post_function=scope.database.patient.values.post_value,
@@ -231,6 +248,9 @@ TEST_CONFIGS = [
         flask_document_set_key="values",
         flask_query_set_element_type="value",
         flask_document_set_element_key="value",
+        options=ConfigTestPatientSetOptions(
+            set_supports_deletion=True,
+        )
     ),
 ]
 
@@ -316,15 +336,13 @@ def test_patient_set_get(
         del document_retrieved["_rev"]
 
         assert "_set_id" in document_retrieved
-        if config.semantic_set_id:
-            assert config.semantic_set_id in document_retrieved
+        assert config.semantic_set_id in document_retrieved
 
         # If the provided documents already included set_id,
         # then we must preserve that for the set comparison
         if not config.options.set_id_will_already_exist:
             del document_retrieved["_set_id"]
-            if config.semantic_set_id:
-                del document_retrieved[config.semantic_set_id]
+            del document_retrieved[config.semantic_set_id]
 
     # Other documents may already be present, so check those present include ours
     for document_stored_current in documents_stored:
@@ -479,10 +497,9 @@ def test_patient_set_post(
     assert "_rev" in document_stored
     del document_stored["_rev"]
 
-    if config.semantic_set_id:
-        assert document_stored[config.semantic_set_id] == document_stored_set_id
-        assert config.semantic_set_id in document_stored
-        del document_stored[config.semantic_set_id]
+    assert document_stored[config.semantic_set_id] == document_stored_set_id
+    assert config.semantic_set_id in document_stored
+    del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -503,9 +520,8 @@ def test_patient_set_post(
     assert "_rev" in document_retrieved
     del document_retrieved["_rev"]
 
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
-        del document_retrieved[config.semantic_set_id]
+    assert config.semantic_set_id in document_retrieved
+    del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -606,17 +622,16 @@ def test_patient_set_post_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes a semantic id
-    if config.semantic_set_id:
-        document = document_factory()
-        document[config.semantic_set_id] = "invalid"
-        response = session.post(
-            url=urljoin(
-                flask_client_config.baseurl,
-                query,
-            ),
-            json={config.flask_document_set_element_key: document},
-        )
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+    document = document_factory()
+    document[config.semantic_set_id] = "invalid"
+    response = session.post(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={config.flask_document_set_element_key: document},
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -731,15 +746,13 @@ def test_patient_set_element_get(
     del document_retrieved["_rev"]
 
     assert "_set_id" in document_retrieved
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
+    assert config.semantic_set_id in document_retrieved
 
     # If the provided documents already included set_id,
     # then we must preserve that for the set comparison
     if not config.options.set_id_will_already_exist:
         del document_retrieved["_set_id"]
-        if config.semantic_set_id:
-            del document_retrieved[config.semantic_set_id]
+        del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -946,10 +959,9 @@ def test_patient_set_element_put(
     assert "_set_id" in document_stored
     assert document_stored["_set_id"] == document_set_id
     del document_stored["_set_id"]
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_stored
-        assert document_stored[config.semantic_set_id] == document_set_id
-        del document_stored[config.semantic_set_id]
+    assert config.semantic_set_id in document_stored
+    assert document_stored[config.semantic_set_id] == document_set_id
+    del document_stored[config.semantic_set_id]
 
     assert document == document_stored
 
@@ -971,10 +983,9 @@ def test_patient_set_element_put(
     assert "_set_id" in document_retrieved
     assert document_retrieved["_set_id"] == document_set_id
     del document_retrieved["_set_id"]
-    if config.semantic_set_id:
-        assert config.semantic_set_id in document_retrieved
-        assert document_retrieved[config.semantic_set_id] == document_set_id
-        del document_retrieved[config.semantic_set_id]
+    assert config.semantic_set_id in document_retrieved
+    assert document_retrieved[config.semantic_set_id] == document_set_id
+    del document_retrieved[config.semantic_set_id]
 
     assert document == document_retrieved
 
@@ -1062,19 +1073,18 @@ def test_patient_set_element_put_invalid(
     assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
     # Invalid document that already includes a mismatched semantic id
-    if config.semantic_set_id:
-        document = document_factory()
-        document[config.semantic_set_id] = "invalid"
-        response = session.put(
-            url=urljoin(
-                flask_client_config.baseurl,
-                query,
-            ),
-            json={
-                config.flask_document_set_element_key: document,
-            },
-        )
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+    document = document_factory()
+    document[config.semantic_set_id] = "invalid"
+    response = session.put(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        json={
+            config.flask_document_set_element_key: document,
+        },
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -1159,11 +1169,10 @@ def test_patient_set_element_put_update(
     assert document_stored["_rev"] != document_updated["_rev"]
     assert document_stored["_rev"] + 1 == document_updated["_rev"]
 
-    if config.semantic_set_id:
-        assert (
-            document_stored[config.semantic_set_id]
-            == document_updated[config.semantic_set_id]
-        )
+    assert (
+        document_stored[config.semantic_set_id]
+        == document_updated[config.semantic_set_id]
+    )
 
     # Retrieve the document
     document_retrieved = config.database_get_function(
@@ -1283,3 +1292,181 @@ def test_patient_set_element_put_update_invalid(
     # Contents of the response should indicate that current "_rev" is the incremented rev
     document_conflict = response.json()[config.flask_document_set_element_key]
     assert document_conflict["_rev"] == document_updated_stored["_rev"]
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_set_element_delete_not_allowed(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test deleting an element in set is not allowed.
+    """
+
+    if config.options.set_supports_deletion:
+        # This set supports deletion, this test does not apply
+        return
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Most set elements expect to be post.
+    #
+    # If elements already include a set ID, they expect to be put.
+    document = document_factory()
+    if not config.options.set_id_will_already_exist:
+        result = config.database_post_function(
+            **{
+                "collection": temp_patient.collection,
+                config.database_document_parameter_name: document,
+            }
+        )
+        assert result.inserted_count == 1
+    else:
+        assert "_set_id" in document
+
+        result = config.database_unsafe_update_function(
+            **{
+                "collection": temp_patient.collection,
+                "set_id": document["_set_id"],
+                "{}_complete".format(config.database_document_parameter_name): document,
+            }
+        )
+        assert result.inserted_count == 1
+
+    document_stored = result.document
+    document_stored_set_id = result.inserted_set_id
+
+    # Attempt to delete via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.METHOD_NOT_ALLOWED
+
+
+@pytest.mark.parametrize(
+    ["config"],
+    [[config] for config in TEST_CONFIGS],
+    ids=[config.name for config in TEST_CONFIGS],
+)
+def test_patient_set_element_delete(
+    request: pytest.FixtureRequest,
+    config: ConfigTestPatientSet,
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    flask_client_config: scope.config.FlaskClientConfig,
+    flask_session_unauthenticated_factory: Callable[[], requests.Session],
+):
+    """
+    Test deleting an element in set.
+    """
+
+    if not config.options.set_supports_deletion:
+        # This set does not support deletion, this test does not apply
+        return
+
+    temp_patient = database_temp_patient_factory()
+    session = flask_session_unauthenticated_factory()
+    document_factory = request.getfixturevalue(
+        config.document_factory_fixture_set_element
+    )
+
+    # Post a document
+    document = document_factory()
+    result = config.database_post_function(
+        **{
+            "collection": temp_patient.collection,
+            config.database_document_parameter_name: document,
+        }
+    )
+    assert result.inserted_count == 1
+
+    document_stored = result.document
+    document_stored_set_id = result.inserted_set_id
+
+    # Retrieve the document
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+            "set_id": document_stored_set_id,
+        }
+    )
+
+    # Confirm it matches expected document
+    assert document_retrieved is not None
+    del document_retrieved["_id"]
+    del document_retrieved["_rev"]
+    del document_retrieved["_set_id"]
+    del document_retrieved[config.semantic_set_id]
+    assert document == document_retrieved
+
+    # Attempt to delete via Flask
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.OK
+
+    # Attempt to retrieve the document, confirm not found
+    document_retrieved = config.database_get_function(
+        **{
+            "collection": temp_patient.collection,
+            "set_id": document_stored_set_id,
+        }
+    )
+
+    # Confirm it matches expected document
+    assert document_retrieved is None
+
+    # Attempt to delete via Flask, confirm not found
+    query = QUERY_SET_ELEMENT.format(
+        patient_id=temp_patient.patient_id,
+        query_type=config.flask_query_set_element_type,
+        set_id=document_stored_set_id,
+    )
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+        headers={
+            "If-Match": str(document_stored["_rev"])
+        }
+    )
+    assert response.status_code == http.HTTPStatus.NOT_FOUND

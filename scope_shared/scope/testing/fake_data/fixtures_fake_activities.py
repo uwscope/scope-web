@@ -4,7 +4,6 @@ from typing import Callable, List
 
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def fake_activities_factory(
@@ -16,7 +15,7 @@ def fake_activities_factory(
     """
 
     def factory() -> List[dict]:
-        fake_activities = [fake_activity_factory() for _ in range(random.randint(0, 5))]
+        fake_activities = [fake_activity_factory() for _ in range(random.randint(1, 5))]
 
         return fake_activities
 
