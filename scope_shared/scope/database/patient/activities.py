@@ -3,13 +3,48 @@ from typing import List, Optional
 import pymongo.collection
 
 import scope.database.collection_utils
-import scope.database.patient.scheduled_activities
+import scope.database.patient.activity_schedules
 import scope.enums
 import scope.schema
 
 
 DOCUMENT_TYPE = "activity"
 SEMANTIC_SET_ID = "activityId"
+
+
+def delete_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "activity" document.
+
+    - Any existing activity schedules with the deleted activity must be deleted.
+    """
+    existing_activity_schedules = (
+        scope.database.patient.activity_schedules.get_activity_schedules(
+            collection=collection
+        )
+    )
+    if existing_activity_schedules:
+        for activity_schedule in existing_activity_schedules:
+            if activity_schedule.get(SEMANTIC_SET_ID) == set_id:
+                scope.database.patient.activity_schedules.delete_activity_schedule(
+                    collection=collection,
+                    set_id=activity_schedule[
+                        scope.database.patient.activity_schedules.SEMANTIC_SET_ID
+                    ],
+                    rev=activity_schedule.get("_rev"),
+                )
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
 
 
 def get_activities(

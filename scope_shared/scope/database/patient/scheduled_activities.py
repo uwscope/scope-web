@@ -13,6 +13,24 @@ DOCUMENT_TYPE = "scheduledActivity"
 SEMANTIC_SET_ID = "scheduledActivityId"
 
 
+def delete_scheduled_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "scheduled-activity" document.
+    """
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
+
+
 def get_scheduled_activities(
     *,
     collection: pymongo.collection.Collection,
@@ -36,27 +54,27 @@ def get_scheduled_activities(
     return scheduled_activities
 
 
-def delete_scheduled_activity(
-    *,
-    collection: pymongo.collection.Collection,
-    scheduled_activity: dict,
-    set_id: str,
-) -> scope.database.collection_utils.SetPutResult:
-    scheduled_activity = copy.deepcopy(scheduled_activity)
+# def delete_scheduled_activity(
+#     *,
+#     collection: pymongo.collection.Collection,
+#     scheduled_activity: dict,
+#     set_id: str,
+# ) -> scope.database.collection_utils.SetPutResult:
+#     scheduled_activity = copy.deepcopy(scheduled_activity)
 
-    scheduled_activity["_deleted"] = True
-    del scheduled_activity["_id"]
+#     scheduled_activity["_deleted"] = True
+#     del scheduled_activity["_id"]
 
-    schema_utils.assert_schema(
-        data=scheduled_activity,
-        schema=scope.schema.scheduled_activity_schema,
-    )
+#     schema_utils.assert_schema(
+#         data=scheduled_activity,
+#         schema=scope.schema.scheduled_activity_schema,
+#     )
 
-    return put_scheduled_activity(
-        collection=collection,
-        scheduled_activity=scheduled_activity,
-        set_id=set_id,
-    )
+#     return put_scheduled_activity(
+#         collection=collection,
+#         scheduled_activity=scheduled_activity,
+#         set_id=set_id,
+#     )
 
 
 def get_scheduled_activity(

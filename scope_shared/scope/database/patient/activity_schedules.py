@@ -148,6 +148,41 @@ def _maintain_pending_scheduled_activities(
             )
 
 
+def delete_activity_schedule(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "activity-schedule" document.
+
+    - Any existing scheduled activity with the deleted activity schedule must be deleted.
+    """
+    existing_scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=collection
+        )
+    )
+    if existing_scheduled_activities:
+        for scheduled_activity in existing_scheduled_activities:
+            if scheduled_activity.get(SEMANTIC_SET_ID) == set_id:
+                scope.database.patient.scheduled_activities.delete_scheduled_activity(
+                    collection=collection,
+                    set_id=scheduled_activity[
+                        scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+                    ],
+                    rev=scheduled_activity.get("_rev"),
+                )
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
+
+
 def get_activity_schedules(
     *,
     collection: pymongo.collection.Collection,
