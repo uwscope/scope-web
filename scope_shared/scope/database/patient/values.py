@@ -1,7 +1,6 @@
-from typing import List, Optional
-from numpy import integer
-
 import pymongo.collection
+from typing import List, Optional
+
 import scope.database.collection_utils
 import scope.database.patient.activities
 
@@ -13,7 +12,7 @@ def delete_value(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
-    rev: integer,
+    rev: int,
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Delete "value" document.
