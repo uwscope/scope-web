@@ -1432,6 +1432,17 @@ def test_patient_set_element_delete(
         query_type=config.flask_query_set_element_type,
         set_id=document_stored_set_id,
     )
+
+    # Without "If-Match" header
+    response = session.delete(
+        url=urljoin(
+            flask_client_config.baseurl,
+            query,
+        ),
+    )
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    # With "If-Match" header
     response = session.delete(
         url=urljoin(
             flask_client_config.baseurl,
