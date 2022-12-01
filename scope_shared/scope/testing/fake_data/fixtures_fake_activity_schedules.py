@@ -16,7 +16,7 @@ def fake_activity_schedules_factory(
 
     def factory() -> List[dict]:
         fake_activity_schedules = [
-            fake_activity_schedule_factory() for _ in range(random.randint(0, 5))
+            fake_activity_schedule_factory() for _ in range(random.randint(1, 5))
         ]
 
         return fake_activity_schedules
