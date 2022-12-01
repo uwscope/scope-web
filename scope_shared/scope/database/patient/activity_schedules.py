@@ -124,10 +124,10 @@ def _maintain_pending_scheduled_activities(
             for delete_item_current in delete_items:
                 scope.database.patient.scheduled_activities.delete_scheduled_activity(
                     collection=collection,
-                    scheduled_activity=delete_item_current,
                     set_id=delete_item_current[
                         scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
                     ],
+                    rev=delete_item_current.get("_rev"),
                 )
 
     # Create new scheduled activities as necessary
