@@ -110,6 +110,7 @@ export interface IPatientService extends IServiceBase {
 
     getValues(): Promise<IValue[]>;
     addValue(value: IValue): Promise<IValue>;
+    deleteValue(value: IValue): Promise<IValue>;
     updateValue(value: IValue): Promise<IValue>;
 }
 
@@ -395,6 +396,17 @@ class PatientService extends ServiceBase implements IPatientService {
         return response.data?.value;
     }
 
+    public async deleteValue(value: IValue): Promise<IValue> {
+        (value as any)._type = 'value';
+        logger.assert((value as any)._rev != undefined, '_rev should be in the request data');
+        const response = await this.axiosInstance.delete<IValueResponse>(`/value/${value.valueId}`, {
+            headers: {
+                'If-Match': (value as any)._rev,
+            },
+        });
+        return response.data?.value;
+    }
+
     public async updateValue(value: IValue): Promise<IValue> {
         (value as any)._type = 'value';
         // TODO Activity Refactor: Who/where should maintained edited time?
@@ -402,12 +414,9 @@ class PatientService extends ServiceBase implements IPatientService {
         logger.assert((value as any)._rev != undefined, '_rev should be in the request data');
         logger.assert((value as any)._set_id != undefined, '_set_id should be in the request data');
 
-        const response = await this.axiosInstance.put<IValueResponse>(
-            `/value/${value.valueId}`,
-            {
-                value: value,
-            } as IValueRequest,
-        );
+        const response = await this.axiosInstance.put<IValueResponse>(`/value/${value.valueId}`, {
+            value: value,
+        } as IValueRequest);
 
         return response.data?.value;
     }
