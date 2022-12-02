@@ -1,6 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EditIcon from '@mui/icons-material/Edit';
 import {
     Box,
     Button,
@@ -20,7 +19,7 @@ import {
 import { random } from 'lodash';
 import { action, runInAction, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
-import React, { Fragment, FunctionComponent, ReactNode} from 'react';
+import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { IActivity, IValue } from 'shared/types';
@@ -37,9 +36,9 @@ interface IValueEditFormSection {
     loading: boolean;
     value: IValue;
     activityExamples: string[];
-    handleEditValue: () => void;
     handleCancelEditActivity: () => void;
     // handleSaveValueActivities: (newValue: IValue) => Promise<void>;
+    handleMoreClickValue: (value: IValue, event: React.MouseEvent<HTMLElement>) => void;
     handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
 
@@ -49,9 +48,9 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         // loading,
         value,
         // activityExamples,
-        handleEditValue,
         // handleCancelEditActivity,
         // handleSaveValueActivities,
+        handleMoreClickValue,
         handleMoreClickActivity,
     } = props;
 
@@ -63,28 +62,26 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         return (
             (activity.enjoyment || activity.importance) && (
                 <HelperText>
-                    { (activity.enjoyment) &&
+                    {activity.enjoyment && (
                         <Fragment>
-                            { getString('values_inventory_value_activity_enjoyment') } { activity.enjoyment }
+                            {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
                         </Fragment>
-                    }
-                    { (activity.enjoyment && activity.importance) &&
-                        ' / '
-                    }
-                    { (activity.importance) &&
+                    )}
+                    {activity.enjoyment && activity.importance && ' / '}
+                    {activity.importance && (
                         <Fragment>
-                            { getString('values_inventory_value_activity_importance') } { activity.importance }
+                            {getString('values_inventory_value_activity_importance')} {activity.importance}
                         </Fragment>
-                    }
+                    )}
                 </HelperText>
             )
-        )
-    }
+        );
+    };
 
     const renderActivities = (activities: IActivity[]): ReactNode => {
-        const sortedActivities = activities.slice().sort(
-            (a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase())
-        );
+        const sortedActivities = activities
+            .slice()
+            .sort((a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()));
 
         return sortedActivities.map((activity, idx) => (
             <Fragment key={activity.activityId as string}>
@@ -104,14 +101,14 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         edge="end"
                         aria-label="more"
                         onClick={(e) => handleMoreClickActivity(activity, e)}
-                        size="small">
-                        <MoreVertIcon />
+                        size="medium">
+                        <MoreVertIcon fontSize="small" />
                     </IconButton>
                 </Grid>
                 {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
             </Fragment>
         ));
-    }
+    };
 
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
 
@@ -119,8 +116,8 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         <Stack spacing={0}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <SubHeaderText>{value.name}</SubHeaderText>
-                <IconButton aria-label="edit" onClick={handleEditValue}>
-                    <EditIcon />
+                <IconButton edge="end" aria-label="more" onClick={(e) => handleMoreClickValue(value, e)} size="medium">
+                    <MoreVertIcon fontSize="large" />
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
@@ -134,8 +131,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         size="small"
                         startIcon={<AddIcon />}
                         component={Link}
-                        to={getFormLink(ParameterValues.form.addActivity)}
-                    >
+                        to={getFormLink(ParameterValues.form.addActivity)}>
                         {getString('values_inventory_add_activity')}
                     </Button>
                 </Box>
@@ -154,7 +150,7 @@ const AddEditValueDialog: FunctionComponent<{
     loading?: boolean;
     handleChange: (change: string) => void;
     handleCancel: () => void;
-    handleDelete?: () => void;
+    //handleDelete?: () => void;
     handleSave: () => void;
 }> = (props) => {
     const {
@@ -167,7 +163,7 @@ const AddEditValueDialog: FunctionComponent<{
         loading,
         handleCancel,
         handleChange,
-        handleDelete,
+        //handleDelete,
         handleSave,
     } = props;
     return (
@@ -196,7 +192,7 @@ const AddEditValueDialog: FunctionComponent<{
                 </Stack>
             }
             handleCancel={handleCancel}
-            handleDelete={handleDelete}
+            //handleDelete={handleDelete}
             handleSave={handleSave}
             disableSave={!value}
         />
@@ -242,7 +238,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         openAddEditValue: boolean;
         name: string;
         modeState: IViewStateModeNone | IViewStateModeAdd | IViewStateModeEdit;
-        moreTargetEl: (EventTarget & HTMLElement) | undefined;
+
+        moreTargetValueEl: (EventTarget & HTMLElement) | undefined;
+        selectedValue: IValue | undefined;
+
+        moreTargetActivityEl: (EventTarget & HTMLElement) | undefined;
         selectedActivity: IActivity | undefined;
     }
 
@@ -252,7 +252,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         modeState: {
             mode: 'none',
         },
-        moreTargetEl: undefined,
+        moreTargetValueEl: undefined,
+        selectedValue: undefined,
+        moreTargetActivityEl: undefined,
         selectedActivity: undefined,
     }));
 
@@ -260,6 +262,16 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleGoBack = action(() => {
         navigate(-1);
+    });
+
+    const handleMoreClickValue = action((value: IValue, event: React.MouseEvent<HTMLElement>) => {
+        viewState.selectedValue = value;
+        viewState.moreTargetValueEl = event.currentTarget;
+    });
+
+    const handleMoreCloseValue = action(() => {
+        viewState.selectedValue = undefined;
+        viewState.moreTargetValueEl = undefined;
     });
 
     const handleAddValue = action(() => {
@@ -272,27 +284,28 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         };
     });
 
-    const handleEditValue = (valueId: string) =>
+    const handleEditValue = action(() => {
         // Open AddEditValueDialog to Edit value.
 
         // valueId is sufficient for creating this interface callback,
         // but upon activation our viewState takes a copy of the value that is being edited.
-        action(() => {
-            const value = patientStore.values.find((value) => valueId == value.valueId);
 
-            console.assert(value, `Value to edit not found: ${valueId}`);
+        //const value = viewState.selectedValue; // NOTE: For discussion w/ James: This should work by itself, but updateValue throws error because of some type conversion issue.
+        const value = patientStore.getValueById(viewState.selectedValue?.valueId as string);
+        console.assert(value, `Value to edit not found: ${value?.valueId}`);
 
-            if (value) {
-                viewState.openAddEditValue = true;
-                viewState.name = value.name;
-                viewState.modeState = {
-                    mode: 'edit',
-                    editValue: {
-                        ...toJS(value)
-                    },
-                };
-            }
-        });
+        if (value) {
+            viewState.moreTargetValueEl = undefined;
+            viewState.openAddEditValue = true;
+            viewState.name = value.name;
+            viewState.modeState = {
+                mode: 'edit',
+                editValue: {
+                    ...toJS(value),
+                },
+            };
+        }
+    });
 
     const handleCancelValue = action(() => {
         viewState.openAddEditValue = false;
@@ -305,6 +318,19 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleChangeValue = action((change: string) => {
         viewState.name = change;
+    });
+
+    const handleDeleteValue = action(async () => {
+        // TODO: Add delete confirmation.
+        //const value = viewState.selectedValue; // NOTE: For discussion w/ James: This should work by itself, but deleteValue throws error because of some type conversion issue.
+        const value = patientStore.getValueById(viewState.selectedValue?.valueId as string);
+        console.assert(value, `Value to edit not found: ${value?.valueId}`);
+        await patientStore.deleteValue(value as IValue);
+
+        if (!patientStore.loadValuesInventoryState.error) {
+            viewState.moreTargetValueEl = undefined;
+            viewState.openAddEditValue = false;
+        }
     });
 
     const handleSaveValue = action(async () => {
@@ -339,40 +365,14 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         });
     });
 
-    const handleDeleteValue = action(async () => {
-        // TODO Activity Refactor: Implement Value Deletion
-        /*
-        const { valuesInventory } = patientStore;
-        const clonedInventory = toJS(valuesInventory);
-
-        let newValues = clonedInventory.values || [];
-
-        if (viewState.editValueIdx >= 0) {
-            newValues.splice(viewState.editValueIdx, 1);
-        }
-
-        const newValuesInventory = {
-            ...toJS(valuesInventory),
-            lastUpdatedDateTime: new Date(),
-            values: newValues,
-        } as IValuesInventory;
-
-        await patientStore.updateValuesInventory(newValuesInventory);
-        */
-
-        if (!patientStore.loadValuesInventoryState.error) {
-            viewState.openAddEditValue = false;
-        }
-    });
-
     const handleMoreClickActivity = action((activity: IActivity, event: React.MouseEvent<HTMLElement>) => {
         viewState.selectedActivity = activity;
-        viewState.moreTargetEl = event.currentTarget;
+        viewState.moreTargetActivityEl = event.currentTarget;
     });
 
     const handleMoreCloseActivity = action(() => {
         viewState.selectedActivity = undefined;
-        viewState.moreTargetEl = undefined;
+        viewState.moreTargetActivityEl = undefined;
     });
 
     const handleEditActivity = action(() => {
@@ -402,22 +402,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 name="values & activities inventory"
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
-                    <Menu
-                        id="activity-menu"
-                        anchorEl={viewState.moreTargetEl}
-                        keepMounted
-                        open={Boolean(viewState.moreTargetEl)}
-                        onClose={handleMoreCloseActivity}>
-                        <MenuItem onClick={handleEditActivity}>
-                            {getString('values_inventory_activity_menu_edit')}
-                        </MenuItem>
-                        <MenuItem onClick={handleScheduleActivity}>
-                            {getString('values_inventory_activity_menu_schedule')}
-                        </MenuItem>
-                        <MenuItem onClick={handleDeleteActivity}>
-                            {getString('values_inventory_activity_menu_delete')}
-                        </MenuItem>
-                    </Menu>
                     {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                         <FormSection
                             prompt={getString('Values_inventory_values_existing_title')}
@@ -435,17 +419,48 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                             <Stack spacing={4}>
                                 {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
                                     return (
-                                        <ValueEditFormSection
-                                            error={patientStore.loadValuesInventoryState.error}
-                                            loading={patientStore.loadValuesInventoryState.pending}
-                                            value={value}
-                                            activityExamples={activityExamples}
-                                            handleEditValue={handleEditValue(value.valueId as string)}
-                                            handleCancelEditActivity={handleCancelEditActivity}
-                                            // handleSaveValueActivities={handleSaveValueActivities(idx)}
-                                            handleMoreClickActivity={handleMoreClickActivity}
-                                            key={value.valueId}
-                                        />
+                                        <Fragment>
+                                            <Menu
+                                                id="value-menu"
+                                                anchorEl={viewState.moreTargetValueEl}
+                                                keepMounted
+                                                open={Boolean(viewState.moreTargetValueEl)}
+                                                onClose={handleMoreCloseValue}>
+                                                <MenuItem onClick={handleEditValue}>
+                                                    {getString('values_inventory_activity_menu_edit')}
+                                                </MenuItem>
+                                                <MenuItem onClick={handleDeleteValue}>
+                                                    {getString('values_inventory_activity_menu_delete')}
+                                                </MenuItem>
+                                            </Menu>
+                                            <Menu
+                                                id="activity-menu"
+                                                anchorEl={viewState.moreTargetActivityEl}
+                                                keepMounted
+                                                open={Boolean(viewState.moreTargetActivityEl)}
+                                                onClose={handleMoreCloseActivity}>
+                                                <MenuItem onClick={handleEditActivity}>
+                                                    {getString('values_inventory_activity_menu_edit')}
+                                                </MenuItem>
+                                                <MenuItem onClick={handleScheduleActivity}>
+                                                    {getString('values_inventory_activity_menu_schedule')}
+                                                </MenuItem>
+                                                <MenuItem onClick={handleDeleteActivity}>
+                                                    {getString('values_inventory_activity_menu_delete')}
+                                                </MenuItem>
+                                            </Menu>
+                                            <ValueEditFormSection
+                                                error={patientStore.loadValuesInventoryState.error}
+                                                loading={patientStore.loadValuesInventoryState.pending}
+                                                value={value}
+                                                activityExamples={activityExamples}
+                                                handleCancelEditActivity={handleCancelEditActivity}
+                                                // handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                                handleMoreClickValue={handleMoreClickValue}
+                                                handleMoreClickActivity={handleMoreClickActivity}
+                                                key={value.valueId}
+                                            />
+                                        </Fragment>
                                     );
                                 })}
                             </Stack>
@@ -480,7 +495,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     handleCancel={handleCancelValue}
                     handleChange={handleChangeValue}
                     handleSave={handleSaveValue}
-                    handleDelete={viewState.modeState.mode == 'edit' ? handleDeleteValue : undefined}
+                    //handleDelete={viewState.modeState.mode == 'edit' ? handleDeleteValue : undefined}
                 />
             </ContentLoader>
         </DetailPage>
