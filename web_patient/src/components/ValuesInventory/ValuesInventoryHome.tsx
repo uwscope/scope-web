@@ -57,8 +57,15 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                             </Fragment>
                         );
                     })}
+                    // TODO: Activity Refactor: Other Activities Placeholder.
+                    <ListItem disableGutters button component={Link} to={`Other`}>
+                        <ListItemIcon>{getLifeAreaIcon('Other')}</ListItemIcon>
+                        <ListItemText
+                            primary={'Other'}
+                            secondary={getActivitiesCountString(patientStore.getActivitiesWithoutValueId().length)}
+                        />
+                    </ListItem>
                 </List>
-                // TODO: Activity Refactor: Other Activities Placeholder.
             </ContentLoader>
         </DetailPage>
     );
