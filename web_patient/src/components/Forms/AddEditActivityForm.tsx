@@ -43,7 +43,30 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // const { valuesInventory } = patientStore;
     const { lifeAreas } = appContentConfig;
 
-    const routeForm = getRouteParameter(Parameters.form);
+    //
+    // View state related to creating or editing an Activity
+    //
+    
+    interface IActivityViewStateModeNone {
+        mode: 'none';
+    }
+    interface IActivityViewStateModeAddActivity {
+        mode: 'addActivity';
+    }
+    interface IActivityViewStateModeEditActivity {
+        mode: 'editActivity';
+        editActivity: IActivity;
+    }
+    type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAddActivity | IActivityViewStateModeEditActivity;
+
+    interface IActivityViewState {
+        name: string;
+        lifeAreaId: string;
+        valueId: string;
+        enjoyment: number;
+        importance: number;
+        modeState: IActivityViewModeState;
+    }
 
     const initialActivityViewState: IActivityViewState = (() => {
         const defaultViewState: IActivityViewState = {
@@ -57,6 +80,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             },
         };
 
+        const routeForm = getRouteParameter(Parameters.form);
         if (routeForm == ParameterValues.form.addActivity) {
             return {
                 ...defaultViewState,
@@ -111,27 +135,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
         return defaultViewState;
     })();
-
-    interface IActivityViewStateModeNone {
-        mode: 'none';
-    }
-    interface IActivityViewStateModeAddActivity {
-        mode: 'addActivity';
-    }
-    interface IActivityViewStateModeEditActivity {
-        mode: 'editActivity';
-        editActivity: IActivity;
-    }
-    type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAddActivity | IActivityViewStateModeEditActivity;
-
-    interface IActivityViewState {
-        name: string;
-        lifeAreaId: string;
-        valueId: string;
-        enjoyment: number;
-        importance: number;
-        modeState: IActivityViewModeState;
-    }
 
     const activityViewState = useLocalObservable<IActivityViewState>(() => initialActivityViewState);
 
