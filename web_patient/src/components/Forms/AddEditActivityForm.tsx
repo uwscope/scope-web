@@ -1,13 +1,13 @@
 // import { DatePicker, TimePicker } from '@mui/lab';
 import {
     // Checkbox,
-    Chip,
+    // Chip,
     // Dialog,
     // DialogContent,
     // DialogTitle,
     // FormControlLabel,
     // FormGroup,
-    Grid,
+    // Grid,
     // InputLabel,
     // List,
     // ListItem,
@@ -195,9 +195,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
+    /*
+    // TODO Activity Refactor: Create and Select Value During Activity Editing
     const handleAddValueOpen = action(() => {
-        // TODO Activity Refactor: Create and Select Value During Activity Editing
     });
+     */
 
     const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
         viewState.name = event.target.value;
@@ -359,6 +361,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 ))
                             )}
                         </Select>
+                        {/*
+                        TODO Activity Refactor: Support Creation of a New Value
                         <Grid container justifyContent="flex-end">
                             <Chip
                                 sx={{ marginTop: 1 }}
@@ -369,6 +373,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 onClick={handleAddValueOpen}
                             />
                         </Grid>
+                        */}
                     </Fragment>
                 }
             />
