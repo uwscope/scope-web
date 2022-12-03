@@ -45,8 +45,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const routeForm = getRouteParameter(Parameters.form);
 
-    const initialViewState: IViewState = (() => {
-        const defaultViewState: IViewState = {
+    const initialActivityViewState: IActivityViewState = (() => {
+        const defaultViewState: IActivityViewState = {
             name: '',
             lifeAreaId: '',
             valueId: '',
@@ -112,28 +112,28 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         return defaultViewState;
     })();
 
-    interface IViewStateModeNone {
+    interface IActivityViewStateModeNone {
         mode: 'none';
     }
-    interface IViewStateModeAddActivity {
+    interface IActivityViewStateModeAddActivity {
         mode: 'addActivity';
     }
-    interface IViewStateModeEditActivity {
+    interface IActivityViewStateModeEditActivity {
         mode: 'editActivity';
         editActivity: IActivity;
     }
-    type IViewModeState = IViewStateModeNone | IViewStateModeAddActivity | IViewStateModeEditActivity;
+    type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAddActivity | IActivityViewStateModeEditActivity;
 
-    interface IViewState {
+    interface IActivityViewState {
         name: string;
         lifeAreaId: string;
         valueId: string;
         enjoyment: number;
         importance: number;
-        modeState: IViewModeState;
+        modeState: IActivityViewModeState;
     }
 
-    const viewState = useLocalObservable<IViewState>(() => initialViewState);
+    const activityViewState = useLocalObservable<IActivityViewState>(() => initialActivityViewState);
 
     /* TODO Activity Refactor: Pending additions to ViewState
     const dataState = useLocalObservable<IActivity>(() => ({
@@ -153,21 +153,21 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const handleSubmit = action(async () => {
         try {
-            if (viewState.modeState.mode == 'addActivity') {
+            if (activityViewState.modeState.mode == 'addActivity') {
                 // TODO Activity Refactor: check that our 'add' is valid
                 // is a unique name
 
                 const createActivity = {
-                    name: viewState.name,
-                    enjoyment: viewState.enjoyment >= 0 ? viewState.enjoyment : undefined,
-                    importance: viewState.importance >= 0 ? viewState.importance : undefined,
-                    valueId: viewState.valueId ? viewState.valueId : undefined,
+                    name: activityViewState.name,
+                    enjoyment: activityViewState.enjoyment >= 0 ? activityViewState.enjoyment : undefined,
+                    importance: activityViewState.importance >= 0 ? activityViewState.importance : undefined,
+                    valueId: activityViewState.valueId ? activityViewState.valueId : undefined,
 
                     editedDateTime: new Date(),
                 };
 
                 await patientStore.addActivity(createActivity);
-            } else if (viewState.modeState.mode == 'editActivity') {
+            } else if (activityViewState.modeState.mode == 'editActivity') {
                 // TODO Activity Refactor: check that our 'edit' is valid
                 // the value still exists
                 // - update should fail due to rev conflict if it does not?
@@ -176,12 +176,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 // the value changed?
 
                 const editActivity = {
-                    ...viewState.modeState.editActivity,
+                    ...activityViewState.modeState.editActivity,
 
-                    name: viewState.name,
-                    enjoyment: viewState.enjoyment >= 0 ? viewState.enjoyment : undefined,
-                    importance: viewState.importance >= 0 ? viewState.importance : undefined,
-                    valueId: viewState.valueId ? viewState.valueId : undefined,
+                    name: activityViewState.name,
+                    enjoyment: activityViewState.enjoyment >= 0 ? activityViewState.enjoyment : undefined,
+                    importance: activityViewState.importance >= 0 ? activityViewState.importance : undefined,
+                    valueId: activityViewState.valueId ? activityViewState.valueId : undefined,
 
                     editedDateTime: new Date(),
                 }
@@ -202,24 +202,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
      */
 
     const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
-        viewState.name = event.target.value;
+        activityViewState.name = event.target.value;
     });
 
     const handleSelectEnjoyment = action((event: SelectChangeEvent<number>) => {
-        viewState.enjoyment = Number(event.target.value);
+        activityViewState.enjoyment = Number(event.target.value);
     });
 
     const handleSelectImportance = action((event: SelectChangeEvent<number>) => {
-        viewState.importance = Number(event.target.value);
+        activityViewState.importance = Number(event.target.value);
     });
 
     const handleSelectLifeArea = action((event: SelectChangeEvent<string>) => {
-        viewState.lifeAreaId = event.target.value as string;
-        viewState.valueId = '';
+        activityViewState.lifeAreaId = event.target.value as string;
+        activityViewState.valueId = '';
     });
 
     const handleSelectValue = action((event: SelectChangeEvent<string>) => {
-        viewState.valueId = event.target.value as string;
+        activityViewState.valueId = event.target.value as string;
     });
 
     {/* TODO Activity Refactor: Abandoned Activity Import Code
@@ -313,7 +313,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     <Fragment>
                         <TextField
                             fullWidth
-                            value={viewState.name}
+                            value={activityViewState.name}
                             onChange={handleChangeName}
                             variant="outlined"
                             multiline
@@ -332,7 +332,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         <HelperText>{getString('form_add_edit_activity_life_area_help')}</HelperText>
                         <Select
                             variant="outlined"
-                            value={viewState.lifeAreaId}
+                            value={activityViewState.lifeAreaId}
                             onChange={handleSelectLifeArea}
                             fullWidth
                         >
@@ -347,14 +347,14 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
                         <Select
                             variant="outlined"
-                            value={viewState.valueId}
+                            value={activityViewState.valueId}
                             onChange={handleSelectValue}
                             fullWidth
-                            disabled={!viewState.lifeAreaId}
+                            disabled={!activityViewState.lifeAreaId}
                         >
                             <MenuItem key='' value=''></MenuItem>
-                            {viewState.lifeAreaId && (
-                                patientStore.getValuesByLifeAreaId(viewState.lifeAreaId).map((value, idx) => (
+                            {activityViewState.lifeAreaId && (
+                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).map((value, idx) => (
                                     <MenuItem key={idx} value={value.valueId}>
                                         {value.name}
                                     </MenuItem>
@@ -386,7 +386,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     <Select
                         labelId="activity-enjoyment-label"
                         id="activity-enjoyment"
-                        value={viewState.enjoyment}
+                        value={activityViewState.enjoyment}
                         onChange={handleSelectEnjoyment}
                     >
                         <MenuItem key='' value='-1'></MenuItem>
@@ -407,7 +407,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     <Select
                         labelId="activity-importance-label"
                         id="activity-importance"
-                        value={viewState.importance}
+                        value={activityViewState.importance}
                         onChange={handleSelectImportance}
                     >
                         <MenuItem key='' value='-1'></MenuItem>
@@ -419,6 +419,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Select>
                 }
             />
+        </Stack>
+    );
+
+    const activitySchedulePage = (
+        <Stack spacing={4}>
+
         </Stack>
     );
 
@@ -612,9 +618,14 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         {
             content: activityPage,
             canGoNext: true,
-            // TODO Activity Refactor
+            // TODO Activity Refactor: Update for valid form submission state
             // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
         },
+        {
+            content: activitySchedulePage,
+            canGoNext: true,
+            // TODO Activity Refactor: Update for valid form submission state
+        }
     ];
 
     return (
