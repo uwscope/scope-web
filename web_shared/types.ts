@@ -110,7 +110,7 @@ export interface IActivitySchedule {
     activityScheduleId?: string;
 
     activityId: string;
-    dateTime: Date;
+    date: Date;
     timeOfDay: number;
 
     hasRepetition: boolean;
