@@ -1,13 +1,16 @@
 import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import {
     Box,
     Button,
     // FormControl,
+    Divider,
     Grid,
     IconButton,
     // InputLabel,
-    // MenuItem,
+    Menu,
+    MenuItem,
     // Select,
     // SelectChangeEvent,
     Stack,
@@ -27,7 +30,7 @@ import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import { getFormLink, Parameters, ParameterValues } from 'src/services/routes';
+import { getFormLink, ParameterValues } from 'src/services/routes';
 
 interface IValueEditFormSection {
     error: boolean;
@@ -37,6 +40,7 @@ interface IValueEditFormSection {
     handleEditValue: () => void;
     handleCancelEditActivity: () => void;
     // handleSaveValueActivities: (newValue: IValue) => Promise<void>;
+    handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const ValueEditFormSection = observer((props: IValueEditFormSection) => {
@@ -48,6 +52,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         handleEditValue,
         // handleCancelEditActivity,
         // handleSaveValueActivities,
+        handleMoreClickActivity,
     } = props;
 
     const rootStore = useStores();
@@ -82,36 +87,32 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         );
 
         return sortedActivities.map((activity, idx) => (
-            <Grid container direction="row" alignItems="flex-start" key={activity.activityId as string} flexWrap="nowrap">
-                <Grid item>
-                    <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
+            <Fragment key={activity.activityId as string}>
+                <Grid container direction="row" alignItems="flex-start" flexWrap="nowrap">
+                    <Grid item>
+                        <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
+                    </Grid>
+                    <Grid item flexGrow={1} overflow="hidden">
+                        <Stack spacing={0}>
+                            <Typography variant="body1" noWrap>
+                                {activity.name}
+                            </Typography>
+                            {renderActivityDetail(activity)}
+                        </Stack>
+                    </Grid>
+                    <IconButton
+                        edge="end"
+                        aria-label="more"
+                        onClick={(e) => handleMoreClickActivity(activity, e)}
+                        size="small">
+                        <MoreVertIcon />
+                    </IconButton>
                 </Grid>
-                <Grid item flexGrow={1} overflow="hidden">
-                    <Stack spacing={0}>
-                        <Typography variant="body1" noWrap>
-                            {activity.name}
-                        </Typography>
-                        { renderActivityDetail(activity) }
-                    </Stack>
-                </Grid>
-                <IconButton
-                    size="small"
-                    aria-label="edit"
-                    component={Link}
-                    to={getFormLink(
-                        ParameterValues.form.editActivity,
-                        {
-                            [Parameters.activityId]: activity.activityId as string,
-                        }
-                    )}
-                >
-                    <EditIcon fontSize="small" />
-                </IconButton>
-            </Grid>
+                {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
+            </Fragment>
         ));
     }
 
-    // TODO Prefer to not need such cast to string
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
 
     return (
@@ -123,7 +124,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
-                { renderActivities(valueActivities) }
+                {renderActivities(valueActivities)}
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
@@ -241,6 +242,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         openAddEditValue: boolean;
         name: string;
         modeState: IViewStateModeNone | IViewStateModeAdd | IViewStateModeEdit;
+        moreTargetEl: (EventTarget & HTMLElement) | undefined;
+        selectedActivity: IActivity | undefined;
     }
 
     const viewState = useLocalObservable<IViewState>(() => ({
@@ -249,6 +252,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         modeState: {
             mode: 'none',
         },
+        moreTargetEl: undefined,
+        selectedActivity: undefined,
     }));
 
     const navigate = useNavigate();
@@ -360,6 +365,31 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
     });
 
+    const handleMoreClickActivity = action((activity: IActivity, event: React.MouseEvent<HTMLElement>) => {
+        viewState.selectedActivity = activity;
+        viewState.moreTargetEl = event.currentTarget;
+    });
+
+    const handleMoreCloseActivity = action(() => {
+        viewState.selectedActivity = undefined;
+        viewState.moreTargetEl = undefined;
+    });
+
+    const handleEditActivity = action(() => {
+        // TODO Activity Refactor: Implement Activity Edit
+        alert('Edit this activity');
+    });
+
+    const handleDeleteActivity = action(() => {
+        // TODO Activity Refactor: Implement Activity Deletion
+        alert('Delete this activity');
+    });
+
+    const handleScheduleActivity = action(() => {
+        // TODO Activity Refactor: Implement Activity Scheduling
+        alert('Schedule this activity');
+    });
+
     const valueExamples = lifeAreaContent.examples.map((e) => e.name);
     const activityExamples = lifeAreaContent.examples[
         random(lifeAreaContent.examples.length - 1, false)
@@ -372,6 +402,22 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 name="values & activities inventory"
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
+                    <Menu
+                        id="activity-menu"
+                        anchorEl={viewState.moreTargetEl}
+                        keepMounted
+                        open={Boolean(viewState.moreTargetEl)}
+                        onClose={handleMoreCloseActivity}>
+                        <MenuItem onClick={handleEditActivity}>
+                            {getString('values_inventory_activity_menu_edit')}
+                        </MenuItem>
+                        <MenuItem onClick={handleScheduleActivity}>
+                            {getString('values_inventory_activity_menu_schedule')}
+                        </MenuItem>
+                        <MenuItem onClick={handleDeleteActivity}>
+                            {getString('values_inventory_activity_menu_delete')}
+                        </MenuItem>
+                    </Menu>
                     {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                         <FormSection
                             prompt={getString('Values_inventory_values_existing_title')}
@@ -397,6 +443,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                             handleEditValue={handleEditValue(value.valueId as string)}
                                             handleCancelEditActivity={handleCancelEditActivity}
                                             // handleSaveValueActivities={handleSaveValueActivities(idx)}
+                                            handleMoreClickActivity={handleMoreClickActivity}
                                             key={value.valueId}
                                         />
                                     );

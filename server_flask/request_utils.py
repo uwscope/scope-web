@@ -49,6 +49,15 @@ def abort_patient_not_found() -> NoReturn:
     )
 
 
+def abort_delete_without_if_match_header() -> NoReturn:
+    _flask_abort(
+        {
+            "message": 'DELETE must include "If-Match" header.',
+        },
+        http.HTTPStatus.BAD_REQUEST,
+    )
+
+
 def abort_post_with_id() -> NoReturn:
     _flask_abort(
         {

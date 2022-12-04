@@ -15,4 +15,5 @@ from scope.testing.test_database.test_patients import *
 from scope.testing.test_database.test_providers import *
 from scope.testing.test_database.test_delete_scheduled_activity import *
 from scope.testing.test_database.test_delete_scheduled_assessment import *
+from scope.testing.test_database.test_delete_value_maintains_activities import *
 from scope.testing.test_database.test_scheduled_item_utils import *
