@@ -1,13 +1,16 @@
-// import { DatePicker, TimePicker } from '@mui/lab';
 import {
-    // Checkbox,
+    DatePicker,
+    TimePicker,
+} from '@mui/lab';
+import {
+    Checkbox,
     // Chip,
     // Dialog,
     // DialogContent,
     // DialogTitle,
-    // FormControlLabel,
-    // FormGroup,
-    // Grid,
+    FormControlLabel,
+    FormGroup,
+    Grid,
     // InputLabel,
     // List,
     // ListItem,
@@ -17,23 +20,27 @@ import {
     Select,
     SelectChangeEvent,
     Stack,
-    // Switch,
+    Switch,
     TextField,
-    // Typography,
+    Typography,
 } from '@mui/material';
 // import { compareAsc } from 'date-fns';
 import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
-// import { DayOfWeek, daysOfWeekValues } from 'shared/enums';
-// import { clearTime } from 'shared/time';
-import { IActivity, /* IValue, ILifeAreaValue, KeyedMap */ } from 'shared/types';
+import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
+import { clearTime } from 'shared/time';
+import { IActivity, IActivitySchedule /* IValue, ILifeAreaValue, KeyedMap */ } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from "src/services/routes";
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
+import {
+    getDayOfWeek,
+    // minDate,
+} from 'shared/time';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
@@ -46,18 +53,18 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     //
     // View state related to creating or editing an Activity
     //
-    
+
     interface IActivityViewStateModeNone {
         mode: 'none';
     }
-    interface IActivityViewStateModeAddActivity {
+    interface IActivityViewStateModeAdd {
         mode: 'addActivity';
     }
-    interface IActivityViewStateModeEditActivity {
+    interface IActivityViewStateModeEdit {
         mode: 'editActivity';
         editActivity: IActivity;
     }
-    type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAddActivity | IActivityViewStateModeEditActivity;
+    type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAdd | IActivityViewStateModeEdit;
 
     interface IActivityViewState {
         name: string;
@@ -65,6 +72,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         valueId: string;
         enjoyment: number;
         importance: number;
+
         modeState: IActivityViewModeState;
     }
 
@@ -138,6 +146,65 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const activityViewState = useLocalObservable<IActivityViewState>(() => initialActivityViewState);
 
+    //
+    // View state related to creating or editing an ActivitySchedule
+    //
+
+    interface IActivityScheduleViewStateModeNone {
+        mode: 'none';
+    }
+    interface IActivityScheduleViewStateModeAdd {
+        mode: 'addActivitySchedule';
+    }
+    interface IActivityScheduleViewStateModeEdit {
+        mode: 'editActivitySchedule';
+        editActivitySchedule: IActivitySchedule;
+    }
+    type IActivityScheduleViewModeState = IActivityScheduleViewStateModeNone | IActivityScheduleViewStateModeAdd | IActivityScheduleViewStateModeEdit;
+
+    interface IActivityScheduleViewState {
+        minValidDate: Date;
+
+        displayedDate: Date | null;
+        displayedTimeOfDay: Date | null;
+
+        date: Date;
+        timeOfDay: number;
+        hasRepetition: boolean;
+        repeatDayFlags: DayOfWeekFlags;
+
+        modeState: IActivityScheduleViewModeState;
+    }
+
+    const initialActivityScheduleViewState: IActivityScheduleViewState = (() => {
+        const _defaultDate = clearTime(new Date());
+        const _defaultTimeOfDay = 9;
+        const defaultViewState: IActivityScheduleViewState = {
+            displayedDate: _defaultDate,
+            minValidDate: clearTime(new Date()),
+            displayedTimeOfDay: new Date(1, 1, 1, _defaultTimeOfDay, 0, 0),
+
+            date: _defaultDate,
+            timeOfDay: _defaultTimeOfDay,
+
+            hasRepetition: false,
+            repeatDayFlags: Object.assign(
+                {},
+                ...daysOfWeekValues.map((dayOfWeek: DayOfWeek) => ({
+                    [dayOfWeek]: false,
+                })),
+            ),
+
+            modeState: {
+                mode: 'none',
+            },
+        };
+
+        return defaultViewState;
+    })();
+
+    const activityScheduleViewState = useLocalObservable<IActivityScheduleViewState>(() => initialActivityScheduleViewState);
+
     /* TODO Activity Refactor: Pending additions to ViewState
     const dataState = useLocalObservable<IActivity>(() => ({
         startDateTime: activity?.startDateTime || new Date(),
@@ -202,30 +269,107 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // TODO Activity Refactor: Create and Select Value During Activity Editing
     const handleAddValueOpen = action(() => {
     });
-     */
+    */
 
-    const handleChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleActivityChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
         activityViewState.name = event.target.value;
     });
 
-    const handleSelectEnjoyment = action((event: SelectChangeEvent<number>) => {
+    const handleActivitySelectEnjoyment = action((event: SelectChangeEvent<number>) => {
         activityViewState.enjoyment = Number(event.target.value);
     });
 
-    const handleSelectImportance = action((event: SelectChangeEvent<number>) => {
+    const handleActivitySelectImportance = action((event: SelectChangeEvent<number>) => {
         activityViewState.importance = Number(event.target.value);
     });
 
-    const handleSelectLifeArea = action((event: SelectChangeEvent<string>) => {
+    const handleActivitySelectLifeArea = action((event: SelectChangeEvent<string>) => {
         activityViewState.lifeAreaId = event.target.value as string;
         activityViewState.valueId = '';
     });
 
-    const handleSelectValue = action((event: SelectChangeEvent<string>) => {
+    const handleActivitySelectValue = action((event: SelectChangeEvent<string>) => {
         activityViewState.valueId = event.target.value as string;
     });
 
-    {/* TODO Activity Refactor: Abandoned Activity Import Code
+    const handleActivityScheduleChangeDate = action((date: Date | null) => {
+        activityScheduleViewState.displayedDate = date;
+
+        if (activityScheduleValidateDate(date).valid) {
+            activityScheduleViewState.date = date as Date;
+        }
+    });
+
+    const handleActivityScheduleChangeTimeOfDay = action((date: Date | null) => {
+        activityScheduleViewState.displayedTimeOfDay = date;
+
+        if (activityScheduleValidateTimeOfDay(date).valid) {
+            activityScheduleViewState.timeOfDay = (date as Date).getHours();
+        }
+    });
+
+    const handleActivityScheduleChangeHasRepetition = action((event: React.ChangeEvent<HTMLInputElement>) => {
+        activityScheduleViewState.hasRepetition = event.target.checked;
+
+        // Clear all flags back to false
+        Object.assign(
+            activityScheduleViewState.repeatDayFlags,
+            ...daysOfWeekValues.map((dayOfWeek: DayOfWeek) => ({
+                [dayOfWeek]: false,
+            })),
+        )
+
+        // If we just enabled repetition, default to the day of week from the scheduled date
+        if (activityScheduleViewState.hasRepetition) {
+            activityScheduleViewState.repeatDayFlags[getDayOfWeek(activityScheduleViewState.date)] = true;
+        }
+    });
+
+    const handleActivityScheduleChangeRepeatDays = action((event: React.ChangeEvent<HTMLInputElement>, dayOfWeek: DayOfWeek) => {
+        activityScheduleViewState.repeatDayFlags[dayOfWeek] = event.target.checked;
+    });
+
+    const activityScheduleValidateDate = (date: Date | null) => {
+        if (!date || date.toString() == "Invalid Date") {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: getString('form_add_edit_activity_schedule_date_validation_invalid_format'),
+            };
+        }
+
+        if (date < activityScheduleViewState.minValidDate) {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: "Date must be on or after " +
+                    activityScheduleViewState.minValidDate.toLocaleDateString() +
+                    ".",
+            };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    const activityScheduleValidateTimeOfDay = (date: Date | null) => {
+        if (!date || date.toString() == "Invalid Date") {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: getString('form_add_edit_activity_schedule_time_of_day_validation_invalid_format'),
+            };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    /* TODO Activity Refactor: Abandoned Activity Import Code
     // const values = valuesInventory?.values || [];
     // const groupedActivities: KeyedMap<ImportableActivity[]> = {};
     // let activityCount = 0;
@@ -305,7 +449,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             </Dialog>
         </Grid>
     )}
-    */}
+    */
 
     const activityPage = (
         <Stack spacing={4}>
@@ -317,7 +461,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         <TextField
                             fullWidth
                             value={activityViewState.name}
-                            onChange={handleChangeName}
+                            onChange={handleActivityChangeName}
                             variant="outlined"
                             multiline
                         />
@@ -336,7 +480,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         <Select
                             variant="outlined"
                             value={activityViewState.lifeAreaId}
-                            onChange={handleSelectLifeArea}
+                            onChange={handleActivitySelectLifeArea}
                             fullWidth
                         >
                             <MenuItem key='' value=''></MenuItem>
@@ -351,9 +495,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         <Select
                             variant="outlined"
                             value={activityViewState.valueId}
-                            onChange={handleSelectValue}
+                            onChange={handleActivitySelectValue}
                             fullWidth
                             disabled={!activityViewState.lifeAreaId}
+                            // TODO Activity Refactor: Validate
                         >
                             <MenuItem key='' value=''></MenuItem>
                             {activityViewState.lifeAreaId && (
@@ -390,7 +535,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         labelId="activity-enjoyment-label"
                         id="activity-enjoyment"
                         value={activityViewState.enjoyment}
-                        onChange={handleSelectEnjoyment}
+                        onChange={handleActivitySelectEnjoyment}
                     >
                         <MenuItem key='' value='-1'></MenuItem>
                         {[...Array(11).keys()].map((v) => (
@@ -411,7 +556,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         labelId="activity-importance-label"
                         id="activity-importance"
                         value={activityViewState.importance}
-                        onChange={handleSelectImportance}
+                        onChange={handleActivitySelectImportance}
                     >
                         <MenuItem key='' value='-1'></MenuItem>
                         {[...Array(11).keys()].map((v) => (
@@ -425,67 +570,123 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         </Stack>
     );
 
+    const _activitySchedulePageValidateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
+    const _activitySchedulePageValidateTimeOfDay = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
     const activitySchedulePage = (
         <Stack spacing={4}>
+            <FormSection
+                prompt={getString('form_add_edit_activity_schedule_when_prompt')}
+                content={
+                    <Fragment>
+                        <SubHeaderText>{getString('form_add_edit_activity_schedule_date_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_schedule_date_help')}</HelperText>
+                        <DatePicker
+                            value={activityScheduleViewState.date}
+                            onChange={handleActivityScheduleChangeDate}
+                            minDate={activityScheduleViewState.minValidDate}
+                            renderInput={(params) => (
+                                <TextField
+                                    variant="outlined"
+                                    margin="none"
+                                    fullWidth
+                                    {...params}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                        sx: { position: 'relative' },
+                                    }}
+                                    error={_activitySchedulePageValidateDate.error}
+                                    helperText={
+                                        _activitySchedulePageValidateDate.error &&
+                                        _activitySchedulePageValidateDate.errorMessage
+                                    }
+                                />
+                            )}
+                        />
+                        <SubHeaderText>{getString('form_add_edit_activity_schedule_time_of_day_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_schedule_time_of_day_help')}</HelperText>
+                        <TimePicker
+                            value={new Date(1, 1, 1, activityScheduleViewState.timeOfDay, 0, 0)}
+                            onChange={handleActivityScheduleChangeTimeOfDay}
+                            renderInput={(params) => (
+                                <TextField
+                                    variant="outlined"
+                                    margin="none"
+                                    fullWidth
+                                    {...params}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                        sx: { position: 'relative' },
+                                    }}
+                                    error={_activitySchedulePageValidateTimeOfDay.error}
+                                    helperText={
+                                        _activitySchedulePageValidateTimeOfDay.error &&
+                                        _activitySchedulePageValidateTimeOfDay.errorMessage
+                                    }
+                                />
+                            )}
+                            ampm={true}
+                            views={['hours']}
+                        />
+                    </Fragment>
+                }
+            />
 
+            <FormSection
+                addPaddingTop
+                prompt={getString("form_add_edit_activity_schedule_has_repetition_prompt")}
+                content={
+                    <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
+                        <Grid item>
+                            <Typography>{getString('Form_button_no')}</Typography>
+                        </Grid>
+                        <Grid item>
+                            <Switch
+                                checked={activityScheduleViewState.hasRepetition}
+                                color="default"
+                                onChange={handleActivityScheduleChangeHasRepetition}
+                                name="onOff"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Typography>{getString('Form_button_yes')}</Typography>
+                        </Grid>
+                    </Grid>
+                }
+            />
+
+            {activityScheduleViewState.hasRepetition && (
+                <FormSection
+                    addPaddingTop
+                    prompt={getString('form_add_edit_activity_schedule_repeat_days_prompt')}
+                    content={
+                        <FormGroup>
+                            {daysOfWeekValues.map((dayOfWeek) => {
+                                return (
+                                    <FormControlLabel
+                                        key={dayOfWeek}
+                                        control={
+                                            <Checkbox
+                                                checked={activityScheduleViewState.repeatDayFlags[dayOfWeek]}
+                                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                    handleActivityScheduleChangeRepeatDays(event, dayOfWeek)
+                                                }
+                                                value={dayOfWeek}
+                                            />
+                                        }
+                                        label={dayOfWeek}
+                                    />
+                                );
+                            })}
+                        </FormGroup>
+                    }
+                />
+            )}
         </Stack>
     );
 
     { /* TODO Activity Refactor: Abandoned Schedule and Notification Code
-    const handleRepeatChange = action((checked: boolean, day: DayOfWeek) => {
-        if (dataState.repeatDayFlags != undefined) {
-            dataState.repeatDayFlags[day] = checked;
-        }
-    });
-
-    const schedulePage = (
+    const reminderPage = (
         <Stack spacing={4}>
-            <FormSection
-                prompt={getString(!!activity ? 'Form_add_activity_date_label' : 'Form_add_activity_date')}
-                content={
-                    <DatePicker
-                        value={dataState.startDateTime || ''}
-                        onChange={(date: Date | null) => handleValueChange('startDateTime', date)}
-                        minDate={activity?.startDateTime || new Date()}
-                        renderInput={(params) => (
-                            <TextField
-                                variant="outlined"
-                                margin="none"
-                                fullWidth
-                                {...params}
-                                InputLabelProps={{
-                                    shrink: true,
-                                    sx: { position: 'relative' },
-                                }}
-                            />
-                        )}
-                    />
-                }
-            />
-            <FormSection
-                addPaddingTop
-                prompt={getString(!!activity ? 'Form_add_activity_time_label' : 'Form_add_activity_time')}
-                content={
-                    <TimePicker
-                        value={new Date(1, 1, 1, dataState.timeOfDay, 0, 0) || new Date()}
-                        onChange={(date: Date | null) => handleValueChange('timeOfDay', date?.getHours())}
-                        renderInput={(params) => (
-                            <TextField
-                                variant="outlined"
-                                margin="none"
-                                fullWidth
-                                {...params}
-                                InputLabelProps={{
-                                    shrink: true,
-                                    sx: { position: 'relative' },
-                                }}
-                            />
-                        )}
-                        ampm={true}
-                        views={['hours']}
-                    />
-                }
-            />
             <FormSection
                 addPaddingTop
                 prompt={getString(!!activity ? 'Form_add_activity_reminder_section' : 'Form_add_activity_reminder')}
@@ -535,64 +736,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             ampm={true}
                             views={['hours']}
                         />
-                    }
-                />
-            )}
-        </Stack>
-    );
-
-    const repetitionPage = (
-        <Stack spacing={4}>
-            <FormSection
-                prompt={getString(!!activity ? 'Form_add_activity_repetition_section' : 'Form_add_activity_repetition')}
-                content={
-                    <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
-                        <Grid item>
-                            <Typography>{getString('Form_button_no')}</Typography>
-                        </Grid>
-                        <Grid item>
-                            <Switch
-                                checked={dataState.hasRepetition}
-                                color="default"
-                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                    handleValueChange('hasRepetition', event.target.checked)
-                                }
-                                name="onOff"
-                            />
-                        </Grid>
-                        <Grid item>
-                            <Typography>{getString('Form_button_yes')}</Typography>
-                        </Grid>
-                    </Grid>
-                }
-            />
-
-            {dataState.hasRepetition && (
-                <FormSection
-                    addPaddingTop
-                    prompt={getString(
-                        !!activity ? 'Form_add_activity_repetition_days_label' : 'Form_add_activity_repetition_days',
-                    )}
-                    content={
-                        <FormGroup row>
-                            {daysOfWeekValues.map((day) => {
-                                return (
-                                    <FormControlLabel
-                                        key={day}
-                                        control={
-                                            <Checkbox
-                                                checked={dataState.repeatDayFlags?.[day]}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleRepeatChange((e.target as HTMLInputElement).checked, day)
-                                                }
-                                                value={day}
-                                            />
-                                        }
-                                        label={day}
-                                    />
-                                );
-                            })}
-                        </FormGroup>
                     }
                 />
             )}
