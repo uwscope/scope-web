@@ -195,31 +195,43 @@ const _strings = {
     form_add_edit_activity_life_area_label: 'Life Area',
     form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
-    form_add_edit_activity_value_help: 'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_value_help:
+        // TODO Activity Refactor
+        // 'Then choose a value you have identified, or add a new value.',
+        'Then choose a value you have identified.',
     form_add_edit_activity_add_value_button: 'Add Value',
     form_add_edit_activity_enjoyment_prompt: 'How much do you enjoy doing this activity?',
     form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',
     form_add_edit_activity_importance_prompt: 'How important it is for you to do this activity?',
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
 
-    // Form_add_activity_describe_lifearea: 'Which life area is this activity best associated with?',
-    // Form_add_activity_describe_value: 'Which value is this activity best associated with?',
+    form_add_edit_activity_schedule_when_prompt:
+        'When would you like to do this activity?',
+    form_add_edit_activity_schedule_date_label:
+        'Schedule Date',
+    form_add_edit_activity_schedule_date_help:
+        'Choose a date you would like to do this activity.',
+    form_add_edit_activity_schedule_date_validation_invalid_format:
+        'Invalid date format.',
+    form_add_edit_activity_schedule_time_of_day_label:
+        'Schedule Time',
+    form_add_edit_activity_schedule_time_of_day_help:
+        'Choose a time you would like to do this activity.',
+    form_add_edit_activity_schedule_time_of_day_validation_invalid_format:
+        'Invalid time format.',
+    form_add_edit_activity_schedule_has_repetition_prompt:
+        'Would you like to repeat this activity every week?',
+    form_add_edit_activity_schedule_repeat_days_prompt:
+        'On what days would you like to repeat this activity?',
+
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
     //
-    //
-    // Form_add_activity_date: 'What date would you like to do/start this activity?',
-    // Form_add_activity_date_label: 'Activity start date',
-    // Form_add_activity_time: 'What time would you like to do this activity?',
-    // Form_add_activity_time_label: 'Activity time',
     // Form_add_activity_reminder_section: 'Set reminder',
     // Form_add_activity_reminder: 'Would you like a reminder for this activity?',
     // Form_add_activity_reminder_time: 'When would you like to be reminded?',
     // Form_add_activity_reminder_time_label: 'Reminder time',
     // Form_add_activity_repetition_section: 'Set repetition',
-    // Form_add_activity_repetition: 'Would you like to repeat this activity?',
-    // Form_add_activity_repetition_days: 'On what days would you like to repeat this activity?',
-    // Form_add_activity_repetition_days_label: 'Repetition days',
     //
     // Form_add_activity_submit_success: 'Great! Your activity is saved.',
 

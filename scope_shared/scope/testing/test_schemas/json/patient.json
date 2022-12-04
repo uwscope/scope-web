@@ -1,30 +1,11 @@
 {
 	"_type": "patient",
-	"identity": {
-		"_id": "1",
-		"_type": "patientIdentity",
-		"_set_id": "patientidvalue",
-		"_rev": 1,
-		"patientId": "patientidvalue",
-		"collection": "collection_patientidvalue",
-		"name": "Paul Atreides",
-		"MRN": "11111111"
-	},
-	"profile": {
-		"_type": "profile",
-		"_rev": 1,
-		"name": "Harry Potter",
-		"MRN": "11111111",
-		"clinicCode": "Transplant – Auto",
-		"birthdate": "1991-08-19T00:00:00Z",
-		"sex": "Male",
-		"discussionFlag": {
-			"Flag as safety risk": true,
-			"Flag for discussion": false
-		},
-		"followupSchedule": "1-week follow-up",
-		"depressionTreatmentStatus": "CoCM"
-	},
+	"activities": [],
+	"activityLogs": [],
+	"activitySchedules": [],
+	"assessments": [],
+	"assessmentLogs": [],
+	"caseReviews": [],
 	"clinicalHistory": {
 		"_type": "clinicalHistory",
 		"_rev": 1,
@@ -40,11 +21,31 @@
 			"Surveillance": true
 		}
 	},
-	"valuesInventory": {
-		"_type": "valuesInventory",
+	"identity": {
+		"_id": "1",
+		"_type": "patientIdentity",
+		"_set_id": "patientidvalue",
 		"_rev": 1,
-		"assigned": true,
-		"assignedDateTime": "2012-12-12T12:12:12Z"
+		"patientId": "patientidvalue",
+		"collection": "collection_patientidvalue",
+		"name": "Paul Atreides",
+		"MRN": "11111111"
+	},
+	"moodLogs":  [],
+	"profile": {
+		"_type": "profile",
+		"_rev": 1,
+		"name": "Harry Potter",
+		"MRN": "11111111",
+		"clinicCode": "Transplant – Auto",
+		"birthdate": "1991-08-19T00:00:00Z",
+		"sex": "Male",
+		"discussionFlag": {
+			"Flag as safety risk": true,
+			"Flag for discussion": false
+		},
+		"followupSchedule": "1-week follow-up",
+		"depressionTreatmentStatus": "CoCM"
 	},
 	"safetyPlan": {
 		"_type": "safetyPlan",
@@ -113,5 +114,14 @@
 		],
 		"safeEnvironment": ["safeEnvironment1", "safeEnvironment2"]
 	},
-	"sessions": []
+	"scheduledActivities": [],
+	"scheduledAssessments": [],
+	"sessions": [],
+	"values": [],
+	"valuesInventory": {
+		"_type": "valuesInventory",
+		"_rev": 1,
+		"assigned": true,
+		"assignedDateTime": "2012-12-12T12:12:12Z"
+	}
 }

@@ -5,8 +5,9 @@ import pymongo.collection
 
 import request_utils
 import request_context
-import scope.database.patient.activity_logs
 import scope.database.patient.activities
+import scope.database.patient.activity_logs
+import scope.database.patient.activity_schedules
 import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
@@ -39,107 +40,95 @@ def _construct_patient_document(
     # Identity
     patient_document["identity"] = copy.deepcopy(patient_identity)
 
-    # Profile
-    profile = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
-    )
-    if profile:
-        patient_document["profile"] = profile
-
-    # Clinical history
-    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
-        collection=patient_collection
-    )
-    if clinical_history:
-        patient_document["clinicalHistory"] = clinical_history
-
-    # Values inventory
-    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection
-    )
-    if values_inventory:
-        patient_document["valuesInventory"] = values_inventory
-
-    # Safety plan
-    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
-        collection=patient_collection
-    )
-    if safety_plan:
-        patient_document["safetyPlan"] = safety_plan
-
-    # Sessions
-    sessions = scope.database.patient.sessions.get_sessions(
-        collection=patient_collection
-    )
-    if sessions:
-        patient_document["sessions"] = sessions
-
-    # Case reviews
-    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
-        collection=patient_collection
-    )
-    if case_reviews:
-        patient_document["caseReviews"] = case_reviews
-
-    # Assessments
-    assessments = scope.database.patient.assessments.get_assessments(
-        collection=patient_collection
-    )
-    if assessments:
-        patient_document["assessments"] = assessments
-
-    # Scheduled Assessments
-    scheduled_assessments = (
-        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-            collection=patient_collection
-        )
-    )
-    if scheduled_assessments:
-        patient_document["scheduledAssessments"] = scheduled_assessments
-
-    # Assessment Logs
-    assessment_logs = scope.database.patient.assessment_logs.get_assessment_logs(
-        collection=patient_collection
-    )
-    if assessment_logs:
-        patient_document["assessmentLogs"] = assessment_logs
-
     # Activities
     activities = scope.database.patient.activities.get_activities(
         collection=patient_collection
     )
-    if activities:
-        patient_document["activities"] = activities
-
-    # Schedule activities
-    scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
-        )
-    )
-    if scheduled_activities:
-        patient_document["scheduledActivities"] = scheduled_activities
+    patient_document["activities"] = activities
 
     # Activity Logs
     activity_logs = scope.database.patient.activity_logs.get_activity_logs(
         collection=patient_collection
     )
-    if activity_logs:
-        patient_document["activityLogs"] = activity_logs
+    patient_document["activityLogs"] = activity_logs
 
-    # Mood logs
+    # Activity Schedules
+    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(
+        collection=patient_collection
+    )
+    patient_document["activitySchedules"] = activity_schedules
+
+    # Assessments
+    assessments = scope.database.patient.assessments.get_assessments(
+        collection=patient_collection
+    )
+    patient_document["assessments"] = assessments
+
+    # Assessment Logs
+    assessment_logs = scope.database.patient.assessment_logs.get_assessment_logs(
+        collection=patient_collection
+    )
+    patient_document["assessmentLogs"] = assessment_logs
+
+    # Case Reviews
+    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
+        collection=patient_collection
+    )
+    patient_document["caseReviews"] = case_reviews
+
+    # Clinical History
+    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
+        collection=patient_collection
+    )
+    patient_document["clinicalHistory"] = clinical_history
+
+    # Mood Logs
     mood_logs = scope.database.patient.mood_logs.get_mood_logs(
         collection=patient_collection
     )
-    if mood_logs:
-        patient_document["moodLogs"] = mood_logs
+    patient_document["moodLogs"] = mood_logs
+
+    # Profile
+    profile = scope.database.patient.patient_profile.get_patient_profile(
+        collection=patient_collection
+    )
+    patient_document["profile"] = profile
+
+    # Safety Plan
+    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
+        collection=patient_collection
+    )
+    patient_document["safetyPlan"] = safety_plan
+
+    # Scheduled Assessments
+    scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+        collection=patient_collection
+    )
+    patient_document["scheduledAssessments"] = scheduled_assessments
+
+    # Scheduled Activities
+    scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities(
+        collection=patient_collection
+    )
+    patient_document["scheduledActivities"] = scheduled_activities
+
+    # Sessions
+    sessions = scope.database.patient.sessions.get_sessions(
+        collection=patient_collection
+    )
+    patient_document["sessions"] = sessions
 
     # Values
     values = scope.database.patient.values.get_values(
         collection=patient_collection
     )
-    if values:
-        patient_document["values"] = values
+    patient_document["values"] = values
+
+    # Values Inventory
+    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
+        collection=patient_collection
+    )
+    patient_document["valuesInventory"] = values_inventory
 
     return patient_document
 

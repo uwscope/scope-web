@@ -220,7 +220,7 @@ def get_set(
     with collection.aggregate(pipeline) as pipeline_result:
         # Confirm a result was found
         if not pipeline_result.alive:
-            return None
+            return []
 
         documents = list(pipeline_result)
 
