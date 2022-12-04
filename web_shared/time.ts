@@ -1,8 +1,8 @@
 import { format, parseISO, setHours, setMilliseconds, setMinutes, setSeconds } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
-import { FollowupSchedule } from 'shared/enums';
+import { DayOfWeek, daysOfWeekValues, FollowupSchedule } from 'shared/enums';
 
-export const clearTime = (date: Date) => {
+export const clearTime = (date: Date): Date => {
     return setMilliseconds(setSeconds(setMinutes(setHours(date, 0), 0), 0), 0);
 };
 
@@ -47,6 +47,13 @@ export const handleDates = (body: any) => {
     }
 };
 
+export const getDayOfWeek = (date: Date): DayOfWeek => {
+    // Date.getDay() returns 0 = Sunday, 6 = Saturday
+    // daysOfWeekValues is indexed 0 = Monday, 6 = Sunday
+
+    return daysOfWeekValues[(date.getDay() + 7 - 1) % 7];
+}
+
 export const getFollowupWeeks = (schedule: FollowupSchedule) => {
     switch (schedule) {
         case '1-week follow-up':
@@ -65,3 +72,17 @@ export const getFollowupWeeks = (schedule: FollowupSchedule) => {
             return 0;
     }
 };
+
+export const minDate = (a: Date, b: Date): Date => {
+    if (a <= b) {
+        console.log('min');
+        console.log(a);
+
+        return a;
+    } else {
+        console.log('min');
+        console.log(b);
+
+        return b;
+    }
+}
