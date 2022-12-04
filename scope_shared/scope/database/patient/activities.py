@@ -1,6 +1,6 @@
 import copy
-from typing import List, Optional
 import pymongo.collection
+from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.patient.activity_schedules
@@ -21,23 +21,22 @@ def delete_activity(
     """
     Delete "activity" document.
 
-    - Any existing activity schedules with the deleted activity must be deleted.
+    - Any corresponding ActivitySchedule documents must be deleted.
     """
     existing_activity_schedules = (
         scope.database.patient.activity_schedules.get_activity_schedules(
             collection=collection
         )
     )
-    if existing_activity_schedules:
-        for activity_schedule in existing_activity_schedules:
-            if activity_schedule.get(SEMANTIC_SET_ID) == set_id:
-                scope.database.patient.activity_schedules.delete_activity_schedule(
-                    collection=collection,
-                    set_id=activity_schedule[
-                        scope.database.patient.activity_schedules.SEMANTIC_SET_ID
-                    ],
-                    rev=activity_schedule.get("_rev"),
-                )
+    for activity_schedule in existing_activity_schedules:
+        if activity_schedule.get(SEMANTIC_SET_ID) == set_id:
+            scope.database.patient.activity_schedules.delete_activity_schedule(
+                collection=collection,
+                set_id=activity_schedule[
+                    scope.database.patient.activity_schedules.SEMANTIC_SET_ID
+                ],
+                rev=activity_schedule.get("_rev"),
+            )
 
     return scope.database.collection_utils.delete_set_element(
         collection=collection,
