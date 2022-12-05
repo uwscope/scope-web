@@ -157,30 +157,41 @@ def delete_activity_schedule(
     """
     Delete "activity-schedule" document.
 
-    - Any existing scheduled activity with the deleted activity schedule must be deleted.
+    - Any corresponding ScheduledActivity documents must be deleted.
     """
-    existing_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=collection
-        )
-    )
-    if existing_scheduled_activities:
-        for scheduled_activity in existing_scheduled_activities:
-            if scheduled_activity.get(SEMANTIC_SET_ID) == set_id:
-                scope.database.patient.scheduled_activities.delete_scheduled_activity(
-                    collection=collection,
-                    set_id=scheduled_activity[
-                        scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
-                    ],
-                    rev=scheduled_activity.get("_rev"),
-                )
 
-    return scope.database.collection_utils.delete_set_element(
+    result = scope.database.collection_utils.delete_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         set_id=set_id,
         rev=rev,
     )
+
+    if result.inserted_count == 1:
+        existing_scheduled_activities = (
+            scope.database.patient.scheduled_activities.get_scheduled_activities(
+                collection=collection
+            )
+        )
+
+        # Perform only the delete component of maintenance
+        delete_items = _calculate_scheduled_activities_to_delete(
+            scheduled_activities=existing_scheduled_activities,
+            activity_schedule_id=set_id,
+            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
+        )
+
+        # Delete the documents
+        for delete_item_current in delete_items:
+            scope.database.patient.scheduled_activities.delete_scheduled_activity(
+                collection=collection,
+                set_id=delete_item_current[
+                    scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+                ],
+                rev=delete_item_current.get("_rev"),
+            )
+
+    return result
 
 
 def get_activity_schedules(
