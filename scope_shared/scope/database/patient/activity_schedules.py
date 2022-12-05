@@ -1,8 +1,8 @@
 import copy
 import datetime
-from typing import List, Optional
 import pymongo.collection
 import pytz
+from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
@@ -22,7 +22,7 @@ def _calculate_scheduled_activities_to_create(
     activity_schedule: dict,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
-    # Temporarily assume everybody is always in local timezone
+    # TODO: Temporarily assuming everybody is always in local timezone
     timezone = pytz.timezone("America/Los_Angeles")
 
     if any([not activity_schedule["isActive"], activity_schedule["isDeleted"]]):
