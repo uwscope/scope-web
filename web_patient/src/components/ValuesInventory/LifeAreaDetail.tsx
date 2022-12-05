@@ -101,8 +101,9 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                         edge="end"
                         aria-label="more"
                         onClick={(e) => handleMoreClickActivity(activity, e)}
-                        size="medium">
-                        <MoreVertIcon fontSize="small" />
+                        size="large"
+                    >
+                        <MoreVertIcon/>
                     </IconButton>
                 </Grid>
                 {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
@@ -116,8 +117,13 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         <Stack spacing={0}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <SubHeaderText>{value.name}</SubHeaderText>
-                <IconButton edge="end" aria-label="more" onClick={(e) => handleMoreClickValue(value, e)} size="medium">
-                    <MoreVertIcon fontSize="large" />
+                <IconButton
+                    edge="end"
+                    aria-label="more"
+                    onClick={(e) => handleMoreClickValue(value, e)}
+                    size="large"
+                >
+                    <MoreVertIcon/>
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
