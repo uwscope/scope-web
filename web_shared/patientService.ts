@@ -427,7 +427,6 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async deleteValue(value: IValue): Promise<IValue> {
-        (value as any)._type = 'value';
         logger.assert((value as any)._rev != undefined, '_rev should be in the request data');
         const response = await this.axiosInstance.delete<IValueResponse>(`/value/${value.valueId}`, {
             headers: {
