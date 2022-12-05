@@ -8,8 +8,6 @@ import scope.enums
 import scope.testing.fixtures_database_temp_patient
 
 
-# TODO Activity Refactor: Resolve with new model for deletion
-@pytest.mark.xfail
 def test_delete_scheduled_activity(
     database_temp_patient_factory: Callable[
         [],
@@ -67,8 +65,8 @@ def test_delete_scheduled_activity(
         scheduled_activity_delete_result = (
             scope.database.patient.scheduled_activities.delete_scheduled_activity(
                 collection=patient_collection,
-                scheduled_activity=scheduled_activity_post_result.document,
                 set_id=scheduled_activity_post_result.inserted_set_id,
+                rev=scheduled_activity_post_result.document["_rev"],
             )
         )
         assert scheduled_activity_delete_result.inserted_count == 1

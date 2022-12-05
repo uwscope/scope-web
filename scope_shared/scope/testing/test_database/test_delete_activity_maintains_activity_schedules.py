@@ -15,7 +15,7 @@ import scope.schema_utils
 import scope.testing.fixtures_database_temp_patient
 
 
-def test_delete_activity(
+def test_delete_activity_maintains_activity_schedules(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -84,16 +84,16 @@ def test_delete_activity(
     )
     assert delete_activity_put_result.inserted_count == 1
 
-    # Get the inserted fake activity
+    # Get the inserted fake activity, assert it is gone
     get_fake_activity = scope.database.patient.activities.get_activity(
         collection=patient_collection,
         set_id=inserted_fake_activity.get(
             scope.database.patient.activities.SEMANTIC_SET_ID
         ),
     )
-    assert get_fake_activity == None
+    assert get_fake_activity is None
 
-    # Get activity schedules matching "activityId"
+    # Get activity schedules matching "activityId", assert they are all gone
     activity_schedules_matching_activity_id = [
         activity_schedule_current
         for activity_schedule_current in scope.database.patient.activity_schedules.get_activity_schedules(

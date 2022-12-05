@@ -3,10 +3,11 @@ A delete to scope.database.patient.activity_schedules must delete the associated
 """
 
 import datetime
-from typing import Callable, List
+import pytz
+from typing import Callable
 
-import pprint
 import scope.database.collection_utils as collection_utils
+import scope.database.date_utils as date_utils
 import scope.database.patient.activity_schedules
 import scope.database.patient.scheduled_activities
 import scope.database.patients
@@ -16,7 +17,7 @@ import scope.schema_utils
 import scope.testing.fixtures_database_temp_patient
 
 
-def test_delete_activity_schedule(
+def test_delete_activity_schedule_maintains_scheduled_activities(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -28,6 +29,14 @@ def test_delete_activity_schedule(
 
     # Obtain fake activity schedule
     fake_activity_schedule = data_fake_activity_schedule_factory()
+    # Ensure the date is in the future so maintenance will result in deletion
+    fake_activity_schedule.update({
+        "startDateTime": date_utils.format_datetime(
+            pytz.utc.localize(
+                datetime.datetime.now() + datetime.timedelta(days=1)
+            )
+        )
+    })
     fake_activity_schedule.update({"isActive": True})
     fake_activity_schedule.update({"isDeleted": False})
     fake_activity_schedule_post_result = (
@@ -78,28 +87,5 @@ def test_delete_activity_schedule(
         scope.database.patient.scheduled_activities.get_scheduled_activities(
             collection=patient_collection
         )
-        == None
+        == []
     )
-
-    # Obtain and insert another fake activity schedule
-    another_fake_activity_schedule = data_fake_activity_schedule_factory()
-    another_fake_activity_schedule.update({"isActive": True})
-    another_fake_activity_schedule.update({"isDeleted": False})
-    another_fake_activity_schedule_post_result = (
-        scope.database.patient.activity_schedules.post_activity_schedule(
-            collection=patient_collection,
-            activity_schedule=another_fake_activity_schedule,
-        )
-    )
-    assert another_fake_activity_schedule_post_result.inserted_count == 1
-
-    # Get scheduled activity matching original "activityScheduleId"
-    scheduled_activities_matching_activity_schedule_id = [
-        scheduled_activity_current
-        for scheduled_activity_current in scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
-        )
-        if scheduled_activity_current.get("activityScheduleId")
-        == inserted_fake_activity_schedule["activityScheduleId"]
-    ]
-    assert len(scheduled_activities_matching_activity_schedule_id) == 0
