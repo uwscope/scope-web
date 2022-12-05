@@ -36,8 +36,8 @@
         "editedDateTime": {
             "$ref": "/schemas/utils/datetime#/properties/datetime"
         },
-        "startDateTime": {
-            "$ref": "/schemas/utils/datetime#/properties/datetime"
+        "date": {
+            "$ref": "/schemas/utils/datetime#/properties/date"
         },
         "timeOfDay": {
             "type": "integer",
@@ -55,7 +55,7 @@
         }
     },
     "additionalProperties": false,
-    "required": ["_type", "activityId", "editedDateTime", "startDateTime", "timeOfDay", "hasReminder", "hasRepetition"],
+    "required": ["_type", "activityId", "editedDateTime", "date", "timeOfDay", "hasReminder", "hasRepetition"],
     "$comment": [
         "---------------------------------------",
         "Removed Pending Reminder Implementation",

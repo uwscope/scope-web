@@ -41,7 +41,7 @@ def _calculate_scheduled_activities_to_create(
 
     # Create scheduled items
     new_scheduled_items = scheduled_item_utils.create_scheduled_items(
-        start_datetime=date_utils.parse_datetime(activity_schedule["startDateTime"]),
+        start_datetime=date_utils.parse_datetime(activity_schedule["date"]),
         effective_datetime=maintenance_datetime,
         has_repetition=activity_schedule["hasRepetition"],
         frequency=frequency,

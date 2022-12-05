@@ -29,7 +29,7 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
         "editedDateTime": date_utils.format_datetime(
             pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
         ),
-        "startDateTime": date_utils.format_datetime(
+        "date": date_utils.format_date(
             pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
         ),
         "hasRepetition": True,
@@ -296,8 +296,8 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     # Ensure the date is in the future so maintenance will result in deletion
     fake_activity_schedule.update(
         {
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.now() + datetime.timedelta(days=1))
+            "date": date_utils.format_date(
+                datetime.date.today() + datetime.timedelta(days=1)
             ),
             "hasRepetition": True,
             "repeatDayFlags": {
