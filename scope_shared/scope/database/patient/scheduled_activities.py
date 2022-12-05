@@ -1,16 +1,32 @@
 import copy
 from typing import List, Optional
 import pymongo.collection
-import pytest
 
 import scope.database.collection_utils
 import scope.database.patient.activities
 import scope.schema
-import scope.schema_utils as schema_utils
 
 
 DOCUMENT_TYPE = "scheduledActivity"
 SEMANTIC_SET_ID = "scheduledActivityId"
+
+
+def delete_scheduled_activity(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "scheduled-activity" document.
+    """
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
 
 
 def get_scheduled_activities(
@@ -26,37 +42,7 @@ def get_scheduled_activities(
         document_type=DOCUMENT_TYPE,
     )
 
-    if scheduled_activities:
-        scheduled_activities = [
-            scheduled_activity_current
-            for scheduled_activity_current in scheduled_activities
-            if not scheduled_activity_current.get("_deleted", False)
-        ]
-
     return scheduled_activities
-
-
-def delete_scheduled_activity(
-    *,
-    collection: pymongo.collection.Collection,
-    scheduled_activity: dict,
-    set_id: str,
-) -> scope.database.collection_utils.SetPutResult:
-    scheduled_activity = copy.deepcopy(scheduled_activity)
-
-    scheduled_activity["_deleted"] = True
-    del scheduled_activity["_id"]
-
-    schema_utils.assert_schema(
-        data=scheduled_activity,
-        schema=scope.schema.scheduled_activity_schema,
-    )
-
-    return put_scheduled_activity(
-        collection=collection,
-        scheduled_activity=scheduled_activity,
-        set_id=set_id,
-    )
 
 
 def get_scheduled_activity(
@@ -73,10 +59,6 @@ def get_scheduled_activity(
         document_type=DOCUMENT_TYPE,
         set_id=set_id,
     )
-
-    if scheduled_activity:
-        if scheduled_activity.get("_deleted", False):
-            scheduled_activity = None
 
     return scheduled_activity
 

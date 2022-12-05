@@ -1,8 +1,8 @@
 import copy
 import datetime
-from typing import List, Optional
 import pymongo.collection
 import pytz
+from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
@@ -22,7 +22,7 @@ def _calculate_scheduled_activities_to_create(
     activity_schedule: dict,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
-    # Temporarily assume everybody is always in local timezone
+    # TODO: Temporarily assuming everybody is always in local timezone
     timezone = pytz.timezone("America/Los_Angeles")
 
     if any([not activity_schedule["isActive"], activity_schedule["isDeleted"]]):
@@ -124,10 +124,10 @@ def _maintain_pending_scheduled_activities(
             for delete_item_current in delete_items:
                 scope.database.patient.scheduled_activities.delete_scheduled_activity(
                     collection=collection,
-                    scheduled_activity=delete_item_current,
                     set_id=delete_item_current[
                         scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
                     ],
+                    rev=delete_item_current.get("_rev"),
                 )
 
     # Create new scheduled activities as necessary
@@ -146,6 +146,52 @@ def _maintain_pending_scheduled_activities(
             scope.database.patient.scheduled_activities.post_scheduled_activity(
                 collection=collection, scheduled_activity=create_item_current
             )
+
+
+def delete_activity_schedule(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "activity-schedule" document.
+
+    - Any corresponding ScheduledActivity documents must be deleted.
+    """
+
+    result = scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
+
+    if result.inserted_count == 1:
+        existing_scheduled_activities = (
+            scope.database.patient.scheduled_activities.get_scheduled_activities(
+                collection=collection
+            )
+        )
+
+        # Perform only the delete component of maintenance
+        delete_items = _calculate_scheduled_activities_to_delete(
+            scheduled_activities=existing_scheduled_activities,
+            activity_schedule_id=set_id,
+            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
+        )
+
+        # Delete the documents
+        for delete_item_current in delete_items:
+            scope.database.patient.scheduled_activities.delete_scheduled_activity(
+                collection=collection,
+                set_id=delete_item_current[
+                    scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+                ],
+                rev=delete_item_current.get("_rev"),
+            )
+
+    return result
 
 
 def get_activity_schedules(

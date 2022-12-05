@@ -15,7 +15,7 @@ import scope.schema_utils
 import scope.testing.fixtures_database_temp_patient
 
 
-def test_delete_value(
+def test_delete_value_mantains_activities(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
@@ -82,6 +82,7 @@ def test_delete_value(
         if "valueId" not in activity_current
     ]
 
+    # All of our activites that previously matched should now be in "othered" activities
     for other_activity, activity_matching_value_id in zip(
         other_activities, activities_matching_value_id
     ):
