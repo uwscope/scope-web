@@ -25,9 +25,6 @@ def _calculate_scheduled_activities_to_create(
     # TODO: Temporarily assuming everybody is always in local timezone
     timezone = pytz.timezone("America/Los_Angeles")
 
-    if any([not activity_schedule["isActive"], activity_schedule["isDeleted"]]):
-        return []
-
     if activity_schedule["hasRepetition"]:
         frequency = scope.enums.ScheduledItemFrequency.Weekly.value
         months = 3
