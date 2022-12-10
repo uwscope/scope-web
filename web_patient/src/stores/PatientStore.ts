@@ -565,6 +565,7 @@ export class PatientStore implements IPatientStore {
         );
     }
 
+    @action.bound
     public async deleteValue(value: IValue) {
         const prevValues = this.values.slice() || [];
         const foundIdx = prevValues.findIndex((v) => v.valueId == value.valueId);
