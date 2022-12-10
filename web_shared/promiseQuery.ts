@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { action, computed, makeAutoObservable, observable } from 'mobx';
+import { action, computed, makeAutoObservable, observable, toJS } from 'mobx';
 
 export type PromiseState = 'Unknown' | 'Pending' | 'Fulfilled' | 'Rejected' | 'Conflicted';
 
@@ -24,12 +24,13 @@ export interface IPromiseQuery<T> extends IPromiseQueryState {
 export class PromiseQuery<T> implements IPromiseQuery<T> {
     public name: string;
 
-    @observable public value: T | undefined;
+    @observable private _value: T | undefined;
+
     @observable public state: PromiseState = 'Unknown';
     @observable public unauthorized: boolean = false;
 
     constructor(defaultValue: T | undefined, name: string) {
-        this.value = defaultValue;
+        this._value = defaultValue;
         this.name = name;
 
         makeAutoObservable(this);
@@ -50,6 +51,15 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
         return this.state === 'Rejected' || this.state === 'Conflicted';
     }
 
+    @computed
+    public get value() {
+        // Because _value is @observable,
+        // the Javascript object/array stored there will be replaced with a proxy.
+        // Ensure the Javascript object/array is vanilla before being accessed.
+
+        return toJS(this._value);
+    }
+
     public fromPromise(promise: Promise<T>, onConflict?: (responseData?: any) => T): Promise<T> {
         action(`${this.name} start`, () => {
             this.state = 'Pending';
@@ -60,7 +70,13 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
             .then((value) => {
                 action(() => {
                     this.state = 'Fulfilled';
-                    this.value = value;
+
+                    // This observable is replaced all at once,
+                    // decided there's no value in calling observable(value)
+                    // (which would recursively make the value observable).
+                    // This reference to an object or an array will be proxied,
+                    // will trigger an updated whenever that object/array is accessed.
+                    this._value = value;
                 })();
                 return value;
             })
@@ -71,7 +87,7 @@ export class PromiseQuery<T> implements IPromiseQuery<T> {
                         this.state = 'Conflicted';
 
                         if (onConflict) {
-                            this.value = onConflict(axiosError.response?.data);
+                            this._value = onConflict(axiosError.response?.data);
                         }
                     })();
                 } else if (axiosError.response?.status == 403) {
