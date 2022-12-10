@@ -41,8 +41,6 @@ def _fake_activity_schedule(
             )
         ),
         "timeOfDay": random.randrange(0, 24),
-        "isActive": random.choice([False, True]),
-        "isDeleted": random.choice([False, True]),
     }
 
     reminder_choices = [

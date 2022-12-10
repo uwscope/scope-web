@@ -30,15 +30,13 @@ def test_delete_activity_schedule_maintains_scheduled_activities(
     # Obtain fake activity schedule
     fake_activity_schedule = data_fake_activity_schedule_factory()
     # Ensure the date is in the future so maintenance will result in deletion
-    fake_activity_schedule.update({
-        "startDateTime": date_utils.format_datetime(
-            pytz.utc.localize(
-                datetime.datetime.now() + datetime.timedelta(days=1)
+    fake_activity_schedule.update(
+        {
+            "startDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.now() + datetime.timedelta(days=1))
             )
-        )
-    })
-    fake_activity_schedule.update({"isActive": True})
-    fake_activity_schedule.update({"isDeleted": False})
+        }
+    )
     fake_activity_schedule_post_result = (
         scope.database.patient.activity_schedules.post_activity_schedule(
             collection=patient_collection,
