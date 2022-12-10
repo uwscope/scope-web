@@ -349,10 +349,12 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     )
 
     # Put the updated activity schedule
-    updated_activity_schedule_put_result = scope.database.patient.activity_schedules.put_activity_schedule(
-        collection=patient_collection,
-        set_id=inserted_fake_activity_schedule["activityScheduleId"],
-        activity_schedule=inserted_fake_activity_schedule,
+    updated_activity_schedule_put_result = (
+        scope.database.patient.activity_schedules.put_activity_schedule(
+            collection=patient_collection,
+            set_id=inserted_fake_activity_schedule["activityScheduleId"],
+            activity_schedule=inserted_fake_activity_schedule,
+        )
     )
     assert updated_activity_schedule_put_result.inserted_count == 1
 
@@ -371,7 +373,8 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     deleted_scheduled_activities = [
         scheduled_activity_current
         for scheduled_activity_current in existing_scheduled_activities_matching_activity_schedule_id
-        if scheduled_activity_current not in new_scheduled_activities_matching_activity_schedule_id
+        if scheduled_activity_current
+        not in new_scheduled_activities_matching_activity_schedule_id
     ]
     assert len(deleted_scheduled_activities) > 0
 
@@ -379,6 +382,7 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     created_scheduled_activiites = [
         scheduled_activity_current
         for scheduled_activity_current in new_scheduled_activities_matching_activity_schedule_id
-        if scheduled_activity_current not in existing_scheduled_activities_matching_activity_schedule_id
+        if scheduled_activity_current
+        not in existing_scheduled_activities_matching_activity_schedule_id
     ]
     assert len(created_scheduled_activiites) > 0
