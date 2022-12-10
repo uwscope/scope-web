@@ -32,8 +32,8 @@ def test_delete_activity_schedule_maintains_scheduled_activities(
     # Ensure the date is in the future so maintenance will result in deletion
     fake_activity_schedule.update(
         {
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.now() + datetime.timedelta(days=1))
+            "date": date_utils.format_date(
+                datetime.date.today() + datetime.timedelta(days=1)
             )
         }
     )
@@ -69,21 +69,13 @@ def test_delete_activity_schedule_maintains_scheduled_activities(
     )
     assert delete_activity_schedule_put_result.inserted_count == 1
 
-    # Get the inserted fake activity schedule
-    get_fake_activity_schedule = (
-        scope.database.patient.activity_schedules.get_activity_schedule(
-            collection=patient_collection,
-            set_id=inserted_fake_activity_schedule.get(
-                scope.database.patient.activity_schedules.SEMANTIC_SET_ID
-            ),
-        )
-    )
-    assert get_fake_activity_schedule == None
-
     # Get scheduled activities
-    assert (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
+    scheduled_activities_matching_activity_schedule_id = [
+        scheduled_activity_current
+        for scheduled_activity_current in scope.database.patient.scheduled_activities.get_scheduled_activities(
             collection=patient_collection
         )
-        == []
-    )
+        if scheduled_activity_current.get("activityScheduleId")
+        == inserted_fake_activity_schedule["activityScheduleId"]
+    ]
+    assert len(scheduled_activities_matching_activity_schedule_id) == 0

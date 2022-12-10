@@ -39,7 +39,7 @@ def _patient_summary_assertions(summary: dict) -> None:
         assert (
             date_utils.parse_date(
                 assigned_scheduled_assessment_current["dueDate"]
-            ).date()
+            )
             <= datetime.date.today()
         )
 

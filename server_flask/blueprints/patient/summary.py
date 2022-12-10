@@ -63,7 +63,7 @@ def compute_patient_summary(
                 and (
                     date_utils.parse_date(
                         scheduled_assessment_current["dueDate"]
-                    ).date()
+                    )
                     <= datetime.date.today()
                 )
             ),

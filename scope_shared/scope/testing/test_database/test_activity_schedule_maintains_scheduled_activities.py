@@ -30,7 +30,7 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
             pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
         ),
         "date": date_utils.format_date(
-            pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
+            datetime.date(2022, 3, 12)
         ),
         "hasRepetition": True,
         "repeatDayFlags": {

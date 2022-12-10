@@ -46,7 +46,7 @@ def _localized_datetime(
     - a provided time_of_day
     - a provided timezone
 
-    The datetime will correspond to the above, but will be UTC aware.
+    The datetime will correspond to the above moment of time, but will represented in UTC.
     """
 
     datetime = _datetime.datetime.combine(date, _datetime.time(hour=time_of_day))
@@ -250,7 +250,8 @@ def _scheduled_dates(
 
 def create_scheduled_items(
     *,
-    start_datetime: _datetime.datetime,
+    start_date: _datetime.date = None,
+    start_datetime: _datetime.datetime = None,
     effective_datetime: _datetime.datetime,
     has_repetition: bool,
     frequency: Optional[str],
@@ -265,7 +266,16 @@ def create_scheduled_items(
     """
     Create a list of scheduled items based on a schedule.
     """
-    date_utils.raise_on_not_datetime_utc_aware(start_datetime)
+    # Provide start_date or start_datetime, but not both
+    if start_date is not None and start_datetime is not None:
+        raise ValueError("start_date or start_datetime must be None")
+    if start_date is None and start_datetime is None:
+        raise ValueError("start_date or start_datetime must be provided")
+    if start_date:
+        date_utils.raise_on_not_date(start_date)
+    if start_datetime:
+        date_utils.raise_on_not_datetime_utc_aware(start_datetime)
+
     date_utils.raise_on_not_datetime_utc_aware(effective_datetime)
     if due_time_of_day < 0 or due_time_of_day > 23:
         raise ValueError("due_time_of_day must be int >=0 and <= 23")
@@ -276,7 +286,9 @@ def create_scheduled_items(
         raise ValueError("timezone must be valid pytz timezone")
 
     # Obtain a start date in the patient's scheduling time zone
-    start_date = start_datetime.astimezone(timezone).date()
+    if start_date is None:
+        start_date = start_datetime.astimezone(timezone).date()
+
     effective_date = effective_datetime.astimezone(timezone).date()
     scheduled_dates = _scheduled_dates(
         start_date=start_date,
