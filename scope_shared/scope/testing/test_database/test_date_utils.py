@@ -105,31 +105,31 @@ def test_parse_date():
     for (test_input, expected) in [
         (
             "2019-11-01T00:00:00Z",
-            pytz.utc.localize(datetime.datetime(2019, 11, 1, 0, 0, 0)),
+            datetime.date(2019, 11, 1),
         ),
         (
             "2019-02-28T00:00:00Z",
-            pytz.utc.localize(datetime.datetime(2019, 2, 28, 0, 0, 0)),
+            datetime.date(2019, 2, 28),
         ),
         (
             "2019-1-1T00:00:00Z",
-            pytz.utc.localize(datetime.datetime(2019, 1, 1, 0, 0, 0)),
+            datetime.date(2019, 1, 1),
         ),
         (
             "2019-11-01T00:00:00Z",
-            pytz.utc.localize(datetime.datetime(2019, 11, 1, 0, 0, 0)),
+            datetime.date(2019, 11, 1),
         ),
         (
             "2019-11-1T00:00:00Z",
-            pytz.utc.localize(datetime.datetime(2019, 11, 1, 0, 0)),
+            datetime.date(2019, 11, 1),
         ),
         (
             "2019-11-1T00:00:00.000Z",
-            pytz.utc.localize(datetime.datetime(2019, 11, 1, 0, 0)),
+            datetime.date(2019, 11, 1),
         ),
         (
             "2019-11-1T00:00:00.000000Z",
-            pytz.utc.localize(datetime.datetime(2019, 11, 1, 0, 0)),
+            datetime.date(2019, 11, 1),
         ),
     ]:
         assert date_utils.parse_date(test_input) == expected

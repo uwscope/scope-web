@@ -32,7 +32,7 @@ def _fake_activity_schedule(
                 datetime_now,
             )
         ),
-        "startDateTime": date_utils.format_datetime(
+        "date": date_utils.format_date(
             pytz.utc.localize(
                 faker.date_time_between(
                     start_date=datetime_now - datetime.timedelta(days=1 * 30),

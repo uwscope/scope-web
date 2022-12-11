@@ -2,7 +2,7 @@
     "_type": "activitySchedule",
     "activityId": "activityId",
     "editedDateTime": "2022-03-16T04:16:52.563Z",
-    "startDateTime": "2022-03-16T04:16:52.563Z",
+    "date": "2022-03-16T00:00:00.000Z",
     "timeOfDay": 9,
     "hasReminder": false,
     "hasRepetition": false,
