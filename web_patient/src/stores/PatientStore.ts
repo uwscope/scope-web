@@ -92,6 +92,7 @@ export interface IPatientStore {
 
     // Values
     addValue: (value: IValue) => Promise<void>;
+    deleteValue: (value: IValue) => Promise<void>;
     updateValue: (value: IValue) => Promise<void>;
 
     // Values inventory
@@ -137,7 +138,10 @@ export class PatientStore implements IPatientStore {
         this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>([], 'loadMoodLogsQuery');
         this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(undefined, 'loadSafetyPlan');
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>([], 'loadScheduledActivitiesQuery');
-        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>([], 'loadScheduledAssessmentsQuery');
+        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
+            [],
+            'loadScheduledAssessmentsQuery',
+        );
         this.loadValuesQuery = new PromiseQuery<IValue[]>([], 'loadValuesQuery');
         this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(undefined, 'loadValuesInventoryQuery');
 
@@ -212,8 +216,7 @@ export class PatientStore implements IPatientStore {
     }
 
     @computed public get config() {
-        const config = this.loadConfigQuery.value
-        || {
+        const config = this.loadConfigQuery.value || {
             // Default value before initial load
             assignedValuesInventory: true,
             assignedSafetyPlan: true,
@@ -319,7 +322,7 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public getActivitiesWithoutValueId() {
         return this.activities.filter((a) => {
-            return (!a.valueId);
+            return !a.valueId;
         });
     }
 
@@ -549,8 +552,7 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async addValue(value: IValue) {
-        const promise = this.patientService.addValue(value).
-        then((addedValue) => {
+        const promise = this.patientService.addValue(value).then((addedValue) => {
             const newValues = this.values.slice() || [];
             newValues.push(addedValue);
             return newValues;
@@ -561,6 +563,29 @@ export class PatientStore implements IPatientStore {
             this.loadValuesQuery,
             onArrayConflict('value', 'valueId', () => this.values, logger),
         );
+    }
+
+    @action.bound
+    public async deleteValue(value: IValue) {
+        const prevValues = this.values.slice() || [];
+        const foundIdx = prevValues.findIndex((v) => v.valueId == value.valueId);
+
+        console.assert(foundIdx >= 0, `Value to delete not found: ${value.valueId}`);
+
+        if (foundIdx >= 0) {
+            const promise = this.patientService.deleteValue(value).then((_deletedValue) => {
+                prevValues.splice(foundIdx, 1);
+                return prevValues;
+            });
+
+            await this.loadAndLogQuery<IValue[]>(
+                () => promise,
+                this.loadValuesQuery,
+                onArrayConflict('value', 'valueId', () => this.values, logger),
+            );
+
+            await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
+        }
     }
 
     @action.bound
@@ -587,18 +612,12 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async loadActivities() {
-        await this.loadAndLogQuery<IActivity[]>(
-            this.patientService.getActivities,
-            this.loadActivitiesQuery
-        );
+        await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
     }
 
     @action.bound
     public async loadActivityLogs() {
-        await this.loadAndLogQuery<IActivityLog[]>(
-            this.patientService.getActivityLogs,
-            this.loadActivityLogsQuery
-        );
+        await this.loadAndLogQuery<IActivityLog[]>(this.patientService.getActivityLogs, this.loadActivityLogsQuery);
     }
 
     @action.bound
@@ -611,9 +630,6 @@ export class PatientStore implements IPatientStore {
 
     @action.bound
     public async loadMoodLogs() {
-        await this.loadAndLogQuery<IMoodLog[]>(
-            this.patientService.getMoodLogs,
-            this.loadMoodLogsQuery
-        );
+        await this.loadAndLogQuery<IMoodLog[]>(this.patientService.getMoodLogs, this.loadMoodLogsQuery);
     }
 }
