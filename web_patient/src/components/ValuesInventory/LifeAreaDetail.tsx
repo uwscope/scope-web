@@ -37,7 +37,6 @@ interface IValueEditFormSection {
     value: IValue;
     activityExamples: string[];
     handleCancelEditActivity: () => void;
-    // handleSaveValueActivities: (newValue: IValue) => Promise<void>;
     handleMoreClickValue: (value: IValue, event: React.MouseEvent<HTMLElement>) => void;
     handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
@@ -49,7 +48,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         value,
         // activityExamples,
         // handleCancelEditActivity,
-        // handleSaveValueActivities,
         handleMoreClickValue,
         handleMoreClickActivity,
     } = props;
@@ -156,7 +154,6 @@ const AddEditValueDialog: FunctionComponent<{
     loading?: boolean;
     handleChange: (change: string) => void;
     handleCancel: () => void;
-    //handleDelete?: () => void;
     handleSave: () => void;
 }> = (props) => {
     const {
@@ -169,7 +166,6 @@ const AddEditValueDialog: FunctionComponent<{
         loading,
         handleCancel,
         handleChange,
-        //handleDelete,
         handleSave,
     } = props;
     return (
@@ -296,8 +292,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         // valueId is sufficient for creating this interface callback,
         // but upon activation our viewState takes a copy of the value that is being edited.
 
-        //const value = viewState.selectedValue; // NOTE: For discussion w/ James: This should work by itself, but updateValue throws error because of some type conversion issue.
-        const value = patientStore.getValueById(viewState.selectedValue?.valueId as string);
+        const value = viewState.selectedValue;
         console.assert(value, `Value to edit not found: ${value?.valueId}`);
 
         if (value) {
@@ -306,19 +301,19 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             viewState.name = value.name;
             viewState.modeState = {
                 mode: 'edit',
-                editValue: {
-                    ...toJS(value),
-                },
+                editValue: value,
             };
         }
     });
 
     const handleCancelValue = action(() => {
         viewState.openAddEditValue = false;
+        // TODO Activity Refactor: No reason we should be reseting this?
         patientStore.loadValuesInventoryState.resetState();
     });
 
     const handleCancelEditActivity = action(() => {
+        // TODO Activity Refactor: No reason we should be reseting this?
         patientStore.loadValuesInventoryState.resetState();
     });
 
@@ -328,15 +323,12 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleDeleteValue = action(async () => {
         // TODO: Add delete confirmation.
-        //const value = viewState.selectedValue; // NOTE: For discussion w/ James: This should work by itself, but deleteValue throws error because of some type conversion issue.
-        const value = patientStore.getValueById(viewState.selectedValue?.valueId as string);
-        console.assert(value, `Value to edit not found: ${value?.valueId}`);
-        await patientStore.deleteValue(value as IValue);
+        const value = viewState.selectedValue;
 
-        if (!patientStore.loadValuesInventoryState.error) {
-            viewState.moreTargetValueEl = undefined;
-            viewState.openAddEditValue = false;
-        }
+        // Remove the popup menu
+        viewState.moreTargetValueEl = undefined;
+
+        await patientStore.deleteValue(value as IValue);
     });
 
     const handleSaveValue = action(async () => {
@@ -358,7 +350,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             // the value changed?
 
             await patientStore.updateValue({
-                ...toJS(viewState.modeState.editValue),
+                ...viewState.modeState.editValue,
                 name: viewState.name,
                 editedDateTime: new Date(),
             });
@@ -461,7 +453,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                                 value={value}
                                                 activityExamples={activityExamples}
                                                 handleCancelEditActivity={handleCancelEditActivity}
-                                                // handleSaveValueActivities={handleSaveValueActivities(idx)}
                                                 handleMoreClickValue={handleMoreClickValue}
                                                 handleMoreClickActivity={handleMoreClickActivity}
                                                 key={value.valueId}
@@ -501,7 +492,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     handleCancel={handleCancelValue}
                     handleChange={handleChangeValue}
                     handleSave={handleSaveValue}
-                    //handleDelete={viewState.modeState.mode == 'edit' ? handleDeleteValue : undefined}
                 />
             </ContentLoader>
         </DetailPage>
