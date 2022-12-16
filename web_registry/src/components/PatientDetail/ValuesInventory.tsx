@@ -4,35 +4,27 @@ import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
-import { KeyedMap } from 'shared/types';
+
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { getString } from 'src/services/strings';
-import { usePatient, useStores } from 'src/stores/stores';
+import { usePatient } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
-    const {
-        appContentConfig: { lifeAreas },
-    } = useStores();
+    // const {
+    //     appContentConfig: { lifeAreas },
+    // } = useStores();
     const currentPatient = usePatient();
-    const { valuesInventory } = currentPatient;
-    const { assigned, assignedDateTime, lastUpdatedDateTime, values } = valuesInventory;
+    const { values, valuesInventory } = currentPatient;
+    const { assigned, assignedDateTime } = valuesInventory;
 
-    const lifeareaMap = Object.assign({}, ...lifeAreas.map((la) => ({ [la.id]: la.name }))) as KeyedMap<string>;
+    console.log(values);
 
     const activities = values
         ?.map((v) => {
-            return v.activities.map((a) => {
-                return {
-                    value: v.name,
-                    lifearea: lifeareaMap[v.lifeAreaId],
-                    name: a.name,
-                    enjoyment: a.enjoyment,
-                    importance: a.importance,
-                    lastEdited: a.editedDateTime,
-                };
-            });
+            return currentPatient.getActivitiesByValueId(v.valueId as string); // NOTE: valueId should not be optional?
         })
         .reduce((a, b) => a.concat(b), []);
+    console.log(activities);
 
     var dateStrings: string[] = [];
     if (assigned && !!assignedDateTime) {
@@ -41,14 +33,15 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         );
     }
 
-    if (!!lastUpdatedDateTime) {
-        dateStrings.push(
-            `${getString('patient_values_inventory_activity_date_header')} ${format(
-                lastUpdatedDateTime,
-                'MM/dd/yyyy',
-            )}`,
-        );
-    }
+    // NOTE: Why did we remove lastUpdatedDateTime from values-inventory.json?
+    // if (!!lastUpdatedDateTime) {
+    //     dateStrings.push(
+    //         `${getString('patient_values_inventory_activity_date_header')} ${format(
+    //             lastUpdatedDateTime,
+    //             'MM/dd/yyyy',
+    //         )}`,
+    //     );
+    // }
 
     return (
         <ActionPanel
@@ -94,13 +87,16 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 {activities.map((activity, idx) => (
                                     <TableRow key={idx}>
                                         <TableCell component="th" scope="row">
-                                            {!!activity.lastEdited ? format(activity.lastEdited, 'MM/dd/yyyy') : '--'}
+                                            {!!activity.editedDateTime
+                                                ? format(activity.editedDateTime, 'MM/dd/yyyy')
+                                                : '--'}
                                         </TableCell>
                                         <TableCell>{activity.name}</TableCell>
                                         <TableCell>{activity.enjoyment}</TableCell>
                                         <TableCell>{activity.importance}</TableCell>
-                                        <TableCell>{activity.lifearea}</TableCell>
-                                        <TableCell>{activity.value}</TableCell>
+                                        <TableCell>{activity.valueId}</TableCell> // TODO: This should be life area
+                                        value
+                                        <TableCell>{activity.valueId}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
