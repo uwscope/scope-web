@@ -1,6 +1,8 @@
 """
 In addition to its standard set properties,
-a put or post to scope.database.patient.activities must maintain the scheduled activities.
+a post or put to scope.database.patient.activity_schedules must maintain the scheduled_activities.
+
+Delete could be here too, which would consolidate all related tests.
 """
 
 import datetime
@@ -12,8 +14,6 @@ import scope.database.date_utils as date_utils
 import scope.database.patient.activity_schedules
 import scope.database.patient.scheduled_activities
 import scope.database.patients
-import scope.database.patient_unsafe_utils as patient_unsafe_utils
-import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.enums
 import scope.schema
 import scope.schema_utils
@@ -26,13 +26,11 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
     activity_schedule = {
         "_type": "activitySchedule",
         "activityId": "testActivityId",
-        "isActive": True,
-        "isDeleted": False,
         "editedDateTime": date_utils.format_datetime(
             pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
         ),
-        "startDateTime": date_utils.format_datetime(
-            pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
+        "date": date_utils.format_date(
+            datetime.date(2022, 3, 12)
         ),
         "hasRepetition": True,
         "repeatDayFlags": {
@@ -227,6 +225,55 @@ def test_activity_schedule_calculate_scheduled_activities_to_delete():
     ]
 
 
+def test_activity_schedule_post_maintains_scheduled_activities(
+    database_temp_patient_factory: Callable[
+        [],
+        scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
+    ],
+    data_fake_activity_schedule_factory: Callable[[], dict],
+):
+    """
+    Test that scheduled activities are maintained in a post.
+
+    The actual logic of specific scheduled activities is tested elsewhere.
+    This test just ensures that it sees the collection being manipulated.
+    """
+
+    temp_patient = database_temp_patient_factory()
+    patient_collection = temp_patient.collection
+
+    # Obtain fake activity schedule
+    fake_activity_schedule = data_fake_activity_schedule_factory()
+    # Ensure the date is in the future so maintenance will result in deletion
+    fake_activity_schedule.update(
+        {
+            "startDateTime": date_utils.format_datetime(
+                pytz.utc.localize(datetime.datetime.now() + datetime.timedelta(days=1))
+            )
+        }
+    )
+    # Post the activity schedule
+    fake_activity_schedule_post_result = (
+        scope.database.patient.activity_schedules.post_activity_schedule(
+            collection=patient_collection,
+            activity_schedule=fake_activity_schedule,
+        )
+    )
+    assert fake_activity_schedule_post_result.inserted_count == 1
+    inserted_fake_activity_schedule = fake_activity_schedule_post_result.document
+
+    # Ensure some scheduled activities were created
+    scheduled_activities_matching_activity_schedule_id = [
+        scheduled_activity_current
+        for scheduled_activity_current in scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
+        if scheduled_activity_current.get("activityScheduleId")
+        == inserted_fake_activity_schedule["activityScheduleId"]
+    ]
+    assert len(scheduled_activities_matching_activity_schedule_id) > 0
+
+
 def test_activity_schedule_put_maintains_scheduled_activities(
     database_temp_patient_factory: Callable[
         [],
@@ -235,188 +282,107 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     data_fake_activity_schedule_factory: Callable[[], dict],
 ):
     """
-    Test that the scheduled activities are maintained.
+    Test that scheduled activities are maintained in a put.
 
-    The actual logic of scheduling specific activities is tested elsewhere.
+    The actual logic of specific scheduled activities is tested elsewhere.
     This test just ensures that it sees the collection being manipulated.
     """
 
     temp_patient = database_temp_patient_factory()
     patient_collection = temp_patient.collection
 
-    # Obtain fake activity schedule to use as template
+    # Obtain fake activity schedule
     fake_activity_schedule = data_fake_activity_schedule_factory()
-    activity_schedule_id = collection_utils.generate_set_id()
-    fake_activity_schedule[
-        scope.database.patient.activity_schedules.SEMANTIC_SET_ID
-    ] = activity_schedule_id
-    fake_activity_schedule["_set_id"] = activity_schedule_id
-
-    # Disable the activity schedule
+    # Ensure the date is in the future so maintenance will result in deletion
     fake_activity_schedule.update(
         {
-            "isActive": False,
-            "isDeleted": False,
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
+            "date": date_utils.format_date(
+                datetime.date.today() + datetime.timedelta(days=1)
             ),
+            "hasRepetition": True,
+            "repeatDayFlags": {
+                scope.enums.DayOfWeek.Monday.value: True,
+                scope.enums.DayOfWeek.Tuesday.value: False,
+                scope.enums.DayOfWeek.Wednesday.value: False,
+                scope.enums.DayOfWeek.Thursday.value: False,
+                scope.enums.DayOfWeek.Friday.value: False,
+                scope.enums.DayOfWeek.Saturday.value: False,
+                scope.enums.DayOfWeek.Sunday.value: False,
+            },
         }
     )
-    patient_unsafe_utils.unsafe_update_activity_schedule(
-        collection=patient_collection,
-        set_id=activity_schedule_id,
-        activity_schedule_complete=fake_activity_schedule,
-    )
-
-    # Determine what scheduled activities already exist
-    existing_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
+    # Post the activity schedule
+    fake_activity_schedule_post_result = (
+        scope.database.patient.activity_schedules.post_activity_schedule(
+            collection=patient_collection,
+            activity_schedule=fake_activity_schedule,
         )
     )
-    if not existing_scheduled_activities:
-        existing_scheduled_activities = []
+    assert fake_activity_schedule_post_result.inserted_count == 1
+    inserted_fake_activity_schedule = fake_activity_schedule_post_result.document
 
-    # Enable the activity schedule
-    fake_activity_schedule.update(
-        {
-            "isActive": True,
-            "isDeleted": False,
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
-            ),
-        }
-    )
-    patient_unsafe_utils.unsafe_update_activity_schedule(
-        collection=patient_collection,
-        set_id=activity_schedule_id,
-        activity_schedule_complete=fake_activity_schedule,
-    )
-
-    # Ensure we now obtain new scheduled activities
-    new_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
-        )
-    )
-    new_scheduled_activities = [
+    # Ensure some scheduled activities were created
+    existing_scheduled_activities_matching_activity_schedule_id = [
         scheduled_activity_current
-        for scheduled_activity_current in new_scheduled_activities
-        if scheduled_activity_current not in existing_scheduled_activities
-    ]
-    assert len(new_scheduled_activities) > 0
-
-    # Disable the activity of the activity schedule
-    fake_activity_schedule.update(
-        {
-            "isActive": False,
-            "isDeleted": False,
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
-            ),
-        }
-    )
-    patient_unsafe_utils.unsafe_update_activity_schedule(
-        collection=patient_collection,
-        set_id=activity_schedule_id,
-        activity_schedule_complete=fake_activity_schedule,
-    )
-
-    # Ensure there are no pending scheduled activities
-    # Because pending logic is already tested,
-    # this confirms cancellation while being robust to an item created in this test which is now in the past
-    existing_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
+        for scheduled_activity_current in scope.database.patient.scheduled_activities.get_scheduled_activities(
             collection=patient_collection
         )
-    )
-    if not existing_scheduled_activities:
-        existing_scheduled_activities = []
-
-    existing_scheduled_activities = [
-        scheduled_activity_current
-        for scheduled_activity_current in existing_scheduled_activities
-        if scheduled_activity_current[
-            scope.database.patient.activity_schedules.SEMANTIC_SET_ID
-        ]
-        == activity_schedule_id
+        if scheduled_activity_current.get("activityScheduleId")
+        == inserted_fake_activity_schedule["activityScheduleId"]
     ]
+    assert len(existing_scheduled_activities_matching_activity_schedule_id) > 0
 
-    pending_scheduled_activities = scheduled_item_utils.pending_scheduled_items(
-        scheduled_items=existing_scheduled_activities,
-        after_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
-    )
-
-    assert len(pending_scheduled_activities) == 0
-
-    # Enable the activity schedule
-    fake_activity_schedule.update(
+    # Change the repeat pattern
+    del inserted_fake_activity_schedule["_id"]
+    inserted_fake_activity_schedule.update(
         {
-            "isActive": True,
-            "isDeleted": False,
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
-            ),
+            "repeatDayFlags": {
+                scope.enums.DayOfWeek.Monday.value: False,  # Change will remove scheduled activities
+                scope.enums.DayOfWeek.Tuesday.value: True,  # Change will create scheduled activities
+                scope.enums.DayOfWeek.Wednesday.value: False,
+                scope.enums.DayOfWeek.Thursday.value: False,
+                scope.enums.DayOfWeek.Friday.value: False,
+                scope.enums.DayOfWeek.Saturday.value: False,
+                scope.enums.DayOfWeek.Sunday.value: False,
+            },
         }
     )
-    patient_unsafe_utils.unsafe_update_activity_schedule(
-        collection=patient_collection,
-        set_id=activity_schedule_id,
-        activity_schedule_complete=fake_activity_schedule,
-    )
 
-    # Ensure we now obtain new scheduled activities
-    new_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
+    # Put the updated activity schedule
+    updated_activity_schedule_put_result = (
+        scope.database.patient.activity_schedules.put_activity_schedule(
+            collection=patient_collection,
+            set_id=inserted_fake_activity_schedule["activityScheduleId"],
+            activity_schedule=inserted_fake_activity_schedule,
         )
     )
-    new_scheduled_activities = [
+    assert updated_activity_schedule_put_result.inserted_count == 1
+
+    # Get the new scheduled activities
+    new_scheduled_activities_matching_activity_schedule_id = [
         scheduled_activity_current
-        for scheduled_activity_current in new_scheduled_activities
-        if scheduled_activity_current not in existing_scheduled_activities
-    ]
-    assert len(new_scheduled_activities) > 0
-
-    # Delete the activity schedule
-    fake_activity_schedule.update(
-        {
-            "isActive": True,
-            "isDeleted": True,
-            "startDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
-            ),
-        }
-    )
-    patient_unsafe_utils.unsafe_update_activity_schedule(
-        collection=patient_collection,
-        set_id=activity_schedule_id,
-        activity_schedule_complete=fake_activity_schedule,
-    )
-
-    # Ensure there are no pending scheduled activities
-    # Because pending logic is already tested,
-    # this confirms cancellation while being robust to an item created in this test which is now in the past
-    existing_scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
+        for scheduled_activity_current in scope.database.patient.scheduled_activities.get_scheduled_activities(
             collection=patient_collection
         )
-    )
-    if not existing_scheduled_activities:
-        existing_scheduled_activities = []
-
-    existing_scheduled_activities = [
-        scheduled_activity_current
-        for scheduled_activity_current in existing_scheduled_activities
-        if scheduled_activity_current[
-            scope.database.patient.activity_schedules.SEMANTIC_SET_ID
-        ]
-        == activity_schedule_id
+        if scheduled_activity_current.get("activityScheduleId")
+        == inserted_fake_activity_schedule["activityScheduleId"]
     ]
+    assert len(existing_scheduled_activities_matching_activity_schedule_id) > 0
 
-    pending_scheduled_activities = scheduled_item_utils.pending_scheduled_items(
-        scheduled_items=existing_scheduled_activities,
-        after_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
-    )
+    # At least one scheduled activity should have been removed
+    deleted_scheduled_activities = [
+        scheduled_activity_current
+        for scheduled_activity_current in existing_scheduled_activities_matching_activity_schedule_id
+        if scheduled_activity_current
+        not in new_scheduled_activities_matching_activity_schedule_id
+    ]
+    assert len(deleted_scheduled_activities) > 0
 
-    assert len(pending_scheduled_activities) == 0
+    # At least one new scheduled activity should have been created
+    created_scheduled_activiites = [
+        scheduled_activity_current
+        for scheduled_activity_current in new_scheduled_activities_matching_activity_schedule_id
+        if scheduled_activity_current
+        not in existing_scheduled_activities_matching_activity_schedule_id
+    ]
+    assert len(created_scheduled_activiites) > 0

@@ -19,10 +19,19 @@ def delete_value(
 
     - Any existing activities with the deleted value must be modified to have no value.
     """
-    existing_activities = scope.database.patient.activities.get_activities(
-        collection=collection
+
+    result = scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
     )
-    if existing_activities:
+
+    if result.inserted_count == 1:
+        existing_activities = scope.database.patient.activities.get_activities(
+            collection=collection
+        )
+
         for activity in existing_activities:
             if activity.get(SEMANTIC_SET_ID) == set_id:
                 del activity["_id"]
@@ -33,12 +42,7 @@ def delete_value(
                     set_id=activity[scope.database.patient.activities.SEMANTIC_SET_ID],
                 )
 
-    return scope.database.collection_utils.delete_set_element(
-        collection=collection,
-        document_type=DOCUMENT_TYPE,
-        set_id=set_id,
-        rev=rev,
-    )
+    return result
 
 
 def get_values(

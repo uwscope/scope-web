@@ -90,6 +90,9 @@ TEST_CONFIGS = [
         flask_document_set_key="activities",
         flask_query_set_element_type="activity",
         flask_document_set_element_key="activity",
+        options=ConfigTestPatientSetOptions(
+            set_supports_deletion=True,
+        ),
     ),
     ConfigTestPatientSet(
         name="activitylogs",
@@ -120,6 +123,9 @@ TEST_CONFIGS = [
         flask_document_set_key="activityschedules",
         flask_query_set_element_type="activityschedule",
         flask_document_set_element_key="activityschedule",
+        options=ConfigTestPatientSetOptions(
+            set_supports_deletion=True,
+        ),
     ),
     ConfigTestPatientSet(
         name="assessments",

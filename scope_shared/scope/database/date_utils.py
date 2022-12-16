@@ -21,7 +21,7 @@ def parse_date(date: str) -> _datetime.date:
     ):
         raise ValueError('Invalid date format: "{}".'.format(date))
 
-    parsed_date = parsed_datetime
+    parsed_date = parsed_datetime.date()
 
     return parsed_date
 

@@ -4,7 +4,7 @@ import pymongo.errors
 
 import request_context
 import request_utils
-import scope.database
+from scope.database import collection_utils
 import scope.database.patient.activity_schedules
 import scope.schema
 
@@ -145,6 +145,51 @@ def put_activity_schedule(patient_id, activityschedule_id):
         request_utils.abort_revision_conflict(
             document={
                 "activityschedule": document_conflict,
+            }
+        )
+    else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
+
+        return {
+            "activityschedule": document_response,
+        }
+
+
+@activity_schedules_blueprint.route(
+    "/<string:patient_id>/activityschedule/<string:activityschedule_id>",
+    methods=["DELETE"],
+)
+@flask_json.as_json
+def delete_activity_schedule(patient_id, activityschedule_id):
+    context = request_context.authorized_for_patient(patient_id=patient_id)
+    patient_collection = context.patient_collection(patient_id=patient_id)
+
+    # Obtain the _rev being deleted
+    if_match_header = flask.request.headers.get("If-Match")
+    if if_match_header is None:
+        request_utils.abort_delete_without_if_match_header()
+    rev = int(if_match_header)
+
+    # Delete the document
+    try:
+        result = scope.database.patient.activity_schedules.delete_activity_schedule(
+            collection=patient_collection,
+            set_id=activityschedule_id,
+            rev=rev,
+        )
+    except collection_utils.DocumentNotFoundException:
+        # The document may have never existed or may have already been deleted
+        request_utils.abort_document_not_found()
+    except collection_utils.DocumentModifiedException as e:
+        # Indicates a revision race condition, return error with current revision
+        document_existing = e.document_existing
+
+        request_utils.abort_revision_conflict(
+            document={
+                "activityschedule": document_existing,
             }
         )
     else:

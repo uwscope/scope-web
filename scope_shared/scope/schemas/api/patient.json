@@ -6,62 +6,84 @@
 	"type": "object",
 	"properties": {
 		"_type": { "const": "patient" },
-		"identity": {
-			"type": "object",
-			"description": "IPatientIdentity schema",
-			"$ref": "/schemas/documents/patient-identity"
+
+		"activities": {
+			"$ref": "/schemas/documents/activities"
 		},
-		"profile": {
-			"type": "object",
-			"description": "IPatientProfile schema",
-			"$ref": "/schemas/documents/patient-profile"
+		"activityLogs": {
+			"$ref": "/schemas/documents/activity-logs"
+		},
+		"activitySchedules": {
+			"$ref": "/schemas/documents/activity-schedules"
+		},
+		"assessments": {
+			"$ref": "/schemas/documents/assessments"
+		},
+		"assessmentLogs": {
+			"$ref": "/schemas/documents/assessment-logs"
+		},
+		"caseReviews": {
+			"$ref": "/schemas/documents/case-reviews"
 		},
 		"clinicalHistory": {
 			"type": "object",
 			"description": "IClinicalHistory schema",
 			"$ref": "/schemas/documents/clinical-history"
 		},
-		"valuesInventory": {
+		"identity": {
 			"type": "object",
-			"description": "IValuesInventory schema",
-			"$ref": "/schemas/documents/values-inventory"
+			"description": "IPatientIdentity schema",
+			"$ref": "/schemas/documents/patient-identity"
+		},
+		"moodLogs": {
+			"$ref": "/schemas/documents/mood-logs"
+		},
+		"profile": {
+			"type": "object",
+			"description": "IPatientProfile schema",
+			"$ref": "/schemas/documents/patient-profile"
 		},
 		"safetyPlan": {
 			"type": "object",
 			"description": "ISafetyPlan schema",
 			"$ref": "/schemas/documents/safety-plan"
 		},
-		"sessions": {
-			"$ref": "/schemas/documents/sessions"
-		},
-		"caseReviews": {
-			"$ref": "/schemas/documents/case-reviews"
-		},
-		"assessments": {
-			"$ref": "/schemas/documents/assessments"
+		"scheduledActivities": {
+			"$ref": "/schemas/documents/scheduled-activities"
 		},
 		"scheduledAssessments": {
 			"$ref": "/schemas/documents/scheduled-assessments"
 		},
-		"assessmentLogs": {
-			"$ref": "/schemas/documents/assessment-logs"
-		},
-		"activities": {
-			"$ref": "/schemas/documents/activities"
-		},
-		"scheduledActivities": {
-			"$ref": "/schemas/documents/scheduled-activities"
-		},
-		"activityLogs": {
-			"$ref": "/schemas/documents/activity-logs"
-		},
-		"moodLogs": {
-			"$ref": "/schemas/documents/mood-logs"
+		"sessions": {
+			"$ref": "/schemas/documents/sessions"
 		},
 		"values": {
 			"$ref": "/schemas/documents/values"
+		},
+		"valuesInventory": {
+			"type": "object",
+			"description": "IValuesInventory schema",
+			"$ref": "/schemas/documents/values-inventory"
 		}
 	},
 	"additionalProperties": false,
-	"required": ["_type", "identity", "profile"]
+	"required": [
+		"_type",
+		"activities",
+		"activityLogs",
+		"activitySchedules",
+		"assessments",
+		"assessmentLogs",
+		"caseReviews",
+		"clinicalHistory",
+		"identity",
+		"moodLogs",
+		"profile",
+		"safetyPlan",
+		"scheduledActivities",
+		"scheduledAssessments",
+		"sessions",
+		"values",
+		"valuesInventory"
+	]
 }

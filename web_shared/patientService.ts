@@ -24,9 +24,18 @@ import {
     ISafetyPlanResponse,
     ISafetyPlanRequest,
     IScheduledActivityListResponse,
+    IActivityRequest,
+    IActivityResponse,
+    IActivityListResponse,
     IActivityLogListResponse,
     IActivityLogResponse,
     IActivityLogRequest,
+    IActivityScheduleRequest,
+    IActivityScheduleResponse,
+    IActivityScheduleListResponse,
+    IMoodLogRequest,
+    IMoodLogResponse,
+    IMoodLogListResponse,
     IScheduledAssessmentListResponse,
     IValueRequest,
     IValueResponse,
@@ -35,6 +44,7 @@ import {
 import {
     IActivity,
     IActivityLog,
+    IActivitySchedule,
     IAssessment,
     IAssessmentLog,
     ICaseReview,
@@ -50,14 +60,6 @@ import {
     IValue,
     IValuesInventory,
 } from 'shared/types';
-import {
-    IActivityListResponse,
-    IActivityRequest,
-    IActivityResponse,
-    IMoodLogListResponse,
-    IMoodLogRequest,
-    IMoodLogResponse,
-} from './serviceTypes';
 
 export interface IPatientService extends IServiceBase {
     // Dynamic
@@ -92,6 +94,10 @@ export interface IPatientService extends IServiceBase {
     getActivities(): Promise<IActivity[]>;
     addActivity(activity: IActivity): Promise<IActivity>;
     updateActivity(activity: IActivity): Promise<IActivity>;
+
+    getActivitySchedules(): Promise<IActivitySchedule[]>;
+    addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
+    updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
 
     getActivityLogs(): Promise<IActivityLog[]>;
     addActivityLog(activityLog: IActivityLog): Promise<IActivityLog>;
@@ -295,6 +301,36 @@ class PatientService extends ServiceBase implements IPatientService {
         return response.data?.activity;
     }
 
+    public async getActivitySchedules(): Promise<IActivitySchedule[]> {
+        const response = await this.axiosInstance.get<IActivityScheduleListResponse>(`/activitySchedules`);
+        return response.data?.activitySchedules;
+    }
+
+    public async addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
+        (activitySchedule as any)._type = 'activitySchedule';
+
+        const response = await this.axiosInstance.post<IActivityScheduleResponse>(`/activitySchedules`, {
+            activitySchedule,
+        } as IActivityScheduleRequest);
+        return response.data?.activitySchedule;
+    }
+
+    public async updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
+        logger.assert(
+            (activitySchedule as any)._type === 'activitySchedule',
+            `invalid _type for activitySchedule: ${(activitySchedule as any)._type}`,
+        );
+
+        (activitySchedule as any)._type = 'activitySchedule';
+        const response = await this.axiosInstance.put<IActivityScheduleResponse>(
+            `/activitySchedules/${activitySchedule.activityScheduleId}`,
+            {
+                activitySchedule,
+            } as IActivityScheduleRequest,
+        );
+        return response.data?.activitySchedule;
+    }
+
     public async getPatientConfig(): Promise<IPatientConfig> {
         const response = await this.axiosInstance.get<IPatientConfig>(`/summary`);
         return response.data;
@@ -397,7 +433,6 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async deleteValue(value: IValue): Promise<IValue> {
-        (value as any)._type = 'value';
         logger.assert((value as any)._rev != undefined, '_rev should be in the request data');
         const response = await this.axiosInstance.delete<IValueResponse>(`/value/${value.valueId}`, {
             headers: {

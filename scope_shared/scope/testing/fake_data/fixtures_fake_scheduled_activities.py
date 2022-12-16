@@ -165,12 +165,7 @@ def fixture_data_fake_scheduled_activities_factory(
     Fixture for data_fake_scheduled_activities_factory.
     """
 
-    # activities may randomly not include any elements.
-    # Scheduled activities are not defined in such a scenario.
-    # Generate new activity schedules that includes at least one element.
     activity_schedules = data_fake_activity_schedules_factory()
-    while not len(activity_schedules) > 0:
-        activity_schedules = data_fake_activity_schedules_factory()
 
     # Simulate IDs that can be referenced in fake scheduled activities
     for activity_schedule_current in activity_schedules:

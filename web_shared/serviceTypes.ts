@@ -1,6 +1,7 @@
 import {
     IActivity,
     IActivityLog,
+    IActivitySchedule,
     IAssessment,
     IAssessmentLog,
     ICaseReview,
@@ -67,7 +68,7 @@ export interface ISessionResponse extends IServiceResponse {
     session: ISession;
 }
 
-export interface ISessionRequest extends IServiceResponse {
+export interface ISessionRequest {
     session: ISession;
 }
 
@@ -79,7 +80,7 @@ export interface ICaseReviewResponse extends IServiceResponse {
     casereview: ICaseReview;
 }
 
-export interface ICaseReviewRequest extends IServiceResponse {
+export interface ICaseReviewRequest {
     casereview: ICaseReview;
 }
 
@@ -91,7 +92,7 @@ export interface IMoodLogResponse extends IServiceResponse {
     moodlog: IMoodLog;
 }
 
-export interface IMoodLogRequest extends IServiceResponse {
+export interface IMoodLogRequest {
     moodlog: IMoodLog;
 }
 
@@ -103,8 +104,20 @@ export interface IActivityResponse extends IServiceResponse {
     activity: IActivity;
 }
 
-export interface IActivityRequest extends IServiceResponse {
+export interface IActivityRequest {
     activity: IActivity;
+}
+
+export interface IActivityScheduleListResponse extends IServiceResponse {
+    activitySchedules: IActivitySchedule[];
+}
+
+export interface IActivityScheduleResponse extends IServiceResponse {
+    activitySchedule: IActivitySchedule;
+}
+
+export interface IActivityScheduleRequest {
+    activitySchedule: IActivitySchedule;
 }
 
 export interface IProviderIdentityListResponse extends IServiceResponse {
@@ -119,7 +132,7 @@ export interface IAssessmentResponse extends IServiceResponse {
     assessment: IAssessment;
 }
 
-export interface IAssessmentRequest extends IServiceResponse {
+export interface IAssessmentRequest {
     assessment: IAssessment;
 }
 
@@ -131,7 +144,7 @@ export interface IAssessmentLogResponse extends IServiceResponse {
     assessmentlog: IAssessmentLog;
 }
 
-export interface IAssessmentLogRequest extends IServiceResponse {
+export interface IAssessmentLogRequest {
     assessmentlog: IAssessmentLog;
 }
 
@@ -159,7 +172,7 @@ export interface IActivityLogResponse extends IServiceResponse {
     activitylog: IActivityLog;
 }
 
-export interface IActivityLogRequest extends IServiceResponse {
+export interface IActivityLogRequest {
     activitylog: IActivityLog;
 }
 

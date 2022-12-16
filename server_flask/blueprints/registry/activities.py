@@ -4,7 +4,7 @@ import pymongo.errors
 import request_context
 
 import request_utils
-import scope.database
+from scope.database import collection_utils
 import scope.database.patient.activities
 import scope.schema
 
@@ -147,6 +147,51 @@ def put_activity(patient_id, activity_id):
         request_utils.abort_revision_conflict(
             document={
                 "activity": document_conflict,
+            }
+        )
+    else:
+        # Validate and normalize the response
+        document_response = request_utils.singleton_put_response_validate(
+            document=result.document,
+        )
+
+        return {
+            "activity": document_response,
+        }
+
+
+@activities_blueprint.route(
+    "/<string:patient_id>/activity/<string:activity_id>",
+    methods=["DELETE"],
+)
+@flask_json.as_json
+def delete_activity(patient_id, activity_id):
+    context = request_context.authorized_for_patient(patient_id=patient_id)
+    patient_collection = context.patient_collection(patient_id=patient_id)
+
+    # Obtain the _rev being deleted
+    if_match_header = flask.request.headers.get("If-Match")
+    if if_match_header is None:
+        request_utils.abort_delete_without_if_match_header()
+    rev = int(if_match_header)
+
+    # Delete the document
+    try:
+        result = scope.database.patient.activities.delete_activity(
+            collection=patient_collection,
+            set_id=activity_id,
+            rev=rev,
+        )
+    except collection_utils.DocumentNotFoundException:
+        # The document may have never existed or may have already been deleted
+        request_utils.abort_document_not_found()
+    except collection_utils.DocumentModifiedException as e:
+        # Indicates a revision race condition, return error with current revision
+        document_existing = e.document_existing
+
+        request_utils.abort_revision_conflict(
+            document={
+                "activity": document_existing,
             }
         )
     else:

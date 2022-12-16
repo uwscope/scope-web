@@ -8,8 +8,6 @@ import scope.enums
 import scope.testing.fixtures_database_temp_patient
 
 
-# TODO Activity Refactor: Resolve with new model for deletion
-@pytest.mark.xfail
 def test_delete_scheduled_assessment(
     database_temp_patient_factory: Callable[
         [],

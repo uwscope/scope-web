@@ -32,7 +32,7 @@ def _fake_activity_schedule(
                 datetime_now,
             )
         ),
-        "startDateTime": date_utils.format_datetime(
+        "date": date_utils.format_date(
             pytz.utc.localize(
                 faker.date_time_between(
                     start_date=datetime_now - datetime.timedelta(days=1 * 30),
@@ -41,8 +41,6 @@ def _fake_activity_schedule(
             )
         ),
         "timeOfDay": random.randrange(0, 24),
-        "isActive": random.choice([False, True]),
-        "isDeleted": random.choice([False, True]),
     }
 
     reminder_choices = [
