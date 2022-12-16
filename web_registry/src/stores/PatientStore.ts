@@ -14,6 +14,7 @@ import { getLoadAndLogQuery, onArrayConflict, onSingletonConflict } from 'shared
 import {
     IActivity,
     IActivityLog,
+    IActivitySchedule,
     IAssessment,
     IAssessmentLog,
     ICaseReview,
@@ -25,6 +26,7 @@ import {
     IScheduledActivity,
     IScheduledAssessment,
     ISession,
+    IValue,
     IValuesInventory,
 } from 'shared/types';
 
@@ -34,28 +36,29 @@ export interface IPatientStore extends IPatient {
     readonly recordId: string;
     readonly name: string;
     readonly age: number;
+    readonly latestSession: ISession | undefined;
 
     readonly loadPatientState: IPromiseQueryState;
 
-    readonly loadValuesInventoryState: IPromiseQueryState;
-    readonly loadProfileState: IPromiseQueryState;
-    readonly loadClinicalHistoryState: IPromiseQueryState;
-    readonly loadSafetyPlanState: IPromiseQueryState;
-
-    readonly loadSessionsState: IPromiseQueryState;
-    readonly loadCaseReviewsState: IPromiseQueryState;
-
-    readonly loadAssessmentsState: IPromiseQueryState;
     readonly loadActivitiesState: IPromiseQueryState;
-
-    readonly loadScheduledAssessmentsState: IPromiseQueryState;
-    readonly loadScheduledActivitiesState: IPromiseQueryState;
-
-    readonly loadMoodLogsState: IPromiseQueryState;
-    readonly loadAssessmentLogsState: IPromiseQueryState;
     readonly loadActivityLogsState: IPromiseQueryState;
+    readonly loadActivitySchedulesState: IPromiseQueryState;
 
-    readonly latestSession: ISession | undefined;
+    readonly loadAssessmentLogsState: IPromiseQueryState;
+    readonly loadAssessmentsState: IPromiseQueryState;
+    readonly loadCaseReviewsState: IPromiseQueryState;
+    readonly loadClinicalHistoryState: IPromiseQueryState;
+    readonly loadMoodLogsState: IPromiseQueryState;
+    readonly loadProfileState: IPromiseQueryState;
+    readonly loadSafetyPlanState: IPromiseQueryState;
+    readonly loadScheduledActivitiesState: IPromiseQueryState;
+    readonly loadScheduledAssessmentsState: IPromiseQueryState;
+    readonly loadSessionsState: IPromiseQueryState;
+    readonly loadValuesState: IPromiseQueryState;
+    readonly loadValuesInventoryState: IPromiseQueryState;
+
+    // Helpers
+    getActivitiesByValueId: (valueId: string) => IActivity[];
 
     load(getToken?: () => string | undefined, onUnauthorized?: () => void): void;
 
@@ -84,6 +87,7 @@ export class PatientStore implements IPatientStore {
     private readonly patientService: IPatientService;
 
     private readonly loadPatientDataQuery: PromiseQuery<IPatient>;
+    private readonly loadValuesQuery: PromiseQuery<IValue[]>;
     private readonly loadValuesInventoryQuery: PromiseQuery<IValuesInventory>;
     private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
     private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
@@ -94,6 +98,7 @@ export class PatientStore implements IPatientStore {
 
     private readonly loadAssessmentsQuery: PromiseQuery<IAssessment[]>;
     private readonly loadActivitiesQuery: PromiseQuery<IActivity[]>;
+    private readonly loadActivitySchedulesQuery: PromiseQuery<IActivitySchedule[]>;
 
     private readonly loadScheduledActivitiesQuery: PromiseQuery<IScheduledActivity[]>;
     private readonly loadScheduledAssessmentsQuery: PromiseQuery<IScheduledAssessment[]>;
@@ -117,35 +122,36 @@ export class PatientStore implements IPatientStore {
         this.loadAndLogQuery = getLoadAndLogQuery(logger, this.patientService);
 
         this.loadPatientDataQuery = new PromiseQuery<IPatient>(patient, 'loadPatientData');
-        this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(
-            patient.valuesInventory,
-            'loadValuesInventory',
-        );
-        this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile');
+
+        this.loadActivitiesQuery = new PromiseQuery<IActivity[]>(patient.activities, 'loadActivities');
+        this.loadActivitySchedulesQuery = new PromiseQuery<IActivitySchedule[]>([], 'loadActivitySchedulesQuery');
+        this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>(patient.activityLogs, 'loadActivityLogs');
+
+        this.loadAssessmentsQuery = new PromiseQuery<IAssessment[]>(patient.assessments, 'loadAssessments');
+        this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>(patient.assessmentLogs, 'loadAssessmentLogs');
+
+        this.loadCaseReviewsQuery = new PromiseQuery<ICaseReview[]>(patient.caseReviews, 'loadCaseReviews');
         this.loadClinicalHistoryQuery = new PromiseQuery<IClinicalHistory>(
             patient.clinicalHistory,
             'loadClinicalHistory',
         );
+        this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>(patient.moodLogs, 'loadMoodLogs');
+        this.loadProfileQuery = new PromiseQuery<IPatientProfile>(patient.profile, 'loadProfile');
         this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(patient.safetyPlan, 'loadSafetyPlan');
-
-        this.loadSessionsQuery = new PromiseQuery<ISession[]>(patient.sessions, 'loadSessions');
-        this.loadCaseReviewsQuery = new PromiseQuery<ICaseReview[]>(patient.caseReviews, 'loadCaseReviews');
-
-        this.loadAssessmentsQuery = new PromiseQuery<IAssessment[]>(patient.assessments, 'loadAssessments');
-        this.loadActivitiesQuery = new PromiseQuery<IActivity[]>(patient.activities, 'loadActivities');
-
-        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
-            patient.scheduledAssessments,
-            'loadScheduledAssessments',
-        );
         this.loadScheduledActivitiesQuery = new PromiseQuery<IScheduledActivity[]>(
             patient.scheduledActivities,
             'loadScheduledActivities',
         );
-
-        this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>(patient.assessmentLogs, 'loadAssessmentLogs');
-        this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>(patient.moodLogs, 'loadMoodLogs');
-        this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>(patient.activityLogs, 'loadActivityLogs');
+        this.loadScheduledAssessmentsQuery = new PromiseQuery<IScheduledAssessment[]>(
+            patient.scheduledAssessments,
+            'loadScheduledAssessments',
+        );
+        this.loadSessionsQuery = new PromiseQuery<ISession[]>(patient.sessions, 'loadSessions');
+        this.loadValuesQuery = new PromiseQuery<IValue[]>([], 'loadValuesQuery');
+        this.loadValuesInventoryQuery = new PromiseQuery<IValuesInventory>(
+            patient.valuesInventory,
+            'loadValuesInventory',
+        );
 
         makeAutoObservable(this);
     }
@@ -168,6 +174,10 @@ export class PatientStore implements IPatientStore {
 
     @computed get loadPatientState() {
         return this.loadPatientDataQuery;
+    }
+
+    @computed public get loadValuesState() {
+        return this.loadValuesQuery;
     }
 
     @computed get loadValuesInventoryState() {
@@ -196,6 +206,10 @@ export class PatientStore implements IPatientStore {
 
     @computed get loadMoodLogsState() {
         return this.loadMoodLogsQuery;
+    }
+
+    @computed get loadActivitySchedulesState() {
+        return this.loadActivitySchedulesQuery;
     }
 
     @computed get loadAssessmentLogsState() {
@@ -228,6 +242,10 @@ export class PatientStore implements IPatientStore {
         }
 
         return undefined;
+    }
+
+    @computed public get values() {
+        return this.loadValuesQuery.value || [];
     }
 
     @computed get valuesInventory() {
@@ -283,12 +301,42 @@ export class PatientStore implements IPatientStore {
         return this.loadActivitiesQuery.value || [];
     }
 
+    @computed get activitySchedules(): IActivitySchedule[] {
+        return this.loadActivitySchedulesQuery.value || [];
+
+        // TODO Activity Refactor: I don't think this is necessary?
+        // return (this.loadActivitySchedulesQuery.value || [])
+        //     .map(
+        //         (as) =>
+        //             ({
+        //                 ...as,
+        //                 repeatDayFlags: Object.assign(
+        //                     {},
+        //                     ...daysOfWeekValues.map((x) => ({
+        //                         [x]: !!as?.repeatDayFlags?.[x],
+        //                     })),
+        //                 ),
+        //             }),
+        //     );
+    }
+
     @computed get scheduledAssessments() {
         return this.loadScheduledAssessmentsQuery.value || [];
     }
 
     @computed get scheduledActivities() {
         return this.loadScheduledActivitiesQuery.value || [];
+    }
+
+    @action.bound
+    public getActivitiesByValueId(valueId: string) {
+        return this.activities.filter((a) => {
+            if (!a.valueId) {
+                return false;
+            }
+
+            return a.valueId == valueId;
+        });
     }
 
     @action.bound
@@ -366,10 +414,10 @@ export class PatientStore implements IPatientStore {
             ),
             primaryCareManager: patientProfile.primaryCareManager
                 ? {
-                    name: patientProfile.primaryCareManager?.name,
-                    providerId: patientProfile.primaryCareManager?.providerId,
-                    role: patientProfile.primaryCareManager?.role,
-                }
+                      name: patientProfile.primaryCareManager?.name,
+                      providerId: patientProfile.primaryCareManager?.providerId,
+                      role: patientProfile.primaryCareManager?.role,
+                  }
                 : undefined,
         });
 
