@@ -4,27 +4,25 @@ import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
+import { IActivity } from 'shared/types';
 
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { getString } from 'src/services/strings';
-import { usePatient } from 'src/stores/stores';
+import { usePatient, useStores } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
-    // const {
-    //     appContentConfig: { lifeAreas },
-    // } = useStores();
+    const rootStore = useStores();
     const currentPatient = usePatient();
     const { values, valuesInventory } = currentPatient;
     const { assigned, assignedDateTime } = valuesInventory;
 
-    console.log(values);
-
-    const activities = values
+    const activitiesWithValue = values
         ?.map((v) => {
-            return currentPatient.getActivitiesByValueId(v.valueId as string); // NOTE: valueId should not be optional?
+            return currentPatient.getActivitiesByValueId(v.valueId as string);
         })
         .reduce((a, b) => a.concat(b), []);
-    console.log(activities);
+
+    const otherActivites = currentPatient.getActivitiesWithoutValueId();
 
     var dateStrings: string[] = [];
     if (assigned && !!assignedDateTime) {
@@ -43,6 +41,39 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     //     );
     // }
 
+    const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
+        const value = currentPatient.getValueById(activity.valueId as string);
+        const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
+
+        return (
+            <TableRow key={idx}>
+                <TableCell component="th" scope="row">
+                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
+                </TableCell>
+                <TableCell>{activity.name}</TableCell>
+                <TableCell>{activity.enjoyment}</TableCell>
+                <TableCell>{activity.importance}</TableCell>
+                <TableCell>{lifeAreaContent?.name}</TableCell>
+                <TableCell>{value?.name}</TableCell>
+            </TableRow>
+        );
+    };
+
+    const otherActivityTableRow = (activity: IActivity, idx: number): JSX.Element => {
+        return (
+            <TableRow key={idx}>
+                <TableCell component="th" scope="row">
+                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
+                </TableCell>
+                <TableCell>{activity.name}</TableCell>
+                <TableCell>{activity.enjoyment}</TableCell>
+                <TableCell>{activity.importance}</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+            </TableRow>
+        );
+    };
+
     return (
         <ActionPanel
             id={getString('patient_detail_subsection_values_inventory_hash')}
@@ -60,7 +91,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 } as IActionButton,
             ]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!activities || activities.length == 0 ? (
+                {!activitiesWithValue || activitiesWithValue.length == 0 ? (
                     <Grid item xs={12}>
                         <Typography>{getString('patient_values_inventory_empty')}</Typography>
                     </Grid>
@@ -84,21 +115,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {activities.map((activity, idx) => (
-                                    <TableRow key={idx}>
-                                        <TableCell component="th" scope="row">
-                                            {!!activity.editedDateTime
-                                                ? format(activity.editedDateTime, 'MM/dd/yyyy')
-                                                : '--'}
-                                        </TableCell>
-                                        <TableCell>{activity.name}</TableCell>
-                                        <TableCell>{activity.enjoyment}</TableCell>
-                                        <TableCell>{activity.importance}</TableCell>
-                                        <TableCell>{activity.valueId}</TableCell> // TODO: This should be life area
-                                        value
-                                        <TableCell>{activity.valueId}</TableCell>
-                                    </TableRow>
-                                ))}
+                                {activitiesWithValue.map((activity, idx) => activityWithValueTableRow(activity, idx))}
+                                {otherActivites.map((activity, idx) => otherActivityTableRow(activity, idx))}
                             </TableBody>
                         </Table>
                     </TableContainer>
