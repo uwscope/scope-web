@@ -59,6 +59,8 @@ export interface IPatientStore extends IPatient {
 
     // Helpers
     getActivitiesByValueId: (valueId: string) => IActivity[];
+    getActivitiesWithoutValueId: () => IActivity[];
+    getValueById: (valueId: string) => IValue | undefined;
 
     load(getToken?: () => string | undefined, onUnauthorized?: () => void): void;
 
@@ -340,6 +342,17 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
+    public getActivitiesWithoutValueId() {
+        return this.activities.filter((a) => {
+            return !a.valueId;
+        });
+    }
+
+    @action.bound getValueById(valueId: string) {
+        return this.values.find((v) => v.valueId == valueId);
+    }
+
+    @action.bound
     public async load(getToken?: () => string | undefined, onUnauthorized?: () => void) {
         if (getToken) {
             this.patientService.applyAuth(getToken, onUnauthorized);
@@ -353,19 +366,22 @@ export class PatientStore implements IPatientStore {
         // Use this to make a single patient call to load everything
         const initialLoad = () =>
             this.patientService.getPatient().then((patient) => {
-                this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
-                this.loadClinicalHistoryQuery.fromPromise(Promise.resolve(patient.clinicalHistory));
-                this.loadValuesInventoryQuery.fromPromise(Promise.resolve(patient.valuesInventory));
-                this.loadSafetyPlanQuery.fromPromise(Promise.resolve(patient.safetyPlan));
-                this.loadSessionsQuery.fromPromise(Promise.resolve(patient.sessions));
-                this.loadCaseReviewsQuery.fromPromise(Promise.resolve(patient.caseReviews));
-                this.loadAssessmentsQuery.fromPromise(Promise.resolve(patient.assessments));
                 this.loadActivitiesQuery.fromPromise(Promise.resolve(patient.activities));
-                this.loadScheduledAssessmentsQuery.fromPromise(Promise.resolve(patient.scheduledAssessments));
-                this.loadScheduledActivitiesQuery.fromPromise(Promise.resolve(patient.scheduledActivities));
-                this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
-                this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
                 this.loadActivityLogsQuery.fromPromise(Promise.resolve(patient.activityLogs));
+                this.loadActivitySchedulesQuery.fromPromise(Promise.resolve(patient.activitySchedules));
+                this.loadAssessmentsQuery.fromPromise(Promise.resolve(patient.assessments));
+                this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
+                this.loadCaseReviewsQuery.fromPromise(Promise.resolve(patient.caseReviews));
+                this.loadClinicalHistoryQuery.fromPromise(Promise.resolve(patient.clinicalHistory));
+                this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
+                this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
+                this.loadSafetyPlanQuery.fromPromise(Promise.resolve(patient.safetyPlan));
+                this.loadScheduledActivitiesQuery.fromPromise(Promise.resolve(patient.scheduledActivities));
+                this.loadScheduledAssessmentsQuery.fromPromise(Promise.resolve(patient.scheduledAssessments));
+                this.loadSessionsQuery.fromPromise(Promise.resolve(patient.sessions));
+                this.loadValuesQuery.fromPromise(Promise.resolve(patient.values));
+                this.loadValuesInventoryQuery.fromPromise(Promise.resolve(patient.valuesInventory));
+
                 return patient;
             });
 
