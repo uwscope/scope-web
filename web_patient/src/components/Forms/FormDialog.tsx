@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import withTheme from '@mui/styles/withTheme';
-import { action, runInAction } from 'mobx';
+import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
@@ -31,6 +31,7 @@ import styled from 'styled-components';
 export interface IFormPage {
     content: React.ReactElement;
     canGoNext?: boolean;
+    onSubmit?: () => Promise<boolean>;
 }
 
 export interface IFormDialogProps {
@@ -118,26 +119,45 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
     });
 
     const handleNext = action(async () => {
-        if (state.activePage == maxPages - 1) {
-            state.submitErrorOpen = false;
-            if (onSubmit) {
-                const success = await onSubmit();
+        const isFinalPage = state.activePage == maxPages - 1;
 
-                runInAction(() => {
-                    if (success) {
-                        state.submitSuccessOpen = true;
-                    } else {
-                        state.submitErrorOpen = true;
-                    }
-                });
+        // If this page has a submit handler,
+        // execute the page submit handler
+        const pageSubmit = pages[state.activePage].onSubmit;
+
+        // If this is the final page of the form,
+        // execute any form submit handler
+        const formSubmit = isFinalPage && onSubmit;
+
+        const submitNeeded = !!pageSubmit || !!formSubmit;
+        if (submitNeeded) {
+            // Perform the desired submissions
+            let submitSuccess = true;
+            if (submitSuccess && pageSubmit) {
+                submitSuccess = await pageSubmit();
+            }
+            if (submitSuccess && formSubmit) {
+                submitSuccess = await formSubmit();
+            }
+
+            // In case of error, do not advance the form.
+            // In case of success, the success closer handler will advance the form.
+            state.submitErrorOpen = false;
+            if (submitSuccess) {
+                state.submitSuccessOpen = true;
+            } else {
+                state.submitErrorOpen = true;
+            }
+        } else {
+            // Without any submission, just advance the page.
+            // If already on the final page, close the form.
+            if (!isFinalPage) {
+                const nextPage = Math.min(maxPages - 1, state.activePage + 1);
+                setActivePage(nextPage);
             } else {
                 forceClose();
             }
         }
-
-        const nextPage = Math.min(maxPages - 1, state.activePage + 1);
-
-        setActivePage(nextPage);
     });
 
     const handleBack = action(() => {
@@ -146,7 +166,14 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
 
     const handleSubmitSuccessClose = action(() => {
         state.submitSuccessOpen = false;
-        forceClose();
+
+        const isFinalPage = state.activePage == maxPages - 1;
+        if (!isFinalPage) {
+            const nextPage = Math.min(maxPages - 1, state.activePage + 1);
+            setActivePage(nextPage);
+        } else {
+            forceClose();
+        }
     });
 
     const handleSnackbarClose = action(() => {
