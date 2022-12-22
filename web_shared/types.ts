@@ -116,8 +116,8 @@ export interface IActivitySchedule {
     hasRepetition: boolean;
     repeatDayFlags?: DayOfWeekFlags;
 
-    // TODO Future Support for Notifications
-    // hasReminder: boolean;
+    // TODO Future support for reminders
+    hasReminder: false;
     // reminderTimeOfDay?: number;
 
     editedDateTime: Date;

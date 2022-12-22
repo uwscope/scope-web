@@ -302,27 +302,27 @@ class PatientService extends ServiceBase implements IPatientService {
     }
 
     public async getActivitySchedules(): Promise<IActivitySchedule[]> {
-        const response = await this.axiosInstance.get<IActivityScheduleListResponse>(`/activitySchedules`);
-        return response.data?.activitySchedules;
+        const response = await this.axiosInstance.get<IActivityScheduleListResponse>(`/activityschedules`);
+        return response.data?.activityschedules;
     }
 
     public async addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
         (activitySchedule as any)._type = 'activitySchedule';
 
-        const response = await this.axiosInstance.post<IActivityScheduleResponse>(`/activitySchedules`, {
-            activitySchedule,
+        const response = await this.axiosInstance.post<IActivityScheduleResponse>(`/activityschedules`, {
+            activityschedule: activitySchedule,
         } as IActivityScheduleRequest);
-        return response.data?.activitySchedule;
+        return response.data?.activityschedule;
     }
 
     public async updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
         logger.assert((activitySchedule as any)._type === 'activitySchedule', `invalid _type for activitySchedule: ${(activitySchedule as any)._type}`);
 
         (activitySchedule as any)._type = 'activitySchedule';
-        const response = await this.axiosInstance.put<IActivityScheduleResponse>(`/activitySchedules/${activitySchedule.activityScheduleId}`, {
-            activitySchedule,
+        const response = await this.axiosInstance.put<IActivityScheduleResponse>(`/activityschedule/${activitySchedule.activityScheduleId}`, {
+            activityschedule: activitySchedule,
         } as IActivityScheduleRequest);
-        return response.data?.activitySchedule;
+        return response.data?.activityschedule;
     }
 
     public async getPatientConfig(): Promise<IPatientConfig> {

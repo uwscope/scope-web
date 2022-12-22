@@ -109,15 +109,15 @@ export interface IActivityRequest {
 }
 
 export interface IActivityScheduleListResponse extends IServiceResponse {
-    activitySchedules: IActivitySchedule[];
+    activityschedules: IActivitySchedule[];
 }
 
 export interface IActivityScheduleResponse extends IServiceResponse {
-    activitySchedule: IActivitySchedule;
+    activityschedule: IActivitySchedule;
 }
 
 export interface IActivityScheduleRequest {
-    activitySchedule: IActivitySchedule;
+    activityschedule: IActivitySchedule;
 }
 
 export interface IProviderIdentityListResponse extends IServiceResponse {
