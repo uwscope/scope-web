@@ -29,9 +29,9 @@ import { action, toJS } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
-import { clearTime } from 'shared/time';
+import {clearTime, toUTCDateOnly} from 'shared/time';
 import { IActivity, IActivitySchedule /* IValue, ILifeAreaValue, KeyedMap */ } from 'shared/types';
-import FormDialog from 'src/components/Forms/FormDialog';
+import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from "src/services/routes";
@@ -155,6 +155,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
     interface IActivityScheduleViewStateModeAdd {
         mode: 'addActivitySchedule';
+        activityId: string;
     }
     interface IActivityScheduleViewStateModeEdit {
         mode: 'editActivitySchedule';
@@ -221,13 +222,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }));
     */
 
-    const handleSubmit = action(async () => {
+    const handleSubmitActivity = action(async () => {
         try {
             if (activityViewState.modeState.mode == 'addActivity') {
                 // TODO Activity Refactor: check that our 'add' is valid
+                // is not an empty name
                 // is a unique name
 
-                const createActivity = {
+                // Construct the activity that will be created
+                const createActivity: IActivity = {
                     name: activityViewState.name,
                     enjoyment: activityViewState.enjoyment >= 0 ? activityViewState.enjoyment : undefined,
                     importance: activityViewState.importance >= 0 ? activityViewState.importance : undefined,
@@ -236,16 +239,26 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     editedDateTime: new Date(),
                 };
 
-                await patientStore.addActivity(createActivity);
+                // Create the activity
+                const createdActivity = await patientStore.addActivity(createActivity);
+
+                // Use the created activity to initiate creation of a schedule
+                if (createdActivity?.activityId) {
+                    activityScheduleViewState.modeState = {
+                        mode: "addActivitySchedule",
+                        activityId: createdActivity.activityId,
+                    }
+                }
             } else if (activityViewState.modeState.mode == 'editActivity') {
                 // TODO Activity Refactor: check that our 'edit' is valid
+                // is not an empty name
                 // the value still exists
                 // - update should fail due to rev conflict if it does not?
                 // - what does the client actually do?
                 // is a unique name
                 // the value changed?
 
-                const editActivity = {
+                const editActivity: IActivity = {
                     ...activityViewState.modeState.editActivity,
 
                     name: activityViewState.name,
@@ -260,6 +273,50 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             }
 
             return !patientStore.loadActivitiesState.error;
+        } catch {
+            return false;
+        }
+    });
+
+    const handleSubmitActivitySchedule = action(async () => {
+        try {
+            if (activityScheduleViewState.modeState.mode == 'addActivitySchedule') {
+                // TODO Activity Refactor: check that our 'add' is valid
+
+                const createActivitySchedule: IActivitySchedule = {
+                    activityId: activityScheduleViewState.modeState.activityId,
+                    date: toUTCDateOnly(activityScheduleViewState.date),
+                    timeOfDay: activityScheduleViewState.timeOfDay,
+
+                    hasRepetition: activityScheduleViewState.hasRepetition,
+                    repeatDayFlags: activityScheduleViewState.hasRepetition ? activityScheduleViewState.repeatDayFlags : undefined,
+
+                    // TODO Future Support for Reminders
+                    hasReminder: false,
+
+                    editedDateTime: new Date(),
+                };
+
+                await patientStore.addActivitySchedule(createActivitySchedule);
+            } else if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
+                // TODO Activity Refactor: check that our 'edit' is valid
+
+                const editActivitySchedule: IActivitySchedule = {
+                    ...activityScheduleViewState.modeState.editActivitySchedule,
+
+                    date: toUTCDateOnly(activityScheduleViewState.date),
+                    timeOfDay: activityScheduleViewState.timeOfDay,
+
+                    hasRepetition: activityScheduleViewState.hasRepetition,
+                    repeatDayFlags: activityScheduleViewState.hasRepetition ? activityScheduleViewState.repeatDayFlags : undefined,
+
+                    editedDateTime: new Date(),
+                }
+
+                await patientStore.updateActivitySchedule(editActivitySchedule);
+            }
+
+            return !patientStore.loadActivitySchedulesState.error;
         } catch {
             return false;
         }
@@ -760,16 +817,18 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     */ }
 
-    const pages = [
+    const pages: IFormPage[] = [
         {
             content: activityPage,
             canGoNext: true,
+            onSubmit: handleSubmitActivity,
             // TODO Activity Refactor: Update for valid form submission state
             // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
         },
         {
             content: activitySchedulePage,
             canGoNext: true,
+            onSubmit: handleSubmitActivitySchedule,
             // TODO Activity Refactor: Update for valid form submission state
         }
     ];
@@ -784,7 +843,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             canClose={false}
             loading={patientStore.loadActivitiesState.pending}
             pages={pages}
-            onSubmit={handleSubmit}
             // TODO Activity Refactor
             // submitToast={getString('Form_add_activity_submit_success')}>
             submitToast={"TODO Activity Refactor"}
