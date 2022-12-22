@@ -31,16 +31,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         );
     }
 
-    // NOTE: Why did we remove lastUpdatedDateTime from values-inventory.json?
-    // if (!!lastUpdatedDateTime) {
-    //     dateStrings.push(
-    //         `${getString('patient_values_inventory_activity_date_header')} ${format(
-    //             lastUpdatedDateTime,
-    //             'MM/dd/yyyy',
-    //         )}`,
-    //     );
-    // }
-
     const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
         const value = currentPatient.getValueById(activity.valueId as string);
         const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
