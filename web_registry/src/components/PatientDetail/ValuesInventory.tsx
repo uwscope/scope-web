@@ -31,6 +31,19 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         );
     }
 
+    // TODO: Activity Refactor
+    // (1) What do we put as last updated date in header?
+    // if (!!lastUpdatedDateTime) {
+    //     dateStrings.push(
+    //         `${getString('patient_values_inventory_activity_date_header')} ${format(
+    //             lastUpdatedDateTime,
+    //             'MM/dd/yyyy',
+    //         )}`,
+    //     );
+    // }
+    // (2) `Last updated on` column in the table
+    // (3) Do we show Activity Schedules?
+
     const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
         const value = currentPatient.getValueById(activity.valueId as string);
         const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
@@ -81,7 +94,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 } as IActionButton,
             ]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!activitiesWithValue || activitiesWithValue.length == 0 ? (
+                {(!activitiesWithValue || activitiesWithValue.length == 0) &&
+                (!otherActivites || otherActivites.length == 0) ? (
                     <Grid item xs={12}>
                         <Typography>{getString('patient_values_inventory_empty')}</Typography>
                     </Grid>
