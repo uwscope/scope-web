@@ -70,7 +70,7 @@ export interface IPatientStore {
     loadValuesInventory: () => Promise<void>;
 
     // Activities
-    addActivity: (activity: IActivity) => Promise<void>;
+    addActivity: (activity: IActivity) => Promise<IActivity | null>;
     updateActivity: (activity: IActivity) => Promise<void>;
 
     // Activity logs
@@ -444,8 +444,12 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
-    public async addActivity(activity: IActivity) {
+    public async addActivity(activity: IActivity): Promise<IActivity | null> {
+        let returnAddedActivity = null;
+
         const promise = this.patientService.addActivity(activity).then((addedActivity) => {
+            returnAddedActivity = addedActivity;
+
             const newActivities = this.activities.slice() || [];
             newActivities.push(addedActivity);
             return newActivities;
@@ -456,6 +460,8 @@ export class PatientStore implements IPatientStore {
             this.loadActivitiesQuery,
             onArrayConflict('activity', 'activityId', () => this.activities, logger),
         );
+
+        return returnAddedActivity;
     }
 
     @action.bound
