@@ -14,7 +14,7 @@ export interface IRootStore {
 
     // Helpers
     getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
-    getLifeAreaContent: (lifeArea: string) => ILifeAreaContent | undefined;
+    getLifeAreaContent: (lifeAreaId: string) => ILifeAreaContent | undefined;
     reset: () => void;
 }
 
@@ -24,7 +24,7 @@ export class RootStore implements IRootStore {
     public authStore: IAuthStore;
 
     // App metadata
-    public appTitle = 'SCOPE Registry';
+    public appTitle = "SCOPE Registry";
     public appContentConfig: IAppContentConfig;
 
     constructor(serverConfig: IAppConfig) {
@@ -41,8 +41,8 @@ export class RootStore implements IRootStore {
     }
 
     @action.bound
-    public getLifeAreaContent(lifearea: string) {
-        return this.appContentConfig.lifeAreas.find((la) => la.id == lifearea);
+    public getLifeAreaContent(lifeAreaId: string) {
+        return this.appContentConfig.lifeAreas.find((la) => la.id == lifeAreaId);
     }
 
     @action.bound
