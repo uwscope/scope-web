@@ -1,5 +1,5 @@
 import { action, makeAutoObservable } from 'mobx';
-import { IAppConfig, IAppContentConfig, IAssessmentContent } from 'shared/types';
+import { IAppConfig, IAppContentConfig, IAssessmentContent, ILifeAreaContent } from 'shared/types';
 import { AuthStore, IAuthStore } from 'src/stores/AuthStore';
 import { IPatientsStore, PatientsStore } from 'src/stores/PatientsStore';
 
@@ -14,6 +14,7 @@ export interface IRootStore {
 
     // Helpers
     getAssessmentContent: (assessmentId: string) => IAssessmentContent | undefined;
+    getLifeAreaContent: (lifeAreaId: string) => ILifeAreaContent | undefined;
     reset: () => void;
 }
 
@@ -23,7 +24,7 @@ export class RootStore implements IRootStore {
     public authStore: IAuthStore;
 
     // App metadata
-    public appTitle = 'SCOPE Registry';
+    public appTitle = "SCOPE Registry";
     public appContentConfig: IAppContentConfig;
 
     constructor(serverConfig: IAppConfig) {
@@ -37,6 +38,11 @@ export class RootStore implements IRootStore {
     @action.bound
     public getAssessmentContent(assessmentId: string) {
         return this.appContentConfig.assessments.find((s) => s.id.toLowerCase() == assessmentId.toLowerCase());
+    }
+
+    @action.bound
+    public getLifeAreaContent(lifeAreaId: string) {
+        return this.appContentConfig.lifeAreas.find((la) => la.id == lifeAreaId);
     }
 
     @action.bound

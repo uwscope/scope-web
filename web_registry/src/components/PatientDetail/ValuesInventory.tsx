@@ -4,35 +4,25 @@ import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
-import { KeyedMap } from 'shared/types';
+import { IActivity } from 'shared/types';
+
 import ActionPanel, { IActionButton } from 'src/components/common/ActionPanel';
 import { getString } from 'src/services/strings';
 import { usePatient, useStores } from 'src/stores/stores';
 
 export const ValuesInventory: FunctionComponent = observer(() => {
-    const {
-        appContentConfig: { lifeAreas },
-    } = useStores();
+    const rootStore = useStores();
     const currentPatient = usePatient();
-    const { valuesInventory } = currentPatient;
-    const { assigned, assignedDateTime, lastUpdatedDateTime, values } = valuesInventory;
+    const { values, valuesInventory } = currentPatient;
+    const { assigned, assignedDateTime } = valuesInventory;
 
-    const lifeareaMap = Object.assign({}, ...lifeAreas.map((la) => ({ [la.id]: la.name }))) as KeyedMap<string>;
-
-    const activities = values
+    const activitiesWithValue = values
         ?.map((v) => {
-            return v.activities.map((a) => {
-                return {
-                    value: v.name,
-                    lifearea: lifeareaMap[v.lifeAreaId],
-                    name: a.name,
-                    enjoyment: a.enjoyment,
-                    importance: a.importance,
-                    lastEdited: a.editedDateTime,
-                };
-            });
+            return currentPatient.getActivitiesByValueId(v.valueId as string);
         })
         .reduce((a, b) => a.concat(b), []);
+
+    const otherActivites = currentPatient.getActivitiesWithoutValueId();
 
     var dateStrings: string[] = [];
     if (assigned && !!assignedDateTime) {
@@ -41,14 +31,51 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         );
     }
 
-    if (!!lastUpdatedDateTime) {
-        dateStrings.push(
-            `${getString('patient_values_inventory_activity_date_header')} ${format(
-                lastUpdatedDateTime,
-                'MM/dd/yyyy',
-            )}`,
+    // TODO: Activity Refactor
+    // (1) What do we put as last updated date in header?
+    // if (!!lastUpdatedDateTime) {
+    //     dateStrings.push(
+    //         `${getString('patient_values_inventory_activity_date_header')} ${format(
+    //             lastUpdatedDateTime,
+    //             'MM/dd/yyyy',
+    //         )}`,
+    //     );
+    // }
+    // (2) `Last updated on` column in the table
+    // (3) Do we show Activity Schedules?
+
+    const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
+        const value = currentPatient.getValueById(activity.valueId as string);
+        const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
+
+        return (
+            <TableRow key={idx}>
+                <TableCell component="th" scope="row">
+                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
+                </TableCell>
+                <TableCell>{activity.name}</TableCell>
+                <TableCell>{activity.enjoyment}</TableCell>
+                <TableCell>{activity.importance}</TableCell>
+                <TableCell>{lifeAreaContent?.name}</TableCell>
+                <TableCell>{value?.name}</TableCell>
+            </TableRow>
         );
-    }
+    };
+
+    const otherActivityTableRow = (activity: IActivity, idx: number): JSX.Element => {
+        return (
+            <TableRow key={idx}>
+                <TableCell component="th" scope="row">
+                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
+                </TableCell>
+                <TableCell>{activity.name}</TableCell>
+                <TableCell>{activity.enjoyment}</TableCell>
+                <TableCell>{activity.importance}</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+            </TableRow>
+        );
+    };
 
     return (
         <ActionPanel
@@ -67,7 +94,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 } as IActionButton,
             ]}>
             <Grid container spacing={2} alignItems="stretch">
-                {!activities || activities.length == 0 ? (
+                {(!activitiesWithValue || activitiesWithValue.length == 0) &&
+                (!otherActivites || otherActivites.length == 0) ? (
                     <Grid item xs={12}>
                         <Typography>{getString('patient_values_inventory_empty')}</Typography>
                     </Grid>
@@ -91,18 +119,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {activities.map((activity, idx) => (
-                                    <TableRow key={idx}>
-                                        <TableCell component="th" scope="row">
-                                            {!!activity.lastEdited ? format(activity.lastEdited, 'MM/dd/yyyy') : '--'}
-                                        </TableCell>
-                                        <TableCell>{activity.name}</TableCell>
-                                        <TableCell>{activity.enjoyment}</TableCell>
-                                        <TableCell>{activity.importance}</TableCell>
-                                        <TableCell>{activity.lifearea}</TableCell>
-                                        <TableCell>{activity.value}</TableCell>
-                                    </TableRow>
-                                ))}
+                                {activitiesWithValue.map((activity, idx) => activityWithValueTableRow(activity, idx))}
+                                {otherActivites.map((activity, idx) => otherActivityTableRow(activity, idx))}
                             </TableBody>
                         </Table>
                     </TableContainer>
