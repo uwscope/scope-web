@@ -81,7 +81,7 @@ const _strings = {
         'The inventory consists of five life areas. You can fill them out in any order you wish.',
     values_inventory_home_instruction4: 'Tap on any life area to start filling the inventory.',
 
-    values_inventory_home_other_activities: 'Other Activities',
+    values_inventory_life_area_other_activities_name: 'Other Activities',
 
     Values_inventory_values_existing_title: 'Your existing values:',
     Values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',

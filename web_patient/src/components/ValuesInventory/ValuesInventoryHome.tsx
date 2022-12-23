@@ -67,7 +67,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                                 <ListItem disableGutters button component={Link} to={LifeAreaIdOther}>
                                     <ListItemIcon>{getLifeAreaIcon(LifeAreaIdOther)}</ListItemIcon>
                                     <ListItemText
-                                        primary={getString('values_inventory_home_other_activities')}
+                                        primary={getString('values_inventory_life_area_other_activities_name')}
                                         secondary={getActivitiesCountString(otherActivities.length)}
                                     />
                                 </ListItem>

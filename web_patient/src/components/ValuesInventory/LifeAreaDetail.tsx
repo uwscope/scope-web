@@ -30,6 +30,8 @@ import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/componen
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import { getFormLink, ParameterValues } from 'src/services/routes';
+import { LifeAreaIdOther } from "shared/enums";
+import { ILifeAreaContent } from "shared/types";
 
 interface IValueEditFormSection {
     error: boolean;
@@ -221,8 +223,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { patientStore } = rootStore;
     const lifeAreaContent = rootStore.getLifeAreaContent(lifeAreaId);
-
-    if (!lifeAreaContent) {
+    if (!lifeAreaContent && lifeAreaId != LifeAreaIdOther) {
         return null;
     }
 
@@ -388,105 +389,136 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         alert('Schedule this activity');
     });
 
-    const valueExamples = lifeAreaContent.examples.map((e) => e.name);
-    const activityExamples = lifeAreaContent.examples[
-        random(lifeAreaContent.examples.length - 1, false)
-    ].activities.map((a) => a.name);
+    const displayLifeAreaName: string = (() => {
+        if (lifeAreaId == LifeAreaIdOther) {
+            return getString('values_inventory_life_area_other_activities_name');
+        } else {
+            return (lifeAreaContent as ILifeAreaContent).name;
+        }
+    })();
+    const displayValueExamples: string[] = (() => {
+        if (lifeAreaContent) {
+            return lifeAreaContent.examples.map((e) => e.name);
+        } else {
+            return [];
+        }
+    })();
+    const displayActivityExamples: string[] = (() => {
+        if (lifeAreaContent) {
+            return lifeAreaContent?.examples[
+                random(lifeAreaContent.examples.length - 1, false)
+            ].activities.map((a) => a.name);
+        } else {
+            return [];
+        }
+    })();
 
     return (
-        <DetailPage title={lifeAreaContent.name} onBack={handleGoBack}>
+        <DetailPage title={displayLifeAreaName} onBack={handleGoBack}>
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
                 onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
-                    {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
-                        <FormSection
-                            prompt={getString('Values_inventory_values_existing_title')}
-                            subPrompt={getString('Values_inventory_values_empty_subprompt')}
-                            content={
-                                <Examples
-                                    title={getString('Values_inventory_values_example_title')}
-                                    examples={valueExamples}
+                    {
+                        lifeAreaId == LifeAreaIdOther ? (
+                            <Fragment>
+                                Placeholder for Other Activities
+                            </Fragment>
+                        ) : (
+                            <Fragment>
+                                {
+                                    patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
+                                        <FormSection
+                                            prompt={getString('Values_inventory_values_example_title')}
+                                            subPrompt={getString('Values_inventory_values_empty_subprompt')}
+                                            content={
+                                                <Examples
+                                                    title={getString('Values_inventory_values_example_title')}
+                                                    examples={displayValueExamples}
+                                                />
+                                            }
+                                        />
+                                    ) : (
+                                        <Stack spacing={0}>
+                                            <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
+                                            <Stack spacing={4}>
+                                                {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
+                                                    return (
+                                                        <Fragment>
+                                                            <Menu
+                                                                id="value-menu"
+                                                                anchorEl={viewState.moreTargetValueEl}
+                                                                keepMounted
+                                                                open={Boolean(viewState.moreTargetValueEl)}
+                                                                onClose={handleMoreCloseValue}>
+                                                                <MenuItem onClick={handleEditValue}>
+                                                                    {getString('values_inventory_activity_menu_edit')}
+                                                                </MenuItem>
+                                                                <MenuItem onClick={handleDeleteValue}>
+                                                                    {getString('values_inventory_activity_menu_delete')}
+                                                                </MenuItem>
+                                                            </Menu>
+                                                            <Menu
+                                                                id="activity-menu"
+                                                                anchorEl={viewState.moreTargetActivityEl}
+                                                                keepMounted
+                                                                open={Boolean(viewState.moreTargetActivityEl)}
+                                                                onClose={handleMoreCloseActivity}>
+                                                                <MenuItem onClick={handleEditActivity}>
+                                                                    {getString('values_inventory_activity_menu_edit')}
+                                                                </MenuItem>
+                                                                <MenuItem onClick={handleScheduleActivity}>
+                                                                    {getString('values_inventory_activity_menu_schedule')}
+                                                                </MenuItem>
+                                                                <MenuItem onClick={handleDeleteActivity}>
+                                                                    {getString('values_inventory_activity_menu_delete')}
+                                                                </MenuItem>
+                                                            </Menu>
+                                                            <ValueEditFormSection
+                                                                error={patientStore.loadValuesInventoryState.error}
+                                                                loading={patientStore.loadValuesInventoryState.pending}
+                                                                value={value}
+                                                                activityExamples={displayActivityExamples}
+                                                                handleCancelEditActivity={handleCancelEditActivity}
+                                                                handleMoreClickValue={handleMoreClickValue}
+                                                                handleMoreClickActivity={handleMoreClickActivity}
+                                                                key={value.valueId}
+                                                            />
+                                                        </Fragment>
+                                                    );
+                                                })}
+                                            </Stack>
+                                        </Stack>
+                                    )
+                                }
+                                <FormSection
+                                    prompt={
+                                        patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
+                                            ? getString('Values_inventory_values_more_title')
+                                            : ''
+                                    }
+                                    content={
+                                        <Button
+                                            sx={{ marginTop: 1, alignSelf: 'flex-start' }}
+                                            variant="contained"
+                                            color="primary"
+                                            startIcon={<AddIcon />}
+                                            onClick={handleAddValue}>
+                                            {getString('Values_inventory_add_value')}
+                                        </Button>
+                                    }
                                 />
-                            }
-                        />
-                    ) : (
-                        <Stack spacing={0}>
-                            <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
-                            <Stack spacing={4}>
-                                {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
-                                    return (
-                                        <Fragment>
-                                            <Menu
-                                                id="value-menu"
-                                                anchorEl={viewState.moreTargetValueEl}
-                                                keepMounted
-                                                open={Boolean(viewState.moreTargetValueEl)}
-                                                onClose={handleMoreCloseValue}>
-                                                <MenuItem onClick={handleEditValue}>
-                                                    {getString('values_inventory_activity_menu_edit')}
-                                                </MenuItem>
-                                                <MenuItem onClick={handleDeleteValue}>
-                                                    {getString('values_inventory_activity_menu_delete')}
-                                                </MenuItem>
-                                            </Menu>
-                                            <Menu
-                                                id="activity-menu"
-                                                anchorEl={viewState.moreTargetActivityEl}
-                                                keepMounted
-                                                open={Boolean(viewState.moreTargetActivityEl)}
-                                                onClose={handleMoreCloseActivity}>
-                                                <MenuItem onClick={handleEditActivity}>
-                                                    {getString('values_inventory_activity_menu_edit')}
-                                                </MenuItem>
-                                                <MenuItem onClick={handleScheduleActivity}>
-                                                    {getString('values_inventory_activity_menu_schedule')}
-                                                </MenuItem>
-                                                <MenuItem onClick={handleDeleteActivity}>
-                                                    {getString('values_inventory_activity_menu_delete')}
-                                                </MenuItem>
-                                            </Menu>
-                                            <ValueEditFormSection
-                                                error={patientStore.loadValuesInventoryState.error}
-                                                loading={patientStore.loadValuesInventoryState.pending}
-                                                value={value}
-                                                activityExamples={activityExamples}
-                                                handleCancelEditActivity={handleCancelEditActivity}
-                                                handleMoreClickValue={handleMoreClickValue}
-                                                handleMoreClickActivity={handleMoreClickActivity}
-                                                key={value.valueId}
-                                            />
-                                        </Fragment>
-                                    );
-                                })}
-                            </Stack>
-                        </Stack>
-                    )}
-                    <FormSection
-                        prompt={
-                            patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
-                                ? getString('Values_inventory_values_more_title')
-                                : ''
-                        }
-                        content={
-                            <Button
-                                sx={{ marginTop: 1, alignSelf: 'flex-start' }}
-                                variant="contained"
-                                color="primary"
-                                startIcon={<AddIcon />}
-                                onClick={handleAddValue}>
-                                {getString('Values_inventory_add_value')}
-                            </Button>
-                        }
-                    />
+                            </Fragment>
+                        )
+                    }
                 </Stack>
                 <AddEditValueDialog
                     open={viewState.openAddEditValue}
                     isEdit={viewState.modeState.mode == 'edit'}
-                    lifeArea={lifeAreaContent.name}
+                    lifeArea={displayLifeAreaName}
                     value={viewState.name}
-                    examples={valueExamples}
+                    examples={displayValueExamples}
                     error={patientStore.loadValuesInventoryState.error}
                     loading={patientStore.loadValuesInventoryState.pending}
                     handleCancel={handleCancelValue}
