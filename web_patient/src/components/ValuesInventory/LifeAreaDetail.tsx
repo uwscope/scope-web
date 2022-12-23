@@ -33,30 +33,13 @@ import { getFormLink, ParameterValues } from 'src/services/routes';
 import { LifeAreaIdOther } from "shared/enums";
 import { ILifeAreaContent } from "shared/types";
 
-interface IValueEditFormSection {
-    error: boolean;
-    loading: boolean;
-    value: IValue;
-    activityExamples: string[];
-    handleCancelEditActivity: () => void;
-    handleMoreClickValue: (value: IValue, event: React.MouseEvent<HTMLElement>) => void;
+
+interface IActivitiesSection {
+    activities: IActivity[];
     handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const ValueEditFormSection = observer((props: IValueEditFormSection) => {
-    const {
-        // error,
-        // loading,
-        value,
-        // activityExamples,
-        // handleCancelEditActivity,
-        handleMoreClickValue,
-        handleMoreClickActivity,
-    } = props;
-
-    const rootStore = useStores();
-    const { patientStore } = rootStore;
-
+const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivitiesSection) => {
     const renderActivityDetail = (activity: IActivity): ReactNode => {
         // TODO Activity Refactor: Enhance this with ActivitySchedule data
         return (
@@ -100,7 +83,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     <IconButton
                         edge="end"
                         aria-label="more"
-                        onClick={(e) => handleMoreClickActivity(activity, e)}
+                        onClick={(e) => props.handleMoreClickActivity(activity, e)}
                         size="large"
                     >
                         <MoreVertIcon/>
@@ -110,6 +93,34 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             </Fragment>
         ));
     };
+
+    return <Box>{renderActivities(props.activities)}</Box>;
+}
+
+interface IValueEditFormSection {
+    error: boolean;
+    loading: boolean;
+    value: IValue;
+    activityExamples: string[];
+    handleCancelEditActivity: () => void;
+    handleMoreClickValue: (value: IValue, event: React.MouseEvent<HTMLElement>) => void;
+    handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
+}
+
+const ValueEditFormSection = observer((props: IValueEditFormSection) => {
+    const {
+        // error,
+        // loading,
+        value,
+        // activityExamples,
+        // handleCancelEditActivity,
+        handleMoreClickValue,
+        handleMoreClickActivity,
+    } = props;
+
+    const rootStore = useStores();
+    const { patientStore } = rootStore;
+
 
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
 
@@ -127,8 +138,10 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                 </IconButton>
             </Stack>
             <Stack spacing={1}>
-                {renderActivities(valueActivities)}
-
+                <ActivitiesSection
+                    activities={valueActivities}
+                    handleMoreClickActivity={handleMoreClickActivity}
+                />
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
                     <Button
@@ -418,12 +431,16 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
-                onRetry={() => patientStore.loadValuesInventory()}>
+                onRetry={() => patientStore.loadValuesInventory()}
+            >
                 <Stack spacing={6}>
                     {
                         lifeAreaId == LifeAreaIdOther ? (
                             <Fragment>
-                                Placeholder for Other Activities
+                                <ActivitiesSection
+                                    activities={patientStore.getActivitiesWithoutValueId()}
+                                    handleMoreClickActivity={handleMoreClickActivity}
+                                />
                             </Fragment>
                         ) : (
                             <Fragment>
