@@ -1,7 +1,7 @@
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { FunctionComponent } from 'react';
 import { IActivity } from 'shared/types';
@@ -15,34 +15,33 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     const currentPatient = usePatient();
     const { values, valuesInventory } = currentPatient;
     const { assigned, assignedDateTime } = valuesInventory;
-
-    const activitiesWithValue = values
-        ?.map((v) => {
-            return currentPatient.getActivitiesByValueId(v.valueId as string);
-        })
-        .reduce((a, b) => a.concat(b), []);
-
-    const otherActivites = currentPatient.getActivitiesWithoutValueId();
-
     var dateStrings: string[] = [];
     if (assigned && !!assignedDateTime) {
         dateStrings.push(
             `${getString('patient_values_inventory_assigned_date')} ${format(assignedDateTime, 'MM/dd/yyyy')}`,
         );
     }
+    const activitiesWithValue = values
+        ?.map((v) => {
+            return currentPatient.getActivitiesByValueId(v.valueId as string);
+        })
+        .reduce((a, b) => a.concat(b), [])
+        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
 
-    // TODO: Activity Refactor
-    // (1) What do we put as last updated date in header?
-    // if (!!lastUpdatedDateTime) {
-    //     dateStrings.push(
-    //         `${getString('patient_values_inventory_activity_date_header')} ${format(
-    //             lastUpdatedDateTime,
-    //             'MM/dd/yyyy',
-    //         )}`,
-    //     );
-    // }
-    // (2) `Last updated on` column in the table
-    // (3) Do we show Activity Schedules?
+    // TODO: Sort on life area and value.
+
+    if (activitiesWithValue.length !== 0) {
+        dateStrings.push(
+            `${getString('patient_values_inventory_activity_date_header')} ${format(
+                activitiesWithValue[0].editedDateTime as Date,
+                'MM/dd/yyyy',
+            )}`,
+        );
+    }
+
+    const otherActivites = currentPatient
+        .getActivitiesWithoutValueId()
+        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
 
     const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
         const value = currentPatient.getValueById(activity.valueId as string);
@@ -50,14 +49,14 @@ export const ValuesInventory: FunctionComponent = observer(() => {
 
         return (
             <TableRow key={idx}>
+                <TableCell>{lifeAreaContent?.name}</TableCell>
+                <TableCell>{value?.name}</TableCell>
                 <TableCell component="th" scope="row">
                     {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
                 </TableCell>
                 <TableCell>{activity.name}</TableCell>
                 <TableCell>{activity.enjoyment}</TableCell>
                 <TableCell>{activity.importance}</TableCell>
-                <TableCell>{lifeAreaContent?.name}</TableCell>
-                <TableCell>{value?.name}</TableCell>
             </TableRow>
         );
     };
@@ -65,14 +64,14 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     const otherActivityTableRow = (activity: IActivity, idx: number): JSX.Element => {
         return (
             <TableRow key={idx}>
+                <TableCell>-</TableCell> {/*NOTE: Should this be "Other"*/}
+                <TableCell>-</TableCell>
                 <TableCell component="th" scope="row">
                     {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
                 </TableCell>
                 <TableCell>{activity.name}</TableCell>
                 <TableCell>{activity.enjoyment}</TableCell>
                 <TableCell>{activity.importance}</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
             </TableRow>
         );
     };
@@ -104,6 +103,10 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>
+                                        {getString('patient_values_inventory_activity_lifearea_header')}
+                                    </TableCell>
+                                    <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
                                     <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
                                     <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
                                     <TableCell>
@@ -112,10 +115,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_importance_header')}
                                     </TableCell>
-                                    <TableCell>
-                                        {getString('patient_values_inventory_activity_lifearea_header')}
-                                    </TableCell>
-                                    <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
