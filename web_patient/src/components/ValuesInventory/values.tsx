@@ -3,7 +3,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import SpaIcon from '@mui/icons-material/Spa';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import WorkIcon from '@mui/icons-material/Work';
 import React from 'react';
 import { getString } from 'src/services/strings';
@@ -22,7 +22,7 @@ export const getLifeAreaIcon = (lifeAreaId: string) => {
         case 'responsibilities':
             return <ListAltIcon fontSize="large" />;
         case LifeAreaIdOther:
-            return <ThumbUpIcon fontSize="large" />;
+            return <PendingActionsIcon fontSize="large" />;
         default:
             return <HelpIcon fontSize="large" />;
     }
