@@ -72,14 +72,16 @@ const _strings = {
     Resources_inventory_title: 'Values & Activities Inventory',
     Resources_inventory_subtitle: 'Values and activities that align with your life goals',
 
-    Values_inventory_title: 'Values & Activities Inventory',
-    Values_inventory_instruction1:
+    values_inventory_home_title: 'Values & Activities Inventory',
+    values_inventory_home_instruction1:
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
-    Values_inventory_instruction2:
+    values_inventory_home_instruction2:
         'The Life Areas, Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might be able to support those values.',
-    Values_inventory_instruction3:
+    values_inventory_home_instruction3:
         'The inventory consists of five life areas. You can fill them out in any order you wish.',
-    Values_inventory_instruction4: 'Tap on any life area to start filling the inventory.',
+    values_inventory_home_instruction4: 'Tap on any life area to start filling the inventory.',
+
+    values_inventory_home_other_activities: 'Other Activities',
 
     Values_inventory_values_existing_title: 'Your existing values:',
     Values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',

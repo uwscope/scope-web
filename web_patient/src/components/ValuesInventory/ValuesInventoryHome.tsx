@@ -10,6 +10,7 @@ import DetailPage from 'src/components/common/DetailPage';
 import { getActivitiesCountString, getLifeAreaIcon, getValuesCountString } from 'src/components/ValuesInventory/values';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
+import { LifeAreaIdOther } from 'shared/enums';
 
 const InstructionText = styled(Typography)({
     lineHeight: 1,
@@ -26,11 +27,11 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
     });
 
     return (
-        <DetailPage title={getString('Values_inventory_title')} onBack={handleGoBack}>
-            <InstructionText paragraph>{getString('Values_inventory_instruction1')}</InstructionText>
-            <InstructionText paragraph>{getString('Values_inventory_instruction2')}</InstructionText>
-            <InstructionText paragraph>{getString('Values_inventory_instruction3')}</InstructionText>
-            <InstructionText paragraph>{getString('Values_inventory_instruction4')}</InstructionText>
+        <DetailPage title={getString('values_inventory_home_title')} onBack={handleGoBack}>
+            <InstructionText paragraph>{getString('values_inventory_home_instruction1')}</InstructionText>
+            <InstructionText paragraph>{getString('values_inventory_home_instruction2')}</InstructionText>
+            <InstructionText paragraph>{getString('values_inventory_home_instruction3')}</InstructionText>
+            <InstructionText paragraph>{getString('values_inventory_home_instruction4')}</InstructionText>
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
@@ -57,13 +58,22 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                             </Fragment>
                         );
                     })}
-                    <ListItem disableGutters button component={Link} to={`Other`}>
-                        <ListItemIcon>{getLifeAreaIcon('Other')}</ListItemIcon>
-                        <ListItemText
-                            primary={'Other'}
-                            secondary={getActivitiesCountString(patientStore.getActivitiesWithoutValueId().length)}
-                        />
-                    </ListItem>
+                    {(() => {
+                        const otherActivities = patientStore.getActivitiesWithoutValueId();
+
+                        return !!otherActivities && (
+                            <Fragment>
+                                <Divider variant="middle" />
+                                <ListItem disableGutters button component={Link} to={LifeAreaIdOther}>
+                                    <ListItemIcon>{getLifeAreaIcon(LifeAreaIdOther)}</ListItemIcon>
+                                    <ListItemText
+                                        primary={getString('values_inventory_home_other_activities')}
+                                        secondary={getActivitiesCountString(otherActivities.length)}
+                                    />
+                                </ListItem>
+                            </Fragment>
+                        );
+                    })()}
                 </List>
             </ContentLoader>
         </DetailPage>
