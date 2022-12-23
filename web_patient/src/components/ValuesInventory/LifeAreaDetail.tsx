@@ -94,7 +94,24 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
         ));
     };
 
-    return <Box>{renderActivities(props.activities)}</Box>;
+    return (
+        <Stack spacing={1}>
+            {renderActivities(props.activities)}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ paddingRight: 1 }}>{`${props.activities.length + 1}.`}</Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    component={Link}
+                    to={getFormLink(ParameterValues.form.addActivity)}
+                >
+                    {getString('values_inventory_add_activity')}
+                </Button>
+            </Box>
+        </Stack>
+    );
 }
 
 interface IValueEditFormSection {
@@ -137,24 +154,10 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     <MoreVertIcon/>
                 </IconButton>
             </Stack>
-            <Stack spacing={1}>
-                <ActivitiesSection
-                    activities={valueActivities}
-                    handleMoreClickActivity={handleMoreClickActivity}
-                />
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography sx={{ paddingRight: 1 }}>{`${valueActivities.length + 1}.`}</Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        component={Link}
-                        to={getFormLink(ParameterValues.form.addActivity)}>
-                        {getString('values_inventory_add_activity')}
-                    </Button>
-                </Box>
-            </Stack>
+            <ActivitiesSection
+                activities={valueActivities}
+                handleMoreClickActivity={handleMoreClickActivity}
+            />
         </Stack>
     );
 });
