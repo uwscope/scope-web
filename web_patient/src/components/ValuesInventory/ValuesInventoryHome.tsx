@@ -61,7 +61,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
                     {(() => {
                         const otherActivities = patientStore.getActivitiesWithoutValueId();
 
-                        return !!otherActivities && (
+                        return (
                             <Fragment>
                                 <Divider variant="middle" />
                                 <ListItem disableGutters button component={Link} to={LifeAreaIdOther}>
