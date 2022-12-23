@@ -463,35 +463,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                                 {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
                                                     return (
                                                         <Fragment key={value.valueId}>
-                                                            <Menu
-                                                                id="value-menu"
-                                                                anchorEl={viewState.moreTargetValueEl}
-                                                                keepMounted
-                                                                open={Boolean(viewState.moreTargetValueEl)}
-                                                                onClose={handleMoreCloseValue}>
-                                                                <MenuItem onClick={handleEditValue}>
-                                                                    {getString('values_inventory_activity_menu_edit')}
-                                                                </MenuItem>
-                                                                <MenuItem onClick={handleDeleteValue}>
-                                                                    {getString('values_inventory_activity_menu_delete')}
-                                                                </MenuItem>
-                                                            </Menu>
-                                                            <Menu
-                                                                id="activity-menu"
-                                                                anchorEl={viewState.moreTargetActivityEl}
-                                                                keepMounted
-                                                                open={Boolean(viewState.moreTargetActivityEl)}
-                                                                onClose={handleMoreCloseActivity}>
-                                                                <MenuItem onClick={handleEditActivity}>
-                                                                    {getString('values_inventory_activity_menu_edit')}
-                                                                </MenuItem>
-                                                                <MenuItem onClick={handleScheduleActivity}>
-                                                                    {getString('values_inventory_activity_menu_schedule')}
-                                                                </MenuItem>
-                                                                <MenuItem onClick={handleDeleteActivity}>
-                                                                    {getString('values_inventory_activity_menu_delete')}
-                                                                </MenuItem>
-                                                            </Menu>
                                                             <ValueEditFormSection
                                                                 error={patientStore.loadValuesInventoryState.error}
                                                                 loading={patientStore.loadValuesInventoryState.pending}
@@ -529,6 +500,35 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         )
                     }
                 </Stack>
+                <Menu
+                    id="value-menu"
+                    anchorEl={viewState.moreTargetValueEl}
+                    keepMounted
+                    open={Boolean(viewState.moreTargetValueEl)}
+                    onClose={handleMoreCloseValue}>
+                    <MenuItem onClick={handleEditValue}>
+                        {getString('values_inventory_activity_menu_edit')}
+                    </MenuItem>
+                    <MenuItem onClick={handleDeleteValue}>
+                        {getString('values_inventory_activity_menu_delete')}
+                    </MenuItem>
+                </Menu>
+                <Menu
+                    id="activity-menu"
+                    anchorEl={viewState.moreTargetActivityEl}
+                    keepMounted
+                    open={Boolean(viewState.moreTargetActivityEl)}
+                    onClose={handleMoreCloseActivity}>
+                    <MenuItem onClick={handleEditActivity}>
+                        {getString('values_inventory_activity_menu_edit')}
+                    </MenuItem>
+                    <MenuItem onClick={handleScheduleActivity}>
+                        {getString('values_inventory_activity_menu_schedule')}
+                    </MenuItem>
+                    <MenuItem onClick={handleDeleteActivity}>
+                        {getString('values_inventory_activity_menu_delete')}
+                    </MenuItem>
+                </Menu>
                 <AddEditValueDialog
                     open={viewState.openAddEditValue}
                     isEdit={viewState.modeState.mode == 'edit'}
