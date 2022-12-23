@@ -445,7 +445,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                             <Stack spacing={4}>
                                                 {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
                                                     return (
-                                                        <Fragment>
+                                                        <Fragment key={value.valueId}>
                                                             <Menu
                                                                 id="value-menu"
                                                                 anchorEl={viewState.moreTargetValueEl}
@@ -483,7 +483,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                                                 handleCancelEditActivity={handleCancelEditActivity}
                                                                 handleMoreClickValue={handleMoreClickValue}
                                                                 handleMoreClickActivity={handleMoreClickActivity}
-                                                                key={value.valueId}
                                                             />
                                                         </Fragment>
                                                     );
