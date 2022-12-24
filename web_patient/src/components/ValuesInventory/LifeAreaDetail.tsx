@@ -397,9 +397,16 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         alert('Edit this activity');
     });
 
-    const handleDeleteActivity = action(() => {
-        // TODO Activity Refactor: Implement Activity Deletion
-        alert('Delete this activity');
+    const handleDeleteActivity = action(async () => {
+        // TODO Activity Refactor: Display some kind of confirmation
+        const activity = viewState.selectedActivity;
+
+        // Remove the popup menu
+        viewState.moreTargetActivityEl = undefined;
+
+        if (!!activity) {
+            await patientStore.deleteActivity(activity);
+        }
     });
 
     const handleScheduleActivity = action(() => {

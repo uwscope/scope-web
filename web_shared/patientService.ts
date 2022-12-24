@@ -93,6 +93,7 @@ export interface IPatientService extends IServiceBase {
 
     getActivities(): Promise<IActivity[]>;
     addActivity(activity: IActivity): Promise<IActivity>;
+    deleteActivity(activity: IActivity): Promise<IActivity>;
     updateActivity(activity: IActivity): Promise<IActivity>;
 
     getActivitySchedules(): Promise<IActivitySchedule[]>;
@@ -288,6 +289,16 @@ class PatientService extends ServiceBase implements IPatientService {
         const response = await this.axiosInstance.post<IActivityResponse>(`/activities`, {
             activity,
         } as IActivityRequest);
+        return response.data?.activity;
+    }
+
+    public async deleteActivity(activity: IActivity): Promise<IActivity> {
+        logger.assert((activity as any)._rev != undefined, '_rev should be in the request data');
+        const response = await this.axiosInstance.delete<IActivityResponse>(`/activity/${activity.activityId}`, {
+            headers: {
+                'If-Match': (activity as any)._rev,
+            },
+        });
         return response.data?.activity;
     }
 

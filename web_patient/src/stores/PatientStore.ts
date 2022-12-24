@@ -65,6 +65,7 @@ export interface IPatientStore {
 
     // Activities
     addActivity: (activity: IActivity) => Promise<IActivity | null>;
+    deleteActivity: (activity: IActivity) => Promise<void>;
     loadActivities: () => Promise<void>;
     updateActivity: (activity: IActivity) => Promise<void>;
 
@@ -380,6 +381,30 @@ export class PatientStore implements IPatientStore {
         );
 
         return returnAddedActivity;
+    }
+
+    @action.bound
+    public async deleteActivity(activity: IActivity) {
+        const prevActivities = this.activities.slice() || [];
+        const foundIdx = prevActivities.findIndex((a) => a.activityId == activity.activityId);
+
+        console.assert(foundIdx >= 0, `Activity to delete not found: ${activity.activityId}`);
+
+        if (foundIdx >= 0) {
+            const promise = this.patientService.deleteActivity(activity).then((_deletedActivity) => {
+                prevActivities.splice(foundIdx, 1);
+                return prevActivities;
+            });
+
+            await this.loadAndLogQuery<IActivity[]>(
+                () => promise,
+                this.loadActivitiesQuery,
+                onArrayConflict('activity', 'activityId', () => this.activities, logger),
+            );
+
+            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
+            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+        }
     }
 
     @action.bound
