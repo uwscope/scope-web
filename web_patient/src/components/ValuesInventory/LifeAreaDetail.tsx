@@ -22,7 +22,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import { IActivity, IValue } from 'shared/types';
+import {IActivity, IValue} from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import StatefulDialog from 'src/components/common/StatefulDialog';
@@ -40,24 +40,52 @@ interface IActivitiesSection {
 }
 
 const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivitiesSection) => {
+    const rootStore = useStores();
+    const { patientStore } = rootStore;
+
     const renderActivityDetail = (activity: IActivity): ReactNode => {
-        // TODO Activity Refactor: Enhance this with ActivitySchedule data
         return (
-            (activity.enjoyment || activity.importance) && (
-                <HelperText>
-                    {activity.enjoyment && (
+            <Stack spacing={1}>
+                {(activity.enjoyment || activity.importance) && (
+                    <HelperText>
+                        {activity.enjoyment && (
+                            <Fragment>
+                                {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
+                            </Fragment>
+                        )}
+                        {activity.enjoyment && activity.importance && ' / '}
+                        {activity.importance && (
+                            <Fragment>
+                                {getString('values_inventory_value_activity_importance')} {activity.importance}
+                            </Fragment>
+                        )}
+                    </HelperText>
+                )}
+                {(!!activity.activityId) && (() => {
+                    const activitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId);
+                    const repeatActivitySchedules = activitySchedules.filter((as) => { return as.hasRepetition; });
+
+                    return (
                         <Fragment>
-                            {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
+                            {(activitySchedules.length == 0) && (
+                                <HelperText>No Schedule</HelperText>
+                            )}
+                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 0) && (
+                                <HelperText>{`1 Schedule`}</HelperText>
+                            )}
+                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 1) && (
+                                <HelperText>{`1 Schedule, with Repeat`}</HelperText>
+                            )}
+                            {(activitySchedules.length > 1 && repeatActivitySchedules.length == 0) && (
+                                <HelperText>{`${activitySchedules.length} Schedule`}</HelperText>
+                            )}
+                            {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
+                                <HelperText>{`${activitySchedules.length} Schedule, Including ${repeatActivitySchedules.length} with Repeat`}</HelperText>
+                            )}
                         </Fragment>
-                    )}
-                    {activity.enjoyment && activity.importance && ' / '}
-                    {activity.importance && (
-                        <Fragment>
-                            {getString('values_inventory_value_activity_importance')} {activity.importance}
-                        </Fragment>
-                    )}
-                </HelperText>
-            )
+                    );
+                })()}
+            </Stack>
         );
     };
 
