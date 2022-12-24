@@ -29,7 +29,7 @@ import StatefulDialog from 'src/components/common/StatefulDialog';
 import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import { getFormLink, ParameterValues } from 'src/services/routes';
+import { getFormLink, getFormPath, Parameters, ParameterValues } from 'src/services/routes';
 import { LifeAreaIdOther } from "shared/enums";
 import { ILifeAreaContent } from "shared/types";
 
@@ -421,8 +421,18 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleEditActivity = action(() => {
-        // TODO Activity Refactor: Implement Activity Edit
-        alert('Edit this activity');
+        const activity = viewState.selectedActivity;
+
+        // Remove the popup menu
+        viewState.moreTargetActivityEl = undefined;
+
+        navigate(getFormPath(
+            ParameterValues.form.editActivity,
+            {
+                [Parameters.activityId as string]:
+                activity?.activityId as string
+            }
+        ));
     });
 
     const handleDeleteActivity = action(async () => {
