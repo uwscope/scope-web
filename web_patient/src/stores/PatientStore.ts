@@ -601,6 +601,8 @@ export class PatientStore implements IPatientStore {
             );
 
             await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
+            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
         }
     }
 

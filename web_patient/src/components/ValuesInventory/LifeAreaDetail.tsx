@@ -345,7 +345,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         // Remove the popup menu
         viewState.moreTargetValueEl = undefined;
 
-        await patientStore.deleteValue(value as IValue);
+        if (!!value) {
+            await patientStore.deleteValue(value);
+        }
     });
 
     const handleSaveValue = action(async () => {
