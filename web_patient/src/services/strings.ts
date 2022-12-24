@@ -112,7 +112,7 @@ const _strings = {
 
     values_inventory_activity_menu_delete: 'Delete',
     values_inventory_activity_menu_edit: 'Edit',
-    values_inventory_activity_menu_schedule: 'Schedule',
+    values_inventory_activity_menu_add_schedule: 'Add Schedule',
 
     // Values_inventory_dialog_add_activity: 'Add activity',
     // Values_inventory_dialog_edit_activity: 'Edit activity',

@@ -563,7 +563,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                         {getString('values_inventory_activity_menu_edit')}
                     </MenuItem>
                     <MenuItem onClick={handleScheduleActivity}>
-                        {getString('values_inventory_activity_menu_schedule')}
+                        {getString('values_inventory_activity_menu_add_schedule')}
                     </MenuItem>
                     <MenuItem onClick={handleDeleteActivity}>
                         {getString('values_inventory_activity_menu_delete')}
