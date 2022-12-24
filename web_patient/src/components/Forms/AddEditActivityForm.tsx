@@ -820,6 +820,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const pages: IFormPage[] = [
         {
             content: activityPage,
+            title: (() => {
+                if (activityViewState.modeState.mode == "addActivity") {
+                    return getString("form_add_activity_title");
+                } else if (activityViewState.modeState.mode == "editActivity") {
+                    return getString("form_edit_activity_title");
+                } else {
+                    return undefined;
+                }
+            })(),
             canGoNext: true,
             onSubmit: handleSubmitActivity,
             // TODO Activity Refactor: Update for valid form submission state
@@ -835,10 +844,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     return (
         <FormDialog
-            title={
-                'TODO Activity Refactor Form Title'
-                // !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
-            }
             isOpen={true}
             canClose={false}
             loading={patientStore.loadActivitiesState.pending}

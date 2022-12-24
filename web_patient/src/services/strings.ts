@@ -179,11 +179,11 @@ const _strings = {
 
     Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
-    // Form_add_activity_title: 'Add activity',
-    // Form_edit_activity_title: 'Edit activity',
+    form_add_activity_title: 'Add Activity',
+    form_edit_activity_title: 'Edit Activity',
     // Form_add_activity_choose_or: 'OR',
     // Form_add_activity_describe: 'Describe the activity',
-    //
+
     form_add_edit_activity_name_prompt: 'What is the name of the activity?',
     // Form_add_activity_describe_name_label: 'Name',
     form_add_edit_activity_name_help: 'Write a descriptive name of the activity that helps you recognize what it is.',
