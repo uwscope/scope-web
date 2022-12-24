@@ -25,7 +25,7 @@ import {
     Typography,
 } from '@mui/material';
 // import { compareAsc } from 'date-fns';
-import { action, toJS } from 'mobx';
+import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
@@ -76,7 +76,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         modeState: IActivityViewModeState;
     }
 
-    const initialActivityViewState: IActivityViewState = (() => {
+    const initialActivityViewState: IActivityViewState = ((): IActivityViewState => {
         const defaultViewState: IActivityViewState = {
             name: '',
             lifeAreaId: '',
@@ -135,10 +135,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 modeState: {
                     mode: 'editActivity',
                     editActivity: {
-                        ...toJS(editActivity)
+                        ...editActivity
                     }
                 },
-            }
+            };
         }
 
         return defaultViewState;
