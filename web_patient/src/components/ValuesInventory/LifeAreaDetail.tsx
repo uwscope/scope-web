@@ -339,7 +339,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleDeleteValue = action(async () => {
-        // TODO: Add delete confirmation.
+        // TODO Activity Refactor: Add delete confirmation.
         const value = viewState.selectedValue;
 
         // Remove the popup menu
