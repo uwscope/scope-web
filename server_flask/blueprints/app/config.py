@@ -44,6 +44,7 @@ def get_app_config():
             with open(path_current, encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
                 content_life_areas.append(config_json)
+    content_life_areas = sorted(content_life_areas, key=lambda c: c["sortKey"])
 
     # Load patient resources configurations
     content_patient_resources = []
