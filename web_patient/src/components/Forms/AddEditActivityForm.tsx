@@ -69,6 +69,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAdd | IActivityViewStateModeEdit;
 
     interface IActivityViewState {
+        displayedName: string;
+
         name: string;
         lifeAreaId: string;
         valueId: string;
@@ -80,11 +82,14 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const initialActivityViewState: IActivityViewState = ((): IActivityViewState => {
         const defaultViewState: IActivityViewState = {
+            displayedName: '',
+
             name: '',
             lifeAreaId: '',
             valueId: '',
             enjoyment: -1,
             importance: -1,
+
             modeState: {
                 mode: 'none',
             },
@@ -93,6 +98,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         if (routeForm == ParameterValues.form.addActivity) {
             return {
                 ...defaultViewState,
+
                 modeState: {
                     mode: 'addActivity',
                 },
@@ -129,10 +135,14 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
             return {
                 ...defaultViewState,
+
+                displayedName: editActivity.name,
+
                 name: editActivity.name,
                 ...valueIdAndLifeAreaId,
                 enjoyment: editActivity.enjoyment ? editActivity.enjoyment : defaultViewState.enjoyment,
                 importance: editActivity.importance ? editActivity.importance : defaultViewState.importance,
+
                 modeState: {
                     mode: 'editActivity',
                     editActivity: {
@@ -350,7 +360,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     */
 
     const handleActivityChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
-        activityViewState.name = event.target.value;
+        // DisplayedName can only trimStart because full trim means never being able to add a space
+        activityViewState.displayedName = event.target.value.trimStart();
+
+        activityViewState.name = activityViewState.displayedName.trim();
     });
 
     const handleActivitySelectEnjoyment = action((event: SelectChangeEvent<number>) => {
@@ -406,6 +419,54 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleActivityScheduleChangeRepeatDays = action((event: React.ChangeEvent<HTMLInputElement>, dayOfWeek: DayOfWeek) => {
         activityScheduleViewState.repeatDayFlags[dayOfWeek] = event.target.checked;
     });
+
+    const activityValidateNext = () => {
+        // Name cannot be blank
+        if (!activityViewState.name) {
+            return {
+                valid: false,
+                error: true,
+            };
+        }
+
+        // Name must validate
+        const validateName = activityValidateName(activityViewState.name);
+        if (validateName.error) {
+            return validateName;
+        }
+
+        return {
+            valid: true,
+            error: false,
+        }
+    }
+
+    const activityValidateName = (name: string) => {
+        // Name must be unique, accounting for case-insensitive comparisons
+        const nameIsUnique = patientStore.activities.filter((activity: IActivity): boolean => {
+            // In case of edit, do not validate against the activity being edited
+            if (activityViewState.modeState.mode == 'editActivity') {
+                return activity.activityId != activityViewState.modeState.editActivity.activityId;
+            }
+
+            return true;
+        }).findIndex((activity: IActivity): boolean => {
+            // Search for a case-insensitive match
+            return activity.name.toLocaleLowerCase() == name.toLocaleLowerCase();
+        }) < 0;
+        if(!nameIsUnique) {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: getString('form_add_edit_activity_name_validation_not_unique'),
+            };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
 
     const activityScheduleValidateDate = (date: Date | null) => {
         if (!date || date.toString() == "Invalid Date") {
@@ -529,6 +590,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     )}
     */
 
+    // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
+    const _activityPageValidateName = activityValidateName(activityViewState.name);
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
@@ -538,10 +601,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     <Fragment>
                         <TextField
                             fullWidth
-                            value={activityViewState.name}
+                            value={activityViewState.displayedName}
                             onChange={handleActivityChangeName}
                             variant="outlined"
                             multiline
+                            error={_activityPageValidateName.error}
+                            helperText={
+                                _activityPageValidateName.error &&
+                                _activityPageValidateName.errorMessage
+                            }
                         />
                     </Fragment>
                 }
@@ -854,10 +922,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     return undefined;
                 }
             })(),
-            canGoNext: true,
+            canGoNext: activityValidateNext().valid,
             onSubmit: handleSubmitActivity,
-            // TODO Activity Refactor: Update for valid form submission state
-            // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
         });
     }
 

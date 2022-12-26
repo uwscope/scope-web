@@ -206,6 +206,7 @@ const _strings = {
     form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',
     form_add_edit_activity_importance_prompt: 'How important it is for you to do this activity?',
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
+    form_add_edit_activity_name_validation_not_unique: 'Activity already exists.',
 
     form_add_edit_activity_schedule_when_prompt:
         'When would you like to do this activity?',
