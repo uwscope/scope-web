@@ -45,6 +45,8 @@ import {
 export interface IAddEditActivityFormProps extends IFormProps {}
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
+    const routeForm = getRouteParameter(Parameters.form) as string;
+
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
     // const { valuesInventory } = patientStore;
@@ -88,7 +90,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             },
         };
 
-        const routeForm = getRouteParameter(Parameters.form);
         if (routeForm == ParameterValues.form.addActivity) {
             return {
                 ...defaultViewState,
@@ -817,8 +818,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     */ }
 
-    const pages: IFormPage[] = [
-        {
+    const pages: IFormPage[] = [];
+    if ([
+        ParameterValues.form.addActivity,
+        ParameterValues.form.editActivity
+    ].includes(routeForm)) {
+        pages.push({
             content: activityPage,
             title: (() => {
                 if (activityViewState.modeState.mode == "addActivity") {
@@ -833,14 +838,21 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             onSubmit: handleSubmitActivity,
             // TODO Activity Refactor: Update for valid form submission state
             // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
-        },
-        {
-            content: activitySchedulePage,
-            canGoNext: true,
-            onSubmit: handleSubmitActivitySchedule,
-            // TODO Activity Refactor: Update for valid form submission state
-        }
-    ];
+        });
+    }
+
+    if ([
+        ParameterValues.form.addActivity,
+    ].includes(routeForm)) {
+        pages.push(
+            {
+                content: activitySchedulePage,
+                canGoNext: true,
+                onSubmit: handleSubmitActivitySchedule,
+                // TODO Activity Refactor: Update for valid form submission state
+            }
+        );
+    }
 
     return (
         <FormDialog
