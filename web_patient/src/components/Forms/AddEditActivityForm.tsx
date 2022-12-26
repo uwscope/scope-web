@@ -61,6 +61,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
     interface IActivityViewStateModeAdd {
         mode: 'addActivity';
+        valueId?: string;
     }
     interface IActivityViewStateModeEdit {
         mode: 'editActivity';
@@ -96,11 +97,33 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         };
 
         if (routeForm == ParameterValues.form.addActivity) {
+            const valueId = getRouteParameter(Parameters.valueId);
+
+            const valueIdAndLifeAreaId = (() => {
+                if (!valueId) {
+                    return {};
+                }
+
+                const value = patientStore.getValueById(valueId);
+                console.assert(!!value, 'addActivity value not found');
+                if (!value) {
+                    return {};
+                }
+
+                return {
+                    valueId: valueId,
+                    lifeAreaId: value.lifeAreaId,
+                }
+            })();
+
             return {
                 ...defaultViewState,
 
+                ...valueIdAndLifeAreaId,
+
                 modeState: {
                     mode: 'addActivity',
+                    valueId: !!valueId ? valueId : undefined,
                 },
             };
         } else if (routeForm == ParameterValues.form.editActivity) {
@@ -121,15 +144,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     return {};
                 }
 
-                const editValue = patientStore.getValueById(editActivity.valueId);
-                console.assert(!!editValue, 'editActivity value not found');
-                if (!editValue) {
+                const value = patientStore.getValueById(editActivity.valueId);
+                console.assert(!!value, 'editActivity value not found');
+                if (!value) {
                     return {};
                 }
 
                 return {
                     valueId: editActivity.valueId,
-                    lifeAreaId: editValue.lifeAreaId,
+                    lifeAreaId: value.lifeAreaId,
                 }
             })();
 
@@ -592,6 +615,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
     const _activityPageValidateName = activityValidateName(activityViewState.name);
+    const _hideLifeAreaAndValue = (
+        activityViewState.modeState.mode == "addActivity" &&
+        !!activityViewState.modeState.valueId
+    );
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
@@ -611,63 +638,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 _activityPageValidateName.errorMessage
                             }
                         />
-                    </Fragment>
-                }
-            />
-
-            <FormSection
-                addPaddingTop
-                prompt={getString('form_add_edit_activity_life_area_value_prompt')}
-                help={getString('form_add_edit_activity_life_area_value_help')}
-                content={
-                    <Fragment>
-                        <SubHeaderText>{getString('form_add_edit_activity_life_area_label')}</SubHeaderText>
-                        <HelperText>{getString('form_add_edit_activity_life_area_help')}</HelperText>
-                        <Select
-                            variant="outlined"
-                            value={activityViewState.lifeAreaId}
-                            onChange={handleActivitySelectLifeArea}
-                            fullWidth
-                        >
-                            <MenuItem key='' value=''></MenuItem>
-                            {lifeAreas.map((lifeArea) => (
-                                <MenuItem key={lifeArea.id} value={lifeArea.id}>
-                                    {lifeArea.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        <SubHeaderText>{getString('form_add_edit_activity_value_label')}</SubHeaderText>
-                        <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
-                        <Select
-                            variant="outlined"
-                            value={activityViewState.valueId}
-                            onChange={handleActivitySelectValue}
-                            fullWidth
-                            disabled={!activityViewState.lifeAreaId}
-                            // TODO Activity Refactor: Validate
-                        >
-                            <MenuItem key='' value=''></MenuItem>
-                            {activityViewState.lifeAreaId && (
-                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).map((value, idx) => (
-                                    <MenuItem key={idx} value={value.valueId}>
-                                        {value.name}
-                                    </MenuItem>
-                                ))
-                            )}
-                        </Select>
-                        {/*
-                        TODO Activity Refactor: Support Creation of a New Value
-                        <Grid container justifyContent="flex-end">
-                            <Chip
-                                sx={{ marginTop: 1 }}
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                label={getString('form_add_edit_activity_add_value_button')}
-                                onClick={handleAddValueOpen}
-                            />
-                        </Grid>
-                        */}
                     </Fragment>
                 }
             />
@@ -713,6 +683,65 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Select>
                 }
             />
+
+            {(!_hideLifeAreaAndValue && <FormSection
+                addPaddingTop
+                prompt={getString('form_add_edit_activity_life_area_value_prompt')}
+                help={getString('form_add_edit_activity_life_area_value_help')}
+                content={
+                    <Fragment>
+                        <SubHeaderText>{getString('form_add_edit_activity_life_area_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_life_area_help')}</HelperText>
+                        <Select
+                            variant="outlined"
+                            value={activityViewState.lifeAreaId}
+                            onChange={handleActivitySelectLifeArea}
+                            fullWidth
+                        >
+                            <MenuItem key='' value=''></MenuItem>
+                            // TODO Activity Refactor: Sort life areas
+                            {lifeAreas.map((lifeArea) => (
+                                <MenuItem key={lifeArea.id} value={lifeArea.id}>
+                                    {lifeArea.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <SubHeaderText>{getString('form_add_edit_activity_value_label')}</SubHeaderText>
+                        <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
+                        <Select
+                            variant="outlined"
+                            value={activityViewState.valueId}
+                            onChange={handleActivitySelectValue}
+                            fullWidth
+                            disabled={!activityViewState.lifeAreaId}
+                            // TODO Activity Refactor: Validate
+                        >
+                            <MenuItem key='' value=''></MenuItem>
+                            // TODO Activity Refactor: Sort values
+                            {activityViewState.lifeAreaId && (
+                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).map((value, idx) => (
+                                    <MenuItem key={idx} value={value.valueId}>
+                                        {value.name}
+                                    </MenuItem>
+                                ))
+                            )}
+                        </Select>
+                        {/*
+                        TODO Activity Refactor: Support Creation of a New Value
+                        <Grid container justifyContent="flex-end">
+                            <Chip
+                                sx={{ marginTop: 1 }}
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                label={getString('form_add_edit_activity_add_value_button')}
+                                onClick={handleAddValueOpen}
+                            />
+                        </Grid>
+                        */}
+                    </Fragment>
+                }
+            />)}
         </Stack>
     );
 

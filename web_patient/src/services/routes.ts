@@ -20,6 +20,7 @@ export const Parameters = {
     activityId: 'activity-id',
     assessmentId: 'assessment-id',
     taskId: 'task-id',
+    valueId: 'value-id',
 };
 
 export const ParameterValues = {

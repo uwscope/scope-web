@@ -36,6 +36,7 @@ import { ILifeAreaContent } from "shared/types";
 
 interface IActivitiesSection {
     activities: IActivity[];
+    valueId?: string;
     handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
 
@@ -133,7 +134,12 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     size="small"
                     startIcon={<AddIcon />}
                     component={Link}
-                    to={getFormLink(ParameterValues.form.addActivity)}
+                    to={getFormLink(
+                        ParameterValues.form.addActivity,
+                        {
+                            [Parameters.valueId as string]: props.valueId as string
+                        }
+                    )}
                 >
                     {getString('values_inventory_add_activity')}
                 </Button>
@@ -182,6 +188,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
             </Stack>
             <ActivitiesSection
                 activities={valueActivities}
+                valueId={value.valueId}
                 handleMoreClickActivity={handleMoreClickActivity}
             />
         </Stack>
