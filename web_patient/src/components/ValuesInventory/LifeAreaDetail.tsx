@@ -147,7 +147,6 @@ interface IValueEditFormSection {
     loading: boolean;
     value: IValue;
     activityExamples: string[];
-    handleCancelEditActivity: () => void;
     handleMoreClickValue: (value: IValue, event: React.MouseEvent<HTMLElement>) => void;
     handleMoreClickActivity: (activity: IActivity, event: React.MouseEvent<HTMLElement>) => void;
 }
@@ -158,7 +157,6 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
         // loading,
         value,
         // activityExamples,
-        // handleCancelEditActivity,
         handleMoreClickValue,
         handleMoreClickActivity,
     } = props;
@@ -353,13 +351,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
     const handleCancelValue = action(() => {
         viewState.openAddEditValue = false;
-        // TODO Activity Refactor: No reason we should be reseting this?
-        patientStore.loadValuesInventoryState.resetState();
-    });
-
-    const handleCancelEditActivity = action(() => {
-        // TODO Activity Refactor: No reason we should be reseting this?
-        patientStore.loadValuesInventoryState.resetState();
     });
 
     const handleChangeValue = action((change: string) => {
@@ -528,7 +519,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                                                 loading={patientStore.loadValuesInventoryState.pending}
                                                                 value={value}
                                                                 activityExamples={displayActivityExamples}
-                                                                handleCancelEditActivity={handleCancelEditActivity}
                                                                 handleMoreClickValue={handleMoreClickValue}
                                                                 handleMoreClickActivity={handleMoreClickActivity}
                                                             />
@@ -609,66 +599,6 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 export default LifeAreaDetail;
 
 /* TODO Activity Refactor: Abandoned AddEditActivityDialog Code
-
-const handleEditActivity = (activityId: string) =>
-    // activityId is sufficient for creating this interface callback.
-    action(() => {
-        console.log(activityId);
-        // const value = patientStore.values.find((value) => valueId == value.valueId);
-        //
-        // console.assert(value, `Value to edit not found: ${valueId}`);
-        //
-        // if (value) {
-        //     viewState.openAddEditValue = true;
-        //     viewState.name = value.name;
-        //     viewState.modeState = {
-        //         mode: 'edit',
-        //         editValue: {
-        //             ...toJS(value)
-        //         },
-        //     };
-        // }
-    });
-
-const handleSaveActivity = action(async (newActivity: ILifeAreaValueActivity) => {
-    const newValue = { ...toJS(value) };
-    newValue.activities = newValue.activities?.slice() || [];
-
-    if (viewState.editActivityIdx >= 0) {
-        newValue.activities[viewState.editActivityIdx] = newActivity;
-    } else {
-        newValue.activities.push(newActivity);
-    }
-
-    await handleSaveValueActivities(newValue);
-
-    runInAction(() => {
-        if (!error) {
-            viewState.openAddActivity = false;
-        }
-    });
-});
-
-const handleDeleteActivity = action(async () => {
-    const newValue = { ...toJS(value) };
-    newValue.activities = newValue.activities?.slice() || [];
-
-    if (viewState.editActivityIdx >= 0) {
-        newValue.activities.splice(viewState.editActivityIdx, 1);
-        await handleSaveValueActivities(newValue);
-    }
-
-    runInAction(() => {
-        if (!error) {
-            viewState.openAddActivity = false;
-        }
-    });
-});
-
-const handleCancelActivity = action(() => {
-    handleCancelEditActivity();
-    viewState.openAddActivity = false;
-});
 
 {viewState.openAddActivity && (
     <AddEditActivityDialog
