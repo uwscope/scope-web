@@ -77,10 +77,10 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                                 <HelperText>{`1 Schedule, with Repeat`}</HelperText>
                             )}
                             {(activitySchedules.length > 1 && repeatActivitySchedules.length == 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedule`}</HelperText>
+                                <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
                             )}
                             {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedule, Including ${repeatActivitySchedules.length} with Repeat`}</HelperText>
+                                <HelperText>{`${activitySchedules.length} Schedules, Including ${repeatActivitySchedules.length} with Repeat`}</HelperText>
                             )}
                         </Fragment>
                     );
@@ -447,9 +447,19 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         }
     });
 
-    const handleScheduleActivity = action(() => {
-        // TODO Activity Refactor: Implement Activity Scheduling
-        alert('Schedule this activity');
+    const handleAddActivitySchedule = action(() => {
+        const activity = viewState.selectedActivity;
+
+        // Remove the popup menu
+        viewState.moreTargetActivityEl = undefined;
+
+        navigate(getFormPath(
+            ParameterValues.form.addActivitySchedule,
+            {
+                [Parameters.activityId as string]:
+                activity?.activityId as string
+            }
+        ));
     });
 
     const displayLifeAreaName: string = (() => {
@@ -572,7 +582,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     <MenuItem onClick={handleEditActivity}>
                         {getString('values_inventory_activity_menu_edit')}
                     </MenuItem>
-                    <MenuItem onClick={handleScheduleActivity}>
+                    <MenuItem onClick={handleAddActivitySchedule}>
                         {getString('values_inventory_activity_menu_add_schedule')}
                     </MenuItem>
                     <MenuItem onClick={handleDeleteActivity}>

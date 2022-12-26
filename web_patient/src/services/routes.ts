@@ -28,7 +28,9 @@ export const ParameterValues = {
         assessmentLog: 'log-assessment',
         activityLog: 'log-activity',
         addActivity: 'add-activity',
+        addActivitySchedule: 'add-activity-schedule',
         editActivity: 'edit-activity',
+        editActivitySchedule: 'edit-activity-schedule',
         safetyPlan: 'safety-plan',
     },
 };

@@ -178,7 +178,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         modeState: IActivityScheduleViewModeState;
     }
 
-    const initialActivityScheduleViewState: IActivityScheduleViewState = (() => {
+    const initialActivityScheduleViewState: IActivityScheduleViewState = ((): IActivityScheduleViewState => {
         const _defaultDate = clearTime(new Date());
         const _defaultTimeOfDay = 9;
         const defaultViewState: IActivityScheduleViewState = {
@@ -201,6 +201,26 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 mode: 'none',
             },
         };
+
+        // ActivityScheduling can also be accessed when routeForm is ParameterValues.form.addActivity.
+        // In that case, the viewState is updated after the activity is created.
+        if (routeForm == ParameterValues.form.addActivitySchedule) {
+            const routeActivityId = getRouteParameter(Parameters.activityId);
+            console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
+            if (!routeActivityId) {
+                return defaultViewState;
+            }
+
+            return {
+                ...defaultViewState,
+                modeState: {
+                    mode: 'addActivitySchedule',
+                    activityId: routeActivityId,
+                }
+            }
+        } else if (routeForm == ParameterValues.form.editActivitySchedule) {
+            // TODO Activity Refactor
+        }
 
         return defaultViewState;
     })();
@@ -819,10 +839,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     */ }
 
     const pages: IFormPage[] = [];
-    if ([
-        ParameterValues.form.addActivity,
-        ParameterValues.form.editActivity
-    ].includes(routeForm)) {
+    if (
+        (routeForm == ParameterValues.form.addActivity) ||
+        (routeForm == ParameterValues.form.editActivity)
+    ) {
         pages.push({
             content: activityPage,
             title: (() => {
@@ -841,9 +861,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         });
     }
 
-    if ([
-        ParameterValues.form.addActivity,
-    ].includes(routeForm)) {
+    if (
+        (routeForm == ParameterValues.form.addActivitySchedule) ||
+        (routeForm == ParameterValues.form.editActivitySchedule) ||
+        (routeForm == ParameterValues.form.addActivity)
+    ) {
         pages.push(
             {
                 content: activitySchedulePage,
