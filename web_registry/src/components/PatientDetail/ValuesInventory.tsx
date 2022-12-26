@@ -13,6 +13,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 export const ValuesInventory: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const currentPatient = usePatient();
+    const { lifeAreas } = rootStore.appContentConfig;
     const { values, valuesInventory } = currentPatient;
     const { assigned, assignedDateTime } = valuesInventory;
     var dateStrings: string[] = [];
@@ -28,8 +29,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
         .reduce((a, b) => a.concat(b), [])
         .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
 
-    // TODO: Sort on life area and value.
-
     if (activitiesWithValue.length !== 0) {
         dateStrings.push(
             `${getString('patient_values_inventory_activity_date_header')} ${format(
@@ -42,24 +41,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     const otherActivites = currentPatient
         .getActivitiesWithoutValueId()
         .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
-
-    const activityWithValueTableRow = (activity: IActivity, idx: number): JSX.Element => {
-        const value = currentPatient.getValueById(activity.valueId as string);
-        const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
-
-        return (
-            <TableRow key={idx}>
-                <TableCell>{lifeAreaContent?.name}</TableCell>
-                <TableCell>{value?.name}</TableCell>
-                <TableCell component="th" scope="row">
-                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
-                </TableCell>
-                <TableCell>{activity.name}</TableCell>
-                <TableCell>{activity.enjoyment}</TableCell>
-                <TableCell>{activity.importance}</TableCell>
-            </TableRow>
-        );
-    };
 
     const otherActivityTableRow = (activity: IActivity, idx: number): JSX.Element => {
         return (
@@ -118,7 +99,31 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {activitiesWithValue.map((activity, idx) => activityWithValueTableRow(activity, idx))}
+                                {lifeAreas.map((la, _idx) => {
+                                    const lifeAreaActivities: IActivity[] = currentPatient
+                                        .getActivitiesByLifeAreaId(la.id)
+                                        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
+                                    return lifeAreaActivities.map((laa, idx) => {
+                                        const value = currentPatient.getValueById(laa.valueId as string);
+                                        const lifeAreaContent = rootStore.getLifeAreaContent(
+                                            value?.lifeAreaId as string,
+                                        );
+                                        return (
+                                            <TableRow key={idx}>
+                                                <TableCell>{lifeAreaContent?.name}</TableCell>
+                                                <TableCell>{value?.name}</TableCell>
+                                                <TableCell component="th" scope="row">
+                                                    {!!laa.editedDateTime
+                                                        ? format(laa.editedDateTime, 'MM/dd/yyyy')
+                                                        : '--'}
+                                                </TableCell>
+                                                <TableCell>{laa.name}</TableCell>
+                                                <TableCell>{laa.enjoyment}</TableCell>
+                                                <TableCell>{laa.importance}</TableCell>
+                                            </TableRow>
+                                        );
+                                    });
+                                })}
                                 {otherActivites.map((activity, idx) => otherActivityTableRow(activity, idx))}
                             </TableBody>
                         </Table>
