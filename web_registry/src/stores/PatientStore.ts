@@ -58,6 +58,7 @@ export interface IPatientStore extends IPatient {
     readonly loadValuesInventoryState: IPromiseQueryState;
 
     // Helpers
+    getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
     getActivitiesWithoutValueId: () => IActivity[];
     getValueById: (valueId: string) => IValue | undefined;
@@ -333,6 +334,22 @@ export class PatientStore implements IPatientStore {
     }
 
     // Helpers
+    @action.bound
+    public getActivitiesByLifeAreaId(lifeAreaId: string) {
+        return this.activities.filter((a) => {
+            if (!a.valueId) {
+                return false;
+            }
+
+            const value = this.getValueById(a.valueId);
+            if (!value) {
+                return false;
+            }
+
+            return value.lifeAreaId == lifeAreaId;
+        });
+    }
+
     @action.bound
     public getActivitiesByValueId(valueId: string) {
         return this.activities.filter((a) => {
