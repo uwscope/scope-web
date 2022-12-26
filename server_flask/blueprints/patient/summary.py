@@ -26,7 +26,8 @@ def compute_patient_summary(
 ) -> dict:
     """
     {
-        # assignedValuesInventory <- True, if assigned is True, and not a single activity exists in values inventory singleton
+        # assignedValuesInventory <- True, if assigned is True, and
+        editedDateTime of an activity with value < assignedDateTime
         assignedValuesInventory: boolean;
 
         # assignedSafetyPlan <- True, if assigned is True, and lastUpdatedDateTime < assignedDateTime in safety plan singleton
