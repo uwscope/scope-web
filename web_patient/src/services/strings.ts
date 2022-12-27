@@ -184,6 +184,11 @@ const _strings = {
 
     form_add_activity_title: 'Add Activity',
     form_edit_activity_title: 'Edit Activity',
+    form_add_activity_submit_success: 'Your activity is created.',
+    form_edit_activity_submit_success: 'Your activity is updated.',
+    form_add_activity_schedule_submit_success: 'Your activity is scheduled.',
+    form_edit_activity_schedule_submit_success: 'Your activity schedule is updated.',
+
     // Form_add_activity_choose_or: 'OR',
     // Form_add_activity_describe: 'Describe the activity',
 
@@ -210,6 +215,10 @@ const _strings = {
     form_add_edit_activity_importance_prompt: 'How important it is for you to do this activity?',
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
     form_add_edit_activity_name_validation_not_unique: 'Activity already exists.',
+
+
+    form_add_activity_schedule_title: 'Add Schedule',
+    form_edit_activity_schedule_title: 'Edit Schedule',
 
     form_add_edit_activity_schedule_when_prompt:
         'When would you like to do this activity?',
@@ -239,9 +248,9 @@ const _strings = {
     // Form_add_activity_reminder_time_label: 'Reminder time',
     // Form_add_activity_repetition_section: 'Set repetition',
     //
-    // Form_add_activity_submit_success: 'Great! Your activity is saved.',
 
-    Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
+
+    Form_submit_error_message: 'Sorry! There was an error submitting. Please try again.',
     Form_submit_error_retry: 'Retry',
 
     Resources_safety_plan_title: 'Safety Plan',

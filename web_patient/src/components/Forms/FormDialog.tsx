@@ -33,6 +33,7 @@ export interface IFormPage {
     title?: string;
     canGoNext?: boolean;
     onSubmit?: () => Promise<boolean>;
+    submitToast?: string;
 }
 
 export interface IFormDialogProps {
@@ -80,7 +81,7 @@ const Transition = React.forwardRef(
 );
 
 export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) => {
-    const { isOpen, pages, canClose, onClose, submitToast, loading } = props;
+    const { isOpen, pages, canClose, onClose, loading } = props;
     const navigate = useNavigate();
 
     const state = useLocalObservable<{
@@ -124,6 +125,16 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
             return pages[state.activePage].title;
         } else if (props.title) {
             return props.title;
+        } else {
+            return undefined;
+        }
+    })();
+
+    const submitToast = (() => {
+        if (pages[state.activePage].submitToast) {
+            return pages[state.activePage].submitToast;
+        } else if (props.submitToast) {
+            return props.submitToast;
         } else {
             return undefined;
         }

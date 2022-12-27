@@ -957,6 +957,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             })(),
             canGoNext: activityValidateNext().valid,
             onSubmit: handleSubmitActivity,
+            submitToast: (() => {
+                if (activityViewState.modeState.mode == "addActivity") {
+                    return getString("form_add_activity_submit_success");
+                } else if (activityViewState.modeState.mode == "editActivity") {
+                    return getString("form_edit_activity_submit_success");
+                } else {
+                    return undefined;
+                }
+            })(),
         });
     }
 
@@ -968,8 +977,26 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         pages.push(
             {
                 content: activitySchedulePage,
+                title: (() => {
+                    if (activityScheduleViewState.modeState.mode == "addActivitySchedule") {
+                        return getString("form_add_activity_schedule_title");
+                    } else if (activityScheduleViewState.modeState.mode == "editActivitySchedule") {
+                        return getString("form_edit_activity_schedule_title");
+                    } else {
+                        return undefined;
+                    }
+                })(),
                 canGoNext: true,
                 onSubmit: handleSubmitActivitySchedule,
+                submitToast: (() => {
+                    if (activityScheduleViewState.modeState.mode == "addActivitySchedule") {
+                        return getString("form_add_activity_schedule_submit_success");
+                    } else if (activityScheduleViewState.modeState.mode == "editActivitySchedule") {
+                        return getString("form_edit_activity_schedule_submit_success");
+                    } else {
+                        return undefined;
+                    }
+                })(),
                 // TODO Activity Refactor: Update for valid form submission state
             }
         );
@@ -981,9 +1008,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             canClose={false}
             loading={patientStore.loadActivitiesState.pending}
             pages={pages}
-            // TODO Activity Refactor
-            // submitToast={getString('Form_add_activity_submit_success')}>
-            submitToast={"TODO Activity Refactor"}
         />
     );
 });
