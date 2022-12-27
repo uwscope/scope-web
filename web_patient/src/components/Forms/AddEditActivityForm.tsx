@@ -9,6 +9,7 @@ import {
     // DialogContent,
     // DialogTitle,
     FormControlLabel,
+    FormHelperText,
     FormGroup,
     Grid,
     // InputLabel,
@@ -495,6 +496,31 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         };
     }
 
+    const activityScheduleValidateNext = () => {
+        // Date must validate
+        const validateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
+        if (validateDate.error) {
+            return validateDate;
+        }
+
+        // Time must validate
+        const validateTime = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
+        if (validateTime.error) {
+            return validateTime;
+        }
+
+        // Repetition must validate
+        const validateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+        if (validateRepetition.error) {
+            return validateRepetition;
+        }
+
+        return {
+            valid: true,
+            error: false,
+        }
+    }
+
     const activityScheduleValidateDate = (date: Date | null) => {
         if (!date || date.toString() == "Invalid Date") {
             return {
@@ -527,6 +553,27 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 error: true,
                 errorMessage: getString('form_add_edit_activity_schedule_time_of_day_validation_invalid_format'),
             };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
+        if (hasRepetition) {
+            const numDaysRepeat = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+                return accumulator + (repeatDayFlags[dayOfWeek] ? 1 : 0);
+            }, 0);
+
+            if (numDaysRepeat == 0) {
+                return {
+                    valid: false,
+                    error: true,
+                    errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_no_days'),
+                };
+            }
         }
 
         return {
@@ -751,6 +798,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const _activitySchedulePageValidateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
     const _activitySchedulePageValidateTimeOfDay = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
+    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
     const activitySchedulePage = (
         <Stack spacing={4}>
             <FormSection
@@ -814,6 +862,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 addPaddingTop
                 prompt={getString("form_add_edit_activity_schedule_has_repetition_prompt")}
                 content={
+                <Fragment>
                     <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
                         <Grid item>
                             <Typography>{getString('Form_button_no')}</Typography>
@@ -830,6 +879,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             <Typography>{getString('Form_button_yes')}</Typography>
                         </Grid>
                     </Grid>
+                </Fragment>
                 }
             />
 
@@ -838,25 +888,32 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     addPaddingTop
                     prompt={getString('form_add_edit_activity_schedule_repeat_days_prompt')}
                     content={
-                        <FormGroup>
-                            {daysOfWeekValues.map((dayOfWeek) => {
-                                return (
-                                    <FormControlLabel
-                                        key={dayOfWeek}
-                                        control={
-                                            <Checkbox
-                                                checked={activityScheduleViewState.repeatDayFlags[dayOfWeek]}
-                                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleActivityScheduleChangeRepeatDays(event, dayOfWeek)
-                                                }
-                                                value={dayOfWeek}
-                                            />
-                                        }
-                                        label={dayOfWeek}
-                                    />
-                                );
-                            })}
-                        </FormGroup>
+                        <Fragment>
+                            {_activitySchedulePageValidateRepetition.error && (
+                                <FormHelperText error={true}>
+                                    {_activitySchedulePageValidateRepetition.errorMessage}
+                                </FormHelperText>
+                            )}
+                            <FormGroup>
+                                {daysOfWeekValues.map((dayOfWeek) => {
+                                    return (
+                                        <FormControlLabel
+                                            key={dayOfWeek}
+                                            control={
+                                                <Checkbox
+                                                    checked={activityScheduleViewState.repeatDayFlags[dayOfWeek]}
+                                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                        handleActivityScheduleChangeRepeatDays(event, dayOfWeek)
+                                                    }
+                                                    value={dayOfWeek}
+                                                />
+                                            }
+                                            label={dayOfWeek}
+                                        />
+                                    );
+                                })}
+                            </FormGroup>
+                        </Fragment>
                     }
                 />
             )}
@@ -986,7 +1043,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         return undefined;
                     }
                 })(),
-                canGoNext: true,
+                canGoNext: activityScheduleValidateNext().valid,
                 onSubmit: handleSubmitActivitySchedule,
                 submitToast: (() => {
                     if (activityScheduleViewState.modeState.mode == "addActivitySchedule") {
@@ -997,7 +1054,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                         return undefined;
                     }
                 })(),
-                // TODO Activity Refactor: Update for valid form submission state
             }
         );
     }

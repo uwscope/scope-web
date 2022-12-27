@@ -238,6 +238,8 @@ const _strings = {
         'Would you like to repeat this activity every week?',
     form_add_edit_activity_schedule_repeat_days_prompt:
         'On what days would you like to repeat this activity?',
+    form_add_edit_activity_schedule_repetition_validation_no_days:
+        'Select one or more days.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
