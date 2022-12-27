@@ -137,7 +137,8 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     to={getFormLink(
                         ParameterValues.form.addActivity,
                         {
-                            [Parameters.valueId as string]: props.valueId as string
+                            [Parameters.valueId]: props.valueId as string,
+                            [Parameters.addSchedule]: ParameterValues.addSchedule.false,
                         }
                     )}
                 >

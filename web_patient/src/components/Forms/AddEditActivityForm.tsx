@@ -45,7 +45,8 @@ import {
 export interface IAddEditActivityFormProps extends IFormProps {}
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
-    const routeForm = getRouteParameter(Parameters.form) as string;
+    const routeParamForm = getRouteParameter(Parameters.form) as string;
+    const routeParamAddSchedule = getRouteParameter(Parameters.addSchedule) == ParameterValues.addSchedule.true;
 
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
@@ -96,37 +97,40 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             },
         };
 
-        if (routeForm == ParameterValues.form.addActivity) {
-            const valueId = getRouteParameter(Parameters.valueId);
-
+        if (routeParamForm == ParameterValues.form.addActivity) {
+            const routeValueId = getRouteParameter(Parameters.valueId);
             const valueIdAndLifeAreaId = (() => {
-                if (!valueId) {
+                if (!routeValueId) {
                     return {};
                 }
 
-                const value = patientStore.getValueById(valueId);
+                const value = patientStore.getValueById(routeValueId);
                 console.assert(!!value, 'addActivity value not found');
                 if (!value) {
                     return {};
                 }
 
                 return {
-                    valueId: valueId,
+                    valueId: routeValueId,
                     lifeAreaId: value.lifeAreaId,
                 }
             })();
 
-            return {
-                ...defaultViewState,
+            if(!valueIdAndLifeAreaId.valueId) {
+                return defaultViewState;
+            } else {
+                return {
+                    ...defaultViewState,
 
-                ...valueIdAndLifeAreaId,
+                    ...valueIdAndLifeAreaId,
 
-                modeState: {
-                    mode: 'addActivity',
-                    valueId: !!valueId ? valueId : undefined,
-                },
-            };
-        } else if (routeForm == ParameterValues.form.editActivity) {
+                    modeState: {
+                        mode: 'addActivity',
+                        valueId: valueIdAndLifeAreaId.valueId,
+                    },
+                };
+            }
+        } else if (routeParamForm == ParameterValues.form.editActivity) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
             console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
             if (!routeActivityId) {
@@ -235,9 +239,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             },
         };
 
-        // ActivityScheduling can also be accessed when routeForm is ParameterValues.form.addActivity.
+        // ActivityScheduling can also be accessed when routeParamForm is ParameterValues.form.addActivity.
         // In that case, the viewState is updated after the activity is created.
-        if (routeForm == ParameterValues.form.addActivitySchedule) {
+        if (routeParamForm == ParameterValues.form.addActivitySchedule) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
             console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
             if (!routeActivityId) {
@@ -251,7 +255,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     activityId: routeActivityId,
                 }
             }
-        } else if (routeForm == ParameterValues.form.editActivitySchedule) {
+        } else if (routeParamForm == ParameterValues.form.editActivitySchedule) {
             // TODO Activity Refactor
         }
 
@@ -937,8 +941,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const pages: IFormPage[] = [];
     if (
-        (routeForm == ParameterValues.form.addActivity) ||
-        (routeForm == ParameterValues.form.editActivity)
+        (routeParamForm == ParameterValues.form.addActivity) ||
+        (routeParamForm == ParameterValues.form.editActivity)
     ) {
         pages.push({
             content: activityPage,
@@ -957,9 +961,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
 
     if (
-        (routeForm == ParameterValues.form.addActivitySchedule) ||
-        (routeForm == ParameterValues.form.editActivitySchedule) ||
-        (routeForm == ParameterValues.form.addActivity)
+        ((routeParamForm == ParameterValues.form.addActivity) && routeParamAddSchedule) ||
+        (routeParamForm == ParameterValues.form.addActivitySchedule) ||
+        (routeParamForm == ParameterValues.form.editActivitySchedule)
     ) {
         pages.push(
             {

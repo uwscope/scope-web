@@ -18,6 +18,7 @@ export const Routes = {
 export const Parameters = {
     form: 'form',
     activityId: 'activity-id',
+    addSchedule: 'add-schedule',
     assessmentId: 'assessment-id',
     taskId: 'task-id',
     valueId: 'value-id',
@@ -34,6 +35,10 @@ export const ParameterValues = {
         editActivitySchedule: 'edit-activity-schedule',
         safetyPlan: 'safety-plan',
     },
+    addSchedule: {
+        true: 'true',
+        false: 'false',
+    }
 };
 
 export const getRouteParameter = (paramName: string) => {
