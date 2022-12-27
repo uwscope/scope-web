@@ -81,7 +81,7 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                                 <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
                             )}
                             {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules, with ${repeatActivitySchedules.length} with Repeating`}</HelperText>
+                                <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeating`}</HelperText>
                             )}
                         </Fragment>
                     );

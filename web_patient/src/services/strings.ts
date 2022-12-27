@@ -88,7 +88,7 @@ const _strings = {
     values_inventory_values_example_title: 'Example Values',
     values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
     values_inventory_values_identify_title: 'Identify Personal Values',
-    values_inventory_values_identify_existing_title: 'Your Identified Personal Values',
+    values_inventory_values_identify_existing_title: 'Identified Personal Values',
     values_inventory_values_identify_more_title: 'Identify Additional Personal Values',
 
     Values_inventory_lifearea: 'Life area',
