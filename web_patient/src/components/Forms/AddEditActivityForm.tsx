@@ -646,48 +646,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             />
 
-            <FormSection
-                addPaddingTop
-                prompt={getString('form_add_edit_activity_enjoyment_prompt')}
-                help={getString('form_add_edit_activity_enjoyment_help')}
-                content={
-                    <Select
-                        labelId="activity-enjoyment-label"
-                        id="activity-enjoyment"
-                        value={activityViewState.enjoyment}
-                        onChange={handleActivitySelectEnjoyment}
-                    >
-                        <MenuItem key='' value='-1'></MenuItem>
-                        {[...Array(11).keys()].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                }
-            />
-
-            <FormSection
-                addPaddingTop
-                prompt={getString('form_add_edit_activity_importance_prompt')}
-                help={getString('form_add_edit_activity_importance_help')}
-                content={
-                    <Select
-                        labelId="activity-importance-label"
-                        id="activity-importance"
-                        value={activityViewState.importance}
-                        onChange={handleActivitySelectImportance}
-                    >
-                        <MenuItem key='' value='-1'></MenuItem>
-                        {[...Array(11).keys()].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                }
-            />
-
             {(!_hideLifeAreaAndValue && <FormSection
                 addPaddingTop
                 prompt={getString('form_add_edit_activity_life_area_value_prompt')}
@@ -746,6 +704,48 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Fragment>
                 }
             />)}
+
+            <FormSection
+                addPaddingTop
+                prompt={getString('form_add_edit_activity_enjoyment_prompt')}
+                help={getString('form_add_edit_activity_enjoyment_help')}
+                content={
+                    <Select
+                        labelId="activity-enjoyment-label"
+                        id="activity-enjoyment"
+                        value={activityViewState.enjoyment}
+                        onChange={handleActivitySelectEnjoyment}
+                    >
+                        <MenuItem key='' value='-1'></MenuItem>
+                        {[...Array(11).keys()].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                }
+            />
+
+            <FormSection
+                addPaddingTop
+                prompt={getString('form_add_edit_activity_importance_prompt')}
+                help={getString('form_add_edit_activity_importance_help')}
+                content={
+                    <Select
+                        labelId="activity-importance-label"
+                        id="activity-importance"
+                        value={activityViewState.importance}
+                        onChange={handleActivitySelectImportance}
+                    >
+                        <MenuItem key='' value='-1'></MenuItem>
+                        {[...Array(11).keys()].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                }
+            />
         </Stack>
     );
 
