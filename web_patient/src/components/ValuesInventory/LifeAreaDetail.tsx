@@ -75,13 +75,13 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                                 <HelperText>{`1 Schedule`}</HelperText>
                             )}
                             {(activitySchedules.length == 1 && repeatActivitySchedules.length == 1) && (
-                                <HelperText>{`1 Schedule, with Repeat`}</HelperText>
+                                <HelperText>{`1 Schedule, with Repeating`}</HelperText>
                             )}
                             {(activitySchedules.length > 1 && repeatActivitySchedules.length == 0) && (
                                 <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
                             )}
                             {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules, Including ${repeatActivitySchedules.length} with Repeat`}</HelperText>
+                                <HelperText>{`${activitySchedules.length} Schedules, with ${repeatActivitySchedules.length} with Repeating`}</HelperText>
                             )}
                         </Fragment>
                     );
@@ -233,7 +233,7 @@ const AddEditValueDialog: FunctionComponent<{
             content={
                 <Stack spacing={2}>
                     <SubHeaderText>{lifeArea}</SubHeaderText>
-                    <Examples title={getString('Values_inventory_values_example_title')} examples={examples} />
+                    <Examples title={getString('values_inventory_values_example_title')} examples={examples} />
                     <TextField
                         autoFocus
                         margin="dense"
@@ -257,10 +257,12 @@ const Examples: FunctionComponent<{ title: string; examples: string[] }> = (prop
     const { title, examples } = props;
     return (
         <HelperText>
-            <div>{`${title}:`}</div>
-            {examples.map((ex, idx) => (
-                <div key={idx}>{`${idx + 1}. ${ex}`}</div>
-            ))}
+            <Stack spacing={1}>
+                <div>{`${title}:`}</div>
+                {examples.map((ex, idx) => (
+                    <div key={idx}>{`${idx + 1}. ${ex}`}</div>
+                ))}
+            </Stack>
         </HelperText>
     );
 };
@@ -495,29 +497,33 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                 <Stack spacing={6}>
                     {
                         lifeAreaId == LifeAreaIdOther ? (
-                            <Fragment>
-                                <ActivitiesSection
-                                    activities={patientStore.getActivitiesWithoutValueId()}
-                                    handleMoreClickActivity={handleMoreClickActivity}
-                                />
-                            </Fragment>
+                            <FormSection
+                                prompt={getString('values_inventory_life_area_other_activities_title')}
+                                subPrompt={getString('values_inventory_life_area_other_activities_subprompt')}
+                                content={
+                                    <ActivitiesSection
+                                        activities={patientStore.getActivitiesWithoutValueId()}
+                                        handleMoreClickActivity={handleMoreClickActivity}
+                                    />
+                                }
+                            />
                         ) : (
                             <Fragment>
                                 {
                                     patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                                         <FormSection
-                                            prompt={getString('Values_inventory_values_example_title')}
-                                            subPrompt={getString('Values_inventory_values_empty_subprompt')}
+                                            prompt={getString('values_inventory_values_identify_title')}
+                                            subPrompt={getString('values_inventory_values_empty_subprompt')}
                                             content={
                                                 <Examples
-                                                    title={getString('Values_inventory_values_example_title')}
+                                                    title={getString('values_inventory_values_example_title')}
                                                     examples={displayValueExamples}
                                                 />
                                             }
                                         />
                                     ) : (
                                         <Stack spacing={0}>
-                                            <HeaderText>{getString('Values_inventory_values_existing_title')}</HeaderText>
+                                            <HeaderText>{getString('values_inventory_values_identify_existing_title')}</HeaderText>
                                             <Stack spacing={4}>
                                                 {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
                                                     return (
@@ -540,7 +546,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                 <FormSection
                                     prompt={
                                         patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
-                                            ? getString('Values_inventory_values_more_title')
+                                            ? getString('values_inventory_values_identify_more_title')
                                             : ''
                                     }
                                     content={

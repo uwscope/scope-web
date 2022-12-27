@@ -76,17 +76,20 @@ const _strings = {
     values_inventory_home_instruction1:
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
     values_inventory_home_instruction2:
-        'The Life Areas, Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might be able to support those values.',
+        'The Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might support those values.',
     values_inventory_home_instruction3:
-        'The inventory consists of five life areas. You can fill them out in any order you wish.',
-    values_inventory_home_instruction4: 'Tap on any life area to start filling the inventory.',
+        'The inventory consists of five life areas. You can fill them out in any order.',
+    values_inventory_home_instruction4: 'Tap on any life area to start.',
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
+    values_inventory_life_area_other_activities_title: 'Activities Not Assigned To Values',
+    values_inventory_life_area_other_activities_subprompt: 'As you identify personal values, assign these to support your values.',
 
-    Values_inventory_values_existing_title: 'Your existing values:',
-    Values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
-    Values_inventory_values_example_title: 'Example values',
-    Values_inventory_values_more_title: 'List additional values',
+    values_inventory_values_example_title: 'Example Values',
+    values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
+    values_inventory_values_identify_title: 'Identify Personal Values',
+    values_inventory_values_identify_existing_title: 'Your Identified Personal Values',
+    values_inventory_values_identify_more_title: 'Identify Additional Personal Values',
 
     Values_inventory_lifearea: 'Life area',
     values_inventory_value_count_singular: 'value',
