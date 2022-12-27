@@ -463,6 +463,24 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             return validateName;
         }
 
+        // If editing an activity, something must have changed
+        if (activityViewState.modeState.mode == 'editActivity') {
+            const editActivity = activityViewState.modeState.editActivity;
+
+            let changeDetected = false;
+            changeDetected ||= activityViewState.name != editActivity.name;
+            changeDetected ||= activityViewState.valueId != editActivity.valueId;
+            changeDetected ||= activityViewState.enjoyment != (!!editActivity.enjoyment ? editActivity.enjoyment : -1);
+            changeDetected ||= activityViewState.importance != (!!editActivity.importance ? editActivity.importance : -1);
+
+            if(!changeDetected) {
+                return {
+                    valid: false,
+                    error: true,
+                };
+            }
+        }
+
         return {
             valid: true,
             error: false,
@@ -513,6 +531,32 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         const validateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
         if (validateRepetition.error) {
             return validateRepetition;
+        }
+
+        // If editing an activity schedule, something must have changed
+        if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
+            const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
+
+            let changeDetected = false;
+            changeDetected ||= activityScheduleViewState.date != editActivitySchedule.date;
+            changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
+            changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
+            if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
+                const repeatDayFlagsChangeDetected = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+                    const reduceEditActivityScheduleRepeatDayFlags = editActivitySchedule.repeatDayFlags as DayOfWeekFlags;
+
+                    return accumulator || (activityScheduleViewState.repeatDayFlags[dayOfWeek] != reduceEditActivityScheduleRepeatDayFlags[dayOfWeek]);
+                }, false);
+
+                changeDetected ||= repeatDayFlagsChangeDetected;
+            }
+
+            if(!changeDetected) {
+                return {
+                    valid: false,
+                    error: true,
+                };
+            }
         }
 
         return {
