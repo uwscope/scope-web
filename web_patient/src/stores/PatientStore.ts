@@ -90,7 +90,7 @@ export interface IPatientStore {
     updateSafetyPlan: (safetyPlan: ISafetyPlan) => Promise<void>;
 
     // Values
-    addValue: (value: IValue) => Promise<void>;
+    addValue: (value: IValue) => Promise<IValue | null>;
     deleteValue: (value: IValue) => Promise<void>;
     updateValue: (value: IValue) => Promise<void>;
 
@@ -600,8 +600,12 @@ export class PatientStore implements IPatientStore {
 
     // Values
     @action.bound
-    public async addValue(value: IValue) {
+    public async addValue(value: IValue): Promise<IValue | null> {
+        let returnAddedValue = null;
+
         const promise = this.patientService.addValue(value).then((addedValue) => {
+            returnAddedValue = addedValue;
+
             const newValues = this.values.slice() || [];
             newValues.push(addedValue);
             return newValues;
@@ -612,6 +616,8 @@ export class PatientStore implements IPatientStore {
             this.loadValuesQuery,
             onArrayConflict('value', 'valueId', () => this.values, logger),
         );
+
+        return returnAddedValue;
     }
 
     @action.bound

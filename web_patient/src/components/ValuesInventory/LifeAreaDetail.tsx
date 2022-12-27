@@ -196,7 +196,7 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
     );
 });
 
-const AddEditValueDialog: FunctionComponent<{
+export const AddEditValueDialog: FunctionComponent<{
     open: boolean;
     isEdit: boolean;
     lifeArea: string;
@@ -382,6 +382,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     const handleSaveValue = action(async () => {
         if (viewState.modeState.mode == 'add') {
             // TODO Activity Refactor: check that our 'add' is valid
+            // Defer until this is more cleanly-organized
             // is a unique name
 
             await patientStore.addValue({
@@ -391,9 +392,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             });
         } else if (viewState.modeState.mode == 'edit') {
             // TODO Activity Refactor: check that our 'edit' is valid
-            // the value still exists
-            // - update should fail due to rev conflict if it does not?
-            // - what does the client actually do?
+            // Defer until this is more cleanly-organized
             // is a unique name
             // the value changed?
 
