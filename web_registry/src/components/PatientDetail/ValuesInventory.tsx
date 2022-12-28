@@ -14,48 +14,78 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const currentPatient = usePatient();
     const { lifeAreas } = rootStore.appContentConfig;
-    const { values, valuesInventory } = currentPatient;
+    const { activities, valuesInventory } = currentPatient;
     const { assigned, assignedDateTime } = valuesInventory;
+
     var dateStrings: string[] = [];
     if (assigned && !!assignedDateTime) {
         dateStrings.push(
             `${getString('patient_values_inventory_assigned_date')} ${format(assignedDateTime, 'MM/dd/yyyy')}`,
         );
     }
-    const activitiesWithValue = values
-        ?.map((v) => {
-            return currentPatient.getActivitiesByValueId(v.valueId as string);
-        })
-        .reduce((a, b) => a.concat(b), [])
-        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
+    if (activities.length > 0) {
+        const mostRecentlyEditedActivityWithValue = activities
+            .filter((activity) => {
+                return !!activity.valueId;
+            })
+            .reduce((mostRecent: IActivity | undefined, current: IActivity) => {
+                if(!mostRecent) {
+                    return current;
+                }
 
-    if (activitiesWithValue.length !== 0) {
-        dateStrings.push(
-            `${getString('patient_values_inventory_activity_date_header')} ${format(
-                activitiesWithValue[0].editedDateTime as Date,
-                'MM/dd/yyyy',
-            )}`,
-        );
+                return compareDesc(mostRecent.editedDateTime, current.editedDateTime) < 0 ? mostRecent : current;
+            }, undefined);
+
+        if (mostRecentlyEditedActivityWithValue) {
+            dateStrings.push(
+                `${getString('patient_values_inventory_activity_date_header')} ${format(
+                    mostRecentlyEditedActivityWithValue.editedDateTime as Date,
+                    'MM/dd/yyyy',
+                )}`,
+            );
+        }
     }
 
-    const otherActivites = currentPatient
-        .getActivitiesWithoutValueId()
-        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
+    const sortedActivities = ((): IActivity[] => {
+        return activities.slice().sort((activityA, activityB) => {
+            let compare = 0;
 
-    const otherActivityTableRow = (activity: IActivity, idx: number): JSX.Element => {
-        return (
-            <TableRow key={idx}>
-                <TableCell>-</TableCell> {/*NOTE: Should this be "Other"*/}
-                <TableCell>-</TableCell>
-                <TableCell component="th" scope="row">
-                    {!!activity.editedDateTime ? format(activity.editedDateTime, 'MM/dd/yyyy') : '--'}
-                </TableCell>
-                <TableCell>{activity.name}</TableCell>
-                <TableCell>{activity.enjoyment}</TableCell>
-                <TableCell>{activity.importance}</TableCell>
-            </TableRow>
-        );
-    };
+            const valueA = !!activityA.valueId ? currentPatient.getValueById(activityA.valueId) : undefined;
+            const valueB = !!activityB.valueId ? currentPatient.getValueById(activityB.valueId) : undefined;
+
+            if (compare === 0) {
+                // Filter on index of the life area of any associated value.
+                // Activities without a value will sort to the end.
+                compare = (() => {
+                    // TODO: This would be much easier if we had the lifeArea sort key available
+                    const lifeAreaIdA = !!valueA ? valueA.lifeAreaId : undefined;
+                    const lifeAreaIndexA = !!lifeAreaIdA
+                        ? lifeAreas.findIndex((lifeArea) => (lifeArea.id === lifeAreaIdA))
+                        : lifeAreas.length;
+                    const lifeAreaIdB = !!valueB ? valueB.lifeAreaId : undefined;
+                    const lifeAreaIndexB = !!lifeAreaIdB
+                        ? lifeAreas.findIndex((lifeArea) => (lifeArea.id === lifeAreaIdB))
+                        : lifeAreas.length;
+
+                    return lifeAreaIndexA - lifeAreaIndexB;
+                })();
+            }
+
+            if (compare === 0) {
+                // Sort by value name
+                if(!!valueA && !!valueB) {
+                    compare = valueA.name.localeCompare(valueB.name, undefined, {sensitivity: 'base'})
+                }
+            }
+
+            if (compare == 0) {
+                // Sort by activity name, which is unique
+                compare = activityA.name.localeCompare(activityB.name, undefined, {sensitivity: 'base'})
+            }
+
+            return compare;
+        });
+    })();
 
     return (
         <ActionPanel
@@ -74,8 +104,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 } as IActionButton,
             ]}>
             <Grid container spacing={2} alignItems="stretch">
-                {(!activitiesWithValue || activitiesWithValue.length == 0) &&
-                (!otherActivites || otherActivites.length == 0) ? (
+                {(activities.length == 0) ? (
                     <Grid item xs={12}>
                         <Typography>{getString('patient_values_inventory_empty')}</Typography>
                     </Grid>
@@ -84,47 +113,36 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_lifearea_header')}
                                     </TableCell>
                                     <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
-                                    <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
-                                    <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_enjoyment_header')}
                                     </TableCell>
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_importance_header')}
                                     </TableCell>
+                                    <TableCell>{getString('patient_values_inventory_activity_date_header')}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {lifeAreas.map((la, _idx) => {
-                                    const lifeAreaActivities: IActivity[] = currentPatient
-                                        .getActivitiesByLifeAreaId(la.id)
-                                        .sort((a, b) => compareDesc(a.editedDateTime, b.editedDateTime));
-                                    return lifeAreaActivities.map((laa, idx) => {
-                                        const value = currentPatient.getValueById(laa.valueId as string);
-                                        const lifeAreaContent = rootStore.getLifeAreaContent(
-                                            value?.lifeAreaId as string,
-                                        );
-                                        return (
-                                            <TableRow key={idx}>
-                                                <TableCell>{lifeAreaContent?.name}</TableCell>
-                                                <TableCell>{value?.name}</TableCell>
-                                                <TableCell component="th" scope="row">
-                                                    {!!laa.editedDateTime
-                                                        ? format(laa.editedDateTime, 'MM/dd/yyyy')
-                                                        : '--'}
-                                                </TableCell>
-                                                <TableCell>{laa.name}</TableCell>
-                                                <TableCell>{laa.enjoyment}</TableCell>
-                                                <TableCell>{laa.importance}</TableCell>
-                                            </TableRow>
-                                        );
-                                    });
+                                {sortedActivities.map((activity, idx) => {
+                                    const value = currentPatient.getValueById(activity.valueId as string);
+                                    const lifeAreaContent = rootStore.getLifeAreaContent(value?.lifeAreaId as string);
+
+                                    return (
+                                        <TableRow key={idx}>
+                                            <TableCell component="th" scope="row">{activity.name}</TableCell>
+                                            <TableCell>{!!lifeAreaContent ? lifeAreaContent.name : "-"}</TableCell>
+                                            <TableCell>{!!value ? value.name : "-"}</TableCell>
+                                            <TableCell>{activity.enjoyment}</TableCell>
+                                            <TableCell>{activity.importance}</TableCell>
+                                            <TableCell>{format(activity.editedDateTime, 'MM/dd/yyyy')}</TableCell>
+                                        </TableRow>
+                                    );
                                 })}
-                                {otherActivites.map((activity, idx) => otherActivityTableRow(activity, idx))}
                             </TableBody>
                         </Table>
                     </TableContainer>
