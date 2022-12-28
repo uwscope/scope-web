@@ -111,7 +111,7 @@ def test_patient_summary_get(
 
 
 def test_compute_patient_summary_values_inventory(
-    data_fake_activity_factory: Callable[[], List[dict]],
+    data_fake_activity_factory: Callable[[], dict],
     data_fake_safety_plan_factory: Callable[[], dict],
     data_fake_scheduled_assessments_factory: Callable[[], List[dict]],
     data_fake_values_inventory_factory: Callable[[], dict],
@@ -151,7 +151,28 @@ def test_compute_patient_summary_values_inventory(
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
 
-    # OPTION 3 - assigned is True and an activity with value was created before that.
+    # OPTION 3 - assigned is True and an activity was created more recently.
+    #          - That activity not associated with a value.
+    #          - Should still be assigned.
+    datetime_now = pytz.utc.localize(datetime.datetime.now())
+    datetime_before = datetime_now - datetime.timedelta(minutes=30)
+    values_inventory = data_fake_values_inventory_factory()
+    values_inventory["assigned"] = True
+    values_inventory["assignedDateTime"] = date_utils.format_datetime(datetime_before)
+    activity = data_fake_activity_factory()
+    activity["editedDateTime"] = date_utils.format_datetime(datetime_now)
+    if "valueId" in activity:
+        del activity["valueId"]
+    summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[activity],
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+    )
+    assert summary["assignedValuesInventory"]
+    _patient_summary_assertions(summary=summary)
+
+    # OPTION 4 - assigned is True and an activity with value was created before that.
     #          - Should be still assigned.
     datetime_now = pytz.utc.localize(datetime.datetime.now())
     datetime_before = datetime_now - datetime.timedelta(minutes=30)
@@ -160,6 +181,7 @@ def test_compute_patient_summary_values_inventory(
     values_inventory["assignedDateTime"] = date_utils.format_datetime(datetime_now)
     activity = data_fake_activity_factory()
     activity["editedDateTime"] = date_utils.format_datetime(datetime_before)
+    activity["valueId"] = "some valueId"
     summary = blueprints.patient.summary.compute_patient_summary(
         activity_documents=[activity],
         safety_plan_document=safety_plan,
