@@ -4,11 +4,12 @@ import {
 } from '@mui/lab';
 import {
     Checkbox,
-    // Chip,
+    Chip,
     // Dialog,
     // DialogContent,
     // DialogTitle,
     FormControlLabel,
+    FormHelperText,
     FormGroup,
     Grid,
     // InputLabel,
@@ -25,12 +26,12 @@ import {
     Typography,
 } from '@mui/material';
 // import { compareAsc } from 'date-fns';
-import { action, toJS } from 'mobx';
+import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
 import {clearTime, toUTCDateOnly} from 'shared/time';
-import { IActivity, IActivitySchedule /* IValue, ILifeAreaValue, KeyedMap */ } from 'shared/types';
+import {IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */} from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
@@ -41,10 +42,14 @@ import {
     getDayOfWeek,
     // minDate,
 } from 'shared/time';
+import { AddEditValueDialog } from 'src/components/ValuesInventory/LifeAreaDetail';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
 export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> = observer(() => {
+    const routeParamForm = getRouteParameter(Parameters.form) as string;
+    const routeParamAddSchedule = getRouteParameter(Parameters.addSchedule) == ParameterValues.addSchedule.true;
+
     const rootStore = useStores();
     const { patientStore, appContentConfig } = rootStore;
     // const { valuesInventory } = patientStore;
@@ -59,6 +64,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
     interface IActivityViewStateModeAdd {
         mode: 'addActivity';
+        valueId?: string;
     }
     interface IActivityViewStateModeEdit {
         mode: 'editActivity';
@@ -67,6 +73,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     type IActivityViewModeState = IActivityViewStateModeNone | IActivityViewStateModeAdd | IActivityViewStateModeEdit;
 
     interface IActivityViewState {
+        displayedName: string;
+
         name: string;
         lifeAreaId: string;
         valueId: string;
@@ -74,29 +82,63 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         importance: number;
 
         modeState: IActivityViewModeState;
+
+        addValueOpen: boolean;
+        addValueName: string;
     }
 
-    const initialActivityViewState: IActivityViewState = (() => {
+    const initialActivityViewState: IActivityViewState = ((): IActivityViewState => {
         const defaultViewState: IActivityViewState = {
+            displayedName: '',
+
             name: '',
             lifeAreaId: '',
             valueId: '',
             enjoyment: -1,
             importance: -1,
+
             modeState: {
                 mode: 'none',
             },
+
+            addValueOpen: false,
+            addValueName: '',
         };
 
-        const routeForm = getRouteParameter(Parameters.form);
-        if (routeForm == ParameterValues.form.addActivity) {
-            return {
-                ...defaultViewState,
-                modeState: {
-                    mode: 'addActivity',
-                },
-            };
-        } else if (routeForm == ParameterValues.form.editActivity) {
+        if (routeParamForm == ParameterValues.form.addActivity) {
+            const routeValueId = getRouteParameter(Parameters.valueId);
+            const valueIdAndLifeAreaId = (() => {
+                if (!routeValueId) {
+                    return {};
+                }
+
+                const value = patientStore.getValueById(routeValueId);
+                console.assert(!!value, 'addActivity value not found');
+                if (!value) {
+                    return {};
+                }
+
+                return {
+                    valueId: routeValueId,
+                    lifeAreaId: value.lifeAreaId,
+                }
+            })();
+
+            if(!valueIdAndLifeAreaId.valueId) {
+                return defaultViewState;
+            } else {
+                return {
+                    ...defaultViewState,
+
+                    ...valueIdAndLifeAreaId,
+
+                    modeState: {
+                        mode: 'addActivity',
+                        valueId: valueIdAndLifeAreaId.valueId,
+                    },
+                };
+            }
+        } else if (routeParamForm == ParameterValues.form.editActivity) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
             console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
             if (!routeActivityId) {
@@ -114,31 +156,35 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     return {};
                 }
 
-                const editValue = patientStore.getValueById(editActivity.valueId);
-                console.assert(!!editValue, 'editActivity value not found');
-                if (!editValue) {
+                const value = patientStore.getValueById(editActivity.valueId);
+                console.assert(!!value, 'editActivity value not found');
+                if (!value) {
                     return {};
                 }
 
                 return {
                     valueId: editActivity.valueId,
-                    lifeAreaId: editValue.lifeAreaId,
+                    lifeAreaId: value.lifeAreaId,
                 }
             })();
 
             return {
                 ...defaultViewState,
+
+                displayedName: editActivity.name,
+
                 name: editActivity.name,
                 ...valueIdAndLifeAreaId,
                 enjoyment: editActivity.enjoyment ? editActivity.enjoyment : defaultViewState.enjoyment,
                 importance: editActivity.importance ? editActivity.importance : defaultViewState.importance,
+
                 modeState: {
                     mode: 'editActivity',
                     editActivity: {
-                        ...toJS(editActivity)
+                        ...editActivity
                     }
                 },
-            }
+            };
         }
 
         return defaultViewState;
@@ -177,7 +223,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         modeState: IActivityScheduleViewModeState;
     }
 
-    const initialActivityScheduleViewState: IActivityScheduleViewState = (() => {
+    const initialActivityScheduleViewState: IActivityScheduleViewState = ((): IActivityScheduleViewState => {
         const _defaultDate = clearTime(new Date());
         const _defaultTimeOfDay = 9;
         const defaultViewState: IActivityScheduleViewState = {
@@ -201,34 +247,34 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             },
         };
 
+        // ActivityScheduling can also be accessed when routeParamForm is ParameterValues.form.addActivity.
+        // In that case, the viewState is updated after the activity is created.
+        if (routeParamForm == ParameterValues.form.addActivitySchedule) {
+            const routeActivityId = getRouteParameter(Parameters.activityId);
+            console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
+            if (!routeActivityId) {
+                return defaultViewState;
+            }
+
+            return {
+                ...defaultViewState,
+                modeState: {
+                    mode: 'addActivitySchedule',
+                    activityId: routeActivityId,
+                }
+            }
+        } else if (routeParamForm == ParameterValues.form.editActivitySchedule) {
+            // TODO Activity Refactor
+        }
+
         return defaultViewState;
     })();
 
     const activityScheduleViewState = useLocalObservable<IActivityScheduleViewState>(() => initialActivityScheduleViewState);
 
-    /* TODO Activity Refactor: Pending additions to ViewState
-    const dataState = useLocalObservable<IActivity>(() => ({
-        startDateTime: activity?.startDateTime || new Date(),
-        timeOfDay: activity?.timeOfDay || 9,
-        hasReminder: activity?.hasReminder || false,
-        reminderTimeOfDay: activity?.reminderTimeOfDay || 9,
-        hasRepetition: activity?.hasRepetition || false,
-        repeatDayFlags: Object.assign(
-            {},
-            ...daysOfWeekValues.map((x) => ({
-                [x]: !!activity?.repeatDayFlags?.[x],
-            })),
-        ),
-    }));
-    */
-
     const handleSubmitActivity = action(async () => {
         try {
             if (activityViewState.modeState.mode == 'addActivity') {
-                // TODO Activity Refactor: check that our 'add' is valid
-                // is not an empty name
-                // is a unique name
-
                 // Construct the activity that will be created
                 const createActivity: IActivity = {
                     name: activityViewState.name,
@@ -250,14 +296,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     }
                 }
             } else if (activityViewState.modeState.mode == 'editActivity') {
-                // TODO Activity Refactor: check that our 'edit' is valid
-                // is not an empty name
-                // the value still exists
-                // - update should fail due to rev conflict if it does not?
-                // - what does the client actually do?
-                // is a unique name
-                // the value changed?
-
+                // Update the existing activity with current view state
                 const editActivity: IActivity = {
                     ...activityViewState.modeState.editActivity,
 
@@ -281,8 +320,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleSubmitActivitySchedule = action(async () => {
         try {
             if (activityScheduleViewState.modeState.mode == 'addActivitySchedule') {
-                // TODO Activity Refactor: check that our 'add' is valid
-
                 const createActivitySchedule: IActivitySchedule = {
                     activityId: activityScheduleViewState.modeState.activityId,
                     date: toUTCDateOnly(activityScheduleViewState.date),
@@ -299,8 +336,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
                 await patientStore.addActivitySchedule(createActivitySchedule);
             } else if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
-                // TODO Activity Refactor: check that our 'edit' is valid
-
                 const editActivitySchedule: IActivitySchedule = {
                     ...activityScheduleViewState.modeState.editActivitySchedule,
 
@@ -322,14 +357,39 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
-    /*
-    // TODO Activity Refactor: Create and Select Value During Activity Editing
     const handleAddValueOpen = action(() => {
+        activityViewState.addValueOpen = true;
+        activityViewState.addValueName = '';
     });
-    */
+
+    const handleAddValueCancel = action(() => {
+        activityViewState.addValueOpen = false;
+    });
+
+    const handleAddValueChange = action((change: string) => {
+        activityViewState.addValueName = change;
+    });
+
+    const handleAddValueSave = action(async () => {
+        activityViewState.addValueOpen = false;
+
+        const createValue: IValue = {
+            name: activityViewState.addValueName,
+            lifeAreaId: activityViewState.lifeAreaId,
+            editedDateTime: new Date(),
+        }
+
+        const createdValue = await patientStore.addValue(createValue);
+        if(createdValue) {
+            activityViewState.valueId = createdValue.valueId as string;
+        }
+    });
 
     const handleActivityChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
-        activityViewState.name = event.target.value;
+        // DisplayedName can only trimStart because full trim means never being able to add a space
+        activityViewState.displayedName = event.target.value.trimStart();
+
+        activityViewState.name = activityViewState.displayedName.trim();
     });
 
     const handleActivitySelectEnjoyment = action((event: SelectChangeEvent<number>) => {
@@ -342,7 +402,21 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const handleActivitySelectLifeArea = action((event: SelectChangeEvent<string>) => {
         activityViewState.lifeAreaId = event.target.value as string;
-        activityViewState.valueId = '';
+
+        // An empty string will fail validation
+        // Default to the first item in the list
+        activityViewState.valueId = (() => {
+            const lifeAreaValues = patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId);
+            if (lifeAreaValues.length) {
+                const valueMin = lifeAreaValues.reduce((minimum, current) => {
+                    return minimum.name.localeCompare(current.name, undefined, {sensitivity: 'base'}) < 0 ? minimum : current;
+                }, lifeAreaValues[0]);
+
+                return valueMin.valueId as string;
+            } else {
+                return '';
+            }
+        })();
     });
 
     const handleActivitySelectValue = action((event: SelectChangeEvent<string>) => {
@@ -386,6 +460,144 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         activityScheduleViewState.repeatDayFlags[dayOfWeek] = event.target.checked;
     });
 
+    const activityValidateNext = () => {
+        // Name cannot be blank
+        if (!activityViewState.name) {
+            return {
+                valid: false,
+                error: true,
+            };
+        }
+
+        // Name must validate
+        const validateName = activityValidateName(activityViewState.name);
+        if (validateName.error) {
+            return validateName;
+        }
+
+        // ValueId must validate
+        const validateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
+        if (validateValueId.error) {
+            return validateValueId;
+        }
+
+        // If editing an activity, something must have changed
+        if (activityViewState.modeState.mode == 'editActivity') {
+            const editActivity = activityViewState.modeState.editActivity;
+
+            let changeDetected = false;
+            changeDetected ||= activityViewState.name != editActivity.name;
+            changeDetected ||= activityViewState.valueId != editActivity.valueId;
+            changeDetected ||= activityViewState.enjoyment != (!!editActivity.enjoyment ? editActivity.enjoyment : -1);
+            changeDetected ||= activityViewState.importance != (!!editActivity.importance ? editActivity.importance : -1);
+
+            if(!changeDetected) {
+                return {
+                    valid: false,
+                    error: true,
+                };
+            }
+        }
+
+        return {
+            valid: true,
+            error: false,
+        }
+    }
+
+    const activityValidateName = (name: string) => {
+        // Name must be unique, accounting for case-insensitive comparisons
+        const nameIsUnique = patientStore.activities.filter((activity: IActivity): boolean => {
+            // In case of edit, do not validate against the activity being edited
+            if (activityViewState.modeState.mode == 'editActivity') {
+                return activity.activityId != activityViewState.modeState.editActivity.activityId;
+            }
+
+            return true;
+        }).findIndex((activity: IActivity): boolean => {
+            // Search for a case-insensitive match
+            return activity.name.toLocaleLowerCase() == name.toLocaleLowerCase();
+        }) < 0;
+        if(!nameIsUnique) {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: getString('form_add_edit_activity_name_validation_not_unique'),
+            };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    const activityValidateValueId = (lifeAreaId: string, valueId: string) => {
+        if (lifeAreaId && !valueId) {
+            return {
+                valid: false,
+                error: true,
+                errorMessage: getString('form_add_edit_activity_valueid_validation_none_selected'),
+            };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    const activityScheduleValidateNext = () => {
+        // Date must validate
+        const validateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
+        if (validateDate.error) {
+            return validateDate;
+        }
+
+        // Time must validate
+        const validateTime = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
+        if (validateTime.error) {
+            return validateTime;
+        }
+
+        // Repetition must validate
+        const validateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+        if (validateRepetition.error) {
+            return validateRepetition;
+        }
+
+        // If editing an activity schedule, something must have changed
+        if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
+            const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
+
+            let changeDetected = false;
+            changeDetected ||= activityScheduleViewState.date != editActivitySchedule.date;
+            changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
+            changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
+            if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
+                const repeatDayFlagsChangeDetected = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+                    const reduceEditActivityScheduleRepeatDayFlags = editActivitySchedule.repeatDayFlags as DayOfWeekFlags;
+
+                    return accumulator || (activityScheduleViewState.repeatDayFlags[dayOfWeek] != reduceEditActivityScheduleRepeatDayFlags[dayOfWeek]);
+                }, false);
+
+                changeDetected ||= repeatDayFlagsChangeDetected;
+            }
+
+            if(!changeDetected) {
+                return {
+                    valid: false,
+                    error: true,
+                };
+            }
+        }
+
+        return {
+            valid: true,
+            error: false,
+        }
+    }
+
     const activityScheduleValidateDate = (date: Date | null) => {
         if (!date || date.toString() == "Invalid Date") {
             return {
@@ -418,6 +630,27 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 error: true,
                 errorMessage: getString('form_add_edit_activity_schedule_time_of_day_validation_invalid_format'),
             };
+        }
+
+        return {
+            valid: true,
+            error: false,
+        };
+    }
+
+    const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
+        if (hasRepetition) {
+            const numDaysRepeat = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+                return accumulator + (repeatDayFlags[dayOfWeek] ? 1 : 0);
+            }, 0);
+
+            if (numDaysRepeat == 0) {
+                return {
+                    valid: false,
+                    error: true,
+                    errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_no_days'),
+                };
+            }
         }
 
         return {
@@ -508,6 +741,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     )}
     */
 
+    // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
+    const _activityPageValidateName = activityValidateName(activityViewState.name);
+    const _activityPageValidateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
+    const _hideLifeAreaAndValue = (
+        activityViewState.modeState.mode == "addActivity" &&
+        !!activityViewState.modeState.valueId
+    );
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
@@ -517,16 +757,21 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     <Fragment>
                         <TextField
                             fullWidth
-                            value={activityViewState.name}
+                            value={activityViewState.displayedName}
                             onChange={handleActivityChangeName}
                             variant="outlined"
                             multiline
+                            error={_activityPageValidateName.error}
+                            helperText={
+                                _activityPageValidateName.error &&
+                                _activityPageValidateName.errorMessage
+                            }
                         />
                     </Fragment>
                 }
             />
 
-            <FormSection
+            {(!_hideLifeAreaAndValue && <FormSection
                 addPaddingTop
                 prompt={getString('form_add_edit_activity_life_area_value_prompt')}
                 help={getString('form_add_edit_activity_life_area_value_help')}
@@ -541,6 +786,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             fullWidth
                         >
                             <MenuItem key='' value=''></MenuItem>
+                            {/* TODO Activity Refactor: Sort life areas */}
                             {lifeAreas.map((lifeArea) => (
                                 <MenuItem key={lifeArea.id} value={lifeArea.id}>
                                     {lifeArea.name}
@@ -548,40 +794,42 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             ))}
                         </Select>
                         <SubHeaderText>{getString('form_add_edit_activity_value_label')}</SubHeaderText>
-                        <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
+                        <FormHelperText
+                            error={_activityPageValidateValueId.error}
+                        >
+                            {_activityPageValidateValueId.valid ? getString('form_add_edit_activity_value_help') : _activityPageValidateValueId.errorMessage}
+                        </FormHelperText>
                         <Select
                             variant="outlined"
                             value={activityViewState.valueId}
                             onChange={handleActivitySelectValue}
                             fullWidth
-                            disabled={!activityViewState.lifeAreaId}
-                            // TODO Activity Refactor: Validate
+                            disabled={!activityViewState.lifeAreaId || patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0}
                         >
-                            <MenuItem key='' value=''></MenuItem>
                             {activityViewState.lifeAreaId && (
-                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).map((value, idx) => (
+                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId)
+                                    .slice()
+                                    .sort((a, b) => { return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}); })
+                                    .map((value, idx) => (
                                     <MenuItem key={idx} value={value.valueId}>
                                         {value.name}
                                     </MenuItem>
                                 ))
                             )}
                         </Select>
-                        {/*
-                        TODO Activity Refactor: Support Creation of a New Value
                         <Grid container justifyContent="flex-end">
                             <Chip
                                 sx={{ marginTop: 1 }}
-                                variant="outlined"
                                 color="primary"
                                 size="small"
                                 label={getString('form_add_edit_activity_add_value_button')}
                                 onClick={handleAddValueOpen}
+                                disabled={!activityViewState.lifeAreaId}
                             />
                         </Grid>
-                        */}
                     </Fragment>
                 }
-            />
+            />)}
 
             <FormSection
                 addPaddingTop
@@ -624,11 +872,44 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Select>
                 }
             />
+
+            { /* TODO: Cleanup Error and Loading Handlers */ }
+            <AddEditValueDialog
+                open={activityViewState.addValueOpen}
+                isEdit={false}
+                lifeArea={(() => {
+                    const lifeAreaContent = rootStore.getLifeAreaContent(activityViewState.lifeAreaId);
+
+                    if (lifeAreaContent) {
+                        return lifeAreaContent.name;
+                    } else {
+                        return '';
+                    }
+                })()}
+                value={activityViewState.addValueName}
+                examples={(() => {
+                    const lifeAreaContent = rootStore.getLifeAreaContent(activityViewState.lifeAreaId);
+
+                    if (lifeAreaContent) {
+                        return lifeAreaContent.examples.map((example) => {
+                            return example.name;
+                        });
+                    } else {
+                        return [];
+                    }
+                })()}
+                error={patientStore.loadValuesInventoryState.error}
+                loading={patientStore.loadValuesInventoryState.pending}
+                handleCancel={handleAddValueCancel}
+                handleChange={handleAddValueChange}
+                handleSave={handleAddValueSave}
+            />
         </Stack>
     );
 
     const _activitySchedulePageValidateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
     const _activitySchedulePageValidateTimeOfDay = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
+    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
     const activitySchedulePage = (
         <Stack spacing={4}>
             <FormSection
@@ -692,6 +973,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 addPaddingTop
                 prompt={getString("form_add_edit_activity_schedule_has_repetition_prompt")}
                 content={
+                <Fragment>
                     <Grid container alignItems="center" spacing={1} justifyContent="flex-start">
                         <Grid item>
                             <Typography>{getString('Form_button_no')}</Typography>
@@ -708,6 +990,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             <Typography>{getString('Form_button_yes')}</Typography>
                         </Grid>
                     </Grid>
+                </Fragment>
                 }
             />
 
@@ -716,25 +999,32 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     addPaddingTop
                     prompt={getString('form_add_edit_activity_schedule_repeat_days_prompt')}
                     content={
-                        <FormGroup>
-                            {daysOfWeekValues.map((dayOfWeek) => {
-                                return (
-                                    <FormControlLabel
-                                        key={dayOfWeek}
-                                        control={
-                                            <Checkbox
-                                                checked={activityScheduleViewState.repeatDayFlags[dayOfWeek]}
-                                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleActivityScheduleChangeRepeatDays(event, dayOfWeek)
-                                                }
-                                                value={dayOfWeek}
-                                            />
-                                        }
-                                        label={dayOfWeek}
-                                    />
-                                );
-                            })}
-                        </FormGroup>
+                        <Fragment>
+                            {_activitySchedulePageValidateRepetition.error && (
+                                <FormHelperText error={true}>
+                                    {_activitySchedulePageValidateRepetition.errorMessage}
+                                </FormHelperText>
+                            )}
+                            <FormGroup>
+                                {daysOfWeekValues.map((dayOfWeek) => {
+                                    return (
+                                        <FormControlLabel
+                                            key={dayOfWeek}
+                                            control={
+                                                <Checkbox
+                                                    checked={activityScheduleViewState.repeatDayFlags[dayOfWeek]}
+                                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                        handleActivityScheduleChangeRepeatDays(event, dayOfWeek)
+                                                    }
+                                                    value={dayOfWeek}
+                                                />
+                                            }
+                                            label={dayOfWeek}
+                                        />
+                                    );
+                                })}
+                            </FormGroup>
+                        </Fragment>
                     }
                 />
             )}
@@ -798,54 +1088,76 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             )}
         </Stack>
     );
-
-    // {
-    //     content: schedulePage,
-    //     canGoNext: true,
-    //     // TODO Activity Refactor
-    //     // activity?.startDateTime
-    //     //     ? compareAsc(clearTime(activity?.startDateTime), clearTime(dataState.startDateTime)) <= 0
-    //     //     : compareAsc(clearTime(new Date()), clearTime(dataState.startDateTime)) <= 0,
-    // },
-    // {
-    //     content: repetitionPage,
-    //     canGoNext: true,
-    //     // TODO Activity Refactor
-    //     // !dataState.hasRepetition ||
-    //     // (dataState.repeatDayFlags && Object.values(dataState.repeatDayFlags).filter((v) => v).length > 0),
-    // },
-
     */ }
 
-    const pages: IFormPage[] = [
-        {
+    const pages: IFormPage[] = [];
+    if (
+        (routeParamForm == ParameterValues.form.addActivity) ||
+        (routeParamForm == ParameterValues.form.editActivity)
+    ) {
+        pages.push({
             content: activityPage,
-            canGoNext: true,
+            title: (() => {
+                if (activityViewState.modeState.mode == "addActivity") {
+                    return getString("form_add_activity_title");
+                } else if (activityViewState.modeState.mode == "editActivity") {
+                    return getString("form_edit_activity_title");
+                } else {
+                    return undefined;
+                }
+            })(),
+            canGoNext: activityValidateNext().valid,
             onSubmit: handleSubmitActivity,
-            // TODO Activity Refactor: Update for valid form submission state
-            // !!dataState.name && !!dataState.value && !!dataState.lifeareaId,
-        },
-        {
-            content: activitySchedulePage,
-            canGoNext: true,
-            onSubmit: handleSubmitActivitySchedule,
-            // TODO Activity Refactor: Update for valid form submission state
-        }
-    ];
+            submitToast: (() => {
+                if (activityViewState.modeState.mode == "addActivity") {
+                    return getString("form_add_activity_submit_success");
+                } else if (activityViewState.modeState.mode == "editActivity") {
+                    return getString("form_edit_activity_submit_success");
+                } else {
+                    return undefined;
+                }
+            })(),
+        });
+    }
+
+    if (
+        ((routeParamForm == ParameterValues.form.addActivity) && routeParamAddSchedule) ||
+        (routeParamForm == ParameterValues.form.addActivitySchedule) ||
+        (routeParamForm == ParameterValues.form.editActivitySchedule)
+    ) {
+        pages.push(
+            {
+                content: activitySchedulePage,
+                title: (() => {
+                    if (activityScheduleViewState.modeState.mode == "addActivitySchedule") {
+                        return getString("form_add_activity_schedule_title");
+                    } else if (activityScheduleViewState.modeState.mode == "editActivitySchedule") {
+                        return getString("form_edit_activity_schedule_title");
+                    } else {
+                        return undefined;
+                    }
+                })(),
+                canGoNext: activityScheduleValidateNext().valid,
+                onSubmit: handleSubmitActivitySchedule,
+                submitToast: (() => {
+                    if (activityScheduleViewState.modeState.mode == "addActivitySchedule") {
+                        return getString("form_add_activity_schedule_submit_success");
+                    } else if (activityScheduleViewState.modeState.mode == "editActivitySchedule") {
+                        return getString("form_edit_activity_schedule_submit_success");
+                    } else {
+                        return undefined;
+                    }
+                })(),
+            }
+        );
+    }
 
     return (
         <FormDialog
-            title={
-                'TODO Activity Refactor Form Title'
-                // !!dataState.activityId ? getString('Form_edit_activity_title') : getString('Form_add_activity_title')
-            }
             isOpen={true}
             canClose={false}
             loading={patientStore.loadActivitiesState.pending}
             pages={pages}
-            // TODO Activity Refactor
-            // submitToast={getString('Form_add_activity_submit_success')}>
-            submitToast={"TODO Activity Refactor"}
         />
     );
 });

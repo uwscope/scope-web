@@ -11,7 +11,9 @@ const formComponents: { [paramName: string]: FunctionComponent<IFormProps> } = {
     [ParameterValues.form.assessmentLog]: AssessmentForm,
     [ParameterValues.form.activityLog]: ActivityLoggingForm,
     [ParameterValues.form.addActivity]: AddEditActivityForm,
+    [ParameterValues.form.addActivitySchedule]: AddEditActivityForm,
     [ParameterValues.form.editActivity]: AddEditActivityForm,
+    [ParameterValues.form.editActivitySchedule]: AddEditActivityForm,
     [ParameterValues.form.safetyPlan]: SafetyPlanForm,
 };
 

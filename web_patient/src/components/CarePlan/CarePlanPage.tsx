@@ -259,7 +259,12 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 <Button
                     startIcon={<AddIcon />}
                     component={Link}
-                    to={getFormLink(ParameterValues.form.addActivity)}
+                    to={getFormLink(
+                        ParameterValues.form.addActivity,
+                        {
+                            [Parameters.addSchedule]: ParameterValues.addSchedule.true,
+                        }
+                    )}
                 >
                     {getString('Careplan_add_activity')}
                 </Button>

@@ -72,19 +72,24 @@ const _strings = {
     Resources_inventory_title: 'Values & Activities Inventory',
     Resources_inventory_subtitle: 'Values and activities that align with your life goals',
 
-    Values_inventory_title: 'Values & Activities Inventory',
-    Values_inventory_instruction1:
+    values_inventory_home_title: 'Values & Activities Inventory',
+    values_inventory_home_instruction1:
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
-    Values_inventory_instruction2:
-        'The Life Areas, Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might be able to support those values.',
-    Values_inventory_instruction3:
-        'The inventory consists of five life areas. You can fill them out in any order you wish.',
-    Values_inventory_instruction4: 'Tap on any life area to start filling the inventory.',
+    values_inventory_home_instruction2:
+        'The Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might support those values.',
+    values_inventory_home_instruction3:
+        'The inventory consists of five life areas. You can fill them out in any order.',
+    values_inventory_home_instruction4: 'Tap on any life area to start.',
 
-    Values_inventory_values_existing_title: 'Your existing values:',
-    Values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
-    Values_inventory_values_example_title: 'Example values',
-    Values_inventory_values_more_title: 'List additional values',
+    values_inventory_life_area_other_activities_name: 'Other Activities',
+    values_inventory_life_area_other_activities_title: 'Activities Not Assigned To Values',
+    values_inventory_life_area_other_activities_subprompt: 'As you identify personal values, assign these to support your values.',
+
+    values_inventory_values_example_title: 'Example Values',
+    values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
+    values_inventory_values_identify_title: 'Identify Personal Values',
+    values_inventory_values_identify_existing_title: 'Identified Personal Values',
+    values_inventory_values_identify_more_title: 'Identify Additional Personal Values',
 
     Values_inventory_lifearea: 'Life area',
     values_inventory_value_count_singular: 'value',
@@ -110,7 +115,7 @@ const _strings = {
 
     values_inventory_activity_menu_delete: 'Delete',
     values_inventory_activity_menu_edit: 'Edit',
-    values_inventory_activity_menu_schedule: 'Schedule',
+    values_inventory_activity_menu_add_schedule: 'Add Schedule',
 
     // Values_inventory_dialog_add_activity: 'Add activity',
     // Values_inventory_dialog_edit_activity: 'Edit activity',
@@ -177,11 +182,16 @@ const _strings = {
 
     Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
-    // Form_add_activity_title: 'Add activity',
-    // Form_edit_activity_title: 'Edit activity',
+    form_add_activity_title: 'Add Activity',
+    form_edit_activity_title: 'Edit Activity',
+    form_add_activity_submit_success: 'Your activity is created.',
+    form_edit_activity_submit_success: 'Your activity is updated.',
+    form_add_activity_schedule_submit_success: 'Your activity is scheduled.',
+    form_edit_activity_schedule_submit_success: 'Your activity schedule is updated.',
+
     // Form_add_activity_choose_or: 'OR',
     // Form_add_activity_describe: 'Describe the activity',
-    //
+
     form_add_edit_activity_name_prompt: 'What is the name of the activity?',
     // Form_add_activity_describe_name_label: 'Name',
     form_add_edit_activity_name_help: 'Write a descriptive name of the activity that helps you recognize what it is.',
@@ -191,19 +201,24 @@ const _strings = {
     // Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
     form_add_edit_activity_life_area_value_prompt: 'Which life area and value are best associated with this activity?',
-    form_add_edit_activity_life_area_value_help: 'You can also identify values in the Values & Activity Inventory.',
+    form_add_edit_activity_life_area_value_help: 'You can also identify and edit personal values in the Values & Activity Inventory.',
     form_add_edit_activity_life_area_label: 'Life Area',
     form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
     form_add_edit_activity_value_help:
-        // TODO Activity Refactor
-        // 'Then choose a value you have identified, or add a new value.',
-        'Then choose a value you have identified.',
+        'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_valueid_validation_none_selected:
+        'If a life area is selected, then a personal value must also be identified and selected.',
     form_add_edit_activity_add_value_button: 'Add Value',
     form_add_edit_activity_enjoyment_prompt: 'How much do you enjoy doing this activity?',
     form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',
     form_add_edit_activity_importance_prompt: 'How important it is for you to do this activity?',
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
+    form_add_edit_activity_name_validation_not_unique: 'Activity already exists.',
+
+
+    form_add_activity_schedule_title: 'Add Schedule',
+    form_edit_activity_schedule_title: 'Edit Schedule',
 
     form_add_edit_activity_schedule_when_prompt:
         'When would you like to do this activity?',
@@ -223,6 +238,8 @@ const _strings = {
         'Would you like to repeat this activity every week?',
     form_add_edit_activity_schedule_repeat_days_prompt:
         'On what days would you like to repeat this activity?',
+    form_add_edit_activity_schedule_repetition_validation_no_days:
+        'Select one or more days.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
@@ -233,9 +250,9 @@ const _strings = {
     // Form_add_activity_reminder_time_label: 'Reminder time',
     // Form_add_activity_repetition_section: 'Set repetition',
     //
-    // Form_add_activity_submit_success: 'Great! Your activity is saved.',
 
-    Form_submit_error_message: 'Sorry! There was an error submitting your response. Please try again.',
+
+    Form_submit_error_message: 'Sorry! There was an error submitting. Please try again.',
     Form_submit_error_retry: 'Retry',
 
     Resources_safety_plan_title: 'Safety Plan',

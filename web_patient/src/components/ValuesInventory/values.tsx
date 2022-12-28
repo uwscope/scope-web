@@ -3,9 +3,11 @@ import HelpIcon from '@mui/icons-material/Help';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import SpaIcon from '@mui/icons-material/Spa';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import WorkIcon from '@mui/icons-material/Work';
 import React from 'react';
 import { getString } from 'src/services/strings';
+import { LifeAreaIdOther } from "shared/enums";
 
 export const getLifeAreaIcon = (lifeAreaId: string) => {
     switch (lifeAreaId) {
@@ -19,6 +21,8 @@ export const getLifeAreaIcon = (lifeAreaId: string) => {
             return <SpaIcon fontSize="large" />;
         case 'responsibilities':
             return <ListAltIcon fontSize="large" />;
+        case LifeAreaIdOther:
+            return <PendingActionsIcon fontSize="large" />;
         default:
             return <HelpIcon fontSize="large" />;
     }

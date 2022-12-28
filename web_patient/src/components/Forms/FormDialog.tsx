@@ -30,13 +30,15 @@ import styled from 'styled-components';
 
 export interface IFormPage {
     content: React.ReactElement;
+    title?: string;
     canGoNext?: boolean;
     onSubmit?: () => Promise<boolean>;
+    submitToast?: string;
 }
 
 export interface IFormDialogProps {
     isOpen: boolean;
-    title: string;
+    title?: string;
     canClose?: boolean;
     loading?: boolean;
     onClose?: () => void;
@@ -79,7 +81,7 @@ const Transition = React.forwardRef(
 );
 
 export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) => {
-    const { isOpen, title, pages, canClose, onClose, onSubmit, submitToast, loading } = props;
+    const { isOpen, pages, canClose, onClose, loading } = props;
     const navigate = useNavigate();
 
     const state = useLocalObservable<{
@@ -118,6 +120,26 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         state.activePage = index;
     });
 
+    const title = (() => {
+        if (pages[state.activePage].title) {
+            return pages[state.activePage].title;
+        } else if (props.title) {
+            return props.title;
+        } else {
+            return undefined;
+        }
+    })();
+
+    const submitToast = (() => {
+        if (pages[state.activePage].submitToast) {
+            return pages[state.activePage].submitToast;
+        } else if (props.submitToast) {
+            return props.submitToast;
+        } else {
+            return undefined;
+        }
+    })();
+
     const handleNext = action(async () => {
         const isFinalPage = state.activePage == maxPages - 1;
 
@@ -127,7 +149,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
 
         // If this is the final page of the form,
         // execute any form submit handler
-        const formSubmit = isFinalPage && onSubmit;
+        const formSubmit = isFinalPage && props.onSubmit;
 
         const submitNeeded = !!pageSubmit || !!formSubmit;
         if (submitNeeded) {
@@ -193,7 +215,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                         disabled={loading}>
                         <CloseIcon />
                     </IconButton>
-                    <Typography variant="h6">{title}</Typography>
+                    {!!title && (<Typography variant="h6">{title}</Typography>)}
                 </Toolbar>
             </AppBar>
             <ContentContainer>
