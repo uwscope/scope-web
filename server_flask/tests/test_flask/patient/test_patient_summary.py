@@ -37,9 +37,7 @@ def _patient_summary_assertions(summary: dict) -> None:
     for assigned_scheduled_assessment_current in assigned_scheduled_assessments:
         assert not assigned_scheduled_assessment_current["completed"]
         assert (
-            date_utils.parse_date(
-                assigned_scheduled_assessment_current["dueDate"]
-            )
+            date_utils.parse_date(assigned_scheduled_assessment_current["dueDate"])
             <= datetime.date.today()
         )
 
@@ -113,9 +111,9 @@ def test_patient_summary_get(
 
 
 def test_compute_patient_summary_values_inventory(
+    data_fake_activity_factory: Callable[[], dict],
     data_fake_safety_plan_factory: Callable[[], dict],
     data_fake_scheduled_assessments_factory: Callable[[], List[dict]],
-    data_fake_value_factory: Callable[[], dict],
     data_fake_values_inventory_factory: Callable[[], dict],
 ):
     # Create values inventory, safety plan, and scheduled assessments
@@ -126,45 +124,68 @@ def test_compute_patient_summary_values_inventory(
     values_inventory = data_fake_values_inventory_factory()
     values_inventory["assigned"] = False
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
 
-    # OPTION 2 - assigned is True and a value was created more recently.
+    # OPTION 2 - assigned is True and an activity with value was created more recently.
     #          - Should be resolved.
     datetime_now = pytz.utc.localize(datetime.datetime.now())
     datetime_before = datetime_now - datetime.timedelta(minutes=30)
     values_inventory = data_fake_values_inventory_factory()
     values_inventory["assigned"] = True
     values_inventory["assignedDateTime"] = date_utils.format_datetime(datetime_before)
-    value = data_fake_value_factory()
-    value["editedDateTime"] = date_utils.format_datetime(datetime_now)
+    activity = data_fake_activity_factory()
+    activity["editedDateTime"] = date_utils.format_datetime(datetime_now)
+    activity["valueId"] = "some valueId"
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[activity],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[value],
         values_inventory_document=values_inventory,
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
 
-    # OPTION 3 - assigned is True and a value was created before that.
+    # OPTION 3 - assigned is True and an activity was created more recently.
+    #          - That activity not associated with a value.
+    #          - Should still be assigned.
+    datetime_now = pytz.utc.localize(datetime.datetime.now())
+    datetime_before = datetime_now - datetime.timedelta(minutes=30)
+    values_inventory = data_fake_values_inventory_factory()
+    values_inventory["assigned"] = True
+    values_inventory["assignedDateTime"] = date_utils.format_datetime(datetime_before)
+    activity = data_fake_activity_factory()
+    activity["editedDateTime"] = date_utils.format_datetime(datetime_now)
+    if "valueId" in activity:
+        del activity["valueId"]
+    summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[activity],
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+    )
+    assert summary["assignedValuesInventory"]
+    _patient_summary_assertions(summary=summary)
+
+    # OPTION 4 - assigned is True and an activity with value was created before that.
     #          - Should be still assigned.
     datetime_now = pytz.utc.localize(datetime.datetime.now())
     datetime_before = datetime_now - datetime.timedelta(minutes=30)
     values_inventory = data_fake_values_inventory_factory()
     values_inventory["assigned"] = True
     values_inventory["assignedDateTime"] = date_utils.format_datetime(datetime_now)
-    value = data_fake_value_factory()
-    value["editedDateTime"] = date_utils.format_datetime(datetime_before)
+    activity = data_fake_activity_factory()
+    activity["editedDateTime"] = date_utils.format_datetime(datetime_before)
+    activity["valueId"] = "some valueId"
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[activity],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[value],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedValuesInventory"]
@@ -185,9 +206,9 @@ def test_compute_patient_summary_safety_plan(
     # OPTION 1 - assigned is False.
     safety_plan["assigned"] = False
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
@@ -197,9 +218,9 @@ def test_compute_patient_summary_safety_plan(
     safety_plan["assigned"] = True
     safety_plan["lastUpdatedDateTime"] = safety_plan["assignedDateTime"]
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
@@ -211,9 +232,9 @@ def test_compute_patient_summary_safety_plan(
         + datetime.timedelta(days=2)
     )
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert not summary["assignedSafetyPlan"]
@@ -225,9 +246,9 @@ def test_compute_patient_summary_safety_plan(
         - datetime.timedelta(days=2)
     )
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedSafetyPlan"]
@@ -248,9 +269,9 @@ def test_compute_patient_summary_scheduled_assessments(
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = True
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] == []
@@ -263,9 +284,9 @@ def test_compute_patient_summary_scheduled_assessments(
             datetime.date.today() + datetime.timedelta(days=2)
         )
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] == []
@@ -278,9 +299,9 @@ def test_compute_patient_summary_scheduled_assessments(
             datetime.date.today()
         )
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] != []
@@ -293,9 +314,9 @@ def test_compute_patient_summary_scheduled_assessments(
             datetime.date.today() - datetime.timedelta(days=1)
         )
     summary = blueprints.patient.summary.compute_patient_summary(
+        activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
-        value_documents=[],
         values_inventory_document=values_inventory,
     )
     assert summary["assignedScheduledAssessments"] != []

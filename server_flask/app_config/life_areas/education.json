@@ -1,61 +1,62 @@
 {
-  "id": "education",
-  "name": "Education/Career/Contributing",
-  "examples": [
-    {
-      "name": "Get more formal education",
-      "activities": [
+    "id": "education",
+    "name": "Education/Career/Contributing",
+    "sortKey": 2,
+    "examples": [
         {
-          "name": "Ask a friend for advice about school"
+            "name": "Get more formal education",
+            "activities": [
+                {
+                    "name": "Ask a friend for advice about school"
+                },
+                {
+                    "name": "Write out a plan for enrolling in school"
+                }
+            ]
         },
         {
-          "name": "Write out a plan for enrolling in school"
-        }
-      ]
-    },
-    {
-      "name": "Learn new skills for work",
-      "activities": [
-        {
-          "name": "Ask someone at work to teach me a new skill"
+            "name": "Learn new skills for work",
+            "activities": [
+                {
+                    "name": "Ask someone at work to teach me a new skill"
+                },
+                {
+                    "name": "Take a class"
+                }
+            ]
         },
         {
-          "name": "Take a class"
-        }
-      ]
-    },
-    {
-      "name": "Be knowledgeable about the world around you",
-      "activities": [
-        {
-          "name": "Read the newspaper everyday"
+            "name": "Be knowledgeable about the world around you",
+            "activities": [
+                {
+                    "name": "Read the newspaper everyday"
+                },
+                {
+                    "name": "Talk about current events to a stranger"
+                }
+            ]
         },
         {
-          "name": "Talk about current events to a stranger"
-        }
-      ]
-    },
-    {
-      "name": "Use your knowledge and skills to help others",
-      "activities": [
-        {
-          "name": "Explore volunteer opportunities at the community center"
+            "name": "Use your knowledge and skills to help others",
+            "activities": [
+                {
+                    "name": "Explore volunteer opportunities at the community center"
+                },
+                {
+                    "name": "Knit blankets for the homeless shelter"
+                }
+            ]
         },
         {
-          "name": "Knit blankets for the homeless shelter"
+            "name": "Find a new job that fits with your skills and interests",
+            "activities": [
+                {
+                    "name": "Look at job advertisements"
+                },
+                {
+                    "name": "Talk to someone who has a job available"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "name": "Find a new job that fits with your skills and interests",
-      "activities": [
-        {
-          "name": "Look at job advertisements"
-        },
-        {
-          "name": "Talk to someone who has a job available"
-        }
-      ]
-    }
-  ]
+    ]
 }
