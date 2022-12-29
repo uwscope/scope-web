@@ -9,6 +9,9 @@
 			"type": "string"
 		},
 		"name": { "type": "string" },
+		"sortKey": {
+			"type": "number"
+		},
 		"examples": {
 			"$comment": "Is this subset of ILifeAreaValue[]?",
 			"type": "array",
@@ -32,5 +35,5 @@
 		}
 	},
 	"additionalProperties": false,
-	"required": ["id", "name", "examples"]
+	"required": ["id", "name", "sortKey","examples"]
 }

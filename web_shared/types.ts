@@ -256,6 +256,7 @@ export interface IValue {
 export interface ILifeAreaContent {
     id: string;
     name: string;
+    sortKey: number;
     examples: ILifeAreaValue[];
 }
 

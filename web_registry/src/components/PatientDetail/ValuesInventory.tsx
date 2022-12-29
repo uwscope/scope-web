@@ -53,22 +53,25 @@ export const ValuesInventory: FunctionComponent = observer(() => {
             const valueA = !!activityA.valueId ? currentPatient.getValueById(activityA.valueId) : undefined;
             const valueB = !!activityB.valueId ? currentPatient.getValueById(activityB.valueId) : undefined;
 
-            if (compare === 0) {
-                // Filter on index of the life area of any associated value.
-                // Activities without a value will sort to the end.
-                compare = (() => {
-                    // TODO: This would be much easier if we had the lifeArea sort key available
-                    const lifeAreaIdA = !!valueA ? valueA.lifeAreaId : undefined;
-                    const lifeAreaIndexA = !!lifeAreaIdA
-                        ? lifeAreas.findIndex((lifeArea) => (lifeArea.id === lifeAreaIdA))
-                        : lifeAreas.length;
-                    const lifeAreaIdB = !!valueB ? valueB.lifeAreaId : undefined;
-                    const lifeAreaIndexB = !!lifeAreaIdB
-                        ? lifeAreas.findIndex((lifeArea) => (lifeArea.id === lifeAreaIdB))
-                        : lifeAreas.length;
+            if (compare == 0) {
+                // Activities without a value sort after activities with a value
+                if(!!valueA) {
+                    compare = !!valueB ? 0 : -1;
+                } else {
+                    compare = !!valueB ? 1 : 0;
+                }
+            }
 
-                    return lifeAreaIndexA - lifeAreaIndexB;
-                })();
+            if (compare === 0) {
+                // Sort by life area sort key
+                if(!!valueA && !!valueB) {
+                    const lifeAreaContentA = rootStore.getLifeAreaContent(valueA.lifeAreaId);
+                    const lifeAreaContentB = rootStore.getLifeAreaContent(valueB.lifeAreaId);
+
+                    if(!!lifeAreaContentA && !!lifeAreaContentB) {
+                        compare = lifeAreaContentA.sortKey - lifeAreaContentB.sortKey;
+                    }
+                }
             }
 
             if (compare === 0) {
@@ -78,7 +81,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 }
             }
 
-            if (compare == 0) {
+            if (compare === 0) {
                 // Sort by activity name, which is unique
                 compare = activityA.name.localeCompare(activityB.name, undefined, {sensitivity: 'base'})
             }
@@ -113,11 +116,15 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>{getString('patient_values_inventory_activity_name_header')}</TableCell>
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_lifearea_header')}
                                     </TableCell>
-                                    <TableCell>{getString('patient_values_inventory_activity_value_header')}</TableCell>
+                                    <TableCell>
+                                        {getString('patient_values_inventory_activity_value_header')}
+                                    </TableCell>
+                                    <TableCell>
+                                        {getString('patient_values_inventory_activity_name_header')}
+                                    </TableCell>
                                     <TableCell>
                                         {getString('patient_values_inventory_activity_enjoyment_header')}
                                     </TableCell>
@@ -134,9 +141,9 @@ export const ValuesInventory: FunctionComponent = observer(() => {
 
                                     return (
                                         <TableRow key={idx}>
-                                            <TableCell component="th" scope="row">{activity.name}</TableCell>
-                                            <TableCell>{!!lifeAreaContent ? lifeAreaContent.name : "-"}</TableCell>
+                                            <TableCell component="th" scope="row">{!!lifeAreaContent ? lifeAreaContent.name : "-"}</TableCell>
                                             <TableCell>{!!value ? value.name : "-"}</TableCell>
+                                            <TableCell>{activity.name}</TableCell>
                                             <TableCell>{activity.enjoyment}</TableCell>
                                             <TableCell>{activity.importance}</TableCell>
                                             <TableCell>{format(activity.editedDateTime, 'MM/dd/yyyy')}</TableCell>
