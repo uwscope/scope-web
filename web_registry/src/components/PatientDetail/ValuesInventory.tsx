@@ -13,7 +13,7 @@ import { usePatient, useStores } from 'src/stores/stores';
 export const ValuesInventory: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const currentPatient = usePatient();
-    const { lifeAreas } = rootStore.appContentConfig;
+    // const { lifeAreas } = rootStore.appContentConfig;
     const { activities, valuesInventory } = currentPatient;
     const { assigned, assignedDateTime } = valuesInventory;
 
