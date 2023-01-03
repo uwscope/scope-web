@@ -744,7 +744,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
     const _activityPageValidateName = activityValidateName(activityViewState.name);
     const _activityPageValidateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
-    const _hideLifeAreaAndValue = (
+    const _disableLifeAreaAndValue = (
         activityViewState.modeState.mode == "addActivity" &&
         !!activityViewState.modeState.valueId
     );
@@ -771,7 +771,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             />
 
-            {(!_hideLifeAreaAndValue && <FormSection
+            <FormSection
                 addPaddingTop
                 prompt={getString('form_add_edit_activity_life_area_value_prompt')}
                 help={getString('form_add_edit_activity_life_area_value_help')}
@@ -784,6 +784,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.lifeAreaId}
                             onChange={handleActivitySelectLifeArea}
                             fullWidth
+                            disabled={
+                                _disableLifeAreaAndValue
+                            }
                         >
                             <MenuItem key='' value=''></MenuItem>
                             {/* TODO Activity Refactor: Sort life areas */}
@@ -804,7 +807,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.valueId}
                             onChange={handleActivitySelectValue}
                             fullWidth
-                            disabled={!activityViewState.lifeAreaId || patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0}
+                            disabled={
+                                _disableLifeAreaAndValue ||
+                                !activityViewState.lifeAreaId ||
+                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0
+                            }
                         >
                             {activityViewState.lifeAreaId && (
                                 patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId)
@@ -824,12 +831,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 size="small"
                                 label={getString('form_add_edit_activity_add_value_button')}
                                 onClick={handleAddValueOpen}
-                                disabled={!activityViewState.lifeAreaId}
+                                disabled={
+                                    _disableLifeAreaAndValue ||
+                                    !activityViewState.lifeAreaId
+                                }
                             />
                         </Grid>
                     </Fragment>
                 }
-            />)}
+            />
 
             <FormSection
                 addPaddingTop
