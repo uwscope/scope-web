@@ -124,20 +124,16 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             })();
 
-            if(!valueIdAndLifeAreaId.valueId) {
-                return defaultViewState;
-            } else {
-                return {
-                    ...defaultViewState,
+            return {
+                ...defaultViewState,
 
-                    ...valueIdAndLifeAreaId,
+                ...valueIdAndLifeAreaId,
 
-                    modeState: {
-                        mode: 'addActivity',
-                        valueId: valueIdAndLifeAreaId.valueId,
-                    },
-                };
-            }
+                modeState: {
+                    mode: 'addActivity',
+                    valueId: valueIdAndLifeAreaId.valueId,
+                },
+            };
         } else if (routeParamForm == ParameterValues.form.editActivity) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
             console.assert(!!routeActivityId, 'editActivity parameter activityId not found');

@@ -140,12 +140,21 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     startIcon={<AddIcon />}
                     component={Link}
                     to={getFormLink(
-                        ParameterValues.form.addActivity,
-                        {
-                            [Parameters.valueId]: props.valueId as string,
-                            [Parameters.addSchedule]: ParameterValues.addSchedule.false,
-                        }
-                    )}
+                            ParameterValues.form.addActivity,
+                            (() => {
+                                if (props.valueId) {
+                                    return {
+                                        [Parameters.valueId]: props.valueId as string,
+                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                    };
+                                } else {
+                                    return {
+                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                    };
+                                }
+                            })()
+                        )
+                    }
                 >
                     {getString('values_inventory_add_activity')}
                 </Button>
