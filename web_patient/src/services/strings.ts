@@ -113,8 +113,11 @@ const _strings = {
 
     Values_inventory_dialog_edit_value: 'Edit value',
 
-    values_inventory_activity_menu_delete: 'Delete',
-    values_inventory_activity_menu_edit: 'Edit',
+    values_inventory_value_menu_delete: 'Delete Value',
+    values_inventory_value_menu_edit: 'Edit Value',
+
+    values_inventory_activity_menu_delete: 'Delete Activity',
+    values_inventory_activity_menu_edit: 'Edit Activity',
     values_inventory_activity_menu_add_schedule: 'Add Schedule',
 
     // Values_inventory_dialog_add_activity: 'Add activity',

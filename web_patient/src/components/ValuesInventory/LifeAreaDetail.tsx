@@ -575,10 +575,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     open={Boolean(viewState.moreTargetValueEl)}
                     onClose={handleMoreCloseValue}>
                     <MenuItem onClick={handleEditValue}>
-                        {getString('values_inventory_activity_menu_edit')}
+                        {getString('values_inventory_value_menu_edit')}
                     </MenuItem>
                     <MenuItem onClick={handleDeleteValue}>
-                        {getString('values_inventory_activity_menu_delete')}
+                        {getString('values_inventory_value_menu_delete')}
                     </MenuItem>
                 </Menu>
                 <Menu
