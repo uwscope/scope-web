@@ -83,7 +83,7 @@ const _strings = {
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Activities Not Assigned To Values',
-    values_inventory_life_area_other_activities_subprompt: 'As you identify personal values, assign these to support your values.',
+    values_inventory_life_area_other_activities_subprompt: 'Edit these activities to assign them to your identified personal values.',
 
     values_inventory_values_example_title: 'Example Values',
     values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
