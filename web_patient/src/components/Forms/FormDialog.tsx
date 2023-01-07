@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import withTheme from '@mui/styles/withTheme';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
@@ -162,14 +162,16 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                 submitSuccess = await formSubmit();
             }
 
+            runInAction(() => {
             // In case of error, do not advance the form.
             // In case of success, the success closer handler will advance the form.
             state.submitErrorOpen = false;
-            if (submitSuccess) {
-                state.submitSuccessOpen = true;
-            } else {
-                state.submitErrorOpen = true;
-            }
+                if (submitSuccess) {
+                    state.submitSuccessOpen = true;
+                } else {
+                    state.submitErrorOpen = true;
+                }
+            });
         } else {
             // Without any submission, just advance the page.
             // If already on the final page, close the form.

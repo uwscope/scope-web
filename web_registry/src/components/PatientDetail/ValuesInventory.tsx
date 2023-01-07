@@ -144,8 +144,8 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                                             <TableCell component="th" scope="row">{!!lifeAreaContent ? lifeAreaContent.name : "-"}</TableCell>
                                             <TableCell>{!!value ? value.name : "-"}</TableCell>
                                             <TableCell>{activity.name}</TableCell>
-                                            <TableCell>{activity.enjoyment}</TableCell>
-                                            <TableCell>{activity.importance}</TableCell>
+                                            <TableCell>{activity.enjoyment != null ? activity.enjoyment : "-"}</TableCell>
+                                            <TableCell>{activity.importance != null ? activity.importance : "-"}</TableCell>
                                             <TableCell>{format(activity.editedDateTime, 'MM/dd/yyyy')}</TableCell>
                                         </TableRow>
                                     );

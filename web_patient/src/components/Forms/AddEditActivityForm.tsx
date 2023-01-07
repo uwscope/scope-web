@@ -26,7 +26,7 @@ import {
     Typography,
 } from '@mui/material';
 // import { compareAsc } from 'date-fns';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
@@ -64,7 +64,8 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     }
     interface IActivityViewStateModeAdd {
         mode: 'addActivity';
-        valueId?: string;
+        providedValueId?: string;
+        createdActivity?: IActivity;
     }
     interface IActivityViewStateModeEdit {
         mode: 'editActivity';
@@ -107,7 +108,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
         if (routeParamForm == ParameterValues.form.addActivity) {
             const routeValueId = getRouteParameter(Parameters.valueId);
-            const valueIdAndLifeAreaId = (() => {
+            const providedValueIdAndLifeAreaId = (() => {
                 if (!routeValueId) {
                     return {};
                 }
@@ -124,20 +125,17 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             })();
 
-            if(!valueIdAndLifeAreaId.valueId) {
-                return defaultViewState;
-            } else {
-                return {
-                    ...defaultViewState,
+            return {
+                ...defaultViewState,
 
-                    ...valueIdAndLifeAreaId,
+                ...providedValueIdAndLifeAreaId,
 
-                    modeState: {
-                        mode: 'addActivity',
-                        valueId: valueIdAndLifeAreaId.valueId,
-                    },
-                };
-            }
+                modeState: {
+                    mode: 'addActivity',
+                    providedValueId: !!providedValueIdAndLifeAreaId.valueId ? providedValueIdAndLifeAreaId.valueId : undefined,
+                    createdActivity: undefined,
+                },
+            };
         } else if (routeParamForm == ParameterValues.form.editActivity) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
             console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
@@ -272,7 +270,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const activityScheduleViewState = useLocalObservable<IActivityScheduleViewState>(() => initialActivityScheduleViewState);
 
-    const handleSubmitActivity = action(async () => {
+    const handleSubmitActivity = action(async (): Promise<boolean> => {
         try {
             if (activityViewState.modeState.mode == 'addActivity') {
                 // Construct the activity that will be created
@@ -287,14 +285,23 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
                 // Create the activity
                 const createdActivity = await patientStore.addActivity(createActivity);
+                runInAction(() => {
+                    // TODO: We could use a TypeScript assertion instead of re-narrowing the context
+                    if (activityViewState.modeState.mode == 'addActivity') {
+                        if (createdActivity) {
+                            // Store that we created the activity
+                            activityViewState.modeState.createdActivity = createdActivity;
 
-                // Use the created activity to initiate creation of a schedule
-                if (createdActivity?.activityId) {
-                    activityScheduleViewState.modeState = {
-                        mode: "addActivitySchedule",
-                        activityId: createdActivity.activityId,
+                            // Use the created activity to initiate creation of a schedule
+                            if (createdActivity.activityId) {
+                                activityScheduleViewState.modeState = {
+                                    mode: "addActivitySchedule",
+                                    activityId: createdActivity.activityId,
+                                };
+                            }
+                        }
                     }
-                }
+                });
             } else if (activityViewState.modeState.mode == 'editActivity') {
                 // Update the existing activity with current view state
                 const editActivity: IActivity = {
@@ -311,8 +318,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 await patientStore.updateActivity(editActivity);
             }
 
-            return !patientStore.loadActivitiesState.error;
-        } catch {
+            return true;
+        } catch(error) {
+            console.error(error);
+
             return false;
         }
     });
@@ -508,6 +517,12 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const activityValidateName = (name: string) => {
         // Name must be unique, accounting for case-insensitive comparisons
         const nameIsUnique = patientStore.activities.filter((activity: IActivity): boolean => {
+            // In case of add, do not validate against an activity we created
+            if (activityViewState.modeState.mode == 'addActivity') {
+                if (activityViewState.modeState.createdActivity) {
+                    return activity.activityId != activityViewState.modeState.createdActivity.activityId;
+                }
+            }
             // In case of edit, do not validate against the activity being edited
             if (activityViewState.modeState.mode == 'editActivity') {
                 return activity.activityId != activityViewState.modeState.editActivity.activityId;
@@ -744,9 +759,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
     const _activityPageValidateName = activityValidateName(activityViewState.name);
     const _activityPageValidateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
-    const _hideLifeAreaAndValue = (
+    const _disableLifeAreaAndValue = (
         activityViewState.modeState.mode == "addActivity" &&
-        !!activityViewState.modeState.valueId
+        !!activityViewState.modeState.providedValueId
     );
     const activityPage = (
         <Stack spacing={4}>
@@ -771,7 +786,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             />
 
-            {(!_hideLifeAreaAndValue && <FormSection
+            <FormSection
                 addPaddingTop
                 prompt={getString('form_add_edit_activity_life_area_value_prompt')}
                 help={getString('form_add_edit_activity_life_area_value_help')}
@@ -784,6 +799,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.lifeAreaId}
                             onChange={handleActivitySelectLifeArea}
                             fullWidth
+                            disabled={
+                                _disableLifeAreaAndValue
+                            }
                         >
                             <MenuItem key='' value=''></MenuItem>
                             {/* TODO Activity Refactor: Sort life areas */}
@@ -804,7 +822,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.valueId}
                             onChange={handleActivitySelectValue}
                             fullWidth
-                            disabled={!activityViewState.lifeAreaId || patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0}
+                            disabled={
+                                _disableLifeAreaAndValue ||
+                                !activityViewState.lifeAreaId ||
+                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0
+                            }
                         >
                             {activityViewState.lifeAreaId && (
                                 patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId)
@@ -824,12 +846,15 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 size="small"
                                 label={getString('form_add_edit_activity_add_value_button')}
                                 onClick={handleAddValueOpen}
-                                disabled={!activityViewState.lifeAreaId}
+                                disabled={
+                                    _disableLifeAreaAndValue ||
+                                    !activityViewState.lifeAreaId
+                                }
                             />
                         </Grid>
                     </Fragment>
                 }
-            />)}
+            />
 
             <FormSection
                 addPaddingTop

@@ -83,7 +83,7 @@ const _strings = {
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Activities Not Assigned To Values',
-    values_inventory_life_area_other_activities_subprompt: 'As you identify personal values, assign these to support your values.',
+    values_inventory_life_area_other_activities_subprompt: 'Edit these activities to assign them to your identified personal values.',
 
     values_inventory_values_example_title: 'Example Values',
     values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
@@ -113,8 +113,11 @@ const _strings = {
 
     Values_inventory_dialog_edit_value: 'Edit value',
 
-    values_inventory_activity_menu_delete: 'Delete',
-    values_inventory_activity_menu_edit: 'Edit',
+    values_inventory_value_menu_delete: 'Delete Value',
+    values_inventory_value_menu_edit: 'Edit Value',
+
+    values_inventory_activity_menu_delete: 'Delete Activity',
+    values_inventory_activity_menu_edit: 'Edit Activity',
     values_inventory_activity_menu_add_schedule: 'Add Schedule',
 
     // Values_inventory_dialog_add_activity: 'Add activity',

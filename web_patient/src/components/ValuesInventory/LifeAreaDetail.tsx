@@ -47,21 +47,26 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
     const renderActivityDetail = (activity: IActivity): ReactNode => {
         return (
             <Stack spacing={1}>
-                {(activity.enjoyment || activity.importance) && (
-                    <HelperText>
-                        {activity.enjoyment && (
-                            <Fragment>
-                                {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
-                            </Fragment>
-                        )}
-                        {activity.enjoyment && activity.importance && ' / '}
-                        {activity.importance && (
-                            <Fragment>
-                                {getString('values_inventory_value_activity_importance')} {activity.importance}
-                            </Fragment>
-                        )}
-                    </HelperText>
-                )}
+                {(() => {
+                    const renderEnjoyment = activity.enjoyment != null ? activity.enjoyment : -1;
+                    const renderImportance = activity.importance != null ? activity.importance : -1;
+
+                    return ((renderEnjoyment >= 0) || (renderImportance >= 0)) && (
+                        <HelperText>
+                            {(renderEnjoyment >= 0) && (
+                                <Fragment>
+                                    {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
+                                </Fragment>
+                            )}
+                            {(renderEnjoyment >= 0) && (renderImportance >= 0) && ' / '}
+                            {(renderImportance >= 0) && (
+                                <Fragment>
+                                    {getString('values_inventory_value_activity_importance')} {activity.importance}
+                                </Fragment>
+                            )}
+                        </HelperText>
+                    )
+                })()}
                 {(!!activity.activityId) && (() => {
                     const activitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId);
                     const repeatActivitySchedules = activitySchedules.filter((as) => { return as.hasRepetition; });
@@ -135,12 +140,21 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     startIcon={<AddIcon />}
                     component={Link}
                     to={getFormLink(
-                        ParameterValues.form.addActivity,
-                        {
-                            [Parameters.valueId]: props.valueId as string,
-                            [Parameters.addSchedule]: ParameterValues.addSchedule.false,
-                        }
-                    )}
+                            ParameterValues.form.addActivity,
+                            (() => {
+                                if (props.valueId) {
+                                    return {
+                                        [Parameters.valueId]: props.valueId as string,
+                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                    };
+                                } else {
+                                    return {
+                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                    };
+                                }
+                            })()
+                        )
+                    }
                 >
                     {getString('values_inventory_add_activity')}
                 </Button>
@@ -570,10 +584,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     open={Boolean(viewState.moreTargetValueEl)}
                     onClose={handleMoreCloseValue}>
                     <MenuItem onClick={handleEditValue}>
-                        {getString('values_inventory_activity_menu_edit')}
+                        {getString('values_inventory_value_menu_edit')}
                     </MenuItem>
                     <MenuItem onClick={handleDeleteValue}>
-                        {getString('values_inventory_activity_menu_delete')}
+                        {getString('values_inventory_value_menu_delete')}
                     </MenuItem>
                 </Menu>
                 <Menu
