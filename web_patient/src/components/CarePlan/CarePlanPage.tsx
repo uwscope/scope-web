@@ -54,12 +54,12 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     const viewState = useLocalObservable<{
         selectedDate: Date;
         showActivities: boolean;
-        moreTargetEl: (EventTarget & HTMLElement) | undefined;
+        moreTargetActivityEl: (EventTarget & HTMLElement) | undefined;
         selectedActivity: IActivity | undefined;
     }>(() => ({
         selectedDate: new Date(),
         showActivities: true,
-        moreTargetEl: undefined,
+        moreTargetActivityEl: undefined,
         selectedActivity: undefined,
     }));
 
@@ -121,26 +121,38 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
     const handleMoreClick = action((activity: IActivity, event: React.MouseEvent<HTMLElement>) => {
         viewState.selectedActivity = activity;
-        viewState.moreTargetEl = event.currentTarget;
+        viewState.moreTargetActivityEl = event.currentTarget;
     });
 
-    const handleMoreClose = action(() => {
+    const handleActivityMoreClose = action(() => {
         viewState.selectedActivity = undefined;
-        viewState.moreTargetEl = undefined;
+        viewState.moreTargetActivityEl = undefined;
     });
 
-    const handleDelete = action(() => {
-        if (!!viewState.selectedActivity) {
-            /* TODO Activity Refactor
-            const activityCopy = viewState.selectedActivity;
-            activityCopy.isDeleted = true;
-            patientStore.updateActivity({
-                ...activityCopy,
-                repeatDayFlags: activityCopy.hasRepetition ? activityCopy.repeatDayFlags : undefined,
-                reminderTimeOfDay: activityCopy.hasReminder ? activityCopy.reminderTimeOfDay : undefined,
-            });
-            */
-            handleMoreClose();
+    const handleActivityEdit = action(() => {
+        const activity = viewState.selectedActivity;
+
+        // Remove the popup menu
+        handleActivityMoreClose();
+
+        navigate(getFormPath(
+            ParameterValues.form.editActivity,
+            {
+                [Parameters.activityId as string]:
+                activity?.activityId as string
+            }
+        ));
+    });
+
+    const handleActivityDelete = action(async () => {
+        // TODO Activity Refactor: Display some kind of confirmation
+        const activity = viewState.selectedActivity;
+
+        // Remove the popup menu
+        handleActivityMoreClose();
+
+        if (!!activity) {
+            await patientStore.deleteActivity(activity);
         }
     });
 
@@ -219,11 +231,12 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         return <Fragment>
             <Menu
                 id="activity-menu"
-                anchorEl={viewState.moreTargetEl}
+                anchorEl={viewState.moreTargetActivityEl}
                 keepMounted
-                open={Boolean(viewState.moreTargetEl)}
-                onClose={handleMoreClose}>
-                <MenuItem onClick={handleDelete}>{getString('careplan_activity_item_delete')}</MenuItem>
+                open={Boolean(viewState.moreTargetActivityEl)}
+                onClose={handleActivityMoreClose}>
+                <MenuItem onClick={handleActivityEdit}>{getString('careplan_activity_item_edit')}</MenuItem>
+                <MenuItem onClick={handleActivityDelete}>{getString('careplan_activity_item_delete')}</MenuItem>
             </Menu>
             {patientStore.activities.length > 0 ? (
                 <Fragment>

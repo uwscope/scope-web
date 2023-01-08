@@ -178,8 +178,8 @@ const _strings = {
     Careplan_activity_item_start_date: 'Starts',
     Careplan_activity_item_repeat: 'Repeats',
 
-    Careplan_activity_item_edit: 'Edit',
-    careplan_activity_item_delete: 'Delete',
+    careplan_activity_item_edit: 'Edit Activity',
+    careplan_activity_item_delete: 'Delete Activity',
 
     Careplan_add_activity: 'Add activity',
 
