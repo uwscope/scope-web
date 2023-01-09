@@ -82,7 +82,7 @@ const _strings = {
     values_inventory_home_instruction4: 'Tap on any life area to start.',
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
-    values_inventory_life_area_other_activities_title: 'Activities Not Assigned To Values',
+    values_inventory_life_area_other_activities_title: 'Not Currently Assigned To Values',
     values_inventory_life_area_other_activities_subprompt: 'Edit these activities to assign them to your identified personal values.',
 
     values_inventory_values_example_title: 'Example Values',
