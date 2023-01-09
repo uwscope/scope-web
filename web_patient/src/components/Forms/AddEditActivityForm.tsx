@@ -759,10 +759,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
     const _activityPageValidateName = activityValidateName(activityViewState.name);
     const _activityPageValidateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
-    const _disableLifeAreaAndValue = (
-        activityViewState.modeState.mode == "addActivity" &&
-        !!activityViewState.modeState.providedValueId
-    );
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
@@ -799,9 +795,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.lifeAreaId}
                             onChange={handleActivitySelectLifeArea}
                             fullWidth
-                            disabled={
-                                _disableLifeAreaAndValue
-                            }
                         >
                             <MenuItem key='' value=''></MenuItem>
                             {/* TODO Activity Refactor: Sort life areas */}
@@ -823,7 +816,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             onChange={handleActivitySelectValue}
                             fullWidth
                             disabled={
-                                _disableLifeAreaAndValue ||
                                 !activityViewState.lifeAreaId ||
                                 patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0
                             }
@@ -847,7 +839,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 label={getString('form_add_edit_activity_add_value_button')}
                                 onClick={handleAddValueOpen}
                                 disabled={
-                                    _disableLifeAreaAndValue ||
                                     !activityViewState.lifeAreaId
                                 }
                             />
