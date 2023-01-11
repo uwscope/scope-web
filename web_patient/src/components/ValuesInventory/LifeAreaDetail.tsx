@@ -8,6 +8,9 @@ import {
     Grid,
     IconButton,
     // InputLabel,
+    List,
+    ListItem,
+    ListItemSecondaryAction,
     Menu,
     MenuItem,
     // Select,
@@ -32,6 +35,21 @@ import { useStores } from 'src/stores/stores';
 import { getFormLink, getFormPath, Parameters, ParameterValues } from 'src/services/routes';
 import { LifeAreaIdOther } from "shared/enums";
 import { ILifeAreaContent } from "shared/types";
+import withTheme from "@mui/styles/withTheme";
+import styled from "styled-components";
+
+
+const CompactList = withTheme(
+    styled(List)((props) => ({
+        marginLeft: props.theme.spacing(-2),
+        marginRight: props.theme.spacing(-2),
+        paddingBottom: props.theme.spacing(0),
+        paddingTop: props.theme.spacing(0),
+        'li>.MuiListItemIcon-root': {
+            minWidth: 36,
+        },
+    })),
+);
 
 
 interface IActivitiesSection {
@@ -100,32 +118,53 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
             .slice()
             .sort((a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()));
 
-        return sortedActivities.map((activity, idx) => (
-            <Fragment key={activity.activityId as string}>
-                <Grid container direction="row" alignItems="flex-start" flexWrap="nowrap">
-                    <Grid item>
-                        <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
-                    </Grid>
-                    <Grid item flexGrow={1} overflow="hidden">
-                        <Stack spacing={0}>
-                            <Typography variant="body1" noWrap>
-                                {activity.name}
-                            </Typography>
-                            {renderActivityDetail(activity)}
-                        </Stack>
-                    </Grid>
-                    <IconButton
-                        edge="end"
-                        aria-label="more"
-                        onClick={(e) => props.handleMoreClickActivity(activity, e)}
-                        size="large"
+        return <CompactList>
+            { sortedActivities.map((activity, idx) => (
+                <Fragment key={activity.activityId as string}>
+                    <ListItem
+                        alignItems="flex-start"
+                        button
+                        component={Link}
+                        to={getFormLink(
+                            ParameterValues.form.editActivity,
+                            {
+                                [Parameters.activityId as string]: activity.activityId as string,
+                            }
+                        )}
                     >
-                        <MoreVertIcon/>
-                    </IconButton>
-                </Grid>
-                {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
-            </Fragment>
-        ));
+                        <Grid
+                            container
+                            direction="row"
+                            alignItems="flex-start"
+                            flexWrap="nowrap"
+                        >
+                            <Grid item>
+                                <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
+                            </Grid>
+                            <Grid item flexGrow={1} overflow="hidden">
+                                <Stack spacing={0}>
+                                    <Typography variant="body1" noWrap>
+                                        {activity.name}
+                                    </Typography>
+                                    {renderActivityDetail(activity)}
+                                </Stack>
+                            </Grid>
+                        </Grid>
+                        <ListItemSecondaryAction sx={{ alignItems: 'flex-start', height: '100%' }}>
+                            <IconButton
+                                edge="end"
+                                aria-label="more"
+                                onClick={(e) => props.handleMoreClickActivity(activity, e)}
+                                size="large"
+                            >
+                                <MoreVertIcon/>
+                            </IconButton>
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                    {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
+                </Fragment>
+            ))}
+        </CompactList>
     };
 
     return (
