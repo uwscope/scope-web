@@ -138,9 +138,6 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                             alignItems="flex-start"
                             flexWrap="nowrap"
                         >
-                            <Grid item>
-                                <Typography sx={{ paddingRight: 1 }}>{`${idx + 1}.`}</Typography>
-                            </Grid>
                             <Grid item flexGrow={1} overflow="hidden">
                                 <Stack spacing={0}>
                                     <Typography variant="body1" noWrap>
@@ -171,7 +168,6 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
         <Stack spacing={1}>
             {renderActivities(props.activities)}
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography sx={{ paddingRight: 1 }}>{`${props.activities.length + 1}.`}</Typography>
                 <Button
                     variant="contained"
                     color="primary"
@@ -240,11 +236,13 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
                     <MoreVertIcon/>
                 </IconButton>
             </Stack>
-            <ActivitiesSection
-                activities={valueActivities}
-                valueId={value.valueId}
-                handleMoreClickActivity={handleMoreClickActivity}
-            />
+            <Box sx={{ marginLeft: 2, marginTop: -1 }}>
+                <ActivitiesSection
+                    activities={valueActivities}
+                    valueId={value.valueId}
+                    handleMoreClickActivity={handleMoreClickActivity}
+                />
+            </Box>
         </Stack>
     );
 });
