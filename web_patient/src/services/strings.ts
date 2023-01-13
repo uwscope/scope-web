@@ -69,6 +69,10 @@ const _strings = {
     Form_activity_log_submit_success:
         'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
+    menuitem_activity_delete: 'Delete Activity',
+    menuitem_activity_edit: 'Edit Activity',
+    menuitem_activityschedule_add: 'Add Schedule',
+
     Resources_inventory_title: 'Values & Activities Inventory',
     Resources_inventory_subtitle: 'Values and activities that align with your life goals',
 
@@ -115,10 +119,6 @@ const _strings = {
 
     values_inventory_value_menu_delete: 'Delete Value',
     values_inventory_value_menu_edit: 'Edit Value',
-
-    values_inventory_activity_menu_delete: 'Delete Activity',
-    values_inventory_activity_menu_edit: 'Edit Activity',
-    values_inventory_activity_menu_add_schedule: 'Add Schedule',
 
     // Values_inventory_dialog_add_activity: 'Add activity',
     // Values_inventory_dialog_edit_activity: 'Edit activity',
@@ -177,9 +177,6 @@ const _strings = {
     Careplan_activity_item_value: 'Value',
     Careplan_activity_item_start_date: 'Starts',
     Careplan_activity_item_repeat: 'Repeats',
-
-    careplan_activity_item_edit: 'Edit Activity',
-    careplan_activity_item_delete: 'Delete Activity',
 
     Careplan_add_activity: 'Add activity',
 

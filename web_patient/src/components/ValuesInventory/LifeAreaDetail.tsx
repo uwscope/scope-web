@@ -634,13 +634,13 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     open={Boolean(viewState.moreTargetActivityEl)}
                     onClose={handleMoreCloseActivity}>
                     <MenuItem onClick={handleEditActivity}>
-                        {getString('values_inventory_activity_menu_edit')}
+                        {getString('menuitem_activity_edit')}
                     </MenuItem>
                     <MenuItem onClick={handleAddActivitySchedule}>
-                        {getString('values_inventory_activity_menu_add_schedule')}
+                        {getString('menuitem_activityschedule_add')}
                     </MenuItem>
                     <MenuItem onClick={handleDeleteActivity}>
-                        {getString('values_inventory_activity_menu_delete')}
+                        {getString('menuitem_activity_delete')}
                     </MenuItem>
                 </Menu>
                 <AddEditValueDialog
