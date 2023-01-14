@@ -18,6 +18,7 @@ export const Routes = {
 export const Parameters = {
     form: 'form',
     activityId: 'activity-id',
+    activityScheduleId: 'activity-schedule-id',
     addSchedule: 'add-schedule',
     assessmentId: 'assessment-id',
     taskId: 'task-id',

@@ -30,7 +30,7 @@ import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
-import {clearTime, toUTCDateOnly} from 'shared/time';
+import {clearTime, getDayOfWeekCount, toUTCDateOnly} from 'shared/time';
 import {IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */} from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
@@ -655,9 +655,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
         if (hasRepetition) {
-            const numDaysRepeat = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
-                return accumulator + (repeatDayFlags[dayOfWeek] ? 1 : 0);
-            }, 0);
+            const numDaysRepeat = getDayOfWeekCount(repeatDayFlags);
 
             if (numDaysRepeat == 0) {
                 return {

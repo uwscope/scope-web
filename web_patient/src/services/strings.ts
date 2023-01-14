@@ -72,6 +72,8 @@ const _strings = {
     menuitem_activity_delete: 'Delete Activity',
     menuitem_activity_edit: 'Edit Activity',
     menuitem_activityschedule_add: 'Add Schedule',
+    menuitem_activityschedule_delete: 'Delete Schedule',
+    menuitem_activityschedule_edit: 'Edit Schedule',
 
     Resources_inventory_title: 'Values & Activities Inventory',
     Resources_inventory_subtitle: 'Values and activities that align with your life goals',
