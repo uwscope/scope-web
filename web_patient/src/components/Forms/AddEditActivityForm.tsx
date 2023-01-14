@@ -30,7 +30,7 @@ import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
-import {clearTime, toUTCDateOnly} from 'shared/time';
+import {clearTime, getDayOfWeekCount, toUTCDateOnly} from 'shared/time';
 import {IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */} from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
@@ -655,9 +655,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
         if (hasRepetition) {
-            const numDaysRepeat = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
-                return accumulator + (repeatDayFlags[dayOfWeek] ? 1 : 0);
-            }, 0);
+            const numDaysRepeat = getDayOfWeekCount(repeatDayFlags);
 
             if (numDaysRepeat == 0) {
                 return {
@@ -759,10 +757,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     // Validate name, not displayed name, because we want to ignore whitespace that will be trimmed
     const _activityPageValidateName = activityValidateName(activityViewState.name);
     const _activityPageValidateValueId = activityValidateValueId(activityViewState.lifeAreaId, activityViewState.valueId);
-    const _disableLifeAreaAndValue = (
-        activityViewState.modeState.mode == "addActivity" &&
-        !!activityViewState.modeState.providedValueId
-    );
     const activityPage = (
         <Stack spacing={4}>
             <FormSection
@@ -799,9 +793,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.lifeAreaId}
                             onChange={handleActivitySelectLifeArea}
                             fullWidth
-                            disabled={
-                                _disableLifeAreaAndValue
-                            }
                         >
                             <MenuItem key='' value=''></MenuItem>
                             {/* TODO Activity Refactor: Sort life areas */}
@@ -823,7 +814,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             onChange={handleActivitySelectValue}
                             fullWidth
                             disabled={
-                                _disableLifeAreaAndValue ||
                                 !activityViewState.lifeAreaId ||
                                 patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0
                             }
@@ -847,7 +837,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                 label={getString('form_add_edit_activity_add_value_button')}
                                 onClick={handleAddValueOpen}
                                 disabled={
-                                    _disableLifeAreaAndValue ||
                                     !activityViewState.lifeAreaId
                                 }
                             />

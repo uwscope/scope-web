@@ -1,6 +1,7 @@
-import { format, parseISO, setHours, setMilliseconds, setMinutes, setSeconds } from 'date-fns';
+import { addDays, format, nextMonday, parseISO, setHours, setMilliseconds, setMinutes, setSeconds } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { DayOfWeek, daysOfWeekValues, FollowupSchedule } from 'shared/enums';
+import {DayOfWeekFlags} from "./enums";
 
 export const clearTime = (date: Date): Date => {
     return setMilliseconds(setSeconds(setMinutes(setHours(date, 0), 0), 0), 0);
@@ -9,6 +10,21 @@ export const clearTime = (date: Date): Date => {
 // Takes the "date" type from service and converts it to a formatted date only string
 export const formatDateOnly = (date: Date | number, formatter: string = 'MM/dd/yy') => {
     return format(toLocalDateOnly(date), formatter);
+};
+
+export const formatDayOfWeekOnly = (dayOfWeek: DayOfWeek, formatter: string = 'EEE') => {
+    // daysOfWeekValues is indexed 0 = Monday, 6 = Sunday
+    return format(
+        addDays(
+            nextMonday(new Date(1, 1, 1)), // Any Monday
+            daysOfWeekValues.indexOf(dayOfWeek)
+        ),
+        formatter
+    );
+}
+
+export const formatTimeOfDayOnly = (timeOfDay: number, formatter: string = 'h:mmaaa') => {
+    return format(new Date(1, 1, 1, timeOfDay, 0, 0), formatter);
 };
 
 // Takes the "date" type from service and converts it to a local date only object
@@ -75,14 +91,14 @@ export const getFollowupWeeks = (schedule: FollowupSchedule) => {
 
 export const minDate = (a: Date, b: Date): Date => {
     if (a <= b) {
-        console.log('min');
-        console.log(a);
-
         return a;
     } else {
-        console.log('min');
-        console.log(b);
-
         return b;
     }
+}
+
+export const getDayOfWeekCount = (dayOfWeekFlags: DayOfWeekFlags): number => {
+    return daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+        return accumulator + (dayOfWeekFlags[dayOfWeek] ? 1 : 0);
+    }, 0);
 }
