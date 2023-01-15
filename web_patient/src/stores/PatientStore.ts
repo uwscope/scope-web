@@ -55,6 +55,7 @@ export interface IPatientStore {
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
     getActivitiesWithoutValueId: () => IActivity[];
+    getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
@@ -317,6 +318,11 @@ export class PatientStore implements IPatientStore {
         return this.activities.filter((a) => {
             return !a.valueId;
         });
+    }
+
+    @action.bound
+    public getActivityScheduleById(activityScheduleId: string) {
+        return this.activitySchedules.find((as) => as.activityScheduleId == activityScheduleId);
     }
 
     @action.bound

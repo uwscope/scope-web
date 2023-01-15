@@ -197,7 +197,17 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleActivityScheduleEdit = action(() => {
-       // TODO
+        const activitySchedule = viewState.selectedActivitySchedule;
+
+        // Remove the popup menu
+        handleActivityScheduleMoreClose();
+
+        navigate(getFormPath(
+            ParameterValues.form.editActivitySchedule,
+            {
+                [Parameters.activityScheduleId as string]: activitySchedule?.activityScheduleId as string
+            }
+        ));
     });
 
     const renderActivitySchedule = (activitySchedule: IActivitySchedule) : ReactNode => {

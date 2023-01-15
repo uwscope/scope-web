@@ -30,7 +30,7 @@ import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
-import {clearTime, getDayOfWeekCount, toUTCDateOnly} from 'shared/time';
+import {clearTime, getDayOfWeekCount, toLocalDateOnly, toUTCDateOnly} from 'shared/time';
 import {IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */} from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
@@ -40,7 +40,7 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import {
     getDayOfWeek,
-    // minDate,
+    minDate,
 } from 'shared/time';
 import { AddEditValueDialog } from 'src/components/ValuesInventory/LifeAreaDetail';
 
@@ -225,8 +225,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         const _defaultDate = clearTime(new Date());
         const _defaultTimeOfDay = 9;
         const defaultViewState: IActivityScheduleViewState = {
-            displayedDate: _defaultDate,
             minValidDate: clearTime(new Date()),
+
+            displayedDate: _defaultDate,
             displayedTimeOfDay: new Date(1, 1, 1, _defaultTimeOfDay, 0, 0),
 
             date: _defaultDate,
@@ -249,7 +250,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         // In that case, the viewState is updated after the activity is created.
         if (routeParamForm == ParameterValues.form.addActivitySchedule) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
-            console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
+            console.assert(!!routeActivityId, 'addActivitySchedule parameter activityId not found');
             if (!routeActivityId) {
                 return defaultViewState;
             }
@@ -262,7 +263,42 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             }
         } else if (routeParamForm == ParameterValues.form.editActivitySchedule) {
-            // TODO Activity Refactor
+            const routeActivityScheduleId = getRouteParameter(Parameters.activityScheduleId);
+            console.assert(!!routeActivityScheduleId, 'editActivitySchedule parameter activityScheduleId not found');
+            if(!routeActivityScheduleId) {
+                return defaultViewState;
+            }
+
+            const editActivitySchedule = patientStore.getActivityScheduleById(routeActivityScheduleId);
+            console.assert(!!editActivitySchedule, 'editActivitySchedule activitySchedule not found');
+            if(!editActivitySchedule) {
+                return defaultViewState;
+            }
+
+            const localEditActivityScheduleDate = toLocalDateOnly(editActivitySchedule.date);
+
+            return {
+                ...defaultViewState,
+
+                minValidDate: minDate(
+                    defaultViewState.minValidDate,
+                    localEditActivityScheduleDate,
+                ),
+
+                displayedDate: localEditActivityScheduleDate,
+                displayedTimeOfDay: new Date(1, 1, 1, editActivitySchedule.timeOfDay, 0, 0),
+
+                date: localEditActivityScheduleDate,
+                timeOfDay: editActivitySchedule.timeOfDay,
+
+                hasRepetition: editActivitySchedule.hasRepetition,
+                repeatDayFlags: !!editActivitySchedule.repeatDayFlags ? editActivitySchedule.repeatDayFlags : defaultViewState.repeatDayFlags,
+
+                modeState: {
+                    mode: 'editActivitySchedule',
+                    editActivitySchedule: editActivitySchedule,
+                }
+            }
         }
 
         return defaultViewState;
