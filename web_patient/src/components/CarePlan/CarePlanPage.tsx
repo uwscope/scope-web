@@ -250,10 +250,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 sx={{ paddingBottom: 0 }}
                             >
                                 <ListItemText
-                                    style={{
-                                        // TODO Activity Refactor
-                                        // opacity: activity.isActive ? 1 : 0.5
-                                    }}
                                     secondaryTypographyProps={{
                                         component: 'div',
                                     }}
@@ -261,27 +257,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                     secondary={
                                         <Fragment>
                                             { !!activity.valueId && patientStore.getValueById(activity.valueId)?.name }
-                                            {/* TODO Activity Refactor
-                                            <Typography variant="body2" component="div">
-                                                {`${getString('Careplan_activity_item_value')}: ${
-                                                    activity.value
-                                                }`}
-                                            </Typography>
-                                            <Typography variant="body2" component="span">
-                                                {`${getString(
-                                                    'Careplan_activity_item_start_date',
-                                                )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
-                                            </Typography>
-                                            {activity.hasRepetition && activity.repeatDayFlags && (
-                                                <Typography variant="body2" component="span">
-                                                    {`; ${getString(
-                                                        'Careplan_activity_item_repeat',
-                                                    )} ${getRepeatDateText(
-                                                        activity.repeatDayFlags,
-                                                    )}`}
-                                                </Typography>
-                                            )}
-                                            */}
                                         </Fragment>
                                     }
                                 />
@@ -324,7 +299,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 return <ActivityScheduleList>
                                     {sortedActivitySchedules.map((activityScheduleCurrent, idxActivityScheduleCurrent) => (
                                         <Fragment>
-                                            {/* {idxActivityScheduleCurrent < sortedActivitySchedules.length - 1 && <Divider variant="middle" />} */}
                                             <ListItem
                                                 alignItems="flex-start"
                                                 button
@@ -336,41 +310,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                     }
                                                 )}
                                             >
-                                                {/*
-                                                <ListItemText
-                                                    style={{
-                                                        // TODO Activity Refactor
-                                                        // opacity: activity.isActive ? 1 : 0.5
-                                                    }}
-                                                    secondaryTypographyProps={{
-                                                        component: 'div',
-                                                    }}
-                                                    primary={<Typography noWrap>{activityScheduleCurrent.activityScheduleId}</Typography>}
-                                                    secondary={
-                                                        <Fragment>
-                                                            <Typography variant="body2" component="div">
-                                                                {`${getString('Careplan_activity_item_value')}: ${
-                                                                    activity.value
-                                                                }`}
-                                                            </Typography>
-                                                            <Typography variant="body2" component="span">
-                                                                {`${getString(
-                                                                    'Careplan_activity_item_start_date',
-                                                                )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
-                                                            </Typography>
-                                                            {activity.hasRepetition && activity.repeatDayFlags && (
-                                                                <Typography variant="body2" component="span">
-                                                                    {`; ${getString(
-                                                                        'Careplan_activity_item_repeat',
-                                                                    )} ${getRepeatDateText(
-                                                                        activity.repeatDayFlags,
-                                                                    )}`}
-                                                                </Typography>
-                                                            )}
-                                                        </Fragment>
-                                                    }
-                                                />
-                                                */}
                                                 { renderActivitySchedule(activityScheduleCurrent) }
 
                                                 <ListItemSecondaryAction>
@@ -388,7 +327,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                     ))}
                                 </ActivityScheduleList>
                             })()}
-                            {/* {idx < activities.length - 1 && <Divider variant="middle" />} */}
                         </Fragment>
                     ))}
                 </CompactList>
