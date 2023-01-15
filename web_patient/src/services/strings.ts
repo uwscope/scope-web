@@ -184,6 +184,8 @@ const _strings = {
 
     Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
+    careplan_activity_no_schedules: 'Tap to Add Schedule';
+
     form_add_activity_title: 'Add Activity',
     form_edit_activity_title: 'Edit Activity',
     form_add_activity_submit_success: 'Your activity is created.',

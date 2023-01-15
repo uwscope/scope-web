@@ -301,6 +301,26 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
                                 // TODO Activity Refactor: Actually Sort Them
 
+                                if (sortedActivitySchedules.length == 0) {
+                                    // TODO: This really belong as part of the activity list item,
+                                    //       but getting it to format correctly wasn't trivial
+                                    return <ActivityScheduleList>
+                                        <ListItem
+                                            alignItems="flex-start"
+                                            button
+                                            component={Link}
+                                            to={getFormLink(
+                                                ParameterValues.form.addActivitySchedule,
+                                                {
+                                                    [Parameters.activityId as string]: activity?.activityId as string
+                                                }
+                                            )}
+                                        >
+                                            <HelperText>{getString('careplan_activity_no_schedules')}</HelperText>
+                                        </ListItem>
+                                    </ActivityScheduleList>
+                                }
+
                                 return <ActivityScheduleList>
                                     {sortedActivitySchedules.map((activityScheduleCurrent, idxActivityScheduleCurrent) => (
                                         <Fragment>
