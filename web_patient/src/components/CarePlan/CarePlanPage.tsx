@@ -241,10 +241,12 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 alignItems="flex-start"
                                 button
                                 component={Link}
-                                to={getFormLink(ParameterValues.form.editActivity, {
-                                    [Parameters.activityId as string]:
-                                        activity.activityId as string,
-                                })}
+                                to={getFormLink(
+                                    ParameterValues.form.addActivitySchedule,
+                                    {
+                                        [Parameters.activityId as string]: activity?.activityId as string
+                                    }
+                                )}
                                 sx={{ paddingBottom: 0 }}
                             >
                                 <ListItemText
@@ -382,8 +384,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 keepMounted
                 open={Boolean(viewState.moreTargetActivityEl)}
                 onClose={handleActivityMoreClose}>
-                <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
                 <MenuItem onClick={handleActivityAddSchedule}>{getString('menuitem_activityschedule_add')}</MenuItem>
+                <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
                 <MenuItem onClick={handleActivityDelete}>{getString('menuitem_activity_delete')}</MenuItem>
             </Menu>
             <Menu
