@@ -184,8 +184,16 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.moreTargetActivityScheduleEl = undefined;
     });
 
-    const handleActivityScheduleDelete = action(() => {
-       // TODO
+    const handleActivityScheduleDelete = action(async () => {
+        // TODO Activity Refactor: Display some kind of confirmation
+        const activitySchedule = viewState.selectedActivitySchedule;
+
+        // Remove the popup menu
+        handleActivityScheduleMoreClose();
+
+        if (!!activitySchedule) {
+            await patientStore.deleteActivitySchedule(activitySchedule);
+        }
     });
 
     const handleActivityScheduleEdit = action(() => {
