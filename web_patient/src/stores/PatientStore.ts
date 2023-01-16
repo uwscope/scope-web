@@ -55,6 +55,7 @@ export interface IPatientStore {
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
     getActivitiesWithoutValueId: () => IActivity[];
+    getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
@@ -76,6 +77,7 @@ export interface IPatientStore {
 
     // Activity schedules
     addActivitySchedule: (activitySchedule: IActivitySchedule) => Promise<void>;
+    deleteActivitySchedule: (activitySchedule: IActivitySchedule) => Promise<void>;
     updateActivitySchedule: (activitySchedule: IActivitySchedule) => Promise<void>;
 
     // Assessment logs
@@ -319,6 +321,11 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
+    public getActivityScheduleById(activityScheduleId: string) {
+        return this.activitySchedules.find((as) => as.activityScheduleId == activityScheduleId);
+    }
+
+    @action.bound
     public getActivitySchedulesByActivityId(activityId: string): IActivitySchedule[] {
         return this.activitySchedules.filter((as) => {
             return as.activityId == activityId;
@@ -488,6 +495,29 @@ export class PatientStore implements IPatientStore {
             this.patientService.getScheduledActivities,
             this.loadScheduledActivitiesQuery,
         );
+    }
+
+    @action.bound
+    public async deleteActivitySchedule(activitySchedule: IActivitySchedule) {
+        const prevActivitySchedules = this.activitySchedules.slice() || [];
+        const foundIdx = prevActivitySchedules.findIndex((as) => as.activityScheduleId == activitySchedule.activityScheduleId);
+
+        console.assert(foundIdx >= 0, `ActivitySchedule to delete not found: ${activitySchedule.activityScheduleId}`);
+
+        if (foundIdx >= 0) {
+            const promise = this.patientService.deleteActivitySchedule(activitySchedule).then((_deletedActivitySchedule) => {
+                prevActivitySchedules.splice(foundIdx, 1);
+                return prevActivitySchedules;
+            });
+
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                () => promise,
+                this.loadActivitySchedulesQuery,
+                onArrayConflict('activitySchedule', 'activityScheduleId', () => this.activitySchedules, logger),
+            );
+
+            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+        }
     }
 
     @action.bound

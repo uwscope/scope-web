@@ -34,6 +34,7 @@ import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 import { HelperText } from 'src/components/Forms/FormSection';
 import {formatDateOnly, formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount} from 'shared/time';
+import {sortActivitiesByName, sortActivitySchedulesByDateAndTime} from "shared/sorting";
 
 
 const CompactList = withTheme(
@@ -184,12 +185,30 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.moreTargetActivityScheduleEl = undefined;
     });
 
-    const handleActivityScheduleDelete = action(() => {
-       // TODO
+    const handleActivityScheduleDelete = action(async () => {
+        // TODO Activity Refactor: Display some kind of confirmation
+        const activitySchedule = viewState.selectedActivitySchedule;
+
+        // Remove the popup menu
+        handleActivityScheduleMoreClose();
+
+        if (!!activitySchedule) {
+            await patientStore.deleteActivitySchedule(activitySchedule);
+        }
     });
 
     const handleActivityScheduleEdit = action(() => {
-       // TODO
+        const activitySchedule = viewState.selectedActivitySchedule;
+
+        // Remove the popup menu
+        handleActivityScheduleMoreClose();
+
+        navigate(getFormPath(
+            ParameterValues.form.editActivitySchedule,
+            {
+                [Parameters.activityScheduleId as string]: activitySchedule?.activityScheduleId as string
+            }
+        ));
     });
 
     const renderActivitySchedule = (activitySchedule: IActivitySchedule) : ReactNode => {
@@ -210,9 +229,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     }
 
     const renderActivitiesSection = (lifeAreaName: string, lifeAreaId: string, activities: IActivity[]): ReactNode => {
-        const sortedActivities = activities.slice();
-
-        // TODO: Actually sort them
+        const sortedActivities = sortActivitiesByName(activities);
 
         return (activities.length > 0) && (
             <Section title={lifeAreaName} key={lifeAreaId}>
@@ -223,17 +240,15 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 alignItems="flex-start"
                                 button
                                 component={Link}
-                                to={getFormLink(ParameterValues.form.editActivity, {
-                                    [Parameters.activityId as string]:
-                                        activity.activityId as string,
-                                })}
+                                to={getFormLink(
+                                    ParameterValues.form.addActivitySchedule,
+                                    {
+                                        [Parameters.activityId as string]: activity?.activityId as string
+                                    }
+                                )}
                                 sx={{ paddingBottom: 0 }}
                             >
                                 <ListItemText
-                                    style={{
-                                        // TODO Activity Refactor
-                                        // opacity: activity.isActive ? 1 : 0.5
-                                    }}
                                     secondaryTypographyProps={{
                                         component: 'div',
                                     }}
@@ -241,27 +256,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                     secondary={
                                         <Fragment>
                                             { !!activity.valueId && patientStore.getValueById(activity.valueId)?.name }
-                                            {/* TODO Activity Refactor
-                                            <Typography variant="body2" component="div">
-                                                {`${getString('Careplan_activity_item_value')}: ${
-                                                    activity.value
-                                                }`}
-                                            </Typography>
-                                            <Typography variant="body2" component="span">
-                                                {`${getString(
-                                                    'Careplan_activity_item_start_date',
-                                                )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
-                                            </Typography>
-                                            {activity.hasRepetition && activity.repeatDayFlags && (
-                                                <Typography variant="body2" component="span">
-                                                    {`; ${getString(
-                                                        'Careplan_activity_item_repeat',
-                                                    )} ${getRepeatDateText(
-                                                        activity.repeatDayFlags,
-                                                    )}`}
-                                                </Typography>
-                                            )}
-                                            */}
                                         </Fragment>
                                     }
                                 />
@@ -277,14 +271,33 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 </ListItemSecondaryAction>
                             </ListItem>
                             {(() => {
-                                const sortedActivitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId as string);
+                                const sortedActivitySchedules = sortActivitySchedulesByDateAndTime(
+                                    patientStore.getActivitySchedulesByActivityId(activity.activityId as string)
+                                );
 
-                                // TODO Activity Refactor: Actually Sort Them
+                                if (sortedActivitySchedules.length == 0) {
+                                    // TODO: This really belong as part of the activity list item,
+                                    //       but getting it to format correctly wasn't trivial
+                                    return <ActivityScheduleList>
+                                        <ListItem
+                                            alignItems="flex-start"
+                                            button
+                                            component={Link}
+                                            to={getFormLink(
+                                                ParameterValues.form.addActivitySchedule,
+                                                {
+                                                    [Parameters.activityId as string]: activity?.activityId as string
+                                                }
+                                            )}
+                                        >
+                                            <HelperText>{getString('careplan_activity_no_schedules')}</HelperText>
+                                        </ListItem>
+                                    </ActivityScheduleList>
+                                }
 
                                 return <ActivityScheduleList>
                                     {sortedActivitySchedules.map((activityScheduleCurrent, idxActivityScheduleCurrent) => (
                                         <Fragment>
-                                            {/* {idxActivityScheduleCurrent < sortedActivitySchedules.length - 1 && <Divider variant="middle" />} */}
                                             <ListItem
                                                 alignItems="flex-start"
                                                 button
@@ -296,41 +309,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                     }
                                                 )}
                                             >
-                                                {/*
-                                                <ListItemText
-                                                    style={{
-                                                        // TODO Activity Refactor
-                                                        // opacity: activity.isActive ? 1 : 0.5
-                                                    }}
-                                                    secondaryTypographyProps={{
-                                                        component: 'div',
-                                                    }}
-                                                    primary={<Typography noWrap>{activityScheduleCurrent.activityScheduleId}</Typography>}
-                                                    secondary={
-                                                        <Fragment>
-                                                            <Typography variant="body2" component="div">
-                                                                {`${getString('Careplan_activity_item_value')}: ${
-                                                                    activity.value
-                                                                }`}
-                                                            </Typography>
-                                                            <Typography variant="body2" component="span">
-                                                                {`${getString(
-                                                                    'Careplan_activity_item_start_date',
-                                                                )} ${format(activity.startDateTime, 'MM/dd/yy')}`}
-                                                            </Typography>
-                                                            {activity.hasRepetition && activity.repeatDayFlags && (
-                                                                <Typography variant="body2" component="span">
-                                                                    {`; ${getString(
-                                                                        'Careplan_activity_item_repeat',
-                                                                    )} ${getRepeatDateText(
-                                                                        activity.repeatDayFlags,
-                                                                    )}`}
-                                                                </Typography>
-                                                            )}
-                                                        </Fragment>
-                                                    }
-                                                />
-                                                */}
                                                 { renderActivitySchedule(activityScheduleCurrent) }
 
                                                 <ListItemSecondaryAction>
@@ -348,7 +326,6 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                     ))}
                                 </ActivityScheduleList>
                             })()}
-                            {/* {idx < activities.length - 1 && <Divider variant="middle" />} */}
                         </Fragment>
                     ))}
                 </CompactList>
@@ -364,8 +341,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 keepMounted
                 open={Boolean(viewState.moreTargetActivityEl)}
                 onClose={handleActivityMoreClose}>
-                <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
                 <MenuItem onClick={handleActivityAddSchedule}>{getString('menuitem_activityschedule_add')}</MenuItem>
+                <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
                 <MenuItem onClick={handleActivityDelete}>{getString('menuitem_activity_delete')}</MenuItem>
             </Menu>
             <Menu

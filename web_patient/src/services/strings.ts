@@ -184,6 +184,8 @@ const _strings = {
 
     Careplan_no_activities: 'You have no activities. Add one by tapping the button above!',
 
+    careplan_activity_no_schedules: 'Tap to Add Schedule',
+
     form_add_activity_title: 'Add Activity',
     form_edit_activity_title: 'Edit Activity',
     form_add_activity_submit_success: 'Your activity is created.',
@@ -242,6 +244,8 @@ const _strings = {
         'On what days would you like to repeat this activity?',
     form_add_edit_activity_schedule_repetition_validation_no_days:
         'Select one or more days.',
+    form_add_edit_activity_schedule_repetition_validation_include_date:
+        'Repeat days must include schedule date.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',

@@ -25,12 +25,12 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-// import { compareAsc } from 'date-fns';
+import { isEqual } from 'date-fns';
 import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import {DayOfWeek, DayOfWeekFlags, daysOfWeekValues} from 'shared/enums';
-import {clearTime, getDayOfWeekCount, toUTCDateOnly} from 'shared/time';
+import { clearTime, getDayOfWeek, getDayOfWeekCount, minDate, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import {IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */} from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText} from 'src/components/Forms/FormSection';
@@ -38,10 +38,6 @@ import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from "src/services/routes";
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
-import {
-    getDayOfWeek,
-    // minDate,
-} from 'shared/time';
 import { AddEditValueDialog } from 'src/components/ValuesInventory/LifeAreaDetail';
 
 export interface IAddEditActivityFormProps extends IFormProps {}
@@ -225,8 +221,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         const _defaultDate = clearTime(new Date());
         const _defaultTimeOfDay = 9;
         const defaultViewState: IActivityScheduleViewState = {
+            minValidDate: _defaultDate,
+
             displayedDate: _defaultDate,
-            minValidDate: clearTime(new Date()),
             displayedTimeOfDay: new Date(1, 1, 1, _defaultTimeOfDay, 0, 0),
 
             date: _defaultDate,
@@ -249,7 +246,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         // In that case, the viewState is updated after the activity is created.
         if (routeParamForm == ParameterValues.form.addActivitySchedule) {
             const routeActivityId = getRouteParameter(Parameters.activityId);
-            console.assert(!!routeActivityId, 'editActivity parameter activityId not found');
+            console.assert(!!routeActivityId, 'addActivitySchedule parameter activityId not found');
             if (!routeActivityId) {
                 return defaultViewState;
             }
@@ -262,7 +259,42 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 }
             }
         } else if (routeParamForm == ParameterValues.form.editActivitySchedule) {
-            // TODO Activity Refactor
+            const routeActivityScheduleId = getRouteParameter(Parameters.activityScheduleId);
+            console.assert(!!routeActivityScheduleId, 'editActivitySchedule parameter activityScheduleId not found');
+            if(!routeActivityScheduleId) {
+                return defaultViewState;
+            }
+
+            const editActivitySchedule = patientStore.getActivityScheduleById(routeActivityScheduleId);
+            console.assert(!!editActivitySchedule, 'editActivitySchedule activitySchedule not found');
+            if(!editActivitySchedule) {
+                return defaultViewState;
+            }
+
+            const localEditActivityScheduleDate = toLocalDateOnly(editActivitySchedule.date);
+
+            return {
+                ...defaultViewState,
+
+                minValidDate: minDate(
+                    defaultViewState.minValidDate,
+                    localEditActivityScheduleDate,
+                ),
+
+                displayedDate: localEditActivityScheduleDate,
+                displayedTimeOfDay: new Date(1, 1, 1, editActivitySchedule.timeOfDay, 0, 0),
+
+                date: localEditActivityScheduleDate,
+                timeOfDay: editActivitySchedule.timeOfDay,
+
+                hasRepetition: editActivitySchedule.hasRepetition,
+                repeatDayFlags: !!editActivitySchedule.repeatDayFlags ? editActivitySchedule.repeatDayFlags : defaultViewState.repeatDayFlags,
+
+                modeState: {
+                    mode: 'editActivitySchedule',
+                    editActivitySchedule: editActivitySchedule,
+                }
+            }
         }
 
         return defaultViewState;
@@ -491,16 +523,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
 
         // If editing an activity, something must have changed
+        // Adding an activity with initial values is allowable if otherwise valid
         if (activityViewState.modeState.mode == 'editActivity') {
-            const editActivity = activityViewState.modeState.editActivity;
-
-            let changeDetected = false;
-            changeDetected ||= activityViewState.name != editActivity.name;
-            changeDetected ||= activityViewState.valueId != editActivity.valueId;
-            changeDetected ||= activityViewState.enjoyment != (!!editActivity.enjoyment ? editActivity.enjoyment : -1);
-            changeDetected ||= activityViewState.importance != (!!editActivity.importance ? editActivity.importance : -1);
-
-            if(!changeDetected) {
+            const changeDetected = activityChangeDetected();
+            if (!changeDetected) {
                 return {
                     valid: false,
                     error: true,
@@ -512,6 +538,28 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             valid: true,
             error: false,
         }
+    }
+
+    const activityChangeDetected = (): boolean => {
+        let changeDetected = false;
+
+        if (activityViewState.modeState.mode == 'addActivity') {
+            // If adding an activity, detect change from the initial values
+            changeDetected || activityViewState.name != '';
+            changeDetected ||= activityViewState.valueId != activityViewState.modeState.providedValueId;
+            changeDetected ||= activityViewState.enjoyment != -1;
+            changeDetected ||= activityViewState.importance != -1;
+        } else if (activityViewState.modeState.mode == 'editActivity') {
+            // If editing an activity, detect change from the previous values
+            const editActivity = activityViewState.modeState.editActivity;
+
+            changeDetected ||= activityViewState.name != editActivity.name;
+            changeDetected ||= activityViewState.valueId != editActivity.valueId;
+            changeDetected ||= activityViewState.enjoyment != (!!editActivity.enjoyment ? editActivity.enjoyment : -1);
+            changeDetected ||= activityViewState.importance != (!!editActivity.importance ? editActivity.importance : -1);
+        }
+
+        return changeDetected;
     }
 
     const activityValidateName = (name: string) => {
@@ -576,29 +624,19 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
 
         // Repetition must validate
-        const validateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+        const validateRepetition = activityScheduleValidateRepetition(
+            activityScheduleViewState.date,
+            activityScheduleViewState.hasRepetition,
+            activityScheduleViewState.repeatDayFlags
+        );
         if (validateRepetition.error) {
             return validateRepetition;
         }
 
-        // If editing an activity schedule, something must have changed
+        // If editing a schedule, something must have changed
+        // Adding a schedule with initial values is allowable if otherwise valid
         if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
-            const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
-
-            let changeDetected = false;
-            changeDetected ||= activityScheduleViewState.date != editActivitySchedule.date;
-            changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
-            changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
-            if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
-                const repeatDayFlagsChangeDetected = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
-                    const reduceEditActivityScheduleRepeatDayFlags = editActivitySchedule.repeatDayFlags as DayOfWeekFlags;
-
-                    return accumulator || (activityScheduleViewState.repeatDayFlags[dayOfWeek] != reduceEditActivityScheduleRepeatDayFlags[dayOfWeek]);
-                }, false);
-
-                changeDetected ||= repeatDayFlagsChangeDetected;
-            }
-
+            const changeDetected = activityScheduleChangeDetected();
             if(!changeDetected) {
                 return {
                     valid: false,
@@ -611,6 +649,38 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             valid: true,
             error: false,
         }
+    }
+
+    const activityScheduleChangeDetected = (): boolean => {
+        let changeDetected = false;
+
+        if (activityScheduleViewState.modeState.mode == 'addActivitySchedule') {
+            // If adding a schedule, detect change from the initial values
+
+            // Only works because both are initially set to _defaultDate
+            changeDetected ||= !isEqual(activityScheduleViewState.date, activityScheduleViewState.minValidDate);
+            changeDetected ||= activityScheduleViewState.timeOfDay != 9;
+            // Because has repetition is initially false, any value of of true is a change
+            changeDetected ||= activityScheduleViewState.hasRepetition != false;
+        } else if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
+            // If editing a schedule, detect change from the previous values
+            const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
+
+            changeDetected ||= !isEqual(toUTCDateOnly(activityScheduleViewState.date), editActivitySchedule.date);
+            changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
+            changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
+            if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
+                const repeatDayFlagsChangeDetected = daysOfWeekValues.reduce((accumulator, dayOfWeek) => {
+                    const reduceEditActivityScheduleRepeatDayFlags = editActivitySchedule.repeatDayFlags as DayOfWeekFlags;
+
+                    return accumulator || (activityScheduleViewState.repeatDayFlags[dayOfWeek] != reduceEditActivityScheduleRepeatDayFlags[dayOfWeek]);
+                }, false);
+
+                changeDetected ||= repeatDayFlagsChangeDetected;
+            }
+        }
+
+        return changeDetected;
     }
 
     const activityScheduleValidateDate = (date: Date | null) => {
@@ -653,15 +723,28 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         };
     }
 
-    const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
+    const activityScheduleValidateRepetition = (
+        date: Date,
+        hasRepetition: boolean,
+        repeatDayFlags: DayOfWeekFlags
+    ) => {
         if (hasRepetition) {
+            // There must be at least one day the schedule repeats
             const numDaysRepeat = getDayOfWeekCount(repeatDayFlags);
-
             if (numDaysRepeat == 0) {
                 return {
                     valid: false,
                     error: true,
                     errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_no_days'),
+                };
+            }
+
+            // The day of week of the start date must be part of the repeat
+            if(!repeatDayFlags[getDayOfWeek(date)]) {
+                return {
+                    valid: false,
+                    error: true,
+                    errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_include_date'),
                 };
             }
         }
@@ -923,7 +1006,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const _activitySchedulePageValidateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
     const _activitySchedulePageValidateTimeOfDay = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
-    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(
+        activityScheduleViewState.date,
+        activityScheduleViewState.hasRepetition,
+        activityScheduleViewState.repeatDayFlags
+    );
     const activitySchedulePage = (
         <Stack spacing={4}>
             <FormSection
