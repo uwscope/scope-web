@@ -624,7 +624,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
 
         // Repetition must validate
-        const validateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+        const validateRepetition = activityScheduleValidateRepetition(
+            activityScheduleViewState.date,
+            activityScheduleViewState.hasRepetition,
+            activityScheduleViewState.repeatDayFlags
+        );
         if (validateRepetition.error) {
             return validateRepetition;
         }
@@ -719,15 +723,28 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         };
     }
 
-    const activityScheduleValidateRepetition = (hasRepetition: boolean, repeatDayFlags: DayOfWeekFlags) => {
+    const activityScheduleValidateRepetition = (
+        date: Date,
+        hasRepetition: boolean,
+        repeatDayFlags: DayOfWeekFlags
+    ) => {
         if (hasRepetition) {
+            // There must be at least one day the schedule repeats
             const numDaysRepeat = getDayOfWeekCount(repeatDayFlags);
-
             if (numDaysRepeat == 0) {
                 return {
                     valid: false,
                     error: true,
                     errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_no_days'),
+                };
+            }
+
+            // The day of week of the start date must be part of the repeat
+            if(!repeatDayFlags[getDayOfWeek(date)]) {
+                return {
+                    valid: false,
+                    error: true,
+                    errorMessage: getString('form_add_edit_activity_schedule_repetition_validation_include_date'),
                 };
             }
         }
@@ -989,7 +1006,11 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const _activitySchedulePageValidateDate = activityScheduleValidateDate(activityScheduleViewState.displayedDate);
     const _activitySchedulePageValidateTimeOfDay = activityScheduleValidateTimeOfDay(activityScheduleViewState.displayedTimeOfDay);
-    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(activityScheduleViewState.hasRepetition, activityScheduleViewState.repeatDayFlags);
+    const _activitySchedulePageValidateRepetition = activityScheduleValidateRepetition(
+        activityScheduleViewState.date,
+        activityScheduleViewState.hasRepetition,
+        activityScheduleViewState.repeatDayFlags
+    );
     const activitySchedulePage = (
         <Stack spacing={4}>
             <FormSection

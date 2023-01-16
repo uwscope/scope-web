@@ -244,6 +244,8 @@ const _strings = {
         'On what days would you like to repeat this activity?',
     form_add_edit_activity_schedule_repetition_validation_no_days:
         'Select one or more days.',
+    form_add_edit_activity_schedule_repetition_validation_include_date:
+        'Repeat days must include schedule date.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
