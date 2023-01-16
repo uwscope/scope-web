@@ -25,7 +25,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-// import { compareAsc } from 'date-fns';
+import { isEqual } from 'date-fns';
 import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -622,7 +622,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
 
             let changeDetected = false;
-            changeDetected ||= activityScheduleViewState.date != editActivitySchedule.date;
+            changeDetected ||= !isEqual(toUTCDateOnly(activityScheduleViewState.date), editActivitySchedule.date);
             changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
             changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
             if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
