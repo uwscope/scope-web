@@ -34,6 +34,7 @@ import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 import { HelperText } from 'src/components/Forms/FormSection';
 import {formatDateOnly, formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount} from 'shared/time';
+import {sortActivitiesByName, sortActivitySchedulesByDateAndTime} from "shared/sorting";
 
 
 const CompactList = withTheme(
@@ -228,9 +229,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     }
 
     const renderActivitiesSection = (lifeAreaName: string, lifeAreaId: string, activities: IActivity[]): ReactNode => {
-        const sortedActivities = activities.slice();
-
-        // TODO: Actually sort them
+        const sortedActivities = sortActivitiesByName(activities);
 
         return (activities.length > 0) && (
             <Section title={lifeAreaName} key={lifeAreaId}>
@@ -272,9 +271,9 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                 </ListItemSecondaryAction>
                             </ListItem>
                             {(() => {
-                                const sortedActivitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId as string);
-
-                                // TODO Activity Refactor: Actually Sort Them
+                                const sortedActivitySchedules = sortActivitySchedulesByDateAndTime(
+                                    patientStore.getActivitySchedulesByActivityId(activity.activityId as string)
+                                );
 
                                 if (sortedActivitySchedules.length == 0) {
                                     // TODO: This really belong as part of the activity list item,
