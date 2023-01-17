@@ -27,6 +27,17 @@ export const formatTimeOfDayOnly = (timeOfDay: number, formatter: string = 'h:mm
     return format(new Date(1, 1, 1, timeOfDay, 0, 0), formatter);
 };
 
+export const toLocalDateTime = (date: Date, timeOfDay: number) => {
+    return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        timeOfDay,
+        0,
+        0
+    );
+}
+
 // Takes the "date" type from service and converts it to a local date only object
 export const toLocalDateOnly = (date: Date | number) => {
     return utcToZonedTime(date, '+00');

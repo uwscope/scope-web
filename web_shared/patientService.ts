@@ -98,6 +98,7 @@ export interface IPatientService extends IServiceBase {
 
     getActivitySchedules(): Promise<IActivitySchedule[]>;
     addActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
+    deleteActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
     updateActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule>;
 
     getActivityLogs(): Promise<IActivityLog[]>;
@@ -323,6 +324,16 @@ class PatientService extends ServiceBase implements IPatientService {
         const response = await this.axiosInstance.post<IActivityScheduleResponse>(`/activityschedules`, {
             activityschedule: activitySchedule,
         } as IActivityScheduleRequest);
+        return response.data?.activityschedule;
+    }
+
+    public async deleteActivitySchedule(activitySchedule: IActivitySchedule): Promise<IActivitySchedule> {
+        logger.assert((activitySchedule as any)._rev != undefined, '_rev should be in the request data');
+        const response = await this.axiosInstance.delete<IActivityScheduleResponse>(`/activityschedule/${activitySchedule.activityScheduleId}`, {
+            headers: {
+                'If-Match': (activitySchedule as any)._rev,
+            },
+        });
         return response.data?.activityschedule;
     }
 
