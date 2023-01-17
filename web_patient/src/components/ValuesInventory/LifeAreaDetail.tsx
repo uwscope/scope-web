@@ -99,37 +99,17 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                                     <HelperText>{`1 Schedule`}</HelperText>
                                 )}
                                 {activitySchedules.length == 1 && repeatActivitySchedules.length == 1 && (
-                                    <HelperText>{`1 Schedule, with Repeating`}</HelperText>
+                                    <HelperText>{`1 Schedule, with Repeat`}</HelperText>
                                 )}
                                 {activitySchedules.length > 1 && repeatActivitySchedules.length == 0 && (
                                     <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
                                 )}
                                 {activitySchedules.length > 1 && repeatActivitySchedules.length > 0 && (
-                                    <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeating`}</HelperText>
+                                    <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeat`}</HelperText>
                                 )}
                             </Fragment>
                         );
                     })()}
-                    return (
-                        <Fragment>
-                            {(activitySchedules.length == 0) && (
-                                <HelperText>No Schedule</HelperText>
-                            )}
-                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 0) && (
-                                <HelperText>{`1 Schedule`}</HelperText>
-                            )}
-                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 1) && (
-                                <HelperText>{`1 Schedule, with Repeat`}</HelperText>
-                            )}
-                            {(activitySchedules.length > 1 && repeatActivitySchedules.length == 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
-                            )}
-                            {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeat`}</HelperText>
-                            )}
-                        </Fragment>
-                    );
-                })()}
             </Stack>
         );
     };
