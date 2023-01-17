@@ -3,6 +3,11 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
     Box,
     Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     // FormControl,
     Divider,
     Grid,
@@ -25,7 +30,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import {IActivity, IValue} from 'shared/types';
+import { IActivity, IValue } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import StatefulDialog from 'src/components/common/StatefulDialog';
@@ -33,11 +38,10 @@ import FormSection, { HeaderText, HelperText, SubHeaderText } from 'src/componen
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import { getFormLink, getFormPath, Parameters, ParameterValues } from 'src/services/routes';
-import { LifeAreaIdOther } from "shared/enums";
-import { ILifeAreaContent } from "shared/types";
-import withTheme from "@mui/styles/withTheme";
-import styled from "styled-components";
-
+import { LifeAreaIdOther } from 'shared/enums';
+import { ILifeAreaContent } from 'shared/types';
+import withTheme from '@mui/styles/withTheme';
+import styled from 'styled-components';
 
 const CompactList = withTheme(
     styled(List)((props) => ({
@@ -50,7 +54,6 @@ const CompactList = withTheme(
         },
     })),
 );
-
 
 interface IActivitiesSection {
     activities: IActivity[];
@@ -69,46 +72,49 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     const renderEnjoyment = activity.enjoyment != null ? activity.enjoyment : -1;
                     const renderImportance = activity.importance != null ? activity.importance : -1;
 
-                    return ((renderEnjoyment >= 0) || (renderImportance >= 0)) && (
-                        <HelperText>
-                            {(renderEnjoyment >= 0) && (
-                                <Fragment>
-                                    {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
-                                </Fragment>
-                            )}
-                            {(renderEnjoyment >= 0) && (renderImportance >= 0) && ' / '}
-                            {(renderImportance >= 0) && (
-                                <Fragment>
-                                    {getString('values_inventory_value_activity_importance')} {activity.importance}
-                                </Fragment>
-                            )}
-                        </HelperText>
-                    )
-                })()}
-                {(!!activity.activityId) && (() => {
-                    const activitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId);
-                    const repeatActivitySchedules = activitySchedules.filter((as) => { return as.hasRepetition; });
-
                     return (
-                        <Fragment>
-                            {(activitySchedules.length == 0) && (
-                                <HelperText>No Schedule</HelperText>
-                            )}
-                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 0) && (
-                                <HelperText>{`1 Schedule`}</HelperText>
-                            )}
-                            {(activitySchedules.length == 1 && repeatActivitySchedules.length == 1) && (
-                                <HelperText>{`1 Schedule, with Repeating`}</HelperText>
-                            )}
-                            {(activitySchedules.length > 1 && repeatActivitySchedules.length == 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
-                            )}
-                            {(activitySchedules.length > 1 && repeatActivitySchedules.length > 0) && (
-                                <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeating`}</HelperText>
-                            )}
-                        </Fragment>
+                        (renderEnjoyment >= 0 || renderImportance >= 0) && (
+                            <HelperText>
+                                {renderEnjoyment >= 0 && (
+                                    <Fragment>
+                                        {getString('values_inventory_value_activity_enjoyment')} {activity.enjoyment}
+                                    </Fragment>
+                                )}
+                                {renderEnjoyment >= 0 && renderImportance >= 0 && ' / '}
+                                {renderImportance >= 0 && (
+                                    <Fragment>
+                                        {getString('values_inventory_value_activity_importance')} {activity.importance}
+                                    </Fragment>
+                                )}
+                            </HelperText>
+                        )
                     );
                 })()}
+                {!!activity.activityId &&
+                    (() => {
+                        const activitySchedules = patientStore.getActivitySchedulesByActivityId(activity.activityId);
+                        const repeatActivitySchedules = activitySchedules.filter((as) => {
+                            return as.hasRepetition;
+                        });
+
+                        return (
+                            <Fragment>
+                                {activitySchedules.length == 0 && <HelperText>No Schedule</HelperText>}
+                                {activitySchedules.length == 1 && repeatActivitySchedules.length == 0 && (
+                                    <HelperText>{`1 Schedule`}</HelperText>
+                                )}
+                                {activitySchedules.length == 1 && repeatActivitySchedules.length == 1 && (
+                                    <HelperText>{`1 Schedule, with Repeating`}</HelperText>
+                                )}
+                                {activitySchedules.length > 1 && repeatActivitySchedules.length == 0 && (
+                                    <HelperText>{`${activitySchedules.length} Schedules`}</HelperText>
+                                )}
+                                {activitySchedules.length > 1 && repeatActivitySchedules.length > 0 && (
+                                    <HelperText>{`${activitySchedules.length} Schedules; ${repeatActivitySchedules.length} Repeating`}</HelperText>
+                                )}
+                            </Fragment>
+                        );
+                    })()}
             </Stack>
         );
     };
@@ -118,50 +124,42 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
             .slice()
             .sort((a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()));
 
-        return <CompactList>
-            { sortedActivities.map((activity, idx) => (
-                <Fragment key={activity.activityId as string}>
-                    <ListItem
-                        alignItems="flex-start"
-                        button
-                        component={Link}
-                        to={getFormLink(
-                            ParameterValues.form.editActivity,
-                            {
-                                [Parameters.activityId as string]: activity.activityId as string,
-                            }
-                        )}
-                    >
-                        <Grid
-                            container
-                            direction="row"
+        return (
+            <CompactList>
+                {sortedActivities.map((activity, idx) => (
+                    <Fragment key={activity.activityId as string}>
+                        <ListItem
                             alignItems="flex-start"
-                            flexWrap="nowrap"
-                        >
-                            <Grid item flexGrow={1} overflow="hidden">
-                                <Stack spacing={0}>
-                                    <Typography variant="body1" noWrap>
-                                        {activity.name}
-                                    </Typography>
-                                    {renderActivityDetail(activity)}
-                                </Stack>
+                            button
+                            component={Link}
+                            to={getFormLink(ParameterValues.form.editActivity, {
+                                [Parameters.activityId as string]: activity.activityId as string,
+                            })}>
+                            <Grid container direction="row" alignItems="flex-start" flexWrap="nowrap">
+                                <Grid item flexGrow={1} overflow="hidden">
+                                    <Stack spacing={0}>
+                                        <Typography variant="body1" noWrap>
+                                            {activity.name}
+                                        </Typography>
+                                        {renderActivityDetail(activity)}
+                                    </Stack>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <ListItemSecondaryAction sx={{ alignItems: 'flex-start', height: '100%' }}>
-                            <IconButton
-                                edge="end"
-                                aria-label="more"
-                                onClick={(e) => props.handleMoreClickActivity(activity, e)}
-                                size="large"
-                            >
-                                <MoreVertIcon/>
-                            </IconButton>
-                        </ListItemSecondaryAction>
-                    </ListItem>
-                    {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
-                </Fragment>
-            ))}
-        </CompactList>
+                            <ListItemSecondaryAction sx={{ alignItems: 'flex-start', height: '100%' }}>
+                                <IconButton
+                                    edge="end"
+                                    aria-label="more"
+                                    onClick={(e) => props.handleMoreClickActivity(activity, e)}
+                                    size="large">
+                                    <MoreVertIcon />
+                                </IconButton>
+                            </ListItemSecondaryAction>
+                        </ListItem>
+                        {idx < sortedActivities.length - 1 && <Divider variant="middle" />}
+                    </Fragment>
+                ))}
+            </CompactList>
+        );
     };
 
     return (
@@ -175,28 +173,26 @@ const ActivitiesSection: FunctionComponent<IActivitiesSection> = (props: IActivi
                     startIcon={<AddIcon />}
                     component={Link}
                     to={getFormLink(
-                            ParameterValues.form.addActivity,
-                            (() => {
-                                if (props.valueId) {
-                                    return {
-                                        [Parameters.valueId]: props.valueId as string,
-                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
-                                    };
-                                } else {
-                                    return {
-                                        [Parameters.addSchedule]: ParameterValues.addSchedule.false,
-                                    };
-                                }
-                            })()
-                        )
-                    }
-                >
+                        ParameterValues.form.addActivity,
+                        (() => {
+                            if (props.valueId) {
+                                return {
+                                    [Parameters.valueId]: props.valueId as string,
+                                    [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                };
+                            } else {
+                                return {
+                                    [Parameters.addSchedule]: ParameterValues.addSchedule.false,
+                                };
+                            }
+                        })(),
+                    )}>
                     {getString('values_inventory_add_activity')}
                 </Button>
             </Box>
         </Stack>
     );
-}
+};
 
 interface IValueEditFormSection {
     error: boolean;
@@ -220,20 +216,14 @@ const ValueEditFormSection = observer((props: IValueEditFormSection) => {
     const rootStore = useStores();
     const { patientStore } = rootStore;
 
-
     const valueActivities = patientStore.getActivitiesByValueId(value.valueId as string);
 
     return (
         <Stack spacing={0}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <SubHeaderText>{value.name}</SubHeaderText>
-                <IconButton
-                    edge="end"
-                    aria-label="more"
-                    onClick={(e) => handleMoreClickValue(value, e)}
-                    size="large"
-                >
-                    <MoreVertIcon/>
+                <IconButton edge="end" aria-label="more" onClick={(e) => handleMoreClickValue(value, e)} size="large">
+                    <MoreVertIcon />
                 </IconButton>
             </Stack>
             <Box sx={{ marginLeft: 2, marginTop: -1 }}>
@@ -259,18 +249,7 @@ export const AddEditValueDialog: FunctionComponent<{
     handleCancel: () => void;
     handleSave: () => void;
 }> = (props) => {
-    const {
-        open,
-        isEdit,
-        lifeArea,
-        value,
-        examples,
-        error,
-        loading,
-        handleCancel,
-        handleChange,
-        handleSave,
-    } = props;
+    const { open, isEdit, lifeArea, value, examples, error, loading, handleCancel, handleChange, handleSave } = props;
     return (
         <StatefulDialog
             open={open}
@@ -342,12 +321,15 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     }
     interface IViewState {
         openAddEditValue: boolean;
+
         name: string;
         modeState: IViewStateModeNone | IViewStateModeAdd | IViewStateModeEdit;
 
+        deleteValueConfirmOpen: boolean;
         moreTargetValueEl: (EventTarget & HTMLElement) | undefined;
         selectedValue: IValue | undefined;
 
+        deleteActivityConfirmOpen: boolean;
         moreTargetActivityEl: (EventTarget & HTMLElement) | undefined;
         selectedActivity: IActivity | undefined;
     }
@@ -358,8 +340,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         modeState: {
             mode: 'none',
         },
+        deleteValueConfirmOpen: false,
         moreTargetValueEl: undefined,
         selectedValue: undefined,
+        deleteActivityConfirmOpen: false,
         moreTargetActivityEl: undefined,
         selectedActivity: undefined,
     }));
@@ -419,15 +403,24 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleDeleteValue = action(async () => {
-        // TODO Activity Refactor: Add delete confirmation.
-        const value = viewState.selectedValue;
-
+        // Open delete confirmation dialog
+        viewState.deleteValueConfirmOpen = true;
         // Remove the popup menu
         viewState.moreTargetValueEl = undefined;
+    });
+
+    const handleDeleteValueConfirmDelete = action(async () => {
+        const value = viewState.selectedValue;
 
         if (!!value) {
             await patientStore.deleteValue(value);
         }
+        viewState.deleteValueConfirmOpen = false;
+    });
+
+    const handleDeleteValueConfirmCancel = action(() => {
+        viewState.deleteValueConfirmOpen = false;
+        viewState.selectedValue = undefined;
     });
 
     const handleSaveValue = action(async () => {
@@ -477,25 +470,33 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         // Remove the popup menu
         viewState.moreTargetActivityEl = undefined;
 
-        navigate(getFormPath(
-            ParameterValues.form.editActivity,
-            {
-                [Parameters.activityId as string]:
-                activity?.activityId as string
-            }
-        ));
+        navigate(
+            getFormPath(ParameterValues.form.editActivity, {
+                [Parameters.activityId as string]: activity?.activityId as string,
+            }),
+        );
     });
 
     const handleDeleteActivity = action(async () => {
-        // TODO Activity Refactor: Display some kind of confirmation
-        const activity = viewState.selectedActivity;
+        // Open delete confirmation dialog
+        viewState.deleteActivityConfirmOpen = true;
 
         // Remove the popup menu
         viewState.moreTargetActivityEl = undefined;
+    });
+
+    const handleDeleteActivityConfirmDelete = action(async () => {
+        const activity = viewState.selectedActivity;
 
         if (!!activity) {
             await patientStore.deleteActivity(activity);
         }
+        viewState.deleteActivityConfirmOpen = false;
+    });
+
+    const handleDeleteActivityConfirmCancel = action(() => {
+        viewState.deleteActivityConfirmOpen = false;
+        viewState.selectedActivity = undefined;
     });
 
     const handleAddActivitySchedule = action(() => {
@@ -504,13 +505,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         // Remove the popup menu
         viewState.moreTargetActivityEl = undefined;
 
-        navigate(getFormPath(
-            ParameterValues.form.addActivitySchedule,
-            {
-                [Parameters.activityId as string]:
-                activity?.activityId as string
-            }
-        ));
+        navigate(
+            getFormPath(ParameterValues.form.addActivitySchedule, {
+                [Parameters.activityId as string]: activity?.activityId as string,
+            }),
+        );
     });
 
     const displayLifeAreaName: string = (() => {
@@ -529,9 +528,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     })();
     const displayActivityExamples: string[] = (() => {
         if (lifeAreaContent) {
-            return lifeAreaContent?.examples[
-                random(lifeAreaContent.examples.length - 1, false)
-            ].activities.map((a) => a.name);
+            return lifeAreaContent?.examples[random(lifeAreaContent.examples.length - 1, false)].activities.map(
+                (a) => a.name,
+            );
         } else {
             return [];
         }
@@ -542,77 +541,74 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
-                onRetry={() => patientStore.loadValuesInventory()}
-            >
+                onRetry={() => patientStore.loadValuesInventory()}>
                 <Stack spacing={6}>
-                    {
-                        lifeAreaId == LifeAreaIdOther ? (
-                            <FormSection
-                                prompt={getString('values_inventory_life_area_other_activities_title')}
-                                subPrompt={getString('values_inventory_life_area_other_activities_subprompt')}
-                                content={
-                                    <ActivitiesSection
-                                        activities={patientStore.getActivitiesWithoutValueId()}
-                                        handleMoreClickActivity={handleMoreClickActivity}
-                                    />
-                                }
-                            />
-                        ) : (
-                            <Fragment>
-                                {
-                                    patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
-                                        <FormSection
-                                            prompt={getString('values_inventory_values_identify_title')}
-                                            subPrompt={getString('values_inventory_values_empty_subprompt')}
-                                            content={
-                                                <Examples
-                                                    title={getString('values_inventory_values_example_title')}
-                                                    examples={displayValueExamples}
-                                                />
-                                            }
-                                        />
-                                    ) : (
-                                        <Stack spacing={0}>
-                                            <HeaderText>{getString('values_inventory_values_identify_existing_title')}</HeaderText>
-                                            <Stack spacing={4}>
-                                                {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
-                                                    return (
-                                                        <Fragment key={value.valueId}>
-                                                            <ValueEditFormSection
-                                                                error={patientStore.loadValuesInventoryState.error}
-                                                                loading={patientStore.loadValuesInventoryState.pending}
-                                                                value={value}
-                                                                activityExamples={displayActivityExamples}
-                                                                handleMoreClickValue={handleMoreClickValue}
-                                                                handleMoreClickActivity={handleMoreClickActivity}
-                                                            />
-                                                        </Fragment>
-                                                    );
-                                                })}
-                                            </Stack>
-                                        </Stack>
-                                    )
-                                }
+                    {lifeAreaId == LifeAreaIdOther ? (
+                        <FormSection
+                            prompt={getString('values_inventory_life_area_other_activities_title')}
+                            subPrompt={getString('values_inventory_life_area_other_activities_subprompt')}
+                            content={
+                                <ActivitiesSection
+                                    activities={patientStore.getActivitiesWithoutValueId()}
+                                    handleMoreClickActivity={handleMoreClickActivity}
+                                />
+                            }
+                        />
+                    ) : (
+                        <Fragment>
+                            {patientStore.getValuesByLifeAreaId(lifeAreaId).length == 0 ? (
                                 <FormSection
-                                    prompt={
-                                        patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
-                                            ? getString('values_inventory_values_identify_more_title')
-                                            : ''
-                                    }
+                                    prompt={getString('values_inventory_values_identify_title')}
+                                    subPrompt={getString('values_inventory_values_empty_subprompt')}
                                     content={
-                                        <Button
-                                            sx={{ marginTop: 1, alignSelf: 'flex-start' }}
-                                            variant="contained"
-                                            color="primary"
-                                            startIcon={<AddIcon />}
-                                            onClick={handleAddValue}>
-                                            {getString('Values_inventory_add_value')}
-                                        </Button>
+                                        <Examples
+                                            title={getString('values_inventory_values_example_title')}
+                                            examples={displayValueExamples}
+                                        />
                                     }
                                 />
-                            </Fragment>
-                        )
-                    }
+                            ) : (
+                                <Stack spacing={0}>
+                                    <HeaderText>
+                                        {getString('values_inventory_values_identify_existing_title')}
+                                    </HeaderText>
+                                    <Stack spacing={4}>
+                                        {patientStore.getValuesByLifeAreaId(lifeAreaId).map((value) => {
+                                            return (
+                                                <Fragment key={value.valueId}>
+                                                    <ValueEditFormSection
+                                                        error={patientStore.loadValuesInventoryState.error}
+                                                        loading={patientStore.loadValuesInventoryState.pending}
+                                                        value={value}
+                                                        activityExamples={displayActivityExamples}
+                                                        handleMoreClickValue={handleMoreClickValue}
+                                                        handleMoreClickActivity={handleMoreClickActivity}
+                                                    />
+                                                </Fragment>
+                                            );
+                                        })}
+                                    </Stack>
+                                </Stack>
+                            )}
+                            <FormSection
+                                prompt={
+                                    patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0
+                                        ? getString('values_inventory_values_identify_more_title')
+                                        : ''
+                                }
+                                content={
+                                    <Button
+                                        sx={{ marginTop: 1, alignSelf: 'flex-start' }}
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<AddIcon />}
+                                        onClick={handleAddValue}>
+                                        {getString('Values_inventory_add_value')}
+                                    </Button>
+                                }
+                            />
+                        </Fragment>
+                    )}
                 </Stack>
                 <Menu
                     id="value-menu"
@@ -620,12 +616,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     keepMounted
                     open={Boolean(viewState.moreTargetValueEl)}
                     onClose={handleMoreCloseValue}>
-                    <MenuItem onClick={handleEditValue}>
-                        {getString('values_inventory_value_menu_edit')}
-                    </MenuItem>
-                    <MenuItem onClick={handleDeleteValue}>
-                        {getString('values_inventory_value_menu_delete')}
-                    </MenuItem>
+                    <MenuItem onClick={handleEditValue}>{getString('values_inventory_value_menu_edit')}</MenuItem>
+                    <MenuItem onClick={handleDeleteValue}>{getString('values_inventory_value_menu_delete')}</MenuItem>
                 </Menu>
                 <Menu
                     id="activity-menu"
@@ -633,15 +625,11 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     keepMounted
                     open={Boolean(viewState.moreTargetActivityEl)}
                     onClose={handleMoreCloseActivity}>
-                    <MenuItem onClick={handleEditActivity}>
-                        {getString('menuitem_activity_edit')}
-                    </MenuItem>
+                    <MenuItem onClick={handleEditActivity}>{getString('menuitem_activity_edit')}</MenuItem>
                     <MenuItem onClick={handleAddActivitySchedule}>
                         {getString('menuitem_activityschedule_add')}
                     </MenuItem>
-                    <MenuItem onClick={handleDeleteActivity}>
-                        {getString('menuitem_activity_delete')}
-                    </MenuItem>
+                    <MenuItem onClick={handleDeleteActivity}>{getString('menuitem_activity_delete')}</MenuItem>
                 </Menu>
                 <AddEditValueDialog
                     open={viewState.openAddEditValue}
@@ -654,6 +642,20 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     handleCancel={handleCancelValue}
                     handleChange={handleChangeValue}
                     handleSave={handleSaveValue}
+                />
+                <StatefulDialog
+                    open={viewState.deleteValueConfirmOpen}
+                    title={getString('Form_confirm_delete_value')}
+                    content={viewState.selectedValue?.name as string}
+                    handleCancel={handleDeleteValueConfirmCancel}
+                    handleDelete={handleDeleteValueConfirmDelete}
+                />
+                <StatefulDialog
+                    open={viewState.deleteActivityConfirmOpen}
+                    title={getString('Form_confirm_delete_activity')}
+                    content={viewState.selectedActivity?.name as string}
+                    handleCancel={handleDeleteActivityConfirmCancel}
+                    handleDelete={handleDeleteActivityConfirmDelete}
                 />
             </ContentLoader>
         </DetailPage>
