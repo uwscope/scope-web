@@ -50,6 +50,7 @@ const _strings = {
 
     Form_confirm_close: 'Are you sure you want to close without submitting?',
     Form_confirm_delete_activity: 'Are you sure you want to delete the activity?',
+    Form_confirm_delete_activity_schedule: 'Are you sure you want to delete the schedule?',
     Form_confirm_delete_value: 'Are you sure you want to delete the value?',
 
     Form_activity_logging_title: 'Activity Check-In',

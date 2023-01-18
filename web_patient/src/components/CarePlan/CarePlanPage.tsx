@@ -73,6 +73,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         deleteActivityConfirmOpen: boolean;
         moreTargetActivityEl: (EventTarget & HTMLElement) | undefined;
         selectedActivity: IActivity | undefined;
+        deleteActivityScheduleConfirmOpen: boolean;
         moreTargetActivityScheduleEl: (EventTarget & HTMLElement) | undefined;
         selectedActivitySchedule: IActivitySchedule | undefined;
     }>(() => ({
@@ -81,6 +82,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         deleteActivityConfirmOpen: false,
         moreTargetActivityEl: undefined,
         selectedActivity: undefined,
+        deleteActivityScheduleConfirmOpen: false,
         moreTargetActivityScheduleEl: undefined,
         selectedActivitySchedule: undefined,
     }));
@@ -201,15 +203,29 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleActivityScheduleDelete = action(async () => {
-        // TODO Activity Refactor: Display some kind of confirmation
-        const activitySchedule = viewState.selectedActivitySchedule;
-
         // Remove the popup menu
-        handleActivityScheduleMoreClose();
+        // Do not reset the selectedActivitySchedule because dialog handlers need it
+        viewState.moreTargetActivityScheduleEl = undefined;
+
+        // Open delete confirmation dialog
+        viewState.deleteActivityScheduleConfirmOpen = true;
+    });
+
+    const handleActivityScheduleDeleteConfirm = action(async () => {
+        const activitySchedule = viewState.selectedActivitySchedule;
 
         if (!!activitySchedule) {
             await patientStore.deleteActivitySchedule(activitySchedule);
         }
+        runInAction(() => {
+            viewState.deleteActivityScheduleConfirmOpen = false;
+            viewState.selectedActivitySchedule = undefined;
+        });
+    });
+
+    const handleActivityScheduleDeleteCancel = action(() => {
+        viewState.deleteActivityScheduleConfirmOpen = false;
+        viewState.selectedActivitySchedule = undefined;
     });
 
     const handleActivityScheduleEdit = action(() => {
@@ -468,6 +484,13 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 content={viewState.selectedActivity?.name as string}
                 handleCancel={handleActivityDeleteCancel}
                 handleDelete={handleActivityDeleteConfirm}
+            />
+            <StatefulDialog
+                open={viewState.deleteActivityScheduleConfirmOpen}
+                title={getString('Form_confirm_delete_activity_schedule')}
+                content={''}
+                handleCancel={handleActivityScheduleDeleteCancel}
+                handleDelete={handleActivityScheduleDeleteConfirm}
             />
         </MainPage>
     );
