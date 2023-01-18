@@ -326,7 +326,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                         <ActivityScheduleList>
                                             {sortedActivitySchedules.map(
                                                 (activityScheduleCurrent, idxActivityScheduleCurrent) => (
-                                                    <Fragment>
+                                                    <Fragment key={activityScheduleCurrent.activityScheduleId}>
                                                         <ListItem
                                                             alignItems="flex-start"
                                                             button
