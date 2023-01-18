@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { format, isSameDay } from 'date-fns';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate } from 'react-router';
@@ -149,30 +149,28 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         );
     });
 
-    const handleActivityDelete = action(async () => {
-        // Open delete confirmation dialog
-        viewState.deleteActivityConfirmOpen = true;
-        // // TODO Activity Refactor: Display some kind of confirmation
-        // const activity = viewState.selectedActivity;
-
+    const handleActivityDelete = action(() => {
         // Remove the popup menu
+        // Do not reset the selectedActivity because dialog handlers need it
         viewState.moreTargetActivityEl = undefined;
 
-        // if (!!activity) {
-        //     await patientStore.deleteActivity(activity);
-        // }
+        // Open delete confirmation dialog
+        viewState.deleteActivityConfirmOpen = true;
     });
 
-    const handleDeleteActivityConfirmDelete = action(async () => {
+    const handleActivityDeleteConfirm = action(async () => {
         const activity = viewState.selectedActivity;
 
         if (!!activity) {
             await patientStore.deleteActivity(activity);
         }
-        viewState.deleteActivityConfirmOpen = false;
+        runInAction(() => {
+            viewState.deleteActivityConfirmOpen = false;
+            viewState.selectedActivity = undefined;
+        });
     });
 
-    const handleDeleteActivityConfirmCancel = action(() => {
+    const handleActivityDeleteCancel = action(() => {
         viewState.deleteActivityConfirmOpen = false;
         viewState.selectedActivity = undefined;
     });
@@ -468,8 +466,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 open={viewState.deleteActivityConfirmOpen}
                 title={getString('Form_confirm_delete_activity')}
                 content={viewState.selectedActivity?.name as string}
-                handleCancel={handleDeleteActivityConfirmCancel}
-                handleDelete={handleDeleteActivityConfirmDelete}
+                handleCancel={handleActivityDeleteCancel}
+                handleDelete={handleActivityDeleteConfirm}
             />
         </MainPage>
     );

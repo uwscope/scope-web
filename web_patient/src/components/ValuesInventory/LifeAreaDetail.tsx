@@ -397,11 +397,13 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         viewState.name = change;
     });
 
-    const handleDeleteValue = action(async () => {
+    const handleDeleteValue = action(() => {
+        // Remove the popup menu
+        // Do not yet clear the selected value because it's needed by dialog handlers
+        viewState.moreTargetValueEl = undefined;
+
         // Open delete confirmation dialog
         viewState.deleteValueConfirmOpen = true;
-        // Remove the popup menu
-        viewState.moreTargetValueEl = undefined;
     });
 
     const handleDeleteValueConfirmDelete = action(async () => {
@@ -410,7 +412,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         if (!!value) {
             await patientStore.deleteValue(value);
         }
-        viewState.deleteValueConfirmOpen = false;
+        runInAction(() => {
+            viewState.deleteValueConfirmOpen = false;
+            viewState.selectedValue = undefined;
+        });
     });
 
     const handleDeleteValueConfirmCancel = action(() => {
@@ -472,12 +477,13 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         );
     });
 
-    const handleDeleteActivity = action(async () => {
+    const handleDeleteActivity = action(() => {
+        // Remove the popup menu
+        // Do not yet clear the selected activity because it's needed by dialog handlers
+        viewState.moreTargetActivityEl = undefined;
+
         // Open delete confirmation dialog
         viewState.deleteActivityConfirmOpen = true;
-
-        // Remove the popup menu
-        viewState.moreTargetActivityEl = undefined;
     });
 
     const handleDeleteActivityConfirmDelete = action(async () => {
@@ -486,7 +492,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
         if (!!activity) {
             await patientStore.deleteActivity(activity);
         }
-        viewState.deleteActivityConfirmOpen = false;
+        runInAction(() => {
+            viewState.deleteActivityConfirmOpen = false;
+            viewState.selectedActivity = undefined;
+        });
     });
 
     const handleDeleteActivityConfirmCancel = action(() => {
