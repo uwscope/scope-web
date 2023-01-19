@@ -49,6 +49,9 @@ const _strings = {
         'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
     Form_confirm_close: 'Are you sure you want to close without submitting?',
+    Form_confirm_delete_activity: 'Are you sure you want to delete the activity?',
+    Form_confirm_delete_activity_schedule: 'Are you sure you want to delete the schedule?',
+    Form_confirm_delete_value: 'Are you sure you want to delete the value?',
 
     Form_activity_logging_title: 'Activity Check-In',
     Form_activity_log_success_prompt: 'Were you able to complete the following activity?',
@@ -89,7 +92,8 @@ const _strings = {
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Not Currently Assigned To Values',
-    values_inventory_life_area_other_activities_subprompt: 'Edit these activities to assign them to your identified personal values.',
+    values_inventory_life_area_other_activities_subprompt:
+        'Edit these activities to assign them to your identified personal values.',
 
     values_inventory_values_example_title: 'Example Values',
     values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
@@ -205,12 +209,12 @@ const _strings = {
     // Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
     form_add_edit_activity_life_area_value_prompt: 'Which life area and value are best associated with this activity?',
-    form_add_edit_activity_life_area_value_help: 'You can also identify and edit personal values in the Values & Activity Inventory.',
+    form_add_edit_activity_life_area_value_help:
+        'You can also identify and edit personal values in the Values & Activity Inventory.',
     form_add_edit_activity_life_area_label: 'Life Area',
     form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
-    form_add_edit_activity_value_help:
-        'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_value_help: 'Then choose a value you have identified, or add a new value.',
     form_add_edit_activity_valueid_validation_none_selected:
         'If a life area is selected, then a personal value must also be identified and selected.',
     form_add_edit_activity_add_value_button: 'Add Value',
@@ -220,32 +224,20 @@ const _strings = {
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
     form_add_edit_activity_name_validation_not_unique: 'Activity already exists.',
 
-
     form_add_activity_schedule_title: 'Add Schedule',
     form_edit_activity_schedule_title: 'Edit Schedule',
 
-    form_add_edit_activity_schedule_when_prompt:
-        'When would you like to do this activity?',
-    form_add_edit_activity_schedule_date_label:
-        'Schedule Date',
-    form_add_edit_activity_schedule_date_help:
-        'Choose a date you would like to do this activity.',
-    form_add_edit_activity_schedule_date_validation_invalid_format:
-        'Invalid date format.',
-    form_add_edit_activity_schedule_time_of_day_label:
-        'Schedule Time',
-    form_add_edit_activity_schedule_time_of_day_help:
-        'Choose a time you would like to do this activity.',
-    form_add_edit_activity_schedule_time_of_day_validation_invalid_format:
-        'Invalid time format.',
-    form_add_edit_activity_schedule_has_repetition_prompt:
-        'Would you like to repeat this activity every week?',
-    form_add_edit_activity_schedule_repeat_days_prompt:
-        'On what days would you like to repeat this activity?',
-    form_add_edit_activity_schedule_repetition_validation_no_days:
-        'Select one or more days.',
-    form_add_edit_activity_schedule_repetition_validation_include_date:
-        'Repeat days must include schedule date.',
+    form_add_edit_activity_schedule_when_prompt: 'When would you like to do this activity?',
+    form_add_edit_activity_schedule_date_label: 'Schedule Date',
+    form_add_edit_activity_schedule_date_help: 'Choose a date you would like to do this activity.',
+    form_add_edit_activity_schedule_date_validation_invalid_format: 'Invalid date format.',
+    form_add_edit_activity_schedule_time_of_day_label: 'Schedule Time',
+    form_add_edit_activity_schedule_time_of_day_help: 'Choose a time you would like to do this activity.',
+    form_add_edit_activity_schedule_time_of_day_validation_invalid_format: 'Invalid time format.',
+    form_add_edit_activity_schedule_has_repetition_prompt: 'Would you like to repeat this activity every week?',
+    form_add_edit_activity_schedule_repeat_days_prompt: 'On what days would you like to repeat this activity?',
+    form_add_edit_activity_schedule_repetition_validation_no_days: 'Select one or more days.',
+    form_add_edit_activity_schedule_repetition_validation_include_date: 'Repeat days must include schedule date.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
@@ -256,7 +248,6 @@ const _strings = {
     // Form_add_activity_reminder_time_label: 'Reminder time',
     // Form_add_activity_repetition_section: 'Set repetition',
     //
-
 
     Form_submit_error_message: 'Sorry! There was an error submitting. Please try again.',
     Form_submit_error_retry: 'Retry',
