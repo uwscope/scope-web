@@ -131,7 +131,9 @@ export interface IScheduledItem {
 
 export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
+    activityScheduleId: string;
 
+    // NOTE: Check w/ James if these can go away.
     activityId: string;
     activityName: string;
     reminder: Date;
