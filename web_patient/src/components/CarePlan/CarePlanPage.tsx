@@ -87,7 +87,9 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         selectedActivitySchedule: undefined,
     }));
 
-    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate));
+    const selectedTaskItems = patientStore.addActivityPropertiesToTaskItems(
+        taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate)),
+    );
 
     const handleDayClick = action((date: Date) => {
         viewState.selectedDate = date;
