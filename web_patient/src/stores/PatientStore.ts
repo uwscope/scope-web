@@ -51,6 +51,7 @@ export interface IPatientStore {
     readonly loadValuesInventoryState: IPromiseQueryState;
 
     // Helpers
+    addActivityPropertiesToTaskItems: (taskItems: IScheduledActivity[]) => IScheduledActivity[];
     getActivityById: (activityId: string) => IActivity | undefined;
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
@@ -72,6 +73,7 @@ export interface IPatientStore {
     updateActivity: (activity: IActivity) => Promise<void>;
 
     // Activity logs
+
     completeScheduledActivity: (activityLog: IActivityLog) => Promise<void>;
     loadActivityLogs: () => Promise<void>;
 
@@ -282,6 +284,20 @@ export class PatientStore implements IPatientStore {
 
     // Helpers
     @action.bound
+    public addActivityPropertiesToTaskItems(taskItems: IScheduledActivity[]) {
+        return taskItems.map((obj) => {
+            const activity = this.getActivityById(
+                this.activitySchedules.find((a) => a.activityScheduleId == obj.activityScheduleId)
+                    ?.activityId as string,
+            );
+            obj.activityId = activity?.activityId as string;
+            obj.activityName = activity?.name as string;
+
+            return obj;
+        });
+    }
+
+    @action.bound
     public getActivityById(activityId: string) {
         return this.activities.find((a) => a.activityId == activityId);
     }
@@ -329,7 +345,7 @@ export class PatientStore implements IPatientStore {
     public getActivitySchedulesByActivityId(activityId: string): IActivitySchedule[] {
         return this.activitySchedules.filter((as) => {
             return as.activityId == activityId;
-        })
+        });
     }
 
     @action.bound
@@ -417,8 +433,14 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activity', 'activityId', () => this.activities, logger),
             );
 
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -500,15 +522,19 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async deleteActivitySchedule(activitySchedule: IActivitySchedule) {
         const prevActivitySchedules = this.activitySchedules.slice() || [];
-        const foundIdx = prevActivitySchedules.findIndex((as) => as.activityScheduleId == activitySchedule.activityScheduleId);
+        const foundIdx = prevActivitySchedules.findIndex(
+            (as) => as.activityScheduleId == activitySchedule.activityScheduleId,
+        );
 
         console.assert(foundIdx >= 0, `ActivitySchedule to delete not found: ${activitySchedule.activityScheduleId}`);
 
         if (foundIdx >= 0) {
-            const promise = this.patientService.deleteActivitySchedule(activitySchedule).then((_deletedActivitySchedule) => {
-                prevActivitySchedules.splice(foundIdx, 1);
-                return prevActivitySchedules;
-            });
+            const promise = this.patientService
+                .deleteActivitySchedule(activitySchedule)
+                .then((_deletedActivitySchedule) => {
+                    prevActivitySchedules.splice(foundIdx, 1);
+                    return prevActivitySchedules;
+                });
 
             await this.loadAndLogQuery<IActivitySchedule[]>(
                 () => promise,
@@ -516,7 +542,10 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activitySchedule', 'activityScheduleId', () => this.activitySchedules, logger),
             );
 
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -670,8 +699,14 @@ export class PatientStore implements IPatientStore {
             );
 
             await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
