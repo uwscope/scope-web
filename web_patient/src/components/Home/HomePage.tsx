@@ -27,6 +27,9 @@ const CompactList = withTheme(
 
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
+    const { patientStore } = rootStore;
+    const todayItems = patientStore.addActivityPropertiesToTaskItems(patientStore.todayItems);
+    console.log(todayItems);
     const navigate = useNavigate();
 
     const onTaskClick = action((item: IScheduledActivity) => () => {
@@ -133,12 +136,12 @@ export const HomePage: FunctionComponent = observer(() => {
                 </CompactList>
             </Section>
             <Section title={getString('Home_plan_title')}>
-                {!!rootStore.patientStore.todayItems && rootStore.patientStore.todayItems.length > 0 ? (
+                {!!todayItems && todayItems.length > 0 ? (
                     <CompactList>
-                        {rootStore.patientStore.todayItems.map((item, idx) => (
+                        {todayItems.map((item, idx) => (
                             <Fragment key={`${item.scheduledActivityId}-${idx}`}>
                                 <ScheduledListItem item={item} onClick={onTaskClick(item)} />
-                                {idx < rootStore.patientStore.todayItems.length - 1 && <Divider variant="middle" />}
+                                {idx < todayItems.length - 1 && <Divider variant="middle" />}
                             </Fragment>
                         ))}
                     </CompactList>
