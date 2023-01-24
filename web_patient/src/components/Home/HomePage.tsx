@@ -28,14 +28,14 @@ const CompactList = withTheme(
 export const HomePage: FunctionComponent = observer(() => {
     const rootStore = useStores();
     const { patientStore } = rootStore;
-    const todayItems = patientStore.addActivityPropertiesToTaskItems(patientStore.todayItems);
-    console.log(todayItems);
+    const todayItems = patientStore.todayItems;
     const navigate = useNavigate();
 
     const onTaskClick = action((item: IScheduledActivity) => () => {
+        const activity = patientStore.getActivityByActivityScheduleId(item.activityScheduleId);
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.activityId,
+                [Parameters.activityId]: activity?.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );

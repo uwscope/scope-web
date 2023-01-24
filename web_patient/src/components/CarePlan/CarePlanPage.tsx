@@ -87,9 +87,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         selectedActivitySchedule: undefined,
     }));
 
-    const selectedTaskItems = patientStore.addActivityPropertiesToTaskItems(
-        taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate)),
-    );
+    const selectedTaskItems = taskItems.filter((t) => isSameDay(t.dueDateTime, viewState.selectedDate));
 
     const handleDayClick = action((date: Date) => {
         viewState.selectedDate = date;
@@ -100,9 +98,10 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleTaskClick = action((item: IScheduledActivity) => () => {
+        const activity = patientStore.getActivityByActivityScheduleId(item.activityScheduleId);
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.activityId,
+                [Parameters.activityId]: activity?.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );

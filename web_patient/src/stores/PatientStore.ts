@@ -51,7 +51,7 @@ export interface IPatientStore {
     readonly loadValuesInventoryState: IPromiseQueryState;
 
     // Helpers
-    addActivityPropertiesToTaskItems: (taskItems: IScheduledActivity[]) => IScheduledActivity[];
+    getActivityByActivityScheduleId: (activityScheduleId: string) => IActivity | undefined;
     getActivityById: (activityId: string) => IActivity | undefined;
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
@@ -284,17 +284,10 @@ export class PatientStore implements IPatientStore {
 
     // Helpers
     @action.bound
-    public addActivityPropertiesToTaskItems(taskItems: IScheduledActivity[]) {
-        return taskItems.map((obj) => {
-            const activity = this.getActivityById(
-                this.activitySchedules.find((a) => a.activityScheduleId == obj.activityScheduleId)
-                    ?.activityId as string,
-            );
-            obj.activityId = activity?.activityId as string;
-            obj.activityName = activity?.name as string;
-
-            return obj;
-        });
+    public getActivityByActivityScheduleId(activityScheduleId: string) {
+        return this.getActivityById(
+            this.activitySchedules.find((a) => a.activityScheduleId == activityScheduleId)?.activityId as string,
+        );
     }
 
     @action.bound
