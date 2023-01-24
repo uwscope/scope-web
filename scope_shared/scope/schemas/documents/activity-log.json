@@ -3,6 +3,19 @@
     "$id": "https://uwscope.org/schemas/documents/activity-log",
     "title": "IActivityLog",
     "description": "IActivityLog Type",
+    "$comment": [
+        "---------------------------------------",
+        "Added Entire Activity Json",
+        "---------------------------------------",
+        {
+            "activityId": {
+                "type": "string"
+            },
+            "activityName": {
+                "type": "string"
+            }
+        }
+    ],
     "type": "object",
     "properties": {
         "_id": {
@@ -23,11 +36,8 @@
         "scheduledActivityId": {
             "type": "string"
         },
-        "activityId": {
-            "type": "string"
-        },
-        "activityName": {
-            "type": "string"
+        "activity": {
+            "$ref": "/schemas/documents/activity"
         },
         "recordedDateTime": {
             "$ref": "/schemas/documents/utils/log#/properties/recordedDateTime"
@@ -52,7 +62,7 @@
         }
     },
     "additionalProperties": false,
-    "required": ["_type", "scheduledActivityId", "activityId", "activityName", "recordedDateTime"],
+    "required": ["_type", "scheduledActivityId", "activity", "recordedDateTime"],
     "allOf": [
         {
             "$ref": "#/$defs/no-success-disallows-accomplishment"
