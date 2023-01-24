@@ -134,8 +134,8 @@ export interface IScheduledActivity extends IScheduledItem {
     activityScheduleId: string;
 
     // NOTE: Check w/ James if these can go away.
-    activityId: string;
-    activityName: string;
+    //activityId: string;
+    //activityName: string;
     reminder: Date;
 
     completed: boolean;
@@ -159,8 +159,10 @@ export interface IActivityLog extends ILog {
     activityLogId?: string;
 
     scheduledActivityId: string;
-    activityId: string;
-    activityName: string;
+
+    activity: IActivity;
+    // activityId: string;
+    // activityName: string;
 
     completed?: boolean;
     success?: ActivitySuccessType;
