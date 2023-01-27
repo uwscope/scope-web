@@ -483,14 +483,14 @@ export const SessionInfo: FunctionComponent = observer(() => {
         .sort((a, b) => (state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date)));
 
     const phqScores = currentPatient.assessmentLogs
-        .filter((log) => log.assessmentId == 'phq-9')
+        .filter((log) => log.assessment?.assessmentId == 'phq-9')
         .map((log) => ({
             date: log.recordedDateTime,
             score: log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
         }));
 
     const gadScores = currentPatient.assessmentLogs
-        .filter((log) => log.assessmentId == 'gad-7')
+        .filter((log) => log.assessment?.assessmentId == 'gad-7')
         .map((log) => ({
             date: log.recordedDateTime,
             score: log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
