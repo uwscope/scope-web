@@ -45,6 +45,12 @@
         "activitySchedule": {
             "$ref": "/schemas/documents/activity-schedule"
         },
+        "activity": {
+            "$ref": "/schemas/documents/activity"
+        },
+        "value": {
+            "$ref": "/schemas/documents/value"
+        },
         "dueDate": {
             "$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDate"
         },
@@ -63,6 +69,8 @@
         "_type",
         "activityScheduleId",
         "activitySchedule",
+        "activity",
+        "value",
         "dueDate",
         "dueTimeOfDay",
         "dueDateTime",
