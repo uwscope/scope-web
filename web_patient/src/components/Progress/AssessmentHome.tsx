@@ -50,7 +50,8 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
         assessmentType == 'phq-9' ? 'Progress_phq_assessment_detail_title' : 'Progress_gad_assessment_detail_title';
     const assessmentContent = rootStore.getAssessmentContent(assessmentType);
 
-    const logs = patientStore.assessmentLogs.filter((a) => a.assessmentId.toLowerCase() == assessmentType);
+    // TODO: Remove ? after a.assessment after database reset.
+    const logs = patientStore.assessmentLogs.filter((a) => a.assessment?.assessmentId.toLowerCase() == assessmentType);
 
     const getValueString = (pointValue: number | undefined) => {
         return `${assessmentContent?.options.find((o) => o.value == pointValue)?.text} (${pointValue})`;
