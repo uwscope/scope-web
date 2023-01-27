@@ -42,14 +42,8 @@
         "activityScheduleId": {
             "type": "string"
         },
-        "activitySchedule": {
-            "$ref": "/schemas/documents/activity-schedule"
-        },
-        "activity": {
-            "$ref": "/schemas/documents/activity"
-        },
-        "value": {
-            "$ref": "/schemas/documents/value"
+        "dataSnapshot": {
+            "$ref": "/schemas/documents/utils/scheduled-activity-data-snapshot"
         },
         "dueDate": {
             "$ref": "/schemas/documents/utils/scheduled-item#/properties/dueDate"
@@ -65,15 +59,5 @@
         }
     },
     "additionalProperties": false,
-    "required": [
-        "_type",
-        "activityScheduleId",
-        "activitySchedule",
-        "activity",
-        "value",
-        "dueDate",
-        "dueTimeOfDay",
-        "dueDateTime",
-        "completed"
-    ]
+    "required": ["_type", "activityScheduleId", "dataSnapshot", "dueDate", "dueTimeOfDay", "dueDateTime", "completed"]
 }
