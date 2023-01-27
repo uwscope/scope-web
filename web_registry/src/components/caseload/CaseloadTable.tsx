@@ -1,12 +1,7 @@
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
-import {
-    GridCellParams,
-    GridColDef,
-    GridColumnHeaderParams,
-    GridRowParams,
-} from '@mui/x-data-grid';
+import { GridCellParams, GridColDef, GridColumnHeaderParams, GridRowParams } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
 import React, { FunctionComponent } from 'react';
 import { formatDateOnly, getFollowupWeeks } from 'shared/time';
@@ -286,11 +281,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         const recentReviewDate = p.caseReviews?.length > 0 ? p.caseReviews[p.caseReviews.length - 1].date : null;
 
         const phq9 = p.assessmentLogs
-            ?.filter((a) => a.assessmentId == 'phq-9')
+            ?.filter((a) => a.assessment.assessmentId == 'phq-9')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
         const gad7 = p.assessmentLogs
-            ?.filter((a) => a.assessmentId == 'gad-7')
+            ?.filter((a) => a.assessment.assessmentId == 'gad-7')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
 
