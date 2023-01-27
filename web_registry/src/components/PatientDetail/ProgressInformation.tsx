@@ -32,7 +32,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
                 assigned: false,
             } as IAssessment);
 
-        const assessmentLogs = currentPatient?.assessmentLogs.filter((l) => l.assessmentId == assessmentId);
+        const assessmentLogs = currentPatient?.assessmentLogs.filter((l) => l.assessment?.assessmentId == assessmentId);
 
         // if (!!assessment) {
         switch (assessmentId) {
