@@ -16,9 +16,9 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
         .slice()
         .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
-    const latestPhqLog = sortedAssessmentLogs.filter((a) => a.assessmentId == 'phq-9')[0];
+    const latestPhqLog = sortedAssessmentLogs.filter((a) => a.assessment?.assessmentId == 'phq-9')[0];
     const latestPhqScore = getLatestScore(currentPatient?.assessmentLogs, 'phq-9');
-    const latestGadLog = sortedAssessmentLogs.filter((a) => a.assessmentId == 'gad-7')[0];
+    const latestGadLog = sortedAssessmentLogs.filter((a) => a.assessment?.assessmentId == 'gad-7')[0];
     const latestGadScore = getLatestScore(currentPatient?.assessmentLogs, 'gad-7');
 
     const latestSessionDate = currentPatient.latestSession?.date;
