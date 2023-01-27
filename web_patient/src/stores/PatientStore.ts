@@ -9,6 +9,7 @@ import {
     IActivity,
     IActivityLog,
     IActivitySchedule,
+    IAssessment,
     IAssessmentLog,
     IMoodLog,
     IPatient,
@@ -26,6 +27,7 @@ export interface IPatientStore {
     readonly activities: IActivity[];
     readonly activityLogs: IActivityLog[];
     readonly activitySchedules: IActivitySchedule[];
+    readonly assessments: IAssessment[];
     readonly assessmentsToComplete: IScheduledAssessment[];
     readonly assessmentLogs: IAssessmentLog[];
     readonly config: IPatientConfig;
@@ -42,6 +44,7 @@ export interface IPatientStore {
     readonly loadActivitiesState: IPromiseQueryState;
     readonly loadActivityLogsState: IPromiseQueryState;
     readonly loadActivitySchedulesState: IPromiseQueryState;
+    readonly loadAssessmentsState: IPromiseQueryState;
     readonly loadAssessmentLogsState: IPromiseQueryState;
     readonly loadConfigState: IPromiseQueryState;
     readonly loadMoodLogsState: IPromiseQueryState;
@@ -58,6 +61,7 @@ export interface IPatientStore {
     getActivitiesWithoutValueId: () => IActivity[];
     getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
+    getAssessmentById: (assessmentId: string) => IAssessment | undefined;
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
@@ -110,6 +114,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadActivitiesQuery: PromiseQuery<IActivity[]>;
     private readonly loadActivityLogsQuery: PromiseQuery<IActivityLog[]>;
     private readonly loadActivitySchedulesQuery: PromiseQuery<IActivitySchedule[]>;
+    private readonly loadAssessmentsQuery: PromiseQuery<IAssessment[]>;
     private readonly loadAssessmentLogsQuery: PromiseQuery<IAssessmentLog[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
     private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
@@ -137,6 +142,7 @@ export class PatientStore implements IPatientStore {
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
         this.loadActivitySchedulesQuery = new PromiseQuery<IActivitySchedule[]>([], 'loadActivitySchedulesQuery');
         this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>([], 'loadActivityLogsQuery');
+        this.loadAssessmentsQuery = new PromiseQuery<IAssessment[]>([], 'loadAssessmentsQuery');
         this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>([], 'loadAssessmentLogsQuery');
         this.loadConfigQuery = new PromiseQuery<IPatientConfig>(undefined, 'loadConfigQuery');
         this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>([], 'loadMoodLogsQuery');
@@ -192,6 +198,10 @@ export class PatientStore implements IPatientStore {
         }
 
         return latestAssessments;
+    }
+
+    @computed public get assessments() {
+        return this.loadAssessmentsQuery.value || [];
     }
 
     @computed public get assessmentLogs() {
@@ -252,6 +262,10 @@ export class PatientStore implements IPatientStore {
 
     @computed public get loadActivitySchedulesState() {
         return this.loadActivitySchedulesQuery;
+    }
+
+    @computed public get loadAssessmentsState() {
+        return this.loadAssessmentsQuery;
     }
 
     @computed public get loadAssessmentLogsState() {
@@ -342,6 +356,11 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
+    public getAssessmentById(assessmentId: string) {
+        return this.assessments.find((a) => a.assessmentId == assessmentId);
+    }
+
+    @action.bound
     public getScheduledAssessmentById(scheduleId: string) {
         return this.loadScheduledAssessmentsQuery.value?.find((t) => t.scheduledAssessmentId == scheduleId);
     }
@@ -369,6 +388,7 @@ export class PatientStore implements IPatientStore {
                 this.loadActivitiesQuery.fromPromise(Promise.resolve(patient.activities));
                 this.loadActivityLogsQuery.fromPromise(Promise.resolve(patient.activityLogs));
                 this.loadActivitySchedulesQuery.fromPromise(Promise.resolve(patient.activitySchedules));
+                this.loadAssessmentsQuery.fromPromise(Promise.resolve(patient.assessments));
                 this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
                 this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
                 this.loadSafetyPlanQuery.fromPromise(Promise.resolve(patient.safetyPlan));
