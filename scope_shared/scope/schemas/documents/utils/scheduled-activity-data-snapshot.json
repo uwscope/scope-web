@@ -14,5 +14,5 @@
         }
     },
     "additionalProperties": false,
-    "required": ["activitySchedule", "activity", "value"]
+    "required": ["activitySchedule", "activity"]
 }
