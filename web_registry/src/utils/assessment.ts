@@ -38,7 +38,7 @@ export const getAssessmentScoreFromPointValues = (pointValues: AssessmentData) =
 };
 
 export const getLatestScore = (assessmentLogs: IAssessmentLog[], assessmentId: string) => {
-    const filteredAssessmentLogs = assessmentLogs.filter((a) => a.assessmentId == assessmentId);
+    const filteredAssessmentLogs = assessmentLogs.filter((a) => a.assessment?.assessmentId == assessmentId);
     if (filteredAssessmentLogs.length > 0) {
         const sortedAssessments = filteredAssessmentLogs
             .slice()
