@@ -15,6 +15,7 @@ isort = "*"
 jupyterlab-lsp = "*"
 python-lsp-server = {extras = ["all"], version = "*"}
 jupyter-dash = "*"
+nbconvert = "*"
 
 [dev-packages]
 
