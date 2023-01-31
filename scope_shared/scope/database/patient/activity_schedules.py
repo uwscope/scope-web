@@ -136,25 +136,27 @@ def _maintain_pending_scheduled_activities(
         maintenance_datetime=maintenance_datetime,
     )
 
-    data_snapshot = {}
-    data_snapshot.update({"activitySchedule": activity_schedule})
-
-    activity_data_snapshot = scope.database.patient.activities.get_activity(
-        collection=collection,
-        set_id=activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID],
-    )
-    data_snapshot.update({"activity": activity_data_snapshot})
-
-    if activity_data_snapshot.get(scope.database.patient.values.SEMANTIC_SET_ID, None):
-        value_data_snapshot = scope.database.patient.values.get_value(
-            collection=collection,
-            set_id=activity_data_snapshot[
-                scope.database.patient.values.SEMANTIC_SET_ID
-            ],
-        )
-        data_snapshot.update({"value": value_data_snapshot})
-
     if create_items:
+        data_snapshot = {}
+        data_snapshot.update({"activitySchedule": activity_schedule})
+
+        activity_data_snapshot = scope.database.patient.activities.get_activity(
+            collection=collection,
+            set_id=activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID],
+        )
+        data_snapshot.update({"activity": activity_data_snapshot})
+
+        if activity_data_snapshot.get(
+            scope.database.patient.values.SEMANTIC_SET_ID, None
+        ):
+            value_data_snapshot = scope.database.patient.values.get_value(
+                collection=collection,
+                set_id=activity_data_snapshot[
+                    scope.database.patient.values.SEMANTIC_SET_ID
+                ],
+            )
+            data_snapshot.update({"value": value_data_snapshot})
+
         for create_item_current in create_items:
             create_item_current = copy.deepcopy(create_item_current)
 
