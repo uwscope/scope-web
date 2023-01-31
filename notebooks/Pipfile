@@ -9,6 +9,12 @@ jupyterlab = "*"
 scope = {editable = true, path = "../scope_shared"}
 pandas = "*"
 jupytext = "*"
+jupyterlab-code-formatter = "*"
+black = "*"
+isort = "*"
+jupyterlab-lsp = "*"
+python-lsp-server = {extras = ["all"], version = "*"}
+jupyter-dash = "*"
 
 [dev-packages]
 
