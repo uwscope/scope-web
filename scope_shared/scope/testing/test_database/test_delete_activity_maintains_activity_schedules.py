@@ -3,11 +3,13 @@ A delete to scope.database.patient.activities must delete the associated activit
 """
 
 import datetime
+import pprint
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils
 import scope.database.patient.activity_schedules
 import scope.database.patient.activities
+import scope.database.patient.values
 import scope.database.patients
 import scope.enums
 import scope.schema
@@ -22,12 +24,31 @@ def test_delete_activity_maintains_activity_schedules(
     ],
     data_fake_activity_factory: Callable[[], dict],
     data_fake_activity_schedules_factory: Callable[[], List[dict]],
+    data_fake_value_factory: Callable[[], dict],
 ):
     temp_patient = database_temp_patient_factory()
     patient_collection = temp_patient.collection
 
     # Obtain fake activity
     fake_activity = data_fake_activity_factory()
+
+    # If activity is associated to a value, insert the value into db.
+    if scope.database.patient.values.SEMANTIC_SET_ID in fake_activity:
+        fake_value = data_fake_value_factory()
+        fake_value_post_result = scope.database.patient.values.post_value(
+            collection=patient_collection,
+            value=fake_value,
+        )
+        assert fake_value_post_result.inserted_count == 1
+        inserted_fake_value = fake_value_post_result.document
+        fake_activity.update(
+            {
+                scope.database.patient.values.SEMANTIC_SET_ID: inserted_fake_value[
+                    scope.database.patient.values.SEMANTIC_SET_ID
+                ]
+            }
+        )
+
     fake_activity_post_result = scope.database.patient.activities.post_activity(
         collection=patient_collection,
         activity=fake_activity,
@@ -41,18 +62,6 @@ def test_delete_activity_maintains_activity_schedules(
         _fake_activity_schedule.update(
             {"activityId": inserted_fake_activity["activityId"]}
         )
-        _fake_activity_schedule_post_result = (
-            scope.database.patient.activity_schedules.post_activity_schedule(
-                collection=patient_collection,
-                activity_schedule=_fake_activity_schedule,
-            )
-        )
-        assert _fake_activity_schedule_post_result.inserted_count == 1
-
-    # Obtain more fake activity schedules and insert them into db.
-    fake_activity_schedules = data_fake_activity_schedules_factory()
-    for _fake_activity_schedule in fake_activity_schedules:
-        _fake_activity_schedule.update({"activityId": "some activityId"})
         _fake_activity_schedule_post_result = (
             scope.database.patient.activity_schedules.post_activity_schedule(
                 collection=patient_collection,
