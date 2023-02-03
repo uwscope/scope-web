@@ -11,8 +11,10 @@ from typing import Callable
 
 import scope.database.collection_utils as collection_utils
 import scope.database.date_utils as date_utils
+import scope.database.patient.activities
 import scope.database.patient.activity_schedules
 import scope.database.patient.scheduled_activities
+import scope.database.patient.values
 import scope.database.patients
 import scope.enums
 import scope.schema
@@ -29,9 +31,7 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
         "editedDateTime": date_utils.format_datetime(
             pytz.utc.localize(datetime.datetime(2022, 3, 12, 6))
         ),
-        "date": date_utils.format_date(
-            datetime.date(2022, 3, 12)
-        ),
+        "date": date_utils.format_date(datetime.date(2022, 3, 12)),
         "hasRepetition": True,
         "repeatDayFlags": {
             scope.enums.DayOfWeek.Monday.value: True,
@@ -46,21 +46,11 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
         "hasReminder": False,
         # "reminderTimeOfDay": time_of_day,
     }
-    scope.schema_utils.assert_schema(
-        data=activity_schedule,
-        schema=scope.schema.activity_schedule_schema,
-        expected_valid=True,
-    )
 
     scheduled_activities = scope.database.patient.activity_schedules._calculate_scheduled_activities_to_create(
         activity_schedule_id="testActivityScheduleId",
         activity_schedule=activity_schedule,
         maintenance_datetime=pytz.utc.localize(datetime.datetime(2022, 3, 14, 10)),
-    )
-    scope.schema_utils.assert_schema(
-        data=scheduled_activities,
-        schema=scope.schema.scheduled_activities_schema,
-        expected_valid=True,
     )
 
     scheduled_dates = []
@@ -187,11 +177,6 @@ def test_activity_schedule_calculate_scheduled_activities_to_delete():
             "completed": False,
         },
     ]
-    scope.schema_utils.assert_schema(
-        data=scheduled_activities,
-        schema=scope.schema.scheduled_activities_schema,
-        expected_valid=True,
-    )
 
     deleted_activities = scope.database.patient.activity_schedules._calculate_scheduled_activities_to_delete(
         activity_schedule_id="deleteTestId",
@@ -230,7 +215,9 @@ def test_activity_schedule_post_maintains_scheduled_activities(
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
     ],
+    data_fake_activity_factory: Callable[[], dict],
     data_fake_activity_schedule_factory: Callable[[], dict],
+    data_fake_value_factory: Callable[[], dict],
 ):
     """
     Test that scheduled activities are maintained in a post.
@@ -242,16 +229,50 @@ def test_activity_schedule_post_maintains_scheduled_activities(
     temp_patient = database_temp_patient_factory()
     patient_collection = temp_patient.collection
 
+    # Obtain fake activity
+    fake_activity = data_fake_activity_factory()
+
+    # If activity is associated to a value, insert the value into db.
+    if scope.database.patient.values.SEMANTIC_SET_ID in fake_activity:
+        fake_value = data_fake_value_factory()
+        fake_value_post_result = scope.database.patient.values.post_value(
+            collection=patient_collection,
+            value=fake_value,
+        )
+        assert fake_value_post_result.inserted_count == 1
+        inserted_fake_value = fake_value_post_result.document
+        fake_activity.update(
+            {
+                scope.database.patient.values.SEMANTIC_SET_ID: inserted_fake_value[
+                    scope.database.patient.values.SEMANTIC_SET_ID
+                ]
+            }
+        )
+    fake_activity_post_result = scope.database.patient.activities.post_activity(
+        collection=patient_collection,
+        activity=fake_activity,
+    )
+    assert fake_activity_post_result.inserted_count == 1
+    inserted_fake_activity = fake_activity_post_result.document
+
     # Obtain fake activity schedule
     fake_activity_schedule = data_fake_activity_schedule_factory()
     # Ensure the date is in the future so maintenance will result in deletion
     fake_activity_schedule.update(
         {
-            "startDateTime": date_utils.format_datetime(
+            "date": date_utils.format_date(
                 pytz.utc.localize(datetime.datetime.now() + datetime.timedelta(days=1))
-            )
+            ),
+            "activityId": inserted_fake_activity["activityId"],
         }
     )
+
+    scope.schema_utils.assert_schema(
+        data=fake_activity_schedule,
+        schema=scope.schema.activity_schedule_schema,
+        expected_valid=True,
+    )
+
     # Post the activity schedule
     fake_activity_schedule_post_result = (
         scope.database.patient.activity_schedules.post_activity_schedule(
@@ -273,13 +294,21 @@ def test_activity_schedule_post_maintains_scheduled_activities(
     ]
     assert len(scheduled_activities_matching_activity_schedule_id) > 0
 
+    scope.schema_utils.assert_schema(
+        data=scheduled_activities_matching_activity_schedule_id,
+        schema=scope.schema.scheduled_activities_schema,
+        expected_valid=True,
+    )
+
 
 def test_activity_schedule_put_maintains_scheduled_activities(
     database_temp_patient_factory: Callable[
         [],
         scope.testing.fixtures_database_temp_patient.DatabaseTempPatient,
     ],
+    data_fake_activity_factory: Callable[[], dict],
     data_fake_activity_schedule_factory: Callable[[], dict],
+    data_fake_value_factory: Callable[[], dict],
 ):
     """
     Test that scheduled activities are maintained in a put.
@@ -291,11 +320,38 @@ def test_activity_schedule_put_maintains_scheduled_activities(
     temp_patient = database_temp_patient_factory()
     patient_collection = temp_patient.collection
 
+    # Obtain fake activity
+    fake_activity = data_fake_activity_factory()
+
+    # If activity is associated to a value, insert the value into db.
+    if scope.database.patient.values.SEMANTIC_SET_ID in fake_activity:
+        fake_value = data_fake_value_factory()
+        fake_value_post_result = scope.database.patient.values.post_value(
+            collection=patient_collection,
+            value=fake_value,
+        )
+        assert fake_value_post_result.inserted_count == 1
+        inserted_fake_value = fake_value_post_result.document
+        fake_activity.update(
+            {
+                scope.database.patient.values.SEMANTIC_SET_ID: inserted_fake_value[
+                    scope.database.patient.values.SEMANTIC_SET_ID
+                ]
+            }
+        )
+    fake_activity_post_result = scope.database.patient.activities.post_activity(
+        collection=patient_collection,
+        activity=fake_activity,
+    )
+    assert fake_activity_post_result.inserted_count == 1
+    inserted_fake_activity = fake_activity_post_result.document
+
     # Obtain fake activity schedule
     fake_activity_schedule = data_fake_activity_schedule_factory()
     # Ensure the date is in the future so maintenance will result in deletion
     fake_activity_schedule.update(
         {
+            "activityId": inserted_fake_activity["activityId"],
             "date": date_utils.format_date(
                 datetime.date.today() + datetime.timedelta(days=1)
             ),
@@ -311,6 +367,13 @@ def test_activity_schedule_put_maintains_scheduled_activities(
             },
         }
     )
+
+    scope.schema_utils.assert_schema(
+        data=fake_activity_schedule,
+        schema=scope.schema.activity_schedule_schema,
+        expected_valid=True,
+    )
+
     # Post the activity schedule
     fake_activity_schedule_post_result = (
         scope.database.patient.activity_schedules.post_activity_schedule(

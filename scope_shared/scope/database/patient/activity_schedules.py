@@ -6,7 +6,9 @@ from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
+import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
+import scope.database.patient.values
 import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.enums
 import scope.schema
@@ -133,8 +135,32 @@ def _maintain_pending_scheduled_activities(
         activity_schedule=activity_schedule,
         maintenance_datetime=maintenance_datetime,
     )
+
     if create_items:
+        data_snapshot = {}
+        data_snapshot.update({"activitySchedule": activity_schedule})
+
+        activity_data_snapshot = scope.database.patient.activities.get_activity(
+            collection=collection,
+            set_id=activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID],
+        )
+        data_snapshot.update({"activity": activity_data_snapshot})
+
+        if activity_data_snapshot.get(
+            scope.database.patient.values.SEMANTIC_SET_ID, None
+        ):
+            value_data_snapshot = scope.database.patient.values.get_value(
+                collection=collection,
+                set_id=activity_data_snapshot[
+                    scope.database.patient.values.SEMANTIC_SET_ID
+                ],
+            )
+            data_snapshot.update({"value": value_data_snapshot})
+
         for create_item_current in create_items:
+            create_item_current = copy.deepcopy(create_item_current)
+
+            create_item_current.update({"dataSnapshot": data_snapshot})
             schema_utils.assert_schema(
                 data=create_item_current,
                 schema=scope.schema.scheduled_activity_schema,
