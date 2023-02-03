@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://uwscope.org/schemas/documents/utils/scheduled-activity-data-snapshot",
+    "type": "object",
+    "properties": {
+        "activitySchedule": {
+            "$ref": "/schemas/documents/activity-schedule"
+        },
+        "activity": {
+            "$ref": "/schemas/documents/activity"
+        },
+        "value": {
+            "$ref": "/schemas/documents/value"
+        }
+    },
+    "additionalProperties": false,
+    "required": ["activitySchedule", "activity"]
+}
