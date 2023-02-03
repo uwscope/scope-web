@@ -3,7 +3,6 @@ A delete to scope.database.patient.activities must delete the associated activit
 """
 
 import datetime
-import pprint
 from typing import Callable, List
 
 import scope.database.collection_utils as collection_utils

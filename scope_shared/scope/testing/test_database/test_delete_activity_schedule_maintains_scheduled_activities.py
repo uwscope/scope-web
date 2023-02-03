@@ -3,7 +3,6 @@ A delete to scope.database.patient.activity_schedules must delete the associated
 """
 
 import datetime
-import pytz
 from typing import Callable
 
 import scope.database.collection_utils as collection_utils
