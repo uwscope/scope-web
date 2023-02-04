@@ -852,7 +852,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             value={activityViewState.displayedName}
                             onChange={handleActivityChangeName}
                             variant="outlined"
-                            multiline
                             error={_activityPageValidateName.error}
                             helperText={
                                 _activityPageValidateName.error &&
