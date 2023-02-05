@@ -1074,6 +1074,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             )}
                             ampm={true}
                             views={['hours']}
+                            disableCloseOnSelect={true}
                         />
                     </Fragment>
                 }
