@@ -1,9 +1,11 @@
-import copy
+import datetime
 import pymongo.collection
+import pytz
 from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.patient.activity_schedules
+import scope.database.patient.scheduled_activities
 import scope.enums
 import scope.schema
 
@@ -107,10 +109,20 @@ def put_activity(
     Put "activity" document.
     """
 
-    return scope.database.collection_utils.put_set_element(
+    activity_set_put_result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
         document=activity,
     )
+
+    if activity_set_put_result.inserted_count == 1:
+        scope.database.patient.scheduled_activities.maintain_scheduled_activities_data_snapshot(
+            collection=collection,
+            value_id=None,
+            activity_id=set_id,
+            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
+        )
+
+    return activity_set_put_result
