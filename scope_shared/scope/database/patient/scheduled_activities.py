@@ -37,7 +37,7 @@ def _build_data_snapshot(
     # Update activity
     data_snapshot.update(
         {
-            scope.database.patient.activities.SEMANTIC_SET_ID: scope.database.patient.activities.get_activity(
+            scope.database.patient.activities.DOCUMENT_TYPE: scope.database.patient.activities.get_activity(
                 collection=collection, set_id=activity_id
             )
         }
@@ -47,7 +47,7 @@ def _build_data_snapshot(
     if value_id:
         data_snapshot.update(
             {
-                scope.database.patient.values.SEMANTIC_SET_ID: scope.database.patient.values.get_value(
+                scope.database.patient.values.DOCUMENT_TYPE: scope.database.patient.values.get_value(
                     collection=collection, set_id=value_id
                 )
             }
