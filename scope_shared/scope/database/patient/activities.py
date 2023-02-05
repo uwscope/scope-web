@@ -120,8 +120,6 @@ def put_activity(
     if activity_set_put_result.inserted_count == 1:
         scope.database.patient.scheduled_activities.maintain_scheduled_activities_data_snapshot(
             collection=collection,
-            value_id=None,
-            activity_id=set_id,
             maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
         )
 
