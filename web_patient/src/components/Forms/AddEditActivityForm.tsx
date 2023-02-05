@@ -3,8 +3,8 @@ import {
     TimePicker,
 } from '@mui/lab';
 import {
+    Button,
     Checkbox,
-    Chip,
     // Dialog,
     // DialogContent,
     // DialogTitle,
@@ -39,6 +39,7 @@ import { getRouteParameter, Parameters, ParameterValues } from "src/services/rou
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import { AddEditValueDialog } from 'src/components/ValuesInventory/LifeAreaDetail';
+import AddIcon from "@mui/icons-material/Add";
 
 export interface IAddEditActivityFormProps extends IFormProps {}
 
@@ -444,24 +445,36 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     const handleActivitySelectLifeArea = action((event: SelectChangeEvent<string>) => {
         activityViewState.lifeAreaId = event.target.value as string;
 
-        // An empty string will fail validation
-        // Default to the first item in the list
         activityViewState.valueId = (() => {
-            const lifeAreaValues = patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId);
-            if (lifeAreaValues.length) {
-                const valueMin = lifeAreaValues.reduce((minimum, current) => {
-                    return minimum.name.localeCompare(current.name, undefined, {sensitivity: 'base'}) < 0 ? minimum : current;
-                }, lifeAreaValues[0]);
-
-                return valueMin.valueId as string;
-            } else {
+            // If no life area is selected, then also clear the value
+            if(!activityViewState.lifeAreaId) {
                 return '';
             }
+
+            // Upon selection of a life area, select the first value
+            const lifeAreaValues = patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId);
+
+            // If no values match this lifeAreaId
+            if (!lifeAreaValues.length) {
+                return '';
+            }
+
+            // Select the first value
+            const valueMin = lifeAreaValues.reduce((minimum, current) => {
+                return minimum.name.localeCompare(current.name, undefined, {sensitivity: 'base'}) < 0 ? minimum : current;
+            }, lifeAreaValues[0]);
+
+            return valueMin.valueId as string;
         })();
     });
 
     const handleActivitySelectValue = action((event: SelectChangeEvent<string>) => {
-        activityViewState.valueId = event.target.value as string;
+        // A few interaction sequences allow selection of an empty value
+        // (e.g., opening the add value dialog, then cancelling it).
+        // That is not actually allowed, so ignore such an event.
+        if (!!event.target.value) {
+            activityViewState.valueId = event.target.value as string;
+        }
     });
 
     const handleActivityScheduleChangeDate = action((date: Date | null) => {
@@ -885,20 +898,13 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                             ))}
                         </Select>
                         <SubHeaderText>{getString('form_add_edit_activity_value_label')}</SubHeaderText>
-                        <FormHelperText
-                            error={_activityPageValidateValueId.error}
-                        >
-                            {_activityPageValidateValueId.valid ? getString('form_add_edit_activity_value_help') : _activityPageValidateValueId.errorMessage}
-                        </FormHelperText>
+                        <HelperText>{getString('form_add_edit_activity_value_help')}</HelperText>
                         <Select
                             variant="outlined"
                             value={activityViewState.valueId}
                             onChange={handleActivitySelectValue}
                             fullWidth
-                            disabled={
-                                !activityViewState.lifeAreaId ||
-                                patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).length == 0
-                            }
+                            disabled={!activityViewState.lifeAreaId}
                         >
                             {activityViewState.lifeAreaId && (
                                 patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId)
@@ -910,19 +916,23 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                                     </MenuItem>
                                 ))
                             )}
-                        </Select>
-                        <Grid container justifyContent="flex-end">
-                            <Chip
-                                sx={{ marginTop: 1 }}
+                            <Button
+                                sx={{ marginLeft: 2, marginBottom: 1, marginTop: 1, alignSelf: 'flex-start' }}
+                                variant="contained"
                                 color="primary"
-                                size="small"
-                                label={getString('form_add_edit_activity_add_value_button')}
+                                startIcon={<AddIcon />}
                                 onClick={handleAddValueOpen}
-                                disabled={
-                                    !activityViewState.lifeAreaId
-                                }
-                            />
-                        </Grid>
+                            >
+                                {getString('form_add_edit_activity_add_value_button')}
+                            </Button>
+                        </Select>
+                        {!_activityPageValidateValueId.valid && (
+                            <FormHelperText
+                                error={_activityPageValidateValueId.error}
+                            >
+                                {_activityPageValidateValueId.errorMessage}
+                            </FormHelperText>
+                        )}
                     </Fragment>
                 }
             />
