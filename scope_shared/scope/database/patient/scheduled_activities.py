@@ -23,10 +23,16 @@ def _build_data_snapshot(
 
     data_snapshot = copy.deepcopy(scheduled_activity.get(DATA_SNAPSHOT_PROPERTY, None))
 
-    activity_id = data_snapshot.get(
-        scope.database.patient.activities.DOCUMENT_TYPE, None
+    activity_id = data_snapshot[scope.database.patient.activities.DOCUMENT_TYPE][
+        scope.database.patient.activities.SEMANTIC_SET_ID
+    ]
+
+    value_id = None
+    value_document = data_snapshot.get(
+        scope.database.patient.values.DOCUMENT_TYPE, None
     )
-    value_id = data_snapshot.get(scope.database.patient.values.DOCUMENT_TYPE, None)
+    if value_document:
+        value_id = value_document[scope.database.patient.values.SEMANTIC_SET_ID]
 
     # Update activity
     data_snapshot.update(
