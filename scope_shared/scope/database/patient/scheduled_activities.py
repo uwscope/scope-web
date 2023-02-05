@@ -1,14 +1,48 @@
 import copy
-from typing import List, Optional
+import datetime
+from typing import List, Optional, Union
 import pymongo.collection
 
 import scope.database.collection_utils
 import scope.database.patient.activities
+import scope.database.patient.values
+import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.schema
 
 
 DOCUMENT_TYPE = "scheduledActivity"
 SEMANTIC_SET_ID = "scheduledActivityId"
+DATA_SNAPSHOT_PROPERTY = "dataSnapshot"
+
+
+def _build_data_snapshot(
+    *,
+    collection: pymongo.collection.Collection,
+    activity_id: Union[str, None],
+    value_id: Union[str, None],
+    scheduled_activity: dict,
+) -> dict:
+
+    data_snapshot = copy.deepcopy(scheduled_activity.get(DATA_SNAPSHOT_PROPERTY, None))
+
+    if activity_id != None:
+        data_snapshot.update(
+            {
+                scope.database.patient.activities.SEMANTIC_SET_ID: scope.database.patient.activities.get_activity(
+                    collection=collection, set_id=activity_id
+                )
+            }
+        )
+    elif value_id != None:
+        data_snapshot.update(
+            {
+                scope.database.patient.values.SEMANTIC_SET_ID: scope.database.patient.values.get_value(
+                    collection=collection, set_id=value_id
+                )
+            }
+        )
+
+    return data_snapshot
 
 
 def delete_scheduled_activity(
@@ -61,6 +95,72 @@ def get_scheduled_activity(
     )
 
     return scheduled_activity
+
+
+def maintain_scheduled_activities_data_snapshot(
+    *,
+    collection: pymongo.collection.Collection,
+    activity_id: Union[str, None],
+    value_id: Union[str, None],
+    maintenance_datetime: datetime.datetime,
+) -> Union[List[scope.database.collection_utils.SetPutResult], None]:
+
+    if all(
+        [
+            activity_id is None,
+            value_id is None,
+        ]
+    ):
+        raise ValueError("activity_id or value_id must be provided")
+
+    if all([activity_id is not None, value_id is not None]):
+        raise ValueError("activity_id or value_id must be None")
+
+    # Compute pending scheduled activities
+    pending_scheduled_activities = scheduled_item_utils.pending_scheduled_items(
+        scheduled_items=get_scheduled_activities(
+            collection=collection,
+        ),
+        after_datetime=maintenance_datetime,
+    )
+
+    if not pending_scheduled_activities:
+        return
+
+    scheduled_activities_pending_update = []
+    for scheduled_activity_current in pending_scheduled_activities:
+        # Calculate a new value for data snapshot
+        new_data_snapshot = _build_data_snapshot(
+            collection=collection,
+            activity_id=activity_id,
+            value_id=value_id,
+            scheduled_activity=scheduled_activity_current,
+        )
+
+        # If data snapshot changed, update scheduled activity and add it to pending update list
+        if new_data_snapshot != scheduled_activity_current.get(
+            DATA_SNAPSHOT_PROPERTY, None
+        ):
+            scheduled_activity_current.update(
+                {DATA_SNAPSHOT_PROPERTY: new_data_snapshot}
+            )
+            scheduled_activities_pending_update.append(scheduled_activity_current)
+
+    if not scheduled_activities_pending_update:
+        return
+
+    # Issue the updates for scheduled activities in pending update list
+    scheduled_activity_put_results = []
+    for scheduled_activity_current in scheduled_activities_pending_update:
+        scheduled_activity_put_results.append(
+            put_scheduled_activity(
+                collection=collection,
+                set_id=scheduled_activity_current[SEMANTIC_SET_ID],
+                scheduled_activity=scheduled_activity_current,
+            )
+        )
+
+    return scheduled_activity_put_results
 
 
 def post_scheduled_activity(
