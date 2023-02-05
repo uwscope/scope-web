@@ -3,6 +3,7 @@ import datetime
 from typing import List, Optional, Union
 import pymongo.collection
 
+
 import scope.database.collection_utils
 import scope.database.patient.activities
 import scope.database.patient.values
@@ -148,6 +149,7 @@ def maintain_scheduled_activities_data_snapshot(
     # Issue the updates for scheduled activities in pending update list
     scheduled_activity_put_results = []
     for scheduled_activity_current in scheduled_activities_pending_update:
+        del scheduled_activity_current["_id"]
         scheduled_activity_put_results.append(
             put_scheduled_activity(
                 collection=collection,
