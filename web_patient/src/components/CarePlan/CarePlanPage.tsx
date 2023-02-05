@@ -431,8 +431,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                     component={Link}
                     to={getFormLink(ParameterValues.form.addActivity, {
                         [Parameters.addSchedule]: ParameterValues.addSchedule.true,
-                    })}>
-                    {getString('Careplan_add_activity')}
+                    })}
+                >
+                    <Typography sx={{fontWeight: 600}}>
+                        {getString('Careplan_add_activity')}
+                    </Typography>
                 </Button>
             }>
             <Grid container alignItems="center" spacing={1} justifyContent="center">
