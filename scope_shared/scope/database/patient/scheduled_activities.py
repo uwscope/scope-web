@@ -23,18 +23,28 @@ def _build_data_snapshot(
     values: List[dict],
 ) -> dict:
     # Every snapshot will include an ActivitySchedule and an Activity
-    activity_schedule_id = scheduled_activity[scope.database.patient.activity_schedules.SEMANTIC_SET_ID]
+    activity_schedule_id = scheduled_activity[
+        scope.database.patient.activity_schedules.SEMANTIC_SET_ID
+    ]
     activity_schedule = next(
         activity_schedule_current
         for activity_schedule_current in activity_schedules
-        if activity_schedule_current[scope.database.patient.activity_schedules.SEMANTIC_SET_ID] == activity_schedule_id
+        if (
+            activity_schedule_current[
+                scope.database.patient.activity_schedules.SEMANTIC_SET_ID
+            ]
+            == activity_schedule_id
+        )
     )
 
     activity_id = activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID]
     activity = next(
         activity_current
         for activity_current in activities
-        if activity_current[scope.database.patient.activities.SEMANTIC_SET_ID] == activity_id
+        if (
+            activity_current[scope.database.patient.activities.SEMANTIC_SET_ID]
+            == activity_id
+        )
     )
 
     data_snapshot = {
@@ -51,9 +61,11 @@ def _build_data_snapshot(
             if value_current[scope.database.patient.values.SEMANTIC_SET_ID] == value_id
         )
 
-        data_snapshot.update({
-            scope.database.patient.values.DOCUMENT_TYPE: value
-        })
+        data_snapshot.update(
+            {
+                scope.database.patient.values.DOCUMENT_TYPE: value,
+            }
+        )
 
     return data_snapshot
 
@@ -132,15 +144,23 @@ def maintain_scheduled_activities_data_snapshot(
 
     # Obtain the documents need to calculate snapshots
     # Do this in 3 queries for the entire collection because that will be faster than many document queries
-    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(collection=collection)
-    activities = scope.database.patient.activities.get_activities(collection=collection)
-    values = scope.database.patient.values.get_values(collection=collection)
+    activity_schedules = scope.database.patient.get_activity_schedules(
+        collection=collection,
+    )
+    activities = scope.database.patient.get_activities(
+        collection=collection,
+    )
+    values = scope.database.patient.get_values(
+        collection=collection,
+    )
 
     # Calculate snapshots and determine which have changed
     scheduled_activities_pending_update = []
     for scheduled_activity_current in pending_scheduled_activities:
         # Capture the existing snapshot
-        existing_data_snapshot = scheduled_activity_current.get(DATA_SNAPSHOT_PROPERTY, None)
+        existing_data_snapshot = scheduled_activity_current.get(
+            DATA_SNAPSHOT_PROPERTY, None
+        )
 
         # Calculate a new value for data snapshot
         new_data_snapshot = _build_data_snapshot(
@@ -152,9 +172,11 @@ def maintain_scheduled_activities_data_snapshot(
 
         # If data snapshot changed, update scheduled activity and add it to pending update list
         if existing_data_snapshot != new_data_snapshot:
-            scheduled_activity_current.update({
-                DATA_SNAPSHOT_PROPERTY: new_data_snapshot
-            })
+            scheduled_activity_current.update(
+                {
+                    DATA_SNAPSHOT_PROPERTY: new_data_snapshot,
+                }
+            )
             scheduled_activities_pending_update.append(scheduled_activity_current)
 
     # Issue the updates for scheduled activities in pending update list
