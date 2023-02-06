@@ -427,20 +427,16 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             title={getString('Navigation_careplan')}
             action={
                 <Button
-                    // If we want the button look
-                    // variant="contained"
-                    // color="primary"
-                    // size="small"
+                    variant="contained"
+                    color="primary"
+                    size="small"
                     startIcon={<AddIcon/>}
                     component={Link}
                     to={getFormLink(ParameterValues.form.addActivity, {
                         [Parameters.addSchedule]: ParameterValues.addSchedule.true,
                     })}
                 >
-                    {/* If we want bolded text */}
-                    {/*<Typography sx={{fontWeight: 600}}>*/}
-                        {getString('Careplan_add_activity')}
-                    {/*</Typography>*/}
+                    {getString('Careplan_add_activity')}
                 </Button>
             }>
             <Grid container alignItems="center" spacing={1} justifyContent="center">
