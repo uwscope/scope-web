@@ -22,6 +22,7 @@ def delete_value(
     Delete "value" document.
 
     - Any existing activities with the deleted value must be modified to have no value.
+    - Modifying the activity will trigger updates to any ScheduledActivities that have a snapshot of this.
     """
 
     result = scope.database.collection_utils.delete_set_element(
@@ -104,6 +105,8 @@ def put_value(
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Put "value" document.
+
+    - Because ScheduledActivity documents may reference this activity, their snapshots must be updated.
     """
 
     value_set_put_result = scope.database.collection_utils.put_set_element(
