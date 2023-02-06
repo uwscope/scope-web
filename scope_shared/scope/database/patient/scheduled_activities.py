@@ -3,13 +3,12 @@ import datetime
 from typing import List, Optional, Union
 import pymongo.collection
 
-
 import scope.database.collection_utils
 import scope.database.patient.activities
+import scope.database.patient.activity_schedules
 import scope.database.patient.values
 import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.schema
-
 
 DOCUMENT_TYPE = "scheduledActivity"
 SEMANTIC_SET_ID = "scheduledActivityId"
@@ -18,41 +17,43 @@ DATA_SNAPSHOT_PROPERTY = "dataSnapshot"
 
 def _build_data_snapshot(
     *,
-    collection: pymongo.collection.Collection,
     scheduled_activity: dict,
+    activity_schedules: List[dict],
+    activities: List[dict],
+    values: List[dict],
 ) -> dict:
-
-    data_snapshot = copy.deepcopy(scheduled_activity.get(DATA_SNAPSHOT_PROPERTY, None))
-
-    activity_id = data_snapshot[scope.database.patient.activities.DOCUMENT_TYPE][
-        scope.database.patient.activities.SEMANTIC_SET_ID
-    ]
-
-    value_id = None
-    value_document = data_snapshot.get(
-        scope.database.patient.values.DOCUMENT_TYPE, None
-    )
-    if value_document:
-        value_id = value_document[scope.database.patient.values.SEMANTIC_SET_ID]
-
-    # Update activity
-    data_snapshot.update(
-        {
-            scope.database.patient.activities.DOCUMENT_TYPE: scope.database.patient.activities.get_activity(
-                collection=collection, set_id=activity_id
-            )
-        }
+    # Every snapshot will include an ActivitySchedule and an Activity
+    activity_schedule_id = scheduled_activity[scope.database.patient.activity_schedules.SEMANTIC_SET_ID]
+    activity_schedule = next(
+        activity_schedule_current
+        for activity_schedule_current in activity_schedules
+        if activity_schedule_current[scope.database.patient.activity_schedules.SEMANTIC_SET_ID] == activity_schedule_id
     )
 
-    # Update value if value_id is not None
-    if value_id:
-        data_snapshot.update(
-            {
-                scope.database.patient.values.DOCUMENT_TYPE: scope.database.patient.values.get_value(
-                    collection=collection, set_id=value_id
-                )
-            }
+    activity_id = activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID]
+    activity = next(
+        activity_current
+        for activity_current in activities
+        if activity_current[scope.database.patient.activities.SEMANTIC_SET_ID] == activity_id
+    )
+
+    data_snapshot = {
+        scope.database.patient.activity_schedules.DOCUMENT_TYPE: activity_schedule,
+        scope.database.patient.activities.DOCUMENT_TYPE: activity,
+    }
+
+    # A snapshot might also include a value
+    if scope.database.patient.values.SEMANTIC_SET_ID in activity:
+        value_id = activity[scope.database.patient.values.SEMANTIC_SET_ID]
+        value = next(
+            value_current
+            for value_current in values
+            if value_current[scope.database.patient.values.SEMANTIC_SET_ID] == value_id
         )
+
+        data_snapshot.update({
+            scope.database.patient.values.DOCUMENT_TYPE: value
+        })
 
     return data_snapshot
 
@@ -80,7 +81,7 @@ def get_scheduled_activities(
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "scheduledAactivity" documents.
+    Get list of "scheduledActivity" documents.
     """
 
     scheduled_activities = scope.database.collection_utils.get_set(
@@ -113,38 +114,48 @@ def maintain_scheduled_activities_data_snapshot(
     *,
     collection: pymongo.collection.Collection,
     maintenance_datetime: datetime.datetime,
-) -> Union[List[scope.database.collection_utils.SetPutResult], None]:
-
+) -> List[scope.database.collection_utils.SetPutResult]:
     # Compute pending scheduled activities
+    scheduled_activities = get_scheduled_activities(collection=collection)
+
+    # Filter to only maintain those which are pending
     pending_scheduled_activities = scheduled_item_utils.pending_scheduled_items(
-        scheduled_items=get_scheduled_activities(
-            collection=collection,
-        ),
+        scheduled_items=scheduled_activities,
         after_datetime=maintenance_datetime,
     )
 
-    if not pending_scheduled_activities:
-        return
+    # TODO: Could further filter for efficiency
 
+    # If there are no pending scheduled activities, we are done
+    if not pending_scheduled_activities:
+        return []
+
+    # Obtain the documents need to calculate snapshots
+    # Do this in 3 queries for the entire collection because that will be faster than many document queries
+    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(collection=collection)
+    activities = scope.database.patient.activities.get_activities(collection=collection)
+    values = scope.database.patient.values.get_values(collection=collection)
+
+    # Calculate snapshots and determine which have changed
     scheduled_activities_pending_update = []
     for scheduled_activity_current in pending_scheduled_activities:
+        # Capture the existing snapshot
+        existing_data_snapshot = scheduled_activity_current.get(DATA_SNAPSHOT_PROPERTY, None)
+
         # Calculate a new value for data snapshot
         new_data_snapshot = _build_data_snapshot(
-            collection=collection,
             scheduled_activity=scheduled_activity_current,
+            activity_schedules=activity_schedules,
+            activities=activities,
+            values=values,
         )
 
         # If data snapshot changed, update scheduled activity and add it to pending update list
-        if new_data_snapshot != scheduled_activity_current.get(
-            DATA_SNAPSHOT_PROPERTY, None
-        ):
-            scheduled_activity_current.update(
-                {DATA_SNAPSHOT_PROPERTY: new_data_snapshot}
-            )
+        if existing_data_snapshot != new_data_snapshot:
+            scheduled_activity_current.update({
+                DATA_SNAPSHOT_PROPERTY: new_data_snapshot
+            })
             scheduled_activities_pending_update.append(scheduled_activity_current)
-
-    if not scheduled_activities_pending_update:
-        return
 
     # Issue the updates for scheduled activities in pending update list
     scheduled_activity_put_results = []
