@@ -96,6 +96,25 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         submitSuccessOpen: false,
     }));
 
+    const canBack: () => boolean = action(() => {
+        // Cannot go back from a first page
+        if (state.activePage === 0) {
+            return false;
+        }
+
+        // Cannot go back to a page which already submitted
+        if (!!pages[state.activePage].onSubmit) {
+            return false;
+        }
+
+        // Cannot go back if currently loading
+        if (!loading) {
+            return false;
+        }
+
+        return true;
+    });
+
     const forceClose = action(() => {
         state.closeConfirmOpen = false;
         onClose && onClose();
@@ -204,6 +223,20 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         state.submitErrorOpen = false;
     });
 
+    const isNextSubmit: () => boolean = action(() => {
+        // The last page is submit
+        if(state.activePage === maxPages - 1) {
+            return true;
+        }
+
+        // A page with a submit handler is submit
+        if(!!pages[state.activePage].onSubmit) {
+            return true;
+        }
+
+        return false;
+    });
+
     return (
         <Dialog fullScreen open={isOpen} onClose={closeAction} TransitionComponent={Transition}>
             <AppBar>
@@ -237,14 +270,19 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                             loading={loading}
                             onClick={handleNext}
                             disabled={!pages[state.activePage].canGoNext}>
-                            {state.activePage === maxPages - 1
+                            {isNextSubmit()
                                 ? getString('Form_button_submit')
-                                : getString('Form_button_next')}
+                                : getString('Form_button_next')
+                            }
                             <KeyboardArrowRight />
                         </LoadingButton>
                     }
                     backButton={
-                        <Button onClick={handleBack} disabled={state.activePage === 0 || loading}>
+                        <Button
+                            onClick={handleBack}
+                            disabled={!canBack()}
+                            sx={{visibility: state.activePage > 0 ? 'visible' : 'hidden'}}
+                        >
                             {<KeyboardArrowLeft />}
                             {getString('Form_button_back')}
                         </Button>
