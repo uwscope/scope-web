@@ -79,6 +79,12 @@ def _calculate_scheduled_activities_to_delete(
     activity_schedule_id: str,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
+    """
+    Determine which scheduled activities to delete:
+    - Belong to the provided ActivitySchedule.
+    - And are still pending.
+    """
+
     date_utils.raise_on_not_datetime_utc_aware(maintenance_datetime)
 
     current_scheduled_items = [
@@ -180,7 +186,7 @@ def delete_activity_schedule(
     """
     Delete "activity-schedule" document.
 
-    - Any corresponding ScheduledActivity documents must be deleted.
+    - Any pending ScheduledActivity documents must also be deleted.
     """
 
     result = scope.database.collection_utils.delete_set_element(

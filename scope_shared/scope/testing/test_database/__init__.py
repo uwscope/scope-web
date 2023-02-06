@@ -13,6 +13,7 @@ from scope.testing.test_database.test_database_put_size import *
 from scope.testing.test_database.test_patient_profile_maintains_identity import *
 from scope.testing.test_database.test_patients import *
 from scope.testing.test_database.test_providers import *
+from scope.testing.test_database.test_scheduled_activities_data_snapshot import *
 from scope.testing.test_database.test_delete_activity_maintains_activity_schedules import *
 from scope.testing.test_database.test_delete_activity_schedule_maintains_scheduled_activities import *
 from scope.testing.test_database.test_delete_scheduled_activity import *
