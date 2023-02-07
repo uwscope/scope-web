@@ -143,30 +143,40 @@ def _maintain_pending_scheduled_activities(
     )
 
     if create_items:
-        data_snapshot = {}
-        data_snapshot.update({"activitySchedule": activity_schedule})
-
-        activity_data_snapshot = scope.database.patient.activities.get_activity(
-            collection=collection,
-            set_id=activity_schedule[scope.database.patient.activities.SEMANTIC_SET_ID],
-        )
-        data_snapshot.update({"activity": activity_data_snapshot})
-
-        if activity_data_snapshot.get(
-            scope.database.patient.values.SEMANTIC_SET_ID, None
-        ):
-            value_data_snapshot = scope.database.patient.values.get_value(
+        # Attempt to get a snapshot of the activity
+        activity = None
+        activity_id = activity_schedule.get(scope.database.patient.activities.SEMANTIC_SET_ID, None)
+        if activity_id:
+            activity = scope.database.patient.get_activity(
                 collection=collection,
-                set_id=activity_data_snapshot[
-                    scope.database.patient.values.SEMANTIC_SET_ID
-                ],
+                set_id=activity_id,
             )
-            data_snapshot.update({"value": value_data_snapshot})
+
+        # Attempt to get a snapshot of the value
+        value = None
+        if activity:
+            value_id = activity.get(scope.database.patient.values.SEMANTIC_SET_ID, None)
+            if value_id:
+                value = scope.database.patient.get_value(
+                    collection=collection,
+                    set_id=value_id,
+                )
+
+        data_snapshot = scope.database.patient.scheduled_activities.build_data_snapshot(
+            activity_schedule_id=activity_schedule_id,
+            activity_schedules=[activity_schedule] if activity_schedule else [],
+            activities=[activity] if activity else [],
+            values=[value] if value else [],
+        )
 
         for create_item_current in create_items:
             create_item_current = copy.deepcopy(create_item_current)
 
-            create_item_current.update({"dataSnapshot": data_snapshot})
+            create_item_current.update(
+                {
+                    scope.database.patient.scheduled_activities.DATA_SNAPSHOT_PROPERTY: data_snapshot
+                }
+            )
             schema_utils.assert_schema(
                 data=create_item_current,
                 schema=scope.schema.scheduled_activity_schema,
