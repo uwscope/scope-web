@@ -427,11 +427,15 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             title={getString('Navigation_careplan')}
             action={
                 <Button
-                    startIcon={<AddIcon />}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<AddIcon/>}
                     component={Link}
                     to={getFormLink(ParameterValues.form.addActivity, {
                         [Parameters.addSchedule]: ParameterValues.addSchedule.true,
-                    })}>
+                    })}
+                >
                     {getString('Careplan_add_activity')}
                 </Button>
             }>

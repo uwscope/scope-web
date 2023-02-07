@@ -214,9 +214,9 @@ const _strings = {
     form_add_edit_activity_life_area_label: 'Life Area',
     form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
-    form_add_edit_activity_value_help: 'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_value_help: 'Then choose a value you have identified.',
     form_add_edit_activity_valueid_validation_none_selected:
-        'If a life area is selected, then a personal value must also be identified and selected.',
+        'If a life area is selected, then a value must also be identified and selected.',
     form_add_edit_activity_add_value_button: 'Add Value',
     form_add_edit_activity_enjoyment_prompt: 'How much do you enjoy doing this activity?',
     form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',

@@ -1,8 +1,12 @@
+import datetime
 import pymongo.collection
+import pytz
 from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.patient.activities
+import scope.database.patient.scheduled_activities
+
 
 DOCUMENT_TYPE = "value"
 SEMANTIC_SET_ID = "valueId"
@@ -18,6 +22,7 @@ def delete_value(
     Delete "value" document.
 
     - Any existing activities with the deleted value must be modified to have no value.
+    - Modifying the activity will trigger updates to any ScheduledActivities that have a snapshot of this.
     """
 
     result = scope.database.collection_utils.delete_set_element(
@@ -100,12 +105,22 @@ def put_value(
 ) -> scope.database.collection_utils.SetPutResult:
     """
     Put "value" document.
+
+    - Because ScheduledActivity documents may reference this activity, their snapshots must be updated.
     """
 
-    return scope.database.collection_utils.put_set_element(
+    value_set_put_result = scope.database.collection_utils.put_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
         document=value,
     )
+
+    if value_set_put_result.inserted_count == 1:
+        scope.database.patient.scheduled_activities.maintain_scheduled_activities_data_snapshot(
+            collection=collection,
+            maintenance_datetime=pytz.utc.localize(datetime.datetime.utcnow()),
+        )
+
+    return value_set_put_result

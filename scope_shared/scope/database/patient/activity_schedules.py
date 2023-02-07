@@ -6,7 +6,9 @@ from typing import List, Optional
 
 import scope.database.collection_utils
 import scope.database.date_utils as date_utils
+import scope.database.patient.activities
 import scope.database.patient.scheduled_activities
+import scope.database.patient.values
 import scope.database.scheduled_item_utils as scheduled_item_utils
 import scope.enums
 import scope.schema
@@ -77,6 +79,12 @@ def _calculate_scheduled_activities_to_delete(
     activity_schedule_id: str,
     maintenance_datetime: datetime.datetime,
 ) -> List[dict]:
+    """
+    Determine which scheduled activities to delete:
+    - Belong to the provided ActivitySchedule.
+    - And are still pending.
+    """
+
     date_utils.raise_on_not_datetime_utc_aware(maintenance_datetime)
 
     current_scheduled_items = [
@@ -133,8 +141,42 @@ def _maintain_pending_scheduled_activities(
         activity_schedule=activity_schedule,
         maintenance_datetime=maintenance_datetime,
     )
+
     if create_items:
+        # Attempt to get a snapshot of the activity
+        activity = None
+        activity_id = activity_schedule.get(scope.database.patient.activities.SEMANTIC_SET_ID, None)
+        if activity_id:
+            activity = scope.database.patient.get_activity(
+                collection=collection,
+                set_id=activity_id,
+            )
+
+        # Attempt to get a snapshot of the value
+        value = None
+        if activity:
+            value_id = activity.get(scope.database.patient.values.SEMANTIC_SET_ID, None)
+            if value_id:
+                value = scope.database.patient.get_value(
+                    collection=collection,
+                    set_id=value_id,
+                )
+
+        data_snapshot = scope.database.patient.scheduled_activities.build_data_snapshot(
+            activity_schedule_id=activity_schedule_id,
+            activity_schedules=[activity_schedule] if activity_schedule else [],
+            activities=[activity] if activity else [],
+            values=[value] if value else [],
+        )
+
         for create_item_current in create_items:
+            create_item_current = copy.deepcopy(create_item_current)
+
+            create_item_current.update(
+                {
+                    scope.database.patient.scheduled_activities.DATA_SNAPSHOT_PROPERTY: data_snapshot
+                }
+            )
             schema_utils.assert_schema(
                 data=create_item_current,
                 schema=scope.schema.scheduled_activity_schema,
@@ -154,7 +196,7 @@ def delete_activity_schedule(
     """
     Delete "activity-schedule" document.
 
-    - Any corresponding ScheduledActivity documents must be deleted.
+    - Any pending ScheduledActivity documents must also be deleted.
     """
 
     result = scope.database.collection_utils.delete_set_element(
