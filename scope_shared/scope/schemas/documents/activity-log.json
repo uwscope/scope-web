@@ -49,7 +49,7 @@
         }
     },
     "additionalProperties": false,
-    "required": ["_type", "scheduledActivityId", "recordedDateTime"],
+    "required": ["_type", "scheduledActivityId", "dataSnapshot", "recordedDateTime"],
     "allOf": [
         {
             "$ref": "#/$defs/no-success-disallows-accomplishment"
