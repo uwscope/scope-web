@@ -40,7 +40,9 @@ def _fake_activity_logs(
             scope.database.patient.scheduled_activities.SEMANTIC_SET_ID: fake_scheduled_activity[
                 scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
             ],
-            "activityName": "fakeActivityName",
+            "dataSnapshot": {
+                scope.database.patient.scheduled_activities.DOCUMENT_TYPE: fake_scheduled_activity
+            },
             "recordedDateTime": fake_scheduled_activity["dueDateTime"],
             "comment": faker_factory.text(),
             "completed": random.choice([True, False]),
