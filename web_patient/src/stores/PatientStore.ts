@@ -9,6 +9,7 @@ import {
     IActivity,
     IActivityLog,
     IActivitySchedule,
+    IAssessment,
     IAssessmentLog,
     IMoodLog,
     IPatient,
@@ -26,6 +27,7 @@ export interface IPatientStore {
     readonly activities: IActivity[];
     readonly activityLogs: IActivityLog[];
     readonly activitySchedules: IActivitySchedule[];
+    readonly assessments: IAssessment[];
     readonly assessmentsToComplete: IScheduledAssessment[];
     readonly assessmentLogs: IAssessmentLog[];
     readonly config: IPatientConfig;
@@ -42,6 +44,7 @@ export interface IPatientStore {
     readonly loadActivitiesState: IPromiseQueryState;
     readonly loadActivityLogsState: IPromiseQueryState;
     readonly loadActivitySchedulesState: IPromiseQueryState;
+    readonly loadAssessmentsState: IPromiseQueryState;
     readonly loadAssessmentLogsState: IPromiseQueryState;
     readonly loadConfigState: IPromiseQueryState;
     readonly loadMoodLogsState: IPromiseQueryState;
@@ -51,12 +54,14 @@ export interface IPatientStore {
     readonly loadValuesInventoryState: IPromiseQueryState;
 
     // Helpers
+    getActivityByActivityScheduleId: (activityScheduleId: string) => IActivity | undefined;
     getActivityById: (activityId: string) => IActivity | undefined;
     getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
     getActivitiesByValueId: (valueId: string) => IActivity[];
     getActivitiesWithoutValueId: () => IActivity[];
     getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
+    getAssessmentById: (assessmentId: string) => IAssessment | undefined;
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
@@ -72,6 +77,7 @@ export interface IPatientStore {
     updateActivity: (activity: IActivity) => Promise<void>;
 
     // Activity logs
+
     completeScheduledActivity: (activityLog: IActivityLog) => Promise<void>;
     loadActivityLogs: () => Promise<void>;
 
@@ -108,6 +114,7 @@ export class PatientStore implements IPatientStore {
     private readonly loadActivitiesQuery: PromiseQuery<IActivity[]>;
     private readonly loadActivityLogsQuery: PromiseQuery<IActivityLog[]>;
     private readonly loadActivitySchedulesQuery: PromiseQuery<IActivitySchedule[]>;
+    private readonly loadAssessmentsQuery: PromiseQuery<IAssessment[]>;
     private readonly loadAssessmentLogsQuery: PromiseQuery<IAssessmentLog[]>;
     private readonly loadConfigQuery: PromiseQuery<IPatientConfig>;
     private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
@@ -135,6 +142,7 @@ export class PatientStore implements IPatientStore {
         this.loadActivitiesQuery = new PromiseQuery<IActivity[]>([], 'loadActivitiesQuery');
         this.loadActivitySchedulesQuery = new PromiseQuery<IActivitySchedule[]>([], 'loadActivitySchedulesQuery');
         this.loadActivityLogsQuery = new PromiseQuery<IActivityLog[]>([], 'loadActivityLogsQuery');
+        this.loadAssessmentsQuery = new PromiseQuery<IAssessment[]>([], 'loadAssessmentsQuery');
         this.loadAssessmentLogsQuery = new PromiseQuery<IAssessmentLog[]>([], 'loadAssessmentLogsQuery');
         this.loadConfigQuery = new PromiseQuery<IPatientConfig>(undefined, 'loadConfigQuery');
         this.loadMoodLogsQuery = new PromiseQuery<IMoodLog[]>([], 'loadMoodLogsQuery');
@@ -190,6 +198,10 @@ export class PatientStore implements IPatientStore {
         }
 
         return latestAssessments;
+    }
+
+    @computed public get assessments() {
+        return this.loadAssessmentsQuery.value || [];
     }
 
     @computed public get assessmentLogs() {
@@ -252,6 +264,10 @@ export class PatientStore implements IPatientStore {
         return this.loadActivitySchedulesQuery;
     }
 
+    @computed public get loadAssessmentsState() {
+        return this.loadAssessmentsQuery;
+    }
+
     @computed public get loadAssessmentLogsState() {
         return this.loadAssessmentLogsQuery;
     }
@@ -281,6 +297,13 @@ export class PatientStore implements IPatientStore {
     }
 
     // Helpers
+    @action.bound
+    public getActivityByActivityScheduleId(activityScheduleId: string) {
+        return this.getActivityById(
+            this.activitySchedules.find((a) => a.activityScheduleId == activityScheduleId)?.activityId as string,
+        );
+    }
+
     @action.bound
     public getActivityById(activityId: string) {
         return this.activities.find((a) => a.activityId == activityId);
@@ -329,7 +352,12 @@ export class PatientStore implements IPatientStore {
     public getActivitySchedulesByActivityId(activityId: string): IActivitySchedule[] {
         return this.activitySchedules.filter((as) => {
             return as.activityId == activityId;
-        })
+        });
+    }
+
+    @action.bound
+    public getAssessmentById(assessmentId: string) {
+        return this.assessments.find((a) => a.assessmentId == assessmentId);
     }
 
     @action.bound
@@ -360,6 +388,7 @@ export class PatientStore implements IPatientStore {
                 this.loadActivitiesQuery.fromPromise(Promise.resolve(patient.activities));
                 this.loadActivityLogsQuery.fromPromise(Promise.resolve(patient.activityLogs));
                 this.loadActivitySchedulesQuery.fromPromise(Promise.resolve(patient.activitySchedules));
+                this.loadAssessmentsQuery.fromPromise(Promise.resolve(patient.assessments));
                 this.loadAssessmentLogsQuery.fromPromise(Promise.resolve(patient.assessmentLogs));
                 this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
                 this.loadSafetyPlanQuery.fromPromise(Promise.resolve(patient.safetyPlan));
@@ -417,8 +446,14 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activity', 'activityId', () => this.activities, logger),
             );
 
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -500,15 +535,19 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async deleteActivitySchedule(activitySchedule: IActivitySchedule) {
         const prevActivitySchedules = this.activitySchedules.slice() || [];
-        const foundIdx = prevActivitySchedules.findIndex((as) => as.activityScheduleId == activitySchedule.activityScheduleId);
+        const foundIdx = prevActivitySchedules.findIndex(
+            (as) => as.activityScheduleId == activitySchedule.activityScheduleId,
+        );
 
         console.assert(foundIdx >= 0, `ActivitySchedule to delete not found: ${activitySchedule.activityScheduleId}`);
 
         if (foundIdx >= 0) {
-            const promise = this.patientService.deleteActivitySchedule(activitySchedule).then((_deletedActivitySchedule) => {
-                prevActivitySchedules.splice(foundIdx, 1);
-                return prevActivitySchedules;
-            });
+            const promise = this.patientService
+                .deleteActivitySchedule(activitySchedule)
+                .then((_deletedActivitySchedule) => {
+                    prevActivitySchedules.splice(foundIdx, 1);
+                    return prevActivitySchedules;
+                });
 
             await this.loadAndLogQuery<IActivitySchedule[]>(
                 () => promise,
@@ -516,7 +555,10 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activitySchedule', 'activityScheduleId', () => this.activitySchedules, logger),
             );
 
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -670,8 +712,14 @@ export class PatientStore implements IPatientStore {
             );
 
             await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 

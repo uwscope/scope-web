@@ -4,6 +4,7 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import React, { FunctionComponent } from 'react';
 import { IScheduledActivity } from 'shared/types';
 import { getTaskItemDueTimeString } from 'src/utils/schedule';
+import { useStores } from 'src/stores/stores';
 
 export interface IScheduledListItemProps {
     item: IScheduledActivity;
@@ -12,6 +13,10 @@ export interface IScheduledListItemProps {
 
 export const ScheduledListItem: FunctionComponent<IScheduledListItemProps> = (props) => {
     const { item, onClick } = props;
+    const rootStore = useStores();
+    const { patientStore } = rootStore;
+
+    const activity = patientStore.getActivityByActivityScheduleId(item.activityScheduleId);
 
     return (
         <ListItem button onClick={onClick} disabled={item.completed}>
@@ -19,7 +24,7 @@ export const ScheduledListItem: FunctionComponent<IScheduledListItemProps> = (pr
                 {item.completed ? <CheckIcon /> : <RadioButtonUncheckedIcon />}
             </ListItemIcon>
             <ListItemText
-                primary={<Typography noWrap>{item.activityName}</Typography>}
+                primary={<Typography noWrap>{activity?.name}</Typography>}
                 secondary={getTaskItemDueTimeString(item, new Date())}
             />
         </ListItem>

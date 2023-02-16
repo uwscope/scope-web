@@ -44,7 +44,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     const tableData = logs?.map((log) => {
         return {
             id: log.scheduledActivityId,
-            name: log.activityName,
+            name: log.activity?.name,
             dueDate: format(log.dueDateTime, 'MM/dd/yyyy'),
             recordedDateTime: log.completed && log.recordedDateTime ? format(log.recordedDateTime, 'MM/dd/yyyy') : '--',
             completed: log.completed && log.success ? getCompleted(log.success) : '--',

@@ -26,7 +26,7 @@ import { useStores } from 'src/stores/stores';
 import { getAssessmentScore } from 'src/utils/assessment';
 import styled from 'styled-components';
 
-export interface IAssessmentFormProps extends IFormProps { }
+export interface IAssessmentFormProps extends IFormProps {}
 
 interface IQuestionFormProps {
     instruction: string;
@@ -67,21 +67,19 @@ const CrisisContent: FunctionComponent = () => {
             prompt={'Crisis resources'}
             content={
                 <Stack spacing={2}>
-                    <BodyText>
-                        You indicated that you are having thoughts of death or suicide.
-                    </BodyText>
+                    <BodyText>You indicated that you are having thoughts of death or suicide.</BodyText>
                     <BodyText>If you need more help right away, here are some resources to try:</BodyText>
                     <ListDiv>
                         <li>
                             <BodyText>
-                                Suicide & Crisis Lifeline - Call {' '}
+                                Suicide & Crisis Lifeline - Call{' '}
                                 <Link
                                     href="tel:988/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     988
-                                </Link>
-                                {' '} or {' '}
+                                </Link>{' '}
+                                or{' '}
                                 <Link
                                     href="tel:18002738255/"
                                     target="_blank"
@@ -92,7 +90,7 @@ const CrisisContent: FunctionComponent = () => {
                         </li>
                         <li>
                             <BodyText>
-                                Lifeline Web Chat - {' '}
+                                Lifeline Web Chat -{' '}
                                 <Link
                                     href="https://suicidepreventionlifeline.org/chat/"
                                     target="_blank"
@@ -103,21 +101,21 @@ const CrisisContent: FunctionComponent = () => {
                         </li>
                         <li>
                             <BodyText>
-                                Crisis Text Line - {' '}
+                                Crisis Text Line -{' '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     https://www.crisistextline.org/
-                                </Link>
-                                {' '} - Text {' '}
+                                </Link>{' '}
+                                - Text{' '}
                                 <Link
                                     href="sms:988/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     988
-                                </Link>
-                                {' '} or Text "HOME" to {' '}
+                                </Link>{' '}
+                                or Text "HOME" to{' '}
                                 <Link
                                     href="sms:741741/"
                                     target="_blank"
@@ -219,10 +217,13 @@ export const AssessmentForm: FunctionComponent<IAssessmentFormProps> = observer(
 
     const handleSubmit = action(async () => {
         const { scheduledAssessmentId, assessmentId } = scheduledAssessment;
+        const assessment = patientStore.getAssessmentById(assessmentId);
+
         try {
             const log = {
                 scheduledAssessmentId,
-                assessmentId,
+                //assessmentId,
+                assessment,
                 patientSubmitted: true,
                 pointValues: Object.fromEntries(dataState.pointValues.entries()),
                 recordedDateTime: new Date(),

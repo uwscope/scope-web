@@ -157,23 +157,25 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         return null;
     }
 
-    if (task.activityId != activityId) {
-        logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.activityId}`);
-        return null;
-    }
+    // NOTE: activityId does not exist on IScheduledActivity anymore
+    // if (task.activityId != activityId) {
+    //     logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.activityId}`);
+    //     return null;
+    // }
 
     const viewState = useLocalObservable<{ hasData: boolean }>(() => ({
         hasData: false,
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
-        activityId,
+        //activityId,
         scheduledActivityId: task.scheduledActivityId,
         alternative: '',
         comment: '',
         pleasure: 5,
         accomplishment: 5,
-        activityName: activity.name,
+        //activityName: activity.name,
+        activity: activity,
         recordedDateTime: new Date(),
         success: '',
     }));

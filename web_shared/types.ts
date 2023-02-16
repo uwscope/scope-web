@@ -131,9 +131,11 @@ export interface IScheduledItem {
 
 export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
+    activityScheduleId: string;
 
-    activityId: string;
-    activityName: string;
+    // NOTE: Check w/ James if these can go away.
+    //activityId: string;
+    //activityName: string;
     reminder: Date;
 
     completed: boolean;
@@ -157,8 +159,10 @@ export interface IActivityLog extends ILog {
     activityLogId?: string;
 
     scheduledActivityId: string;
-    activityId: string;
-    activityName: string;
+
+    activity: IActivity;
+    // activityId: string;
+    // activityName: string;
 
     completed?: boolean;
     success?: ActivitySuccessType;
@@ -171,7 +175,8 @@ export interface IAssessmentLog extends ILog {
     assessmentLogId?: string;
 
     scheduledAssessmentId: string;
-    assessmentId: string; // NEW
+    //assessmentId: string; // NEW
+    assessment: IAssessment;
 
     patientSubmitted?: boolean; // NEW
     submittedByProviderId?: string;

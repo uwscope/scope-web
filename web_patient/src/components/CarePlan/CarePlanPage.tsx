@@ -98,9 +98,10 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleTaskClick = action((item: IScheduledActivity) => () => {
+        const activity = patientStore.getActivityByActivityScheduleId(item.activityScheduleId);
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.activityId,
+                [Parameters.activityId]: activity?.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );

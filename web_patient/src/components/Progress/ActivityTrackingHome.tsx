@@ -64,14 +64,17 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
         // TODO Activity Refactor: Activity Tracking
-        // const activity = patientStore.getActivityById(log.activityId);
-        // viewState.selectedValue = activity?.value || getString('Activity_tracking_log_value_none');
-        viewState.selectedValue = getString('Activity_tracking_log_value_none');
+        const activity = patientStore.getActivityById(log.activity?.activityId as string);
+        viewState.selectedValue =
+            patientStore.getValueById(activity?.valueId as string)?.name ||
+            getString('Activity_tracking_log_value_none');
+        //viewState.selectedValue = getString('Activity_tracking_log_value_none');
 
-        // TODO Activity Refactor: Activity Tracking
         // const lifearea = activity && rootStore.getLifeAreaContent(activity?.lifeareaId);
-        // viewState.selectedLifearea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
-        viewState.selectedLifeArea = getString('Activity_tracking_log_lifearea_none');
+        //viewState.selectedLifeArea = getString('Activity_tracking_log_lifearea_none');
+        viewState.selectedLifeArea =
+            (rootStore.getLifeAreaContent(patientStore.getValueById(activity?.valueId as string)?.lifeAreaId as string)
+                ?.name as string) || getString('Activity_tracking_log_lifearea_none');
     });
 
     const handleClose = action(() => {
@@ -103,7 +106,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <WordBreakTableCell>{log.activityName}</WordBreakTableCell>
+                                        {/* TODO: Remove ? from activity after database reset. */}
+                                        <WordBreakTableCell>{log.activity?.name}</WordBreakTableCell>
                                         <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
@@ -112,7 +116,8 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                         {viewState.selectedLog && (
                             <ProgressDialog
                                 isOpen={viewState.isOpen}
-                                title={viewState.selectedLog?.activityName || 'Activity Log'}
+                                // TODO: Remove ? from activity after database reset.
+                                title={viewState.selectedLog?.activity?.name || 'Activity Log'}
                                 content={
                                     <Table size="small" aria-label="a dense table">
                                         <TableBody>

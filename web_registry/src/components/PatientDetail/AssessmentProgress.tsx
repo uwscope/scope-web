@@ -95,7 +95,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         totalOnly: false,
         totalScoreString: '',
         log: {
-            assessmentId: assessment.assessmentId,
+            assessment: assessment,
             recordedDateTime: new Date(),
             comment: '',
             pointValues: {},
@@ -112,7 +112,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> = o
         logState.openEdit = true;
         logState.totalOnly = false;
         logState.log = {
-            assessmentId: assessment.assessmentId,
+            assessment: assessment,
             recordedDateTime: new Date(),
             comment: '',
             pointValues: {},
