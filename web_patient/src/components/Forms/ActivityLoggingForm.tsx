@@ -157,8 +157,11 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         return null;
     }
 
-    if (task.activityId != activityId) {
-        logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.activityId}`);
+    if (task.dataSnapshot?.activity?.activityId != activityId) {
+        logError(
+            'ActivityForm',
+            `Activity and task mismatch: activity=${activityId}, taskSource=${task.dataSnapshot?.activity?.activityId}`,
+        );
         return null;
     }
 
@@ -167,13 +170,14 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
-        activityId,
+        //activityId,
         scheduledActivityId: task.scheduledActivityId,
+        dataSnapshot: { scheduledActivity: task },
         alternative: '',
         comment: '',
         pleasure: 5,
         accomplishment: 5,
-        activityName: activity.name,
+        //activityName: activity.name,
         recordedDateTime: new Date(),
         success: '',
     }));
@@ -186,6 +190,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
                 await patientStore.completeScheduledActivity({ ...logData });
             } else if (dataState.success == 'Yes') {
                 const { alternative, ...logData } = dataState;
+
                 await patientStore.completeScheduledActivity({ ...logData });
             } else {
                 await patientStore.completeScheduledActivity({ ...dataState });
