@@ -19,7 +19,7 @@ export const ScheduledListItem: FunctionComponent<IScheduledListItemProps> = (pr
                 {item.completed ? <CheckIcon /> : <RadioButtonUncheckedIcon />}
             </ListItemIcon>
             <ListItemText
-                primary={<Typography noWrap>{item.activityName}</Typography>}
+                primary={<Typography noWrap>{item.dataSnapshot?.activity?.name}</Typography>}
                 secondary={getTaskItemDueTimeString(item, new Date())}
             />
         </ListItem>
