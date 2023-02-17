@@ -4,6 +4,16 @@
     "title": "IActivityLog",
     "description": "IActivityLog Type",
     "type": "object",
+    "$comment": [
+        "---------------------------------------",
+        "Removed Unused Property",
+        "---------------------------------------",
+        {
+            "completed": {
+                "type": "boolean"
+            }
+        }
+    ],
     "properties": {
         "_id": {
             "type": "string"
@@ -32,9 +42,6 @@
         "comment": {
             "$ref": "/schemas/documents/utils/log#/properties/comment"
         },
-        "completed": {
-            "type": "boolean"
-        },
         "success": {
             "$ref": "/schemas/utils/enums#/properties/activitySuccessType"
         },
@@ -56,6 +63,9 @@
         },
         {
             "$ref": "#/$defs/no-success-disallows-pleasure"
+        },
+        {
+            "$ref": "#/$defs/yes-success-disallows-alternative"
         }
     ],
     "$defs": {
@@ -79,10 +89,28 @@
                 }
             ]
         },
+        "yes-success-disallows-alternative": {
+            "anyOf": [
+                {
+                    "not": { "$ref": "#/$defs/yes-success" }
+                },
+                {
+                    "not": { "required": ["alternative"] }
+                }
+            ]
+        },
         "no-success": {
             "properties": {
                 "success": {
                     "const": "No"
+                }
+            },
+            "required": ["success"]
+        },
+        "yes-success": {
+            "properties": {
+                "success": {
+                    "const": "Yes"
                 }
             },
             "required": ["success"]
