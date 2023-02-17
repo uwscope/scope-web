@@ -40,6 +40,18 @@ TEST_CONFIGS = [
         document_path="activity-log/no-success-disallows-pleasure-invalid.json",
         expected_valid=False,
     ),
+    ConfigTestJSONSchema(
+        name="activity-log-yes-success-disallows-alternative-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/yes-success-disallows-alternative-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-yes-success-disallows-alternative-valid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/yes-success-disallows-alternative-valid.json",
+        expected_valid=True,
+    ),
     # activity-schedule
     ConfigTestJSONSchema(
         name="activity-schedule-hasReminder-is-true-requires-reminderTimeOfDay-valid",
