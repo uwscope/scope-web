@@ -32,7 +32,7 @@ export const HomePage: FunctionComponent = observer(() => {
     const onTaskClick = action((item: IScheduledActivity) => () => {
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.activityId,
+                [Parameters.activityId]: item.dataSnapshot.activity?.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );
