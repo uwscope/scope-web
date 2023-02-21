@@ -458,7 +458,8 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async completeScheduledActivity(activityLog: IActivityLog) {
         const promise = this.patientService
-            //.addActivityLog({ ...activityLog, completed: true, recordedDateTime: new Date() }) TODO: Confirm if completed: true can be removed
+            //.addActivityLog({ ...activityLog, completed: true, recordedDateTime: new Date() })
+            // TODO Activity Refactor: Confirm if completed: true can be removed
             .addActivityLog({ ...activityLog, recordedDateTime: new Date() })
             .then((addedLog) => {
                 const newLogs = this.activityLogs.slice() || [];
