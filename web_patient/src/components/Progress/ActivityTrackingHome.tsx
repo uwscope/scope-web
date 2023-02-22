@@ -64,7 +64,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
 
-        // TODO Activity Refactor: Make dataSnapshot a required field after db reset
+        // TODO Activity Refactor: Make dataSnapshot a required field after db migration
         const value = log.dataSnapshot?.scheduledActivity.dataSnapshot.value;
         viewState.selectedValue = value?.name || getString('Activity_tracking_log_value_none');
 
