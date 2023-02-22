@@ -102,7 +102,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
                                         <WordBreakTableCell>
-                                            {/* TODO: Remove ? db reset. */}
+                                            {/* TODO Activity Refactor: Remove ? after db migration. */}
                                             {log.dataSnapshot?.scheduledActivity?.dataSnapshot?.activity?.name}
                                         </WordBreakTableCell>
                                         <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
