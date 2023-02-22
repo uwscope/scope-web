@@ -133,7 +133,7 @@ export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
 
     dataSnapshot: IScheduledActivityDataSnapshot;
-    // TODO: Remove activityId and activityName after db reset
+    // TODO Activity Refactor: Remove activityId and activityName after db migration
     activityId: string;
     activityName: string;
     reminder: Date;
