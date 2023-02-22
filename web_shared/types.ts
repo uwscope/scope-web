@@ -166,7 +166,7 @@ export interface IActivityLog extends ILog {
 
     scheduledActivityId: string;
     dataSnapshot: IActivityLogDataSnapshot;
-    // TODO: Remove activityId and activityName after db reset
+    // TODO Activity Refactor: Remove activityId and activityName after db migration
     activityId?: string;
     activityName?: string;
 
