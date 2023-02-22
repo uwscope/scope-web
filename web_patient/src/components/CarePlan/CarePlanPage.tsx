@@ -100,7 +100,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     const handleTaskClick = action((item: IScheduledActivity) => () => {
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.dataSnapshot.activity?.activityId as string,
+                [Parameters.activityId]: item.dataSnapshot.activity.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );

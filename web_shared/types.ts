@@ -143,7 +143,7 @@ export interface IScheduledActivity extends IScheduledItem {
 
 export interface IScheduledActivityDataSnapshot {
     activitySchedule: IActivitySchedule;
-    activity?: IActivity;
+    activity: IActivity;
     value?: IValue;
 }
 
