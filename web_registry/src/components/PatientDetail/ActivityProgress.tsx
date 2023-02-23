@@ -16,10 +16,13 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const logMap = new Map<string, IActivityLog>();
 
+    // TODO Activity Refactor: Question for James, why are we sorting here? Also, should this be a helper function in PatientStore?
     currentPatient.activityLogs
         ?.slice()
         .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))
-        .forEach((log) => logMap.set(log.scheduledActivityId, log));
+        .forEach((log) => {
+            logMap.set(log.scheduledActivityId, log);
+        });
 
     const logs = currentPatient.scheduledActivities
         ?.slice()
@@ -27,7 +30,6 @@ export const ActivityProgress: FunctionComponent = observer(() => {
         .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime))
         .map((scheduledActivity) => ({
             ...scheduledActivity,
-            ...logMap.get(scheduledActivity.scheduledActivityId),
         }));
 
     const getCompleted = (success: ActivitySuccessType) => {
@@ -42,16 +44,21 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     };
 
     const tableData = logs?.map((log) => {
+        const activityLog = logMap.get(log.scheduledActivityId);
+
         return {
             id: log.scheduledActivityId,
-            name: log.activityName,
+            name: log.dataSnapshot?.activity.name,
             dueDate: format(log.dueDateTime, 'MM/dd/yyyy'),
-            recordedDateTime: log.completed && log.recordedDateTime ? format(log.recordedDateTime, 'MM/dd/yyyy') : '--',
-            completed: log.completed && log.success ? getCompleted(log.success) : '--',
-            alternative: log.alternative || '--',
-            pleasure: log.completed && log.success != 'No' ? log.pleasure : '--',
-            accomplishment: log.completed && log.success != 'No' ? log.accomplishment : '--',
-            comment: log.completed ? log.comment : '--',
+            recordedDateTime:
+                log.completed && activityLog?.recordedDateTime
+                    ? format(activityLog?.recordedDateTime, 'MM/dd/yyyy')
+                    : '--',
+            completed: log.completed && activityLog?.success ? getCompleted(activityLog?.success) : '--',
+            alternative: activityLog?.alternative || '--',
+            pleasure: log.completed && activityLog?.success != 'No' ? activityLog?.pleasure : '--',
+            accomplishment: log.completed && activityLog?.success != 'No' ? activityLog?.accomplishment : '--',
+            comment: log.completed ? activityLog?.comment : '--',
         };
     });
 
