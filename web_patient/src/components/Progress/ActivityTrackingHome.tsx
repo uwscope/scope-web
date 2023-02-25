@@ -63,15 +63,13 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const handleLogClick = action((log: IActivityLog) => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
-        // TODO Activity Refactor: Activity Tracking
-        // const activity = patientStore.getActivityById(log.activityId);
-        // viewState.selectedValue = activity?.value || getString('Activity_tracking_log_value_none');
-        viewState.selectedValue = getString('Activity_tracking_log_value_none');
 
-        // TODO Activity Refactor: Activity Tracking
-        // const lifearea = activity && rootStore.getLifeAreaContent(activity?.lifeareaId);
-        // viewState.selectedLifearea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
-        viewState.selectedLifeArea = getString('Activity_tracking_log_lifearea_none');
+        // TODO Activity Refactor: Make dataSnapshot a required field after db migration
+        const value = log.dataSnapshot?.scheduledActivity.dataSnapshot.value;
+        viewState.selectedValue = value?.name || getString('Activity_tracking_log_value_none');
+
+        const lifearea = value && rootStore.getLifeAreaContent(value?.lifeAreaId as string);
+        viewState.selectedLifeArea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
     });
 
     const handleClose = action(() => {
@@ -103,7 +101,10 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <WordBreakTableCell>{log.activityName}</WordBreakTableCell>
+                                        <WordBreakTableCell>
+                                            {/* TODO Activity Refactor: Remove ? after db migration. */}
+                                            {log.dataSnapshot?.scheduledActivity?.dataSnapshot?.activity?.name}
+                                        </WordBreakTableCell>
                                         <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
