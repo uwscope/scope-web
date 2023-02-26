@@ -16,13 +16,9 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
     const logMap = new Map<string, IActivityLog>();
 
-    // TODO Activity Refactor: Question for James, why are we sorting here? Also, should this be a helper function in PatientStore?
-    currentPatient.activityLogs
-        ?.slice()
-        .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime))
-        .forEach((log) => {
-            logMap.set(log.scheduledActivityId, log);
-        });
+    currentPatient.activityLogs?.slice().forEach((log) => {
+        logMap.set(log.scheduledActivityId, log);
+    });
 
     const logs = currentPatient.scheduledActivities
         ?.slice()
@@ -48,6 +44,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
         return {
             id: log.scheduledActivityId,
+            // TODO Activity Refactor: Make dataSnapshot a required field after db migration
             name: log.dataSnapshot?.activity.name,
             dueDate: format(log.dueDateTime, 'MM/dd/yyyy'),
             recordedDateTime:
