@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
-import { compareAsc, format, isBefore } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 import compareDesc from 'date-fns/compareDesc';
 import { observer } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
