@@ -1,3 +1,4 @@
+import copy
 from typing import List, Optional
 
 import pymongo.collection
@@ -6,13 +7,14 @@ import scope.database.patient.scheduled_activities
 
 DOCUMENT_TYPE = "activityLog"
 SEMANTIC_SET_ID = "activityLogId"
+DATA_SNAPSHOT_PROPERTY = "dataSnapshot"
 
 
 def _maintain_scheduled_activity(
     *,
     collection: pymongo.collection.Collection,
     activity_log: dict,
-):
+) -> Optional[scope.database.collection_utils.SetPutResult]:
     scheduled_activity_id = activity_log.get(
         scope.database.patient.scheduled_activities.SEMANTIC_SET_ID, None
     )
@@ -81,20 +83,29 @@ def post_activity_log(
     Post "activityLog" document.
     """
 
-    activity_log_set_post_result = scope.database.collection_utils.post_set_element(
+    maintained_scheduled_activity_set_put_result = _maintain_scheduled_activity(
+        collection=collection,
+        activity_log=activity_log,
+    )
+
+    updated_activity_log = copy.deepcopy(activity_log)
+    if maintained_scheduled_activity_set_put_result.inserted_count == 1:
+        activity_log_data_snapshot = {}
+        activity_log_data_snapshot.update(
+            {
+                scope.database.patient.scheduled_activities.DOCUMENT_TYPE: maintained_scheduled_activity_set_put_result.document
+            }
+        )
+        updated_activity_log.update(
+            {DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot}
+        )
+
+    return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
-        document=activity_log,
+        document=updated_activity_log,
     )
-
-    if activity_log_set_post_result.inserted_count == 1:
-        _maintain_scheduled_activity(
-            collection=collection,
-            activity_log=activity_log_set_post_result.document,
-        )
-
-    return activity_log_set_post_result
 
 
 def put_activity_log(
