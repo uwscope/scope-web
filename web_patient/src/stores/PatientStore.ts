@@ -1,4 +1,4 @@
-import { compareDesc } from 'date-fns';
+import { compareDesc, differenceInWeeks, isBefore } from 'date-fns';
 import _ from 'lodash';
 import { action, computed, makeAutoObservable, toJS } from 'mobx';
 import { getLogger } from 'shared/logger';
@@ -57,6 +57,7 @@ export interface IPatientStore {
     getActivitiesWithoutValueId: () => IActivity[];
     getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
+    getOverdueItems: (week: number) => IScheduledActivity[] | undefined;
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
@@ -330,6 +331,17 @@ export class PatientStore implements IPatientStore {
         return this.activitySchedules.filter((as) => {
             return as.activityId == activityId;
         });
+    }
+
+    @action.bound
+    public getOverdueItems(week: number): IScheduledActivity[] {
+        return this.taskItems
+            .filter(
+                (i) =>
+                    isBefore(i.dueDateTime, new Date()) &&
+                    differenceInWeeks(new Date(), i.dueDateTime, { roundingMethod: 'ceil' }) <= week,
+            )
+            .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
     }
 
     @action.bound
