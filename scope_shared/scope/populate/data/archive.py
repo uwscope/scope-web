@@ -119,30 +119,6 @@ class Archive:
                     )
 
     @staticmethod
-    def collapse_document_revisions(
-        *,
-        documents: List[dict],
-    ) -> List[dict]:
-        """
-        Remove all documents that have been replaced by a more recent revision.
-        """
-        grouped_documents = Archive.group_document_revisions(documents=documents)
-
-        # Each group contains all revisions of a specific document, keep only the most recent version
-        collapsed_documents: List[dict] = []
-        for (group_key_current, group_current) in grouped_documents.items():
-            document_most_recent = None
-            for document_current in group_current:
-                if (document_most_recent is None) or (
-                    document_current["_rev"] > document_most_recent["_rev"]
-                ):
-                    document_most_recent = document_current
-
-            collapsed_documents.append(document_most_recent)
-
-        return collapsed_documents
-
-    @staticmethod
     def collapse_entry_revisions(
         *,
         entries: Dict[Path, dict],
