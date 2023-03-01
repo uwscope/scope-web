@@ -168,6 +168,24 @@ class Archive:
 
         return collapsed_entries
 
+    def collections(
+        self,
+    ) -> List[str]:
+        """
+        Obtain a list of collections that are in this archive.
+
+        Collections are not explicitly represented, so this is just every directory with at least one file.
+        """
+
+        collections = []
+
+        for (key_current, document_current) in self.entries.items():
+            collection_current = str(key_current.parent)
+            if collection_current not in collections:
+                collections.append(collection_current)
+
+        return collections
+
     def collection_documents(
         self,
         *,
