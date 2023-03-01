@@ -1,4 +1,4 @@
-import { compareDesc, differenceInWeeks, isBefore } from 'date-fns';
+import { compareAsc, compareDesc, differenceInWeeks, endOfYesterday, isAfter, isBefore, startOfToday } from 'date-fns';
 import _ from 'lodash';
 import { action, computed, makeAutoObservable, toJS } from 'mobx';
 import { getLogger } from 'shared/logger';
@@ -57,8 +57,10 @@ export interface IPatientStore {
     getActivitiesWithoutValueId: () => IActivity[];
     getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
+    getNextTaskByActivityScheduleId: (activityScheduleId: string) => IScheduledActivity | undefined;
     getOverdueItems: (week: number) => IScheduledActivity[] | undefined;
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
+    getTasksByActivityScheduleId: (activityScheduleId: string) => IScheduledActivity[] | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
     getValuesByLifeAreaId: (lifeAreaId: string) => IValue[];
@@ -334,11 +336,19 @@ export class PatientStore implements IPatientStore {
     }
 
     @action.bound
+    public getNextTaskByActivityScheduleId(activityScheduleId: string) {
+        return this.getTasksByActivityScheduleId(activityScheduleId)
+            .filter((i) => !i.completed && isAfter(i.dueDateTime, startOfToday()))
+            .sort((a, b) => compareAsc(a.dueDateTime, b.dueDateTime))
+            .find(() => true);
+    }
+
+    @action.bound
     public getOverdueItems(week: number): IScheduledActivity[] {
         return this.taskItems
             .filter(
                 (i) =>
-                    isBefore(i.dueDateTime, new Date()) &&
+                    isBefore(i.dueDateTime, endOfYesterday()) &&
                     differenceInWeeks(new Date(), i.dueDateTime, { roundingMethod: 'ceil' }) <= week,
             )
             .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
@@ -352,6 +362,11 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public getTaskById(taskId: string) {
         return this.taskItems.find((t) => t.scheduledActivityId == taskId);
+    }
+
+    @action.bound
+    public getTasksByActivityScheduleId(activityScheduleId: string) {
+        return this.taskItems.filter((t) => t.activityScheduleId == activityScheduleId);
     }
 
     @action.bound getValueById(valueId: string) {
