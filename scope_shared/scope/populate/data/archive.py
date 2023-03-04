@@ -278,15 +278,15 @@ class Archive:
     def patients_documents(
         self,
         *,
-        ignore_sentinel: bool,
-        collapsed: bool,
+        remove_sentinel: bool,
+        remove_revisions: bool,
     ) -> List[dict]:
         document_set = self.collection_documents(
             collection="patients",
         )
-        if ignore_sentinel:
+        if remove_sentinel:
             document_set = document_set.remove_sentinel()
-        if collapsed:
+        if remove_revisions:
             document_set = document_set.remove_revisions()
 
         return document_set.documents
@@ -294,15 +294,15 @@ class Archive:
     def providers_documents(
         self,
         *,
-        ignore_sentinel: bool,
-        collapsed: bool,
+        remove_sentinel: bool,
+        remove_revisions: bool,
     ) -> List[dict]:
         document_set = self.collection_documents(
             collection="providers",
         )
-        if ignore_sentinel:
+        if remove_sentinel:
             document_set = document_set.remove_sentinel()
-        if collapsed:
+        if remove_revisions:
             document_set = document_set.remove_revisions()
 
         return document_set.documents

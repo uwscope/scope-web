@@ -109,8 +109,8 @@ def _archive_restore(
     # But it will have an existing "sentinel" that needs to be deleted.
     # Simply restore the "providers" collection.
     restore_providers_documents = archive.providers_documents(
-        ignore_sentinel=False,
-        collapsed=False,
+        remove_sentinel=False,
+        remove_revisions=False,
     )
     _collection_restore(
         collection=database["providers"],
@@ -127,8 +127,8 @@ def _archive_restore(
 
     # Restore the "patients" collection
     restore_patients_documents = archive.patients_documents(
-        ignore_sentinel=False,
-        collapsed=False,
+        remove_sentinel=False,
+        remove_revisions=False,
     )
     _collection_restore(
         collection=database["patients"],
@@ -138,8 +138,8 @@ def _archive_restore(
 
     # Iterate over each patient, restore its collection and documents
     for patient_current_document in archive.patients_documents(
-        ignore_sentinel=True,
-        collapsed=True,
+        remove_sentinel=True,
+        remove_revisions=True,
     ):
         # Recover fields we need from the patient document
         patient_id = patient_current_document["patientId"]
