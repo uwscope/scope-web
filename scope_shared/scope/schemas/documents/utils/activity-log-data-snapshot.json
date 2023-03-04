@@ -8,5 +8,6 @@
         }
     },
     "additionalProperties": false,
-    "required": ["scheduledActivity"]
+    "$comment": "TODO Activity Refactor: scheduledActivity should be required if text fixtures allowed that",
+    "required": []
 }

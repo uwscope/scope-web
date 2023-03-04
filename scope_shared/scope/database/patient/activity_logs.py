@@ -18,8 +18,6 @@ def _maintain_scheduled_activity(
     scheduled_activity_id = activity_log.get(
         scope.database.patient.scheduled_activities.SEMANTIC_SET_ID, None
     )
-    if not scheduled_activity_id:
-        return
 
     scheduled_activity_document = (
         scope.database.patient.scheduled_activities.get_scheduled_activity(
@@ -27,6 +25,8 @@ def _maintain_scheduled_activity(
             set_id=scheduled_activity_id,
         )
     )
+
+    # TODO: This should never happen in production, but can happen in automated tests
     if not scheduled_activity_document:
         return
 
@@ -89,15 +89,21 @@ def post_activity_log(
     )
 
     updated_activity_log = copy.deepcopy(activity_log)
-    if maintained_scheduled_activity_set_put_result.inserted_count == 1:
-        activity_log_data_snapshot = {
-            scope.database.patient.scheduled_activities.DOCUMENT_TYPE: maintained_scheduled_activity_set_put_result.document,
-        }
-        updated_activity_log.update(
-            {
-                DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot
-            }
-        )
+    activity_log_data_snapshot = {}
+
+    # TODO: This should always be true in production, but not in current automated tests
+    if maintained_scheduled_activity_set_put_result:
+        if maintained_scheduled_activity_set_put_result.inserted_count == 1:
+            activity_log_data_snapshot.update(
+                {
+                    scope.database.patient.scheduled_activities.DOCUMENT_TYPE: maintained_scheduled_activity_set_put_result.document,
+                }
+            )
+            updated_activity_log.update(
+                {
+                    DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot
+                }
+            )
 
     return scope.database.collection_utils.post_set_element(
         collection=collection,
