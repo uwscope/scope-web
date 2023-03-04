@@ -48,13 +48,12 @@ def _fake_activity_logs(
             "success": fake_utils.fake_enum_value(scope.enums.ActivitySuccessType),
         }
 
-        if fake_activity_log["success"] != scope.enums.ActivitySuccessType.Yes.value:
-            if random.choice([True, False]):
-                fake_activity_log.update(
-                    {
-                        "alternative": faker_factory.text(),
-                    }
-                )
+        if fake_activity_log["success"] == scope.enums.ActivitySuccessType.SomethingElse.value:
+            fake_activity_log.update(
+                {
+                    "alternative": faker_factory.text(),
+                }
+            )
 
         if fake_activity_log["success"] != scope.enums.ActivitySuccessType.No.value:
             fake_activity_log.update(
