@@ -159,7 +159,7 @@ def _archive_restore(
         restore_patient_current_documents = archive.collection_documents(
             collection=patient_collection_name,
             ignore_sentinel=False,
-        )
+        ).documents
         _collection_restore(
             collection=patient_collection,
             restore_documents=restore_patient_current_documents,

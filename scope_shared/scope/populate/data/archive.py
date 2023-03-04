@@ -2,13 +2,14 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+from scope.documents.document_set import DocumentSet
 import scope.database.document_utils as document_utils
 
 import copy
 import json
 from pathlib import Path
 import pyzipper
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 
 class Archive:
@@ -166,16 +167,15 @@ class Archive:
         self,
         *,
         collection: str,
-        ignore_sentinel: bool,
-    ) -> List[dict]:
+    ) -> DocumentSet:
         """
         Obtain all documents in a specified collection.
         """
 
-        return list(
-            self.collection_entries(
+        return DocumentSet(
+            documents=self.collection_entries(
                 collection=collection,
-                ignore_sentinel=ignore_sentinel,
+                ignore_sentinel=False,
             ).values()
         )
 
@@ -192,13 +192,9 @@ class Archive:
         # Filter to entries in this collection
         collection_entries = {}
         for (key_current, document_current) in self.entries.items():
-            parents_current = [
-                str(parent_current)
-                for parent_current in key_current.parents
-                if str(parent_current) not in ["."]
-            ]
+            collection_current = str(key_current.parent)
 
-            if collection in parents_current:
+            if collection == collection_current:
                 collection_entries[key_current] = document_current
 
         # If there is a sentinel to ignore, do that
@@ -285,15 +281,15 @@ class Archive:
         ignore_sentinel: bool,
         collapsed: bool,
     ) -> List[dict]:
-        documents = self.collection_documents(
+        document_set = self.collection_documents(
             collection="patients",
-            ignore_sentinel=ignore_sentinel,
         )
-
+        if ignore_sentinel:
+            document_set = document_set.remove_sentinel()
         if collapsed:
-            documents = Archive.collapse_document_revisions(documents=documents)
+            document_set = document_set.remove_revisions()
 
-        return documents
+        return document_set.documents
 
     def providers_documents(
         self,
@@ -301,12 +297,12 @@ class Archive:
         ignore_sentinel: bool,
         collapsed: bool,
     ) -> List[dict]:
-        documents = self.collection_documents(
+        document_set = self.collection_documents(
             collection="providers",
-            ignore_sentinel=ignore_sentinel,
         )
-
+        if ignore_sentinel:
+            document_set = document_set.remove_sentinel()
         if collapsed:
-            documents = Archive.collapse_document_revisions(documents=documents)
+            document_set = document_set.remove_revisions()
 
-        return documents
+        return document_set.documents
