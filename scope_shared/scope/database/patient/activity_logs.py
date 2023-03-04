@@ -90,14 +90,13 @@ def post_activity_log(
 
     updated_activity_log = copy.deepcopy(activity_log)
     if maintained_scheduled_activity_set_put_result.inserted_count == 1:
-        activity_log_data_snapshot = {}
-        activity_log_data_snapshot.update(
-            {
-                scope.database.patient.scheduled_activities.DOCUMENT_TYPE: maintained_scheduled_activity_set_put_result.document
-            }
-        )
+        activity_log_data_snapshot = {
+            scope.database.patient.scheduled_activities.DOCUMENT_TYPE: maintained_scheduled_activity_set_put_result.document,
+        }
         updated_activity_log.update(
-            {DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot}
+            {
+                DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot
+            }
         )
 
     return scope.database.collection_utils.post_set_element(
