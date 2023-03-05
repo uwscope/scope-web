@@ -2,7 +2,7 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, NewType, Tuple, Union
+from typing import Dict, Iterable, List, NewType, Optional, Tuple, Union
 
 
 DocumentType = NewType('DocumentType', str)
@@ -41,6 +41,63 @@ class DocumentSet:
         Access the contained set of documents.
         """
         return self._documents
+
+    @staticmethod
+    def _match_document(
+        document: dict,
+        match_type: Optional[str],
+    ) -> bool:
+        tested: bool = False
+        matches: bool = True
+
+        if match_type:
+            tested = True
+            matches = matches and document["_type"] == match_type
+
+        if not tested:
+            raise ValueError('At least one match parameter must be provided')
+
+        return matches
+
+    def filter(
+        self,
+        match_type: Optional[str] = None,
+    ) -> DocumentSet:
+        """
+        Keep only documents that match all provided parameters.
+        """
+
+        retained_documents = []
+        for document_current in self:
+            matches: bool = DocumentSet._match_document(
+                document=document_current,
+                match_type=match_type,
+            )
+
+            if matches:
+                retained_documents.append(document_current)
+
+        return DocumentSet(documents=retained_documents)
+
+    def remove(
+        self,
+        match_type: Optional[str] = None,
+    ) -> DocumentSet:
+        """
+        Remove any documents that match all provided parameters.
+        """
+
+        retained_documents = []
+        for document_current in self:
+            matches: bool = DocumentSet._match_document(
+                document=document_current,
+                match_type=match_type,
+            )
+
+            if not matches:
+                retained_documents.append(document_current)
+
+        return DocumentSet(documents=retained_documents)
 
     def remove_revisions(self) -> DocumentSet:
         """
