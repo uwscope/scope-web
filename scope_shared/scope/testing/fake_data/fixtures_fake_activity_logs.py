@@ -45,10 +45,17 @@ def _fake_activity_logs(
             },
             "recordedDateTime": fake_scheduled_activity["dueDateTime"],
             "comment": faker_factory.text(),
-            "completed": random.choice([True, False]),
             "success": fake_utils.fake_enum_value(scope.enums.ActivitySuccessType),
-            "alternative": faker_factory.text(),
         }
+
+        if fake_activity_log["success"] != scope.enums.ActivitySuccessType.Yes.value:
+            if random.choice([True, False]):
+                fake_activity_log.update(
+                    {
+                        "alternative": faker_factory.text(),
+                    }
+                )
+
         if fake_activity_log["success"] != scope.enums.ActivitySuccessType.No.value:
             fake_activity_log.update(
                 {
