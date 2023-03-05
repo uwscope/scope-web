@@ -145,6 +145,17 @@ class Archive:
 
         return collapsed_entries
 
+    @staticmethod
+    def _collection_from_archive_path(
+        *,
+        path: Path
+    ) -> str:
+        """
+        Obtain the name of the collection that contains a document at the given archive path.
+        """
+
+        return str(path.parent)
+
     def collections(
         self,
     ) -> List[str]:
@@ -306,3 +317,23 @@ class Archive:
             document_set = document_set.remove_revisions()
 
         return document_set.documents
+
+    def replace_collection_documents(
+        self,
+        *,
+        collection: str,
+        document_set: DocumentSet,
+    ) -> None:
+        self._entries = {
+            key_current: document_current
+            for (key_current, document_current) in self.entries.items()
+            if Archive._collection_from_archive_path(path=key_current) != collection
+        }
+
+        for document_current in document_set:
+            self._entries[
+                Path(
+                    collection,
+                    "{}.json".format(document_current["_id"]),
+                )
+            ] = document_current
