@@ -71,6 +71,7 @@ class _ArchiveMigrateAction(PopulateAction):
         # Obtain expected variables from action
         archive_destination = action["archive_destination"]
         migration = action["migration"]
+        dry_run = action.get("dry_run", False)
 
         # Ensure archive exists
         if not Path(self.archive).exists():
@@ -88,6 +89,7 @@ class _ArchiveMigrateAction(PopulateAction):
             password=password,
             archive_destination_path=Path(archive_destination),
             migration=migration,
+            dry_run=dry_run,
         )
 
         return populate_config
@@ -99,6 +101,7 @@ def _archive_migrate(
     password: str,
     archive_destination_path: Path,
     migration: str,
+    dry_run: bool,
 ):
     # Obtain the archive
     archive = scope.populate.data.archive.Archive.read_archive(
@@ -120,6 +123,9 @@ def _archive_migrate(
 
     # Validate the migrated archive
     scope.populate.data.validate.validate_archive(archive=archive)
+
+    # If this is a dry run, stop before doing the export
+    assert not dry_run
 
     # Export the migrated archive
     scope.populate.data.archive.Archive.write_archive(
