@@ -131,7 +131,7 @@ export interface IScheduledItem {
 
 export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
-
+    activityScheduleId: string;
     dataSnapshot: IScheduledActivityDataSnapshot;
     // TODO Activity Refactor: Remove activityId and activityName after db migration
     activityId: string;
