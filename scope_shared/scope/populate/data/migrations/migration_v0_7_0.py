@@ -2,8 +2,13 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+import copy
+import pprint
 from pathlib import Path
+from scope.documents.document_set import DocumentSet
 import scope.populate.data.archive
+import scope.schema
+import scope.schema_utils
 
 
 def archive_migrate_v0_7_0(
@@ -31,19 +36,66 @@ def archive_migrate_v0_7_0(
             if document_current not in delete_documents
         }
 
-        print("Deleted {} documents.".format(len(archive.entries) - len(migrated_entries)))
+        print("Deleted {} collections containing a total of {} documents.".format(
+            len(delete_collections),
+            len(archive.entries) - len(migrated_entries),
+        ))
 
         archive = scope.populate.data.archive.Archive(entries=migrated_entries)
 
     #
     # Go through each patient collection
     #
-    # for patient_collection_current in archive.
+    patients_documents = archive.patients_documents(
+        remove_sentinel=True,
+        remove_revisions=True,
+    )
+
+    for patients_document_current in patients_documents:
+        print("Migrating patient '{}'.".format(patients_document_current["name"]))
+
+        patient_collection = archive.collection_documents(
+            collection=patients_document_current["collection"],
+        )
+
+        patient_collection = _migrate_assessment_log_with_embedded_assessment(
+            collection=patient_collection,
+        )
+
+
+        archive.replace_collection_documents(
+            collection=patients_document_current["collection"],
+            document_set=patient_collection,
+        )
 
     return archive
 
 
+def _migrate_assessment_log_with_embedded_assessment(
+    collection: DocumentSet
+) -> DocumentSet:
+    """
+    These resulted from some development / experimentation.
+    """
 
+    migrated_documents = []
+
+    for document_current in collection:
+        document_current = copy.deepcopy(document_current)
+
+        if document_current["_type"] == "assessmentLog":
+            if "assessment" in document_current:
+                document_current["assessmentId"] = document_current["assessment"]["assessmentId"]
+                del document_current["assessment"]
+
+            scope.schema_utils.assert_schema(
+                data=document_current,
+                schema=scope.schema.assessment_log_schema,
+            )
+
+        migrated_documents.append(document_current)
+
+    return DocumentSet(documents=migrated_documents)
 
 # # Allow typing to forward reference
 # # TODO: Not necessary with Python 3.11
