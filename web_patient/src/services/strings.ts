@@ -26,9 +26,10 @@ const _strings = {
     Home_mood_button_text: 'Log your mood',
     Home_plan_title: 'My plan for today',
     Home_plan_done: 'You are all caught up! Make sure to celebrate your achievement!',
-    Home_overdue_title: 'My plan for last week',
+    Home_overdue_title: 'My plan for past 2 weeks',
     Home_overdue_pending: 'Show pending activities',
     Home_overdue_all: 'Show all activities',
+    Home_overdue_done: 'You are all caught up for the past 2 weeks! Make sure to celebrate your achievement!',
 
     Form_mood_logging_title: 'Mood Check-In',
     Form_mood_logging_mood_prompt: 'How would you rate your current mood?',
