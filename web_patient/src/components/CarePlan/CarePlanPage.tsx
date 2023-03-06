@@ -241,16 +241,18 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         );
     });
 
-    const renderActivitySchedule = (activitySchedule: IActivitySchedule): ReactNode => {
+    const renderActivitySchedule = (nextTask: IScheduledActivity): ReactNode => {
         return (
             <Stack spacing={1}>
                 <HelperText>
-                    {formatDateOnly(activitySchedule.date, 'EEE, MMM d') +
+                    {formatDateOnly(nextTask.dueDateTime, 'EEE, MMM d') +
                         ', ' +
-                        formatTimeOfDayOnly(activitySchedule.timeOfDay)}
+                        formatTimeOfDayOnly(nextTask.dataSnapshot.activitySchedule.timeOfDay)}
                 </HelperText>
-                {activitySchedule.hasRepetition && (
-                    <HelperText>{getRepeatDayText(activitySchedule.repeatDayFlags as DayOfWeekFlags)}</HelperText>
+                {nextTask.dataSnapshot.activitySchedule.hasRepetition && (
+                    <HelperText>
+                        {getRepeatDayText(nextTask.dataSnapshot.activitySchedule.repeatDayFlags as DayOfWeekFlags)}
+                    </HelperText>
                 )}
             </Stack>
         );
@@ -301,7 +303,19 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                         patientStore.getActivitySchedulesByActivityId(activity.activityId as string),
                                     );
 
-                                    if (sortedActivitySchedules.length == 0) {
+                                    const nextTasks: IScheduledActivity[] = new Array();
+
+                                    sortedActivitySchedules?.slice().forEach((activitySchedule) => {
+                                        const nextTask = patientStore.getNextTaskByActivityScheduleId(
+                                            activitySchedule.activityScheduleId as string,
+                                        );
+
+                                        if (nextTask !== undefined) {
+                                            nextTasks.push(nextTask);
+                                        }
+                                    });
+
+                                    if (nextTasks.length == 0) {
                                         // TODO: This really belong as part of the activity list item,
                                         //       but getting it to format correctly wasn't trivial
                                         return (
@@ -324,41 +338,38 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
                                     return (
                                         <ActivityScheduleList>
-                                            {sortedActivitySchedules.map(
-                                                (activityScheduleCurrent, idxActivityScheduleCurrent) => (
-                                                    <Fragment key={activityScheduleCurrent.activityScheduleId}>
-                                                        <ListItem
-                                                            alignItems="flex-start"
-                                                            button
-                                                            component={Link}
-                                                            to={getFormLink(ParameterValues.form.editActivitySchedule, {
-                                                                [Parameters.activityScheduleId as string]:
-                                                                    activityScheduleCurrent.activityScheduleId as string,
-                                                            })}>
-                                                            {renderActivitySchedule(activityScheduleCurrent)}
+                                            {nextTasks.map((nextTask, idxNextTask) => (
+                                                <Fragment
+                                                    key={nextTask.dataSnapshot.activitySchedule.activityScheduleId}>
+                                                    <ListItem
+                                                        alignItems="flex-start"
+                                                        button
+                                                        component={Link}
+                                                        to={getFormLink(ParameterValues.form.editActivitySchedule, {
+                                                            [Parameters.activityScheduleId as string]: nextTask
+                                                                .dataSnapshot.activitySchedule
+                                                                .activityScheduleId as string,
+                                                        })}>
+                                                        {renderActivitySchedule(nextTask)}
 
-                                                            <ListItemSecondaryAction>
-                                                                <IconButton
-                                                                    edge="end"
-                                                                    aria-label="more"
-                                                                    onClick={(e) =>
-                                                                        handleActivityScheduleMoreClick(
-                                                                            activityScheduleCurrent,
-                                                                            e,
-                                                                        )
-                                                                    }
-                                                                    size="large">
-                                                                    <MoreVertIcon />
-                                                                </IconButton>
-                                                            </ListItemSecondaryAction>
-                                                        </ListItem>
-                                                        {idxActivityScheduleCurrent <
-                                                            sortedActivitySchedules.length - 1 && (
-                                                            <Divider variant="middle" />
-                                                        )}
-                                                    </Fragment>
-                                                ),
-                                            )}
+                                                        <ListItemSecondaryAction>
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label="more"
+                                                                onClick={(e) =>
+                                                                    handleActivityScheduleMoreClick(
+                                                                        nextTask.dataSnapshot.activitySchedule,
+                                                                        e,
+                                                                    )
+                                                                }
+                                                                size="large">
+                                                                <MoreVertIcon />
+                                                            </IconButton>
+                                                        </ListItemSecondaryAction>
+                                                    </ListItem>
+                                                    {idxNextTask < nextTasks.length - 1 && <Divider variant="middle" />}
+                                                </Fragment>
+                                            ))}
                                         </ActivityScheduleList>
                                     );
                                 })()}
