@@ -65,6 +65,9 @@
             "$ref": "#/$defs/no-success-disallows-pleasure"
         },
         {
+            "$ref": "#/$defs/no-success-disallows-alternative"
+        },
+        {
             "$ref": "#/$defs/yes-success-disallows-alternative"
         }
     ],
@@ -86,6 +89,16 @@
                 },
                 {
                     "not": { "required": ["pleasure"] }
+                }
+            ]
+        },
+        "no-success-disallows-alternative": {
+            "anyOf": [
+                {
+                    "not": { "$ref": "#/$defs/no-success" }
+                },
+                {
+                    "not": { "required": ["alternative"] }
                 }
             ]
         },

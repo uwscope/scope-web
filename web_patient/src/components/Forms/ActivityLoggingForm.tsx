@@ -186,7 +186,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         try {
             // Some cleaning up of the log data based on completion state
             if (dataState.success == 'No') {
-                const { pleasure, accomplishment, ...logData } = dataState;
+                const { alternative, pleasure, accomplishment, ...logData } = dataState;
                 await patientStore.completeScheduledActivity({ ...logData });
             } else if (dataState.success == 'Yes') {
                 const { alternative, ...logData } = dataState;
