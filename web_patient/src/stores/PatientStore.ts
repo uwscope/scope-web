@@ -33,6 +33,7 @@ export interface IPatientStore {
     readonly safetyPlan: ISafetyPlan;
     readonly taskItems: IScheduledActivity[];
     readonly todayItems: IScheduledActivity[];
+    readonly todayItemsCompleted: boolean;
     readonly values: IValue[];
     readonly valuesInventory: IValuesInventory;
 
@@ -224,6 +225,10 @@ export class PatientStore implements IPatientStore {
 
     @computed public get todayItems() {
         return this.taskItems.filter((i) => isScheduledForDay(i, new Date()));
+    }
+
+    @computed public get todayItemsCompleted() {
+        return this.todayItems.filter((i) => !i.completed).length == 0;
     }
 
     @computed public get values() {
