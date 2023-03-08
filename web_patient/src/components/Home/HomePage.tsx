@@ -30,13 +30,13 @@ export const HomePage: FunctionComponent = observer(() => {
     const navigate = useNavigate();
 
     const viewState = useLocalObservable<{
-        showAllOverdueActivities: boolean;
+        showPendingOverdueActivities: boolean;
     }>(() => ({
-        showAllOverdueActivities: false,
+        showPendingOverdueActivities: false,
     }));
 
     const handleOverdueViewToggle = action((event: React.ChangeEvent<HTMLInputElement>) => {
-        viewState.showAllOverdueActivities = event.target.checked;
+        viewState.showPendingOverdueActivities = event.target.checked;
     });
 
     const overdueItems = rootStore.patientStore.getOverdueItems(2);
@@ -146,16 +146,21 @@ export const HomePage: FunctionComponent = observer(() => {
             </Section>
             <Section title={getString('Home_plan_title')}>
                 {!!rootStore.patientStore.todayItems && rootStore.patientStore.todayItems.length > 0 ? (
-                    <CompactList>
-                        {rootStore.patientStore.todayItems.map((item, idx) => (
-                            <Fragment key={`${item.scheduledActivityId}-${idx}`}>
-                                <ScheduledListItem item={item} onClick={onTaskClick(item)} />
-                                {idx < rootStore.patientStore.todayItems.length - 1 && <Divider variant="middle" />}
-                            </Fragment>
-                        ))}
-                    </CompactList>
+                    <Fragment>
+                        {!!rootStore.patientStore.todayItemsCompleted && (
+                            <Typography variant="body2">{getString('Home_plan_done')}</Typography>
+                        )}
+                        <CompactList>
+                            {rootStore.patientStore.todayItems.map((item, idx) => (
+                                <Fragment key={`${item.scheduledActivityId}-${idx}`}>
+                                    <ScheduledListItem item={item} onClick={onTaskClick(item)} />
+                                    {idx < rootStore.patientStore.todayItems.length - 1 && <Divider variant="middle" />}
+                                </Fragment>
+                            ))}
+                        </CompactList>
+                    </Fragment>
                 ) : (
-                    <Typography variant="body2">{getString('Home_plan_done')}</Typography>
+                    <Typography variant="body2">{getString('Home_plan_empty')}</Typography>
                 )}
             </Section>
             <Section title={getString('Home_overdue_title')}>
@@ -165,13 +170,13 @@ export const HomePage: FunctionComponent = observer(() => {
                             <Grid item>
                                 <Typography
                                     variant="subtitle2"
-                                    color={viewState.showAllOverdueActivities ? 'textSecondary' : 'textPrimary'}>
+                                    color={viewState.showPendingOverdueActivities ? 'textSecondary' : 'textPrimary'}>
                                     {getString('Home_overdue_all')}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Switch
-                                    checked={viewState.showAllOverdueActivities}
+                                    checked={viewState.showPendingOverdueActivities}
                                     color="default"
                                     onChange={handleOverdueViewToggle}
                                     name="onOff"
@@ -180,12 +185,12 @@ export const HomePage: FunctionComponent = observer(() => {
                             <Grid item>
                                 <Typography
                                     variant="subtitle2"
-                                    color={viewState.showAllOverdueActivities ? 'textPrimary' : 'textSecondary'}>
+                                    color={viewState.showPendingOverdueActivities ? 'textPrimary' : 'textSecondary'}>
                                     {getString('Home_overdue_pending')}
                                 </Typography>
                             </Grid>
                         </Grid>
-                        {viewState.showAllOverdueActivities ? (
+                        {viewState.showPendingOverdueActivities ? (
                             <CompactList>
                                 {overdueItems
                                     .filter((i) => !i.completed)
@@ -210,7 +215,7 @@ export const HomePage: FunctionComponent = observer(() => {
                         )}
                     </Fragment>
                 ) : (
-                    <Typography variant="body2">{getString('Home_overdue_done')}</Typography>
+                    <Typography variant="body2">{getString('Home_overdue_empty')}</Typography>
                 )}
             </Section>
         </MainPage>
