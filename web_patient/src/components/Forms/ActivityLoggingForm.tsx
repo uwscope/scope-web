@@ -216,7 +216,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
                     onSuccessChange={(v) => handleValueChange('success', v)}
                 />
             ),
-            canGoNext: dataState.success == 'SomethingElse' ? !!dataState.alternative : dataState.success != undefined,
+            canGoNext: dataState.success == 'SomethingElse' ? !!dataState.alternative : !!dataState.success,
         };
 
         const pleasurePage = {
