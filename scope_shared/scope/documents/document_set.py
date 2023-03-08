@@ -35,6 +35,36 @@ class DocumentSet:
         """
         return iter(self.documents)
 
+    def contains_all(
+        self,
+        *,
+        documents: DocumentSet,
+    ):
+        """
+        Return whether the set of documents contains all of the provided documents.
+        """
+
+        for document_current in documents:
+            if document_current not in self.documents:
+                return False
+
+        return True
+
+    def contains_any(
+            self,
+            *,
+            documents: DocumentSet,
+    ):
+        """
+        Return whether the set of documents contains any of the provided documents.
+        """
+
+        for document_current in documents:
+            if document_current in self.documents:
+                return True
+
+        return False
+
     @property
     def documents(self) -> List[dict]:
         """
@@ -46,22 +76,30 @@ class DocumentSet:
     def _match_document(
         document: dict,
         match_type: Optional[str],
+        match_values: Optional[Dict[str, str]] = None,
     ) -> bool:
         tested: bool = False
         matches: bool = True
 
-        if match_type:
+        if matches and match_type:
             tested = True
             matches = matches and document["_type"] == match_type
+
+        if matches and match_values:
+            tested = True
+            for key_current, value_current in match_values.items():
+                matches = matches and key_current in document
+                matches = matches and document[key_current] == value_current
 
         if not tested:
             raise ValueError('At least one match parameter must be provided')
 
         return matches
 
-    def filter(
+    def filter_match(
         self,
         match_type: Optional[str] = None,
+        match_values: Optional[Dict[str, str]] = None,
     ) -> DocumentSet:
         """
         Keep only documents that match all provided parameters.
@@ -72,6 +110,7 @@ class DocumentSet:
             matches: bool = DocumentSet._match_document(
                 document=document_current,
                 match_type=match_type,
+                match_values=match_values,
             )
 
             if matches:
@@ -79,9 +118,10 @@ class DocumentSet:
 
         return DocumentSet(documents=retained_documents)
 
-    def remove(
+    def remove_match(
         self,
         match_type: Optional[str] = None,
+        match_values: Optional[Dict[str, str]] = None,
     ) -> DocumentSet:
         """
         Remove any documents that match all provided parameters.
@@ -92,6 +132,7 @@ class DocumentSet:
             matches: bool = DocumentSet._match_document(
                 document=document_current,
                 match_type=match_type,
+                match_values=match_values,
             )
 
             if not matches:
@@ -139,3 +180,19 @@ class DocumentSet:
                 if document_current["_type"] != "sentinel"
             )
         )
+
+    def union(
+        self,
+        *,
+        documents: DocumentSet,
+    ):
+        """
+        Union this set with the provided documents.
+        """
+
+        retained_documents = list(self.documents)
+        for document_current in documents:
+            if document_current not in retained_documents:
+                retained_documents.append(document_current)
+
+        return DocumentSet(documents=retained_documents)
