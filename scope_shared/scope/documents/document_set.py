@@ -32,7 +32,7 @@ class DocumentSet:
     def contains_all(
         self,
         *,
-        documents: DocumentSet,
+        documents: Iterable[dict] = None,
     ):
         """
         Return whether the set of documents contains all of the provided documents.
@@ -45,9 +45,9 @@ class DocumentSet:
         return True
 
     def contains_any(
-            self,
-            *,
-            documents: DocumentSet,
+        self,
+        *,
+        documents: Iterable[dict] = None,
     ):
         """
         Return whether the set of documents contains any of the provided documents.

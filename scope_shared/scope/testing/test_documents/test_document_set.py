@@ -40,49 +40,41 @@ def test_document_set_contains():
     )
 
     assert document_set.contains_all(
-        documents=DocumentSet(
-            documents=[
-                {
-                    "key": "value"
-                },
-                {
-                    "key": "other value"
-                },
-            ]
-        )
+        documents=[
+            {
+                "key": "value"
+            },
+            {
+                "key": "other value"
+            },
+        ]
     )
 
     assert not document_set.contains_all(
-        documents=DocumentSet(
-            documents=[
-                {
-                    "key": "value"
-                },
-                {
-                    "key": "missing value"
-                },
-            ]
-        )
+        documents=[
+            {
+                "key": "value"
+            },
+            {
+                "key": "missing value"
+            },
+        ]
     )
 
     assert document_set.contains_any(
-        documents=DocumentSet(
-            documents=[
-                {
-                    "key": "value"
-                },
-            ]
-        )
+        documents=[
+            {
+                "key": "value"
+            },
+        ]
     )
 
     assert not document_set.contains_any(
-        documents=DocumentSet(
-            documents=[
-                {
-                    "key": "missing value"
-                },
-            ]
-        )
+        documents=[
+            {
+                "key": "missing value"
+            },
+        ]
     )
 
 
@@ -290,12 +282,6 @@ def test_document_set_remove_revisions():
 
     document_set = DocumentSet(documents=original_documents)
     document_set = document_set.remove_revisions()
-    document_set = DocumentSet(
-        documents=sorted(
-            document_set.documents,
-            key=lambda document: original_documents.index(document),
-        )
-    )
 
     assert document_set.documents == [
         {
