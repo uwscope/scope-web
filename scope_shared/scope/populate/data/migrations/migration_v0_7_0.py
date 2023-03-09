@@ -72,26 +72,42 @@ def archive_migrate_v0_7_0(
 
 
 def _migrate_assessment_log_with_embedded_assessment(
-    collection: DocumentSet
+    collection: DocumentSet,
 ) -> DocumentSet:
     """
     These resulted from some development / experimentation.
     """
 
+    original_documents = collection.filter_match(
+        match_type="assessmentLog"
+    )
+
+    migrated_documents = []
+    for document_current in original_documents:
+        document_current = copy.deepcopy(document_current)
+
+        if "assessment" in document_current:
+            document_current["assessmentId"] = document_current["assessment"]["assessmentId"]
+            del document_current["assessment"]
+
+        scope.schema_utils.assert_schema(
+            data=document_current,
+            schema=scope.schema.assessment_log_schema,
+        )
+
+        migrated_documents.append(document_current)
+
+    return collection.remove_all(
+        documents=original_documents,
+    ).union(
+        documents=migrated_documents
+    )
     migrated_documents = []
 
     for document_current in collection:
         document_current = copy.deepcopy(document_current)
 
-        if document_current["_type"] == "assessmentLog":
-            if "assessment" in document_current:
-                document_current["assessmentId"] = document_current["assessment"]["assessmentId"]
-                del document_current["assessment"]
 
-            scope.schema_utils.assert_schema(
-                data=document_current,
-                schema=scope.schema.assessment_log_schema,
-            )
 
         migrated_documents.append(document_current)
 
