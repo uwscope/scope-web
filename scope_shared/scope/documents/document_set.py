@@ -275,7 +275,7 @@ class DocumentSet:
     def union(
         self,
         *,
-        documents: DocumentSet,
+        documents: Iterable[dict],
     ):
         """
         Union this set with the provided documents.
