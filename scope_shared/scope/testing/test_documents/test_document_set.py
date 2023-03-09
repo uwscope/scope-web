@@ -86,6 +86,71 @@ def test_document_set_contains():
     )
 
 
+def test_document_set_eq():
+    document_set = DocumentSet(
+        documents=[
+            {
+                "key": "first value"
+            },
+            {
+                "key": "second value"
+            },
+        ]
+    )
+
+    # Non-iterable comparison
+    assert document_set != 0
+
+    # Another document set
+    assert document_set == DocumentSet(
+        documents=[
+            {
+                "key": "first value"
+            },
+            {
+                "key": "second value"
+            },
+        ]
+    )
+
+    # A list
+    assert document_set == [
+        {
+            "key": "first value"
+        },
+        {
+            "key": "second value"
+        },
+    ]
+
+    # Order is not considered
+    assert document_set == [
+        {
+            "key": "second value"
+        },
+        {
+            "key": "first value"
+        },
+    ]
+
+    # Missing item
+    assert document_set != [
+        {
+            "key": "first value"
+        },
+    ]
+
+    # Different item
+    assert document_set == [
+        {
+            "key": "first value"
+        },
+        {
+            "key": "different value"
+        },
+    ]
+
+
 def test_document_set_match():
     document_set_matching = DocumentSet(documents=[
         {
@@ -122,6 +187,73 @@ def test_document_set_match():
 
     assert document_set_removed.contains_all(documents=document_set_not_matching)
     assert not document_set_removed.contains_any(documents=document_set_matching)
+
+
+def test_document_set_match_deleted():
+    document_set = DocumentSet(documents=[
+        {
+            "_type": "test",
+        },
+        {
+            "_type": "test",
+            "_deleted": True
+        },
+    ])
+
+    assert document_set.filter_match(
+        match_type="test",
+    ) == [
+        {
+            "_type": "test",
+        },
+        {
+            "_type": "test",
+            "_deleted": True
+        },
+    ]
+
+    assert document_set.filter_match(
+        match_type="test",
+        match_deleted=False,
+    ) == [
+        {
+            "_type": "test",
+        },
+    ]
+
+    assert document_set.filter_match(
+        match_type="test",
+        match_deleted=True,
+    ) == [
+        {
+            "_type": "test",
+            "_deleted": True
+        },
+    ]
+
+    assert document_set.remove_match(
+        match_type="test",
+    ) == [
+    ]
+
+    assert document_set.remove_match(
+        match_type="test",
+        match_deleted=False,
+    ) == [
+        {
+            "_type": "test",
+            "_deleted": True
+        },
+    ]
+
+    assert document_set.remove_match(
+        match_type="test",
+        match_deleted=True,
+    ) == [
+        {
+            "_type": "test",
+        },
+    ]
 
 
 def test_document_set_remove_revisions():

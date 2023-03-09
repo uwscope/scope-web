@@ -29,12 +29,6 @@ class DocumentSet:
 
         self._documents = list(documents)
 
-    def __iter__(self) -> Iterable[dict]:
-        """
-        Iterate over contained documents.
-        """
-        return iter(self.documents)
-
     def contains_all(
         self,
         *,
@@ -72,11 +66,74 @@ class DocumentSet:
         """
         return self._documents
 
+    def __eq__(self, other) -> bool:
+        """
+        Equal to any iterable containing equivalent objects in any order.
+        """
+        other_items: List
+
+        # Obtain a list of items
+        try:
+            remaining_items = list(iter(other))
+        except TypeError:
+            return False
+
+        # If the lists are not the same length, we cannot be equal
+        if len(self) != len(remaining_items):
+            return False
+
+        # Every item in our set must appear exactly once
+        remaining_items = list(self.documents)
+        for item_current in self:
+            try:
+                remaining_items.remove(item_current)
+            except ValueError:
+                return False
+
+        return True
+
+    def __len__(self) -> int:
+        """
+        Number of documents in the set.
+        """
+        return len(self.documents)
+
+    def filter_match(
+        self,
+        match_type: Optional[str] = None,
+        match_deleted: Optional[bool] = None,
+        match_values: Optional[Dict[str, str]] = None,
+    ) -> DocumentSet:
+        """
+        Keep only documents that match all provided parameters.
+        """
+
+        retained_documents = []
+        for document_current in self:
+            matches: bool = DocumentSet._match_document(
+                document=document_current,
+                match_type=match_type,
+                match_deleted=match_deleted,
+                match_values=match_values,
+            )
+
+            if matches:
+                retained_documents.append(document_current)
+
+        return DocumentSet(documents=retained_documents)
+
+    def __iter__(self) -> Iterable[dict]:
+        """
+        Iterate over contained documents.
+        """
+        return iter(self.documents)
+
     @staticmethod
     def _match_document(
         document: dict,
         match_type: Optional[str],
-        match_values: Optional[Dict[str, str]] = None,
+        match_deleted: Optional[bool],
+        match_values: Optional[Dict[str, str]],
     ) -> bool:
         tested: bool = False
         matches: bool = True
@@ -84,6 +141,10 @@ class DocumentSet:
         if matches and match_type:
             tested = True
             matches = matches and document["_type"] == match_type
+
+        if matches and match_deleted is not None:
+            tested = True
+            matches = matches and document.get("_deleted", False)
 
         if matches and match_values:
             tested = True
@@ -96,31 +157,10 @@ class DocumentSet:
 
         return matches
 
-    def filter_match(
-        self,
-        match_type: Optional[str] = None,
-        match_values: Optional[Dict[str, str]] = None,
-    ) -> DocumentSet:
-        """
-        Keep only documents that match all provided parameters.
-        """
-
-        retained_documents = []
-        for document_current in self:
-            matches: bool = DocumentSet._match_document(
-                document=document_current,
-                match_type=match_type,
-                match_values=match_values,
-            )
-
-            if matches:
-                retained_documents.append(document_current)
-
-        return DocumentSet(documents=retained_documents)
-
     def remove_match(
         self,
         match_type: Optional[str] = None,
+        match_deleted: Optional[bool] = None,
         match_values: Optional[Dict[str, str]] = None,
     ) -> DocumentSet:
         """
@@ -132,6 +172,7 @@ class DocumentSet:
             matches: bool = DocumentSet._match_document(
                 document=document_current,
                 match_type=match_type,
+                match_deleted=match_deleted,
                 match_values=match_values,
             )
 
