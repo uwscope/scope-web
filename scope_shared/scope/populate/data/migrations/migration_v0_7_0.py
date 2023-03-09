@@ -79,7 +79,8 @@ def _migrate_assessment_log_with_embedded_assessment(
     """
 
     original_documents = collection.filter_match(
-        match_type="assessmentLog"
+        match_type="assessmentLog",
+        match_deleted=False,
     )
 
     migrated_documents = []
