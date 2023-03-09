@@ -9,6 +9,7 @@ DocumentType = NewType('DocumentType', str)
 SetId = NewType('SetId', str)
 DocumentKey = Union[Tuple[DocumentType], Tuple[DocumentType, SetId]]
 
+
 class DocumentSet:
     """
     A set of documents that are all from the same collection.
@@ -23,11 +24,20 @@ class DocumentSet:
     ):
         """
         Create a set containing a shallow copy of the provided documents.
+
+        Ensures the provided documents are unique.
         """
         if not documents:
             documents = []
 
-        self._documents = list(documents)
+        retained_documents = []
+        for document_current in documents:
+            if document_current in retained_documents:
+                raise ValueError
+
+            retained_documents.append(document_current)
+
+        self._documents = retained_documents
 
     def contains_all(
         self,
@@ -156,6 +166,46 @@ class DocumentSet:
             raise ValueError('At least one match parameter must be provided')
 
         return matches
+
+    def remove_all(
+        self,
+        *,
+        documents: Iterable[dict] = None,
+    ) -> DocumentSet:
+        """
+        Remove all of the provided documents from the set.
+
+        Raise ValueError if a provided document was not in the set.
+        """
+
+        remove_documents = list(documents)
+
+        retained_documents = list(self)
+        for document_current in remove_documents:
+            try:
+                retained_documents.remove(document_current)
+            except ValueError:
+                # Re-raise the ValueError
+                raise
+
+        return DocumentSet(documents=retained_documents)
+
+    def remove_any(
+        self,
+        *,
+        documents: Iterable[dict] = None,
+    ) -> DocumentSet:
+        """
+        Remove any of the provided documents that occur in set.
+        """
+
+        remove_documents = list(documents)
+
+        return DocumentSet(documents=[
+            document_current
+            for document_current in self
+            if document_current not in remove_documents
+        ])
 
     def remove_match(
         self,

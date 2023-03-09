@@ -1,4 +1,30 @@
+import pytest
+
 from scope.documents.document_set import DocumentSet
+
+
+def test_document_set_constructor_enforces_unique():
+    """
+    DocumentSet should shallow copy the provided documents.
+    """
+
+    original_documents = [
+        {
+            "key": "value",
+        },
+        {
+            "key": "other value",
+        },
+        {
+            "key": "duplicate value",
+        },
+        {
+            "key": "duplicate value",
+        },
+    ]
+
+    with pytest.raises(ValueError):
+        document_set = DocumentSet(documents=original_documents)
 
 
 def test_document_set_constructor_shallow_copies_documents():
@@ -11,7 +37,7 @@ def test_document_set_constructor_shallow_copies_documents():
             "key": "value",
         },
         {
-            "key": "value",
+            "key": "other value",
         },
     ]
 
@@ -246,6 +272,79 @@ def test_document_set_match_deleted():
             "_type": "test",
         },
     ]
+
+
+def test_document_set_remove_documents():
+    document_set = DocumentSet(
+        documents=[
+            {
+                "key": "first value"
+            },
+            {
+                "key": "second value"
+            },
+            {
+                "key": "third value"
+            },
+        ]
+    )
+
+    assert document_set.remove_any(
+        documents=[
+            {
+                "key": "first value"
+            },
+            {
+                "key": "first value"
+            },
+            {
+                "key": "missing value"
+            },
+        ]
+    ) == [
+        {
+            "key": "second value"
+        },
+        {
+            "key": "third value"
+        },
+    ]
+
+    assert document_set.remove_all(
+        documents=[
+            {
+                "key": "first value"
+            },
+        ]
+    ) == [
+        {
+            "key": "second value"
+        },
+        {
+            "key": "third value"
+        },
+    ]
+
+    with pytest.raises(ValueError):
+        assert document_set.remove_all(
+            documents=[
+                {
+                    "key": "first value"
+                },
+                {
+                    "key": "first value"
+                },
+            ]
+        )
+
+    with pytest.raises(ValueError):
+        assert document_set.remove_all(
+            documents=[
+                {
+                    "key": "missing value"
+                },
+            ]
+        )
 
 
 def test_document_set_remove_revisions():
