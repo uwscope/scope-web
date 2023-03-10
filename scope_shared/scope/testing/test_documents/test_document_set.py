@@ -159,7 +159,7 @@ def test_document_set_eq():
     ]
 
     # Different item
-    assert document_set == [
+    assert document_set != [
         {
             "key": "first value"
         },
@@ -214,7 +214,7 @@ def test_document_set_match_deleted():
         },
         {
             "_type": "test",
-            "_deleted": True
+            "_deleted": True,
         },
     ])
 
@@ -226,7 +226,7 @@ def test_document_set_match_deleted():
         },
         {
             "_type": "test",
-            "_deleted": True
+            "_deleted": True,
         },
     ]
 
@@ -245,7 +245,7 @@ def test_document_set_match_deleted():
     ) == [
         {
             "_type": "test",
-            "_deleted": True
+            "_deleted": True,
         },
     ]
 
@@ -260,7 +260,7 @@ def test_document_set_match_deleted():
     ) == [
         {
             "_type": "test",
-            "_deleted": True
+            "_deleted": True,
         },
     ]
 

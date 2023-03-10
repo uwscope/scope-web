@@ -80,23 +80,21 @@ class DocumentSet:
         """
         Equal to any iterable containing equivalent objects in any order.
         """
-        other_items: List
 
         # Obtain a list of items
         try:
-            remaining_items = list(iter(other))
+            other_items: List = list(iter(other))
         except TypeError:
             return False
 
         # If the lists are not the same length, we cannot be equal
-        if len(self) != len(remaining_items):
+        if len(self) != len(other_items):
             return False
 
-        # Every item in our set must appear exactly once
-        remaining_items = list(self.documents)
+        # Every item in our set must appear exactly once in the other items
         for item_current in self:
             try:
-                remaining_items.remove(item_current)
+                other_items.remove(item_current)
             except ValueError:
                 return False
 
@@ -154,7 +152,7 @@ class DocumentSet:
 
         if matches and match_deleted is not None:
             tested = True
-            matches = matches and document.get("_deleted", False)
+            matches = matches and match_deleted == document.get("_deleted", False)
 
         if matches and match_values:
             tested = True
@@ -271,6 +269,18 @@ class DocumentSet:
                 if document_current["_type"] != "sentinel"
             )
         )
+
+    def __repr__(self) -> str:
+        """
+        String representation is the same as our documents.
+        """
+        return repr(self.documents)
+
+    def __str__(self) -> str:
+        """
+        String representation is the same as our documents.
+        """
+        return str(self.documents)
 
     def union(
         self,
