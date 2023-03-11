@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 import pytest
+import pytz
 
-from scope.documents.document_set import DocumentSet
+from scope.documents.document_set import document_id_from_datetime, DocumentSet
 
 
 def test_document_set_constructor_enforces_unique():
@@ -274,6 +276,117 @@ def test_document_set_match_deleted():
     ]
 
 
+def test_document_set_match_datetime_at():
+    datetime_rev1 = pytz.utc.localize(datetime(
+        year=2023,
+        month=3,
+        day=11,
+        hour=7,
+        minute=0,
+        second=0,
+        microsecond=0,
+    ))
+    document_rev1 = {
+        "_id": document_id_from_datetime(
+            generation_time=datetime_rev1
+        ),
+        "_type": "type",
+        "_rev": 1,
+    }
+
+    datetime_rev2 = datetime_rev1 + timedelta(days=1)
+    document_rev2 = {
+        "_id": document_id_from_datetime(
+            generation_time=datetime_rev2
+        ),
+        "_type": "type",
+        "_rev": 2,
+    }
+
+    datetime_rev3 = datetime_rev2 + timedelta(hours=1)
+    document_rev3 = {
+        "_id": document_id_from_datetime(
+            generation_time=datetime_rev3
+        ),
+        "_type": "type",
+        "_rev": 3,
+    }
+
+    # The encoding within _id is only to the second.
+    # This is effectively at the same time as rev3.
+    datetime_rev4 = datetime_rev3 + timedelta(milliseconds=1)
+    document_rev4 = {
+        "_id": document_id_from_datetime(
+            generation_time=datetime_rev4
+        ),
+        "_type": "type",
+        "_rev": 4,
+    }
+
+    document_other_type = {
+        "_id": document_id_from_datetime(
+            generation_time=datetime_rev1
+        ),
+        "_type": "other type",
+        "_rev": 1,
+    }
+
+    # Create the document set, reversing order so the set must sort
+    document_set = DocumentSet(documents=[
+        document_other_type,
+        document_rev4,
+        document_rev3,
+        document_rev2,
+        document_rev1,
+    ])
+
+    # Before our initial documents should be an empty set
+    assert document_set.filter_match(
+        match_datetime_at=datetime_rev1 - timedelta(days=1),
+    ) == [
+    ]
+
+    # Same time as our initial documents should be both of them
+    assert document_set.filter_match(
+        match_datetime_at=datetime_rev1,
+    ) == [
+        document_rev1,
+        document_other_type
+    ]
+
+    # An additional filter for type
+    assert document_set.filter_match(
+        match_type="type",
+        match_datetime_at=datetime_rev1,
+    ) == [
+        document_rev1,
+    ]
+
+    # Because rev3 and rev4 are effectively the same time, prefer the later revision
+    assert document_set.filter_match(
+        match_type="type",
+        match_datetime_at=datetime_rev3,
+    ) == [
+        document_rev4,
+    ]
+
+    # Because rev3 and rev4 are effectively the same time, prefer the later revision
+    assert document_set.filter_match(
+        match_type="type",
+        match_datetime_at=datetime_rev4,
+    ) == [
+        document_rev4,
+    ]
+
+    # In the future should still be rev4
+    assert document_set.filter_match(
+        match_datetime_at=datetime_rev4 + timedelta(days=1),
+    ) == [
+        document_rev4,
+        document_other_type
+    ]
+
+
 def test_document_set_remove_documents():
     document_set = DocumentSet(
         documents=[
@@ -465,7 +578,7 @@ def test_document_set_revisions():
 
     document_set = DocumentSet(documents=original_documents)
 
-    assert document_set.revisions() == {
+    assert document_set.revisions == {
         ("type", ): [
             {
                 "_type": "type",

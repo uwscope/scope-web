@@ -2,12 +2,57 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+import bson.objectid
+from datetime import datetime
+import pytz
+import secrets
 from typing import Dict, Iterable, List, NewType, Optional, Tuple, Union
 
+# This will allow either until we actually have a Document type
+Document = Union[NewType("Document", dict), dict]
 
 DocumentType = NewType('DocumentType', str)
 SetId = NewType('SetId', str)
 DocumentKey = Union[Tuple[DocumentType], Tuple[DocumentType, SetId]]
+
+
+def datetime_from_document(
+    *,
+    document: dict,
+) -> datetime:
+    return bson.objectid.ObjectId(document["_id"]).generation_time.astimezone(pytz.utc)
+
+
+def document_id_from_datetime(
+    generation_time: datetime,
+) -> str:
+    hex_datetime = str(bson.objectid.ObjectId.from_datetime(
+        generation_time=generation_time
+    ))[0:8]
+
+    hex_random = secrets.token_hex(8)
+
+    return hex_datetime + hex_random
+
+
+def document_key(
+    *,
+    document: Document
+) -> DocumentKey:
+    """
+    Obtain a key for the provided document.
+    """
+
+    key = (
+        document["_type"],
+    )
+    if "_set_id" in document:
+        key = (
+            document["_type"],
+            document["_set_id"],
+        )
+
+    return key
 
 
 class DocumentSet:
@@ -16,6 +61,7 @@ class DocumentSet:
     """
 
     _documents: List[dict]
+    _revisions: Optional[Dict[DocumentKey, DocumentSet]]
 
     def __init__(
         self,
@@ -38,6 +84,7 @@ class DocumentSet:
             retained_documents.append(document_current)
 
         self._documents = retained_documents
+        self._revisions = None
 
     def contains_all(
         self,
@@ -110,6 +157,7 @@ class DocumentSet:
         self,
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
+        match_datetime_at: Optional[datetime] = None,
         match_values: Optional[Dict[str, str]] = None,
     ) -> DocumentSet:
         """
@@ -118,10 +166,11 @@ class DocumentSet:
 
         retained_documents = []
         for document_current in self:
-            matches: bool = DocumentSet._match_document(
+            matches: bool = self._match_document(
                 document=document_current,
                 match_type=match_type,
                 match_deleted=match_deleted,
+                match_datetime_at=match_datetime_at,
                 match_values=match_values,
             )
 
@@ -130,17 +179,24 @@ class DocumentSet:
 
         return DocumentSet(documents=retained_documents)
 
+    def is_unique(self) -> bool:
+        """
+        Whether this set contains exactly one document.
+        """
+        return len(self) == 1
+
     def __iter__(self) -> Iterable[dict]:
         """
         Iterate over contained documents.
         """
         return iter(self.documents)
 
-    @staticmethod
     def _match_document(
+        self,
         document: dict,
         match_type: Optional[str],
         match_deleted: Optional[bool],
+        match_datetime_at: Optional[datetime],
         match_values: Optional[Dict[str, str]],
     ) -> bool:
         tested: bool = False
@@ -154,6 +210,27 @@ class DocumentSet:
             tested = True
             matches = matches and match_deleted == document.get("_deleted", False)
 
+        if matches and match_datetime_at is not None:
+            tested = True
+
+            if match_datetime_at < datetime_from_document(document=document):
+                # A document created after our match time cannot match
+                matches = matches and False
+            else:
+                # A document created at or before our match time
+                # matches if no revision replaces it before the match time
+                revisions = self.revisions[document_key(document=document)]
+                revision_index = revisions.documents.index(document)
+                if revision_index + 1 == len(revisions):
+                    # The current document is the final revision
+                    matches = matches and True
+                else:
+                    # There is a document after this
+                    datetime_next_revision = datetime_from_document(
+                        document=revisions.documents[revision_index + 1],
+                    )
+                    matches = matches and match_datetime_at < datetime_next_revision
+
         if matches and match_values:
             tested = True
             for key_current, value_current in match_values.items():
@@ -161,7 +238,7 @@ class DocumentSet:
                 matches = matches and document[key_current] == value_current
 
         if not tested:
-            raise ValueError('At least one match parameter must be provided')
+            raise ValueError('At least one match parameter must be provided.')
 
         return matches
 
@@ -209,6 +286,7 @@ class DocumentSet:
         self,
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
+        match_datetime_at: Optional[datetime] = None,
         match_values: Optional[Dict[str, str]] = None,
     ) -> DocumentSet:
         """
@@ -217,10 +295,11 @@ class DocumentSet:
 
         retained_documents = []
         for document_current in self:
-            matches: bool = DocumentSet._match_document(
+            matches: bool = self._match_document(
                 document=document_current,
                 match_type=match_type,
                 match_deleted=match_deleted,
+                match_datetime_at=match_datetime_at,
                 match_values=match_values,
             )
 
@@ -237,7 +316,7 @@ class DocumentSet:
         return DocumentSet(
             documents=[
                 document_revisions.documents[-1]
-                for document_revisions in self.revisions().values()
+                for document_revisions in self.revisions.values()
             ]
         )
 
@@ -282,6 +361,7 @@ class DocumentSet:
 
         return DocumentSet(documents=retained_documents)
 
+    @property
     def revisions(self) -> Dict[DocumentKey, DocumentSet]:
         """
         Group documents that are revisions of each underlying DocumentKey.
@@ -289,26 +369,31 @@ class DocumentSet:
         - The documents property of that set will be sorted in increasing order (i.e., the latest revision at the end).
         """
 
-        revisions: Dict[DocumentKey, List[dict]] = {}
-        for document_current in self:
-            # Singletons have only a _type, while set elements also have a _set_id
-            key_current = (
-                document_current["_type"],
-            )
-            if "_set_id" in document_current:
-                key_current = (
-                    document_current["_type"],
-                    document_current["_set_id"],
-                )
+        if self._revisions is None:
+            revisions: Dict[DocumentKey, List[dict]] = {}
+            for document_current in self:
+                # Singletons have only a _type, while set elements also have a _set_id
+                key_current = document_key(document=document_current)
 
-            revisions_existing = revisions.get(key_current, [])
-            revisions_existing.append(document_current)
-            revisions_existing = sorted(revisions_existing, key=lambda document: int(document["_rev"]))
+                revisions_existing = revisions.get(key_current, [])
+                revisions_existing.append(document_current)
+                revisions_existing = sorted(revisions_existing, key=lambda document: int(document["_rev"]))
 
-            revisions[key_current] = revisions_existing
+                revisions[key_current] = revisions_existing
 
-        return {
-            key_current: DocumentSet(documents=revisions[key_current])
-            for key_current in revisions.keys()
-        }
+            self._revisions = {
+                key_current: DocumentSet(documents=revisions[key_current])
+                for key_current in revisions.keys()
+            }
 
+        return self._revisions
+
+    def unique(self) -> Dict:
+        """
+        Obtain the single document in this set.
+        """
+
+        if len(self) != 1:
+            raise ValueError
+
+        return self.documents[0]
