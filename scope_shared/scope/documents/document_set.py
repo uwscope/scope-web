@@ -234,27 +234,11 @@ class DocumentSet:
         Remove any prior revisions of documents.
         """
 
-        current_revisions: Dict[DocumentKey, dict] = {}
-        for document_current in self:
-            # Singletons have only a _type, while set elements also have a _set_id
-            key_current = document_current["_type"]
-            if "_set_id" in document_current:
-                key_current = (
-                    document_current["_type"],
-                    document_current["_set_id"],
-                )
-
-            # Keep one document for each key
-            document_existing = current_revisions.get(key_current, None)
-            if document_existing:
-                # If we already have a document for this key, keep only the greatest revision
-                if int(document_current["_rev"]) > int(document_existing["_rev"]):
-                    current_revisions[key_current] = document_current
-            else:
-                current_revisions[key_current] = document_current
-
         return DocumentSet(
-            documents=current_revisions.values()
+            documents=[
+                document_revisions.documents[-1]
+                for document_revisions in self.revisions().values()
+            ]
         )
 
     def remove_sentinel(self) -> DocumentSet:
@@ -297,3 +281,34 @@ class DocumentSet:
                 retained_documents.append(document_current)
 
         return DocumentSet(documents=retained_documents)
+
+    def revisions(self) -> Dict[DocumentKey, DocumentSet]:
+        """
+        Group documents that are revisions of each underlying DocumentKey.
+        - Each DocumentKey will correspond to a set of all revisions of a document.
+        - The documents property of that set will be sorted in increasing order (i.e., the latest revision at the end).
+        """
+
+        revisions: Dict[DocumentKey, List[dict]] = {}
+        for document_current in self:
+            # Singletons have only a _type, while set elements also have a _set_id
+            key_current = (
+                document_current["_type"],
+            )
+            if "_set_id" in document_current:
+                key_current = (
+                    document_current["_type"],
+                    document_current["_set_id"],
+                )
+
+            revisions_existing = revisions.get(key_current, [])
+            revisions_existing.append(document_current)
+            revisions_existing = sorted(revisions_existing, key=lambda document: int(document["_rev"]))
+
+            revisions[key_current] = revisions_existing
+
+        return {
+            key_current: DocumentSet(documents=revisions[key_current])
+            for key_current in revisions.keys()
+        }
+

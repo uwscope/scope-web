@@ -348,6 +348,11 @@ def test_document_set_remove_documents():
 
 
 def test_document_set_remove_revisions():
+    # In addition to testing basic removal of old revision,
+    # this test purposefully uses strings for "_rev" to ensure that error gets handled correctly.
+    # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
+    # and the logic of DocumentSet.revisions that currently ensures robustness to string values.
+
     original_documents = [
         {
             "_type": "type",
@@ -419,3 +424,80 @@ def test_document_set_remove_sentinel():
             "_type": "type",
         },
     ]
+
+
+def test_document_set_revisions():
+    # In addition to testing basic removal of old revision,
+    # this test purposefully uses strings for "_rev" to ensure that error gets handled correctly.
+    # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
+    # and the logic of DocumentSet.revisions that currently ensures robustness to string values.
+
+    original_documents = [
+        {
+            "_type": "type",
+            "_rev": "3",
+        },
+        {
+            "_type": "type",
+            "_rev": "20",
+        },
+        {
+            "_type": "set type",
+            "_set_id": "set id",
+            "_rev": "3",
+        },
+        {
+            "_type": "set type",
+            "_set_id": "set id",
+            "_rev": "20",
+        },
+        {
+            "_type": "set type",
+            "_set_id": "other set id",
+            "_rev": "30",
+        },
+        {
+            "_type": "set type",
+            "_set_id": "other set id",
+            "_rev": "4",
+        },
+    ]
+
+    document_set = DocumentSet(documents=original_documents)
+
+    assert document_set.revisions() == {
+        ("type", ): [
+            {
+                "_type": "type",
+                "_rev": "3",
+            },
+            {
+                "_type": "type",
+                "_rev": "20",
+            },
+        ],
+        ("set type", "set id"): [
+            {
+                "_type": "set type",
+                "_set_id": "set id",
+                "_rev": "3",
+            },
+            {
+                "_type": "set type",
+                "_set_id": "set id",
+                "_rev": "20",
+            },
+        ],
+        ("set type", "other set id"): [
+            {
+                "_type": "set type",
+                "_set_id": "other set id",
+                "_rev": "30",
+            },
+            {
+                "_type": "set type",
+                "_set_id": "other set id",
+                "_rev": "4",
+            },
+        ],
+    }
