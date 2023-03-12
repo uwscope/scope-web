@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import copy
-import pprint
 from pathlib import Path
-from scope.documents.document_set import DocumentSet
+
+from scope.documents.document_set import datetime_from_document, DocumentSet
 import scope.populate.data.archive
 import scope.schema
 import scope.schema_utils
@@ -16,6 +16,8 @@ def archive_migrate_v0_7_0(
     archive_path: Path,
     archive: scope.populate.data.archive.Archive,
 ) -> scope.populate.data.archive.Archive:
+    print("Migrating to v0.7.0.")
+
     #
     # These specific collections in the dev database are leftovers from testing, delete them
     #
@@ -36,7 +38,7 @@ def archive_migrate_v0_7_0(
             if document_current not in delete_documents
         }
 
-        print("Deleted {} collections containing a total of {} documents.".format(
+        print("Deleted {} collections totaling {} documents.".format(
             len(delete_collections),
             len(archive.entries) - len(migrated_entries),
         ))
@@ -61,7 +63,17 @@ def archive_migrate_v0_7_0(
         patient_collection = _migrate_assessment_log_with_embedded_assessment(
             collection=patient_collection,
         )
+        patient_collection = _migrate_scheduled_activity_snapshot(
+            collection=patient_collection,
+        )
 
+        # Filtering during migration development
+        # TODO Migration: Remove these as they are migrated
+        patient_collection = patient_collection.remove_match(
+            match_type='activityLog',
+        # ).remove(
+        #     match_type='scheduledActivity',
+        )
 
         archive.replace_collection_documents(
             collection=patients_document_current["collection"],
@@ -75,44 +87,127 @@ def _migrate_assessment_log_with_embedded_assessment(
     collection: DocumentSet,
 ) -> DocumentSet:
     """
-    These resulted from some development / experimentation.
+    Some assessmentLog documents have an embedded assessment.
+    These resulted from early experimentation in developing snapshots.
     """
 
-    original_documents = collection.filter_match(
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
         match_type="assessmentLog",
         match_deleted=False,
-    )
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
 
-    migrated_documents = []
-    for document_current in original_documents:
-        document_current = copy.deepcopy(document_current)
+        if "assessment" in document_migrated:
+            is_migrated = True
 
-        if "assessment" in document_current:
-            document_current["assessmentId"] = document_current["assessment"]["assessmentId"]
-            del document_current["assessment"]
+            document_migrated["assessmentId"] = document_migrated["assessment"]["assessmentId"]
+            del document_migrated["assessment"]
 
-        scope.schema_utils.assert_schema(
-            data=document_current,
-            schema=scope.schema.assessment_log_schema,
-        )
+        if is_migrated:
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.assessment_log_schema,
+            )
 
-        migrated_documents.append(document_current)
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    print("  Updated {:4} documents: {}.".format(
+        len(documents_original),
+        "migrate_assessment_log_with_embedded_assessment",
+    ))
 
     return collection.remove_all(
-        documents=original_documents,
+        documents=documents_original,
     ).union(
-        documents=migrated_documents
+        documents=documents_migrated
     )
-    migrated_documents = []
-
-    for document_current in collection:
-        document_current = copy.deepcopy(document_current)
 
 
+def _migrate_scheduled_activity_snapshot(
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Create snapshots for any scheduled activity that does not have one.
+    """
 
-        migrated_documents.append(document_current)
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="scheduledActivity",
+        match_deleted=False,
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
 
-    return DocumentSet(documents=migrated_documents)
+        if "dataSnapshot" not in document_migrated:
+            is_migrated = True
+
+            document_migrated["dataSnapshot"] = {}
+
+        if "activitySchedule" not in document_migrated["dataSnapshot"]:
+            is_migrated = True
+
+            document_migrated["dataSnapshot"]["activitySchedule"] = collection.filter_match(
+                match_type="activitySchedule",
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_values={
+                    "activityScheduleId": document_migrated["activityScheduleId"]
+                }
+            ).unique()
+
+        if "activity" not in document_migrated["dataSnapshot"]:
+            is_migrated = True
+
+            document_migrated["dataSnapshot"]["activity"] = collection.filter_match(
+                match_type="activity",
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_values={
+                    "activityId": document_migrated["dataSnapshot"]["activitySchedule"]["activityId"]
+                }
+            ).unique()
+
+        if "valueId" in document_migrated["dataSnapshot"]["activity"]:
+            if "value" not in document_migrated["dataSnapshot"]:
+                is_migrated = True
+
+                document_migrated["dataSnapshot"]["value"] = collection.filter_match(
+                    match_type="value",
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=document_migrated),
+                    match_values={
+                        "valueId": document_migrated["dataSnapshot"]["activity"]["valueId"]
+                    }
+                ).unique()
+
+        if is_migrated:
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.scheduled_activity_schema,
+            )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    print("  Updated {:4} documents: {}.".format(
+        len(documents_original),
+        "migrate_scheduled_activity",
+    ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
 
 # # Allow typing to forward reference
 # # TODO: Not necessary with Python 3.11
