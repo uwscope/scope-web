@@ -2,13 +2,13 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
-from scope.documents.document_set import DocumentSet
+from scope.documents.document_set import datetime_from_document, DocumentSet
 import scope.populate.data.archive
 import scope.schema
 import scope.schema_utils
 
 
-def validate_archive(archive: scope.populate.data.archive.Archive):
+def validate_archive(*, archive: scope.populate.data.archive.Archive,):
     # Validate that expected collections exist
     _validate_archive_expected_collections(archive=archive)
 
@@ -23,13 +23,13 @@ def validate_archive(archive: scope.populate.data.archive.Archive):
             collection=patients_document_current["collection"]
         )
 
-        _validate_patient_collection(patient_collection_current)
+        _validate_patient_collection(collection=patient_collection_current)
 
     # Validate every document matches the document schema
     _validate_archive_document_schema(archive=archive)
 
 
-def _validate_archive_document_schema(archive: scope.populate.data.archive.Archive):
+def _validate_archive_document_schema(*, archive: scope.populate.data.archive.Archive,):
     """
     Validate every document matches the document schema.
     """
@@ -44,11 +44,9 @@ def _validate_archive_document_schema(archive: scope.populate.data.archive.Archi
         # These are currently not enforced by the schema
         if document_current["_type"] == "activityLog":
             assert "scheduledActivity" in document_current["dataSnapshot"]
-        if document_current["_type"] == "scheduledActivity":
-            assert "activity" in document_current["dataSnapshot"]
 
 
-def _validate_archive_expected_collections(archive: scope.populate.data.archive.Archive):
+def _validate_archive_expected_collections(*, archive: scope.populate.data.archive.Archive,):
     """
     Validate archive contains expected collections.
     """
@@ -81,9 +79,19 @@ def _validate_archive_expected_collections(archive: scope.populate.data.archive.
     assert len(unreferenced_collections) == 0
 
 
-def _validate_patient_collection(collection: DocumentSet):
+def _validate_patient_collection(*, collection: DocumentSet,):
     """
     Validate the entire set of documents in a patient collection.
+    """
+
+    _validate_patient_collection_documents(collection=collection)
+
+    _validate_patient_collection_scheduled_activities(collection=collection)
+
+
+def _validate_patient_collection_documents(*, collection: DocumentSet,):
+    """
+    Validate the core properties of documents.
     """
 
     # Every document must have a unique id
@@ -91,3 +99,67 @@ def _validate_patient_collection(collection: DocumentSet):
     for document_current in collection:
         assert document_current["_id"] not in existing_document_ids
         existing_document_ids.append(document_current["_id"])
+
+    # Every document key must be unique,
+    # with incrementing revisions,
+    # with monotonically increasing times
+    for revisions_current in collection.revisions.values():
+        document_previous = None
+        for index, document_current in enumerate(revisions_current):
+            assert document_current["_rev"] == index + 1
+
+            if document_previous:
+                assert datetime_from_document(document=document_current) >= datetime_from_document(document=document_previous)
+
+            document_previous = document_current
+
+
+def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet,):
+    """
+    Validate additional properties of scheduled activity documents.
+    """
+
+    activity_documents = collection.filter_match(
+        match_type="activity",
+        match_deleted=False,
+    )
+    activity_schedule_documents = collection.filter_match(
+        match_type="activitySchedule",
+        match_deleted=False,
+    )
+    value_documents = collection.filter_match(
+        match_type="value",
+        match_deleted=False,
+    )
+
+    for document_current in collection.filter_match(
+        match_type="scheduledActivity",
+        match_deleted=False,
+    ):
+        # The snapshot of the activitySchedule must match
+        activity_schedule_current = activity_schedule_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_values={
+                "activityScheduleId": document_current["activityScheduleId"]
+            }
+        ).unique()
+        assert document_current["dataSnapshot"]["activitySchedule"] == activity_schedule_current
+
+        # The snapshot of the activity must match
+        activity_current = activity_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_values={
+                "activityId": activity_schedule_current["activityId"]
+            }
+        ).unique()
+        assert document_current["dataSnapshot"]["activity"] == activity_current
+
+        # If the activity has a value, the snapshot of the activity must match
+        if "valueId" in activity_current:
+            value_current = value_documents.filter_match(
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={
+                    "valueId": activity_current["valueId"]
+                }
+            ).unique()
+            assert document_current["dataSnapshot"]["value"] == value_current
