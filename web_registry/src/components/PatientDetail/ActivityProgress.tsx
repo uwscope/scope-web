@@ -44,8 +44,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
         return {
             id: log.scheduledActivityId,
-            // TODO Activity Refactor: Make dataSnapshot a required field after db migration
-            name: log.dataSnapshot?.activity.name,
+            name: log.dataSnapshot.activity.name,
             dueDate: format(log.dueDateTime, 'MM/dd/yyyy'),
             recordedDateTime:
                 log.completed && activityLog?.recordedDateTime

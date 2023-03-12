@@ -160,7 +160,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     if (task.dataSnapshot.activity.activityId != activityId) {
         logError(
             'ActivityForm',
-            `Activity and task mismatch: activity=${activityId}, taskSource=${task.dataSnapshot?.activity?.activityId}`,
+            `Activity and task mismatch: activity=${activityId}, taskSource=${task.dataSnapshot.activity.activityId}`,
         );
         return null;
     }

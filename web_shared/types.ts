@@ -133,9 +133,6 @@ export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
     activityScheduleId: string;
     dataSnapshot: IScheduledActivityDataSnapshot;
-    // TODO Activity Refactor: Remove activityId and activityName after db migration
-    activityId: string;
-    activityName: string;
     reminder: Date;
 
     completed: boolean;
@@ -166,11 +163,7 @@ export interface IActivityLog extends ILog {
 
     scheduledActivityId: string;
     dataSnapshot: IActivityLogDataSnapshot;
-    // TODO Activity Refactor: Remove activityId and activityName after db migration
-    activityId?: string;
-    activityName?: string;
 
-    //completed?: boolean;
     success?: ActivitySuccessType;
     alternative?: string;
     pleasure?: number;
