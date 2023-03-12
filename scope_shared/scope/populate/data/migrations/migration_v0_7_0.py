@@ -244,6 +244,12 @@ def _migrate_activity_log_snapshot(
         if "activity" in document_migrated:
             del document_migrated["activity"]
 
+        # Schema was enhanced to enforce that success No disallows alternative
+        # Prior to that the client was storing empty strings
+        if document_migrated["success"] == "No":
+            assert document_migrated["alternative"] == ""
+            del document_migrated["alternative"]
+
         # Development included generation of some snapshots that
         # captured the scheduledActivity before marking it complete
         if "dataSnapshot" in document_migrated:
