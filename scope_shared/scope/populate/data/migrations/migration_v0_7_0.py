@@ -231,22 +231,33 @@ def _migrate_activity_log_snapshot(
 
         # Including the snapshot led to removal of several incomplete fields
         if "activityId" in document_migrated:
+            is_migrated = True
+
             del document_migrated["activityId"]
+
         if "activityName" in document_migrated:
+            is_migrated = True
+
             del document_migrated["activityName"]
 
         # completed was determined to be redundant with existence of the log
         if "completed" in document_migrated:
+            is_migrated = True
+
             del document_migrated["completed"]
 
         # Development included experimentation with an embedded activity document
         if "activity" in document_migrated:
+            is_migrated = True
+
             del document_migrated["activity"]
 
         # Schema was enhanced to enforce that success No disallows alternative
         # Prior to that the client was storing empty strings
         if document_migrated["success"] == "No":
             if "alternative" in document_migrated:
+                is_migrated = True
+
                 assert document_migrated["alternative"] == ""
                 del document_migrated["alternative"]
 
@@ -255,6 +266,8 @@ def _migrate_activity_log_snapshot(
         if "dataSnapshot" in document_migrated:
             if "scheduledActivity" in document_migrated["dataSnapshot"]:
                 if not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]:
+                    is_migrated = True
+
                     # We expect only two instances of this,
                     # pay attention if we unexpectedly see other instances
                     assert document_migrated["_id"] in [
