@@ -102,7 +102,6 @@ def _migrate_assessment_log_with_embedded_assessment(
 
             # We expect only one instance of this,
             # pay attention if we unexpectedly see other instances
-            print(document_migrated["_id"])
             assert document_migrated["_id"] in [
                 "63d04ccf30b3259d115d7503",
             ]
