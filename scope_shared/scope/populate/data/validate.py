@@ -10,23 +10,26 @@ import scope.schema_utils
 
 def validate_archive(*, archive: scope.populate.data.archive.Archive,):
     # Validate that expected collections exist
+    print("Validating archive patients structure.")
     _validate_archive_expected_collections(archive=archive)
 
-    # Validate every patient collection
+    # Validate every document matches the document schema
+    print("Validating document schemas.")
+    _validate_archive_document_schema(archive=archive)
+
+    # Go through each patient collection, validate contents of each patient collection
     patients_documents = archive.patients_documents(
         remove_sentinel=True,
         remove_revisions=True,
     )
-
     for patients_document_current in patients_documents:
+        print("Validating patient '{}'.".format(patients_document_current["name"]))
+
         patient_collection_current = archive.collection_documents(
             collection=patients_document_current["collection"]
         )
 
         _validate_patient_collection(collection=patient_collection_current)
-
-    # Validate every document matches the document schema
-    _validate_archive_document_schema(archive=archive)
 
 
 def _validate_archive_document_schema(*, archive: scope.populate.data.archive.Archive,):
@@ -86,6 +89,7 @@ def _validate_patient_collection(*, collection: DocumentSet,):
 
     _validate_patient_collection_documents(collection=collection)
 
+    _validate_patient_collection_activity_logs(collection=collection)
     _validate_patient_collection_scheduled_activities(collection=collection)
 
 
@@ -112,6 +116,30 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
                 assert datetime_from_document(document=document_current) >= datetime_from_document(document=document_previous)
 
             document_previous = document_current
+
+
+def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
+    """
+    Validate additional properties of activity log documents.
+    """
+
+    scheduled_activity_documents = collection.filter_match(
+        match_type="scheduledActivity",
+        match_deleted=False,
+    )
+
+    for document_current in collection.filter_match(
+        match_type="activityLog",
+        match_deleted=False,
+    ):
+        # The snapshot of the scheduledActivity must match
+        scheduled_activity_current = scheduled_activity_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_values={
+                "scheduledActivityId": document_current["scheduledActivityId"]
+            }
+        ).unique()
+        assert document_current["dataSnapshot"]["scheduledActivity"] == scheduled_activity_current
 
 
 def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet,):
