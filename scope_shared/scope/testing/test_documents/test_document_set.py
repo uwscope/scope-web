@@ -578,7 +578,16 @@ def test_document_set_revisions():
 
     document_set = DocumentSet(documents=original_documents)
 
-    assert document_set.revisions == {
+    # revisions should ensure that each set is sorted by its revision,
+    # as other capabilities depend on this (e.g., match_time_at).
+    # But our set comparison is independent of order,
+    # so this test needs to compare the raw underlying lists.
+    revisions_as_lists = {
+        key_current: value_current.documents
+        for (key_current, value_current) in document_set.revisions.items()
+    }
+
+    assert revisions_as_lists == {
         ("type", ): [
             {
                 "_type": "type",
@@ -605,12 +614,12 @@ def test_document_set_revisions():
             {
                 "_type": "set type",
                 "_set_id": "other set id",
-                "_rev": "30",
+                "_rev": "4",
             },
             {
                 "_type": "set type",
                 "_set_id": "other set id",
-                "_rev": "4",
+                "_rev": "30",
             },
         ],
     }
