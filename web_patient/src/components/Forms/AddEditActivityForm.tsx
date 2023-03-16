@@ -27,8 +27,8 @@ import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
 import { DayOfWeek, DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
-import { clearTime, getDayOfWeek, getDayOfWeekCount, minDate, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
-import { IActivity, IActivitySchedule, IValue /* ILifeAreaValue, KeyedMap */ } from 'shared/types';
+import { clearTime, getDayOfWeek, getDayOfWeekCount, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
+import { IActivity, IActivitySchedule, IValue } from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
 import { FormSection, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
@@ -278,13 +278,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 editActivitySchedule.activityScheduleId as string,
             );
 
-            const localEditActivityScheduleDate = toLocalDateOnly(editActivitySchedule.date);
             const nextTaskDueDate = toLocalDateOnly(nextTask?.dueDateTime as Date);
 
             return {
                 ...defaultViewState,
-
-                minValidDate: minDate(defaultViewState.minValidDate, localEditActivityScheduleDate),
 
                 displayedDate: nextTaskDueDate,
                 displayedTimeOfDay: new Date(1, 1, 1, editActivitySchedule.timeOfDay, 0, 0),
@@ -574,7 +571,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
         if (activityViewState.modeState.mode == 'addActivity') {
             // If adding an activity, detect change from the initial values
-            changeDetected || activityViewState.name != '';
+            changeDetected ||= activityViewState.name != '';
             changeDetected ||= activityViewState.valueId != activityViewState.modeState.providedValueId;
             changeDetected ||= activityViewState.enjoyment != -1;
             changeDetected ||= activityViewState.importance != -1;
@@ -693,13 +690,17 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             // Only works because both are initially set to _defaultDate
             changeDetected ||= !isEqual(activityScheduleViewState.date, activityScheduleViewState.minValidDate);
             changeDetected ||= activityScheduleViewState.timeOfDay != 9;
-            // Because has repetition is initially false, any value of of true is a change
-            changeDetected ||= activityScheduleViewState.hasRepetition != false;
+            // Because has repetition is initially false, a value of true is a change
+            changeDetected ||= activityScheduleViewState.hasRepetition;
         } else if (activityScheduleViewState.modeState.mode == 'editActivitySchedule') {
             // If editing a schedule, detect change from the previous values
             const editActivitySchedule = activityScheduleViewState.modeState.editActivitySchedule;
+            const nextTask = patientStore.getNextTaskByActivityScheduleId(
+                editActivitySchedule.activityScheduleId as string,
+            );
+            const nextTaskDueDate = toLocalDateOnly(nextTask?.dueDateTime as Date);
 
-            changeDetected ||= !isEqual(toUTCDateOnly(activityScheduleViewState.date), editActivitySchedule.date);
+            changeDetected ||= !isEqual(activityScheduleViewState.date, nextTaskDueDate);
             changeDetected ||= activityScheduleViewState.timeOfDay != editActivitySchedule.timeOfDay;
             changeDetected ||= activityScheduleViewState.hasRepetition != editActivitySchedule.hasRepetition;
             if (!changeDetected && activityScheduleViewState.hasRepetition && editActivitySchedule.hasRepetition) {
