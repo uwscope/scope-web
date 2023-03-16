@@ -64,8 +64,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
 
-        // TODO Activity Refactor: Make dataSnapshot a required field after db migration
-        const value = log.dataSnapshot?.scheduledActivity.dataSnapshot.value;
+        const value = log.dataSnapshot.scheduledActivity.dataSnapshot.value;
         viewState.selectedValue = value?.name || getString('Activity_tracking_log_value_none');
 
         const lifearea = value && rootStore.getLifeAreaContent(value?.lifeAreaId as string);
@@ -102,8 +101,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
                                         <WordBreakTableCell>
-                                            {/* TODO Activity Refactor: Remove ? after db migration. */}
-                                            {log.dataSnapshot?.scheduledActivity?.dataSnapshot?.activity?.name}
+                                            {log.dataSnapshot.scheduledActivity.dataSnapshot.activity.name}
                                         </WordBreakTableCell>
                                         <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
                                     </TableRow>
@@ -113,7 +111,10 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                         {viewState.selectedLog && (
                             <ProgressDialog
                                 isOpen={viewState.isOpen}
-                                title={viewState.selectedLog?.activityName || 'Activity Log'}
+                                title={
+                                    viewState.selectedLog?.dataSnapshot.scheduledActivity.dataSnapshot.activity.name ||
+                                    'Activity Log'
+                                }
                                 content={
                                     <Table size="small" aria-label="a dense table">
                                         <TableBody>
