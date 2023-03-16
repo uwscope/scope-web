@@ -28,7 +28,7 @@ const _strings = {
     Home_plan_empty: 'You do not have any planned activities for today.',
     Home_plan_done: 'You have completed all planned activities for today! Make sure to celebrate your achievement!',
     Home_overdue_title: 'My Past 2 Weeks',
-    Home_overdue_pending: 'Pending Activities',
+    Home_overdue_pending: 'Planned Activities',
     Home_overdue_all: 'All Activities',
     Home_overdue_empty: 'You did not have any planned activities.',
 
