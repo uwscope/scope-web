@@ -20,16 +20,30 @@ def datetime_from_document(
     *,
     document: dict,
 ) -> datetime:
+    """
+    Recover the generation time from an _id.
+
+    Format of an ObjectID is documented:
+
+    https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid
+    """
+
     return bson.objectid.ObjectId(document["_id"]).generation_time.astimezone(pytz.utc)
 
 
 def document_id_from_datetime(
     generation_time: datetime,
 ) -> str:
+    """
+    Obtain a random document _id corresponding to the provided time.
+
+    Format of an ObjectID is documented:
+
+    https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid
+    """
     hex_datetime = str(bson.objectid.ObjectId.from_datetime(
         generation_time=generation_time
     ))[0:8]
-
     hex_random = secrets.token_hex(8)
 
     return hex_datetime + hex_random
@@ -71,7 +85,7 @@ class DocumentSet:
         """
         Create a set containing a shallow copy of the provided documents.
 
-        Ensures the provided documents are unique.
+        Ensures the provided documents does not contain duplicate elements.
         """
         if not documents:
             documents = []
@@ -79,7 +93,7 @@ class DocumentSet:
         retained_documents = []
         for document_current in documents:
             if document_current in retained_documents:
-                raise ValueError
+                raise ValueError("documents may not contain duplicate elements.")
 
             retained_documents.append(document_current)
 
@@ -90,7 +104,7 @@ class DocumentSet:
         self,
         *,
         documents: Iterable[dict] = None,
-    ):
+    ) -> bool:
         """
         Return whether the set of documents contains all of the provided documents.
         """
@@ -105,7 +119,7 @@ class DocumentSet:
         self,
         *,
         documents: Iterable[dict] = None,
-    ):
+    ) -> bool:
         """
         Return whether the set of documents contains any of the provided documents.
         """
@@ -257,11 +271,8 @@ class DocumentSet:
 
         retained_documents = list(self)
         for document_current in remove_documents:
-            try:
-                retained_documents.remove(document_current)
-            except ValueError:
-                # Re-raise the ValueError
-                raise
+            # Will raise ValueError if document_current is not still in the set
+            retained_documents.remove(document_current)
 
         return DocumentSet(documents=retained_documents)
 
@@ -394,6 +405,6 @@ class DocumentSet:
         """
 
         if len(self) != 1:
-            raise ValueError
+            raise ValueError("DocumentSet does not exactly exactly 1 element.")
 
         return self.documents[0]

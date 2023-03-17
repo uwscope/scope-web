@@ -64,6 +64,9 @@ def test_document_set_contains():
             {
                 "key": "other value"
             },
+            {
+                "key": "another value"
+            },
         ]
     )
 
@@ -74,6 +77,20 @@ def test_document_set_contains():
             },
             {
                 "key": "other value"
+            },
+        ]
+    )
+
+    assert document_set.contains_all(
+        documents=[
+            {
+                "key": "value"
+            },
+            {
+                "key": "other value"
+            },
+            {
+                "key": "another value"
             },
         ]
     )
@@ -200,11 +217,10 @@ def test_document_set_match():
     document_set_combined = document_set_matching.union(documents=document_set_not_matching)
 
     document_set_filtered = document_set_combined.filter_match(**match_args)
-    document_set_removed = document_set_combined.remove_match(**match_args)
-
     assert document_set_filtered.contains_all(documents=document_set_matching)
     assert not document_set_filtered.contains_any(documents=document_set_not_matching)
 
+    document_set_removed = document_set_combined.remove_match(**match_args)
     assert document_set_removed.contains_all(documents=document_set_not_matching)
     assert not document_set_removed.contains_any(documents=document_set_matching)
 
