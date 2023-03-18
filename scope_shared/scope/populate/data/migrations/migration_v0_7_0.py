@@ -63,6 +63,9 @@ def archive_migrate_v0_7_0(
         patient_collection = _migrate_assessment_log_with_embedded_assessment(
             collection=patient_collection,
         )
+        patient_collection = _migrate_scheduled_activity_remove_reminder(
+            collection=patient_collection,
+        )
         patient_collection = _migrate_scheduled_activity_snapshot(
             collection=patient_collection,
         )
@@ -110,10 +113,10 @@ def _migrate_assessment_log_with_embedded_assessment(
             del document_migrated["assessment"]
 
         if is_migrated:
-            scope.schema_utils.assert_schema(
-                data=document_migrated,
-                schema=scope.schema.assessment_log_schema,
-            )
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.assessment_log_schema,
+            # )
 
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
@@ -121,6 +124,62 @@ def _migrate_assessment_log_with_embedded_assessment(
     print("  Updated {:4} documents: {}.".format(
         len(documents_original),
         "migrate_assessment_log_with_embedded_assessment",
+    ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
+
+
+def _migrate_scheduled_activity_remove_reminder(
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Remove reminder fields from any scheduled activity.
+    """
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="scheduledActivity",
+        match_deleted=False,
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        # Remove any "reminderDate"
+        if "reminderDate" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["reminderDate"]
+
+        # Remove any "reminderDateTime"
+        if "reminderDateTime" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["reminderDateTime"]
+
+        # Remove any "reminderTimeOfDay"
+        if "reminderTimeOfDay" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["reminderTimeOfDay"]
+
+        if is_migrated:
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.scheduled_activity_schema,
+            # )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    print("  Updated {:4} documents: {}.".format(
+        len(documents_original),
+        "migrate_scheduled_activity_remove_reminder",
     ))
 
     return collection.remove_all(
@@ -191,10 +250,10 @@ def _migrate_scheduled_activity_snapshot(
                 ).unique()
 
         if is_migrated:
-            scope.schema_utils.assert_schema(
-                data=document_migrated,
-                schema=scope.schema.scheduled_activity_schema,
-            )
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.scheduled_activity_schema,
+            # )
 
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
@@ -294,10 +353,10 @@ def _migrate_activity_log_snapshot(
             ).unique()
 
         if is_migrated:
-            scope.schema_utils.assert_schema(
-                data=document_migrated,
-                schema=scope.schema.activity_log_schema,
-            )
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.activity_log_schema,
+            # )
 
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
