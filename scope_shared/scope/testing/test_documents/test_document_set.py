@@ -500,11 +500,11 @@ def test_document_set_order_by_revisions():
 
     # A mixed set should error
     with pytest.raises(ValueError):
-        document_set.order_by_revisions()
+        document_set.order_by_revision()
 
     assert document_set.filter_match(
         match_type="type",
-    ).order_by_revisions() == [
+    ).order_by_revision() == [
         {
             "_type": "type",
             "_rev": "4",

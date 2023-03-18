@@ -109,7 +109,7 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
     # with monotonically increasing times
     for revisions_current in collection.group_revisions().values():
         document_previous = None
-        for index, document_current in enumerate(revisions_current.order_by_revisions()):
+        for index, document_current in enumerate(revisions_current.order_by_revision()):
             assert document_current["_rev"] == index + 1
 
             if document_previous:

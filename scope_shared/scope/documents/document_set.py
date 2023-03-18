@@ -75,6 +75,8 @@ class DocumentSet:
     """
 
     _documents: List[dict]
+    _group_revisions: Optional[Dict[DocumentKey, DocumentSet]]
+    _order_by_revision: List[dict]
 
     def __init__(
         self,
@@ -97,6 +99,8 @@ class DocumentSet:
             retained_documents.append(document_current)
 
         self._documents = retained_documents
+        self._group_revisions = None
+        self._order_by_revision = None
 
     def contains_all(
         self,
@@ -196,20 +200,23 @@ class DocumentSet:
         Group documents that are revisions of the same underlying DocumentKey.
         """
 
-        revisions: Dict[DocumentKey, List[dict]] = {}
-        for document_current in self:
-            # Singletons have only a _type, while set elements also have a _set_id
-            key_current = document_key(document=document_current)
+        if self._group_revisions is None:
+            revisions: Dict[DocumentKey, List[dict]] = {}
+            for document_current in self:
+                # Singletons have only a _type, while set elements also have a _set_id
+                key_current = document_key(document=document_current)
 
-            revisions_existing = revisions.get(key_current, [])
-            revisions_existing.append(document_current)
+                revisions_existing = revisions.get(key_current, [])
+                revisions_existing.append(document_current)
 
-            revisions[key_current] = revisions_existing
+                revisions[key_current] = revisions_existing
 
-        return {
-            key_current: DocumentSet(documents=revisions[key_current])
-            for key_current in revisions.keys()
-        }
+            self._group_revisions = {
+                key_current: DocumentSet(documents=revisions[key_current])
+                for key_current in revisions.keys()
+            }
+
+        return self._group_revisions
 
     def is_unique(self) -> bool:
         """
@@ -251,7 +258,7 @@ class DocumentSet:
             else:
                 # A document created at or before our match time
                 # matches if no revision replaces it before the match time
-                revisions = self.group_revisions()[document_key(document=document)].order_by_revisions()
+                revisions = self.group_revisions()[document_key(document=document)].order_by_revision()
                 revision_index = revisions.index(document)
                 if revision_index + 1 == len(revisions):
                     # The current document is the final revision
@@ -274,6 +281,31 @@ class DocumentSet:
 
         return matches
 
+    def order_by_revision(
+        self,
+        reverse: bool = False,
+    ) -> List[Document]:
+        """
+        Orders a DocumentSet by revision.
+
+        Requires all documents have the same DocumentKey, otherwise the order is not defined.
+
+        Raises ValueError if not all documents have the same DocumentKey.
+        """
+
+        if self._order_by_revision is None:
+            revisions = self.group_revisions()
+            if len(revisions) != 1:
+                raise ValueError("Not all documents have the same DocumentKey.")
+
+            self._order_by_revision = sorted(
+                revisions.popitem()[1],
+                key=lambda document: int(document["_rev"]),
+                reverse=reverse,
+            )
+
+        return self._order_by_revision
+
     def remove_all(
         self,
         *,
@@ -293,28 +325,6 @@ class DocumentSet:
             retained_documents.remove(document_current)
 
         return DocumentSet(documents=retained_documents)
-
-    def order_by_revisions(
-        self,
-        reverse: bool = False,
-    ) -> List[Document]:
-        """
-        Orders a DocumentSet by revision.
-
-        Requires all documents have the same DocumentKey, otherwise the order is not defined.
-
-        Raises ValueError if not all documents have the same DocumentKey.
-        """
-
-        revisions = self.group_revisions()
-        if len(revisions) != 1:
-            raise ValueError("Not all documents have the same DocumentKey.")
-
-        return sorted(
-            revisions.popitem()[1],
-            key=lambda document: int(document["_rev"]),
-            reverse=reverse,
-        )
 
     def remove_any(
         self,
@@ -366,7 +376,7 @@ class DocumentSet:
 
         return DocumentSet(
             documents=[
-                document_revisions.order_by_revisions()[-1]
+                document_revisions.order_by_revision()[-1]
                 for document_revisions in self.group_revisions().values()
             ]
         )
