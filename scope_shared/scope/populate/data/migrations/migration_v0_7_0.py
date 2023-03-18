@@ -81,6 +81,109 @@ def archive_migrate_v0_7_0(
     return archive
 
 
+def _migrate_activity_log_snapshot(
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Create snapshots for any activity log that does not have one.
+    """
+
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="activityLog",
+        match_deleted=False,
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        # Including the snapshot led to removal of several incomplete fields
+        if "activityId" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["activityId"]
+
+        if "activityName" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["activityName"]
+
+        # completed was determined to be redundant with existence of the log
+        if "completed" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["completed"]
+
+        # Development included experimentation with an embedded activity document
+        if "activity" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["activity"]
+
+        # Schema was enhanced to enforce that success No disallows alternative
+        # Prior to that the client was storing empty strings
+        if document_migrated["success"] == "No":
+            if "alternative" in document_migrated:
+                is_migrated = True
+
+                assert document_migrated["alternative"] == ""
+                del document_migrated["alternative"]
+
+        # Development included generation of some snapshots that
+        # captured the scheduledActivity before marking it complete
+        if "dataSnapshot" in document_migrated:
+            if "scheduledActivity" in document_migrated["dataSnapshot"]:
+                if not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]:
+                    is_migrated = True
+
+                    # We expect only two instances of this,
+                    # pay attention if we unexpectedly see other instances
+                    assert document_migrated["_id"] in [
+                        "63eea4a7ac019fe9b4bc07cc",
+                        "63efc99eac019fe9b4bc08d2",
+                    ]
+                    del document_migrated["dataSnapshot"]["scheduledActivity"]
+
+        if "dataSnapshot" not in document_migrated:
+            is_migrated = True
+
+            document_migrated["dataSnapshot"] = {}
+
+        if "scheduledActivity" not in document_migrated["dataSnapshot"]:
+            is_migrated = True
+
+            document_migrated["dataSnapshot"]["scheduledActivity"] = collection.filter_match(
+                match_type="scheduledActivity",
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_values={
+                    "scheduledActivityId": document_migrated["scheduledActivityId"]
+                }
+            ).unique()
+
+        if is_migrated:
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.activity_log_schema,
+            # )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    print("  Updated {:4} documents: {}.".format(
+        len(documents_original),
+        "migrate_activity_log_snapshot",
+    ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
+
+
 def _migrate_assessment_log_with_embedded_assessment(
     collection: DocumentSet,
 ) -> DocumentSet:
@@ -269,108 +372,6 @@ def _migrate_scheduled_activity_snapshot(
         documents=documents_migrated
     )
 
-
-def _migrate_activity_log_snapshot(
-    collection: DocumentSet,
-) -> DocumentSet:
-    """
-    Create snapshots for any activity log that does not have one.
-    """
-
-    # Migrate documents, tracking which are migrated
-    documents_original = []
-    documents_migrated = []
-    for document_current in collection.filter_match(
-        match_type="activityLog",
-        match_deleted=False,
-    ):
-        is_migrated = False
-        document_original = document_current
-        document_migrated = copy.deepcopy(document_current)
-
-        # Including the snapshot led to removal of several incomplete fields
-        if "activityId" in document_migrated:
-            is_migrated = True
-
-            del document_migrated["activityId"]
-
-        if "activityName" in document_migrated:
-            is_migrated = True
-
-            del document_migrated["activityName"]
-
-        # completed was determined to be redundant with existence of the log
-        if "completed" in document_migrated:
-            is_migrated = True
-
-            del document_migrated["completed"]
-
-        # Development included experimentation with an embedded activity document
-        if "activity" in document_migrated:
-            is_migrated = True
-
-            del document_migrated["activity"]
-
-        # Schema was enhanced to enforce that success No disallows alternative
-        # Prior to that the client was storing empty strings
-        if document_migrated["success"] == "No":
-            if "alternative" in document_migrated:
-                is_migrated = True
-
-                assert document_migrated["alternative"] == ""
-                del document_migrated["alternative"]
-
-        # Development included generation of some snapshots that
-        # captured the scheduledActivity before marking it complete
-        if "dataSnapshot" in document_migrated:
-            if "scheduledActivity" in document_migrated["dataSnapshot"]:
-                if not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]:
-                    is_migrated = True
-
-                    # We expect only two instances of this,
-                    # pay attention if we unexpectedly see other instances
-                    assert document_migrated["_id"] in [
-                        "63eea4a7ac019fe9b4bc07cc",
-                        "63efc99eac019fe9b4bc08d2",
-                    ]
-                    del document_migrated["dataSnapshot"]["scheduledActivity"]
-
-        if "dataSnapshot" not in document_migrated:
-            is_migrated = True
-
-            document_migrated["dataSnapshot"] = {}
-
-        if "scheduledActivity" not in document_migrated["dataSnapshot"]:
-            is_migrated = True
-
-            document_migrated["dataSnapshot"]["scheduledActivity"] = collection.filter_match(
-                match_type="scheduledActivity",
-                match_deleted=False,
-                match_datetime_at=datetime_from_document(document=document_migrated),
-                match_values={
-                    "scheduledActivityId": document_migrated["scheduledActivityId"]
-                }
-            ).unique()
-
-        if is_migrated:
-            # scope.schema_utils.assert_schema(
-            #     data=document_migrated,
-            #     schema=scope.schema.activity_log_schema,
-            # )
-
-            documents_original.append(document_original)
-            documents_migrated.append(document_migrated)
-
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_activity_log_snapshot",
-    ))
-
-    return collection.remove_all(
-        documents=documents_original,
-    ).union(
-        documents=documents_migrated
-    )
 
 # # Allow typing to forward reference
 # # TODO: Not necessary with Python 3.11
