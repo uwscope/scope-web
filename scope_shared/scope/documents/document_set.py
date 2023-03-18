@@ -8,8 +8,8 @@ import pytz
 import secrets
 from typing import Dict, Iterable, List, NewType, Optional, Tuple, Union
 
-# This will allow either until we actually have a Document type
-Document = Union[NewType("Document", dict), dict]
+# This will hold things until we actually have a Document type
+Document = dict
 
 DocumentType = NewType('DocumentType', str)
 SetId = NewType('SetId', str)
@@ -75,7 +75,6 @@ class DocumentSet:
     """
 
     _documents: List[dict]
-    _revisions: Optional[Dict[DocumentKey, DocumentSet]]
 
     def __init__(
         self,
@@ -98,7 +97,6 @@ class DocumentSet:
             retained_documents.append(document_current)
 
         self._documents = retained_documents
-        self._revisions = None
 
     def contains_all(
         self,
@@ -193,6 +191,26 @@ class DocumentSet:
 
         return DocumentSet(documents=retained_documents)
 
+    def group_revisions(self) -> Dict[DocumentKey, DocumentSet]:
+        """
+        Group documents that are revisions of the same underlying DocumentKey.
+        """
+
+        revisions: Dict[DocumentKey, List[dict]] = {}
+        for document_current in self:
+            # Singletons have only a _type, while set elements also have a _set_id
+            key_current = document_key(document=document_current)
+
+            revisions_existing = revisions.get(key_current, [])
+            revisions_existing.append(document_current)
+
+            revisions[key_current] = revisions_existing
+
+        return {
+            key_current: DocumentSet(documents=revisions[key_current])
+            for key_current in revisions.keys()
+        }
+
     def is_unique(self) -> bool:
         """
         Whether this set contains exactly one document.
@@ -233,15 +251,15 @@ class DocumentSet:
             else:
                 # A document created at or before our match time
                 # matches if no revision replaces it before the match time
-                revisions = self.revisions[document_key(document=document)]
-                revision_index = revisions.documents.index(document)
+                revisions = self.group_revisions()[document_key(document=document)].order_by_revisions()
+                revision_index = revisions.index(document)
                 if revision_index + 1 == len(revisions):
                     # The current document is the final revision
                     matches = matches and True
                 else:
                     # There is a document after this
                     datetime_next_revision = datetime_from_document(
-                        document=revisions.documents[revision_index + 1],
+                        document=revisions[revision_index + 1],
                     )
                     matches = matches and match_datetime_at < datetime_next_revision
 
@@ -275,6 +293,28 @@ class DocumentSet:
             retained_documents.remove(document_current)
 
         return DocumentSet(documents=retained_documents)
+
+    def order_by_revisions(
+        self,
+        reverse: bool = False,
+    ) -> List[Document]:
+        """
+        Orders a DocumentSet by revision.
+
+        Requires all documents have the same DocumentKey, otherwise the order is not defined.
+
+        Raises ValueError if not all documents have the same DocumentKey.
+        """
+
+        revisions = self.group_revisions()
+        if len(revisions) != 1:
+            raise ValueError("Not all documents have the same DocumentKey.")
+
+        return sorted(
+            revisions.popitem()[1],
+            key=lambda document: int(document["_rev"]),
+            reverse=reverse,
+        )
 
     def remove_any(
         self,
@@ -326,8 +366,8 @@ class DocumentSet:
 
         return DocumentSet(
             documents=[
-                document_revisions.documents[-1]
-                for document_revisions in self.revisions.values()
+                document_revisions.order_by_revisions()[-1]
+                for document_revisions in self.group_revisions().values()
             ]
         )
 
@@ -371,33 +411,6 @@ class DocumentSet:
                 retained_documents.append(document_current)
 
         return DocumentSet(documents=retained_documents)
-
-    @property
-    def revisions(self) -> Dict[DocumentKey, DocumentSet]:
-        """
-        Group documents that are revisions of each underlying DocumentKey.
-        - Each DocumentKey will correspond to a set of all revisions of a document.
-        - The documents property of that set will be sorted in increasing order (i.e., the latest revision at the end).
-        """
-
-        if self._revisions is None:
-            revisions: Dict[DocumentKey, List[dict]] = {}
-            for document_current in self:
-                # Singletons have only a _type, while set elements also have a _set_id
-                key_current = document_key(document=document_current)
-
-                revisions_existing = revisions.get(key_current, [])
-                revisions_existing.append(document_current)
-                revisions_existing = sorted(revisions_existing, key=lambda document: int(document["_rev"]))
-
-                revisions[key_current] = revisions_existing
-
-            self._revisions = {
-                key_current: DocumentSet(documents=revisions[key_current])
-                for key_current in revisions.keys()
-            }
-
-        return self._revisions
 
     def unique(self) -> Dict:
         """

@@ -26,7 +26,7 @@ def test_document_set_constructor_enforces_unique():
     ]
 
     with pytest.raises(ValueError):
-        document_set = DocumentSet(documents=original_documents)
+        DocumentSet(documents=original_documents)
 
 
 def test_document_set_constructor_shallow_copies_documents():
@@ -53,6 +53,76 @@ def test_document_set_constructor_shallow_copies_documents():
     # Deleting a document should only change one
     del original_documents[0]
     assert original_documents != document_set.documents
+
+
+def test_document_set_group_revisions():
+    original_documents = [
+        {
+            "_type": "type",
+            "_rev": 3,
+        },
+        {
+            "_type": "type",
+            "_rev": 20,
+        },
+        {
+            "_type": "set type",
+            "_set_id": "set id",
+            "_rev": 3,
+        },
+        {
+            "_type": "set type",
+            "_set_id": "set id",
+            "_rev": 20,
+        },
+        {
+            "_type": "set type",
+            "_set_id": "other set id",
+            "_rev": 30,
+        },
+        {
+            "_type": "set type",
+            "_set_id": "other set id",
+            "_rev": 4,
+        },
+    ]
+
+    assert DocumentSet(documents=original_documents).group_revisions() == {
+        ("type", ): [
+            {
+                "_type": "type",
+                "_rev": 3,
+            },
+            {
+                "_type": "type",
+                "_rev": 20,
+            },
+        ],
+        ("set type", "set id"): [
+            {
+                "_type": "set type",
+                "_set_id": "set id",
+                "_rev": 3,
+            },
+            {
+                "_type": "set type",
+                "_set_id": "set id",
+                "_rev": 20,
+            },
+        ],
+        ("set type", "other set id"): [
+            {
+                "_type": "set type",
+                "_set_id": "other set id",
+                "_rev": 4,
+            },
+            {
+                "_type": "set type",
+                "_set_id": "other set id",
+                "_rev": 30,
+            },
+        ],
+    }
 
 
 def test_document_set_contains():
@@ -347,7 +417,8 @@ def test_document_set_match_datetime_at():
         "_rev": 1,
     }
 
-    # Create the document set, reversing order so the set must sort
+    # The internal implementation of match_date_time_at is based on sorting by revision
+    # Ensure documents are not already sorted by revision
     document_set = DocumentSet(documents=[
         document_other_type,
         document_rev4,
@@ -400,6 +471,52 @@ def test_document_set_match_datetime_at():
     ) == [
         document_rev4,
         document_other_type
+    ]
+
+
+def test_document_set_order_by_revisions():
+    # This test purposefully uses strings for "_rev" to ensure that error gets handled correctly.
+    # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
+    # and the logic of DocumentSet.order_by_revisions that currently ensures robustness to string values.
+
+    document_set = DocumentSet(documents=[
+        {
+            "_type": "type",
+            "_rev": "20",
+        },
+        {
+            "_type": "type",
+            "_rev": "30",
+        },
+        {
+            "_type": "type",
+            "_rev": "4",
+        },
+        {
+            "_type": "other type",
+            "_rev": "1",
+        },
+    ])
+
+    # A mixed set should error
+    with pytest.raises(ValueError):
+        document_set.order_by_revisions()
+
+    assert document_set.filter_match(
+        match_type="type",
+    ).order_by_revisions() == [
+        {
+            "_type": "type",
+            "_rev": "4",
+        },
+        {
+            "_type": "type",
+            "_rev": "20",
+        },
+        {
+            "_type": "type",
+            "_rev": "30",
+        },
     ]
 
 
@@ -477,39 +594,34 @@ def test_document_set_remove_documents():
 
 
 def test_document_set_remove_revisions():
-    # In addition to testing basic removal of old revision,
-    # this test purposefully uses strings for "_rev" to ensure that error gets handled correctly.
-    # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
-    # and the logic of DocumentSet.revisions that currently ensures robustness to string values.
-
     original_documents = [
         {
             "_type": "type",
-            "_rev": "3",
+            "_rev": 3,
         },
         {
             "_type": "type",
-            "_rev": "20",
+            "_rev": 20,
         },
         {
             "_type": "set type",
             "_set_id": "set id",
-            "_rev": "3",
+            "_rev": 3,
         },
         {
             "_type": "set type",
             "_set_id": "set id",
-            "_rev": "20",
+            "_rev": 20,
         },
         {
             "_type": "set type",
             "_set_id": "other set id",
-            "_rev": "30",
+            "_rev": 30,
         },
         {
             "_type": "set type",
             "_set_id": "other set id",
-            "_rev": "4",
+            "_rev": 4,
         },
     ]
 
@@ -519,17 +631,17 @@ def test_document_set_remove_revisions():
     assert document_set.documents == [
         {
             "_type": "type",
-            "_rev": "20",
+            "_rev": 20,
         },
         {
             "_type": "set type",
             "_set_id": "set id",
-            "_rev": "20",
+            "_rev": 20,
         },
         {
             "_type": "set type",
             "_set_id": "other set id",
-            "_rev": "30",
+            "_rev": 30,
         },
     ]
 
@@ -553,89 +665,3 @@ def test_document_set_remove_sentinel():
             "_type": "type",
         },
     ]
-
-
-def test_document_set_revisions():
-    # In addition to testing basic removal of old revision,
-    # this test purposefully uses strings for "_rev" to ensure that error gets handled correctly.
-    # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
-    # and the logic of DocumentSet.revisions that currently ensures robustness to string values.
-
-    original_documents = [
-        {
-            "_type": "type",
-            "_rev": "3",
-        },
-        {
-            "_type": "type",
-            "_rev": "20",
-        },
-        {
-            "_type": "set type",
-            "_set_id": "set id",
-            "_rev": "3",
-        },
-        {
-            "_type": "set type",
-            "_set_id": "set id",
-            "_rev": "20",
-        },
-        {
-            "_type": "set type",
-            "_set_id": "other set id",
-            "_rev": "30",
-        },
-        {
-            "_type": "set type",
-            "_set_id": "other set id",
-            "_rev": "4",
-        },
-    ]
-
-    document_set = DocumentSet(documents=original_documents)
-
-    # revisions should ensure that each set is sorted by its revision,
-    # as other capabilities depend on this (e.g., match_time_at).
-    # But our set comparison is independent of order,
-    # so this test needs to compare the raw underlying lists.
-    revisions_as_lists = {
-        key_current: value_current.documents
-        for (key_current, value_current) in document_set.revisions.items()
-    }
-
-    assert revisions_as_lists == {
-        ("type", ): [
-            {
-                "_type": "type",
-                "_rev": "3",
-            },
-            {
-                "_type": "type",
-                "_rev": "20",
-            },
-        ],
-        ("set type", "set id"): [
-            {
-                "_type": "set type",
-                "_set_id": "set id",
-                "_rev": "3",
-            },
-            {
-                "_type": "set type",
-                "_set_id": "set id",
-                "_rev": "20",
-            },
-        ],
-        ("set type", "other set id"): [
-            {
-                "_type": "set type",
-                "_set_id": "other set id",
-                "_rev": "4",
-            },
-            {
-                "_type": "set type",
-                "_set_id": "other set id",
-                "_rev": "30",
-            },
-        ],
-    }
