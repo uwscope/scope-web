@@ -107,9 +107,9 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
     # Every document key must be unique,
     # with incrementing revisions,
     # with monotonically increasing times
-    for revisions_current in collection.revisions.values():
+    for revisions_current in collection.group_revisions().values():
         document_previous = None
-        for index, document_current in enumerate(revisions_current):
+        for index, document_current in enumerate(revisions_current.order_by_revisions()):
             assert document_current["_rev"] == index + 1
 
             if document_previous:
