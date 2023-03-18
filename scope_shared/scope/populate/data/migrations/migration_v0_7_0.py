@@ -60,12 +60,18 @@ def archive_migrate_v0_7_0(
             collection=patients_document_current["collection"],
         )
 
+        # Cleaning up individual fields
         patient_collection = _migrate_assessment_log_with_embedded_assessment(
+            collection=patient_collection,
+        )
+        patient_collection = _migrate_activity_remove_reminder(
             collection=patient_collection,
         )
         patient_collection = _migrate_scheduled_activity_remove_reminder(
             collection=patient_collection,
         )
+
+        # Snapshots can only be constructed after everything else is complete
         patient_collection = _migrate_scheduled_activity_snapshot(
             collection=patient_collection,
         )
@@ -79,6 +85,56 @@ def archive_migrate_v0_7_0(
         )
 
     return archive
+
+
+def _migrate_activity_remove_reminder(
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Remove reminder fields from any activity.
+    """
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="activity",
+        match_deleted=False,
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        # Ensure "hasReminder" is always False
+        if document_migrated["hasReminder"]:
+            is_migrated = True
+
+            document_migrated["hasReminder"] = False
+
+        # Remove any "reminderTimeOfDay"
+        if "reminderTimeOfDay" in document_migrated:
+            is_migrated = True
+
+            del document_migrated["reminderTimeOfDay"]
+
+        if is_migrated:
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.activity_schema,
+            # )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    print("  Updated {:4} documents: {}.".format(
+        len(documents_original),
+        "migrate_activity_remove_reminder",
+    ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
 
 
 def _migrate_activity_log_snapshot(
@@ -371,51 +427,3 @@ def _migrate_scheduled_activity_snapshot(
     ).union(
         documents=documents_migrated
     )
-
-
-# # Allow typing to forward reference
-# # TODO: Not necessary with Python 3.11
-# from __future__ import annotations
-#
-# import copy
-# from pathlib import Path
-# from typing import Dict
-#
-# import scope.populate.data.archive
-#
-#
-# def archive_migrate_v0_7_0(
-#     *,
-#     archive: scope.populate.data.archive.Archive,
-# ) -> scope.populate.data.archive.Archive:
-#     #
-#     # Migration for schema modifications in #354
-#     # https://github.com/uwscope/scope-web/pull/354
-#     #
-#     migrated_entries: Dict[Path, dict] = {}
-#     for (path_current, document_current) in archive.entries.items():
-#         path_current = copy.deepcopy(path_current)
-#         document_current = copy.deepcopy(document_current)
-#
-#         # #354 migration applies to activity documents
-#         if document_current["_type"] == "activity":
-#             # Ensure "hasReminder" is always False
-#             document_current["hasReminder"] = False
-#             # Remove any "reminderTimeOfDay"
-#             if "reminderTimeOfDay" in document_current:
-#                 del document_current["reminderTimeOfDay"]
-#         # #354 migration applies to scheduledActivity documents
-#         if document_current["_type"] == "scheduledActivity":
-#             # Remove any "reminderDate"
-#             if "reminderDate" in document_current:
-#                 del document_current["reminderDate"]
-#             # Remove any "reminderDateTime"
-#             if "reminderDateTime" in document_current:
-#                 del document_current["reminderDateTime"]
-#             # Remove any "reminderTimeOfDay"
-#             if "reminderTimeOfDay" in document_current:
-#                 del document_current["reminderTimeOfDay"]
-#
-#         migrated_entries[path_current] = document_current
-#
-#     return scope.populate.data.archive.Archive(entries=migrated_entries)
