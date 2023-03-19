@@ -32,6 +32,7 @@ def datetime_from_document(
 
 
 def document_id_from_datetime(
+    *,
     generation_time: datetime,
 ) -> str:
     """
@@ -171,6 +172,7 @@ class DocumentSet:
 
     def filter_match(
         self,
+        *,
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
         match_datetime_at: Optional[datetime] = None,
@@ -283,6 +285,7 @@ class DocumentSet:
 
     def order_by_revision(
         self,
+        *,
         reverse: bool = False,
     ) -> List[Document]:
         """
@@ -345,6 +348,7 @@ class DocumentSet:
 
     def remove_match(
         self,
+        *,
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
         match_datetime_at: Optional[datetime] = None,
@@ -428,6 +432,6 @@ class DocumentSet:
         """
 
         if len(self) != 1:
-            raise ValueError("DocumentSet does not exactly exactly 1 element.")
+            raise ValueError("DocumentSet does not contain exactly 1 element.")
 
         return self.documents[0]
