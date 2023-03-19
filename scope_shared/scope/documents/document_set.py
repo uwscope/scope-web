@@ -220,6 +220,12 @@ class DocumentSet:
 
         return self._group_revisions
 
+    def is_empty(self) -> bool:
+        """
+        Whether this set is empty.
+        """
+        return len(self) == 0
+
     def is_unique(self) -> bool:
         """
         Whether this set contains exactly one document.
