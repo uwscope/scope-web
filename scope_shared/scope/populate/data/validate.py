@@ -125,14 +125,14 @@ def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
 
     scheduled_activity_documents = collection.filter_match(
         match_type="scheduledActivity",
-        match_deleted=False,
     )
 
     for document_current in collection.filter_match(
         match_type="activityLog",
         match_deleted=False,
     ):
-        # The snapshot of the scheduledActivity must match
+        # The referenced activitySchedule must exist.
+        # The snapshot of the scheduledActivity must match.
         scheduled_activity_current = scheduled_activity_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
@@ -149,22 +149,20 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
 
     activity_documents = collection.filter_match(
         match_type="activity",
-        match_deleted=False,
     )
     activity_schedule_documents = collection.filter_match(
         match_type="activitySchedule",
-        match_deleted=False,
     )
     value_documents = collection.filter_match(
         match_type="value",
-        match_deleted=False,
     )
 
     for document_current in collection.filter_match(
         match_type="scheduledActivity",
         match_deleted=False,
     ):
-        # The snapshot of the activitySchedule must match
+        # The referenced activitySchedule must exist.
+        # The snapshot of the activitySchedule must match.
         activity_schedule_current = activity_schedule_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
@@ -173,7 +171,8 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
         ).unique()
         assert document_current["dataSnapshot"]["activitySchedule"] == activity_schedule_current
 
-        # The snapshot of the activity must match
+        # The referenced activity must exist.
+        # The snapshot of the activity must match.
         activity_current = activity_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
@@ -182,7 +181,8 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
         ).unique()
         assert document_current["dataSnapshot"]["activity"] == activity_current
 
-        # If the activity has a value, the snapshot of the activity must match
+        # If the activity has a value, the referenced value must exist.
+        # If the activity has a value, the snapshot of the activity must match.
         if "valueId" in activity_current:
             value_current = value_documents.filter_match(
                 match_datetime_at=datetime_from_document(document=document_current),
