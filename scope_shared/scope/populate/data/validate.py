@@ -89,7 +89,9 @@ def _validate_patient_collection(*, collection: DocumentSet,):
 
     _validate_patient_collection_documents(collection=collection)
 
+    _validate_patient_collection_activity(collection=collection)
     _validate_patient_collection_activity_logs(collection=collection)
+    _validate_patient_collection_activity_schedules(collection=collection)
     _validate_patient_collection_scheduled_activities(collection=collection)
 
 
@@ -118,6 +120,42 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
             document_previous = document_current
 
 
+def _validate_patient_collection_activity(*, collection: DocumentSet,):
+    """
+    Validate additional properties of activity documents.
+    """
+
+    activity_documents = collection.filter_match(
+        match_type="activity",
+    )
+
+    values_documents = collection.filter_match(
+        match_type="value",
+    )
+
+    for document_current in activity_documents.filter_match(
+        match_deleted=False,
+    ):
+        # If the activity has a value, the referenced value must exist.
+        if "valueId" in document_current:
+            assert values_documents.filter_match(
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={
+                    "valueId": document_current["valueId"]
+                }
+            ).is_unique()
+
+        # For the time that each value activity exists, its name/value tuple must be unique.
+        for activity_current in activity_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_deleted=False,
+        ):
+            assert (
+                document_current["name"] != activity_current["name"]
+                or document_current.get("valueId", None) != activity_current.get("valuedId", None)
+            )
+
+
 def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
     """
     Validate additional properties of activity log documents.
@@ -140,6 +178,28 @@ def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
             }
         ).unique()
         assert document_current["dataSnapshot"]["scheduledActivity"] == scheduled_activity_current
+
+
+def _validate_patient_collection_activity_schedules(*, collection: DocumentSet,):
+    """
+    Validate additional properties of activity schedule documents.
+    """
+
+    activity_documents = collection.filter_match(
+        match_type="activity",
+    )
+
+    for document_current in collection.filter_match(
+        match_type="activitySchedule",
+        match_deleted=False,
+    ):
+        # The referenced activity must exist
+        assert activity_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_values={
+                "activityId": document_current["activityId"]
+            }
+        ).is_unique()
 
 
 def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet,):
@@ -191,3 +251,23 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
                 }
             ).unique()
             assert document_current["dataSnapshot"]["value"] == value_current
+
+
+def _validate_patient_collection_values(*, collection: DocumentSet,):
+    """
+    Validate additional properties of value documents.
+    """
+
+    value_documents = collection.filter_match(
+        match_type="value",
+    )
+
+    for document_current in value_documents.filter_match(
+        match_deleted=False,
+    ):
+        # For the time that each value document exists, its name must be unique.
+        for value_current in value_documents.filter_match(
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_deleted=False,
+        ):
+            assert document_current["name"] != value_current["name"]
