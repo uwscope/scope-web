@@ -142,11 +142,15 @@ def _migrate_activity_rename_type_old_format(
 
 
 def _migrate_activity_remove_reminder(
+    *,
     collection: DocumentSet,
 ) -> DocumentSet:
     """
     Remove reminder fields from any activity.
     """
+
+    print("  migrate_activity_remove_reminder")
+
     # Migrate documents, tracking which are migrated
     documents_original = []
     documents_migrated = []
@@ -179,10 +183,10 @@ def _migrate_activity_remove_reminder(
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
 
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_activity_remove_reminder",
-    ))
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
 
     return collection.remove_all(
         documents=documents_original,
@@ -192,11 +196,14 @@ def _migrate_activity_remove_reminder(
 
 
 def _migrate_activity_log_snapshot(
+    *,
     collection: DocumentSet,
 ) -> DocumentSet:
     """
     Create snapshots for any activity log that does not have one.
     """
+
+    print("  migrate_activity_log_snapshot")
 
     # Migrate documents, tracking which are migrated
     documents_original = []
@@ -282,10 +289,10 @@ def _migrate_activity_log_snapshot(
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
 
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_activity_log_snapshot",
-    ))
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
 
     return collection.remove_all(
         documents=documents_original,
@@ -295,12 +302,15 @@ def _migrate_activity_log_snapshot(
 
 
 def _migrate_assessment_log_with_embedded_assessment(
+    *,
     collection: DocumentSet,
 ) -> DocumentSet:
     """
     Some assessmentLog documents have an embedded assessment.
     These resulted from early experimentation in developing snapshots.
     """
+
+    print("  migrate_assessment_log_with_embedded_assessment")
 
     # Migrate documents, tracking which are migrated
     documents_original = []
@@ -334,10 +344,10 @@ def _migrate_assessment_log_with_embedded_assessment(
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
 
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_assessment_log_with_embedded_assessment",
-    ))
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
 
     return collection.remove_all(
         documents=documents_original,
@@ -347,11 +357,15 @@ def _migrate_assessment_log_with_embedded_assessment(
 
 
 def _migrate_scheduled_activity_remove_reminder(
+    *,
     collection: DocumentSet,
 ) -> DocumentSet:
     """
     Remove reminder fields from any scheduled activity.
     """
+
+    print("  migrate_scheduled_activity_remove_reminder")
+
     # Migrate documents, tracking which are migrated
     documents_original = []
     documents_migrated = []
@@ -390,10 +404,10 @@ def _migrate_scheduled_activity_remove_reminder(
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
 
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_scheduled_activity_remove_reminder",
-    ))
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
 
     return collection.remove_all(
         documents=documents_original,
@@ -403,11 +417,14 @@ def _migrate_scheduled_activity_remove_reminder(
 
 
 def _migrate_scheduled_activity_snapshot(
+    *,
     collection: DocumentSet,
 ) -> DocumentSet:
     """
     Create snapshots for any scheduled activity that does not have one.
     """
+
+    print("  migrate_scheduled_activity_snapshot")
 
     # Migrate documents, tracking which are migrated
     documents_original = []
@@ -471,10 +488,10 @@ def _migrate_scheduled_activity_snapshot(
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
 
-    print("  Updated {:4} documents: {}.".format(
-        len(documents_original),
-        "migrate_scheduled_activity_snapshot",
-    ))
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
 
     return collection.remove_all(
         documents=documents_original,
