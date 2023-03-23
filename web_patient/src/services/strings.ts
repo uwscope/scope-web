@@ -139,6 +139,7 @@ const _strings = {
 
     Values_inventory_dialog_add_value: 'Add value',
     Values_inventory_dialog_add_value_label: 'Name your value',
+    Values_inventory_dialog_value_name_validation_not_unique: 'Value already exists.',
 
     Values_inventory_dialog_edit_value: 'Edit value',
 
