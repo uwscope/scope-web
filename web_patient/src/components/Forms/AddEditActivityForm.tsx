@@ -436,6 +436,17 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         }
     });
 
+    const valueValidateName = () => {
+        // Value name must be unique, accounting for case-insensitive comparisons
+        const nameIsUnique: boolean =
+            patientStore.values.findIndex((value: IValue): boolean => {
+                // Search for a case-insensitive match
+                return value.name.toLocaleLowerCase() == activityViewState.addValueName.toLocaleLowerCase();
+            }) < 0;
+
+        return nameIsUnique;
+    };
+
     const handleActivityChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
         // DisplayedName can only trimStart because full trim means never being able to add a space
         activityViewState.displayedName = event.target.value.trimStart();
@@ -1022,6 +1033,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 })()}
                 error={patientStore.loadValuesInventoryState.error}
                 loading={patientStore.loadValuesInventoryState.pending}
+                nameIsUnique={valueValidateName}
                 handleCancel={handleAddValueCancel}
                 handleChange={handleAddValueChange}
                 handleSave={handleAddValueSave}
