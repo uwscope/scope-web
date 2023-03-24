@@ -176,7 +176,7 @@ class DocumentSet:
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
         match_datetime_at: Optional[datetime] = None,
-        match_values: Optional[Dict[str, str]] = None,
+        match_values: Optional[Dict[str, Union[int, str]]] = None,
     ) -> DocumentSet:
         """
         Keep only documents that match all provided parameters.
@@ -244,7 +244,7 @@ class DocumentSet:
         match_type: Optional[str],
         match_deleted: Optional[bool],
         match_datetime_at: Optional[datetime],
-        match_values: Optional[Dict[str, str]],
+        match_values: Optional[Dict[str, Union[int, str]]],
     ) -> bool:
         tested: bool = False
         matches: bool = True
@@ -358,7 +358,7 @@ class DocumentSet:
         match_type: Optional[str] = None,
         match_deleted: Optional[bool] = None,
         match_datetime_at: Optional[datetime] = None,
-        match_values: Optional[Dict[str, str]] = None,
+        match_values: Optional[Dict[str, Union[int, str]]] = None,
     ) -> DocumentSet:
         """
         Remove any documents that match all provided parameters.
