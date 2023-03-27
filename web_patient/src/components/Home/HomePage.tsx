@@ -1,4 +1,15 @@
-import { Avatar, Divider, Grid, List, ListItem, ListItemAvatar, ListItemText, Switch, Typography } from '@mui/material';
+import {
+    Avatar,
+    ButtonBase,
+    Divider,
+    Grid,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Switch,
+    Typography,
+} from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -34,6 +45,10 @@ export const HomePage: FunctionComponent = observer(() => {
     }>(() => ({
         showPendingOverdueActivities: false,
     }));
+
+    const handleOverdueViewClick = action((showPendingOverdueActivities: boolean) => {
+        viewState.showPendingOverdueActivities = showPendingOverdueActivities;
+    });
 
     const handleOverdueViewToggle = action((event: React.ChangeEvent<HTMLInputElement>) => {
         viewState.showPendingOverdueActivities = event.target.checked;
@@ -168,11 +183,14 @@ export const HomePage: FunctionComponent = observer(() => {
                     <Fragment>
                         <Grid container alignItems="center" spacing={1} justifyContent="center">
                             <Grid item>
-                                <Typography
-                                    variant="subtitle2"
-                                    color={viewState.showPendingOverdueActivities ? 'textSecondary' : 'textPrimary'}>
-                                    {getString('Home_overdue_all')}
-                                </Typography>
+                                <ButtonBase onClick={() => handleOverdueViewClick(false)}>
+                                    <Typography
+                                        color={
+                                            viewState.showPendingOverdueActivities ? 'textSecondary' : 'textPrimary'
+                                        }>
+                                        {getString('Home_overdue_all')}
+                                    </Typography>
+                                </ButtonBase>
                             </Grid>
                             <Grid item>
                                 <Switch
@@ -183,11 +201,14 @@ export const HomePage: FunctionComponent = observer(() => {
                                 />
                             </Grid>
                             <Grid item>
-                                <Typography
-                                    variant="subtitle2"
-                                    color={viewState.showPendingOverdueActivities ? 'textPrimary' : 'textSecondary'}>
-                                    {getString('Home_overdue_pending')}
-                                </Typography>
+                                <ButtonBase onClick={() => handleOverdueViewClick(true)}>
+                                    <Typography
+                                        color={
+                                            viewState.showPendingOverdueActivities ? 'textPrimary' : 'textSecondary'
+                                        }>
+                                        {getString('Home_overdue_pending')}
+                                    </Typography>
+                                </ButtonBase>
                             </Grid>
                         </Grid>
                         {viewState.showPendingOverdueActivities ? (
