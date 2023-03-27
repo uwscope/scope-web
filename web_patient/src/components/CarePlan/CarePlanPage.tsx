@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
     Button,
+    ButtonBase,
     Divider,
     Grid,
     IconButton,
@@ -91,6 +92,10 @@ export const CarePlanPage: FunctionComponent = observer(() => {
 
     const handleDayClick = action((date: Date) => {
         viewState.selectedDate = date;
+    });
+
+    const handleViewClick = action((showActivities: boolean) => {
+        viewState.showActivities = showActivities;
     });
 
     const handleViewToggle = action((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -451,9 +456,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
             }>
             <Grid container alignItems="center" spacing={1} justifyContent="center">
                 <Grid item>
-                    <Typography color={viewState.showActivities ? 'textSecondary' : 'textPrimary'}>
-                        {getString('Careplan_view_calendar')}
-                    </Typography>
+                    <ButtonBase onClick={() => handleViewClick(false)}>
+                        <Typography color={viewState.showActivities ? 'textSecondary' : 'textPrimary'}>
+                            {getString('Careplan_view_calendar')}
+                        </Typography>
+                    </ButtonBase>
                 </Grid>
                 <Grid item>
                     <Switch
@@ -464,9 +471,11 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                     />
                 </Grid>
                 <Grid item>
-                    <Typography color={viewState.showActivities ? 'textPrimary' : 'textSecondary'}>
-                        {getString('Careplan_view_activity')}
-                    </Typography>
+                    <ButtonBase onClick={() => handleViewClick(true)}>
+                        <Typography color={viewState.showActivities ? 'textPrimary' : 'textSecondary'}>
+                            {getString('Careplan_view_activity')}
+                        </Typography>
+                    </ButtonBase>
                 </Grid>
             </Grid>
             {viewState.showActivities ? (
