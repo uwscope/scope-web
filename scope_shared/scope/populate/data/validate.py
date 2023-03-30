@@ -107,14 +107,54 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
         assert document_current["_id"] not in existing_document_ids
         existing_document_ids.append(document_current["_id"])
 
-    # Every document key must be unique,
-    # with incrementing revisions,
-    # with monotonically increasing times
+    # Set types must have matching _set_id and semantic id
+    for document_current in collection:
+        if document_current["_type"] in [
+            "activityLog",
+            "activitySchedule",
+            "activity",
+            "assessmentLog",
+            "assessment",
+            "caseReview",
+            "moodLog",
+            "scheduledActivity",
+            "scheduledAssessment",
+            "session",
+            "value",
+        ]:
+            if "_deleted" in document_current:
+                assert document_current["_deleted"]
+                assert "_set_id" in document_current
+            else:
+                assert document_current["_set_id"] == document_current["{}Id".format(document_current["_type"])]
+        else:
+            assert "_set_id" not in document_current
+
+    # Every document key must be unique, with incrementing revisions, with monotonically increasing times.
+    # Any deletion must be the final revision in a sequence.
     for revisions_current in collection.group_revisions().values():
+        # If two documents have the same key,
+        # they'll be grouped into the same revision sequence.
+        # Two documents would therefore have _rev of 1.
+        # This would also be caught in the next loop,
+        # but is explicitly tested here for clarity in case of failure.
+        assert revisions_current.filter_match(
+            match_values={
+                "_rev": 1
+            }
+        ).is_unique()
+
         document_previous = None
         for index, document_current in enumerate(revisions_current.order_by_revision()):
+            # Revisions must have an incrementing sequence of _rev values
             assert document_current["_rev"] == index + 1
 
+            # Any deletion cannot be the first revision and must be the final revision
+            if "_delete" in document_current:
+                assert "_rev" != 1
+                assert "_rev" == len(revisions_current)
+
+            # Times must be monotonically increasing.
             if document_previous:
                 assert datetime_from_document(document=document_current) >= datetime_from_document(document=document_previous)
 
