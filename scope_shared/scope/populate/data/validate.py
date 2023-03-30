@@ -334,8 +334,11 @@ def _validate_patient_collection_values(*, collection: DocumentSet,):
         match_deleted=False,
     ):
         # For the time that each value document exists, its name must be unique.
-        for value_current in value_documents.filter_match(
+        assert value_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,
-        ):
-            assert document_current["name"] != value_current["name"]
+            match_values={
+                "name": document_current["name"],
+                "lifeAreaId": document_current["lifeAreaId"],
+            }
+        ).is_unique()
