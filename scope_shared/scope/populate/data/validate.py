@@ -196,8 +196,7 @@ def _validate_patient_collection_activity(*, collection: DocumentSet,):
     activity_documents = collection.filter_match(
         match_type="activity",
     )
-
-    values_documents = collection.filter_match(
+    value_documents = collection.filter_match(
         match_type="value",
     )
 
@@ -206,22 +205,23 @@ def _validate_patient_collection_activity(*, collection: DocumentSet,):
     ):
         # If the activity has a value, the referenced value must exist.
         if "valueId" in document_current:
-            assert values_documents.filter_match(
+            assert value_documents.filter_match(
+                match_deleted=False,
                 match_datetime_at=datetime_from_document(document=document_current),
                 match_values={
                     "valueId": document_current["valueId"]
                 }
             ).is_unique()
 
-        # For the time that each value activity exists, its name/value tuple must be unique.
-        for activity_current in activity_documents.filter_match(
+        # For the time that each activity exists, its name/value tuple must be unique.
+        assert activity_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,
-        ):
-            assert (
-                document_current["name"] != activity_current["name"]
-                or document_current.get("valueId", None) != activity_current.get("valuedId", None)
-            )
+            match_values={
+                "name": document_current["name"],
+                "valueId": document_current["valueId"],
+            }
+        ).is_unique()
 
 
 def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
