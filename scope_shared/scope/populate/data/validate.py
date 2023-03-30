@@ -94,6 +94,7 @@ def _validate_patient_collection(*, collection: DocumentSet,):
     _validate_patient_collection_activity_logs(collection=collection)
     _validate_patient_collection_activity_schedules(collection=collection)
     _validate_patient_collection_scheduled_activities(collection=collection)
+    _validate_patient_collection_values(collection=collection)
 
 
 def _validate_patient_collection_documents(*, collection: DocumentSet,):
