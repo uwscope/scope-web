@@ -88,6 +88,7 @@ def _validate_patient_collection(*, collection: DocumentSet,):
     """
 
     _validate_patient_collection_documents(collection=collection)
+    _validate_patient_collection_strings(collection=collection)
 
     _validate_patient_collection_activity(collection=collection)
     _validate_patient_collection_activity_logs(collection=collection)
@@ -118,6 +119,32 @@ def _validate_patient_collection_documents(*, collection: DocumentSet,):
                 assert datetime_from_document(document=document_current) >= datetime_from_document(document=document_previous)
 
             document_previous = document_current
+
+
+def _validate_patient_collection_strings(
+    *,
+    collection: DocumentSet,
+):
+    """
+    Validate properties of strings in specific documents.
+    """
+
+    activity_documents = collection.filter_match(
+        match_type="activity",
+        match_deleted=False,
+    )
+    value_documents = collection.filter_match(
+        match_type="value",
+        match_deleted=False,
+    )
+
+    # Activity names must already be trimmed
+    for document_current in activity_documents:
+        assert document_current["name"] == document_current["name"].strip()
+
+    # Value names must already be trimmed
+    for document_current in value_documents:
+        assert document_current["name"] == document_current["name"].strip()
 
 
 def _validate_patient_collection_activity(*, collection: DocumentSet,):
