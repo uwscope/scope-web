@@ -33,9 +33,6 @@
         "_rev": {
             "type": "number"
         },
-        "_deleted": {
-            "const": true
-        },
         "scheduledActivityId": {
             "type": "string"
         },

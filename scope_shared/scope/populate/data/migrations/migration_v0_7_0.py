@@ -69,6 +69,9 @@ def archive_migrate_v0_7_0(
         patient_collection = _migrate_activity_remove_reminder(
             collection=patient_collection,
         )
+        patient_collection = _migrate_scheduled_activity_deletion(
+            collection=patient_collection
+        )
         patient_collection = _migrate_scheduled_activity_remove_reminder(
             collection=patient_collection,
         )
@@ -340,6 +343,68 @@ def _migrate_assessment_log_with_embedded_assessment(
             #     data=document_migrated,
             #     schema=scope.schema.assessment_log_schema,
             # )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
+
+
+def _migrate_scheduled_activity_deletion(
+    *,
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Remove extra fields from any scheduled activity that is a deletion.
+    These are left over from an earlier ad-hoc implementation of deletion.
+    """
+
+    print("  migrate_scheduled_activity_deletion")
+
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="scheduledActivity",
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        if "_deleted" in document_migrated:
+            # Remove any fields that are not needed in a deletion tombstone
+            remove_fields = [
+                "activityId",
+                "activityName",
+                "completed",
+                "dueDate",
+                "dueDateTime",
+                "dueTimeOfDay",
+                "reminderDate",
+                "reminderDateTime",
+                "reminderTimeOfDay",
+                "scheduledActivityId",
+            ]
+            for remove_field_current in remove_fields:
+                if remove_field_current in document_migrated:
+                    is_migrated = True
+
+                    del document_migrated[remove_field_current]
+
+        if is_migrated:
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.set_tombstone_schema,
+            )
 
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
