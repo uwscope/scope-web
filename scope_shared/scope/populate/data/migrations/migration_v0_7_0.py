@@ -2325,3 +2325,932 @@ def _migrate_values_inventory_refactor_values_and_activities(
     ).union(
         documents=documents_created,
     )
+
+
+# def _test_fuse_value_interval():
+#     #
+#     # Test Case: After All Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: No Overlap
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Identical Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#
+#     #
+#     # Test Case: Append Two Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Merge Two Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Existing Interval Contains New Interval
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: New Interval Contains Existing Interval
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: New Interval Fuses Existing Interval
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 15),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 45)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#     assert _test_fuse_result[1].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 15)
+#
+#     #
+#     # Test Case: Does Not End, After All Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             )
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert not _test_fuse_result[1].hasEnd
+#
+#     #
+#     # Test Case: Does Not End, Fuses Existing Interval
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert not _test_fuse_result[0].hasEnd
+#
+#     #
+#     # Test Case: Does Not End, Fuses Some Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_value_interval(
+#         existing_intervals=[
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#             ValueInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 12, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 12, 30),
+#                 name="",
+#                 lifeAreaId="",
+#             ),
+#         ],
+#         new_interval=ValueInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             lifeAreaId="",
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#     assert not _test_fuse_result[1].hasEnd
+#
+#
+# # Run our tests
+# _test_fuse_value_interval()
+#
+#
+# def _test_fuse_activity_interval():
+#     #
+#     # Test Case: After All Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: No Overlap
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Identical Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#
+#     #
+#     # Test Case: Identical Intervals with Different E/I
+#     #
+#     # This is an error, because the "first" E/I gets completely erased.
+#     #
+#     error_raised = False
+#     try:
+#         _test_fuse_result = _fuse_activity_interval(
+#             existing_intervals=[
+#                 ActivityInterval(
+#                     datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                     hasEnd=True,
+#                     datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                     name="",
+#                     valueId="",
+#                     enjoyment=0,
+#                     importance=0,
+#                 )
+#             ],
+#             new_interval=ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=10,
+#                 importance=10,
+#             )
+#         )
+#     except ValueError:
+#         error_raised = True
+#     assert error_raised
+#
+#     #
+#     # Test Case: Append Two Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Append Two Intervals with Second Lacking E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=None,
+#             importance=None,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].enjoyment == 0
+#
+#     #
+#     # Test Case: Append Two Intervals with First Lacking E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=None,
+#                 importance=None,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=10,
+#             importance=10,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].enjoyment == None
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#     assert _test_fuse_result[1].enjoyment == 10
+#
+#     #
+#     # Test Case: Append Two Intervals with Different E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=10,
+#             importance=10,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].enjoyment == 0
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#     assert _test_fuse_result[1].enjoyment == 10
+#
+#     #
+#     # Test Case: Merge Two Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Merge Two Intervals with Different E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 00),
+#             name="",
+#             valueId="",
+#             enjoyment=10,
+#             importance=10,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#     assert _test_fuse_result[0].enjoyment == 0
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 30)
+#     assert _test_fuse_result[1].enjoyment == 10
+#
+#     #
+#     # Test Case: Existing Interval Contains New Interval
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: Existing Interval with No/EI Contains New Interval with E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=None,
+#                 importance=None,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#             name="",
+#             valueId="",
+#             enjoyment=10,
+#             importance=10,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 15)
+#     assert _test_fuse_result[1].enjoyment == 10
+#
+#     #
+#     # Test Case: New Interval Contains Existing Interval
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#
+#     #
+#     # Test Case: New Interval Fuses Existing Interval
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 45),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 15),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
+#             hasEnd=True,
+#             datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 45)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#     assert _test_fuse_result[1].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 15)
+#
+#     #
+#     # Test Case: Does Not End, After All Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             )
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert not _test_fuse_result[1].hasEnd
+#
+#     #
+#     # Test Case: Does Not End, Fuses Existing Interval
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 1
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert not _test_fuse_result[0].hasEnd
+#
+#     #
+#     # Test Case: Does Not End, Fuses Some Existing Intervals
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 11, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 12, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 12, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             valueId="",
+#             enjoyment=0,
+#             importance=0,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 2
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#     assert not _test_fuse_result[1].hasEnd
+#
+#     #
+#     # Test Case: Does Not End, Fuses Some Existing Intervals with Different E/I
+#     #
+#     _test_fuse_result = _fuse_activity_interval(
+#         existing_intervals=[
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 10, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 12, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 12, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=None,
+#                 importance=None,
+#             ),
+#             ActivityInterval(
+#                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 13, 0),
+#                 hasEnd=True,
+#                 datetimeEnd=datetime.datetime(2023, 3, 28, 6, 13, 30),
+#                 name="",
+#                 valueId="",
+#                 enjoyment=0,
+#                 importance=0,
+#             ),
+#         ],
+#         new_interval=ActivityInterval(
+#             datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
+#             hasEnd=False,
+#             datetimeEnd=None,
+#             name="",
+#             valueId="",
+#             enjoyment=10,
+#             importance=10,
+#         )
+#     )
+#     assert len(_test_fuse_result) == 3
+#     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
+#     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
+#     assert _test_fuse_result[0].enjoyment == 0
+#     assert _test_fuse_result[1].datetimeStart == datetime.datetime(2023, 3, 28, 6, 11, 0)
+#     assert _test_fuse_result[1].enjoyment == 10
+#     assert _test_fuse_result[2].datetimeStart == datetime.datetime(2023, 3, 28, 6, 13, 0)
+#     assert _test_fuse_result[2].enjoyment == 0
+#     assert not _test_fuse_result[2].hasEnd
+#
+#
+# # Run our tests
+# _test_fuse_activity_interval()
