@@ -88,12 +88,12 @@ def archive_migrate_v0_7_0(
         # Refactor values and activities out of values inventory
         patient_collection = _migrate_values_inventory_refactor_values_and_activities(
             collection=patient_collection,
-            verbose=True,
+            verbose=False,
         )
         # Refactor activity schedules out of the old activity format
         patient_collection = _migrate_activity_old_format_refactor_activity_schedule(
             collection=patient_collection,
-            verbose=True,
+            verbose=False,
         )
 
         # Snapshots can only be constructed after everything else is complete
