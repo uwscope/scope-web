@@ -646,6 +646,12 @@ def _migrate_activity_old_format_refactor_value_helper(
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
+    # This migration tears down values in order to integrate new values from the old activity format.
+    # It therefore cannot track changes in individual documents.
+    # But if there are no old format activities to integrate, then there is nothing to do.
+    if documents_activities_old_format.is_empty():
+        return documents_values
+
     #
     # Build up a set of fused values
     #
@@ -865,6 +871,12 @@ def _migrate_activity_old_format_refactor_activity_helper(
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
+    # This migration tears down activities in order to integrate new activities from the old activity format.
+    # It therefore cannot track changes in individual documents.
+    # But if there are no old format activities to integrate, then there is nothing to do.
+    if documents_activities_old_format.is_empty():
+        return documents_activities
+
     #
     # Build up a set of fused activities
     #
@@ -1187,6 +1199,11 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
+    # This migration creates new activity schedules without destroying existing activity schedules.
+    # It would generally only be executed once in the history of a collection.
+    # But if executed more than once, obtain the complete set of activity schedules
+    # requires combining the results of this migration with whatever activity schedules already existed.
+
     documents_activity_schedules: List[dict] = []
 
     for activity_old_format_revisions in documents_activities_old_format.group_revisions().values():
@@ -1450,6 +1467,7 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     # The initial revision of every scheduled activity
     # will have been created immediately after its corresponding activity schedule.
 
+    original_scheduled_activities: List[dict] = []
     migrated_scheduled_activities: List[dict] = []
 
     sorted_activity_schedules_and_initial_scheduled_activities = sorted(
@@ -1499,37 +1517,41 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
             )
 
             for scheduled_activity_revision_current in scheduled_activity_revisions:
-                scheduled_activity_revision_migrated = copy.deepcopy(scheduled_activity_revision_current)
-                del scheduled_activity_revision_migrated["activityId"]
-                scheduled_activity_revision_migrated["activityScheduleId"] = migrated_activity_schedule_id
+                # Only migrate scheduled activities that do not already have the correct activity schedule
+                if scheduled_activity_revision_current.get("activityScheduleId", None) != migrated_activity_schedule_id:
+                    scheduled_activity_revision_migrated = copy.deepcopy(scheduled_activity_revision_current)
+                    scheduled_activity_revision_migrated["activityScheduleId"] = migrated_activity_schedule_id
 
-                # The referenced activity schedule may not actually exist anymore.
-                # But this should only happen if the activity schedule was deleted.
-                referenced_activity_schedule = documents_activity_schedules.filter_match(
-                    match_deleted=False,
-                    match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
-                    match_values={
-                        "activityScheduleId": scheduled_activity_revision_migrated["activityScheduleId"]
-                    }
-                )
-                if referenced_activity_schedule.is_empty():
-                    assert documents_activity_schedules.filter_match(
-                        match_deleted=True,
+                    # In a first migration, this old field will need deleted
+                    if "activityId" in scheduled_activity_revision_migrated:
+                        del scheduled_activity_revision_migrated["activityId"]
+
+                    # The referenced activity schedule may not actually exist anymore.
+                    # But this should only happen if the activity schedule was deleted.
+                    referenced_activity_schedule = documents_activity_schedules.filter_match(
+                        match_deleted=False,
                         match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
                         match_values={
-                            "_set_id": scheduled_activity_revision_migrated["activityScheduleId"]
+                            "activityScheduleId": scheduled_activity_revision_migrated["activityScheduleId"]
                         }
                     )
+                    if referenced_activity_schedule.is_empty():
+                        assert documents_activity_schedules.filter_match(
+                            match_deleted=True,
+                            match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
+                            match_values={
+                                "_set_id": scheduled_activity_revision_migrated["activityScheduleId"]
+                            }
+                        )
 
-                migrated_scheduled_activities.append(scheduled_activity_revision_migrated)
+                    original_scheduled_activities.append(scheduled_activity_revision_current)
+                    migrated_scheduled_activities.append(scheduled_activity_revision_migrated)
 
-    # We should have migrated every scheduled activity that is not a deletion
-    migrated_scheduled_activities: DocumentSet = DocumentSet(
-        documents=migrated_scheduled_activities
+    # Merge our migrated scheduled activities with the original scheduled activities
+    migrated_scheduled_activities: DocumentSet = documents_scheduled_activities.remove_all(
+        documents=original_scheduled_activities,
     ).union(
-        documents=documents_scheduled_activities.filter_match(
-            match_deleted=True
-        )
+        documents=migrated_scheduled_activities,
     )
     assert len(migrated_scheduled_activities) == len(documents_scheduled_activities)
 
@@ -1563,6 +1585,9 @@ def _migrate_activity_old_format_refactor_activity_schedule(
     documents_activities = collection.filter_match(
         match_type="activity",
     )
+    documents_activity_schedules = collection.filter_match(
+        match_type="activitySchedule",
+    )
     documents_scheduled_activities = collection.filter_match(
         match_type="scheduledActivity",
     )
@@ -1589,54 +1614,58 @@ def _migrate_activity_old_format_refactor_activity_schedule(
         verbose=verbose,
     )
     documents_scheduled_activities_migrated = _migrate_activity_old_format_refactor_scheduled_activity_helper(
-        documents_activity_schedules=documents_activity_schedules_migrated,
+        documents_activity_schedules=documents_activity_schedules.union(
+            documents=documents_activity_schedules_migrated,
+        ),
         documents_scheduled_activities=documents_scheduled_activities,
         verbose=verbose,
     )
 
-    if len(documents_activities):
-        print("  - Deleted {} activity documents.".format(
-            len(documents_activities),
-        ))
-    if len(documents_values):
+    if len(documents_values.remove_any(documents=documents_values_migrated)):
         print("  - Deleted {} value documents.".format(
-            len(documents_values),
+            len(documents_values.remove_any(documents=documents_values_migrated)),
+        ))
+    if len(documents_activities.remove_any(documents=documents_activities_migrated)):
+        print("  - Deleted {} activity documents.".format(
+            len(documents_activities.remove_any(documents=documents_activities_migrated)),
         ))
     if len(documents_activities_old_format):
         print("  - Deleted {} activity_old_format documents.".format(
             len(documents_activities_old_format),
         ))
-    if len(documents_values_migrated):
+    if len(documents_values_migrated.remove_any(documents=documents_values)):
         print("  - Created {} value documents.".format(
-            len(documents_values_migrated),
+            len(documents_values_migrated.remove_any(documents=documents_values)),
         ))
-    if len(documents_activities_migrated):
+    if len(documents_activities_migrated.remove_any(documents=documents_activities)):
         print("  - Created {} activity documents.".format(
-            len(documents_activities_migrated),
+            len(documents_activities_migrated.remove_any(documents=documents_activities)),
         ))
     if len(documents_activity_schedules_migrated):
         print("  - Created {} activitySchedule documents.".format(
             len(documents_activity_schedules_migrated),
         ))
-    if len(documents_scheduled_activities_migrated):
-        print("  - Updated {} scheduled activity documents.".format(
-            len(documents_scheduled_activities_migrated),
+    if len(documents_scheduled_activities_migrated.remove_any(documents=documents_scheduled_activities)):
+        print("  - Updated {} scheduledActivity documents.".format(
+            len(documents_scheduled_activities_migrated.remove_any(documents=documents_scheduled_activities)),
         ))
 
     return collection.remove_all(
         documents=documents_activities_old_format,
     ).remove_all(
-        documents=documents_activities,
-    ).remove_all(
-        documents=documents_scheduled_activities,
-    ).remove_all(
         documents=documents_values,
     ).union(
         documents=documents_values_migrated,
+    ).remove_all(
+        documents=documents_activities,
     ).union(
         documents=documents_activities_migrated,
     ).union(
+        # There is no removal of previously-existing activity schedules.
+        # That was accomplished in removing the old format activities.
         documents=documents_activity_schedules_migrated,
+    ).remove_all(
+        documents=documents_scheduled_activities,
     ).union(
         documents=documents_scheduled_activities_migrated,
     )
@@ -1664,7 +1693,7 @@ def _migrate_activity_remove_reminder(
         document_migrated = copy.deepcopy(document_current)
 
         # Ensure "hasReminder" is always False
-        if document_migrated["hasReminder"]:
+        if document_migrated.get("hasReminder", False):
             is_migrated = True
 
             document_migrated["hasReminder"] = False
@@ -2189,9 +2218,10 @@ def _migrate_strip_strings(
             if document_migrated["name"] != document_migrated["name"].strip():
                 is_migrated = True
                 document_migrated["name"] = document_migrated["name"].strip()
-            if document_migrated["value"] != document_migrated["value"].strip():
-                is_migrated = True
-                document_migrated["value"] = document_migrated["value"].strip()
+            if "value" in document_migrated:
+                if document_migrated["value"] != document_migrated["value"].strip():
+                    is_migrated = True
+                    document_migrated["value"] = document_migrated["value"].strip()
 
         if document_migrated["_type"] == "valuesInventory":
             if "values" in document_migrated:
