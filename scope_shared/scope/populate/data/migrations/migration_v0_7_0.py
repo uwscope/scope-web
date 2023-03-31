@@ -112,7 +112,6 @@ def archive_migrate_v0_7_0(
     return archive
 
 
-def _migrate_activity_rename_type_old_format(
 @dataclass(frozen=True)
 class ValueInterval:
     name: str
@@ -1537,16 +1536,112 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     return migrated_scheduled_activities
 
 
+def _migrate_activity_old_format_refactor_activity_schedule(
     *,
     collection: DocumentSet,
+    verbose: bool,
 ) -> DocumentSet:
     """
-    Renames the type of existing activities.
+    Refactor the old activity format into an activity schedule.
 
-    This gets them out of the way while we create activities from the values inventory.
+    Values and activities have already been refactored out of the values inventory.
+    This builds up a layer of values that exist at required times,
+    then a layer of activities upon that,
+    and finally the layer of activity schedules.
+    It then re-maps the previously existing scheduled activities to those activity schedules.
+
+    I found it far too unwieldy to attempt to directly trace the old activity objects.
+    They did not have the strong consistency that we now have, creating too many conflicts.
     """
 
-    print("  migrate_activity_rename_type_old_format")
+    print("  migrate_activity_old_format_refactor_activity_schedule")
+
+    documents_activities_old_format = collection.filter_match(
+        match_type="activity_old_format"
+    )
+
+    documents_activities = collection.filter_match(
+        match_type="activity",
+    )
+    documents_scheduled_activities = collection.filter_match(
+        match_type="scheduledActivity",
+    )
+    documents_values = collection.filter_match(
+        match_type="value",
+    )
+
+    documents_values_migrated = _migrate_activity_old_format_refactor_value_helper(
+        documents_values=documents_values,
+        documents_activities_old_format=documents_activities_old_format,
+        verbose=verbose,
+    )
+    documents_activities_migrated = _migrate_activity_old_format_refactor_activity_helper(
+        documents_values=documents_values,
+        documents_values_migrated=documents_values_migrated,
+        documents_activities=documents_activities,
+        documents_activities_old_format=documents_activities_old_format,
+        verbose=verbose,
+    )
+    documents_activity_schedules_migrated = _migrate_activity_old_format_refactor_activity_schedule_helper(
+        documents_values=documents_values_migrated,
+        documents_activities=documents_activities_migrated,
+        documents_activities_old_format=documents_activities_old_format,
+        verbose=verbose,
+    )
+    documents_scheduled_activities_migrated = _migrate_activity_old_format_refactor_scheduled_activity_helper(
+        documents_activity_schedules=documents_activity_schedules_migrated,
+        documents_scheduled_activities=documents_scheduled_activities,
+        verbose=verbose,
+    )
+
+    if len(documents_activities):
+        print("  - Deleted {} activity documents.".format(
+            len(documents_activities),
+        ))
+    if len(documents_values):
+        print("  - Deleted {} value documents.".format(
+            len(documents_values),
+        ))
+    if len(documents_activities_old_format):
+        print("  - Deleted {} activity_old_format documents.".format(
+            len(documents_activities_old_format),
+        ))
+    if len(documents_values_migrated):
+        print("  - Created {} value documents.".format(
+            len(documents_values_migrated),
+        ))
+    if len(documents_activities_migrated):
+        print("  - Created {} activity documents.".format(
+            len(documents_activities_migrated),
+        ))
+    if len(documents_activity_schedules_migrated):
+        print("  - Created {} activitySchedule documents.".format(
+            len(documents_activity_schedules_migrated),
+        ))
+    if len(documents_scheduled_activities_migrated):
+        print("  - Updated {} scheduled activity documents.".format(
+            len(documents_scheduled_activities_migrated),
+        ))
+
+    return collection.remove_all(
+        documents=documents_activities_old_format,
+    ).remove_all(
+        documents=documents_activities,
+    ).remove_all(
+        documents=documents_scheduled_activities,
+    ).remove_all(
+        documents=documents_values,
+    ).union(
+        documents=documents_values_migrated,
+    ).union(
+        documents=documents_activities_migrated,
+    ).union(
+        documents=documents_activity_schedules_migrated,
+    ).union(
+        documents=documents_scheduled_activities_migrated,
+    )
+
+
 def _migrate_activity_remove_reminder(
     *,
     collection: DocumentSet,
