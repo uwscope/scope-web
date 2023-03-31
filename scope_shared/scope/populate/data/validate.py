@@ -45,10 +45,11 @@ def _validate_archive_document_schema(*, archive: scope.populate.data.archive.Ar
         )
 
         # These are currently not enforced by the schema
-        if document_current["_type"] == "activityLog":
-            assert "scheduledActivity" in document_current["dataSnapshot"]
-        if document_current["_type"] == "scheduledActivity":
-            assert "activity" in document_current["dataSnapshot"]
+        if not document_current.get("_deleted"):
+            if document_current["_type"] == "activityLog":
+                assert "scheduledActivity" in document_current["dataSnapshot"]
+            if document_current["_type"] == "scheduledActivity":
+                assert "activity" in document_current["dataSnapshot"]
 
 
 def _validate_archive_expected_collections(*, archive: scope.populate.data.archive.Archive,):
