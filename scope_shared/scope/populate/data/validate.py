@@ -310,8 +310,6 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
             "_rev": 1
         },
     ):
-        # The referenced activitySchedule must exist.
-        # The snapshot of the activitySchedule must match.
         activity_schedule_current = activity_schedule_documents.filter_match(
             match_deleted=False,
             match_datetime_at=datetime_from_document(document=document_current),
@@ -330,39 +328,74 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
     for document_current in scheduled_activity_documents.filter_match(
         match_deleted=False,
     ):
-        # The referenced activitySchedule must exist.
-        # The snapshot of the activitySchedule must match.
-        activity_schedule_current = activity_schedule_documents.filter_match(
-            match_deleted=False,
+        # A referenced activity schedule might no longer exist.
+        # This is because we do not update scheduled activities in the past.
+        # A referenced activity schedule must have existed at some point.
+        # Its snapshot must be current or what it was before deletion.
+        activity_schedule_snapshot = activity_schedule_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
-                "activityScheduleId": document_current["activityScheduleId"]
+                "_set_id": document_current["activityScheduleId"]
             }
         ).unique()
-        assert document_current["dataSnapshot"]["activitySchedule"] == activity_schedule_current
+        if activity_schedule_snapshot.get("_deleted"):
+            # Snapshot should be of the state immediately before deletion.
+            assert activity_schedule_snapshot["_deleted"]
+
+            activity_schedule_snapshot = activity_schedule_documents.filter_match(
+                match_deleted=False,
+                match_values={
+                    "_rev": activity_schedule_snapshot["_rev"] - 1,
+                    "activityScheduleId": document_current["activityScheduleId"]
+                }
+            ).unique()
+
+        assert document_current["dataSnapshot"]["activitySchedule"] == activity_schedule_snapshot
 
         # The referenced activity must exist.
         # The snapshot of the activity must match.
-        activity_current = activity_documents.filter_match(
-            match_deleted=False,
+        activity_snapshot = activity_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
-                "activityId": activity_schedule_current["activityId"]
+                "_set_id": activity_schedule_snapshot["activityId"]
             }
         ).unique()
-        assert document_current["dataSnapshot"]["activity"] == activity_current
+        if activity_snapshot.get("_deleted"):
+            # Snapshot should be of the state immediately before deletion.
+            assert activity_snapshot["_deleted"]
+
+            activity_snapshot = activity_documents.filter_match(
+                match_deleted=False,
+                match_values={
+                    "_rev": activity_snapshot["_rev"] - 1,
+                    "activityId": activity_schedule_snapshot["activityId"],
+                }
+            ).unique()
+
+        assert document_current["dataSnapshot"]["activity"] == activity_snapshot
 
         # If the activity has a value, the referenced value must exist.
         # If the activity has a value, the snapshot of the activity must match.
-        if "valueId" in activity_current:
-            value_current = value_documents.filter_match(
-                match_deleted=False,
+        if "valueId" in activity_snapshot:
+            value_snapshot = value_documents.filter_match(
                 match_datetime_at=datetime_from_document(document=document_current),
                 match_values={
-                    "valueId": activity_current["valueId"]
+                    "_set_id": activity_snapshot["valueId"],
                 }
             ).unique()
-            assert document_current["dataSnapshot"]["value"] == value_current
+            if value_snapshot.get("_deleted"):
+                # Snapshot should be of the state immediately before deletion.
+                assert value_snapshot["_deleted"]
+
+                value_snapshot = value_documents.filter_match(
+                    match_deleted=False,
+                    match_values={
+                        "_rev": value_snapshot["_rev"] - 1,
+                        "valueId": activity_snapshot["valueId"]
+                    }
+                ).unique()
+
+            assert document_current["dataSnapshot"]["value"] == value_snapshot
 
 
 def _validate_patient_collection_values(*, collection: DocumentSet,):
