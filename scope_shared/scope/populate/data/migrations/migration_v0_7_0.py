@@ -841,6 +841,329 @@ def _migrate_activity_old_format_refactor_value_helper(
     return documents_values_migrated
 
 
+def _migrate_activity_old_format_refactor_activity_helper(
+    *,
+    documents_values: DocumentSet,
+    documents_values_migrated: DocumentSet,
+    documents_activities: DocumentSet,
+    documents_activities_old_format: DocumentSet,
+    verbose: bool,
+) -> DocumentSet:
+    #
+    # Build up a set of fused activities
+    #
+    fused_activity_intervals = []
+
+    #
+    # First fuse activities obtained from the values inventory
+    #
+    for activity_revisions in documents_activities.group_revisions().values():
+        activity_revisions = activity_revisions.order_by_revision()
+
+        for (revision_index, activity_revision_current) in enumerate(activity_revisions):
+            # We do not create intervals for deletions.
+            # They are represented by the datetimeEnd of the previous interval.
+            if "_deleted" in activity_revision_current:
+                assert revision_index == len(activity_revisions) - 1
+            else:
+                # Create and fuse this interval
+
+                # The activity created from the values inventory references
+                # an id of a value created at the same time, which has since been migrated.
+                # Recover an id in the migrated values.
+                original_value = documents_values.filter_match(
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=activity_revision_current),
+                    match_values={
+                        "valueId": activity_revision_current["valueId"]
+                    }
+                ).unique()
+                migrated_value_id = documents_values_migrated.filter_match(
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=activity_revision_current),
+                    match_values={
+                        "name": original_value["name"],
+                        "lifeAreaId": original_value["lifeAreaId"],
+                    }
+                ).unique()["valueId"]
+
+                # If there is no revision after this,
+                # this activity is expected to be valid in our final state
+                datetime_end = None
+                if revision_index + 1 < len(activity_revisions):
+                    # Otherwise this activity is expected to be valid until the next revision.
+                    datetime_end = datetime_from_document(
+                        document=activity_revisions[revision_index + 1],
+                    )
+
+                fused_activity_intervals = _fuse_activity_interval(
+                    existing_intervals=fused_activity_intervals,
+                    new_interval=ActivityInterval(
+                        name=activity_revision_current["name"],
+                        valueId=migrated_value_id,
+                        enjoyment=activity_revision_current.get("enjoyment", None),
+                        importance=activity_revision_current.get("importance", None),
+                        datetimeStart=datetime_from_document(
+                            document=activity_revision_current,
+                        ),
+                        hasEnd=datetime_end is not None,
+                        datetimeEnd=datetime_end,
+                    )
+                )
+
+    #
+    # Then fuse activities obtained from the old activity format
+    #
+    for old_format_activity_revisions in documents_activities_old_format.group_revisions().values():
+        old_format_activity_revisions = old_format_activity_revisions.order_by_revision()
+
+        for (revision_index, old_format_activity_current) in enumerate(old_format_activity_revisions):
+            if old_format_activity_current["isDeleted"]:
+                assert revision_index == len(old_format_activity_revisions) - 1
+            else:
+                # Create and fuse this interval
+
+                migrated_value_id = documents_values_migrated.filter_match(
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=old_format_activity_current),
+                    match_values={
+                        "name": old_format_activity_current["value"],
+                        "lifeAreaId": old_format_activity_current["lifeareaId"],
+                    }
+                ).unique()["valueId"]
+
+                # If there is no revision after this,
+                # this activity is expected to be valid in our final state
+                datetime_end = None
+                if revision_index + 1 < len(old_format_activity_revisions):
+                    # Otherwise this activity is expected to be valid until the next revision.
+                    datetime_end = datetime_from_document(
+                        document=old_format_activity_revisions[revision_index + 1],
+                    )
+
+                fused_activity_intervals = _fuse_activity_interval(
+                    existing_intervals=fused_activity_intervals,
+                    new_interval=ActivityInterval(
+                        name=old_format_activity_current["name"],
+                        valueId=migrated_value_id,
+                        enjoyment=None,
+                        importance=None,
+                        datetimeStart=datetime_from_document(
+                            document=old_format_activity_current,
+                        ),
+                        hasEnd=datetime_end is not None,
+                        datetimeEnd=datetime_end,
+                    )
+                )
+
+    #
+    # Convert the activity intervals into activity documents
+    #
+    documents_activities_migrated: List[dict] = []
+    for interval_group_current in _group_matching_activity_intervals(intervals=fused_activity_intervals).values():
+        # Variables for tracking within a sequence of documents
+        activity_id_current: Optional[str] = None
+        revision_current: int = 0
+        document_migrated_previous: Optional[dict] = None
+        for (index_current, interval_current) in enumerate(interval_group_current):
+            if not activity_id_current:
+                activity_id_current = collection_utils.generate_set_id()
+            revision_current += 1
+            document_migrated = {
+                "_id": document_id_from_datetime(generation_time=interval_current.datetimeStart),
+                "_type": "activity",
+                "_set_id": activity_id_current,
+                "_rev": revision_current,
+                "activityId": activity_id_current,
+                "name": interval_current.name,
+                "valueId": interval_current.valueId,
+                "editedDateTime": date_utils.format_datetime(interval_current.datetimeStart),
+            }
+            if interval_current.enjoyment:
+                document_migrated.update({
+                    "enjoyment": interval_current.enjoyment
+                })
+            if interval_current.importance:
+                document_migrated.update({
+                    "importance": interval_current.importance
+                })
+
+            if verbose:
+                if revision_current == 1:
+                    print("  - Create Activity {}".format(activity_id_current))
+                    print("    + Now: {}".format(document_migrated["name"]))
+                    print("           {}".format(document_migrated["valueId"]))
+                    print("           E: {} I: {}".format(
+                        document_migrated.get("enjoyment", None),
+                        document_migrated.get("importance", None),
+                    ))
+                else:
+                    print("  - Update Activity {}".format(activity_id_current))
+                    print("    + Now: {}".format(document_migrated["name"]))
+                    print("           {}".format(document_migrated["valueId"]))
+                    print("           E: {} I: {}".format(
+                        document_migrated.get("enjoyment", None),
+                        document_migrated.get("importance", None),
+                    ))
+                    print("    + Was: {}".format(document_migrated_previous["name"]))
+                    print("           {}".format(document_migrated_previous["valueId"]))
+                    print("           E: {} I: {}".format(
+                        document_migrated_previous.get("enjoyment", None),
+                        document_migrated_previous.get("importance", None),
+                    ))
+
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.activity_schema,
+            )
+            documents_activities_migrated.append(document_migrated)
+            document_migrated_previous = document_migrated
+
+            # If this interval has an end time,
+            # which is not also the start time of the next interval,
+            # then it corresponds to an activity deletion.
+            if (
+                interval_current.hasEnd
+                and (
+                    index_current == len(interval_group_current) - 1
+                    or interval_group_current[index_current + 1].datetimeStart > interval_current.datetimeEnd
+                )
+            ):
+                revision_current += 1
+                document_migrated = {
+                    "_id": document_id_from_datetime(generation_time=interval_current.datetimeEnd),
+                    "_type": "activity",
+                    "_set_id": activity_id_current,
+                    "_rev": revision_current,
+                    "_deleted": True
+                }
+
+                scope.schema_utils.assert_schema(
+                    data=document_migrated,
+                    schema=scope.schema.set_tombstone_schema,
+                )
+                documents_activities_migrated.append(document_migrated)
+
+                if verbose:
+                    print("  - Deleted Activity {}".format(activity_id_current))
+                    print("    + Was: {}".format(document_migrated_previous["name"]))
+                    print("           {}".format(document_migrated_previous["valueId"]))
+                    print("           E: {} I: {}".format(
+                        document_migrated_previous.get("enjoyment", None),
+                        document_migrated_previous.get("importance", None),
+                    ))
+
+                revision_current = 0
+                activity_id_current = None
+                document_migrated_previous = None
+
+    # Convert migrated activities into a document set for ease
+    documents_activities_migrated: DocumentSet = DocumentSet(documents=documents_activities_migrated)
+
+    #
+    # Confirm necessary activities exist at the times they are supposed to exist
+    #
+    for original_activity_current in documents_activities.filter_match(
+        match_deleted=False,
+    ):
+        # The activity created from the values inventory references
+        # an id of a value created at the same time, which has since been migrated.
+        # Recover an id in the migrated values.
+        original_value = documents_values.filter_match(
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=original_activity_current),
+            match_values={
+                "valueId": original_activity_current["valueId"]
+            }
+        ).unique()
+        migrated_value_id = documents_values_migrated.filter_match(
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=original_activity_current),
+            match_values={
+                "name": original_value["name"],
+                "lifeAreaId": original_value["lifeAreaId"],
+            }
+        ).unique()["valueId"]
+
+        assert documents_activities_migrated.filter_match(
+            match_datetime_at=datetime_from_document(document=original_activity_current),
+            match_values={
+                "name": original_activity_current["name"],
+                "valueId": migrated_value_id,
+            }
+        ).unique()
+    for original_activity_old_format_current in documents_activities_old_format:
+        if not original_activity_old_format_current["isDeleted"]:
+            migrated_value_id = documents_values_migrated.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=original_activity_old_format_current),
+                match_values={
+                    "name": original_activity_old_format_current["value"],
+                    "lifeAreaId": original_activity_old_format_current["lifeareaId"],
+                }
+            ).unique()["valueId"]
+
+            assert documents_activities_migrated.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=original_activity_old_format_current),
+                match_values={
+                    "name": original_activity_old_format_current["name"],
+                    "valueId": migrated_value_id,
+                }
+            ).unique()
+
+    #
+    # Confirm that the final set of activities are the same in both representations
+    #
+    original_activity_set = set()
+    for original_activity_current in documents_activities.remove_revisions().filter_match(
+        match_deleted=False,
+    ):
+        original_value = documents_values.filter_match(
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=original_activity_current),
+            match_values={
+                "valueId": original_activity_current["valueId"]
+            }
+        ).unique()
+
+        original_activity_set.add((
+            original_activity_current["name"],
+            original_value["name"],
+            original_value["lifeAreaId"],
+        ))
+
+    for original_activity_old_format_current in documents_activities_old_format.remove_revisions():
+        if not original_activity_old_format_current["isDeleted"]:
+            original_activity_set.add((
+                original_activity_old_format_current["name"],
+                original_activity_old_format_current["value"],
+                original_activity_old_format_current["lifeareaId"],
+            ))
+
+    migrated_activity_set = set()
+    for migrated_activity_current in documents_activities_migrated.remove_revisions().filter_match(
+        match_deleted=False,
+    ):
+        migrated_value = documents_values_migrated.filter_match(
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=migrated_activity_current),
+            match_values={
+                "valueId": migrated_activity_current["valueId"]
+            }
+        ).unique()
+
+        migrated_activity_set.add((
+            migrated_activity_current["name"],
+            migrated_value["name"],
+            migrated_value["lifeAreaId"],
+        ))
+
+    assert original_activity_set == migrated_activity_set
+
+    return documents_activities_migrated
+
+
     *,
     collection: DocumentSet,
 ) -> DocumentSet:
