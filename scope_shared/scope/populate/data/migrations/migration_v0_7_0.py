@@ -624,6 +624,223 @@ def _fuse_activity_interval(
             return result_intervals
 
 
+def _migrate_activity_old_format_refactor_value_helper(
+    *,
+    documents_values: DocumentSet,
+    documents_activities_old_format: DocumentSet,
+    verbose: bool,
+) -> DocumentSet:
+    #
+    # Build up a set of fused values
+    #
+    fused_value_intervals = []
+
+    #
+    # First fuse values obtained from the values inventory
+    #
+    for value_revisions in documents_values.group_revisions().values():
+        value_revisions = value_revisions.order_by_revision()
+
+        for (revision_index, value_revision_current) in enumerate(value_revisions):
+            # We do not create intervals for deletions.
+            # They are represented by the datetimeEnd of the previous interval.
+            if "_deleted" in value_revision_current:
+                assert revision_index == len(value_revisions) - 1
+            else:
+                # Create and fuse this interval
+
+                # If there is no revision after this,
+                # this value is expected to be valid in our final state
+                datetime_end = None
+                if revision_index + 1 < len(value_revisions):
+                    # Otherwise this value is expected to be valid until the next revision.
+                    datetime_end = datetime_from_document(
+                        document=value_revisions[revision_index + 1],
+                    )
+
+                fused_value_intervals = _fuse_value_interval(
+                    existing_intervals=fused_value_intervals,
+                    new_interval=ValueInterval(
+                        name=value_revision_current["name"],
+                        lifeAreaId=value_revision_current["lifeAreaId"],
+                        datetimeStart=datetime_from_document(
+                            document=value_revision_current,
+                        ),
+                        hasEnd=datetime_end is not None,
+                        datetimeEnd=datetime_end,
+                    )
+                )
+
+    #
+    # Then fuse values obtained from the old activity format
+    #
+    for old_format_activity_revisions in documents_activities_old_format.group_revisions().values():
+        old_format_activity_revisions = old_format_activity_revisions.order_by_revision()
+
+        for (revision_index, old_format_activity_current) in enumerate(old_format_activity_revisions):
+            if old_format_activity_current["isDeleted"]:
+                assert revision_index == len(old_format_activity_revisions) - 1
+            else:
+                # Create and fuse this interval
+
+                # If there is no revision after this,
+                # this value is expected to be valid in our final state
+                datetime_end = None
+                if revision_index + 1 < len(old_format_activity_revisions):
+                    # Otherwise this value is expected to be valid until the next revision.
+                    datetime_end = datetime_from_document(
+                        document=old_format_activity_revisions[revision_index + 1],
+                    )
+
+                fused_value_intervals = _fuse_value_interval(
+                    existing_intervals=fused_value_intervals,
+                    new_interval=ValueInterval(
+                        name=old_format_activity_current["value"],
+                        lifeAreaId=old_format_activity_current["lifeareaId"],
+                        datetimeStart=datetime_from_document(
+                            document=old_format_activity_current,
+                        ),
+                        hasEnd=datetime_end is not None,
+                        datetimeEnd=datetime_end,
+                    )
+                )
+
+    #
+    # Convert the value intervals into value documents
+    #
+    documents_values_migrated: List[dict] = []
+    for interval_group_current in _group_matching_value_intervals(intervals=fused_value_intervals).values():
+        # Variables for tracking within a sequence of documents
+        value_id_current: Optional[str] = None
+        revision_current: int = 0
+        document_migrated_previous: Optional[dict] = None
+        for (index_current, interval_current) in enumerate(interval_group_current):
+            if not value_id_current:
+                value_id_current = collection_utils.generate_set_id()
+            revision_current += 1
+            document_migrated = {
+                "_id": document_id_from_datetime(generation_time=interval_current.datetimeStart),
+                "_type": "value",
+                "_set_id": value_id_current,
+                "_rev": revision_current,
+                "valueId": value_id_current,
+                "name": interval_current.name,
+                "lifeAreaId": interval_current.lifeAreaId,
+                "editedDateTime": date_utils.format_datetime(interval_current.datetimeStart),
+            }
+
+            if verbose:
+                if revision_current == 1:
+                    print("  - Create Value {}".format(value_id_current))
+                    print("    + Now: {}".format(document_migrated["name"]))
+                    print("           {}".format(document_migrated["lifeAreaId"]))
+                else:
+                    print("  - Update Value {}".format(value_id_current))
+                    print("    + Now: {}".format(document_migrated["name"]))
+                    print("           {}".format(document_migrated["lifeAreaId"]))
+                    print("    + Was: {}".format(document_migrated_previous["name"]))
+                    print("           {}".format(document_migrated_previous["lifeAreaId"]))
+
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.value_schema,
+            )
+            documents_values_migrated.append(document_migrated)
+            document_migrated_previous = document_migrated
+
+            # If this interval has an end time,
+            # which is not also the start time of the next interval,
+            # then it corresponds to a value deletion.
+            if (
+                interval_current.hasEnd
+                and (
+                    index_current == len(interval_group_current) - 1
+                    or interval_group_current[index_current + 1].datetimeStart > interval_current.datetimeEnd
+                )
+            ):
+                revision_current += 1
+                document_migrated = {
+                    "_id": document_id_from_datetime(generation_time=interval_current.datetimeEnd),
+                    "_type": "value",
+                    "_set_id": value_id_current,
+                    "_rev": revision_current,
+                    "_deleted": True
+                }
+
+                scope.schema_utils.assert_schema(
+                    data=document_migrated,
+                    schema=scope.schema.set_tombstone_schema,
+                )
+                documents_values_migrated.append(document_migrated)
+
+                if verbose:
+                    print("  - Deleted Value {}".format(value_id_current))
+                    print("    + Was: {}".format(document_migrated_previous["name"]))
+                    print("           {}".format(document_migrated_previous["lifeAreaId"]))
+
+                revision_current = 0
+                value_id_current = None
+                document_migrated_previous = None
+
+    # Convert migrated values into a document set for ease
+    documents_values_migrated: DocumentSet = DocumentSet(documents=documents_values_migrated)
+
+    #
+    # Confirm necessary values exist at the times they are supposed to exist
+    #
+    for original_value_current in documents_values.filter_match(
+        match_deleted=False,
+    ):
+        assert documents_values_migrated.filter_match(
+            match_datetime_at=datetime_from_document(document=original_value_current),
+            match_values={
+                "name": original_value_current["name"],
+                "lifeAreaId": original_value_current["lifeAreaId"]
+            }
+        ).unique()
+    for original_activity_old_format_current in documents_activities_old_format:
+        if not original_activity_old_format_current["isDeleted"]:
+            assert documents_values_migrated.filter_match(
+                match_datetime_at=datetime_from_document(document=original_activity_old_format_current),
+                match_values={
+                    "name": original_activity_old_format_current["value"],
+                    "lifeAreaId": original_activity_old_format_current["lifeareaId"]
+                }
+            ).unique()
+
+    #
+    # Confirm that the final set of values are the same in both representations
+    #
+    original_value_set = set()
+    for original_value_current in documents_values.remove_revisions().filter_match(
+        match_deleted=False,
+    ):
+        original_value_set.add((
+            original_value_current["name"],
+            original_value_current["lifeAreaId"],
+        ))
+
+    for original_activity_old_format_current in documents_activities_old_format.remove_revisions():
+        if not original_activity_old_format_current["isDeleted"]:
+            original_value_set.add((
+                original_activity_old_format_current["value"],
+                original_activity_old_format_current["lifeareaId"],
+            ))
+
+    migrated_value_set = set()
+    for migrated_value_current in documents_values_migrated.remove_revisions().filter_match(
+        match_deleted=False,
+    ):
+        migrated_value_set.add((
+            migrated_value_current["name"],
+            migrated_value_current["lifeAreaId"],
+        ))
+
+    assert original_value_set == migrated_value_set
+
+    return documents_values_migrated
+
+
     *,
     collection: DocumentSet,
 ) -> DocumentSet:
