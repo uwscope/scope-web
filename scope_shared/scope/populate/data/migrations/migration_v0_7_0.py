@@ -94,6 +94,534 @@ def archive_migrate_v0_7_0(
 
 
 def _migrate_activity_rename_type_old_format(
+@dataclass(frozen=True)
+class ValueInterval:
+    name: str
+    lifeAreaId: str
+    datetimeStart: datetime.datetime
+    hasEnd: bool
+    datetimeEnd: Optional[datetime.datetime]
+
+
+def _group_matching_value_intervals(
+    intervals: List[ValueInterval]
+) -> Dict[(str, str), List[ValueInterval]]:
+    unsorted_groups: Dict[(str, str), List[ValueInterval]] = {}
+    for interval_current in intervals:
+        key = (
+            interval_current.name,
+            interval_current.lifeAreaId,
+        )
+
+        if key in unsorted_groups:
+            unsorted_groups[key].append(interval_current)
+        else:
+            unsorted_groups[key] = [interval_current]
+
+    sorted_groups: Dict[(str, str), List[ValueInterval]] = {
+        key_current: sorted(
+            unsorted_intervals_current,
+            key=lambda interval_sort_current: (
+                interval_sort_current.datetimeStart
+            ),
+        )
+        for (key_current, unsorted_intervals_current) in unsorted_groups.items()
+    }
+
+    return sorted_groups
+
+
+def _validate_value_intervals(
+    intervals: List[ValueInterval]
+) -> None:
+    # Every interval must have a start before its end.
+    for interval_current in intervals:
+        if interval_current.hasEnd:
+            assert interval_current.datetimeStart < interval_current.datetimeEnd
+
+    # Grouped intervals must be in order and non-overlapping.
+    grouped_matching_intervals = _group_matching_value_intervals(intervals=intervals)
+    for group_current in grouped_matching_intervals.values():
+        interval_previous = None
+        for (index_current, interval_current) in enumerate(group_current):
+            # If an interval does not end, it must be the final interval.
+            # This also implies there can be only one interval that does not end.
+            if not interval_current.hasEnd:
+                assert index_current == len(group_current) - 1
+
+            if interval_previous:
+                # Must be in order.
+                assert interval_previous.datetimeStart < interval_current.datetimeStart
+                # Implemented as strictly less than because otherwise they should have merged.
+                assert interval_previous.hasEnd
+                assert interval_previous.datetimeEnd < interval_current.datetimeStart
+            interval_previous = interval_current
+
+
+def _fuse_value_interval(
+    *,
+    existing_intervals: List[ValueInterval],
+    new_interval: ValueInterval,
+) -> List[ValueInterval]:
+    # Validate the provided intervals
+    _validate_value_intervals([new_interval])
+    _validate_value_intervals(existing_intervals)
+
+    # Goal is to identify one overlapping segment, resolve that, and recurse for any other overlap.
+
+    # Obtain existing intervals that match, sorted by their datetimeStart
+    matching_intervals = _group_matching_value_intervals(
+        intervals=existing_intervals,
+    ).get(
+        (
+            new_interval.name,
+            new_interval.lifeAreaId,
+        ),
+        [],
+    )
+
+    # Condition: No Existing Interval
+    # - There are no matching intervals.
+    # - Keep the new interval.
+    if len(matching_intervals) == 0:
+        result_intervals: List[ValueInterval] = copy.deepcopy(existing_intervals)
+        result_intervals.append(new_interval)
+
+        _validate_value_intervals(result_intervals)
+
+        return result_intervals
+
+    # Identify the first matching interval
+    # that ends at or after this new interval starts.
+    # That is the first interval that could potentially overlap.
+    # All previous matching intervals end before our new interval starts.
+    search_index: int = 0
+    search_found: bool = False
+    while not search_found and search_index < len(matching_intervals):
+        search_matching_interval = matching_intervals[search_index]
+
+        search_found = (
+            not search_matching_interval.hasEnd
+            or search_matching_interval.datetimeEnd >= new_interval.datetimeStart
+        )
+
+        if not search_found:
+            search_index += 1
+
+    if search_index == len(matching_intervals):
+        # Search failed,
+        # every matching interval ends before this new interval starts.
+        assert matching_intervals[len(matching_intervals) - 1].hasEnd
+        assert matching_intervals[len(matching_intervals) - 1].datetimeEnd
+        assert matching_intervals[len(matching_intervals) - 1].datetimeEnd < new_interval.datetimeStart
+
+        # Condition:
+        # - All matching intervals end before the new interval starts.
+        # - Keep the new interval.
+        result_intervals: List[ValueInterval] = copy.deepcopy(existing_intervals)
+        result_intervals.append(new_interval)
+
+        _validate_value_intervals(result_intervals)
+
+        return result_intervals
+    else:
+        # Search succeeded, index is the first interval that ends after new interval starts.
+        matching_interval = matching_intervals[search_index]
+
+        # Order the intervals by their start time
+        first_interval: ValueInterval
+        second_interval: ValueInterval
+        if new_interval.datetimeStart <= matching_interval.datetimeStart:
+            first_interval = new_interval
+            second_interval = matching_interval
+        else:
+            first_interval = matching_interval
+            second_interval = new_interval
+
+        if first_interval.hasEnd and first_interval.datetimeEnd < second_interval.datetimeStart:
+            # Condition:
+            # - The two intervals do not actually overlap.
+            # - Keep the new interval.
+
+            # print("No Overlap")
+            # print("  + {} -> {}".format(first_interval.datetimeStart, first_interval.datetimeEnd))
+            # print("  + {} -> {}".format(second_interval.datetimeStart, second_interval.datetimeEnd))
+
+            result_intervals: List[ValueInterval] = copy.deepcopy(existing_intervals)
+            result_intervals.append(new_interval)
+
+            _validate_value_intervals(result_intervals)
+
+            return result_intervals
+
+        # Confirmed these intervals overlap
+        assert (
+            not first_interval.hasEnd
+            or second_interval.datetimeStart <= first_interval.datetimeEnd
+        )
+
+        # Condition:
+        # - The intervals overlap.
+        # - Fuse their start and end times.
+        # - Then recurse for any additional overlaps.
+        fused_start = first_interval.datetimeStart
+        fused_has_end = first_interval.hasEnd and second_interval.hasEnd
+        fused_end = max(first_interval.datetimeEnd, second_interval.datetimeEnd) if fused_has_end else None
+
+        assert first_interval.name == second_interval.name
+        assert first_interval.lifeAreaId == second_interval.lifeAreaId
+        fused_interval = ValueInterval(
+            name=first_interval.name,
+            lifeAreaId=first_interval.lifeAreaId,
+            datetimeStart=fused_start,
+            hasEnd=fused_has_end,
+            datetimeEnd=fused_end,
+        )
+
+        # print("Fuse Intervals")
+        # print("  - {} -> {}".format(first_interval.datetimeStart, first_interval.datetimeEnd))
+        # print("  - {} -> {}".format(second_interval.datetimeStart, second_interval.datetimeEnd))
+        # print("  + {} -> {}".format(fused_interval.datetimeStart, fused_interval.datetimeEnd))
+
+        result_intervals: List[ValueInterval] = copy.deepcopy(existing_intervals)
+        result_intervals.remove(matching_interval)
+
+        result_intervals = _fuse_value_interval(
+            existing_intervals=result_intervals,
+            new_interval=fused_interval,
+        )
+        _validate_value_intervals(result_intervals)
+
+        return result_intervals
+
+
+@dataclass(frozen=True)
+class ActivityInterval:
+    name: str
+    valueId: str
+    enjoyment: Optional[int]
+    importance: Optional[int]
+    datetimeStart: datetime.datetime
+    hasEnd: bool
+    datetimeEnd: Optional[datetime.datetime]
+
+
+def _group_matching_activity_intervals(
+    intervals: List[ActivityInterval]
+) -> Dict[(str, str), List[ActivityInterval]]:
+    unsorted_groups: Dict[(str, str), List[ActivityInterval]] = {}
+    for interval_current in intervals:
+        key = (
+            interval_current.name,
+            interval_current.valueId,
+        )
+
+        if key in unsorted_groups:
+            unsorted_groups[key].append(interval_current)
+        else:
+            unsorted_groups[key] = [interval_current]
+
+    sorted_groups: Dict[(str, str), List[ActivityInterval]] = {
+        key_current: sorted(
+            unsorted_intervals_current,
+            key=lambda interval_sort_current: (
+                interval_sort_current.datetimeStart
+            ),
+        )
+        for (key_current, unsorted_intervals_current) in unsorted_groups.items()
+    }
+
+    return sorted_groups
+
+
+def _validate_activity_intervals(
+    intervals: List[ActivityInterval]
+) -> None:
+    # Every interval must have a start before its end.
+    for interval_current in intervals:
+        if interval_current.hasEnd:
+            assert interval_current.datetimeStart < interval_current.datetimeEnd
+
+    # Grouped intervals must be in order and non-overlapping.
+    grouped_matching_intervals = _group_matching_activity_intervals(intervals=intervals)
+    for group_current in grouped_matching_intervals.values():
+        interval_previous = None
+        for (index_current, interval_current) in enumerate(group_current):
+            # If an interval does not end, it must be the final interval.
+            # This also implies there can be only one interval that does not end.
+            if not interval_current.hasEnd:
+                assert index_current == len(group_current) - 1
+
+            if interval_previous:
+                # Must be in order.
+                assert interval_previous.datetimeStart < interval_current.datetimeStart
+                # Intervals either have a gap or have different enjoyment/importance, otherwise they should have merged.
+                assert interval_previous.hasEnd
+                assert (
+                    interval_previous.datetimeEnd < interval_current.datetimeStart
+                    or interval_previous.enjoyment != interval_current.enjoyment
+                    or interval_previous.importance != interval_current.importance
+                )
+            interval_previous = interval_current
+
+
+def _fuse_activity_interval(
+    *,
+    existing_intervals: List[ActivityInterval],
+    new_interval: ActivityInterval,
+) -> List[ActivityInterval]:
+    # Validate the provided intervals
+    _validate_activity_intervals([new_interval])
+    _validate_activity_intervals(existing_intervals)
+
+    # Goal is to identify one overlapping segment, resolve that, and recurse for any other overlap.
+
+    # Obtain existing intervals that match, sorted by their datetimeStart
+    matching_intervals = _group_matching_activity_intervals(
+        intervals=existing_intervals,
+    ).get(
+        (
+            new_interval.name,
+            new_interval.valueId,
+        ),
+        [],
+    )
+
+    # Condition: No Existing Interval
+    # - There are no matching intervals.
+    # - Keep the new interval.
+    if len(matching_intervals) == 0:
+        result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+        result_intervals.append(new_interval)
+
+        _validate_activity_intervals(result_intervals)
+
+        return result_intervals
+
+    # Identify the first matching interval
+    # that ends at or after this new interval starts.
+    # That is the first interval that could potentially overlap.
+    # All previous matching intervals end before our new interval starts.
+    search_index: int = 0
+    search_found: bool = False
+    while not search_found and search_index < len(matching_intervals):
+        search_matching_interval = matching_intervals[search_index]
+
+        search_found = (
+            not search_matching_interval.hasEnd
+            or search_matching_interval.datetimeEnd >= new_interval.datetimeStart
+        )
+
+        if not search_found:
+            search_index += 1
+
+    if search_index == len(matching_intervals):
+        # Search failed,
+        # every matching interval ends before this new interval starts.
+        assert matching_intervals[len(matching_intervals) - 1].hasEnd
+        assert matching_intervals[len(matching_intervals) - 1].datetimeEnd
+        assert matching_intervals[len(matching_intervals) - 1].datetimeEnd < new_interval.datetimeStart
+
+        # Condition:
+        # - All matching intervals end before the new interval starts.
+        # - Keep the new interval.
+        result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+        result_intervals.append(new_interval)
+
+        _validate_activity_intervals(result_intervals)
+
+        return result_intervals
+    else:
+        # Search succeeded, index is the first interval that ends after new interval starts.
+        matching_interval = matching_intervals[search_index]
+
+        # Order the intervals by their start time
+        first_interval: ActivityInterval
+        second_interval: ActivityInterval
+        if new_interval.datetimeStart <= matching_interval.datetimeStart:
+            first_interval = new_interval
+            second_interval = matching_interval
+        else:
+            first_interval = matching_interval
+            second_interval = new_interval
+
+        # If a second interval does not have an enjoyment/importance,
+        # pre-emptively fuse those from the first interval.
+        # This will allow fusing the intervals together,
+        # so we can later focus on actual changes to the enjoyment/importance.
+        if second_interval.enjoyment is None:
+            second_interval = ActivityInterval(
+                name=second_interval.name,
+                valueId=second_interval.valueId,
+                enjoyment=first_interval.enjoyment,
+                importance=second_interval.importance,
+                datetimeStart=second_interval.datetimeStart,
+                hasEnd=second_interval.hasEnd,
+                datetimeEnd=second_interval.datetimeEnd,
+            )
+        if second_interval.importance is None:
+            second_interval = ActivityInterval(
+                name=second_interval.name,
+                valueId=second_interval.valueId,
+                enjoyment=second_interval.enjoyment,
+                importance=first_interval.importance,
+                datetimeStart=second_interval.datetimeStart,
+                hasEnd=second_interval.hasEnd,
+                datetimeEnd=second_interval.datetimeEnd,
+            )
+
+        # If the two intervals start at the same time, one will be erased.
+        # That is fine if they have the same enjoyment/importance, but an error if they do not.
+        if (
+            first_interval.datetimeStart == second_interval.datetimeStart
+            and (
+                first_interval.enjoyment != second_interval.enjoyment
+                or first_interval.importance != second_interval.importance
+            )
+        ):
+            raise ValueError("Conflicting Values of Enjoyment/Importance")
+
+        if first_interval.hasEnd and first_interval.datetimeEnd < second_interval.datetimeStart:
+            # Condition:
+            # - The two intervals do not actually overlap.
+            # - Keep the new interval.
+
+            # print("No Overlap")
+            # print("  + {} -> {}".format(first_interval.datetimeStart, first_interval.datetimeEnd))
+            # print("  + {} -> {}".format(second_interval.datetimeStart, second_interval.datetimeEnd))
+
+            result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+            result_intervals.append(new_interval)
+
+            _validate_activity_intervals(result_intervals)
+
+            return result_intervals
+
+        if (
+            first_interval.hasEnd
+            and first_interval.datetimeEnd == second_interval.datetimeStart
+            and (
+                first_interval.enjoyment != second_interval.enjoyment
+                or first_interval.importance != second_interval.importance
+            )
+        ):
+            # Condition:
+            # - The two intervals are directly adjacent.
+            # - The intervals have different enjoyment/importance.
+            # - Keep the new interval.
+
+            result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+            result_intervals.append(new_interval)
+
+            _validate_activity_intervals(result_intervals)
+
+            return result_intervals
+
+        # Confirmed these intervals overlap
+        assert (
+            not first_interval.hasEnd
+            or second_interval.datetimeStart <= first_interval.datetimeEnd
+        )
+
+        if (
+            first_interval.enjoyment == second_interval.enjoyment
+            and first_interval.importance == second_interval.importance
+        ):
+            # Condition:
+            # - The intervals overlap.
+            # - The intervals have identical enjoyment/importance.
+            # - Fuse their start and end times.
+            # - Then recurse for any additional overlaps.
+            fused_start = first_interval.datetimeStart
+            fused_has_end = first_interval.hasEnd and second_interval.hasEnd
+            fused_end = max(first_interval.datetimeEnd, second_interval.datetimeEnd) if fused_has_end else None
+
+            assert first_interval.name == second_interval.name
+            assert first_interval.valueId == second_interval.valueId
+            assert first_interval.enjoyment == second_interval.enjoyment
+            assert first_interval.importance == second_interval.importance
+            fused_interval = ActivityInterval(
+                name=first_interval.name,
+                valueId=first_interval.valueId,
+                enjoyment=first_interval.enjoyment,
+                importance=first_interval.importance,
+                datetimeStart=fused_start,
+                hasEnd=fused_has_end,
+                datetimeEnd=fused_end,
+            )
+
+            # print("Fuse Intervals")
+            # print("  - {} -> {}".format(first_interval.datetimeStart, first_interval.datetimeEnd))
+            # print("  - {} -> {}".format(second_interval.datetimeStart, second_interval.datetimeEnd))
+            # print("  + {} -> {}".format(fused_interval.datetimeStart, fused_interval.datetimeEnd))
+
+            result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+            result_intervals.remove(matching_interval)
+
+            return _fuse_activity_interval(
+                existing_intervals=result_intervals,
+                new_interval=fused_interval,
+            )
+        else:
+            # Condition:
+            # - The intervals overlap.
+            # - The intervals have different enjoyment/importance.
+            # - The first interval's enjoyment/importance continues until the second.
+            # - The second interval's enjoyment/importance is fused, then continues from its start time.
+            # - Then recurse for any additional overlaps.
+
+            assert first_interval.name == second_interval.name
+            assert first_interval.valueId == second_interval.valueId
+            fused_first_interval = ActivityInterval(
+                name=first_interval.name,
+                valueId=first_interval.valueId,
+                enjoyment=first_interval.enjoyment,
+                importance=first_interval.importance,
+                datetimeStart=first_interval.datetimeStart,
+                hasEnd=True,
+                datetimeEnd=second_interval.datetimeStart,
+            )
+
+            fused_has_end = first_interval.hasEnd and second_interval.hasEnd
+            fused_end = max(first_interval.datetimeEnd, second_interval.datetimeEnd) if fused_has_end else None
+            fused_second_interval = ActivityInterval(
+                name=second_interval.name,
+                valueId=second_interval.valueId,
+                enjoyment=second_interval.enjoyment,
+                importance=second_interval.importance,
+                datetimeStart=second_interval.datetimeStart,
+                hasEnd=fused_has_end,
+                datetimeEnd=fused_end,
+            )
+
+            # print("Fuse Enjoyment/Importance")
+            # print("  - {} -> {}".format(first_interval.datetimeStart, first_interval.datetimeEnd))
+            # print("    E: {} I: {}".format(first_interval.enjoyment, first_interval.importance))
+            # print("  - {} -> {}".format(second_interval.datetimeStart, second_interval.datetimeEnd))
+            # print("    E: {} I: {}".format(second_interval.enjoyment, second_interval.importance))
+            # print("  + {} -> {}".format(fused_first_interval.datetimeStart, fused_first_interval.datetimeEnd))
+            # print("    E: {} I: {}".format(fused_first_interval.enjoyment, fused_first_interval.importance))
+            # print("  + {} -> {}".format(fused_second_interval.datetimeStart, fused_second_interval.datetimeEnd))
+            # print("    E: {} I: {}".format(fused_second_interval.enjoyment, fused_second_interval.importance))
+
+            result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
+            result_intervals.remove(matching_interval)
+
+            result_intervals = _fuse_activity_interval(
+                existing_intervals=result_intervals,
+                new_interval=fused_first_interval,
+            )
+            _validate_activity_intervals(result_intervals)
+
+            result_intervals = _fuse_activity_interval(
+                existing_intervals=result_intervals,
+                new_interval=fused_second_interval,
+            )
+            _validate_activity_intervals(result_intervals)
+
+            return result_intervals
+
+
     *,
     collection: DocumentSet,
 ) -> DocumentSet:
