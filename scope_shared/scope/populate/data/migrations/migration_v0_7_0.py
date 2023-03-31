@@ -1547,46 +1547,6 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     """
 
     print("  migrate_activity_rename_type_old_format")
-
-    # Migrate documents, tracking which are migrated
-    documents_original = []
-    documents_migrated = []
-    for document_current in collection.filter_match(
-        match_type="activity",
-        match_deleted=False,
-    ):
-        is_migrated = False
-        document_original = document_current
-        document_migrated = copy.deepcopy(document_current)
-
-        # Presence of "startDateTime" indicates this activity
-        # is in the old format that includes an embedded schedule
-        if "startDateTime" in document_migrated:
-            is_migrated = True
-
-            document_migrated["_type"] = "activity_OldFormat"
-
-        if is_migrated:
-            # scope.schema_utils.assert_schema(
-            #     data=document_migrated,
-            #     schema=scope.schema.activity_schema,
-            # )
-
-            documents_original.append(document_original)
-            documents_migrated.append(document_migrated)
-
-    if len(documents_migrated):
-        print("  - Updated {} documents.".format(
-            len(documents_migrated),
-        ))
-
-    return collection.remove_all(
-        documents=documents_original,
-    ).union(
-        documents=documents_migrated
-    )
-
-
 def _migrate_activity_remove_reminder(
     *,
     collection: DocumentSet,
@@ -1619,6 +1579,56 @@ def _migrate_activity_remove_reminder(
             is_migrated = True
 
             del document_migrated["reminderTimeOfDay"]
+
+        if is_migrated:
+            # scope.schema_utils.assert_schema(
+            #     data=document_migrated,
+            #     schema=scope.schema.activity_schema,
+            # )
+
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
+
+
+def _migrate_activity_rename_type_old_format(
+    *,
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Renames the type of existing activities.
+
+    This gets them out of the way while we create activities from the values inventory.
+    """
+
+    print("  migrate_activity_rename_type_old_format")
+
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_type="activity",
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        # Presence of "startDateTime" indicates this activity
+        # is in the old format that includes an embedded schedule
+        if "startDateTime" in document_migrated:
+            is_migrated = True
+
+            document_migrated["_type"] = "activity_old_format"
 
         if is_migrated:
             # scope.schema_utils.assert_schema(
