@@ -2067,6 +2067,7 @@ def _migrate_strip_strings(
 def _migrate_values_inventory_refactor_values_and_activities(
     *,
     collection: DocumentSet,
+    verbose: bool,
 ) -> DocumentSet:
     """
     Remove values and activities from values inventory and refactor them into documents.
@@ -2103,7 +2104,6 @@ def _migrate_values_inventory_refactor_values_and_activities(
     documents_created = []
     for document_current in documents_filtered_relevant.filter_match(
         match_type="valuesInventory",
-        match_deleted=False,
     ).order_by_revision():
         is_migrated = False
         document_original = document_current
@@ -2150,8 +2150,10 @@ def _migrate_values_inventory_refactor_values_and_activities(
             for value_document_current in values_existing:
                 created_datetime = created_datetime_by_value_id[value_document_current["valueId"]]
                 if created_datetime not in document_migrated_values_created_datetimes:
-                    print("  - Delete Value:")
-                    print("    + Was: {}".format(value_document_current["name"]))
+                    # Deleting a value
+                    if verbose:
+                        print("  - Delete Value")
+                        print("    + Was: {}".format(value_document_current["name"]))
 
                     document_value_deleted = {
                         "_id": document_id_from_datetime(
@@ -2178,8 +2180,9 @@ def _migrate_values_inventory_refactor_values_and_activities(
             for value_entry_current in document_migrated["values"]:
                 if value_entry_current["createdDateTime"] not in value_id_by_created_datetime:
                     # Creating a new value
-                    print("  - Create Value:")
-                    print("    + Now: {}".format(value_entry_current["name"]))
+                    if verbose:
+                        print("  - Create Value")
+                        print("    + Now: {}".format(value_entry_current["name"]))
 
                     # Generate a new value id
                     value_id = collection_utils.generate_set_id()
@@ -2225,24 +2228,23 @@ def _migrate_values_inventory_refactor_values_and_activities(
                     )
 
                     if value_document_changed:
-                        print("  - Update Value:")
-                        print("    + Now: {}".format(value_entry_current["name"]))
-                        print("    + Was: {}".format(value_document_current["name"]))
+                        if verbose:
+                            print("  - Update Value")
+                            print("    + Now: {}".format(value_entry_current["name"]))
+                            print("    + Was: {}".format(value_document_current["name"]))
 
-                        value_document_created = {
+                        value_document_created = copy.deepcopy(value_document_current)
+                        value_document_created.update({
                             "_id": document_id_from_datetime(
                                 generation_time=datetime_from_document(
                                     document=document_migrated,
                                 )
                             ),
-                            "_type": "value",
-                            "_set_id": value_document_current["_set_id"],
                             "_rev": value_document_current["_rev"] + 1,
-                            "valueId": value_document_current["valueId"],
                             "name": value_entry_current["name"],
                             "lifeAreaId": value_entry_current["lifeareaId"],
                             "editedDateTime": value_entry_current["editedDateTime"],
-                        }
+                        })
 
                         scope.schema_utils.assert_schema(
                             data=value_document_created,
@@ -2298,8 +2300,10 @@ def _migrate_values_inventory_refactor_values_and_activities(
             for activity_document_current in activities_existing:
                 created_datetime = created_datetime_by_activity_id[activity_document_current["activityId"]]
                 if created_datetime not in document_migrated_activities_created_datetimes:
-                    print("  - Delete Activity:")
-                    print("    + Was: {}".format(activity_document_current["name"]))
+                    # Deleting an activity
+                    if verbose:
+                        print("  - Delete Activity")
+                        print("    + Was: {}".format(activity_document_current["name"]))
 
                     document_activity_deleted = {
                         "_id": document_id_from_datetime(
@@ -2321,7 +2325,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
                     documents_created.append(document_activity_deleted)
 
             #
-            # Create/Maintain any values in this values inventory document
+            # Create/Maintain any activities in this values inventory document
             #
             for value_entry_current in document_migrated["values"]:
                 value_document_current = values_existing.filter_match(
@@ -2333,12 +2337,13 @@ def _migrate_values_inventory_refactor_values_and_activities(
                 for activity_entry_current in value_entry_current["activities"]:
                     if activity_entry_current["createdDateTime"] not in activity_id_by_created_datetime:
                         # Creating a new activity
-                        print("  - Create Activity:")
-                        print("    + Now: {}".format(activity_entry_current["name"]))
-                        print("           E: {} / I: {}".format(
-                            activity_entry_current["enjoyment"],
-                            activity_entry_current["importance"],
-                        ))
+                        if verbose:
+                            print("  - Create Activity")
+                            print("    + Now: {}".format(activity_entry_current["name"]))
+                            print("           E: {} / I: {}".format(
+                                activity_entry_current["enjoyment"],
+                                activity_entry_current["importance"],
+                            ))
 
                         # Generate a new activity id
                         activity_id = collection_utils.generate_set_id()
@@ -2385,34 +2390,33 @@ def _migrate_values_inventory_refactor_values_and_activities(
                         )
 
                         if activity_document_changed:
-                            print("  - Update Activity:")
-                            print("    + Now: {}".format(activity_entry_current["name"]))
-                            print("           E: {} / I: {}".format(
-                                activity_entry_current["enjoyment"],
-                                activity_entry_current["importance"],
-                            ))
-                            print("    + Was: {}".format(activity_document_current["name"]))
-                            print("           E: {} / I: {}".format(
-                                activity_document_current["enjoyment"],
-                                activity_document_current["importance"],
-                            ))
+                            if verbose:
+                                print("  - Update Activity")
+                                print("    + Now: {}".format(activity_entry_current["name"]))
+                                print("           E: {} / I: {}".format(
+                                    activity_entry_current["enjoyment"],
+                                    activity_entry_current["importance"],
+                                ))
+                                print("    + Was: {}".format(activity_document_current["name"]))
+                                print("           E: {} / I: {}".format(
+                                    activity_document_current["enjoyment"],
+                                    activity_document_current["importance"],
+                                ))
 
-                            activity_document_created = {
+                            activity_document_created = copy.deepcopy(activity_document_current)
+                            activity_document_created.update({
                                 "_id": document_id_from_datetime(
                                     generation_time=datetime_from_document(
                                         document=document_migrated,
                                     )
                                 ),
-                                "_type": "activity",
-                                "_set_id": activity_document_current["_set_id"],
                                 "_rev": activity_document_current["_rev"] + 1,
-                                "activityId": activity_document_current["activityId"],
                                 "name": activity_entry_current["name"],
                                 "enjoyment": activity_entry_current["enjoyment"],
                                 "importance": activity_entry_current["importance"],
                                 "valueId": value_document_current["valueId"],
                                 "editedDateTime": activity_entry_current["editedDateTime"],
-                            }
+                            })
 
                             scope.schema_utils.assert_schema(
                                 data=activity_document_created,
