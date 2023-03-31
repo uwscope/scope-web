@@ -240,6 +240,7 @@ def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
         # The referenced activitySchedule must exist.
         # The snapshot of the scheduledActivity must match.
         scheduled_activity_current = scheduled_activity_documents.filter_match(
+            match_deleted=False,
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
                 "scheduledActivityId": document_current["scheduledActivityId"]
@@ -256,18 +257,32 @@ def _validate_patient_collection_activity_schedules(*, collection: DocumentSet,)
     activity_documents = collection.filter_match(
         match_type="activity",
     )
-
-    for document_current in collection.filter_match(
+    activity_schedule_documents = collection.filter_match(
         match_type="activitySchedule",
+    )
+
+    for document_current in activity_schedule_documents.filter_match(
         match_deleted=False,
     ):
-        # The referenced activity must exist
+        # The referenced activity must exist at the time of the activity schedule.
         assert activity_documents.filter_match(
+            match_deleted=False,
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
                 "activityId": document_current["activityId"]
             }
         ).is_unique()
+
+    # All revisions of an activity schedule must reference the same activity.
+    for (document_key, document_revisions) in activity_schedule_documents.filter_match(
+        match_deleted=False,
+    ).group_revisions().items():
+        activity_id = None
+        for (index_current, revision_current) in enumerate(document_revisions):
+            if index_current == 0:
+                activity_id = revision_current["activityId"]
+            else:
+                assert revision_current["activityId"] == activity_id
 
 
 def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet,):
@@ -281,17 +296,44 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
     activity_schedule_documents = collection.filter_match(
         match_type="activitySchedule",
     )
+    scheduled_activity_documents = collection.filter_match(
+        match_type="scheduledActivity",
+    )
     value_documents = collection.filter_match(
         match_type="value",
     )
 
-    for document_current in collection.filter_match(
-        match_type="scheduledActivity",
+    # Each scheduled activity must have been initially created immediately after its activity schedule
+    for document_current in activity_schedule_documents.filter_match(
+        match_deleted=False,
+        match_values={
+            "_rev": 1
+        },
+    ):
+        # The referenced activitySchedule must exist.
+        # The snapshot of the activitySchedule must match.
+        activity_schedule_current = activity_schedule_documents.filter_match(
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=document_current),
+            match_values={
+                "activityScheduleId": document_current["activityScheduleId"]
+            }
+        ).unique()
+
+        datetime_scheduled_activity = datetime_from_document(document=document_current)
+        datetime_activity_schedule = datetime_from_document(document=activity_schedule_current)
+        timedelta_difference = (datetime_scheduled_activity - datetime_activity_schedule).total_seconds()
+
+        # 5 seconds would be really slow, most of these are 0 or 1
+        assert timedelta_difference < 5
+
+    for document_current in scheduled_activity_documents.filter_match(
         match_deleted=False,
     ):
         # The referenced activitySchedule must exist.
         # The snapshot of the activitySchedule must match.
         activity_schedule_current = activity_schedule_documents.filter_match(
+            match_deleted=False,
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
                 "activityScheduleId": document_current["activityScheduleId"]
@@ -302,6 +344,7 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
         # The referenced activity must exist.
         # The snapshot of the activity must match.
         activity_current = activity_documents.filter_match(
+            match_deleted=False,
             match_datetime_at=datetime_from_document(document=document_current),
             match_values={
                 "activityId": activity_schedule_current["activityId"]
@@ -313,6 +356,7 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
         # If the activity has a value, the snapshot of the activity must match.
         if "valueId" in activity_current:
             value_current = value_documents.filter_match(
+                match_deleted=False,
                 match_datetime_at=datetime_from_document(document=document_current),
                 match_values={
                     "valueId": activity_current["valueId"]
