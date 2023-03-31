@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass
 import datetime
 from pathlib import Path
+from typing import Dict, List, Optional
 
 from scope.database import collection_utils, date_utils
-from scope.documents.document_set import datetime_from_document, document_id_from_datetime, DocumentSet
+from scope.documents.document_set import datetime_from_document, document_key, document_id_from_datetime, DocumentSet
 import scope.populate.data.archive
 import scope.schema
 import scope.schema_utils
