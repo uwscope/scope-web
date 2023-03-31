@@ -1991,6 +1991,62 @@ def _migrate_scheduled_activity_snapshot(
     )
 
 
+def _migrate_strip_strings(
+    *,
+    collection: DocumentSet,
+) -> DocumentSet:
+    """
+    Apply strip() to strings.
+    """
+
+    print("  migrate_strip_strings")
+
+    # Migrate documents, tracking which are migrated
+    documents_original = []
+    documents_migrated = []
+    for document_current in collection.filter_match(
+        match_deleted=False,
+    ):
+        is_migrated = False
+        document_original = document_current
+        document_migrated = copy.deepcopy(document_current)
+
+        if document_migrated["_type"] == "activity":
+            if document_migrated["name"] != document_migrated["name"].strip():
+                is_migrated = True
+                document_migrated["name"] = document_migrated["name"].strip()
+            if document_migrated["value"] != document_migrated["value"].strip():
+                is_migrated = True
+                document_migrated["value"] = document_migrated["value"].strip()
+
+        if document_migrated["_type"] == "valuesInventory":
+            if "values" in document_migrated:
+                for value_current in document_migrated["values"]:
+                    if value_current["name"] != value_current["name"].strip():
+                        is_migrated = True
+                        value_current["name"] = value_current["name"].strip()
+
+                    for activity_current in value_current["activities"]:
+                        if activity_current["name"] != activity_current["name"].strip():
+                            is_migrated = True
+                            activity_current["name"] = activity_current["name"].strip()
+
+        if is_migrated:
+            documents_original.append(document_original)
+            documents_migrated.append(document_migrated)
+
+    if len(documents_migrated):
+        print("  - Updated {} documents.".format(
+            len(documents_migrated),
+        ))
+
+    return collection.remove_all(
+        documents=documents_original,
+    ).union(
+        documents=documents_migrated
+    )
+
+
 def _migrate_values_inventory_refactor_values_and_activities(
     *,
     collection: DocumentSet,
