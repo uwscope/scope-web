@@ -33,7 +33,7 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 import { HelperText } from 'src/components/Forms/FormSection';
-import { formatDateOnly, formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount } from 'shared/time';
+import { formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount } from 'shared/time';
 import { sortActivitiesByName, sortActivitySchedulesByDateAndTime } from 'shared/sorting';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 
@@ -242,16 +242,19 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const renderActivitySchedule = (nextTask: IScheduledActivity): ReactNode => {
+        const activitySchedule = patientStore.getActivityScheduleById(nextTask.activityScheduleId);
+
         return (
             <Stack spacing={1}>
                 <HelperText>
-                    {formatDateOnly(nextTask.dueDateTime, 'EEE, MMM d') +
+                    {format(nextTask.dueDateTime, 'EEE, MMM d') +
                         ', ' +
-                        formatTimeOfDayOnly(nextTask.dataSnapshot.activitySchedule.timeOfDay)}
+                        formatTimeOfDayOnly((activitySchedule as IActivitySchedule).timeOfDay)}
                 </HelperText>
-                {nextTask.dataSnapshot.activitySchedule.hasRepetition && (
+
+                {(activitySchedule as IActivitySchedule).hasRepetition && (
                     <HelperText>
-                        {getRepeatDayText(nextTask.dataSnapshot.activitySchedule.repeatDayFlags as DayOfWeekFlags)}
+                        {getRepeatDayText((activitySchedule as IActivitySchedule).repeatDayFlags as DayOfWeekFlags)}
                     </HelperText>
                 )}
             </Stack>
@@ -346,9 +349,8 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                                                         button
                                                         component={Link}
                                                         to={getFormLink(ParameterValues.form.editActivitySchedule, {
-                                                            [Parameters.activityScheduleId as string]: nextTask
-                                                                .dataSnapshot.activitySchedule
-                                                                .activityScheduleId as string,
+                                                            [Parameters.activityScheduleId as string]:
+                                                                nextTask.activityScheduleId as string,
                                                         })}>
                                                         {renderActivitySchedule(nextTask)}
 
