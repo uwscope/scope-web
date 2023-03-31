@@ -278,7 +278,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 editActivitySchedule.activityScheduleId as string,
             );
 
-            const nextTaskDueDate = toLocalDateOnly(nextTask?.dueDateTime as Date);
+            const nextTaskDueDate = nextTask?.dueDateTime as Date;
 
             return {
                 ...defaultViewState,
