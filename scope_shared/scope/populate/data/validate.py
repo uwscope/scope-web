@@ -239,7 +239,7 @@ def _validate_patient_collection_activity_logs(*, collection: DocumentSet,):
         match_type="activityLog",
         match_deleted=False,
     ):
-        # The referenced activitySchedule must exist.
+        # The referenced scheduledActivity must exist.
         # The snapshot of the scheduledActivity must match.
         scheduled_activity_current = scheduled_activity_documents.filter_match(
             match_deleted=False,
