@@ -1164,6 +1164,264 @@ def _migrate_activity_old_format_refactor_activity_helper(
     return documents_activities_migrated
 
 
+def _migrate_activity_old_format_refactor_activity_schedule_helper(
+    *,
+    documents_values: DocumentSet,
+    documents_activities: DocumentSet,
+    documents_activities_old_format: DocumentSet,
+    verbose: bool,
+) -> DocumentSet:
+    documents_activity_schedules: List[dict] = []
+
+    for activity_old_format_revisions in documents_activities_old_format.group_revisions().values():
+        activity_old_format_revisions = activity_old_format_revisions.order_by_revision()
+
+        activity_schedule_id_current: Optional[str] = None
+        revision_current: int = 0
+        document_migrated_previous: Optional[dict] = None
+
+        for (activity_revision_index, activity_revision_current) in enumerate(activity_old_format_revisions):
+            #
+            # Determine whether we need to delete an ongoing sequence
+            #
+            delete_sequence = False
+            if document_migrated_previous:
+                assert activity_revision_index > 0
+
+                # Delete if the current revision is not active
+                delete_sequence = delete_sequence or not activity_revision_current["isActive"]
+                # Delete if the current revision points at a different migrated activity document
+                delete_sequence = delete_sequence or (
+                    activity_revision_current["name"] != activity_old_format_revisions[activity_revision_index - 1]["name"]
+                    or activity_revision_current["value"] != activity_old_format_revisions[activity_revision_index - 1]["value"]
+                    or activity_revision_current["lifeareaId"] != activity_old_format_revisions[activity_revision_index - 1]["lifeareaId"]
+                )
+
+            #
+            # Delete an ongoing sequence
+            #
+            if delete_sequence or activity_revision_current["isDeleted"]:
+                assert activity_schedule_id_current
+                assert revision_current > 0
+                assert document_migrated_previous
+
+                # Create and store the deletion document
+                revision_current += 1
+                activity_schedule_delete = {
+                    "_id": document_id_from_datetime(
+                        generation_time=datetime_from_document(document=activity_revision_current),
+                    ),
+                    "_type": "activitySchedule",
+                    "_set_id": activity_schedule_id_current,
+                    "_rev": revision_current,
+                    "_deleted": True,
+                }
+
+                scope.schema_utils.assert_schema(
+                    data=activity_schedule_delete,
+                    schema=scope.schema.set_tombstone_schema,
+                )
+
+                documents_activity_schedules.append(activity_schedule_delete)
+
+                if verbose:
+                    print("  - Delete Activity Schedule {}".format(activity_schedule_delete["_set_id"]))
+                    print("    + Was: {}".format(document_migrated_previous["activityId"]))
+                    print("           Date: {}".format(
+                        date_utils.parse_date(document_migrated_previous["date"])
+                    ))
+                    print("           Time: {}".format(document_migrated_previous["timeOfDay"]))
+                    print("           {} {}".format(
+                        ("Repeat" if document_migrated_previous["hasRepetition"] else "No Repeat"),
+                        (
+                            "".join([
+                                "T" if repeat_day_flag_current else "F"
+                                for repeat_day_flag_current in document_migrated_previous["repeatDayFlags"].values()
+                            ]) if document_migrated_previous["hasRepetition"] else ""
+                        ),
+                    ))
+
+                # Reset the sequence
+                activity_schedule_id_current = None
+                revision_current = 0
+                document_migrated_previous = None
+
+            #
+            # Create the current document in the sequence
+            #
+            if activity_revision_current["isActive"] and not activity_revision_current["isDeleted"]:
+                # Obtain the matching value id
+                value_current = documents_values.filter_match(
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=activity_revision_current),
+                    match_values={
+                        "name": activity_revision_current["value"],
+                        "lifeAreaId": activity_revision_current["lifeareaId"],
+                    }
+                ).unique()
+                value_id_current = value_current["valueId"]
+
+                # Obtain the matching activity id
+                activity_current = documents_activities.filter_match(
+                    match_deleted=False,
+                    match_datetime_at=datetime_from_document(document=activity_revision_current),
+                    match_values={
+                        "name": activity_revision_current["name"],
+                        "valueId": value_id_current,
+                    }
+                ).unique()
+                activity_id_current = activity_current["activityId"]
+
+                # Prepare creation of this document
+                if not activity_schedule_id_current:
+                    activity_schedule_id_current = collection_utils.generate_set_id()
+                revision_current += 1
+
+                # Create and store this document
+                activity_schedule_current = {
+                    "_id": document_id_from_datetime(
+                        generation_time=datetime_from_document(document=activity_revision_current),
+                    ),
+                    "_type": "activitySchedule",
+                    "_set_id": activity_schedule_id_current,
+                    "_rev": revision_current,
+                    "activityScheduleId": activity_schedule_id_current,
+                    "activityId": activity_id_current,
+                    "date": date_utils.format_date(
+                        date_utils.parse_datetime(
+                            activity_revision_current["startDateTime"]
+                        ),
+                    ),
+                    "timeOfDay": activity_revision_current["timeOfDay"],
+                    "hasReminder": activity_revision_current["hasReminder"],
+                    "hasRepetition": activity_revision_current["hasRepetition"],
+                    "editedDateTime": date_utils.format_datetime(
+                        datetime=datetime_from_document(document=activity_revision_current)
+                    ),
+                }
+                if activity_revision_current["hasRepetition"]:
+                    activity_schedule_current.update({
+                        "repeatDayFlags": activity_revision_current["repeatDayFlags"]
+                    })
+
+                if verbose:
+                    if revision_current == 1:
+                        print("  - Create Activity Schedule {}".format(activity_schedule_id_current))
+                        print("    + Now: {}".format(activity_id_current))
+                        print("           Date: {}".format(
+                            date_utils.parse_date(activity_schedule_current["date"])
+                        ))
+                        print("           Time: {}".format(activity_schedule_current["timeOfDay"]))
+                        print("           {} {}".format(
+                            ("Repeat" if activity_schedule_current["hasRepetition"] else "No Repeat"),
+                            (
+                                "".join([
+                                    "T" if repeat_day_flag_current else "F"
+                                    for repeat_day_flag_current in activity_schedule_current["repeatDayFlags"].values()
+                                ]) if activity_schedule_current["hasRepetition"] else ""
+                            ),
+                        ))
+                    else:
+                        print("  - Update Activity Schedule {}".format(activity_schedule_current["activityId"]))
+                        print("    + Now: {}".format(activity_id_current))
+                        print("           Date: {}".format(
+                            date_utils.parse_date(activity_schedule_current["date"])
+                        ))
+                        print("           Time: {}".format(activity_schedule_current["timeOfDay"]))
+                        print("           {} {}".format(
+                            ("Repeat" if activity_schedule_current["hasRepetition"] else "No Repeat"),
+                            (
+                                "".join([
+                                    "T" if repeat_day_flag_current else "F"
+                                    for repeat_day_flag_current in activity_schedule_current["repeatDayFlags"].values()
+                                ]) if activity_schedule_current["hasRepetition"] else ""
+                            ),
+                        ))
+                        print("    + Was: {}".format(document_migrated_previous["activityId"]))
+                        print("           Date: {}".format(
+                            date_utils.parse_date(document_migrated_previous["date"])
+                        ))
+                        print("           Time: {}".format(document_migrated_previous["timeOfDay"]))
+                        print("           {} {}".format(
+                            ("Repeat" if document_migrated_previous["hasRepetition"] else "No Repeat"),
+                            (
+                                "".join([
+                                    "T" if repeat_day_flag_current else "F"
+                                    for repeat_day_flag_current in document_migrated_previous["repeatDayFlags"].values()
+                                ]) if document_migrated_previous["hasRepetition"] else ""
+                            ),
+                        ))
+
+                scope.schema_utils.assert_schema(
+                    data=activity_schedule_current,
+                    schema=scope.schema.activity_schedule_schema,
+                )
+
+                documents_activity_schedules.append(activity_schedule_current)
+                document_migrated_previous = activity_schedule_current
+
+    # Convert migrated activity schedules into a document set for ease
+    documents_activity_schedules: DocumentSet = DocumentSet(documents=documents_activity_schedules)
+
+    #
+    # Confirm that the final set of activity schedules are the same in both representations.
+    #
+    original_activity_schedule_set = set()
+    for original_activity_schedule_current in documents_activities_old_format.remove_revisions():
+        if original_activity_schedule_current["isActive"] and not original_activity_schedule_current["isDeleted"]:
+            original_activity_schedule_set.add((
+                original_activity_schedule_current["name"],
+                original_activity_schedule_current["value"],
+                original_activity_schedule_current["lifeareaId"],
+                date_utils.format_date(
+                    date_utils.parse_datetime(
+                        original_activity_schedule_current["startDateTime"]
+                    ),
+                ),
+                original_activity_schedule_current["timeOfDay"],
+                original_activity_schedule_current["hasRepetition"],
+                "".join([
+                    "T" if repeat_day_flag_current else "F"
+                    for repeat_day_flag_current in original_activity_schedule_current["repeatDayFlags"].values()
+                ]) if original_activity_schedule_current["hasRepetition"] else "",
+            ))
+
+    migrated_activity_schedule_set = set()
+    for migrated_activity_schedule_current in documents_activity_schedules.remove_revisions().filter_match(
+        match_deleted=False,
+    ):
+        activity_current = documents_activities.filter_match(
+            match_datetime_at=datetime_from_document(document=migrated_activity_schedule_current),
+            match_values={
+                "activityId": migrated_activity_schedule_current["activityId"]
+            }
+        ).unique()
+
+        value_current = documents_values.filter_match(
+            match_datetime_at=datetime_from_document(document=migrated_activity_schedule_current),
+            match_values={
+                "valueId": activity_current["valueId"]
+            }
+        ).unique()
+
+        migrated_activity_schedule_set.add((
+            activity_current["name"],
+            value_current["name"],
+            value_current["lifeAreaId"],
+            migrated_activity_schedule_current["date"],
+            migrated_activity_schedule_current["timeOfDay"],
+            migrated_activity_schedule_current["hasRepetition"],
+            "".join([
+                "T" if repeat_day_flag_current else "F"
+                for repeat_day_flag_current in migrated_activity_schedule_current["repeatDayFlags"].values()
+            ]) if migrated_activity_schedule_current["hasRepetition"] else "",
+        ))
+
+    assert original_activity_schedule_set == migrated_activity_schedule_set
+
+    return documents_activity_schedules
+
+
     *,
     collection: DocumentSet,
 ) -> DocumentSet:
