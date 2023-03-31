@@ -77,6 +77,9 @@ def archive_migrate_v0_7_0(
         patient_collection = _migrate_scheduled_activity_remove_reminder(
             collection=patient_collection,
         )
+        patient_collection = _migrate_strip_strings(
+            collection=patient_collection,
+        )
 
         # Set aside documents in the old activity format
         patient_collection = _migrate_activity_rename_type_old_format(
@@ -85,7 +88,21 @@ def archive_migrate_v0_7_0(
         # Refactor values and activities out of values inventory
         patient_collection = _migrate_values_inventory_refactor_values_and_activities(
             collection=patient_collection,
+            verbose=True,
         )
+        # Refactor activity schedules out of the old activity format
+        patient_collection = _migrate_activity_old_format_refactor_activity_schedule(
+            collection=patient_collection,
+            verbose=True,
+        )
+
+        # Snapshots can only be constructed after everything else is complete
+        patient_collection = _migrate_scheduled_activity_snapshot(
+            collection=patient_collection,
+        )
+        # patient_collection = _migrate_activity_log_snapshot(
+        #     collection=patient_collection,
+        # )
 
         archive.replace_collection_documents(
             collection=patients_document_current["collection"],
