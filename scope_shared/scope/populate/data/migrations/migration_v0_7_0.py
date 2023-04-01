@@ -96,14 +96,13 @@ def archive_migrate_v0_7_0(
             verbose=False,
         )
 
-        # TODO: Remove
         # Snapshots can only be constructed after everything else is complete
         patient_collection = _migrate_scheduled_activity_snapshot(
             collection=patient_collection,
         )
-        # patient_collection = _migrate_activity_log_snapshot(
-        #     collection=patient_collection,
-        # )
+        patient_collection = _migrate_activity_log_snapshot(
+            collection=patient_collection,
+        )
 
         archive.replace_collection_documents(
             collection=patients_document_current["collection"],
@@ -1821,13 +1820,13 @@ def _migrate_activity_log_snapshot(
 
             del document_migrated["activity"]
 
-        # Schema was enhanced to enforce that success No disallows alternative
+        # Schema was enhanced to enforce that alternative
+        # is only allowed if "success" is "SomethingElse"
         # Prior to that the client was storing empty strings
-        if document_migrated["success"] == "No":
+        if document_migrated["success"] != "SomethingElse":
             if "alternative" in document_migrated:
                 is_migrated = True
 
-                assert document_migrated["alternative"] == ""
                 del document_migrated["alternative"]
 
         # Development included generation of some snapshots that
@@ -1863,10 +1862,10 @@ def _migrate_activity_log_snapshot(
             ).unique()
 
         if is_migrated:
-            # scope.schema_utils.assert_schema(
-            #     data=document_migrated,
-            #     schema=scope.schema.activity_log_schema,
-            # )
+            scope.schema_utils.assert_schema(
+                data=document_migrated,
+                schema=scope.schema.activity_log_schema,
+            )
 
             documents_original.append(document_original)
             documents_migrated.append(document_migrated)
