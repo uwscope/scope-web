@@ -108,7 +108,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         }
 
         // Cannot go back if currently loading
-        if (!loading) {
+        if (loading) {
             return false;
         }
 
@@ -182,9 +182,9 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
             }
 
             runInAction(() => {
-            // In case of error, do not advance the form.
-            // In case of success, the success closer handler will advance the form.
-            state.submitErrorOpen = false;
+                // In case of error, do not advance the form.
+                // In case of success, the success closer handler will advance the form.
+                state.submitErrorOpen = false;
                 if (submitSuccess) {
                     state.submitSuccessOpen = true;
                 } else {
@@ -225,12 +225,12 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
 
     const isNextSubmit: () => boolean = action(() => {
         // The last page is submit
-        if(state.activePage === maxPages - 1) {
+        if (state.activePage === maxPages - 1) {
             return true;
         }
 
         // A page with a submit handler is submit
-        if(!!pages[state.activePage].onSubmit) {
+        if (!!pages[state.activePage].onSubmit) {
             return true;
         }
 
@@ -250,7 +250,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                         disabled={loading}>
                         <CloseIcon />
                     </IconButton>
-                    {!!title && (<Typography variant="h6">{title}</Typography>)}
+                    {!!title && <Typography variant="h6">{title}</Typography>}
                 </Toolbar>
             </AppBar>
             <ContentContainer>
@@ -270,10 +270,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                             loading={loading}
                             onClick={handleNext}
                             disabled={!pages[state.activePage].canGoNext}>
-                            {isNextSubmit()
-                                ? getString('Form_button_submit')
-                                : getString('Form_button_next')
-                            }
+                            {isNextSubmit() ? getString('Form_button_submit') : getString('Form_button_next')}
                             <KeyboardArrowRight />
                         </LoadingButton>
                     }
@@ -281,8 +278,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                         <Button
                             onClick={handleBack}
                             disabled={!canBack()}
-                            sx={{visibility: state.activePage > 0 ? 'visible' : 'hidden'}}
-                        >
+                            sx={{ visibility: state.activePage > 0 ? 'visible' : 'hidden' }}>
                             {<KeyboardArrowLeft />}
                             {getString('Form_button_back')}
                         </Button>
