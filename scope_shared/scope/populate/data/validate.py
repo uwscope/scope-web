@@ -216,13 +216,12 @@ def _validate_patient_collection_activity(*, collection: DocumentSet,):
                 }
             ).is_unique()
 
-        # For the time that each activity exists, its name/value tuple must be unique.
+        # For the time that each activity exists, its name must be unique.
         assert activity_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,
             match_values={
                 "name": document_current["name"],
-                "valueId": document_current["valueId"],
             }
         ).is_unique()
 
@@ -413,7 +412,7 @@ def _validate_patient_collection_values(*, collection: DocumentSet,):
     for document_current in value_documents.filter_match(
         match_deleted=False,
     ):
-        # For the time that each value document exists, its name must be unique.
+        # For the time that each value exists, its name/lifeArea tuple must be unique.
         assert value_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,

@@ -96,6 +96,7 @@ def archive_migrate_v0_7_0(
             verbose=False,
         )
 
+        # TODO: Remove
         # Snapshots can only be constructed after everything else is complete
         patient_collection = _migrate_scheduled_activity_snapshot(
             collection=patient_collection,
@@ -326,12 +327,11 @@ class ActivityInterval:
 
 def _group_matching_activity_intervals(
     intervals: List[ActivityInterval]
-) -> Dict[(str, str), List[ActivityInterval]]:
-    unsorted_groups: Dict[(str, str), List[ActivityInterval]] = {}
+) -> Dict[(str,), List[ActivityInterval]]:
+    unsorted_groups: Dict[(str,), List[ActivityInterval]] = {}
     for interval_current in intervals:
         key = (
             interval_current.name,
-            interval_current.valueId,
         )
 
         if key in unsorted_groups:
@@ -339,7 +339,7 @@ def _group_matching_activity_intervals(
         else:
             unsorted_groups[key] = [interval_current]
 
-    sorted_groups: Dict[(str, str), List[ActivityInterval]] = {
+    sorted_groups: Dict[(str,), List[ActivityInterval]] = {
         key_current: sorted(
             unsorted_intervals_current,
             key=lambda interval_sort_current: (
@@ -377,6 +377,7 @@ def _validate_activity_intervals(
                 assert interval_previous.hasEnd
                 assert (
                     interval_previous.datetimeEnd < interval_current.datetimeStart
+                    or interval_previous.valueId != interval_current.valueId
                     or interval_previous.enjoyment != interval_current.enjoyment
                     or interval_previous.importance != interval_current.importance
                 )
@@ -400,7 +401,6 @@ def _fuse_activity_interval(
     ).get(
         (
             new_interval.name,
-            new_interval.valueId,
         ),
         [],
     )
@@ -489,15 +489,16 @@ def _fuse_activity_interval(
             )
 
         # If the two intervals start at the same time, one will be erased.
-        # That is fine if they have the same enjoyment/importance, but an error if they do not.
+        # That is fine if they have the same valueId/enjoyment/importance, but an error if they do not.
         if (
             first_interval.datetimeStart == second_interval.datetimeStart
             and (
-                first_interval.enjoyment != second_interval.enjoyment
+                first_interval.valueId != second_interval.valueId
+                or first_interval.enjoyment != second_interval.enjoyment
                 or first_interval.importance != second_interval.importance
             )
         ):
-            raise ValueError("Conflicting Values of Enjoyment/Importance")
+            raise ValueError("Conflicting Values of ValueId/Enjoyment/Importance")
 
         if first_interval.hasEnd and first_interval.datetimeEnd < second_interval.datetimeStart:
             # Condition:
@@ -519,13 +520,14 @@ def _fuse_activity_interval(
             first_interval.hasEnd
             and first_interval.datetimeEnd == second_interval.datetimeStart
             and (
-                first_interval.enjoyment != second_interval.enjoyment
+                first_interval.valueId != second_interval.valueId
+                or first_interval.enjoyment != second_interval.enjoyment
                 or first_interval.importance != second_interval.importance
             )
         ):
             # Condition:
             # - The two intervals are directly adjacent.
-            # - The intervals have different enjoyment/importance.
+            # - The intervals have different valueId/enjoyment/importance.
             # - Keep the new interval.
 
             result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
@@ -542,12 +544,13 @@ def _fuse_activity_interval(
         )
 
         if (
-            first_interval.enjoyment == second_interval.enjoyment
+            first_interval.valueId == second_interval.valueId
+            and first_interval.enjoyment == second_interval.enjoyment
             and first_interval.importance == second_interval.importance
         ):
             # Condition:
             # - The intervals overlap.
-            # - The intervals have identical enjoyment/importance.
+            # - The intervals have identical valueId/enjoyment/importance.
             # - Fuse their start and end times.
             # - Then recurse for any additional overlaps.
             fused_start = first_interval.datetimeStart
@@ -583,13 +586,18 @@ def _fuse_activity_interval(
         else:
             # Condition:
             # - The intervals overlap.
-            # - The intervals have different enjoyment/importance.
-            # - The first interval's enjoyment/importance continues until the second.
-            # - The second interval's enjoyment/importance is fused, then continues from its start time.
+            # - The intervals have different valueId/enjoyment/importance.
+            # - The first interval's valueId/enjoyment/importance continues until the second.
+            # - The second interval's valueId/enjoyment/importance is fused, then continues from its start time.
             # - Then recurse for any additional overlaps.
 
             assert first_interval.name == second_interval.name
-            assert first_interval.valueId == second_interval.valueId
+            assert (
+                first_interval.valueId != second_interval.valueId
+                or first_interval.enjoyment != second_interval.enjoyment
+                or first_interval.importance != second_interval.importance
+            )
+
             fused_first_interval = ActivityInterval(
                 name=first_interval.name,
                 valueId=first_interval.valueId,
@@ -1157,16 +1165,12 @@ def _migrate_activity_old_format_refactor_activity_helper(
 
         original_activity_set.add((
             original_activity_current["name"],
-            original_value["name"],
-            original_value["lifeAreaId"],
         ))
 
     for original_activity_old_format_current in documents_activities_old_format.remove_revisions():
         if not original_activity_old_format_current["isDeleted"]:
             original_activity_set.add((
                 original_activity_old_format_current["name"],
-                original_activity_old_format_current["value"],
-                original_activity_old_format_current["lifeareaId"],
             ))
 
     migrated_activity_set = set()
@@ -1183,8 +1187,6 @@ def _migrate_activity_old_format_refactor_activity_helper(
 
         migrated_activity_set.add((
             migrated_activity_current["name"],
-            migrated_value["name"],
-            migrated_value["lifeAreaId"],
         ))
 
     assert original_activity_set == migrated_activity_set
