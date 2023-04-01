@@ -556,9 +556,10 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const valueValidateName = () => {
-        // Value name must be unique, accounting for case-insensitive comparisons
+        // Value name must be unique within the life area, accounting for case-insensitive comparisons
         const nameIsUnique: boolean =
-            patientStore.values
+            patientStore
+                .getValuesByLifeAreaId(lifeAreaId)
                 .filter((value: IValue): boolean => {
                     // In case of edit, do not validate against the value being edited
                     if (viewState.modeState.mode == 'edit') {

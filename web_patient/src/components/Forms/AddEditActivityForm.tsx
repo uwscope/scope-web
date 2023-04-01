@@ -437,9 +437,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
     });
 
     const valueValidateName = () => {
-        // Value name must be unique, accounting for case-insensitive comparisons
+        // Value name must be unique within a life area, accounting for case-insensitive comparisons
         const nameIsUnique: boolean =
-            patientStore.values.findIndex((value: IValue): boolean => {
+            patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).findIndex((value: IValue): boolean => {
                 // Search for a case-insensitive match
                 return value.name.toLocaleLowerCase() == activityViewState.addValueName.toLocaleLowerCase();
             }) < 0;
