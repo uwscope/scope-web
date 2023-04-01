@@ -398,6 +398,9 @@ def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet
                 ).unique()
 
             assert document_current["dataSnapshot"]["value"] == value_snapshot
+        else:
+            # There must not be a value snapshot
+            assert "value" not in document_current["dataSnapshot"]
 
 
 def _validate_patient_collection_values(*, collection: DocumentSet,):
