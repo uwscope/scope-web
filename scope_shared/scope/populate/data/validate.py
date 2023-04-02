@@ -47,8 +47,12 @@ def _validate_archive_document_schema(*, archive: scope.populate.data.archive.Ar
         # These are currently not enforced by the schema
         if not document_current.get("_deleted"):
             if document_current["_type"] == "activityLog":
+                # Cannot be included because of test framework
                 assert "scheduledActivity" in document_current["dataSnapshot"]
+                # Should always be true but not tested by schema
+                assert document_current["dataSnapshot"]["scheduledActivity"]["completed"]
             if document_current["_type"] == "scheduledActivity":
+                # Cannot be included because of test framework
                 assert "activity" in document_current["dataSnapshot"]
 
 
