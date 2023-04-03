@@ -160,7 +160,7 @@ const _strings = {
     Activity_tracking_column_comment: 'Note',
     Activity_tracking_success_yes: 'Yes',
     Activity_tracking_success_no: 'No',
-    Activity_tracking_success_alt: 'Alternative Activity',
+    Activity_tracking_success_alt: 'Alternate',
     Activity_tracking_success_none: '--',
 
     Activity_tracking_log_lifearea_none: 'Uncategorized',
