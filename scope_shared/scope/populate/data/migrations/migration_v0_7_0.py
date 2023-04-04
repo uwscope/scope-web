@@ -6,7 +6,6 @@ import copy
 from dataclasses import dataclass
 import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 from typing import Dict, List, Optional, Tuple
 
 from scope.database import collection_utils, date_utils
@@ -2940,7 +2939,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert not _test_fused
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3007,7 +3006,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert _test_fused
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3230,7 +3229,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
-#     assert _test_fused
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3263,7 +3262,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
-#     assert _test_fused
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3326,7 +3325,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
-#     assert not _test_fused
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3390,7 +3389,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
-#     assert not _test_fused
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
