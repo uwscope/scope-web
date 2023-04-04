@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from scope.database import collection_utils, date_utils
 from scope.documents.document_set import datetime_from_document, document_key, document_id_from_datetime, DocumentSet
@@ -180,7 +181,7 @@ def _fuse_value_interval(
     *,
     existing_intervals: List[ValueInterval],
     new_interval: ValueInterval,
-) -> List[ValueInterval]:
+) -> Tuple[List[ValueInterval], bool]:
     # Validate the provided intervals
     _validate_value_intervals([new_interval])
     _validate_value_intervals(existing_intervals)
@@ -207,7 +208,7 @@ def _fuse_value_interval(
 
         _validate_value_intervals(result_intervals)
 
-        return result_intervals
+        return result_intervals, False
 
     # Identify the first matching interval
     # that ends at or after this new interval starts.
@@ -241,7 +242,7 @@ def _fuse_value_interval(
 
         _validate_value_intervals(result_intervals)
 
-        return result_intervals
+        return result_intervals, False
     else:
         # Search succeeded, index is the first interval that ends after new interval starts.
         matching_interval = matching_intervals[search_index]
@@ -270,7 +271,7 @@ def _fuse_value_interval(
 
             _validate_value_intervals(result_intervals)
 
-            return result_intervals
+            return result_intervals, False
 
         # Confirmed these intervals overlap
         assert (
@@ -307,10 +308,10 @@ def _fuse_value_interval(
         result_intervals = _fuse_value_interval(
             existing_intervals=result_intervals,
             new_interval=fused_interval,
-        )
+        )[0]
         _validate_value_intervals(result_intervals)
 
-        return result_intervals
+        return result_intervals, True
 
 
 @dataclass(frozen=True)
@@ -387,7 +388,7 @@ def _fuse_activity_interval(
     *,
     existing_intervals: List[ActivityInterval],
     new_interval: ActivityInterval,
-) -> List[ActivityInterval]:
+) -> Tuple[List[ActivityInterval], bool]:
     # Validate the provided intervals
     _validate_activity_intervals([new_interval])
     _validate_activity_intervals(existing_intervals)
@@ -413,7 +414,7 @@ def _fuse_activity_interval(
 
         _validate_activity_intervals(result_intervals)
 
-        return result_intervals
+        return result_intervals, False
 
     # Identify the first matching interval
     # that ends at or after this new interval starts.
@@ -447,7 +448,7 @@ def _fuse_activity_interval(
 
         _validate_activity_intervals(result_intervals)
 
-        return result_intervals
+        return result_intervals, False
     else:
         # Search succeeded, index is the first interval that ends after new interval starts.
         matching_interval = matching_intervals[search_index]
@@ -513,7 +514,7 @@ def _fuse_activity_interval(
 
             _validate_activity_intervals(result_intervals)
 
-            return result_intervals
+            return result_intervals, False
 
         if (
             first_interval.hasEnd
@@ -534,7 +535,7 @@ def _fuse_activity_interval(
 
             _validate_activity_intervals(result_intervals)
 
-            return result_intervals
+            return result_intervals, False
 
         # Confirmed these intervals overlap
         assert (
@@ -581,7 +582,7 @@ def _fuse_activity_interval(
             return _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_interval,
-            )
+            )[0], True
         else:
             # Condition:
             # - The intervals overlap.
@@ -635,16 +636,16 @@ def _fuse_activity_interval(
             result_intervals = _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_first_interval,
-            )
+            )[0]
             _validate_activity_intervals(result_intervals)
 
             result_intervals = _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_second_interval,
-            )
+            )[0]
             _validate_activity_intervals(result_intervals)
 
-            return result_intervals
+            return result_intervals, True
 
 
 def _migrate_activity_old_format_refactor_value_helper(
@@ -2694,7 +2695,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: After All Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2712,6 +2713,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -2720,7 +2722,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: No Overlap
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
@@ -2738,6 +2740,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -2746,7 +2749,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Identical Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2764,6 +2767,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 30)
@@ -2771,7 +2775,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Append Two Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2789,6 +2793,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -2796,7 +2801,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Merge Two Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2814,6 +2819,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -2821,7 +2827,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Existing Interval Contains New Interval
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2839,6 +2845,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -2846,7 +2853,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: New Interval Contains Existing Interval
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
@@ -2864,6 +2871,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -2871,7 +2879,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: New Interval Fuses Existing Interval
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2903,6 +2911,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -2913,7 +2922,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, After All Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2931,6 +2940,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -2939,7 +2949,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, Fuses Existing Interval
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2957,6 +2967,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert not _test_fuse_result[0].hasEnd
@@ -2964,7 +2975,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, Fuses Some Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_value_interval(
+#     _test_fuse_result, _test_fused = _fuse_value_interval(
 #         existing_intervals=[
 #             ValueInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -2996,6 +3007,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3011,7 +3023,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: After All Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3033,6 +3045,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3041,7 +3054,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: No Overlap
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 11, 0),
@@ -3063,6 +3076,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3071,7 +3085,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Identical Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3093,6 +3107,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 10, 30)
@@ -3104,7 +3119,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     error_raised = False
 #     try:
-#         _test_fuse_result = _fuse_activity_interval(
+#         _test_fuse_result, _test_fused = _fuse_activity_interval(
 #             existing_intervals=[
 #                 ActivityInterval(
 #                     datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3133,7 +3148,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Append Two Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3155,6 +3170,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -3162,7 +3178,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Append Two Intervals with Second Lacking E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3184,6 +3200,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=None,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].enjoyment == 0
@@ -3191,7 +3208,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Append Two Intervals with First Lacking E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3213,6 +3230,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3223,7 +3241,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Append Two Intervals with Different E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3245,6 +3263,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3255,7 +3274,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Merge Two Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3277,6 +3296,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -3284,7 +3304,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Merge Two Intervals with Different E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3306,6 +3326,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3317,7 +3338,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Existing Interval Contains New Interval
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3339,6 +3360,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -3346,7 +3368,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Existing Interval with No/EI Contains New Interval with E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3368,6 +3390,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3377,7 +3400,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: New Interval Contains Existing Interval
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 15),
@@ -3399,6 +3422,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert _test_fuse_result[0].datetimeEnd == datetime.datetime(2023, 3, 28, 6, 11, 0)
@@ -3406,7 +3430,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: New Interval Fuses Existing Interval
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3446,6 +3470,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3456,7 +3481,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, After All Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3478,6 +3503,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3486,7 +3512,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, Fuses Existing Interval
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3508,6 +3534,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 1
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
 #     assert not _test_fuse_result[0].hasEnd
@@ -3515,7 +3542,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, Fuses Some Existing Intervals
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3555,6 +3582,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=0,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3564,7 +3592,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #     #
 #     # Test Case: Does Not End, Fuses Some Existing Intervals with Different E/I
 #     #
-#     _test_fuse_result = _fuse_activity_interval(
+#     _test_fuse_result, _test_fused = _fuse_activity_interval(
 #         existing_intervals=[
 #             ActivityInterval(
 #                 datetimeStart=datetime.datetime(2023, 3, 28, 6, 10, 0),
@@ -3604,6 +3632,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             importance=10,
 #         )
 #     )
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 3
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
