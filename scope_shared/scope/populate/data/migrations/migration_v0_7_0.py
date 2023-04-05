@@ -316,7 +316,7 @@ def _fuse_value_interval(
 @dataclass(frozen=True)
 class ActivityInterval:
     name: str
-    valueId: str
+    valueId: Optional[str]
     enjoyment: Optional[int]
     importance: Optional[int]
     datetimeStart: datetime.datetime
@@ -387,6 +387,7 @@ def _fuse_activity_interval(
     *,
     existing_intervals: List[ActivityInterval],
     new_interval: ActivityInterval,
+    fuse_enjoyment_and_importance: bool,
 ) -> Tuple[List[ActivityInterval], bool]:
     # Validate the provided intervals
     _validate_activity_intervals([new_interval])
@@ -449,7 +450,7 @@ def _fuse_activity_interval(
 
         return result_intervals, False
     else:
-        # Search succeeded, index is the first interval that ends after new interval starts.
+        # Search succeeded, index is the first interval that ends at or after new interval starts.
         matching_interval = matching_intervals[search_index]
 
         # Order the intervals by their start time
@@ -462,30 +463,35 @@ def _fuse_activity_interval(
             first_interval = matching_interval
             second_interval = new_interval
 
-        # If a second interval does not have an enjoyment/importance,
+        # If a second interval overlaps and does not have an enjoyment/importance,
         # pre-emptively fuse those from the first interval.
         # This will allow fusing the intervals together,
         # so we can later focus on actual changes to the enjoyment/importance.
-        if second_interval.enjoyment is None:
-            second_interval = ActivityInterval(
-                name=second_interval.name,
-                valueId=second_interval.valueId,
-                enjoyment=first_interval.enjoyment,
-                importance=second_interval.importance,
-                datetimeStart=second_interval.datetimeStart,
-                hasEnd=second_interval.hasEnd,
-                datetimeEnd=second_interval.datetimeEnd,
-            )
-        if second_interval.importance is None:
-            second_interval = ActivityInterval(
-                name=second_interval.name,
-                valueId=second_interval.valueId,
-                enjoyment=second_interval.enjoyment,
-                importance=first_interval.importance,
-                datetimeStart=second_interval.datetimeStart,
-                hasEnd=second_interval.hasEnd,
-                datetimeEnd=second_interval.datetimeEnd,
-            )
+        if fuse_enjoyment_and_importance:
+            if (
+                not first_interval.hasEnd
+                or second_interval.datetimeStart <= first_interval.datetimeEnd
+            ):
+                if second_interval.enjoyment is None:
+                    second_interval = ActivityInterval(
+                        name=second_interval.name,
+                        valueId=second_interval.valueId,
+                        enjoyment=first_interval.enjoyment,
+                        importance=second_interval.importance,
+                        datetimeStart=second_interval.datetimeStart,
+                        hasEnd=second_interval.hasEnd,
+                        datetimeEnd=second_interval.datetimeEnd,
+                    )
+                if second_interval.importance is None:
+                    second_interval = ActivityInterval(
+                        name=second_interval.name,
+                        valueId=second_interval.valueId,
+                        enjoyment=second_interval.enjoyment,
+                        importance=first_interval.importance,
+                        datetimeStart=second_interval.datetimeStart,
+                        hasEnd=second_interval.hasEnd,
+                        datetimeEnd=second_interval.datetimeEnd,
+                    )
 
         # If the two intervals start at the same time, one will be erased.
         # That is fine if they have the same valueId/enjoyment/importance, but an error if they do not.
@@ -578,9 +584,11 @@ def _fuse_activity_interval(
             result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
             result_intervals.remove(matching_interval)
 
+            # Do not fuse enjoyment/importance on recursion
             return _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_interval,
+                fuse_enjoyment_and_importance=False,
             )[0], True
         else:
             # Condition:
@@ -632,15 +640,19 @@ def _fuse_activity_interval(
             result_intervals: List[ActivityInterval] = copy.deepcopy(existing_intervals)
             result_intervals.remove(matching_interval)
 
+            # Do not fuse enjoyment/importance on recursion
             result_intervals = _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_first_interval,
+                fuse_enjoyment_and_importance=False,
             )[0]
             _validate_activity_intervals(result_intervals)
 
+            # Do not fuse enjoyment/importance on recursion
             result_intervals = _fuse_activity_interval(
                 existing_intervals=result_intervals,
                 new_interval=fused_second_interval,
+                fuse_enjoyment_and_importance=False,
             )[0]
             _validate_activity_intervals(result_intervals)
 
