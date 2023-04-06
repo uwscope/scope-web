@@ -2423,13 +2423,20 @@ def _migrate_strip_strings(
         document_migrated = copy.deepcopy(document_current)
 
         if document_migrated["_type"] == "activity":
-            if document_migrated["name"] != document_migrated["name"].strip():
-                is_migrated = True
-                document_migrated["name"] = document_migrated["name"].strip()
+            if "name" in document_migrated:
+                if document_migrated["name"] != document_migrated["name"].strip():
+                    is_migrated = True
+                    document_migrated["name"] = document_migrated["name"].strip()
             if "value" in document_migrated:
                 if document_migrated["value"] != document_migrated["value"].strip():
                     is_migrated = True
                     document_migrated["value"] = document_migrated["value"].strip()
+
+        if document_migrated["_type"] == "value":
+            if "name" in document_migrated:
+                if document_migrated["name"] != document_migrated["name"].strip():
+                    is_migrated = True
+                    document_migrated["name"] = document_migrated["name"].strip()
 
         if document_migrated["_type"] == "valuesInventory":
             if "values" in document_migrated:
