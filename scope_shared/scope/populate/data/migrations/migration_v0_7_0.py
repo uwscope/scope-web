@@ -665,19 +665,18 @@ def _migrate_activity_old_format_refactor_value_helper(
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
-    # This migration tears down values in order to integrate new values from the old activity format.
-    # It therefore cannot track changes in individual documents.
-    # But if there are no old format activities to integrate, then there is nothing to do.
-    if documents_activities_old_format.is_empty():
-        return documents_values
-
     #
     # Build up a set of fused values
     #
-    fused_value_intervals = []
+    fused_value_intervals: List[ValueInterval] = []
+
+    # Keep track of whether we needed at least one actual fusion,
+    # as this means our documents are actually different.
+    migrated_documents_modified: bool = False
 
     #
-    # First fuse values obtained from the values inventory
+    # First fuse existing values documents.
+    # This might be from the values inventory or from a previous execution.
     #
     for value_revisions in documents_values.group_revisions().values():
         value_revisions = value_revisions.order_by_revision()
@@ -699,7 +698,7 @@ def _migrate_activity_old_format_refactor_value_helper(
                         document=value_revisions[revision_index + 1],
                     )
 
-                fused_value_intervals = _fuse_value_interval(
+                fused_value_intervals, fused_detected = _fuse_value_interval(
                     existing_intervals=fused_value_intervals,
                     new_interval=ValueInterval(
                         name=value_revision_current["name"],
@@ -711,9 +710,12 @@ def _migrate_activity_old_format_refactor_value_helper(
                         datetimeEnd=datetime_end,
                     )
                 )
+                # If any values were fused, our documents have been modified.
+                if fused_detected:
+                    migrated_documents_modified = True
 
     #
-    # Then fuse values obtained from the old activity format
+    # Then fuse values obtained from the old activity format.
     #
     for old_format_activity_revisions in documents_activities_old_format.group_revisions().values():
         old_format_activity_revisions = old_format_activity_revisions.order_by_revision()
@@ -733,7 +735,7 @@ def _migrate_activity_old_format_refactor_value_helper(
                         document=old_format_activity_revisions[revision_index + 1],
                     )
 
-                fused_value_intervals = _fuse_value_interval(
+                fused_value_intervals, fused_detected = _fuse_value_interval(
                     existing_intervals=fused_value_intervals,
                     new_interval=ValueInterval(
                         name=old_format_activity_current["value"],
@@ -745,6 +747,15 @@ def _migrate_activity_old_format_refactor_value_helper(
                         datetimeEnd=datetime_end,
                     )
                 )
+                # Any migration of the old activity format is considered a modification.
+                migrated_documents_modified = True
+
+    #
+    # By this point we have created ValueIntervals from everything.
+    # If none of that is going to result in new documents, we can now return the previous documents.
+    #
+    if not migrated_documents_modified:
+        return documents_values
 
     #
     # Convert the value intervals into value documents
@@ -839,6 +850,7 @@ def _migrate_activity_old_format_refactor_value_helper(
                 "lifeAreaId": original_value_current["lifeAreaId"]
             }
         ).unique()
+
     for original_activity_old_format_current in documents_activities_old_format:
         if not original_activity_old_format_current["isDeleted"]:
             assert documents_values_migrated.filter_match(
