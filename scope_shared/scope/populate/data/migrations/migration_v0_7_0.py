@@ -1241,17 +1241,38 @@ def _migrate_activity_old_format_refactor_activity_helper(
 def _migrate_activity_old_format_refactor_activity_schedule_helper(
     *,
     documents_values: DocumentSet,
+    documents_values_migrated: DocumentSet,
     documents_activities: DocumentSet,
+    documents_activities_migrated: DocumentSet,
+    documents_activity_schedules: DocumentSet,
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
-    # This migration creates new activity schedules without destroying existing activity schedules.
-    # It would generally only be executed once in the history of a collection.
-    # But if executed more than once, obtain the complete set of activity schedules
-    # requires combining the results of this migration with whatever activity schedules already existed.
+    documents_activity_schedules_migrated: List[dict] = []
 
-    documents_activity_schedules: List[dict] = []
+    # Activity schedules that already exist might reference an activity that has been migrated.
+    for activity_schedule_current in documents_activity_schedules:
+        activity_schedule_migrated = copy.deepcopy(activity_schedule_current)
 
+        if not activity_schedule_migrated.get("_deleted"):
+            original_activity = documents_activities.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=activity_schedule_migrated),
+                match_values={
+                    "activityId": activity_schedule_migrated["activityId"]
+                }
+            ).unique()
+            migrated_activity = documents_activities_migrated.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=activity_schedule_migrated),
+                match_values={
+                    "name": original_activity["name"]
+                }
+
+            activity_schedule_migrated["activityId"] = migrated_activity["activityId"]
+        documents_activity_schedules_migrated.append(activity_schedule_migrated)
+
+    # Old format activities are migrated into a new activity schedule
     for activity_old_format_revisions in documents_activities_old_format.group_revisions().values():
         activity_old_format_revisions = activity_old_format_revisions.order_by_revision()
 
@@ -1301,7 +1322,7 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
                     schema=scope.schema.set_tombstone_schema,
                 )
 
-                documents_activity_schedules.append(activity_schedule_delete)
+                documents_activity_schedules_migrated.append(activity_schedule_delete)
 
                 if verbose:
                     print("  - Delete Activity Schedule {}".format(activity_schedule_delete["_set_id"]))
@@ -1329,31 +1350,23 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
             # Create the current document in the sequence
             #
             if activity_revision_current["isActive"] and not activity_revision_current["isDeleted"]:
-                # Obtain the matching value id
-                value_current = documents_values.filter_match(
-                    match_deleted=False,
-                    match_datetime_at=datetime_from_document(document=activity_revision_current),
-                    match_values={
-                        "name": activity_revision_current["value"],
-                        "lifeAreaId": activity_revision_current["lifeareaId"],
-                    }
-                ).unique()
-                value_id_current = value_current["valueId"]
-
                 # Obtain the matching activity id
-                activity_current = documents_activities.filter_match(
+                activity_current = documents_activities_migrated.filter_match(
                     match_deleted=False,
                     match_datetime_at=datetime_from_document(document=activity_revision_current),
                     match_values={
                         "name": activity_revision_current["name"],
-                        "valueId": value_id_current,
+                        # "valueId": value_id_current,
                     }
                 ).unique()
                 activity_id_current = activity_current["activityId"]
 
                 # Prepare creation of this document
                 if not activity_schedule_id_current:
-                    activity_schedule_id_current = collection_utils.generate_set_id()
+                    if activity_revision_index == 0:
+                        activity_schedule_id_current = activity_revision_current["_set_id"]
+                    else:
+                        activity_schedule_id_current = collection_utils.generate_set_id()
                 revision_current += 1
 
                 # Create and store this document
@@ -1436,57 +1449,94 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
                     schema=scope.schema.activity_schedule_schema,
                 )
 
-                documents_activity_schedules.append(activity_schedule_current)
+                documents_activity_schedules_migrated.append(activity_schedule_current)
                 document_migrated_previous = activity_schedule_current
 
     # Convert migrated activity schedules into a document set for ease
-    documents_activity_schedules: DocumentSet = DocumentSet(documents=documents_activity_schedules)
+    documents_activity_schedules_migrated: DocumentSet = DocumentSet(documents=documents_activity_schedules_migrated)
 
     #
     # Confirm that the final set of activity schedules are the same in both representations.
     #
     original_activity_schedule_set = set()
-    for original_activity_schedule_current in documents_activities_old_format.remove_revisions():
-        if original_activity_schedule_current["isActive"] and not original_activity_schedule_current["isDeleted"]:
+
+    for original_activity_schedule_current in documents_activity_schedules.remove_revisions().filter_match(
+        match_deleted=False
+    ):
+        activity_current = documents_activities.filter_match(
+            match_datetime_at=datetime_from_document(document=original_activity_schedule_current),
+            match_values={
+                "activityId": original_activity_schedule_current["activityId"]
+            }
+        ).unique()
+
+        if "valueId" in activity_current:
+            value_current = documents_values.filter_match(
+                match_datetime_at=datetime_from_document(document=original_activity_schedule_current),
+                match_values={
+                    "valueId": activity_current["valueId"]
+                }
+            ).unique()
+        else:
+            value_current = None
+
+        original_activity_schedule_set.add((
+            activity_current["name"],
+            value_current["name"] if value_current else None,
+            value_current["lifeAreaId"] if value_current else None,
+            original_activity_schedule_current["date"],
+            original_activity_schedule_current["timeOfDay"],
+            original_activity_schedule_current["hasRepetition"],
+            "".join([
+                "T" if repeat_day_flag_current else "F"
+                for repeat_day_flag_current in original_activity_schedule_current["repeatDayFlags"].values()
+            ]) if original_activity_schedule_current["hasRepetition"] else "",
+        ))
+
+    for original_activity_old_format_current in documents_activities_old_format.remove_revisions():
+        if original_activity_old_format_current["isActive"] and not original_activity_old_format_current["isDeleted"]:
             original_activity_schedule_set.add((
-                original_activity_schedule_current["name"],
-                original_activity_schedule_current["value"],
-                original_activity_schedule_current["lifeareaId"],
+                original_activity_old_format_current["name"],
+                original_activity_old_format_current["value"],
+                original_activity_old_format_current["lifeareaId"],
                 date_utils.format_date(
                     date_utils.parse_datetime(
-                        original_activity_schedule_current["startDateTime"]
+                        original_activity_old_format_current["startDateTime"]
                     ),
                 ),
-                original_activity_schedule_current["timeOfDay"],
-                original_activity_schedule_current["hasRepetition"],
+                original_activity_old_format_current["timeOfDay"],
+                original_activity_old_format_current["hasRepetition"],
                 "".join([
                     "T" if repeat_day_flag_current else "F"
-                    for repeat_day_flag_current in original_activity_schedule_current["repeatDayFlags"].values()
-                ]) if original_activity_schedule_current["hasRepetition"] else "",
+                    for repeat_day_flag_current in original_activity_old_format_current["repeatDayFlags"].values()
+                ]) if original_activity_old_format_current["hasRepetition"] else "",
             ))
 
     migrated_activity_schedule_set = set()
-    for migrated_activity_schedule_current in documents_activity_schedules.remove_revisions().filter_match(
+    for migrated_activity_schedule_current in documents_activity_schedules_migrated.remove_revisions().filter_match(
         match_deleted=False,
     ):
-        activity_current = documents_activities.filter_match(
+        activity_current = documents_activities_migrated.filter_match(
             match_datetime_at=datetime_from_document(document=migrated_activity_schedule_current),
             match_values={
                 "activityId": migrated_activity_schedule_current["activityId"]
             }
         ).unique()
 
-        value_current = documents_values.filter_match(
-            match_datetime_at=datetime_from_document(document=migrated_activity_schedule_current),
-            match_values={
-                "valueId": activity_current["valueId"]
-            }
-        ).unique()
+        if "valueId" in activity_current:
+            value_current = documents_values_migrated.filter_match(
+                match_datetime_at=datetime_from_document(document=migrated_activity_schedule_current),
+                match_values={
+                    "valueId": activity_current["valueId"]
+                }
+            ).unique()
+        else:
+            value_current = None
 
         migrated_activity_schedule_set.add((
             activity_current["name"],
-            value_current["name"],
-            value_current["lifeAreaId"],
+            value_current["name"] if value_current else None,
+            value_current["lifeAreaId"] if value_current else None,
             migrated_activity_schedule_current["date"],
             migrated_activity_schedule_current["timeOfDay"],
             migrated_activity_schedule_current["hasRepetition"],
@@ -1498,7 +1548,7 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
 
     assert original_activity_schedule_set == migrated_activity_schedule_set
 
-    return documents_activity_schedules
+    return documents_activity_schedules_migrated
 
 
 def _migrate_activity_old_format_refactor_scheduled_activity_helper(
