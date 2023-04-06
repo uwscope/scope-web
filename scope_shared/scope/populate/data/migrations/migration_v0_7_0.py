@@ -1771,42 +1771,47 @@ def _migrate_activity_old_format_refactor_activity_schedule(
         verbose=verbose,
     )
     documents_activity_schedules_migrated = _migrate_activity_old_format_refactor_activity_schedule_helper(
-        documents_values=documents_values_migrated,
-        documents_activities=documents_activities_migrated,
+        documents_values=documents_values,
+        documents_values_migrated=documents_values_migrated,
+        documents_activities=documents_activities,
+        documents_activities_migrated=documents_activities_migrated,
+        documents_activity_schedules=documents_activity_schedules,
         documents_activities_old_format=documents_activities_old_format,
         verbose=verbose,
     )
     documents_scheduled_activities_migrated = _migrate_activity_old_format_refactor_scheduled_activity_helper(
-        documents_activity_schedules=documents_activity_schedules.union(
-            documents=documents_activity_schedules_migrated,
-        ),
+        documents_activity_schedules_migrated=documents_activity_schedules_migrated,
         documents_scheduled_activities=documents_scheduled_activities,
         verbose=verbose,
     )
 
-    if len(documents_values.remove_any(documents=documents_values_migrated)):
-        print("  - Deleted {} value documents.".format(
-            len(documents_values.remove_any(documents=documents_values_migrated)),
-        ))
-    if len(documents_activities.remove_any(documents=documents_activities_migrated)):
-        print("  - Deleted {} activity documents.".format(
-            len(documents_activities.remove_any(documents=documents_activities_migrated)),
-        ))
     if len(documents_activities_old_format):
         print("  - Deleted {} activity_old_format documents.".format(
             len(documents_activities_old_format),
+        ))
+    if len(documents_values.remove_any(documents=documents_values_migrated)):
+        print("  - Deleted {} value documents.".format(
+            len(documents_values.remove_any(documents=documents_values_migrated)),
         ))
     if len(documents_values_migrated.remove_any(documents=documents_values)):
         print("  - Created {} value documents.".format(
             len(documents_values_migrated.remove_any(documents=documents_values)),
         ))
+    if len(documents_activities.remove_any(documents=documents_activities_migrated)):
+        print("  - Deleted {} activity documents.".format(
+            len(documents_activities.remove_any(documents=documents_activities_migrated)),
+        ))
     if len(documents_activities_migrated.remove_any(documents=documents_activities)):
         print("  - Created {} activity documents.".format(
             len(documents_activities_migrated.remove_any(documents=documents_activities)),
         ))
-    if len(documents_activity_schedules_migrated):
+    if len(documents_activity_schedules.remove_any(documents=documents_activity_schedules_migrated)):
+        print("  - Deleted {} activitySchedule documents.".format(
+            len(documents_activity_schedules.remove_any(documents=documents_activity_schedules_migrated)),
+        ))
+    if len(documents_activity_schedules_migrated.remove_any(documents=documents_activity_schedules)):
         print("  - Created {} activitySchedule documents.".format(
-            len(documents_activity_schedules_migrated),
+            len(documents_activity_schedules_migrated.remove_any(documents=documents_activity_schedules)),
         ))
     if len(documents_scheduled_activities_migrated.remove_any(documents=documents_scheduled_activities)):
         print("  - Updated {} scheduledActivity documents.".format(
@@ -1823,9 +1828,9 @@ def _migrate_activity_old_format_refactor_activity_schedule(
         documents=documents_activities,
     ).union(
         documents=documents_activities_migrated,
+    ).remove_all(
+        documents=documents_activity_schedules,
     ).union(
-        # There is no removal of previously-existing activity schedules.
-        # That was accomplished in removing the old format activities.
         documents=documents_activity_schedules_migrated,
     ).remove_all(
         documents=documents_scheduled_activities,
