@@ -2294,82 +2294,90 @@ def _migrate_scheduled_activity_snapshot(
 
             document_migrated["dataSnapshot"] = {}
 
-        if "activitySchedule" not in document_migrated["dataSnapshot"]:
-            is_migrated = True
+        snapshot_activity_schedule = collection.filter_match(
+            match_type="activitySchedule",
+            match_datetime_at=datetime_from_document(document=document_migrated),
+            match_values={
+                "_set_id": document_migrated["activityScheduleId"]
+            }
+        ).unique()
+        if snapshot_activity_schedule.get("_deleted", False):
+            # If we need a snapshot but the activity schedule has been deleted,
+            # then our snapshot should be of the state immediately before deletion.
+            assert snapshot_activity_schedule["_deleted"]
 
             snapshot_activity_schedule = collection.filter_match(
                 match_type="activitySchedule",
-                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_deleted=False,
                 match_values={
-                    "_set_id": document_migrated["activityScheduleId"]
+                    "_rev": snapshot_activity_schedule["_rev"] - 1,
+                    "activityScheduleId": document_migrated["activityScheduleId"]
                 }
             ).unique()
-            if snapshot_activity_schedule.get("_deleted", False):
-                # If we need a snapshot but the activity schedule has been deleted,
-                # then our snapshot should be of the state immediately before deletion.
-                assert snapshot_activity_schedule["_deleted"]
 
-                snapshot_activity_schedule = collection.filter_match(
-                    match_type="activitySchedule",
-                    match_deleted=False,
-                    match_values={
-                        "_rev": snapshot_activity_schedule["_rev"] - 1,
-                        "activityScheduleId": document_migrated["activityScheduleId"]
-                    }
-                ).unique()
+        if (
+            "activitySchedule" not in document_migrated["dataSnapshot"]
+            or document_migrated["dataSnapshot"]["activitySchedule"] != snapshot_activity_schedule
+        ):
+            is_migrated = True
 
             document_migrated["dataSnapshot"]["activitySchedule"] = snapshot_activity_schedule
 
-        if "activity" not in document_migrated["dataSnapshot"]:
-            is_migrated = True
+        snapshot_activity = collection.filter_match(
+            match_type="activity",
+            match_datetime_at=datetime_from_document(document=document_migrated),
+            match_values={
+                "_set_id": document_migrated["dataSnapshot"]["activitySchedule"]["activityId"]
+            }
+        ).unique()
+        if snapshot_activity.get("_deleted", False):
+            # If we need a snapshot but the activity has been deleted,
+            # then our snapshot should be of the state immediately before deletion.
+            assert snapshot_activity["_deleted"]
 
             snapshot_activity = collection.filter_match(
                 match_type="activity",
-                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_deleted=False,
                 match_values={
-                    "_set_id": document_migrated["dataSnapshot"]["activitySchedule"]["activityId"]
+                    "_rev": snapshot_activity["_rev"] - 1,
+                    "activityId": document_migrated["dataSnapshot"]["activitySchedule"]["activityId"]
                 }
             ).unique()
-            if snapshot_activity.get("_deleted", False):
-                # If we need a snapshot but the activity has been deleted,
-                # then our snapshot should be of the state immediately before deletion.
-                assert snapshot_activity["_deleted"]
-
-                snapshot_activity = collection.filter_match(
-                    match_type="activity",
-                    match_deleted=False,
-                    match_values={
-                        "_rev": snapshot_activity["_rev"] - 1,
-                        "activityId": document_migrated["dataSnapshot"]["activitySchedule"]["activityId"]
-                    }
-                ).unique()
+        if (
+            "activity" not in document_migrated["dataSnapshot"]
+            or document_migrated["dataSnapshot"]["activity"] != snapshot_activity
+        ):
+            is_migrated = True
 
             document_migrated["dataSnapshot"]["activity"] = snapshot_activity
 
         if "valueId" in document_migrated["dataSnapshot"]["activity"]:
-            if "value" not in document_migrated["dataSnapshot"]:
-                is_migrated = True
+            snapshot_value = collection.filter_match(
+                match_type="value",
+                match_datetime_at=datetime_from_document(document=document_migrated),
+                match_values={
+                    "_set_id": document_migrated["dataSnapshot"]["activity"]["valueId"]
+                }
+            ).unique()
+            if snapshot_value.get("_deleted", False):
+                # If we need a snapshot but the value has been deleted,
+                # then our snapshot should be of the state immediately before deletion.
+                assert snapshot_value["_deleted"]
 
                 snapshot_value = collection.filter_match(
                     match_type="value",
-                    match_datetime_at=datetime_from_document(document=document_migrated),
+                    match_deleted=False,
                     match_values={
-                        "_set_id": document_migrated["dataSnapshot"]["activity"]["valueId"]
+                        "_rev": snapshot_value["_rev"] - 1,
+                        "valueId": document_migrated["dataSnapshot"]["activity"]["valueId"]
                     }
                 ).unique()
-                if snapshot_value.get("_deleted", False):
-                    # If we need a snapshot but the value has been deleted,
-                    # then our snapshot should be of the state immediately before deletion.
-                    assert snapshot_value["_deleted"]
 
-                    snapshot_value = collection.filter_match(
-                        match_type="value",
-                        match_deleted=False,
-                        match_values={
-                            "_rev": snapshot_value["_rev"] - 1,
-                            "valueId": document_migrated["dataSnapshot"]["activity"]["valueId"]
-                        }
-                    ).unique()
+            if (
+                "value" not in document_migrated["dataSnapshot"]
+                or document_migrated["dataSnapshot"]["value"] != snapshot_value
+            ):
+                is_migrated = True
 
                 document_migrated["dataSnapshot"]["value"] = snapshot_value
 
