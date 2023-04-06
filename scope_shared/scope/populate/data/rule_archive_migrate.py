@@ -1,8 +1,11 @@
 import copy
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import scope.populate.data.archive
+import scope.populate.data.migrations.migration_v0_5_0
+import scope.populate.data.migrations.migration_v0_7_0
+import scope.populate.data.validate
 import scope.schema
 import scope.schema_utils
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
@@ -68,6 +71,7 @@ class _ArchiveMigrateAction(PopulateAction):
         # Obtain expected variables from action
         archive_destination = action["archive_destination"]
         migration = action["migration"]
+        dry_run = action.get("dry_run", False)
 
         # Ensure archive exists
         if not Path(self.archive).exists():
@@ -85,6 +89,7 @@ class _ArchiveMigrateAction(PopulateAction):
             password=password,
             archive_destination_path=Path(archive_destination),
             migration=migration,
+            dry_run=dry_run,
         )
 
         return populate_config
@@ -96,76 +101,39 @@ def _archive_migrate(
     password: str,
     archive_destination_path: Path,
     migration: str,
+    dry_run: bool,
 ):
-    # Obtain all entries in the archive
+    # Obtain the archive
     archive = scope.populate.data.archive.Archive.read_archive(
         archive_path=archive_path,
         password=password,
     )
-    entries: Dict[Path, dict] = archive.entries
 
-    # First simple migration, structure can be added for later migrations
     if migration == "v0.5.0":
-        #
-        # Migration for schema modifications in #335
-        # https://github.com/uwscope/scope-web/pull/335
-        #
-        migrated_entries: Dict[Path, dict] = {}
-        for (path_current, document_current) in entries.items():
-            path_current = copy.deepcopy(path_current)
-            document_current = copy.deepcopy(document_current)
-
-            # #335 migration applies to activityLog documents
-            if document_current["_type"] == "activityLog":
-                # If "success" is "No", remove any "accomplishment" or "pleasure"
-                if document_current["success"] == "No":
-                    if "accomplishment" in document_current:
-                        del document_current["accomplishment"]
-                    if "pleasure" in document_current:
-                        del document_current["pleasure"]
-
-            migrated_entries[path_current] = document_current
-
-        entries = migrated_entries
+        archive = (
+            scope.populate.data.migrations.migration_v0_5_0.archive_migrate_v0_5_0(
+                archive=archive,
+            )
+        )
     elif migration == "v0.7.0":
-        #
-        # Migration for schema modifications in #354
-        # https://github.com/uwscope/scope-web/pull/354
-        #
-        migrated_entries: Dict[Path, dict] = {}
-        for (path_current, document_current) in entries.items():
-            path_current = copy.deepcopy(path_current)
-            document_current = copy.deepcopy(document_current)
-
-            # #354 migration applies to activity documents
-            if document_current["_type"] == "activity":
-                # Ensure "hasReminder" is always False
-                document_current["hasReminder"] = False
-                # Remove any "reminderTimeOfDay"
-                if "reminderTimeOfDay" in document_current:
-                    del document_current["reminderTimeOfDay"]
-            # #354 migration applies to scheduledActivity documents
-            if document_current["_type"] == "scheduledActivity":
-                # Remove any "reminderDate"
-                if "reminderDate" in document_current:
-                    del document_current["reminderDate"]
-                # Remove any "reminderDateTime"
-                if "reminderDateTime" in document_current:
-                    del document_current["reminderDateTime"]
-                # Remove any "reminderTimeOfDay"
-                if "reminderTimeOfDay" in document_current:
-                    del document_current["reminderTimeOfDay"]
-
-            migrated_entries[path_current] = document_current
-
-        entries = migrated_entries
+        archive = (
+            scope.populate.data.migrations.migration_v0_7_0.archive_migrate_v0_7_0(
+                archive=archive,
+                archive_path=archive_path,
+            )
+        )
     else:
         raise ValueError("No migration performed")
 
-    # Export the migrated entries
-    # Store the collection of entries to an archive
+    # Validate the migrated archive
+    scope.populate.data.validate.validate_archive(archive=archive)
+
+    # If this is a dry run, stop before doing the export
+    assert not dry_run
+
+    # Export the migrated archive
     scope.populate.data.archive.Archive.write_archive(
-        archive=scope.populate.data.archive.Archive(entries=entries),
+        archive=archive,
         archive_path=archive_destination_path,
         password=password,
     )

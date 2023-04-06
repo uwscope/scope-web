@@ -145,7 +145,10 @@ def _maintain_pending_scheduled_activities(
     if create_items:
         # Attempt to get a snapshot of the activity
         activity = None
-        activity_id = activity_schedule.get(scope.database.patient.activities.SEMANTIC_SET_ID, None)
+        activity_id = activity_schedule.get(
+            scope.database.patient.activities.SEMANTIC_SET_ID,
+            None,
+        )
         if activity_id:
             activity = scope.database.patient.get_activity(
                 collection=collection,
