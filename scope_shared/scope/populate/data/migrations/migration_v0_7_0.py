@@ -902,19 +902,20 @@ def _migrate_activity_old_format_refactor_activity_helper(
     documents_activities_old_format: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
-    # This migration tears down activities in order to integrate new activities from the old activity format.
-    # It therefore cannot track changes in individual documents.
-    # But if there are no old format activities to integrate, then there is nothing to do.
-    if documents_activities_old_format.is_empty():
-        return documents_activities
-
     #
     # Build up a set of fused activities
     #
-    fused_activity_intervals = []
+    fused_activity_intervals: List[ActivityInterval] = []
+
+    # Keep track of whether we needed at least one actual fusion,
+    # as this means our documents are actually different.
+    migrated_documents_modified: bool = False
 
     #
-    # First fuse activities obtained from the values inventory
+    # First fuse existing activity documents.
+    # This might be from the values inventory or from a previous execution.
+    # Because they are not only from the values inventory,
+    # they may or may not have a value associated with them.
     #
     for activity_revisions in documents_activities.group_revisions().values():
         activity_revisions = activity_revisions.order_by_revision()
@@ -927,24 +928,26 @@ def _migrate_activity_old_format_refactor_activity_helper(
             else:
                 # Create and fuse this interval
 
-                # The activity created from the values inventory references
-                # an id of a value created at the same time, which has since been migrated.
-                # Recover an id in the migrated values.
-                original_value = documents_values.filter_match(
-                    match_deleted=False,
-                    match_datetime_at=datetime_from_document(document=activity_revision_current),
-                    match_values={
-                        "valueId": activity_revision_current["valueId"]
-                    }
-                ).unique()
-                migrated_value_id = documents_values_migrated.filter_match(
-                    match_deleted=False,
-                    match_datetime_at=datetime_from_document(document=activity_revision_current),
-                    match_values={
-                        "name": original_value["name"],
-                        "lifeAreaId": original_value["lifeAreaId"],
-                    }
-                ).unique()["valueId"]
+                # The activity may reference an id of a value, which has since been migrated.
+                # If so, recover an id in the migrated values.
+                if "valueId" in activity_revision_current:
+                    original_value = documents_values.filter_match(
+                        match_deleted=False,
+                        match_datetime_at=datetime_from_document(document=activity_revision_current),
+                        match_values={
+                            "valueId": activity_revision_current["valueId"]
+                        }
+                    ).unique()
+                    migrated_value_id = documents_values_migrated.filter_match(
+                        match_deleted=False,
+                        match_datetime_at=datetime_from_document(document=activity_revision_current),
+                        match_values={
+                            "name": original_value["name"],
+                            "lifeAreaId": original_value["lifeAreaId"],
+                        }
+                    ).unique()["valueId"]
+                else:
+                    migrated_value_id = None
 
                 # If there is no revision after this,
                 # this activity is expected to be valid in our final state
@@ -955,7 +958,9 @@ def _migrate_activity_old_format_refactor_activity_helper(
                         document=activity_revisions[revision_index + 1],
                     )
 
-                fused_activity_intervals = _fuse_activity_interval(
+                # These activities are already separate from each other.
+                # We cannot fuse their existing fields without potential data destruction.
+                fused_activity_intervals, fused_detected = _fuse_activity_interval(
                     existing_intervals=fused_activity_intervals,
                     new_interval=ActivityInterval(
                         name=activity_revision_current["name"],
@@ -967,8 +972,15 @@ def _migrate_activity_old_format_refactor_activity_helper(
                         ),
                         hasEnd=datetime_end is not None,
                         datetimeEnd=datetime_end,
-                    )
+                    ),
+                    fuse_enjoyment_and_importance=False
                 )
+                # If an activity references a different valueId, our documents have been modified
+                if migrated_value_id != activity_revision_current.get("valueId", None):
+                    migrated_documents_modified = True
+                # If any activities were fused, our documents have been modified.
+                if fused_detected:
+                    migrated_documents_modified = True
 
     #
     # Then fuse activities obtained from the old activity format
@@ -982,6 +994,7 @@ def _migrate_activity_old_format_refactor_activity_helper(
             else:
                 # Create and fuse this interval
 
+                # Look up a value id
                 migrated_value_id = documents_values_migrated.filter_match(
                     match_deleted=False,
                     match_datetime_at=datetime_from_document(document=old_format_activity_current),
@@ -1000,7 +1013,10 @@ def _migrate_activity_old_format_refactor_activity_helper(
                         document=old_format_activity_revisions[revision_index + 1],
                     )
 
-                fused_activity_intervals = _fuse_activity_interval(
+                # It's desirable to fuse fields here,
+                # because the old activity format did not have enjoyment or importance.
+                # This allows them to persist if they were created in the values inventory.
+                fused_activity_intervals, fused_detected = _fuse_activity_interval(
                     existing_intervals=fused_activity_intervals,
                     new_interval=ActivityInterval(
                         name=old_format_activity_current["name"],
@@ -1012,8 +1028,18 @@ def _migrate_activity_old_format_refactor_activity_helper(
                         ),
                         hasEnd=datetime_end is not None,
                         datetimeEnd=datetime_end,
-                    )
+                    ),
+                    fuse_enjoyment_and_importance=True
                 )
+                # Any migration of the old activity format is considered a modification.
+                migrated_documents_modified = True
+
+    #
+    # By this point we have created ActivityIntervals from everything.
+    # If none of that is going to result in new documents, we can now return the previous documents.
+    #
+    if not migrated_documents_modified:
+        return documents_activities
 
     #
     # Convert the activity intervals into activity documents
@@ -1035,23 +1061,26 @@ def _migrate_activity_old_format_refactor_activity_helper(
                 "_rev": revision_current,
                 "activityId": activity_id_current,
                 "name": interval_current.name,
-                "valueId": interval_current.valueId,
                 "editedDateTime": date_utils.format_datetime(interval_current.datetimeStart),
             }
+            if interval_current.valueId:
+                document_migrated.update({
+                    "valueId": interval_current.valueId,
+                })
             if interval_current.enjoyment:
                 document_migrated.update({
-                    "enjoyment": interval_current.enjoyment
+                    "enjoyment": interval_current.enjoyment,
                 })
             if interval_current.importance:
                 document_migrated.update({
-                    "importance": interval_current.importance
+                    "importance": interval_current.importance,
                 })
 
             if verbose:
                 if revision_current == 1:
                     print("  - Create Activity {}".format(activity_id_current))
                     print("    + Now: {}".format(document_migrated["name"]))
-                    print("           {}".format(document_migrated["valueId"]))
+                    print("           {}".format(document_migrated.get("valueId", "X")))
                     print("           E: {} I: {}".format(
                         document_migrated.get("enjoyment", None),
                         document_migrated.get("importance", None),
@@ -1059,13 +1088,13 @@ def _migrate_activity_old_format_refactor_activity_helper(
                 else:
                     print("  - Update Activity {}".format(activity_id_current))
                     print("    + Now: {}".format(document_migrated["name"]))
-                    print("           {}".format(document_migrated["valueId"]))
+                    print("           {}".format(document_migrated.get("valueId", "X")))
                     print("           E: {} I: {}".format(
                         document_migrated.get("enjoyment", None),
                         document_migrated.get("importance", None),
                     ))
                     print("    + Was: {}".format(document_migrated_previous["name"]))
-                    print("           {}".format(document_migrated_previous["valueId"]))
+                    print("           {}".format(document_migrated_previous.get("valueId", "X")))
                     print("           E: {} I: {}".format(
                         document_migrated_previous.get("enjoyment", None),
                         document_migrated_previous.get("importance", None),
@@ -1106,7 +1135,7 @@ def _migrate_activity_old_format_refactor_activity_helper(
                 if verbose:
                     print("  - Deleted Activity {}".format(activity_id_current))
                     print("    + Was: {}".format(document_migrated_previous["name"]))
-                    print("           {}".format(document_migrated_previous["valueId"]))
+                    print("           {}".format(document_migrated_previous.get("valueId", "X")))
                     print("           E: {} I: {}".format(
                         document_migrated_previous.get("enjoyment", None),
                         document_migrated_previous.get("importance", None),
@@ -1125,32 +1154,40 @@ def _migrate_activity_old_format_refactor_activity_helper(
     for original_activity_current in documents_activities.filter_match(
         match_deleted=False,
     ):
-        # The activity created from the values inventory references
-        # an id of a value created at the same time, which has since been migrated.
+        # An existing activity may reference a value that has since been migrated.
         # Recover an id in the migrated values.
-        original_value = documents_values.filter_match(
-            match_deleted=False,
-            match_datetime_at=datetime_from_document(document=original_activity_current),
-            match_values={
-                "valueId": original_activity_current["valueId"]
-            }
-        ).unique()
-        migrated_value_id = documents_values_migrated.filter_match(
-            match_deleted=False,
-            match_datetime_at=datetime_from_document(document=original_activity_current),
-            match_values={
-                "name": original_value["name"],
-                "lifeAreaId": original_value["lifeAreaId"],
-            }
-        ).unique()["valueId"]
+        if "valueId" in original_activity_current:
+            original_value = documents_values.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=original_activity_current),
+                match_values={
+                    "valueId": original_activity_current["valueId"]
+                }
+            ).unique()
+            migrated_value_id = documents_values_migrated.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=original_activity_current),
+                match_values={
+                    "name": original_value["name"],
+                    "lifeAreaId": original_value["lifeAreaId"],
+                }
+            ).unique()["valueId"]
 
-        assert documents_activities_migrated.filter_match(
-            match_datetime_at=datetime_from_document(document=original_activity_current),
-            match_values={
-                "name": original_activity_current["name"],
-                "valueId": migrated_value_id,
-            }
-        ).unique()
+            assert documents_activities_migrated.filter_match(
+                match_datetime_at=datetime_from_document(document=original_activity_current),
+                match_values={
+                    "name": original_activity_current["name"],
+                    "valueId": migrated_value_id,
+                }
+            ).unique()
+        else:
+            assert documents_activities_migrated.filter_match(
+                match_datetime_at=datetime_from_document(document=original_activity_current),
+                match_values={
+                    "name": original_activity_current["name"],
+                }
+            ).unique()
+
     for original_activity_old_format_current in documents_activities_old_format:
         if not original_activity_old_format_current["isDeleted"]:
             migrated_value_id = documents_values_migrated.filter_match(
@@ -1178,14 +1215,6 @@ def _migrate_activity_old_format_refactor_activity_helper(
     for original_activity_current in documents_activities.remove_revisions().filter_match(
         match_deleted=False,
     ):
-        original_value = documents_values.filter_match(
-            match_deleted=False,
-            match_datetime_at=datetime_from_document(document=original_activity_current),
-            match_values={
-                "valueId": original_activity_current["valueId"]
-            }
-        ).unique()
-
         original_activity_set.add((
             original_activity_current["name"],
         ))
@@ -1200,14 +1229,6 @@ def _migrate_activity_old_format_refactor_activity_helper(
     for migrated_activity_current in documents_activities_migrated.remove_revisions().filter_match(
         match_deleted=False,
     ):
-        migrated_value = documents_values_migrated.filter_match(
-            match_deleted=False,
-            match_datetime_at=datetime_from_document(document=migrated_activity_current),
-            match_values={
-                "valueId": migrated_activity_current["valueId"]
-            }
-        ).unique()
-
         migrated_activity_set.add((
             migrated_activity_current["name"],
         ))
