@@ -1555,7 +1555,7 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
 
 def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     *,
-    documents_activity_schedules: DocumentSet,
+    documents_activity_schedules_migrated: DocumentSet,
     documents_scheduled_activities: DocumentSet,
     verbose: bool,
 ) -> DocumentSet:
@@ -1568,8 +1568,8 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     original_scheduled_activities: List[dict] = []
     migrated_scheduled_activities: List[dict] = []
 
-    sorted_activity_schedules_and_initial_scheduled_activities = sorted(
-        documents_activity_schedules.filter_match(
+    sorted_activity_schedules_and_initial_scheduled_activities: List[dict] = sorted(
+        documents_activity_schedules_migrated.filter_match(
             match_deleted=False
         ).union(
             documents=documents_scheduled_activities.filter_match(
@@ -1588,62 +1588,127 @@ def _migrate_activity_old_format_refactor_scheduled_activity_helper(
     )
 
     activity_schedule_current = None
+    activity_schedule_current_printed: bool = False
     for document_current in sorted_activity_schedules_and_initial_scheduled_activities:
         if document_current["_type"] == "activitySchedule":
             activity_schedule_current = document_current
+            activity_schedule_current_printed = False
+
         else:
             assert activity_schedule_current
             assert document_current["_type"] == "scheduledActivity"
             scheduled_activity_current = document_current
 
-            datetime_activity_schedule = datetime_from_document(document=activity_schedule_current)
-            datetime_scheduled_activity = datetime_from_document(document=scheduled_activity_current)
-            timedelta_difference = (datetime_scheduled_activity - datetime_activity_schedule).total_seconds()
-
-            # 5 seconds would be really slow, most of these are 0 or 1
-            assert timedelta_difference < 5
-
-            # Obtain the id that this sequence of scheduled activity revisions should be accessing
+            # Obtain the id that this sequence of scheduled activity revisions should be referencing
             migrated_activity_schedule_id = activity_schedule_current["_set_id"]
 
-            # Obtain the sequence of scheduled activity revisions
-            scheduled_activity_revisions = documents_scheduled_activities.filter_match(
-                match_deleted=False,
+            # This scheduled activity will already reference an activitySchedule.
+            # If never migrated since the use of old activity format, that reference will be in activityId.
+            # Otherwise it will be in activityScheduleId.
+            assert "activityId" in scheduled_activity_current or "activityScheduleId" in scheduled_activity_current
+            if "activityId" in scheduled_activity_current:
+                assert "activityScheduleId" not in scheduled_activity_current
+                existing_referenced_activity_schedule_id = scheduled_activity_current["activityId"]
+            else:
+                existing_referenced_activity_schedule_id = scheduled_activity_current["activityScheduleId"]
+
+            # Check on the time difference
+            datetime_scheduled_activity = datetime_from_document(document=scheduled_activity_current)
+            datetime_most_recent_activity_schedule = datetime_from_document(document=activity_schedule_current)
+            timedelta_difference = (datetime_scheduled_activity - datetime_most_recent_activity_schedule).total_seconds()
+
+            # Determine how old the existing activity schedule reference might be.
+            existing_referenced_activity_schedule = documents_activity_schedules_migrated.filter_match(
+                match_datetime_at=datetime_scheduled_activity,
                 match_values={
-                    "scheduledActivityId": scheduled_activity_current["scheduledActivityId"],
+                    "activityScheduleId": existing_referenced_activity_schedule_id
+                }
+            )
+            if existing_referenced_activity_schedule.is_unique():
+                datetime_existing_referenced_activity_schedule = datetime_from_document(document=existing_referenced_activity_schedule.unique())
+                timedelta_difference_existing_reference = (datetime_scheduled_activity - datetime_existing_referenced_activity_schedule).total_seconds()
+
+                # Override the recency effect to preserve the existing valid reference
+                if timedelta_difference_existing_reference < 15:
+                    migrated_activity_schedule_id = existing_referenced_activity_schedule_id
+
+            # Obtain the sequence of scheduled activity revisions.
+            scheduled_activity_revisions = documents_scheduled_activities.filter_match(
+                match_values={
+                    "_set_id": scheduled_activity_current["scheduledActivityId"],
                 },
             )
 
+            original_revisions = []
+            migrated_revisions = []
             for scheduled_activity_revision_current in scheduled_activity_revisions:
-                # Only migrate scheduled activities that do not already have the correct activity schedule
-                if scheduled_activity_revision_current.get("activityScheduleId", None) != migrated_activity_schedule_id:
+                if not scheduled_activity_revision_current.get("_deleted", False):
+                    is_migrated_revision: bool = False
                     scheduled_activity_revision_migrated = copy.deepcopy(scheduled_activity_revision_current)
-                    scheduled_activity_revision_migrated["activityScheduleId"] = migrated_activity_schedule_id
 
                     # In a first migration, this old field will need deleted
                     if "activityId" in scheduled_activity_revision_migrated:
+                        is_migrated_revision = True
+
+                        scheduled_activity_revision_migrated["activityScheduleId"] = scheduled_activity_revision_migrated["activityId"]
                         del scheduled_activity_revision_migrated["activityId"]
 
-                    # The referenced activity schedule may not actually exist anymore.
-                    # But this should only happen if the activity schedule was deleted.
-                    referenced_activity_schedule = documents_activity_schedules.filter_match(
-                        match_deleted=False,
-                        match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
-                        match_values={
-                            "activityScheduleId": scheduled_activity_revision_migrated["activityScheduleId"]
-                        }
-                    )
-                    if referenced_activity_schedule.is_empty():
-                        assert documents_activity_schedules.filter_match(
-                            match_deleted=True,
+                    # Ensure the scheduled activity points at the activity schedule
+                    if scheduled_activity_revision_migrated.get("activityScheduleId", None) != migrated_activity_schedule_id:
+                        is_migrated_revision = True
+
+                        # Update the reference, which will also require updating the snapshot.
+                        # That actually happens in a later migration.
+                        scheduled_activity_revision_migrated["activityScheduleId"] = migrated_activity_schedule_id
+
+                        # The referenced activity schedule may not actually exist anymore.
+                        # But this should only happen if the activity schedule was deleted.
+                        referenced_activity_schedule = documents_activity_schedules_migrated.filter_match(
+                            match_deleted=False,
                             match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
                             match_values={
-                                "_set_id": scheduled_activity_revision_migrated["activityScheduleId"]
+                                "activityScheduleId": scheduled_activity_revision_migrated["activityScheduleId"]
                             }
                         )
+                        if referenced_activity_schedule.is_empty():
+                            assert documents_activity_schedules_migrated.filter_match(
+                                match_deleted=True,
+                                match_datetime_at=datetime_from_document(document=scheduled_activity_revision_migrated),
+                                match_values={
+                                    "_set_id": scheduled_activity_revision_migrated["activityScheduleId"]
+                                }
+                            )
 
-                    original_scheduled_activities.append(scheduled_activity_revision_current)
-                    migrated_scheduled_activities.append(scheduled_activity_revision_migrated)
+                    if is_migrated_revision:
+                        original_revisions.append(scheduled_activity_revision_current)
+                        migrated_revisions.append(scheduled_activity_revision_migrated)
+
+            if len(migrated_revisions) > 0:
+                if verbose:
+                    if not activity_schedule_current_printed:
+                        print("  - ActivitySchedule: {} _rev: {}".format(
+                            activity_schedule_current["_set_id"],
+                            activity_schedule_current["_rev"],
+                        ))
+                        activity_schedule_current_printed = True
+
+                    print(
+                        "    + ScheduledActivity: {} _rev: {} timedelta: {} activityId: {} activityScheduleId: {}".format(
+                        scheduled_activity_current["_set_id"],
+                        scheduled_activity_current["_rev"],
+                        timedelta_difference,
+                        scheduled_activity_current.get("activityId", "X"),
+                        scheduled_activity_current.get("activityScheduleId", "X"),
+                    ))
+                    print("      Migrating {} of {} Revision{} to activityScheduleId {}".format(
+                        len(migrated_revisions),
+                        len(scheduled_activity_revisions),
+                        "s" if len(scheduled_activity_revisions) > 1 else "",
+                        migrated_activity_schedule_id,
+                    ))
+
+                original_scheduled_activities.extend(original_revisions)
+                migrated_scheduled_activities.extend(migrated_revisions)
 
     # Merge our migrated scheduled activities with the original scheduled activities
     migrated_scheduled_activities: DocumentSet = documents_scheduled_activities.remove_all(
