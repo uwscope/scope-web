@@ -1268,8 +1268,10 @@ def _migrate_activity_old_format_refactor_activity_schedule_helper(
                 match_values={
                     "name": original_activity["name"]
                 }
+            ).unique()
 
             activity_schedule_migrated["activityId"] = migrated_activity["activityId"]
+
         documents_activity_schedules_migrated.append(activity_schedule_migrated)
 
     # Old format activities are migrated into a new activity schedule
