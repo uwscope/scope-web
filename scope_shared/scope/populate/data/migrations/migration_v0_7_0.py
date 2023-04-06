@@ -1996,37 +1996,69 @@ def _migrate_activity_log_snapshot(
 
                 del document_migrated["alternative"]
 
-        # Development included generation of some snapshots that
-        # captured the scheduledActivity before marking it complete
-        if "dataSnapshot" in document_migrated:
-            if "scheduledActivity" in document_migrated["dataSnapshot"]:
-                if not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]:
-                    is_migrated = True
-
-                    # We expect only two instances of this,
-                    # pay attention if we unexpectedly see other instances
-                    assert document_migrated["_id"] in [
-                        "63eea4a7ac019fe9b4bc07cc",
-                        "63efc99eac019fe9b4bc08d2",
-                    ]
-                    del document_migrated["dataSnapshot"]["scheduledActivity"]
+        # # Development included generation of some snapshots that
+        # # captured the scheduledActivity before marking it complete
+        # if "dataSnapshot" in document_migrated:
+        #     if "scheduledActivity" in document_migrated["dataSnapshot"]:
+        #         if not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]:
+        #             is_migrated = True
+        #
+        #             # We expect only two instances of this,
+        #             # pay attention if we unexpectedly see other instances
+        #             assert document_migrated["_id"] in [
+        #                 "63eea4a7ac019fe9b4bc07cc",
+        #                 "63efc99eac019fe9b4bc08d2",
+        #             ]
+        #             del document_migrated["dataSnapshot"]["scheduledActivity"]
 
         if "dataSnapshot" not in document_migrated:
             is_migrated = True
 
             document_migrated["dataSnapshot"] = {}
 
-        if "scheduledActivity" not in document_migrated["dataSnapshot"]:
+        document_snapshot = collection.filter_match(
+            match_type="scheduledActivity",
+            match_deleted=False,
+            match_datetime_at=datetime_from_document(document=document_migrated),
+            match_values={
+                "scheduledActivityId": document_migrated["scheduledActivityId"]
+            }
+        ).unique()
+        if (
+            "scheduledActivity" not in document_migrated["dataSnapshot"]
+            or document_migrated["dataSnapshot"]["scheduledActivity"] != document_snapshot
+            or not document_migrated["dataSnapshot"]["scheduledActivity"]["completed"]
+        ):
             is_migrated = True
 
-            document_migrated["dataSnapshot"]["scheduledActivity"] = collection.filter_match(
-                match_type="scheduledActivity",
-                match_deleted=False,
-                match_datetime_at=datetime_from_document(document=document_migrated),
-                match_values={
-                    "scheduledActivityId": document_migrated["scheduledActivityId"]
-                }
-            ).unique()
+            # Snapshots must include a scheduled activity that is completed,
+            # but migration needs to account for documents that
+            # did not enforce this and are off in their creation time/order.
+            if not document_snapshot["completed"]:
+                document_snapshot = collection.filter_match(
+                    match_type="scheduledActivity",
+                    match_deleted=False,
+                    match_values={
+                        "_rev": document_snapshot["_rev"] + 1,
+                        "scheduledActivityId": document_migrated["scheduledActivityId"],
+                    }
+                ).unique()
+                assert document_snapshot["completed"]
+
+                datetime_activity_log = datetime_from_document(document=document_migrated)
+                datetime_snapshot = datetime_from_document(document=document_snapshot)
+                timedelta_difference = (datetime_snapshot - datetime_activity_log).total_seconds()
+
+                # Ensure the time of the snapshot is valid
+                assert timedelta_difference >= 0
+
+                # 5 seconds would be really slow, most of these are 0 or 1.
+                assert timedelta_difference < 5
+
+                # Move the log to occur at the same time as the snapshot
+                document_migrated["_id"] = document_id_from_datetime(generation_time=datetime_snapshot)
+
+            document_migrated["dataSnapshot"]["scheduledActivity"] = document_snapshot
 
         if is_migrated:
             scope.schema_utils.assert_schema(
