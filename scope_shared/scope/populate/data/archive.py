@@ -148,7 +148,7 @@ class Archive:
     @staticmethod
     def _collection_from_archive_path(
         *,
-        path: Path
+        path: Path,
     ) -> str:
         """
         Obtain the name of the collection that contains a document at the given archive path.

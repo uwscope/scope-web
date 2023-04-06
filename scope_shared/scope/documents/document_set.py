@@ -11,8 +11,8 @@ from typing import Dict, Iterable, List, NewType, Optional, Tuple, Union
 # This will hold things until we actually have a Document type
 Document = dict
 
-DocumentType = NewType('DocumentType', str)
-SetId = NewType('SetId', str)
+DocumentType = NewType("DocumentType", str)
+SetId = NewType("SetId", str)
 DocumentKey = Union[Tuple[DocumentType], Tuple[DocumentType, SetId]]
 
 
@@ -42,9 +42,9 @@ def document_id_from_datetime(
 
     https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid
     """
-    hex_datetime = str(bson.objectid.ObjectId.from_datetime(
-        generation_time=generation_time
-    ))[0:8]
+    hex_datetime = str(
+        bson.objectid.ObjectId.from_datetime(generation_time=generation_time)
+    )[0:8]
     hex_random = secrets.token_hex(8)
 
     return hex_datetime + hex_random
@@ -52,15 +52,13 @@ def document_id_from_datetime(
 
 def document_key(
     *,
-    document: Document
+    document: Document,
 ) -> DocumentKey:
     """
     Obtain a key for the provided document.
     """
 
-    key = (
-        document["_type"],
-    )
+    key = (document["_type"],)
     if "_set_id" in document:
         key = (
             document["_type"],
@@ -266,7 +264,8 @@ class DocumentSet:
             else:
                 # A document created at or before our match time
                 # matches if no revision replaces it before the match time
-                revisions = self.group_revisions()[document_key(document=document)].order_by_revision()
+                key = document_key(document=document)
+                revisions = self.group_revisions()[key].order_by_revision()
                 revision_index = revisions.index(document)
                 if revision_index + 1 == len(revisions):
                     # The current document is the final revision
@@ -285,7 +284,7 @@ class DocumentSet:
                 matches = matches and document[key_current] == value_current
 
         if not tested:
-            raise ValueError('At least one match parameter must be provided.')
+            raise ValueError("At least one match parameter must be provided.")
 
         return matches
 
@@ -346,11 +345,13 @@ class DocumentSet:
 
         remove_documents = list(documents)
 
-        return DocumentSet(documents=[
-            document_current
-            for document_current in self
-            if document_current not in remove_documents
-        ])
+        return DocumentSet(
+            documents=[
+                document_current
+                for document_current in self
+                if document_current not in remove_documents
+            ]
+        )
 
     def remove_match(
         self,

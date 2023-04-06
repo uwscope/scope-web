@@ -110,13 +110,17 @@ def _archive_migrate(
     )
 
     if migration == "v0.5.0":
-        archive = scope.populate.data.migrations.migration_v0_5_0.archive_migrate_v0_5_0(
-            archive=archive,
+        archive = (
+            scope.populate.data.migrations.migration_v0_5_0.archive_migrate_v0_5_0(
+                archive=archive,
+            )
         )
     elif migration == "v0.7.0":
-        archive = scope.populate.data.migrations.migration_v0_7_0.archive_migrate_v0_7_0(
-            archive=archive,
-            archive_path=archive_path,
+        archive = (
+            scope.populate.data.migrations.migration_v0_7_0.archive_migrate_v0_7_0(
+                archive=archive,
+                archive_path=archive_path,
+            )
         )
     else:
         raise ValueError("No migration performed")

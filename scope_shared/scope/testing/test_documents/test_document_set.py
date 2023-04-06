@@ -88,7 +88,7 @@ def test_document_set_group_revisions():
     ]
 
     assert DocumentSet(documents=original_documents).group_revisions() == {
-        ("type", ): [
+        ("type",): [
             {
                 "_type": "type",
                 "_rev": 3,
@@ -129,24 +129,13 @@ def test_document_set_contains():
     document_set = DocumentSet(
         documents=[
             {
-                "key": "value"
+                "key": "value",
             },
             {
-                "key": "other value"
+                "key": "other value",
             },
             {
-                "key": "another value"
-            },
-        ]
-    )
-
-    assert document_set.contains_all(
-        documents=[
-            {
-                "key": "value"
-            },
-            {
-                "key": "other value"
+                "key": "another value",
             },
         ]
     )
@@ -154,13 +143,24 @@ def test_document_set_contains():
     assert document_set.contains_all(
         documents=[
             {
-                "key": "value"
+                "key": "value",
             },
             {
-                "key": "other value"
+                "key": "other value",
+            },
+        ]
+    )
+
+    assert document_set.contains_all(
+        documents=[
+            {
+                "key": "value",
             },
             {
-                "key": "another value"
+                "key": "other value",
+            },
+            {
+                "key": "another value",
             },
         ]
     )
@@ -168,10 +168,10 @@ def test_document_set_contains():
     assert not document_set.contains_all(
         documents=[
             {
-                "key": "value"
+                "key": "value",
             },
             {
-                "key": "missing value"
+                "key": "missing value",
             },
         ]
     )
@@ -179,7 +179,7 @@ def test_document_set_contains():
     assert document_set.contains_any(
         documents=[
             {
-                "key": "value"
+                "key": "value",
             },
         ]
     )
@@ -187,7 +187,7 @@ def test_document_set_contains():
     assert not document_set.contains_any(
         documents=[
             {
-                "key": "missing value"
+                "key": "missing value",
             },
         ]
     )
@@ -197,10 +197,10 @@ def test_document_set_eq():
     document_set = DocumentSet(
         documents=[
             {
-                "key": "first value"
+                "key": "first value",
             },
             {
-                "key": "second value"
+                "key": "second value",
             },
         ]
     )
@@ -212,10 +212,10 @@ def test_document_set_eq():
     assert document_set == DocumentSet(
         documents=[
             {
-                "key": "first value"
+                "key": "first value",
             },
             {
-                "key": "second value"
+                "key": "second value",
             },
         ]
     )
@@ -223,68 +223,74 @@ def test_document_set_eq():
     # A list
     assert document_set == [
         {
-            "key": "first value"
+            "key": "first value",
         },
         {
-            "key": "second value"
+            "key": "second value",
         },
     ]
 
     # Order is not considered
     assert document_set == [
         {
-            "key": "second value"
+            "key": "second value",
         },
         {
-            "key": "first value"
+            "key": "first value",
         },
     ]
 
     # Missing item
     assert document_set != [
         {
-            "key": "first value"
+            "key": "first value",
         },
     ]
 
     # Different item
     assert document_set != [
         {
-            "key": "first value"
+            "key": "first value",
         },
         {
-            "key": "different value"
+            "key": "different value",
         },
     ]
 
 
 def test_document_set_match():
-    document_set_matching = DocumentSet(documents=[
-        {
-            "_type": "matching",
-            "match_value_key": "matching",
-        },
-    ])
+    document_set_matching = DocumentSet(
+        documents=[
+            {
+                "_type": "matching",
+                "match_value_key": "matching",
+            },
+        ]
+    )
 
-    document_set_not_matching = DocumentSet(documents=[
-        {
-            "_type": "not matching",
-            "match_value_key": "matching",
-        },
-        {
-            "_type": "matching",
-            "match_value_key": "not matching",
-        },
-    ])
+    document_set_not_matching = DocumentSet(
+        documents=[
+            {
+                "_type": "not matching",
+                "match_value_key": "matching",
+            },
+            {
+                "_type": "matching",
+                "match_value_key": "not matching",
+            },
+        ]
+    )
 
     match_args = {
         "match_type": "matching",
         "match_values": {
             "match_value_key": "matching",
-        }
+        },
     }
 
-    document_set_combined = document_set_matching.union(documents=document_set_not_matching)
+    document_set_combined = document_set_matching.union(
+        documents=document_set_not_matching
+    )
 
     document_set_filtered = document_set_combined.filter_match(**match_args)
     assert document_set_filtered.contains_all(documents=document_set_matching)
@@ -296,7 +302,19 @@ def test_document_set_match():
 
 
 def test_document_set_match_deleted():
-    document_set = DocumentSet(documents=[
+    document_set = DocumentSet(
+        documents=[
+            {
+                "_type": "test",
+            },
+            {
+                "_type": "test",
+                "_deleted": True,
+            },
+        ]
+    )
+
+    assert document_set.filter_match(match_type="test",) == [
         {
             "_type": "test",
         },
@@ -304,58 +322,36 @@ def test_document_set_match_deleted():
             "_type": "test",
             "_deleted": True,
         },
-    ])
-
-    assert document_set.filter_match(
-        match_type="test",
-    ) == [
-        {
-            "_type": "test",
-        },
-        {
-            "_type": "test",
-            "_deleted": True,
-        },
     ]
 
-    assert document_set.filter_match(
-        match_type="test",
-        match_deleted=False,
-    ) == [
+    assert document_set.filter_match(match_type="test", match_deleted=False,) == [
         {
             "_type": "test",
         },
     ]
 
-    assert document_set.filter_match(
-        match_type="test",
-        match_deleted=True,
-    ) == [
+    assert document_set.filter_match(match_type="test", match_deleted=True,) == [
         {
             "_type": "test",
             "_deleted": True,
         },
     ]
 
-    assert document_set.remove_match(
-        match_type="test",
-    ) == [
-    ]
+    assert (
+        document_set.remove_match(
+            match_type="test",
+        )
+        == []
+    )
 
-    assert document_set.remove_match(
-        match_type="test",
-        match_deleted=False,
-    ) == [
+    assert document_set.remove_match(match_type="test", match_deleted=False,) == [
         {
             "_type": "test",
             "_deleted": True,
         },
     ]
 
-    assert document_set.remove_match(
-        match_type="test",
-        match_deleted=True,
-    ) == [
+    assert document_set.remove_match(match_type="test", match_deleted=True,) == [
         {
             "_type": "test",
         },
@@ -363,18 +359,20 @@ def test_document_set_match_deleted():
 
 
 def test_document_set_match_datetime_at():
-    datetime_rev1 = pytz.utc.localize(datetime(
-        year=2023,
-        month=3,
-        day=11,
-        hour=7,
-        minute=0,
-        second=0,
-        microsecond=0,
-    ))
+    datetime_rev1 = pytz.utc.localize(
+        datetime(
+            year=2023,
+            month=3,
+            day=11,
+            hour=7,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+    )
     document_rev1 = {
         "_id": document_id_from_datetime(
-            generation_time=datetime_rev1
+            generation_time=datetime_rev1,
         ),
         "_type": "type",
         "_rev": 1,
@@ -383,7 +381,7 @@ def test_document_set_match_datetime_at():
     datetime_rev2 = datetime_rev1 + timedelta(days=1)
     document_rev2 = {
         "_id": document_id_from_datetime(
-            generation_time=datetime_rev2
+            generation_time=datetime_rev2,
         ),
         "_type": "type",
         "_rev": 2,
@@ -392,7 +390,7 @@ def test_document_set_match_datetime_at():
     datetime_rev3 = datetime_rev2 + timedelta(hours=1)
     document_rev3 = {
         "_id": document_id_from_datetime(
-            generation_time=datetime_rev3
+            generation_time=datetime_rev3,
         ),
         "_type": "type",
         "_rev": 3,
@@ -403,7 +401,7 @@ def test_document_set_match_datetime_at():
     datetime_rev4 = datetime_rev3 + timedelta(milliseconds=1)
     document_rev4 = {
         "_id": document_id_from_datetime(
-            generation_time=datetime_rev4
+            generation_time=datetime_rev4,
         ),
         "_type": "type",
         "_rev": 4,
@@ -411,7 +409,7 @@ def test_document_set_match_datetime_at():
 
     document_other_type = {
         "_id": document_id_from_datetime(
-            generation_time=datetime_rev1
+            generation_time=datetime_rev1,
         ),
         "_type": "other type",
         "_rev": 1,
@@ -419,27 +417,28 @@ def test_document_set_match_datetime_at():
 
     # The internal implementation of match_date_time_at is based on sorting by revision
     # Ensure documents are not already sorted by revision
-    document_set = DocumentSet(documents=[
-        document_other_type,
-        document_rev4,
-        document_rev3,
-        document_rev2,
-        document_rev1,
-    ])
+    document_set = DocumentSet(
+        documents=[
+            document_other_type,
+            document_rev4,
+            document_rev3,
+            document_rev2,
+            document_rev1,
+        ]
+    )
 
     # Before our initial documents should be an empty set
-    assert document_set.filter_match(
-        match_datetime_at=datetime_rev1 - timedelta(days=1),
-    ) == [
-    ]
+    assert (
+        document_set.filter_match(
+            match_datetime_at=datetime_rev1 - timedelta(days=1),
+        )
+        == []
+    )
 
     # Same time as our initial documents should be both of them
     assert document_set.filter_match(
         match_datetime_at=datetime_rev1,
-    ) == [
-        document_rev1,
-        document_other_type
-    ]
+    ) == [document_rev1, document_other_type]
 
     # An additional filter for type
     assert document_set.filter_match(
@@ -468,10 +467,7 @@ def test_document_set_match_datetime_at():
     # In the future should still be rev4
     assert document_set.filter_match(
         match_datetime_at=datetime_rev4 + timedelta(days=1),
-    ) == [
-        document_rev4,
-        document_other_type
-    ]
+    ) == [document_rev4, document_other_type]
 
 
 def test_document_set_order_by_revisions():
@@ -479,32 +475,32 @@ def test_document_set_order_by_revisions():
     # "_rev" should be an integer, and enforcing that elsewhere would allow simplifying this test
     # and the logic of DocumentSet.order_by_revisions that currently ensures robustness to string values.
 
-    document_set = DocumentSet(documents=[
-        {
-            "_type": "type",
-            "_rev": "20",
-        },
-        {
-            "_type": "type",
-            "_rev": "30",
-        },
-        {
-            "_type": "type",
-            "_rev": "4",
-        },
-        {
-            "_type": "other type",
-            "_rev": "1",
-        },
-    ])
+    document_set = DocumentSet(
+        documents=[
+            {
+                "_type": "type",
+                "_rev": "20",
+            },
+            {
+                "_type": "type",
+                "_rev": "30",
+            },
+            {
+                "_type": "type",
+                "_rev": "4",
+            },
+            {
+                "_type": "other type",
+                "_rev": "1",
+            },
+        ]
+    )
 
     # A mixed set should error
     with pytest.raises(ValueError):
         document_set.order_by_revision()
 
-    assert document_set.filter_match(
-        match_type="type",
-    ).order_by_revision() == [
+    assert document_set.filter_match(match_type="type",).order_by_revision() == [
         {
             "_type": "type",
             "_rev": "4",
@@ -524,13 +520,13 @@ def test_document_set_remove_documents():
     document_set = DocumentSet(
         documents=[
             {
-                "key": "first value"
+                "key": "first value",
             },
             {
-                "key": "second value"
+                "key": "second value",
             },
             {
-                "key": "third value"
+                "key": "third value",
             },
         ]
     )
@@ -538,36 +534,30 @@ def test_document_set_remove_documents():
     assert document_set.remove_any(
         documents=[
             {
-                "key": "first value"
+                "key": "first value",
             },
             {
-                "key": "first value"
+                "key": "first value",
             },
             {
-                "key": "missing value"
+                "key": "missing value",
             },
         ]
     ) == [
         {
-            "key": "second value"
+            "key": "second value",
         },
         {
-            "key": "third value"
+            "key": "third value",
         },
     ]
 
-    assert document_set.remove_all(
-        documents=[
-            {
-                "key": "first value"
-            },
-        ]
-    ) == [
+    assert document_set.remove_all(documents=[{"key": "first value",},]) == [
         {
-            "key": "second value"
+            "key": "second value",
         },
         {
-            "key": "third value"
+            "key": "third value",
         },
     ]
 
@@ -575,10 +565,10 @@ def test_document_set_remove_documents():
         assert document_set.remove_all(
             documents=[
                 {
-                    "key": "first value"
+                    "key": "first value",
                 },
                 {
-                    "key": "first value"
+                    "key": "first value",
                 },
             ]
         )
@@ -587,7 +577,7 @@ def test_document_set_remove_documents():
         assert document_set.remove_all(
             documents=[
                 {
-                    "key": "missing value"
+                    "key": "missing value",
                 },
             ]
         )

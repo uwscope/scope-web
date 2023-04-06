@@ -42,43 +42,56 @@ def build_data_snapshot(
                     == activity_schedule_id
                 )
             ),
-            None
+            None,
         )
 
     # Every activity schedule should reference an activity
     if activity_schedule:
-        activity_id = activity_schedule.get(scope.database.patient.activities.SEMANTIC_SET_ID, None)
+        activity_id = activity_schedule.get(
+            scope.database.patient.activities.SEMANTIC_SET_ID,
+            None,
+        )
         if activity_id:
             activity = next(
                 (
                     activity_current
                     for activity_current in activities
                     if (
-                            activity_current[scope.database.patient.activities.SEMANTIC_SET_ID]
-                            == activity_id
+                        activity_current[
+                            scope.database.patient.activities.SEMANTIC_SET_ID
+                        ]
+                        == activity_id
                     )
                 ),
-                None
+                None,
             )
 
     # An activity may reference a value
     if activity:
-        value_id = activity.get(scope.database.patient.values.SEMANTIC_SET_ID, None)
+        value_id = activity.get(
+            scope.database.patient.values.SEMANTIC_SET_ID,
+            None,
+        )
         if value_id:
             value = next(
                 (
                     value_current
                     for value_current in values
-                    if value_current[scope.database.patient.values.SEMANTIC_SET_ID] == value_id
+                    if (
+                        value_current[scope.database.patient.values.SEMANTIC_SET_ID]
+                        == value_id
+                    )
                 ),
-                None
+                None,
             )
 
     # Build the snapshot
     data_snapshot = {}
 
     if activity_schedule:
-        data_snapshot[scope.database.patient.activity_schedules.DOCUMENT_TYPE] = activity_schedule
+        data_snapshot[
+            scope.database.patient.activity_schedules.DOCUMENT_TYPE
+        ] = activity_schedule
     if activity:
         data_snapshot[scope.database.patient.activities.DOCUMENT_TYPE] = activity
     if value:
@@ -181,7 +194,9 @@ def maintain_scheduled_activities_data_snapshot(
 
         # Calculate a new value for data snapshot
         new_data_snapshot = build_data_snapshot(
-            activity_schedule_id=scheduled_activity_current[scope.database.patient.activity_schedules.SEMANTIC_SET_ID],
+            activity_schedule_id=scheduled_activity_current[
+                scope.database.patient.activity_schedules.SEMANTIC_SET_ID
+            ],
             activity_schedules=activity_schedules,
             activities=activities,
             values=values,
