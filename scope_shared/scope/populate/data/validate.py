@@ -266,6 +266,9 @@ def _validate_patient_collection_activity_schedules(*, collection: DocumentSet,)
     activity_schedule_documents = collection.filter_match(
         match_type="activitySchedule",
     )
+    scheduled_activity_documents = collection.filter_match(
+        match_type="scheduledActivity"
+    )
 
     for document_current in activity_schedule_documents.filter_match(
         match_deleted=False,
@@ -289,6 +292,20 @@ def _validate_patient_collection_activity_schedules(*, collection: DocumentSet,)
                 activity_id = revision_current["activityId"]
             else:
                 assert revision_current["activityId"] == activity_id
+
+    # Every activity schedule must result in at least one scheduled activity
+    for activity_schedule_current in activity_schedule_documents.filter_match(
+        match_deleted=False,
+        match_values={
+            "_rev": 1,
+        },
+    ):
+        assert not scheduled_activity_documents.filter_match(
+            match_deleted=False,
+            match_values={
+                "activityScheduleId": activity_schedule_current["activityScheduleId"]
+            },
+        ).is_empty()
 
 
 def _validate_patient_collection_scheduled_activities(*, collection: DocumentSet,):
