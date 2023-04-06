@@ -295,8 +295,8 @@ const _strings = {
     Safetyplan_add: 'Add another',
     Safetyplan_add_place: 'Add place',
     Safetyplan_add_person: 'Add person',
-    Safetyplan_suicide_hotline_title: 'Suicide prevention lifeline phone',
-    Safetyplan_suicide_hotline_phone: '1-800-273-TALK(8255)',
+    Safetyplan_suicide_hotline_title: 'Suicide & Crisis Lifeline',
+    Safetyplan_suicide_hotline_phone: '988 or 1-800-273-TALK(8255)',
     Safetyplan_environment_title: 'Safe environment',
     Safetyplan_environment_description: 'What are some ways I can make the environment safe?',
     Safetyplan_submit_success:
