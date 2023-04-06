@@ -2926,7 +2926,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert _test_fused
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3124,7 +3124,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert not _test_fused
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3153,7 +3153,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert _test_fused
+#     assert not _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
@@ -3220,7 +3220,7 @@ def _migrate_values_inventory_refactor_values_and_activities(
 #             lifeAreaId="",
 #         )
 #     )
-#     assert not _test_fused
+#     assert _test_fused
 #     assert len(_test_fuse_result) == 2
 #     _test_fuse_result = sorted(_test_fuse_result, key=lambda document: document.datetimeStart)
 #     assert _test_fuse_result[0].datetimeStart == datetime.datetime(2023, 3, 28, 6, 10, 0)
