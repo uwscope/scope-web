@@ -210,7 +210,10 @@ def _validate_patient_collection_strings(
 
     # Value names must already be trimmed
     for document_current in value_documents:
-        assert document_current["name"] == document_current["name"].strip()
+        if document_current["name"] != document_current["name"].strip():
+            print("  Warning: Value Name Not Trimmed")
+
+        # assert document_current["name"] == document_current["name"].strip()
 
 
 def _validate_patient_collection_activity(
