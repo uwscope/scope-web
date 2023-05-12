@@ -54,7 +54,7 @@ export const HomePage: FunctionComponent = observer(() => {
         viewState.showPendingOverdueActivities = event.target.checked;
     });
 
-    const overdueItems = rootStore.patientStore.getOverdueItems(2);
+    const overdueItems = rootStore.patientStore.getOverdueItems(1);
 
     const onTaskClick = action((item: IScheduledActivity) => () => {
         navigate(

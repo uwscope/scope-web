@@ -101,7 +101,7 @@ def post_activity_log(
             )
             updated_activity_log.update(
                 {
-                    DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot
+                    DATA_SNAPSHOT_PROPERTY: activity_log_data_snapshot,
                 }
             )
 

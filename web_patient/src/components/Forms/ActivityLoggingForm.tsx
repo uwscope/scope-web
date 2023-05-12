@@ -149,11 +149,11 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
 
     const rootStore = useStores();
     const { patientStore } = rootStore;
-    const activity = patientStore.getActivityById(activityId);
+
     const task = patientStore.getTaskById(taskId);
 
-    if (!activity || !task) {
-        logError('ActivityForm', `Activity or task not found: activity=${activityId}, task=${taskId}`);
+    if (!task) {
+        logError('ActivityForm', `Task not found: task=${taskId}`);
         return null;
     }
 
@@ -170,14 +170,13 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
-        //activityId,
         scheduledActivityId: task.scheduledActivityId,
         dataSnapshot: { scheduledActivity: task },
         alternative: '',
         comment: '',
         pleasure: 5,
         accomplishment: 5,
-        //activityName: activity.name,
+
         recordedDateTime: new Date(),
         success: '',
     }));
@@ -209,7 +208,7 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         const successPage = {
             content: (
                 <PageSuccess
-                    activityName={activity.name}
+                    activityName={task.dataSnapshot.activity.name}
                     alternate={dataState.alternative}
                     successValue={dataState.success}
                     onAlternateChange={(v) => handleValueChange('alternative', v)}

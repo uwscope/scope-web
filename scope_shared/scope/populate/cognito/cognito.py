@@ -8,11 +8,8 @@ def generate_temporary_password() -> str:
     - 8 characters long
     - Includes at least 1 lowercase, uppercase, number, and symbol
 
-    Allowable Cognito symbols are:
-      ^$*.[]{}()?!@#%&/\,><'":;|_~`=+-
-
-    For readability of generated passwords that are emailed to people, we use:
-      !@#$%^&*
+    Cognito defines a limited set of allowable symbols.
+    For readability of generated passwords that are emailed to people, we further limit.
     """
 
     lowercase = string.ascii_lowercase
