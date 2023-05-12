@@ -44,7 +44,7 @@ export interface IFormDialogProps {
     onClose?: () => void;
     onSubmit?: () => Promise<boolean>;
     pages: IFormPage[];
-    submitToast?: string;
+    submitToast?: string | React.ReactElement;
 }
 
 const ContentContainer = styled.div({
