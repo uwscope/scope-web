@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -42,13 +42,15 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
         viewState.isOpen = false;
     });
 
+    const moodLogs = patientStore.moodLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
+
     return (
         <DetailPage title={getString('Progress_mood_tracking_title')} onBack={handleGoBack}>
             <ContentLoader
                 state={patientStore.loadMoodLogsState}
                 name="mood logs"
                 onRetry={() => patientStore.loadMoodLogs()}>
-                {patientStore.moodLogs.length > 0 ? (
+                {moodLogs.length > 0 ? (
                     <Fragment>
                         <Table size="small" aria-label="a dense table">
                             <TableHead>
@@ -59,7 +61,7 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {patientStore.moodLogs.map((log, idx) => (
+                                {moodLogs.map((log, idx) => (
                                     <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}

@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -50,7 +50,9 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
         assessmentType == 'phq-9' ? 'Progress_phq_assessment_detail_title' : 'Progress_gad_assessment_detail_title';
     const assessmentContent = rootStore.getAssessmentContent(assessmentType);
 
-    const logs = patientStore.assessmentLogs.filter((a) => a.assessmentId.toLowerCase() == assessmentType);
+    const logs = patientStore.assessmentLogs
+        .filter((a) => a.assessmentId.toLowerCase() == assessmentType)
+        .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     const getValueString = (pointValue: number | undefined) => {
         return `${assessmentContent?.options.find((o) => o.value == pointValue)?.text} (${pointValue})`;
