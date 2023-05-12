@@ -30,7 +30,7 @@ import { DayOfWeek, DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
 import { clearTime, getDayOfWeek, getDayOfWeekCount, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IActivity, IActivitySchedule, IValue } from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
-import { FormSection, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
+import { FormSection, HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from 'src/services/routes';
 import { getString } from 'src/services/strings';
@@ -1038,8 +1038,19 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         activityScheduleViewState.hasRepetition,
         activityScheduleViewState.repeatDayFlags,
     );
+
+    const getActivityNameByActivityScheduleViewState = () => {
+        if (activityScheduleViewState.modeState.mode === 'addActivitySchedule') {
+            return patientStore.getActivityById(activityScheduleViewState.modeState.activityId)?.name;
+        } else if (activityScheduleViewState.modeState.mode === 'editActivitySchedule') {
+            return patientStore.getActivityById(activityScheduleViewState.modeState.editActivitySchedule.activityId)
+                ?.name;
+        }
+    };
+
     const activitySchedulePage = (
         <Stack spacing={4}>
+            <SubHeaderText>{getActivityNameByActivityScheduleViewState()}</SubHeaderText>
             <FormSection
                 prompt={getString('form_add_edit_activity_schedule_when_prompt')}
                 content={
@@ -1097,7 +1108,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Fragment>
                 }
             />
-
             <FormSection
                 addPaddingTop
                 prompt={getString('form_add_edit_activity_schedule_has_repetition_prompt')}
@@ -1122,7 +1132,6 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                     </Fragment>
                 }
             />
-
             {activityScheduleViewState.hasRepetition && (
                 <FormSection
                     addPaddingTop
