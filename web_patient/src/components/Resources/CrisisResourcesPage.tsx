@@ -3,6 +3,7 @@ import { action } from 'mobx';
 import React, { FunctionComponent } from 'react';
 import { useNavigate } from 'react-router';
 import { DetailPage } from 'src/components/common/DetailPage';
+import { Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import styled, { withTheme } from 'styled-components';
 
@@ -24,7 +25,7 @@ export const CrisisResourcesPage: FunctionComponent = () => {
     const navigate = useNavigate();
 
     const handleGoBack = action(() => {
-        navigate(-1);
+        navigate('/' + Routes.resources);
     });
 
     return (
@@ -44,14 +45,14 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                     <ListDiv>
                         <li>
                             <Typography variant="body1">
-                                Suicide & Crisis Lifeline - Call {' '}
+                                Suicide & Crisis Lifeline - Call{' '}
                                 <Link
                                     href="tel:988/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     988
-                                </Link>
-                                {' '} or {' '}
+                                </Link>{' '}
+                                or{' '}
                                 <Link
                                     href="tel:18002738255/"
                                     target="_blank"
@@ -62,7 +63,7 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                         </li>
                         <li>
                             <Typography variant="body1">
-                                Lifeline Web Chat - {' '}
+                                Lifeline Web Chat -{' '}
                                 <Link
                                     href="https://suicidepreventionlifeline.org/chat/"
                                     target="_blank"
@@ -73,21 +74,21 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                         </li>
                         <li>
                             <Typography variant="body1">
-                                Crisis Text Line - {' '}
+                                Crisis Text Line -{' '}
                                 <Link
                                     href="https://www.crisistextline.org/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     https://www.crisistextline.org/
-                                </Link>
-                                {' '} - Text {' '}
+                                </Link>{' '}
+                                - Text{' '}
                                 <Link
                                     href="sms:988/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     988
-                                </Link>
-                                {' '} or Text "HOME" to {' '}
+                                </Link>{' '}
+                                or Text "HOME" to{' '}
                                 <Link
                                     href="sms:741741/"
                                     target="_blank"
