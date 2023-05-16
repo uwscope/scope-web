@@ -30,7 +30,7 @@ import { DayOfWeek, DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
 import { clearTime, getDayOfWeek, getDayOfWeekCount, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IActivity, IActivitySchedule, IValue } from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
-import { FormSection, HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
+import { FormSection, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from 'src/services/routes';
 import { getString } from 'src/services/strings';
