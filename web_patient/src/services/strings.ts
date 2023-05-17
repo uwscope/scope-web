@@ -92,8 +92,10 @@ const _strings = {
     values_inventory_home_instruction2:
         'The Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might support those values.',
     values_inventory_home_instruction3:
+        'Need help with ideas for activities? Check out a list of Activities Menu in the Tools > Library.',
+    values_inventory_home_instruction4:
         'The inventory consists of five life areas. You can fill them out in any order.',
-    values_inventory_home_instruction4: 'Tap on any life area to start.',
+    values_inventory_home_instruction5: 'Tap on any life area to start.',
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Not Currently Assigned To Values',

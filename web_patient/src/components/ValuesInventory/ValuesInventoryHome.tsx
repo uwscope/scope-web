@@ -32,6 +32,7 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
             <InstructionText paragraph>{getString('values_inventory_home_instruction2')}</InstructionText>
             <InstructionText paragraph>{getString('values_inventory_home_instruction3')}</InstructionText>
             <InstructionText paragraph>{getString('values_inventory_home_instruction4')}</InstructionText>
+            <InstructionText paragraph>{getString('values_inventory_home_instruction5')}</InstructionText>
             <ContentLoader
                 state={patientStore.loadValuesInventoryState}
                 name="values & activities inventory"
