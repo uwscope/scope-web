@@ -101,10 +101,12 @@ const _strings = {
         'Edit these activities to assign them to your identified personal values.',
 
     values_inventory_values_example_title: 'Example Values',
-    values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
-    values_inventory_values_identify_title: 'Identify Personal Values',
+    values_inventory_values_activity_example_title: 'Example Values and Activities',
+    values_inventory_values_empty_subprompt:
+        'List one or more of your personal values and acivities that fit with this life area.',
+    values_inventory_values_identify_title: 'Identify Personal Values and Activities',
     values_inventory_values_identify_existing_title: 'Identified Personal Values',
-    values_inventory_values_identify_more_title: 'Identify Additional Personal Values',
+    values_inventory_values_identify_more_title: 'Identify Additional Personal Values and Activities',
 
     Values_inventory_lifearea: 'Life area',
     values_inventory_value_count_singular: 'value',
