@@ -25,7 +25,7 @@ import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import { IActivity, IValue } from 'shared/types';
+import { IActivity, ILifeAreaValue, IValue } from 'shared/types';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import { DetailPage } from 'src/components/common/DetailPage';
 import StatefulDialog from 'src/components/common/StatefulDialog';
@@ -292,6 +292,27 @@ const Examples: FunctionComponent<{ title: string; examples: string[] }> = (prop
     );
 };
 
+const NestedExamples: FunctionComponent<{ title: string; examples: ILifeAreaValue[] }> = (props) => {
+    const { title, examples } = props;
+    return (
+        <HelperText>
+            <Stack spacing={1}>
+                <div>{`${title}:`}</div>
+                {examples.map((ex, valueIdx) => (
+                    <React.Fragment>
+                        <div key={`value` + valueIdx}>{`${valueIdx + 1}. ${ex.name}`}</div>
+                        <ol type="i">
+                            {ex.activities.map((activityEx, activityIdx) => (
+                                <li key={`activity` + activityIdx}>{activityEx.name}</li>
+                            ))}
+                        </ol>
+                    </React.Fragment>
+                ))}
+            </Stack>
+        </HelperText>
+    );
+};
+
 export const LifeAreaDetail: FunctionComponent = observer(() => {
     const { lifeAreaId } = useParams<{ lifeAreaId: string }>();
     if (!lifeAreaId) {
@@ -530,6 +551,15 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             return [];
         }
     })();
+
+    const displayValueAndActivityExamples: ILifeAreaValue[] = (() => {
+        if (lifeAreaContent) {
+            return lifeAreaContent.examples;
+        } else {
+            return [];
+        }
+    })();
+
     const displayActivityExamples: string[] = (() => {
         if (lifeAreaContent) {
             return lifeAreaContent?.examples[random(lifeAreaContent.examples.length - 1, false)].activities.map(
@@ -565,9 +595,9 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                     prompt={getString('values_inventory_values_identify_title')}
                                     subPrompt={getString('values_inventory_values_empty_subprompt')}
                                     content={
-                                        <Examples
-                                            title={getString('values_inventory_values_example_title')}
-                                            examples={displayValueExamples}
+                                        <NestedExamples
+                                            title={getString('values_inventory_values_activity_example_title')}
+                                            examples={displayValueAndActivityExamples}
                                         />
                                     }
                                 />
@@ -601,14 +631,24 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                         : ''
                                 }
                                 content={
-                                    <Button
-                                        sx={{ marginTop: 1, alignSelf: 'flex-start' }}
-                                        variant="contained"
-                                        color="primary"
-                                        startIcon={<AddIcon />}
-                                        onClick={handleAddValue}>
-                                        {getString('Values_inventory_add_value')}
-                                    </Button>
+                                    <React.Fragment>
+                                        {patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0 ? (
+                                            <NestedExamples
+                                                title={getString('values_inventory_values_activity_example_title')}
+                                                examples={displayValueAndActivityExamples}
+                                            />
+                                        ) : (
+                                            ''
+                                        )}
+                                        <Button
+                                            sx={{ marginTop: 1, alignSelf: 'flex-start' }}
+                                            variant="contained"
+                                            color="primary"
+                                            startIcon={<AddIcon />}
+                                            onClick={handleAddValue}>
+                                            {getString('Values_inventory_add_value')}
+                                        </Button>
+                                    </React.Fragment>
                                 }
                             />
                         </Fragment>
