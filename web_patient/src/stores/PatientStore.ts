@@ -181,6 +181,22 @@ export class PatientStore implements IPatientStore {
         //     );
     }
 
+    // TODO: Delete commented code after testing new assessmentsToComplete()
+    // @computed public get assessmentsToComplete() {
+    //     const scheduledAssessments = this.config?.assignedScheduledAssessments || [];
+    //     // Returns deduped list of assessments to complete
+    //     const latestAssessments: IScheduledAssessment[] = [];
+    //     const assessmentGroups = _.groupBy(scheduledAssessments, (a) => a.assessmentId);
+
+    //     for (var assessmentId in assessmentGroups) {
+    //         const group = assessmentGroups[assessmentId];
+    //         group.sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
+    //         latestAssessments.push(group[0]);
+    //     }
+
+    //     return latestAssessments;
+    // }
+
     @computed public get assessmentsToComplete() {
         const scheduledAssessments = this.config?.assignedScheduledAssessments || [];
         // Returns deduped list of assessments to complete
@@ -190,7 +206,14 @@ export class PatientStore implements IPatientStore {
         for (var assessmentId in assessmentGroups) {
             const group = assessmentGroups[assessmentId];
             group.sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
-            latestAssessments.push(group[0]);
+            const latestAssessment = group[0];
+
+            const logs = this.assessmentLogs
+                .filter((a) => a.assessmentId.toLowerCase() == latestAssessment.assessmentId.toLowerCase())
+                .filter((a) => isAfter(a.recordedDateTime, latestAssessment.dueDateTime));
+            if (logs.length === 0) {
+                latestAssessments.push(latestAssessment);
+            }
         }
 
         return latestAssessments;
