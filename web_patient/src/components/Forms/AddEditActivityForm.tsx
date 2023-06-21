@@ -423,9 +423,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const handleAddValueSave = action(async () => {
         activityViewState.addValueOpen = false;
-
+        const valueName = activityViewState.addValueName.trim();
         const createValue: IValue = {
-            name: activityViewState.addValueName,
+            name: valueName,
             lifeAreaId: activityViewState.lifeAreaId,
             editedDateTime: new Date(),
         };

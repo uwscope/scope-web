@@ -463,13 +463,14 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleSaveValue = action(async () => {
+        const valueName = viewState.name.trim();
         if (viewState.modeState.mode == 'add') {
             // TODO Activity Refactor: check that our 'add' is valid
             // Defer until this is more cleanly-organized
             // is a unique name
 
             await patientStore.addValue({
-                name: viewState.name,
+                name: valueName,
                 lifeAreaId: lifeAreaId,
                 editedDateTime: new Date(),
             });
@@ -481,7 +482,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
             await patientStore.updateValue({
                 ...viewState.modeState.editValue,
-                name: viewState.name,
+                name: valueName,
                 editedDateTime: new Date(),
             });
         }
