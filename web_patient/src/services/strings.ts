@@ -182,8 +182,8 @@ const _strings = {
     Progress_gad_assessment_detail_title: 'Anxiety Assessment',
 
     Careplan_no_tasks: 'There are no planned activities for this day.',
-    Careplan_view_calendar: 'Calendar view',
-    Careplan_view_activity: 'Activity view',
+    Careplan_view_calendar: 'Calendar View',
+    Careplan_view_activity: 'Activity View',
     careplan_activities_other: 'Other Activities',
     Careplan_activity_item_value: 'Value',
     Careplan_activity_item_start_date: 'Starts',
