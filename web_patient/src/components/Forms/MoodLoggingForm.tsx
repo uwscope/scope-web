@@ -1,4 +1,4 @@
-import { Slider, TextField } from '@mui/material';
+import { Box, Slider, Stack, TextField } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
@@ -110,10 +110,15 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
 
     const submitToast = () => {
         return (
-            <React.Fragment>
-                Thank you for checking in. If you are in crisis or need immediate help,{' '}
-                <Link to={Routes.resources + '/' + Routes.crisisresources}>click here for crisis resources</Link>.
-            </React.Fragment>
+            <Stack spacing={2}>
+                <Box>
+                    { getString('Form_mood_submit_success') } {' '}
+                </Box>
+                <Box>
+                    If you are in crisis or need immediate help, {' '}
+                    <Link to={Routes.resources + '/' + Routes.crisisresources}>click here for crisis resources</Link>.
+                </Box>
+            </Stack>
         );
     };
 
