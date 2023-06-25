@@ -22,7 +22,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { isEqual } from 'date-fns';
+import { isEqual, isSameDay } from 'date-fns';
 import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -278,7 +278,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 editActivitySchedule.activityScheduleId as string,
             );
 
-            const nextTaskDueDate = toLocalDateOnly(nextTask?.dueDateTime as Date);
+            const nextTaskDueDate = nextTask?.dueDateTime as Date;
 
             return {
                 ...defaultViewState,
@@ -755,6 +755,21 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             };
         }
 
+        // Check if activityScheduleViewState.displayedDate is today
+        const currentTime = new Date();
+        if (isSameDay(activityScheduleViewState.displayedDate as Date, currentTime)) {
+            // If so, check if the time is in the past
+            const timeOfDayDate = new Date(2023, 0, 1, date.getHours(), date.getMinutes(), 0);
+            const currentTimeDate = new Date(2023, 0, 1, currentTime.getHours(), currentTime.getMinutes(), 0);
+            if (timeOfDayDate < currentTimeDate) {
+                return {
+                    valid: false,
+                    error: true,
+                    errorMessage: getString('form_add_edit_activity_schedule_time_of_day_validation_in_past'),
+                };
+            }
+        }
+
         return {
             valid: true,
             error: false,
@@ -1038,6 +1053,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
         activityScheduleViewState.hasRepetition,
         activityScheduleViewState.repeatDayFlags,
     );
+
     const activitySchedulePage = (
         <Stack spacing={4}>
             <FormSection
