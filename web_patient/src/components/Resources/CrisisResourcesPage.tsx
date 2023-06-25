@@ -80,15 +80,15 @@ export const CrisisResourcesPage: FunctionComponent = () => {
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     https://www.crisistextline.org/
-                                </Link> {' '}
-                                - Text {' '}
+                                </Link>
+                                {' '} - Text {' '}
                                 <Link
                                     href="sms:988/"
                                     target="_blank"
                                     sx={{ display: 'inline-block', overflowWrap: 'anywhere' }}>
                                     988
-                                </Link> {' '}
-                                or Text "HOME" to {' '}
+                                </Link>
+                                {' '} or Text "HOME" to {' '}
                                 <Link
                                     href="sms:741741/"
                                     target="_blank"
