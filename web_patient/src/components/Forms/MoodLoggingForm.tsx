@@ -18,7 +18,7 @@ export interface IMoodLoggingFormProps extends IFormProps {}
 const SliderContainer = withTheme(
     styled.div((props) => ({
         padding: props.theme.spacing(8, 2),
-    })),
+    }))
 );
 
 export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observer(() => {
