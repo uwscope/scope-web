@@ -238,7 +238,9 @@ const _strings = {
     form_add_edit_activity_schedule_date_validation_invalid_format: 'Invalid date format.',
     form_add_edit_activity_schedule_time_of_day_label: 'Schedule Time',
     form_add_edit_activity_schedule_time_of_day_help: 'Choose a time you would like to do this activity.',
+    form_add_edit_activity_schedule_time_of_day_validation_in_past: 'Time must be in the future.',
     form_add_edit_activity_schedule_time_of_day_validation_invalid_format: 'Invalid time format.',
+
     form_add_edit_activity_schedule_has_repetition_prompt: 'Would you like to repeat this activity every week?',
     form_add_edit_activity_schedule_repeat_days_prompt: 'On what days would you like to repeat this activity?',
     form_add_edit_activity_schedule_repetition_validation_no_days: 'Select one or more days.',
