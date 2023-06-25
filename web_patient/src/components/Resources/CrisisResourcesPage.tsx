@@ -25,6 +25,15 @@ export const CrisisResourcesPage: FunctionComponent = () => {
     const navigate = useNavigate();
 
     const handleGoBack = action(() => {
+        // TODO: Determine if there is a better way to do this.
+        // It's usually sufficient to just go back in the stack (i.e., -1).
+        // But this resource page can be reached by either:
+        // - Navigating downward through resources.
+        // - Or direct linking from elsewhere in the map (i.e., submission of a mood report).
+        // When direct linked to this, going "back" can be problematic.
+        // For example, take us back to a mood report that we've already submitted.
+        // Hard coding the "back" destination to be "up" ensure a reasonable behavior.
+        // I would prefer to not do this (e.g., perhaps by manipulating the "back" stack instead).
         navigate('/' + Routes.resources);
     });
 
