@@ -30,7 +30,7 @@ import { DayOfWeek, DayOfWeekFlags, daysOfWeekValues } from 'shared/enums';
 import { clearTime, getDayOfWeek, getDayOfWeekCount, toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IActivity, IActivitySchedule, IValue } from 'shared/types';
 import { IFormPage, FormDialog } from 'src/components/Forms/FormDialog';
-import { FormSection, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
+import { FormSection, HeaderText, HelperText, SubHeaderText } from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
 import { getRouteParameter, Parameters, ParameterValues } from 'src/services/routes';
 import { getString } from 'src/services/strings';
@@ -1050,7 +1050,10 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const activitySchedulePage = (
         <Stack spacing={4}>
-            <SubHeaderText>{getActivityNameByActivityScheduleViewState()}</SubHeaderText>
+            <Stack spacing={1}>
+                <HeaderText>Activity</HeaderText>
+                <SubHeaderText>{getActivityNameByActivityScheduleViewState()}</SubHeaderText>
+            </Stack>
             <FormSection
                 prompt={getString('form_add_edit_activity_schedule_when_prompt')}
                 content={
