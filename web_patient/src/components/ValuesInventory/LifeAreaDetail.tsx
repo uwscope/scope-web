@@ -631,7 +631,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                         : ''
                                 }
                                 content={
-                                    <Box>
+                                    <React.Fragment>
                                         <Button
                                             sx={{ marginTop: 1, alignSelf: 'flex-start' }}
                                             variant="contained"
