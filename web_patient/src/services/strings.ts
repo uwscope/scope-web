@@ -97,9 +97,15 @@ const _strings = {
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
     values_inventory_home_instruction2:
         'The Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might support those values.',
-    values_inventory_home_instruction3:
+    values_inventory_home_instruction3_before_link:
+        'Need help with ideas for activities? Check out Activity Ideas in the ',
+    values_inventory_home_instruction3_within_link:
+        'Library',
+    values_inventory_home_instruction3_after_link:
+        '.',
+    values_inventory_home_instruction4:
         'The inventory consists of five life areas. You can fill them out in any order.',
-    values_inventory_home_instruction4: 'Tap on any life area to start.',
+    values_inventory_home_instruction5: 'Tap on any life area to start.',
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Not Currently Assigned To Values',
