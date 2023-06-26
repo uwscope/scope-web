@@ -631,15 +631,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                         : ''
                                 }
                                 content={
-                                    <React.Fragment>
-                                        {patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0 ? (
-                                            <NestedExamples
-                                                title={getString('values_inventory_values_activity_example_title')}
-                                                examples={displayValueAndActivityExamples}
-                                            />
-                                        ) : (
-                                            ''
-                                        )}
+                                    <Box>
                                         <Button
                                             sx={{ marginTop: 1, alignSelf: 'flex-start' }}
                                             variant="contained"
@@ -648,6 +640,16 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                                             onClick={handleAddValue}>
                                             {getString('Values_inventory_add_value')}
                                         </Button>
+                                        <Box paddingTop={4}>
+                                            {patientStore.getValuesByLifeAreaId(lifeAreaId).length > 0 ? (
+                                                <NestedExamples
+                                                    title={getString('values_inventory_values_activity_example_title')}
+                                                    examples={displayValueAndActivityExamples}
+                                                />
+                                            ) : (
+                                                ''
+                                            )}
+                                        </Box>
                                     </React.Fragment>
                                 }
                             />
