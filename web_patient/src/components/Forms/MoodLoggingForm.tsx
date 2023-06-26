@@ -116,7 +116,7 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
                 </Box>
                 <Box>
                     { getString('Form_mood_submit_success_2_before_link') }
-                    <Link to={Routes.resources + '/' + Routes.crisisresources}>{ getString('Form_mood_submit_success_2_within_link') }</Link>
+                    <Link to={'/' + Routes.resources + '/' + Routes.crisisresources}>{ getString('Form_mood_submit_success_2_within_link') }</Link>
                     { getString('Form_mood_submit_success_2_after_link') }
                 </Box>
             </Stack>
