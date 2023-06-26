@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import ContentLoader from 'src/components/Chrome/ContentLoader';
 import DetailPage from 'src/components/common/DetailPage';
 import { getActivitiesCountString, getLifeAreaIcon, getValuesCountString } from 'src/components/ValuesInventory/values';
+import { Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import { LifeAreaIdOther } from 'shared/enums';
@@ -30,7 +31,11 @@ export const ValuesInventoryHome: FunctionComponent = observer(() => {
         <DetailPage title={getString('values_inventory_home_title')} onBack={handleGoBack}>
             <InstructionText paragraph>{getString('values_inventory_home_instruction1')}</InstructionText>
             <InstructionText paragraph>{getString('values_inventory_home_instruction2')}</InstructionText>
-            <InstructionText paragraph>{getString('values_inventory_home_instruction3')}</InstructionText>
+            <InstructionText paragraph>
+                {getString('values_inventory_home_instruction3_before_link')}
+                <Link to={'/' + Routes.resources + '/' + Routes.worksheets}>{getString('values_inventory_home_instruction3_within_link')}</Link>
+                {getString('values_inventory_home_instruction3_after_link')}
+            </InstructionText>
             <InstructionText paragraph>{getString('values_inventory_home_instruction4')}</InstructionText>
             <InstructionText paragraph>{getString('values_inventory_home_instruction5')}</InstructionText>
             <ContentLoader
