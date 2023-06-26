@@ -112,11 +112,12 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
         return (
             <Stack spacing={2}>
                 <Box>
-                    { getString('Form_mood_submit_success') } {' '}
+                    { getString('Form_mood_submit_success_1') }
                 </Box>
                 <Box>
-                    If you are in crisis or need immediate help, {' '}
-                    <Link to={Routes.resources + '/' + Routes.crisisresources}>click here for crisis resources</Link>.
+                    { getString('Form_mood_submit_success_2_before_link') }
+                    <Link to={Routes.resources + '/' + Routes.crisisresources}>{ getString('Form_mood_submit_success_2_within_link') }</Link>
+                    { getString('Form_mood_submit_success_2_after_link') }
                 </Box>
             </Stack>
         );

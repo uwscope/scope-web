@@ -42,8 +42,14 @@ const _strings = {
     Form_mood_logging_comment_prompt: 'Do you have any other notes?',
     Form_mood_logging_comment_help:
         'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your clinical social worker, but responses may not be reviewed right away.',
-    Form_mood_submit_success:
-        'Thank you for checking in. Your responses will be available to your clinical social worker, but may not be reviewed right away.',
+    Form_mood_submit_success_1:
+        'Thank you for checking in. This information will be available to your clinical social worker, but responses may not be reviewed right away.',
+    Form_mood_submit_success_2_before_link:
+        'If you are in crisis or need immediate help, resources are available in ',
+    Form_mood_submit_success_2_within_link:
+        'Crisis Help',
+    Form_mood_submit_success_2_after_link:
+        '.',
 
     Form_assessment_checkin_title: 'Check-In',
     Form_assessment_score_column_name: 'Score',
