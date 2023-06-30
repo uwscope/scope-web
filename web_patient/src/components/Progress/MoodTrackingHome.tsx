@@ -42,7 +42,7 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
         viewState.isOpen = false;
     });
 
-    const moodLogs = patientStore.moodLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
+    const sortedMoodLogs = patientStore.moodLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     return (
         <DetailPage title={getString('Progress_mood_tracking_title')} onBack={handleGoBack}>
@@ -50,7 +50,7 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                 state={patientStore.loadMoodLogsState}
                 name="mood logs"
                 onRetry={() => patientStore.loadMoodLogs()}>
-                {moodLogs.length > 0 ? (
+                {sortedMoodLogs.length > 0 ? (
                     <Fragment>
                         <Table size="small" aria-label="a dense table">
                             <TableHead>
@@ -61,7 +61,7 @@ export const MoodTrackingHome: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {moodLogs.map((log, idx) => (
+                                {sortedMoodLogs.map((log, idx) => (
                                     <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}

@@ -50,7 +50,7 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
         assessmentType == 'phq-9' ? 'Progress_phq_assessment_detail_title' : 'Progress_gad_assessment_detail_title';
     const assessmentContent = rootStore.getAssessmentContent(assessmentType);
 
-    const logs = patientStore.assessmentLogs
+    const sortedLogs = patientStore.assessmentLogs
         .filter((a) => a.assessmentId.toLowerCase() == assessmentType)
         .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
@@ -64,7 +64,7 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                 state={patientStore.loadAssessmentLogsState}
                 name={`${assessmentContent?.name} logs`}
                 onRetry={() => patientStore.loadAssessmentLogs()}>
-                {logs.length > 0 ? (
+                {sortedLogs.length > 0 ? (
                     <Fragment>
                         <Table size="small" aria-label="a dense table">
                             <TableHead>
@@ -75,7 +75,7 @@ export const AssessmentHome: FunctionComponent<{ assessmentType: string }> = obs
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {logs.map((log, idx) => (
+                                {sortedLogs.map((log, idx) => (
                                     <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}

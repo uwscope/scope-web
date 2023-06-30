@@ -78,7 +78,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         viewState.selectedValue = undefined;
     });
 
-    const activityLogs = patientStore.activityLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
+    const sortedActivityLogs = patientStore.activityLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
     return (
         <DetailPage title={getString('Progress_activity_tracking_title')} onBack={handleGoBack}>
@@ -86,7 +86,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                 state={patientStore.loadActivityLogsState}
                 name="activity logs"
                 onRetry={() => patientStore.loadActivityLogs()}>
-                {activityLogs.length > 0 ? (
+                {sortedActivityLogs.length > 0 ? (
                     <Fragment>
                         <Table size="small" aria-label="a dense table">
                             <TableHead>
@@ -97,7 +97,7 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {activityLogs.map((log, idx) => (
+                                {sortedActivityLogs.map((log, idx) => (
                                     <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
