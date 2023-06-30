@@ -268,7 +268,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Medication changes"
+                label="Medication Changes"
                 value={review.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onReviewValueChange('medicationChange', text)}
