@@ -153,7 +153,7 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Medication changes"
+                label="Medication Notes"
                 value={session.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onSessionValueChange('medicationChange', text)}
