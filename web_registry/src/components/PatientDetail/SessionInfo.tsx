@@ -153,7 +153,7 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Medication changes"
+                label="Medication Notes"
                 value={session.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onSessionValueChange('medicationChange', text)}
@@ -164,8 +164,8 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Current medications"
-                helperText="Psychotropic and other relevant medications (e.g., steroids, hormone therapies, opioids, etc.)"
+                label="Current Medications"
+                helperText="Psychotropic and other relevant medications (e.g., steroids, hormone therapies, opioids)."
                 value={session.currentMedications}
                 onChange={(text) => onSessionValueChange('currentMedications', text)}
             />
@@ -216,7 +216,7 @@ const SessionEdit: FunctionComponent<ISessionEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Other recommendations / action items"
+                label="Other Recommendations / Action Items"
                 value={session.otherRecommendations}
                 onChange={(text) => onSessionValueChange('otherRecommendations', text)}
             />
@@ -268,7 +268,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Medication changes"
+                label="Medication Changes"
                 value={review.medicationChange}
                 placeholder="Leave blank if no change in current medications"
                 onChange={(text) => onReviewValueChange('medicationChange', text)}
@@ -279,7 +279,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Behavioral strategy changes"
+                label="Behavioral Strategy Changes"
                 value={review.behavioralStrategyChange}
                 placeholder="Leave blank if no change to behavioral strategies"
                 onChange={(text) => onReviewValueChange('behavioralStrategyChange', text)}
@@ -290,7 +290,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Referral changes"
+                label="Referral Changes"
                 value={review.referralsChange}
                 placeholder="Leave blank if no change to referrals"
                 onChange={(text) => onReviewValueChange('referralsChange', text)}
@@ -301,7 +301,7 @@ const ReviewEdit: FunctionComponent<IReviewEditProps> = observer((props) => {
                 multiline={true}
                 minLine={4}
                 maxLine={4}
-                label="Other recommendations / action items"
+                label="Other Recommendations / Action Items"
                 value={review.otherRecommendations}
                 onChange={(text) => onReviewValueChange('otherRecommendations', text)}
             />
