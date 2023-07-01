@@ -175,7 +175,13 @@ export type DueType = typeof dueTypeValues[number];
 export const providerRoleValues = ['studyStaff', 'psychiatrist', 'socialWorker'];
 export type ProviderRole = typeof providerRoleValues[number];
 
-export const siteValues = ['SCCA – SLU', 'SCCA – UW-NW', 'SCCA – PEN', 'MultiCare – Tacoma', 'MultiCare – Gig Harbor'];
+export const siteValues = [
+    'SCCA – SLU',
+    'SCCA – UW-NW',
+    'SCCA – PEN',
+    'MultiCare – Tacoma',
+    'MultiCare – Gig Harbor',
+];
 export type Site = typeof siteValues[number];
 
 export const LifeAreaIdOther = 'other';
