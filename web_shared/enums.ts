@@ -180,6 +180,7 @@ export const siteValues = [
     'SCCA – UW-NW',
     'SCCA – PEN',
     'MultiCare – Tacoma',
+    'MultiCare – Auburn',
     'MultiCare – Gig Harbor',
 ];
 export type Site = typeof siteValues[number];

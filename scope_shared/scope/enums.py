@@ -200,6 +200,7 @@ class Site(Enum):
     SCCAUWNW = "SCCA – UW-NW"
     SCCAPEN = "SCCA – PEN"
     MultiCareTacoma = "MultiCare – Tacoma"
+    MultiCareAuburn = "MultiCare – Auburn"
     MultiCareGigHarbor = "MultiCare – Gig Harbor"
 
 
