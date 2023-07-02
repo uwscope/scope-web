@@ -7,6 +7,7 @@ import { IPatientStore, PatientStore } from 'src/stores/PatientStore';
 import { contains } from 'src/utils/array';
 import { getLogger } from 'shared/logger';
 import { getLoadAndLogQuery } from 'shared/stores';
+import { sortStringsCaseInsensitive } from "shared/sorting";
 
 const logger = getLogger('RegistryStore');
 
@@ -82,7 +83,7 @@ export class PatientsStore implements IPatientsStore {
 
     @computed
     public get filterableCareManagers() {
-        return this.careManagers.map((c) => c.name).concat([AllCareManagers]);
+        return sortStringsCaseInsensitive(this.careManagers.map((c) => c.name)).concat([AllCareManagers]);
     }
 
     @computed
