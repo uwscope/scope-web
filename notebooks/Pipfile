@@ -4,18 +4,25 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-numpy = "*"
 jupyterlab = "*"
-scope = {editable = true, path = "../scope_shared"}
+
+jupyterlab-lsp = "*"
+python-lsp-server = {extras = ["all"], version = "*"}
+
+jupyter-dash = "*"
+numpy = "*"
 pandas = "*"
-jupytext = "*"
+
 jupyterlab-code-formatter = "*"
 black = "*"
 isort = "*"
-jupyterlab-lsp = "*"
-python-lsp-server = {extras = ["all"], version = "*"}
-jupyter-dash = "*"
+
+jupytext = "*"
 nbconvert = "*"
+
+[packages.scope]
+editable = true
+path = "../scope_shared"
 
 [dev-packages]
 
