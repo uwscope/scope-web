@@ -20,9 +20,18 @@ isort = "*"
 jupytext = "*"
 nbconvert = "*"
 
+# TODO: scope has gotten to a point where it can't import without this
+pytest = "*"
+
 [packages.scope]
 editable = true
 path = "../scope_shared"
+
+# TODO: scope has gotten to a point where it can't import without this
+[packages.aws_infrastructure]
+git = "https://github.com/fogies/aws-infrastructure.git"
+subdirectory = "aws_infrastructure"
+editable = true
 
 [dev-packages]
 
