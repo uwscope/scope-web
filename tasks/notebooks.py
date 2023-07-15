@@ -11,9 +11,42 @@ NOTEBOOKS_PATH = "./notebooks"
 
 
 @task
-def run(context):
+def build(context):
     """
-    Start JupyterLab, listening on "localhost:8888/lab".
+    Rebuild JupyterLab.
+    """
+
+    with context.cd(Path(NOTEBOOKS_PATH)):
+        context.run(
+            command=" ".join(
+                [
+                    "pipenv",
+                    "run",
+                    "jupyter",
+                    "lab",
+                    "clean",
+                    "--all",
+                ]
+            ),
+        )
+
+        context.run(
+            command=" ".join(
+                [
+                    "pipenv",
+                    "run",
+                    "jupyter",
+                    "lab",
+                    "build",
+                ]
+            ),
+        )
+
+
+@task
+def serve(context):
+    """
+    Serve JupyterLab.
     """
 
     if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
@@ -33,4 +66,5 @@ def run(context):
 # Build task collection
 ns = Collection("notebooks")
 
-ns.add_task(run, "run")
+ns.add_task(build, "build")
+ns.add_task(serve, "serve")
