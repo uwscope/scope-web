@@ -23,6 +23,11 @@ nbconvert = "*"
 # TODO: scope has gotten to a point where it can't import without this
 pytest = "*"
 
+# Needed for Mac environment
+appnope = {version = "*", sys_platform = "== 'darwin'"}
+pexpect = {version = "*", sys_platform = "== 'darwin'"}
+ptyprocess = {version = "*", sys_platform = "== 'darwin'"}
+
 [packages.scope]
 editable = true
 path = "../scope_shared"
