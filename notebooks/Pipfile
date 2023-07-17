@@ -1,0 +1,44 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+jupyterlab = "*"
+
+jupyterlab-lsp = "*"
+python-lsp-server = {extras = ["all"], version = "*"}
+
+jupyter-dash = "*"
+numpy = "*"
+pandas = "*"
+
+jupyterlab-code-formatter = "*"
+black = "*"
+isort = "*"
+
+jupytext = "*"
+nbconvert = "*"
+
+# TODO: scope has gotten to a point where it can't import without this
+pytest = "*"
+
+# Needed for Mac environment
+appnope = {version = "*", sys_platform = "== 'darwin'"}
+pexpect = {version = "*", sys_platform = "== 'darwin'"}
+ptyprocess = {version = "*", sys_platform = "== 'darwin'"}
+
+[packages.scope]
+editable = true
+path = "../scope_shared"
+
+# TODO: scope has gotten to a point where it can't import without this
+[packages.aws_infrastructure]
+git = "https://github.com/fogies/aws-infrastructure.git"
+subdirectory = "aws_infrastructure"
+editable = true
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

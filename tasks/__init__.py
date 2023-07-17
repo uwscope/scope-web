@@ -8,6 +8,7 @@ import tasks.celery
 import tasks.database
 import tasks.documentdb
 import tasks.dependencies
+import tasks.notebooks
 import tasks.server_flask
 import tasks.web_patient
 import tasks.web_registry
@@ -34,6 +35,9 @@ compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 
 # Compose from dependencies.py
 compose_collection(ns, tasks.dependencies.ns, name="depend")
+
+# Compose from notebooks.py
+compose_collection(ns, tasks.notebooks.ns, name="notebooks")
 
 # Compose from test.py
 compose_collection(ns, tasks.test.ns, name="test")
