@@ -59,7 +59,7 @@ const LoginForm: FunctionComponent<{
                     margin="normal"
                     variant="standard"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -78,7 +78,7 @@ const LoginForm: FunctionComponent<{
                     variant="standard"
                     margin="normal"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
                     InputLabelProps={{
                         shrink: true,
                     }}
