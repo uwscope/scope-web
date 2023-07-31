@@ -59,7 +59,10 @@ const LoginForm: FunctionComponent<{
                     margin="normal"
                     variant="standard"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))}
+                    onChange={(e) => setEmail(
+                        // Username cannot include whitespace.
+                        e.target.value.replace(/\s/g, '')
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -78,7 +81,11 @@ const LoginForm: FunctionComponent<{
                     variant="standard"
                     margin="normal"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
+                    onChange={(e) => setPassword(
+                        // Password can include an interior space,
+                        // but cannot include any other whitespace.
+                        e.target.value.replace(/[\t\r\n\f]/g, '').trim()
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
