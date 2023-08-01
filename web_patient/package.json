@@ -48,11 +48,11 @@
         "ts-loader": "8.0.x",
         "tsconfig-paths-webpack-plugin": "^3.3.0",
         "typescript": "4.5.5",
-        "webpack": "5.68.0",
-        "webpack-cli": "4.3.x",
-        "webpack-dev-middleware": "4.0.x",
-        "webpack-hot-middleware": "2.25.x",
-        "webpack-merge": "^5.8.0"
+        "webpack": "5.x",
+        "webpack-cli": "5.x",
+        "webpack-dev-middleware": "6.x",
+        "webpack-hot-middleware": "2.x",
+        "webpack-merge": "5.x"
     },
     "scripts": {
         "start": "npm run dev_serve",
