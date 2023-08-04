@@ -30,8 +30,8 @@ export const AboutUsPage: FunctionComponent = () => {
                     you feel better.
                 </Typography>
                 <Typography>
-                    This app was designed by researchers at the University of Washington and Seattle Cancer Alliance,
-                    with input from patients like you.
+                    This app was designed by researchers at the University of Washington and Fred Hutchinson Cancer
+                    Center, with input from patients like you.
                 </Typography>
                 <Typography>
                     The app is part of the SCOPE study funded by the National Cancer Institute. The goal of our research
