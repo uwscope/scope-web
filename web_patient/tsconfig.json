@@ -8,7 +8,7 @@
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "jsx": "react",
-        "lib": ["ES2020.Promise", "DOM"], // Necessary for accessing window, document, promise for service worker
+        "lib": ["ES2020.Promise", "DOM", "webworker"], // Necessary for accessing window, document, promise for service worker
         "moduleResolution": "node",
         "noImplicitAny": true,
         "noImplicitThis": true,

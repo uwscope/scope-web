@@ -25,7 +25,9 @@
         "react-router": "6.2.x",
         "react-router-dom": "6.2.x",
         "styled-components": "5.3.3",
-        "url": "^0.11.0"
+        "url": "^0.11.0",
+        "workbox-precaching": "*",
+        "workbox-routing": "*"
     },
     "@comment devDependencies": [],
     "devDependencies": {
@@ -52,7 +54,8 @@
         "webpack-cli": "5.x",
         "webpack-dev-middleware": "6.x",
         "webpack-hot-middleware": "2.x",
-        "webpack-merge": "5.x"
+        "webpack-merge": "5.x",
+        "workbox-webpack-plugin": "*"
     },
     "scripts": {
         "start": "npm run dev_serve",
