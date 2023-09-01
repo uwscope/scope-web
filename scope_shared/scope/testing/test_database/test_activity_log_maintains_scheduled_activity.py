@@ -3,7 +3,6 @@ In addition to its standard set properties,
 a put to scope.database.patient.activity_logs must maintain the scheduled activity.
 """
 
-import pytest
 from typing import Callable
 
 import scope.database.patient.activities
@@ -71,3 +70,18 @@ def test_activity_log_post_maintains_scheduled_activity(
         )
     )
     assert updated_scheduled_activity["completed"]
+
+    # Confirm data snapshot in the activity log is updated
+    activity_log_get_result = scope.database.patient.activity_logs.get_activity_log(
+        collection=patient_collection,
+        set_id=activity_log_post_result.document[
+            scope.database.patient.activity_logs.SEMANTIC_SET_ID
+        ],
+    )
+
+    assert (
+        activity_log_get_result[
+            scope.database.patient.activity_logs.DATA_SNAPSHOT_PROPERTY
+        ][scope.database.patient.scheduled_activities.DOCUMENT_TYPE]
+        == updated_scheduled_activity
+    )

@@ -149,16 +149,19 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
 
     const rootStore = useStores();
     const { patientStore } = rootStore;
-    const activity = patientStore.getActivityById(activityId);
+
     const task = patientStore.getTaskById(taskId);
 
-    if (!activity || !task) {
-        logError('ActivityForm', `Activity or task not found: activity=${activityId}, task=${taskId}`);
+    if (!task) {
+        logError('ActivityForm', `Task not found: task=${taskId}`);
         return null;
     }
 
-    if (task.activityId != activityId) {
-        logError('ActivityForm', `Activity and task mismatch: activity=${activityId}, taskSource=${task.activityId}`);
+    if (task.dataSnapshot.activity.activityId != activityId) {
+        logError(
+            'ActivityForm',
+            `Activity and task mismatch: activity=${activityId}, taskSource=${task.dataSnapshot.activity.activityId}`,
+        );
         return null;
     }
 
@@ -167,13 +170,13 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
     }));
 
     const dataState = useLocalObservable<IActivityLog>(() => ({
-        activityId,
         scheduledActivityId: task.scheduledActivityId,
+        dataSnapshot: { scheduledActivity: task },
         alternative: '',
         comment: '',
         pleasure: 5,
         accomplishment: 5,
-        activityName: activity.name,
+
         recordedDateTime: new Date(),
         success: '',
     }));
@@ -182,10 +185,11 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         try {
             // Some cleaning up of the log data based on completion state
             if (dataState.success == 'No') {
-                const { pleasure, accomplishment, ...logData } = dataState;
+                const { alternative, pleasure, accomplishment, ...logData } = dataState;
                 await patientStore.completeScheduledActivity({ ...logData });
             } else if (dataState.success == 'Yes') {
                 const { alternative, ...logData } = dataState;
+
                 await patientStore.completeScheduledActivity({ ...logData });
             } else {
                 await patientStore.completeScheduledActivity({ ...dataState });
@@ -204,14 +208,14 @@ export const ActivityLoggingForm: FunctionComponent<IActivityLoggingFormProps> =
         const successPage = {
             content: (
                 <PageSuccess
-                    activityName={activity.name}
+                    activityName={task.dataSnapshot.activity.name}
                     alternate={dataState.alternative}
                     successValue={dataState.success}
                     onAlternateChange={(v) => handleValueChange('alternative', v)}
                     onSuccessChange={(v) => handleValueChange('success', v)}
                 />
             ),
-            canGoNext: dataState.success == 'SomethingElse' ? !!dataState.alternative : dataState.success != undefined,
+            canGoNext: dataState.success == 'SomethingElse' ? !!dataState.alternative : !!dataState.success,
         };
 
         const pleasurePage = {

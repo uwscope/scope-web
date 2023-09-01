@@ -25,7 +25,12 @@ const _strings = {
     Home_assessment_button_text: 'Complete ${assessment} Check-In',
     Home_mood_button_text: 'Log your mood',
     Home_plan_title: 'My plan for today',
-    Home_plan_done: 'You are all caught up! Make sure to celebrate your achievement!',
+    Home_plan_empty: 'You do not have any planned activities for today.',
+    Home_plan_done: 'You have completed all planned activities for today! Make sure to celebrate your achievement!',
+    Home_overdue_title: 'My Past Week',
+    Home_overdue_pending: 'Past Due',
+    Home_overdue_all: 'All Activities',
+    Home_overdue_empty: 'You did not have any planned activities.',
 
     Form_mood_logging_title: 'Mood Check-In',
     Form_mood_logging_mood_prompt: 'How would you rate your current mood?',
@@ -36,9 +41,15 @@ const _strings = {
     Form_mood_logging_mood_good: 'High',
     Form_mood_logging_comment_prompt: 'Do you have any other notes?',
     Form_mood_logging_comment_help:
-        'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your clinical social worker.',
-    Form_mood_submit_success:
-        'Thank you for checking in. Your responses will be available to your clinical social worker.',
+        'You can use the space below to record notes about mood or any events that may be affecting your mood. This information will be available to your clinical social worker, but responses may not be reviewed right away.',
+    Form_mood_submit_success_1:
+        'Thank you for checking in. This information will be available to your clinical social worker, but responses may not be reviewed right away.',
+    Form_mood_submit_success_2_before_link:
+        'If you are in crisis or need immediate help, resources are available in ',
+    Form_mood_submit_success_2_within_link:
+        'Crisis Help',
+    Form_mood_submit_success_2_after_link:
+        '.',
 
     Form_medication_logging_medication_question_prompt: 'Do you have questions for your psychosocial care team about any of the medications you are taking?',
     Form_medication_logging_medication_note_prompt: 'What question about your medications would you like to ask your phsychosocial team?',
@@ -54,6 +65,9 @@ const _strings = {
         'Thank you for checking in. Your responses will be available to your clinical social worker.',
 
     Form_confirm_close: 'Are you sure you want to close without submitting?',
+    Form_confirm_delete_activity: 'Are you sure you want to delete the activity?',
+    Form_confirm_delete_activity_schedule: 'Are you sure you want to delete the schedule?',
+    Form_confirm_delete_value: 'Are you sure you want to delete the value?',
 
     Form_activity_logging_title: 'Activity Check-In',
     Form_activity_log_success_prompt: 'Were you able to complete the following activity?',
@@ -88,19 +102,28 @@ const _strings = {
         'Staying active in things that are important to you is very important in maintaining your health and quality of life.',
     values_inventory_home_instruction2:
         'The Values & Activities inventory will be useful in collaborating with your care team by identifying what values are important to you and what activities might support those values.',
-    values_inventory_home_instruction3:
+    values_inventory_home_instruction3_before_link:
+        'Need help with ideas for activities? Check out Activity Ideas in the ',
+    values_inventory_home_instruction3_within_link:
+        'Library',
+    values_inventory_home_instruction3_after_link:
+        '.',
+    values_inventory_home_instruction4:
         'The inventory consists of five life areas. You can fill them out in any order.',
-    values_inventory_home_instruction4: 'Tap on any life area to start.',
+    values_inventory_home_instruction5: 'Tap on any life area to start.',
 
     values_inventory_life_area_other_activities_name: 'Other Activities',
     values_inventory_life_area_other_activities_title: 'Not Currently Assigned To Values',
-    values_inventory_life_area_other_activities_subprompt: 'Edit these activities to assign them to your identified personal values.',
+    values_inventory_life_area_other_activities_subprompt:
+        'Edit these activities to assign them to your identified values.',
 
     values_inventory_values_example_title: 'Example Values',
-    values_inventory_values_empty_subprompt: 'List one or more of your personal values that fit with this life area.',
-    values_inventory_values_identify_title: 'Identify Personal Values',
-    values_inventory_values_identify_existing_title: 'Identified Personal Values',
-    values_inventory_values_identify_more_title: 'Identify Additional Personal Values',
+    values_inventory_values_activity_example_title: 'Example Values and Activities',
+    values_inventory_values_empty_subprompt:
+        'List one or more personal values and activities that fit this life area.',
+    values_inventory_values_identify_title: 'Identify Values and Activities',
+    values_inventory_values_identify_existing_title: 'Identified Values and Activities',
+    values_inventory_values_identify_more_title: 'Additional Values and Activities',
 
     Values_inventory_lifearea: 'Life area',
     values_inventory_value_count_singular: 'value',
@@ -157,7 +180,7 @@ const _strings = {
     Activity_tracking_column_comment: 'Note',
     Activity_tracking_success_yes: 'Yes',
     Activity_tracking_success_no: 'No',
-    Activity_tracking_success_alt: 'Alt',
+    Activity_tracking_success_alt: 'Alternate',
     Activity_tracking_success_none: '--',
 
     Activity_tracking_log_lifearea_none: 'Uncategorized',
@@ -183,8 +206,8 @@ const _strings = {
     Progress_medication_assessment_detail_title: 'Medication Assessment',
 
     Careplan_no_tasks: 'There are no planned activities for this day.',
-    Careplan_view_calendar: 'Calendar view',
-    Careplan_view_activity: 'Activity view',
+    Careplan_view_calendar: 'Calendar View',
+    Careplan_view_activity: 'Activity View',
     careplan_activities_other: 'Other Activities',
     Careplan_activity_item_value: 'Value',
     Careplan_activity_item_start_date: 'Starts',
@@ -215,14 +238,14 @@ const _strings = {
     // Form_add_activity_describe_name_import_dialog_title: 'Choose from the values & activities inventory',
 
     form_add_edit_activity_life_area_value_prompt: 'Which life area and value are best associated with this activity?',
-    form_add_edit_activity_life_area_value_help: 'You can also identify and edit personal values in the Values & Activity Inventory.',
+    form_add_edit_activity_life_area_value_help:
+        'You can also identify and edit personal values in the Values & Activity Inventory.',
     form_add_edit_activity_life_area_label: 'Life Area',
     form_add_edit_activity_life_area_help: 'Choose a life area.',
     form_add_edit_activity_value_label: 'Value',
-    form_add_edit_activity_value_help:
-        'Then choose a value you have identified, or add a new value.',
+    form_add_edit_activity_value_help: 'Then choose a value you have identified.',
     form_add_edit_activity_valueid_validation_none_selected:
-        'If a life area is selected, then a personal value must also be identified and selected.',
+        'If a life area is selected, then a value must also be identified and selected.',
     form_add_edit_activity_add_value_button: 'Add Value',
     form_add_edit_activity_enjoyment_prompt: 'How much do you enjoy doing this activity?',
     form_add_edit_activity_enjoyment_help: '0 is low enjoyment and 10 is high enjoyment.',
@@ -230,32 +253,20 @@ const _strings = {
     form_add_edit_activity_importance_help: '0 is low importance and 10 is high importance.',
     form_add_edit_activity_name_validation_not_unique: 'Activity already exists.',
 
-
     form_add_activity_schedule_title: 'Add Schedule',
     form_edit_activity_schedule_title: 'Edit Schedule',
 
-    form_add_edit_activity_schedule_when_prompt:
-        'When would you like to do this activity?',
-    form_add_edit_activity_schedule_date_label:
-        'Schedule Date',
-    form_add_edit_activity_schedule_date_help:
-        'Choose a date you would like to do this activity.',
-    form_add_edit_activity_schedule_date_validation_invalid_format:
-        'Invalid date format.',
-    form_add_edit_activity_schedule_time_of_day_label:
-        'Schedule Time',
-    form_add_edit_activity_schedule_time_of_day_help:
-        'Choose a time you would like to do this activity.',
-    form_add_edit_activity_schedule_time_of_day_validation_invalid_format:
-        'Invalid time format.',
-    form_add_edit_activity_schedule_has_repetition_prompt:
-        'Would you like to repeat this activity every week?',
-    form_add_edit_activity_schedule_repeat_days_prompt:
-        'On what days would you like to repeat this activity?',
-    form_add_edit_activity_schedule_repetition_validation_no_days:
-        'Select one or more days.',
-    form_add_edit_activity_schedule_repetition_validation_include_date:
-        'Repeat days must include schedule date.',
+    form_add_edit_activity_schedule_when_prompt: 'When would you like to do this activity?',
+    form_add_edit_activity_schedule_date_label: 'Schedule Date',
+    form_add_edit_activity_schedule_date_help: 'Choose a date you would like to do this activity.',
+    form_add_edit_activity_schedule_date_validation_invalid_format: 'Invalid date format.',
+    form_add_edit_activity_schedule_time_of_day_label: 'Schedule Time',
+    form_add_edit_activity_schedule_time_of_day_help: 'Choose a time you would like to do this activity.',
+    form_add_edit_activity_schedule_time_of_day_validation_invalid_format: 'Invalid time format.',
+    form_add_edit_activity_schedule_has_repetition_prompt: 'Would you like to repeat this activity every week?',
+    form_add_edit_activity_schedule_repeat_days_prompt: 'On what days would you like to repeat this activity?',
+    form_add_edit_activity_schedule_repetition_validation_no_days: 'Select one or more days.',
+    form_add_edit_activity_schedule_repetition_validation_include_date: 'Repeat days must include schedule date.',
 
     // Form_add_activity_describe_value_help:
     //     'If the value does not appear in this list, you can add them from the values inventory.',
@@ -266,7 +277,6 @@ const _strings = {
     // Form_add_activity_reminder_time_label: 'Reminder time',
     // Form_add_activity_repetition_section: 'Set repetition',
     //
-
 
     Form_submit_error_message: 'Sorry! There was an error submitting. Please try again.',
     Form_submit_error_retry: 'Retry',
@@ -309,8 +319,8 @@ const _strings = {
     Safetyplan_add: 'Add another',
     Safetyplan_add_place: 'Add place',
     Safetyplan_add_person: 'Add person',
-    Safetyplan_suicide_hotline_title: 'Suicide prevention lifeline phone',
-    Safetyplan_suicide_hotline_phone: '1-800-273-TALK(8255)',
+    Safetyplan_suicide_hotline_title: 'Suicide & Crisis Lifeline',
+    Safetyplan_suicide_hotline_phone: '988 or 1-800-273-TALK(8255)',
     Safetyplan_environment_title: 'Safe environment',
     Safetyplan_environment_description: 'What are some ways I can make the environment safe?',
     Safetyplan_submit_success:

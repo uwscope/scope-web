@@ -1,4 +1,4 @@
-import { compareDesc } from 'date-fns';
+import { compareAsc, compareDesc, differenceInWeeks, endOfYesterday, isAfter, isBefore, startOfToday } from 'date-fns';
 import _ from 'lodash';
 import { action, computed, makeAutoObservable, toJS } from 'mobx';
 import { getLogger } from 'shared/logger';
@@ -33,6 +33,7 @@ export interface IPatientStore {
     readonly safetyPlan: ISafetyPlan;
     readonly taskItems: IScheduledActivity[];
     readonly todayItems: IScheduledActivity[];
+    readonly todayItemsCompleted: boolean;
     readonly values: IValue[];
     readonly valuesInventory: IValuesInventory;
 
@@ -57,7 +58,10 @@ export interface IPatientStore {
     getActivitiesWithoutValueId: () => IActivity[];
     getActivityScheduleById: (activityScheduleId: string) => IActivitySchedule | undefined;
     getActivitySchedulesByActivityId: (activityId: string) => IActivitySchedule[];
+    getNextTaskByActivityScheduleId: (activityScheduleId: string) => IScheduledActivity | undefined;
+    getOverdueItems: (week: number) => IScheduledActivity[] | undefined;
     getScheduledAssessmentById: (scheduleId: string) => IScheduledAssessment | undefined;
+    getTasksByActivityScheduleId: (activityScheduleId: string) => IScheduledActivity[] | undefined;
     getTaskById: (taskId: string) => IScheduledActivity | undefined;
     getValueById: (valueId: string) => IValue | undefined;
     getValuesByLifeAreaId: (lifeAreaId: string) => IValue[];
@@ -223,6 +227,10 @@ export class PatientStore implements IPatientStore {
         return this.taskItems.filter((i) => isScheduledForDay(i, new Date()));
     }
 
+    @computed public get todayItemsCompleted() {
+        return this.todayItems.filter((i) => !i.completed).length == 0;
+    }
+
     @computed public get values() {
         return this.loadValuesQuery.value || [];
     }
@@ -329,7 +337,26 @@ export class PatientStore implements IPatientStore {
     public getActivitySchedulesByActivityId(activityId: string): IActivitySchedule[] {
         return this.activitySchedules.filter((as) => {
             return as.activityId == activityId;
-        })
+        });
+    }
+
+    @action.bound
+    public getNextTaskByActivityScheduleId(activityScheduleId: string) {
+        return this.getTasksByActivityScheduleId(activityScheduleId)
+            .filter((i) => !i.completed && isAfter(i.dueDateTime, startOfToday()))
+            .sort((a, b) => compareAsc(a.dueDateTime, b.dueDateTime))
+            .find(() => true);
+    }
+
+    @action.bound
+    public getOverdueItems(week: number): IScheduledActivity[] {
+        return this.taskItems
+            .filter(
+                (i) =>
+                    isBefore(i.dueDateTime, endOfYesterday()) &&
+                    differenceInWeeks(new Date(), i.dueDateTime, { roundingMethod: 'ceil' }) <= week,
+            )
+            .sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
     }
 
     @action.bound
@@ -340,6 +367,11 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public getTaskById(taskId: string) {
         return this.taskItems.find((t) => t.scheduledActivityId == taskId);
+    }
+
+    @action.bound
+    public getTasksByActivityScheduleId(activityScheduleId: string) {
+        return this.taskItems.filter((t) => t.activityScheduleId == activityScheduleId);
     }
 
     @action.bound getValueById(valueId: string) {
@@ -417,8 +449,14 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activity', 'activityId', () => this.activities, logger),
             );
 
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -452,7 +490,9 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async completeScheduledActivity(activityLog: IActivityLog) {
         const promise = this.patientService
-            .addActivityLog({ ...activityLog, completed: true, recordedDateTime: new Date() })
+            //.addActivityLog({ ...activityLog, completed: true, recordedDateTime: new Date() })
+            // TODO Activity Refactor: Confirm if completed: true can be removed
+            .addActivityLog({ ...activityLog, recordedDateTime: new Date() })
             .then((addedLog) => {
                 const newLogs = this.activityLogs.slice() || [];
                 newLogs.push(addedLog);
@@ -500,15 +540,19 @@ export class PatientStore implements IPatientStore {
     @action.bound
     public async deleteActivitySchedule(activitySchedule: IActivitySchedule) {
         const prevActivitySchedules = this.activitySchedules.slice() || [];
-        const foundIdx = prevActivitySchedules.findIndex((as) => as.activityScheduleId == activitySchedule.activityScheduleId);
+        const foundIdx = prevActivitySchedules.findIndex(
+            (as) => as.activityScheduleId == activitySchedule.activityScheduleId,
+        );
 
         console.assert(foundIdx >= 0, `ActivitySchedule to delete not found: ${activitySchedule.activityScheduleId}`);
 
         if (foundIdx >= 0) {
-            const promise = this.patientService.deleteActivitySchedule(activitySchedule).then((_deletedActivitySchedule) => {
-                prevActivitySchedules.splice(foundIdx, 1);
-                return prevActivitySchedules;
-            });
+            const promise = this.patientService
+                .deleteActivitySchedule(activitySchedule)
+                .then((_deletedActivitySchedule) => {
+                    prevActivitySchedules.splice(foundIdx, 1);
+                    return prevActivitySchedules;
+                });
 
             await this.loadAndLogQuery<IActivitySchedule[]>(
                 () => promise,
@@ -516,7 +560,10 @@ export class PatientStore implements IPatientStore {
                 onArrayConflict('activitySchedule', 'activityScheduleId', () => this.activitySchedules, logger),
             );
 
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 
@@ -670,8 +717,14 @@ export class PatientStore implements IPatientStore {
             );
 
             await this.loadAndLogQuery<IActivity[]>(this.patientService.getActivities, this.loadActivitiesQuery);
-            await this.loadAndLogQuery<IActivitySchedule[]>(this.patientService.getActivitySchedules, this.loadActivitySchedulesQuery);
-            await this.loadAndLogQuery<IScheduledActivity[]>(this.patientService.getScheduledActivities, this.loadScheduledActivitiesQuery);
+            await this.loadAndLogQuery<IActivitySchedule[]>(
+                this.patientService.getActivitySchedules,
+                this.loadActivitySchedulesQuery,
+            );
+            await this.loadAndLogQuery<IScheduledActivity[]>(
+                this.patientService.getScheduledActivities,
+                this.loadScheduledActivitiesQuery,
+            );
         }
     }
 

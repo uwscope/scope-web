@@ -6,6 +6,7 @@ from typing import Optional
 # Declare each schema in order to support code analysis/completion
 activity_schema: Optional[jschon.JSONSchema] = None
 activities_schema: Optional[jschon.JSONSchema] = None
+activity_log_data_snapshot_schema: Optional[jschon.JSONSchema] = None
 activity_log_schema: Optional[jschon.JSONSchema] = None
 activity_logs_schema: Optional[jschon.JSONSchema] = None
 activity_schedule_schema: Optional[jschon.JSONSchema] = None
@@ -44,6 +45,7 @@ regexes: Optional[jschon.JSONSchema] = None
 resource_content_schema: Optional[jschon.JSONSchema] = None
 resource_contents_schema: Optional[jschon.JSONSchema] = None
 safety_plan_schema: Optional[jschon.JSONSchema] = None
+scheduled_activity_data_snapshot_schema: Optional[jschon.JSONSchema] = None
 scheduled_activity_schema: Optional[jschon.JSONSchema] = None
 scheduled_activities_schema: Optional[jschon.JSONSchema] = None
 scheduled_assessments_schema: Optional[jschon.JSONSchema] = None
@@ -112,9 +114,11 @@ SCHEMAS = {
     "values_inventory_schema": "documents/values-inventory.json",
     # documents/utils,
     # Contains subschemas referenced (using $ref) by schemas in documents
+    "activity_log_data_snapshot_schema": "documents/utils/activity-log-data-snapshot.json",
     "contact_schema": "documents/utils/contact.json",
     "log_schema": "documents/utils/log.json",
     "referral_status_schema": "documents/utils/referral-status.json",
+    "scheduled_activity_data_snapshot_schema": "documents/utils/scheduled-activity-data-snapshot.json",
     "scheduled_item_schema": "documents/utils/scheduled-item.json",
     # populate,
     # Corresponds to json schemas used by populate scripts

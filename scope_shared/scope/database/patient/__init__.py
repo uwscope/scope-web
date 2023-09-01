@@ -4,6 +4,12 @@ from scope.database.patient.activities import (
     post_activity,
     put_activity,
 )
+from scope.database.patient.activity_schedules import (
+    get_activity_schedules,
+    get_activity_schedule,
+    post_activity_schedule,
+    put_activity_schedule,
+)
 from scope.database.patient.assessments import (
     get_assessments,
     get_assessment,
@@ -29,6 +35,12 @@ from scope.database.patient.patient_profile import (
     get_patient_profile,
     put_patient_profile,
 )
+from scope.database.patient.scheduled_activities import (
+    get_scheduled_activities,
+    get_scheduled_activity,
+    post_scheduled_activity,
+    put_scheduled_activity,
+)
 from scope.database.patient.safety_plan import (
     get_safety_plan,
     put_safety_plan,
@@ -38,6 +50,12 @@ from scope.database.patient.sessions import (
     get_session,
     post_session,
     put_session,
+)
+from scope.database.patient.values import (
+    get_values,
+    get_value,
+    post_value,
+    put_value,
 )
 from scope.database.patient.values_inventory import (
     get_values_inventory,

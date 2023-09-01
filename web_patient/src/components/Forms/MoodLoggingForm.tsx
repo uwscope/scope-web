@@ -1,12 +1,14 @@
-import { Slider, TextField } from '@mui/material';
+import { Box, Slider, Stack, TextField } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { FunctionComponent } from 'react';
+import { Link } from 'react-router-dom';
 import { IMoodLog } from 'shared/types';
 import FormDialog from 'src/components/Forms/FormDialog';
 import FormSection from 'src/components/Forms/FormSection';
 import { IFormProps } from 'src/components/Forms/GetFormDialog';
+import { Routes } from 'src/services/routes';
 import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
@@ -106,6 +108,21 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
         }
     });
 
+    const submitToast = () => {
+        return (
+            <Stack spacing={2}>
+                <Box>
+                    { getString('Form_mood_submit_success_1') }
+                </Box>
+                <Box>
+                    { getString('Form_mood_submit_success_2_before_link') }
+                    <Link to={'/' + Routes.resources + '/' + Routes.crisisresources}>{ getString('Form_mood_submit_success_2_within_link') }</Link>
+                    { getString('Form_mood_submit_success_2_after_link') }
+                </Box>
+            </Stack>
+        );
+    };
+
     return (
         <FormDialog
             title={getString('Form_mood_logging_title')}
@@ -114,7 +131,7 @@ export const MoodLoggingForm: FunctionComponent<IMoodLoggingFormProps> = observe
             loading={patientStore.loadMoodLogsState.pending}
             pages={getMoodLoggingPages()}
             onSubmit={handleSubmit}
-            submitToast={getString('Form_mood_submit_success')}
+            submitToast={submitToast()}
         />
     );
 });

@@ -23,9 +23,9 @@ class ConfigTestJSONSchema:
 TEST_CONFIGS = [
     # activity-log
     ConfigTestJSONSchema(
-        name="activity-log-no-success-disallows-accomplishment-and-pleasure-valid",
+        name="activity-log-no-success-disallows-accomplishment-and-pleasure-and-alternative-valid",
         schema=scope.schema.activity_log_schema,
-        document_path="activity-log/no-success-disallows-accomplishment-and-pleasure-valid.json",
+        document_path="activity-log/no-success-disallows-accomplishment-and-pleasure-and-alternative-valid.json",
         expected_valid=True,
     ),
     ConfigTestJSONSchema(
@@ -35,10 +35,28 @@ TEST_CONFIGS = [
         expected_valid=False,
     ),
     ConfigTestJSONSchema(
+        name="activity-log-no-success-disallows-alternative-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/no-success-disallows-alternative-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
         name="activity-log-no-success-disallows-pleasure-invalid",
         schema=scope.schema.activity_log_schema,
         document_path="activity-log/no-success-disallows-pleasure-invalid.json",
         expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-yes-success-disallows-alternative-invalid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/yes-success-disallows-alternative-invalid.json",
+        expected_valid=False,
+    ),
+    ConfigTestJSONSchema(
+        name="activity-log-yes-success-disallows-alternative-valid",
+        schema=scope.schema.activity_log_schema,
+        document_path="activity-log/yes-success-disallows-alternative-valid.json",
+        expected_valid=True,
     ),
     # activity-schedule
     ConfigTestJSONSchema(

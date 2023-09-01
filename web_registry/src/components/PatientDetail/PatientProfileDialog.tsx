@@ -15,6 +15,7 @@ import {
 } from 'shared/enums';
 import { toLocalDateOnly, toUTCDateOnly } from 'shared/time';
 import { IPatientProfile, IProviderIdentity } from 'shared/types';
+import { sortStringsCaseInsensitive } from "shared/sorting";
 import { GridDateField, GridDropdownField, GridMultiSelectField, GridTextField } from 'src/components/common/GridField';
 import StatefulDialog from 'src/components/common/StatefulDialog';
 
@@ -44,6 +45,8 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
         onValueChange,
         onCareManagerChange,
     } = props;
+
+    const sortedAvailableCareManagerNames = sortStringsCaseInsensitive(availableCareManagerNames);
 
     const getTextField = (label: string, value: any, propName: string, required?: boolean) => (
         <GridTextField
@@ -94,7 +97,7 @@ const EditPatientProfileContent: FunctionComponent<IEditPatientProfileContentPro
                 editable
                 label={'Primary Social Worker'}
                 value={primaryCareManager?.name || ''}
-                options={availableCareManagerNames}
+                options={sortedAvailableCareManagerNames}
                 onChange={(text) => onCareManagerChange(text as string)}
             />
             {getDropdownField(

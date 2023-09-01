@@ -2,13 +2,14 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+from scope.documents.document_set import DocumentSet
 import scope.database.document_utils as document_utils
 
 import copy
 import json
 from pathlib import Path
 import pyzipper
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 
 class Archive:
@@ -119,30 +120,6 @@ class Archive:
                     )
 
     @staticmethod
-    def collapse_document_revisions(
-        *,
-        documents: List[dict],
-    ) -> List[dict]:
-        """
-        Remove all documents that have been replaced by a more recent revision.
-        """
-        grouped_documents = Archive.group_document_revisions(documents=documents)
-
-        # Each group contains all revisions of a specific document, keep only the most recent version
-        collapsed_documents: List[dict] = []
-        for (group_key_current, group_current) in grouped_documents.items():
-            document_most_recent = None
-            for document_current in group_current:
-                if (document_most_recent is None) or (
-                    document_current["_rev"] > document_most_recent["_rev"]
-                ):
-                    document_most_recent = document_current
-
-            collapsed_documents.append(document_most_recent)
-
-        return collapsed_documents
-
-    @staticmethod
     def collapse_entry_revisions(
         *,
         entries: Dict[Path, dict],
@@ -168,20 +145,48 @@ class Archive:
 
         return collapsed_entries
 
+    @staticmethod
+    def _collection_from_archive_path(
+        *,
+        path: Path,
+    ) -> str:
+        """
+        Obtain the name of the collection that contains a document at the given archive path.
+        """
+
+        return str(path.parent)
+
+    def collections(
+        self,
+    ) -> List[str]:
+        """
+        Obtain a list of collections that are in this archive.
+
+        Collections are not explicitly represented, so this is just every directory with at least one file.
+        """
+
+        collections = []
+
+        for (key_current, document_current) in self.entries.items():
+            collection_current = str(key_current.parent)
+            if collection_current not in collections:
+                collections.append(collection_current)
+
+        return collections
+
     def collection_documents(
         self,
         *,
         collection: str,
-        ignore_sentinel: bool,
-    ) -> List[dict]:
+    ) -> DocumentSet:
         """
         Obtain all documents in a specified collection.
         """
 
-        return list(
-            self.collection_entries(
+        return DocumentSet(
+            documents=self.collection_entries(
                 collection=collection,
-                ignore_sentinel=ignore_sentinel,
+                ignore_sentinel=False,
             ).values()
         )
 
@@ -198,13 +203,9 @@ class Archive:
         # Filter to entries in this collection
         collection_entries = {}
         for (key_current, document_current) in self.entries.items():
-            parents_current = [
-                str(parent_current)
-                for parent_current in key_current.parents
-                if str(parent_current) not in ["."]
-            ]
+            collection_current = str(key_current.parent)
 
-            if collection in parents_current:
+            if collection == collection_current:
                 collection_entries[key_current] = document_current
 
         # If there is a sentinel to ignore, do that
@@ -288,31 +289,51 @@ class Archive:
     def patients_documents(
         self,
         *,
-        ignore_sentinel: bool,
-        collapsed: bool,
+        remove_sentinel: bool,
+        remove_revisions: bool,
     ) -> List[dict]:
-        documents = self.collection_documents(
+        document_set = self.collection_documents(
             collection="patients",
-            ignore_sentinel=ignore_sentinel,
         )
+        if remove_sentinel:
+            document_set = document_set.remove_sentinel()
+        if remove_revisions:
+            document_set = document_set.remove_revisions()
 
-        if collapsed:
-            documents = Archive.collapse_document_revisions(documents=documents)
-
-        return documents
+        return document_set.documents
 
     def providers_documents(
         self,
         *,
-        ignore_sentinel: bool,
-        collapsed: bool,
+        remove_sentinel: bool,
+        remove_revisions: bool,
     ) -> List[dict]:
-        documents = self.collection_documents(
+        document_set = self.collection_documents(
             collection="providers",
-            ignore_sentinel=ignore_sentinel,
         )
+        if remove_sentinel:
+            document_set = document_set.remove_sentinel()
+        if remove_revisions:
+            document_set = document_set.remove_revisions()
 
-        if collapsed:
-            documents = Archive.collapse_document_revisions(documents=documents)
+        return document_set.documents
 
-        return documents
+    def replace_collection_documents(
+        self,
+        *,
+        collection: str,
+        document_set: DocumentSet,
+    ) -> None:
+        self._entries = {
+            key_current: document_current
+            for (key_current, document_current) in self.entries.items()
+            if Archive._collection_from_archive_path(path=key_current) != collection
+        }
+
+        for document_current in document_set:
+            self._entries[
+                Path(
+                    collection,
+                    "{}.json".format(document_current["_id"]),
+                )
+            ] = document_current

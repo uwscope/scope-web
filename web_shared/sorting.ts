@@ -10,10 +10,10 @@ export const compareActivityByName: (
     compareA: IActivity,
     compareB: IActivity,
 ): number {
-    const compareNameA = compareA.name.toLocaleLowerCase();
-    const compareNameB = compareB.name.toLocaleLowerCase();
-
-    return compareNameA.localeCompare(compareNameB);
+    return compareStringCaseInsensitive(
+        compareA.name,
+        compareB.name,
+    );
 };
 
 export const compareActivityScheduleByDateAndTime: (
@@ -29,6 +29,19 @@ export const compareActivityScheduleByDateAndTime: (
     return compareAsc(compareDateA, compareDateB);
 };
 
+export const compareStringCaseInsensitive: (
+    compareA: string,
+    compareB: string,
+) => number = function (
+    compareA: string,
+    compareB: string,
+): number {
+    const compareInsensitiveA = compareA.toLocaleLowerCase();
+    const compareInsensitiveB = compareB.toLocaleLowerCase();
+
+    return compareInsensitiveA.localeCompare(compareInsensitiveB);
+}
+
 export const sortActivitiesByName: (
     activities: IActivity[],
 ) => IActivity[] = function(
@@ -36,7 +49,7 @@ export const sortActivitiesByName: (
 ): IActivity[] {
     return activities.slice().sort(
         compareActivityByName
-    )
+    );
 };
 
 export const sortActivitySchedulesByDateAndTime: (
@@ -46,5 +59,15 @@ export const sortActivitySchedulesByDateAndTime: (
 ): IActivitySchedule[] {
     return activitySchedules.slice().sort(
         compareActivityScheduleByDateAndTime
-    )
+    );
 };
+
+export const sortStringsCaseInsensitive: (
+    strings: string[],
+) => string[] = function (
+    strings: string[],
+): string[] {
+    return strings.slice().sort(
+        compareStringCaseInsensitive
+    );
+}

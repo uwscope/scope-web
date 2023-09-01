@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { format } from 'date-fns';
+import { compareDesc, format } from 'date-fns';
 import { action } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent } from 'react';
@@ -63,15 +63,12 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
     const handleLogClick = action((log: IActivityLog) => {
         viewState.selectedLog = log;
         viewState.isOpen = true;
-        // TODO Activity Refactor: Activity Tracking
-        // const activity = patientStore.getActivityById(log.activityId);
-        // viewState.selectedValue = activity?.value || getString('Activity_tracking_log_value_none');
-        viewState.selectedValue = getString('Activity_tracking_log_value_none');
 
-        // TODO Activity Refactor: Activity Tracking
-        // const lifearea = activity && rootStore.getLifeAreaContent(activity?.lifeareaId);
-        // viewState.selectedLifearea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
-        viewState.selectedLifeArea = getString('Activity_tracking_log_lifearea_none');
+        const value = log.dataSnapshot.scheduledActivity.dataSnapshot.value;
+        viewState.selectedValue = value?.name || getString('Activity_tracking_log_value_none');
+
+        const lifearea = value && rootStore.getLifeAreaContent(value?.lifeAreaId as string);
+        viewState.selectedLifeArea = lifearea?.name || getString('Activity_tracking_log_lifearea_none');
     });
 
     const handleClose = action(() => {
@@ -81,13 +78,15 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
         viewState.selectedValue = undefined;
     });
 
+    const sortedActivityLogs = patientStore.activityLogs.sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
+
     return (
         <DetailPage title={getString('Progress_activity_tracking_title')} onBack={handleGoBack}>
             <ContentLoader
                 state={patientStore.loadActivityLogsState}
                 name="activity logs"
                 onRetry={() => patientStore.loadActivityLogs()}>
-                {patientStore.activityLogs.length > 0 ? (
+                {sortedActivityLogs.length > 0 ? (
                     <Fragment>
                         <Table size="small" aria-label="a dense table">
                             <TableHead>
@@ -98,12 +97,14 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {patientStore.activityLogs.map((log, idx) => (
+                                {sortedActivityLogs.map((log, idx) => (
                                     <TableRow key={idx} hover onClick={() => handleLogClick(log)}>
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <WordBreakTableCell>{log.activityName}</WordBreakTableCell>
+                                        <WordBreakTableCell>
+                                            {log.dataSnapshot.scheduledActivity.dataSnapshot.activity.name}
+                                        </WordBreakTableCell>
                                         <WordBreakTableCell>{getSuccessStringShort(log.success)}</WordBreakTableCell>
                                     </TableRow>
                                 ))}
@@ -112,7 +113,10 @@ export const ActivityTrackingHome: FunctionComponent = observer(() => {
                         {viewState.selectedLog && (
                             <ProgressDialog
                                 isOpen={viewState.isOpen}
-                                title={viewState.selectedLog?.activityName || 'Activity Log'}
+                                title={
+                                    viewState.selectedLog?.dataSnapshot.scheduledActivity.dataSnapshot.activity.name ||
+                                    'Activity Log'
+                                }
                                 content={
                                     <Table size="small" aria-label="a dense table">
                                         <TableBody>

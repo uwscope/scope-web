@@ -44,7 +44,7 @@ export interface IFormDialogProps {
     onClose?: () => void;
     onSubmit?: () => Promise<boolean>;
     pages: IFormPage[];
-    submitToast?: string;
+    submitToast?: string | React.ReactElement;
 }
 
 const ContentContainer = styled.div({
@@ -95,6 +95,25 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         submitErrorOpen: false,
         submitSuccessOpen: false,
     }));
+
+    const canBack: () => boolean = action(() => {
+        // Cannot go back from a first page
+        if (state.activePage === 0) {
+            return false;
+        }
+
+        // Cannot go back to a page which already submitted
+        if (!!pages[state.activePage].onSubmit) {
+            return false;
+        }
+
+        // Cannot go back if currently loading
+        if (loading) {
+            return false;
+        }
+
+        return true;
+    });
 
     const forceClose = action(() => {
         state.closeConfirmOpen = false;
@@ -163,9 +182,9 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
             }
 
             runInAction(() => {
-            // In case of error, do not advance the form.
-            // In case of success, the success closer handler will advance the form.
-            state.submitErrorOpen = false;
+                // In case of error, do not advance the form.
+                // In case of success, the success closer handler will advance the form.
+                state.submitErrorOpen = false;
                 if (submitSuccess) {
                     state.submitSuccessOpen = true;
                 } else {
@@ -204,6 +223,20 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
         state.submitErrorOpen = false;
     });
 
+    const isNextSubmit: () => boolean = action(() => {
+        // The last page is submit
+        if (state.activePage === maxPages - 1) {
+            return true;
+        }
+
+        // A page with a submit handler is submit
+        if (!!pages[state.activePage].onSubmit) {
+            return true;
+        }
+
+        return false;
+    });
+
     return (
         <Dialog fullScreen open={isOpen} onClose={closeAction} TransitionComponent={Transition}>
             <AppBar>
@@ -217,7 +250,7 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                         disabled={loading}>
                         <CloseIcon />
                     </IconButton>
-                    {!!title && (<Typography variant="h6">{title}</Typography>)}
+                    {!!title && <Typography variant="h6">{title}</Typography>}
                 </Toolbar>
             </AppBar>
             <ContentContainer>
@@ -237,14 +270,15 @@ export const FormDialog: FunctionComponent<IFormDialogProps> = observer((props) 
                             loading={loading}
                             onClick={handleNext}
                             disabled={!pages[state.activePage].canGoNext}>
-                            {state.activePage === maxPages - 1
-                                ? getString('Form_button_submit')
-                                : getString('Form_button_next')}
+                            {isNextSubmit() ? getString('Form_button_submit') : getString('Form_button_next')}
                             <KeyboardArrowRight />
                         </LoadingButton>
                     }
                     backButton={
-                        <Button onClick={handleBack} disabled={state.activePage === 0 || loading}>
+                        <Button
+                            onClick={handleBack}
+                            disabled={!canBack()}
+                            sx={{ visibility: state.activePage > 0 ? 'visible' : 'hidden' }}>
                             {<KeyboardArrowLeft />}
                             {getString('Form_button_back')}
                         </Button>

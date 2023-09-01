@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
     Button,
+    ButtonBase,
     Divider,
     Grid,
     IconButton,
@@ -17,7 +18,7 @@ import {
 } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import { format, isSameDay } from 'date-fns';
-import { action } from 'mobx';
+import { action, runInAction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react';
 import React, { Fragment, FunctionComponent, ReactNode } from 'react';
 import { useNavigate } from 'react-router';
@@ -33,9 +34,9 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import styled from 'styled-components';
 import { HelperText } from 'src/components/Forms/FormSection';
-import {formatDateOnly, formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount} from 'shared/time';
-import {sortActivitiesByName, sortActivitySchedulesByDateAndTime} from "shared/sorting";
-
+import { formatDateOnly, formatDayOfWeekOnly, formatTimeOfDayOnly, getDayOfWeekCount } from 'shared/time';
+import { sortActivitiesByName, sortActivitySchedulesByDateAndTime } from 'shared/sorting';
+import StatefulDialog from 'src/components/common/StatefulDialog';
 
 const CompactList = withTheme(
     styled(List)((props) => ({
@@ -70,15 +71,19 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     const viewState = useLocalObservable<{
         selectedDate: Date;
         showActivities: boolean;
+        deleteActivityConfirmOpen: boolean;
         moreTargetActivityEl: (EventTarget & HTMLElement) | undefined;
         selectedActivity: IActivity | undefined;
+        deleteActivityScheduleConfirmOpen: boolean;
         moreTargetActivityScheduleEl: (EventTarget & HTMLElement) | undefined;
         selectedActivitySchedule: IActivitySchedule | undefined;
     }>(() => ({
         selectedDate: new Date(),
         showActivities: true,
+        deleteActivityConfirmOpen: false,
         moreTargetActivityEl: undefined,
         selectedActivity: undefined,
+        deleteActivityScheduleConfirmOpen: false,
         moreTargetActivityScheduleEl: undefined,
         selectedActivitySchedule: undefined,
     }));
@@ -89,6 +94,10 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         viewState.selectedDate = date;
     });
 
+    const handleViewClick = action((showActivities: boolean) => {
+        viewState.showActivities = showActivities;
+    });
+
     const handleViewToggle = action((event: React.ChangeEvent<HTMLInputElement>) => {
         viewState.showActivities = event.target.checked;
     });
@@ -96,7 +105,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     const handleTaskClick = action((item: IScheduledActivity) => () => {
         navigate(
             getFormPath(ParameterValues.form.activityLog, {
-                [Parameters.activityId]: item.activityId,
+                [Parameters.activityId]: item.dataSnapshot.activity.activityId as string,
                 [Parameters.taskId]: item.scheduledActivityId,
             }),
         );
@@ -114,7 +123,7 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                 if (repeatDayFlags[dayOfWeek]) {
                     if (accumulator === '') {
                         return 'Repeat ' + formatDayOfWeekOnly(dayOfWeek);
-                    }  else {
+                    } else {
                         return accumulator + ', ' + formatDayOfWeekOnly(dayOfWeek);
                     }
                 } else {
@@ -140,25 +149,37 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         // Remove the popup menu
         handleActivityMoreClose();
 
-        navigate(getFormPath(
-            ParameterValues.form.editActivity,
-            {
-                [Parameters.activityId as string]:
-                activity?.activityId as string
-            }
-        ));
+        navigate(
+            getFormPath(ParameterValues.form.editActivity, {
+                [Parameters.activityId as string]: activity?.activityId as string,
+            }),
+        );
     });
 
-    const handleActivityDelete = action(async () => {
-        // TODO Activity Refactor: Display some kind of confirmation
-        const activity = viewState.selectedActivity;
-
+    const handleActivityDelete = action(() => {
         // Remove the popup menu
-        handleActivityMoreClose();
+        // Do not reset the selectedActivity because dialog handlers need it
+        viewState.moreTargetActivityEl = undefined;
+
+        // Open delete confirmation dialog
+        viewState.deleteActivityConfirmOpen = true;
+    });
+
+    const handleActivityDeleteConfirm = action(async () => {
+        const activity = viewState.selectedActivity;
 
         if (!!activity) {
             await patientStore.deleteActivity(activity);
         }
+        runInAction(() => {
+            viewState.deleteActivityConfirmOpen = false;
+            viewState.selectedActivity = undefined;
+        });
+    });
+
+    const handleActivityDeleteCancel = action(() => {
+        viewState.deleteActivityConfirmOpen = false;
+        viewState.selectedActivity = undefined;
     });
 
     const handleActivityAddSchedule = action(() => {
@@ -167,18 +188,19 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         // Remove the popup menu
         handleActivityMoreClose();
 
-        navigate(getFormPath(
-            ParameterValues.form.addActivitySchedule,
-            {
-                [Parameters.activityId as string]: activity?.activityId as string
-            }
-        ));
+        navigate(
+            getFormPath(ParameterValues.form.addActivitySchedule, {
+                [Parameters.activityId as string]: activity?.activityId as string,
+            }),
+        );
     });
 
-    const handleActivityScheduleMoreClick = action((activitySchedule: IActivitySchedule, event: React.MouseEvent<HTMLElement>) => {
-        viewState.selectedActivitySchedule = activitySchedule;
-        viewState.moreTargetActivityScheduleEl = event.currentTarget;
-    });
+    const handleActivityScheduleMoreClick = action(
+        (activitySchedule: IActivitySchedule, event: React.MouseEvent<HTMLElement>) => {
+            viewState.selectedActivitySchedule = activitySchedule;
+            viewState.moreTargetActivityScheduleEl = event.currentTarget;
+        },
+    );
 
     const handleActivityScheduleMoreClose = action(() => {
         viewState.selectedActivitySchedule = undefined;
@@ -186,15 +208,29 @@ export const CarePlanPage: FunctionComponent = observer(() => {
     });
 
     const handleActivityScheduleDelete = action(async () => {
-        // TODO Activity Refactor: Display some kind of confirmation
-        const activitySchedule = viewState.selectedActivitySchedule;
-
         // Remove the popup menu
-        handleActivityScheduleMoreClose();
+        // Do not reset the selectedActivitySchedule because dialog handlers need it
+        viewState.moreTargetActivityScheduleEl = undefined;
+
+        // Open delete confirmation dialog
+        viewState.deleteActivityScheduleConfirmOpen = true;
+    });
+
+    const handleActivityScheduleDeleteConfirm = action(async () => {
+        const activitySchedule = viewState.selectedActivitySchedule;
 
         if (!!activitySchedule) {
             await patientStore.deleteActivitySchedule(activitySchedule);
         }
+        runInAction(() => {
+            viewState.deleteActivityScheduleConfirmOpen = false;
+            viewState.selectedActivitySchedule = undefined;
+        });
+    });
+
+    const handleActivityScheduleDeleteCancel = action(() => {
+        viewState.deleteActivityScheduleConfirmOpen = false;
+        viewState.selectedActivitySchedule = undefined;
     });
 
     const handleActivityScheduleEdit = action(() => {
@@ -203,206 +239,228 @@ export const CarePlanPage: FunctionComponent = observer(() => {
         // Remove the popup menu
         handleActivityScheduleMoreClose();
 
-        navigate(getFormPath(
-            ParameterValues.form.editActivitySchedule,
-            {
-                [Parameters.activityScheduleId as string]: activitySchedule?.activityScheduleId as string
-            }
-        ));
+        navigate(
+            getFormPath(ParameterValues.form.editActivitySchedule, {
+                [Parameters.activityScheduleId as string]: activitySchedule?.activityScheduleId as string,
+            }),
+        );
     });
 
-    const renderActivitySchedule = (activitySchedule: IActivitySchedule) : ReactNode => {
+    const renderActivitySchedule = (nextTask: IScheduledActivity): ReactNode => {
         return (
             <Stack spacing={1}>
                 <HelperText>
-                    {
-                        formatDateOnly(activitySchedule.date, 'EEE, MMM d') +
+                    {formatDateOnly(nextTask.dueDateTime, 'EEE, MMM d') +
                         ', ' +
-                        formatTimeOfDayOnly(activitySchedule.timeOfDay)
-                    }
+                        formatTimeOfDayOnly(nextTask.dataSnapshot.activitySchedule.timeOfDay)}
                 </HelperText>
-                { activitySchedule.hasRepetition && (
-                    <HelperText>{getRepeatDayText(activitySchedule.repeatDayFlags as DayOfWeekFlags)}</HelperText>
+                {nextTask.dataSnapshot.activitySchedule.hasRepetition && (
+                    <HelperText>
+                        {getRepeatDayText(nextTask.dataSnapshot.activitySchedule.repeatDayFlags as DayOfWeekFlags)}
+                    </HelperText>
                 )}
             </Stack>
         );
-    }
+    };
 
     const renderActivitiesSection = (lifeAreaName: string, lifeAreaId: string, activities: IActivity[]): ReactNode => {
         const sortedActivities = sortActivitiesByName(activities);
 
-        return (activities.length > 0) && (
-            <Section title={lifeAreaName} key={lifeAreaId}>
-                <CompactList aria-labelledby="nested-list-subheader">
-                    {sortedActivities.map((activity) => (
-                        <Fragment key={activity.activityId}>
-                            <ListItem
-                                alignItems="flex-start"
-                                button
-                                component={Link}
-                                to={getFormLink(
-                                    ParameterValues.form.addActivitySchedule,
-                                    {
-                                        [Parameters.activityId as string]: activity?.activityId as string
+        return (
+            activities.length > 0 && (
+                <Section title={lifeAreaName} key={lifeAreaId}>
+                    <CompactList aria-labelledby="nested-list-subheader">
+                        {sortedActivities.map((activity) => (
+                            <Fragment key={activity.activityId}>
+                                <ListItem
+                                    alignItems="flex-start"
+                                    button
+                                    component={Link}
+                                    to={getFormLink(ParameterValues.form.addActivitySchedule, {
+                                        [Parameters.activityId as string]: activity?.activityId as string,
+                                    })}
+                                    sx={{ paddingBottom: 0 }}>
+                                    <ListItemText
+                                        secondaryTypographyProps={{
+                                            component: 'div',
+                                        }}
+                                        primary={<Typography noWrap>{activity.name}</Typography>}
+                                        secondary={
+                                            <Fragment>
+                                                {!!activity.valueId &&
+                                                    patientStore.getValueById(activity.valueId)?.name}
+                                            </Fragment>
+                                        }
+                                    />
+
+                                    <ListItemSecondaryAction sx={{ alignItems: 'flex-start', height: '100%' }}>
+                                        <IconButton
+                                            edge="end"
+                                            aria-label="more"
+                                            onClick={(e) => handleActivityMoreClick(activity, e)}
+                                            size="large">
+                                            <MoreVertIcon />
+                                        </IconButton>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                {(() => {
+                                    const sortedActivitySchedules = sortActivitySchedulesByDateAndTime(
+                                        patientStore.getActivitySchedulesByActivityId(activity.activityId as string),
+                                    );
+
+                                    const nextTasks: IScheduledActivity[] = new Array();
+
+                                    sortedActivitySchedules?.slice().forEach((activitySchedule) => {
+                                        const nextTask = patientStore.getNextTaskByActivityScheduleId(
+                                            activitySchedule.activityScheduleId as string,
+                                        );
+
+                                        if (nextTask !== undefined) {
+                                            nextTasks.push(nextTask);
+                                        }
+                                    });
+
+                                    if (nextTasks.length == 0) {
+                                        // TODO: This really belong as part of the activity list item,
+                                        //       but getting it to format correctly wasn't trivial
+                                        return (
+                                            <ActivityScheduleList>
+                                                <ListItem
+                                                    alignItems="flex-start"
+                                                    button
+                                                    component={Link}
+                                                    to={getFormLink(ParameterValues.form.addActivitySchedule, {
+                                                        [Parameters.activityId as string]:
+                                                            activity?.activityId as string,
+                                                    })}>
+                                                    <HelperText>
+                                                        {getString('careplan_activity_no_schedules')}
+                                                    </HelperText>
+                                                </ListItem>
+                                            </ActivityScheduleList>
+                                        );
                                     }
-                                )}
-                                sx={{ paddingBottom: 0 }}
-                            >
-                                <ListItemText
-                                    secondaryTypographyProps={{
-                                        component: 'div',
-                                    }}
-                                    primary={<Typography noWrap>{activity.name}</Typography>}
-                                    secondary={
-                                        <Fragment>
-                                            { !!activity.valueId && patientStore.getValueById(activity.valueId)?.name }
-                                        </Fragment>
-                                    }
-                                />
 
-                                <ListItemSecondaryAction sx={{ alignItems: 'flex-start', height: '100%' }}>
-                                    <IconButton
-                                        edge="end"
-                                        aria-label="more"
-                                        onClick={(e) => handleActivityMoreClick(activity, e)}
-                                        size="large">
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                </ListItemSecondaryAction>
-                            </ListItem>
-                            {(() => {
-                                const sortedActivitySchedules = sortActivitySchedulesByDateAndTime(
-                                    patientStore.getActivitySchedulesByActivityId(activity.activityId as string)
-                                );
+                                    return (
+                                        <ActivityScheduleList>
+                                            {nextTasks.map((nextTask, idxNextTask) => (
+                                                <Fragment
+                                                    key={nextTask.dataSnapshot.activitySchedule.activityScheduleId}>
+                                                    <ListItem
+                                                        alignItems="flex-start"
+                                                        button
+                                                        component={Link}
+                                                        to={getFormLink(ParameterValues.form.editActivitySchedule, {
+                                                            [Parameters.activityScheduleId as string]: nextTask
+                                                                .dataSnapshot.activitySchedule
+                                                                .activityScheduleId as string,
+                                                        })}>
+                                                        {renderActivitySchedule(nextTask)}
 
-                                if (sortedActivitySchedules.length == 0) {
-                                    // TODO: This really belong as part of the activity list item,
-                                    //       but getting it to format correctly wasn't trivial
-                                    return <ActivityScheduleList>
-                                        <ListItem
-                                            alignItems="flex-start"
-                                            button
-                                            component={Link}
-                                            to={getFormLink(
-                                                ParameterValues.form.addActivitySchedule,
-                                                {
-                                                    [Parameters.activityId as string]: activity?.activityId as string
-                                                }
-                                            )}
-                                        >
-                                            <HelperText>{getString('careplan_activity_no_schedules')}</HelperText>
-                                        </ListItem>
-                                    </ActivityScheduleList>
-                                }
-
-                                return <ActivityScheduleList>
-                                    {sortedActivitySchedules.map((activityScheduleCurrent, idxActivityScheduleCurrent) => (
-                                        <Fragment>
-                                            <ListItem
-                                                alignItems="flex-start"
-                                                button
-                                                component={Link}
-                                                to={getFormLink(
-                                                    ParameterValues.form.editActivitySchedule,
-                                                    {
-                                                        [Parameters.activityScheduleId as string]: activityScheduleCurrent.activityScheduleId as string,
-                                                    }
-                                                )}
-                                            >
-                                                { renderActivitySchedule(activityScheduleCurrent) }
-
-                                                <ListItemSecondaryAction>
-                                                    <IconButton
-                                                        edge="end"
-                                                        aria-label="more"
-                                                        onClick={(e) => handleActivityScheduleMoreClick(activityScheduleCurrent, e)}
-                                                        size="large">
-                                                        <MoreVertIcon />
-                                                    </IconButton>
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                            {idxActivityScheduleCurrent < sortedActivitySchedules.length - 1 && <Divider variant="middle" />}
-                                        </Fragment>
-                                    ))}
-                                </ActivityScheduleList>
-                            })()}
-                        </Fragment>
-                    ))}
-                </CompactList>
-            </Section>
-        )
-    }
+                                                        <ListItemSecondaryAction>
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label="more"
+                                                                onClick={(e) =>
+                                                                    handleActivityScheduleMoreClick(
+                                                                        nextTask.dataSnapshot.activitySchedule,
+                                                                        e,
+                                                                    )
+                                                                }
+                                                                size="large">
+                                                                <MoreVertIcon />
+                                                            </IconButton>
+                                                        </ListItemSecondaryAction>
+                                                    </ListItem>
+                                                    {idxNextTask < nextTasks.length - 1 && <Divider variant="middle" />}
+                                                </Fragment>
+                                            ))}
+                                        </ActivityScheduleList>
+                                    );
+                                })()}
+                            </Fragment>
+                        ))}
+                    </CompactList>
+                </Section>
+            )
+        );
+    };
 
     const renderActivities = (): ReactNode => {
-        return <Fragment>
-            <Menu
-                id="activity-menu"
-                anchorEl={viewState.moreTargetActivityEl}
-                keepMounted
-                open={Boolean(viewState.moreTargetActivityEl)}
-                onClose={handleActivityMoreClose}>
-                <MenuItem onClick={handleActivityAddSchedule}>{getString('menuitem_activityschedule_add')}</MenuItem>
-                <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
-                <MenuItem onClick={handleActivityDelete}>{getString('menuitem_activity_delete')}</MenuItem>
-            </Menu>
-            <Menu
-                id="activityschedule-menu"
-                anchorEl={viewState.moreTargetActivityScheduleEl}
-                keepMounted
-                open={Boolean(viewState.moreTargetActivityScheduleEl)}
-                onClose={handleActivityScheduleMoreClose}>
-                <MenuItem onClick={handleActivityScheduleEdit}>{getString('menuitem_activityschedule_edit')}</MenuItem>
-                <MenuItem onClick={handleActivityScheduleDelete}>{getString('menuitem_activityschedule_delete')}</MenuItem>
-            </Menu>
-            {patientStore.activities.length > 0 ? (
-                <Fragment>
-                    {
-                        lifeAreas.map((lifeArea) =>
+        return (
+            <Fragment>
+                <Menu
+                    id="activity-menu"
+                    anchorEl={viewState.moreTargetActivityEl}
+                    keepMounted
+                    open={Boolean(viewState.moreTargetActivityEl)}
+                    onClose={handleActivityMoreClose}>
+                    <MenuItem onClick={handleActivityAddSchedule}>
+                        {getString('menuitem_activityschedule_add')}
+                    </MenuItem>
+                    <MenuItem onClick={handleActivityEdit}>{getString('menuitem_activity_edit')}</MenuItem>
+                    <MenuItem onClick={handleActivityDelete}>{getString('menuitem_activity_delete')}</MenuItem>
+                </Menu>
+                <Menu
+                    id="activityschedule-menu"
+                    anchorEl={viewState.moreTargetActivityScheduleEl}
+                    keepMounted
+                    open={Boolean(viewState.moreTargetActivityScheduleEl)}
+                    onClose={handleActivityScheduleMoreClose}>
+                    <MenuItem onClick={handleActivityScheduleEdit}>
+                        {getString('menuitem_activityschedule_edit')}
+                    </MenuItem>
+                    <MenuItem onClick={handleActivityScheduleDelete}>
+                        {getString('menuitem_activityschedule_delete')}
+                    </MenuItem>
+                </Menu>
+                {patientStore.activities.length > 0 ? (
+                    <Fragment>
+                        {lifeAreas.map((lifeArea) =>
                             renderActivitiesSection(
                                 lifeArea.name,
                                 lifeArea.id,
-                                patientStore.getActivitiesByLifeAreaId(lifeArea.id)
-                            )
-                        )
-                    }
-                    {
-                        renderActivitiesSection(
+                                patientStore.getActivitiesByLifeAreaId(lifeArea.id),
+                            ),
+                        )}
+                        {renderActivitiesSection(
                             getString('careplan_activities_other'),
                             'other',
-                            patientStore.getActivitiesWithoutValueId()
-                        )
-                    }
-                </Fragment>
-            ) : (
-                <Section title={getString('Careplan_add_activity')}>
-                    <Typography variant="body2">{getString('Careplan_no_activities')}</Typography>
-                </Section>
-            )}
-        </Fragment>
-    }
+                            patientStore.getActivitiesWithoutValueId(),
+                        )}
+                    </Fragment>
+                ) : (
+                    <Section title={getString('Careplan_add_activity')}>
+                        <Typography variant="body2">{getString('Careplan_no_activities')}</Typography>
+                    </Section>
+                )}
+            </Fragment>
+        );
+    };
 
     return (
         <MainPage
             title={getString('Navigation_careplan')}
             action={
                 <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
                     startIcon={<AddIcon />}
                     component={Link}
-                    to={getFormLink(
-                        ParameterValues.form.addActivity,
-                        {
-                            [Parameters.addSchedule]: ParameterValues.addSchedule.true,
-                        }
-                    )}
-                >
+                    to={getFormLink(ParameterValues.form.addActivity, {
+                        [Parameters.addSchedule]: ParameterValues.addSchedule.true,
+                    })}>
                     {getString('Careplan_add_activity')}
                 </Button>
             }>
             <Grid container alignItems="center" spacing={1} justifyContent="center">
                 <Grid item>
-                    <Typography color={viewState.showActivities ? 'textSecondary' : 'textPrimary'}>
-                        {getString('Careplan_view_calendar')}
-                    </Typography>
+                    <ButtonBase onClick={() => handleViewClick(false)}>
+                        <Typography color={viewState.showActivities ? 'textSecondary' : 'textPrimary'}>
+                            {getString('Careplan_view_calendar')}
+                        </Typography>
+                    </ButtonBase>
                 </Grid>
                 <Grid item>
                     <Switch
@@ -413,15 +471,15 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                     />
                 </Grid>
                 <Grid item>
-                    <Typography color={viewState.showActivities ? 'textPrimary' : 'textSecondary'}>
-                        {getString('Careplan_view_activity')}
-                    </Typography>
+                    <ButtonBase onClick={() => handleViewClick(true)}>
+                        <Typography color={viewState.showActivities ? 'textPrimary' : 'textSecondary'}>
+                            {getString('Careplan_view_activity')}
+                        </Typography>
+                    </ButtonBase>
                 </Grid>
             </Grid>
             {viewState.showActivities ? (
-                <div>
-                    { renderActivities() }
-                </div>
+                <div>{renderActivities()}</div>
             ) : (
                 <div>
                     <Section>
@@ -443,6 +501,20 @@ export const CarePlanPage: FunctionComponent = observer(() => {
                     </Section>
                 </div>
             )}
+            <StatefulDialog
+                open={viewState.deleteActivityConfirmOpen}
+                title={getString('Form_confirm_delete_activity')}
+                content={viewState.selectedActivity?.name as string}
+                handleCancel={handleActivityDeleteCancel}
+                handleDelete={handleActivityDeleteConfirm}
+            />
+            <StatefulDialog
+                open={viewState.deleteActivityScheduleConfirmOpen}
+                title={getString('Form_confirm_delete_activity_schedule')}
+                content={''}
+                handleCancel={handleActivityScheduleDeleteCancel}
+                handleDelete={handleActivityScheduleDeleteConfirm}
+            />
         </MainPage>
     );
 });

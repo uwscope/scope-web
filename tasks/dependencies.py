@@ -12,6 +12,7 @@ DEPENDENCIES = {
     "all": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=[
             ".",
+            "./notebooks",
             "./server_celery",
             "./server_flask",
         ],
@@ -29,9 +30,14 @@ DEPENDENCIES = {
             "./web_shared",
         ],
     ),
+    "notebooks": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=["./notebooks"],
+        yarn_dirs=None,
+    ),
     "python": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=[
             ".",
+            "./notebooks",
             "./server_celery",
             "./server_flask",
         ],

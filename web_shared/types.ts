@@ -131,12 +131,17 @@ export interface IScheduledItem {
 
 export interface IScheduledActivity extends IScheduledItem {
     scheduledActivityId: string;
-
-    activityId: string;
-    activityName: string;
+    activityScheduleId: string;
+    dataSnapshot: IScheduledActivityDataSnapshot;
     reminder: Date;
 
     completed: boolean;
+}
+
+export interface IScheduledActivityDataSnapshot {
+    activitySchedule: IActivitySchedule;
+    activity: IActivity;
+    value?: IValue;
 }
 
 export interface IScheduledAssessment extends IScheduledItem {
@@ -157,14 +162,16 @@ export interface IActivityLog extends ILog {
     activityLogId?: string;
 
     scheduledActivityId: string;
-    activityId: string;
-    activityName: string;
+    dataSnapshot: IActivityLogDataSnapshot;
 
-    completed?: boolean;
     success?: ActivitySuccessType;
     alternative?: string;
     pleasure?: number;
     accomplishment?: number;
+}
+
+export interface IActivityLogDataSnapshot {
+    scheduledActivity: IScheduledActivity;
 }
 
 export interface IAssessmentLog extends ILog {

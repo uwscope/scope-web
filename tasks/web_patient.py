@@ -57,7 +57,7 @@ def prod_build(context):
 @task
 def prod_serve(context):
     """
-    Serve a bundle of the client, listening on `0.0.0.0:3000`.
+    Serve a bundle of the client, listening on `0.0.0.0:3001`.
 
     For production purposes, synchronously executes in the current terminal.
 

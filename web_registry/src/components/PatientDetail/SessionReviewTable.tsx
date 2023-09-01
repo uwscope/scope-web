@@ -88,7 +88,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
         },
         {
             field: 'medications',
-            headerName: 'Med Changes',
+            headerName: 'Med Changes / Notes',
             width: 150,
             renderHeader,
             renderCell: renderMultilineCell,

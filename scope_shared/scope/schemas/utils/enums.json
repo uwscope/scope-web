@@ -330,7 +330,14 @@
 		"site": {
 			"type": "string",
 			"description": "Site Type",
-			"enum": ["SCCA – SLU", "SCCA – UW-NW", "SCCA – PEN", "MultiCare – Tacoma", "MultiCare – Gig Harbor"]
+			"enum": [
+				"SCCA – SLU",
+				"SCCA – UW-NW",
+				"SCCA – PEN",
+				"MultiCare – Tacoma",
+				"MultiCare – Auburn",
+				"MultiCare – Gig Harbor"
+			]
 		}
 	}
 }

@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import scope.populate.data.archive
-import scope.schema
-import scope.schema_utils
+import scope.populate.data.validate
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
 ACTION_NAME = "archive_validate"
@@ -91,12 +90,4 @@ def _archive_validate(
         password=password,
     )
 
-    # Validate every document matches the document schema
-    for document_current in archive.entries.values():
-        # Assert the document schema
-        scope.schema_utils.assert_schema(
-            data=document_current,
-            schema=scope.schema.document_schema,
-        )
-
-        # TODO: A more complete validation, shared with rule_archive_restore
+    scope.populate.data.validate.validate_archive(archive=archive)
