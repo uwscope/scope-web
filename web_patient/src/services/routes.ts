@@ -31,6 +31,7 @@ export const ParameterValues = {
         activityLog: 'log-activity',
         addActivity: 'add-activity',
         addActivitySchedule: 'add-activity-schedule',
+        assessmentLog: 'log-assessment',
         editActivity: 'edit-activity',
         editActivitySchedule: 'edit-activity-schedule',
         medicationLog: 'log-medication',
