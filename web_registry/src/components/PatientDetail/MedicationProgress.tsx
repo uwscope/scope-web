@@ -43,14 +43,15 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
         state.openConfigure = false;
     });
 
-    // const handleConfigure = action(() => {
-    //     state.openConfigure = true;
-    //     state.frequency = assessment.frequency || 'Every 2 weeks';
-    //     state.dayOfWeek = assessment.dayOfWeek || 'Monday';
-    // });
+    const handleConfigure = action(() => {
+        state.openConfigure = true;
+        state.frequency = assessment.frequency || 'Every 2 weeks';
+        state.dayOfWeek = assessment.dayOfWeek || 'Monday';
+    });
 
     const onSaveConfigure = action(() => {
         const { frequency, dayOfWeek } = state;
+        assessment.assignedDateTime = new Date();
         var newAssessment = { ...assessment, frequency, dayOfWeek };
         currentPatient.updateAssessment(newAssessment);
         state.openConfigure = false;
@@ -66,15 +67,16 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
 
     const sortedLogs = assessmentLogs?.slice().sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
 
+
     const tableData = sortedLogs?.map((a) => {
         return {
             date: format(a.recordedDateTime, 'MM/dd/yy'),
             adherence:
-                a.pointValues['Adherence'] == 1
+                a.adherence == 1
                     ? getString('patient_progress_medication_adherence_yes')
                     : getString('patient_progress_medication_adherence_no'),
             id: a.assessmentLogId,
-            comment: a.comment,
+            medicationNote: a.medicationQuestion ? a.medicationNote : undefined,
         };
     });
 
@@ -96,7 +98,7 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
             headerAlign: 'center',
         },
         {
-            field: 'comment',
+            field: 'medicationNote',
             headerName: getString('patient_progress_medication_header_comment'),
             width: 300,
             flex: 1,
@@ -108,9 +110,9 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
     const recurrence =
         assessment.assigned && assessment.assignedDateTime
             ? `${assessment.frequency} on ${assessment.dayOfWeek}s, assigned on ${format(
-                  assessment.assignedDateTime,
-                  'MM/dd/yyyy',
-              )}`
+                assessment.assignedDateTime,
+                'MM/dd/yyyy',
+            )}`
             : 'Not assigned';
 
     return (
@@ -126,21 +128,19 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> = o
                     text: assessment.assigned
                         ? getString('patient_progress_assessment_assigned_button')
                         : getString('patient_progress_assessment_assign_button'),
-                    // Temporarily disable assignment
-                    // onClick: assessment.assigned
-                    //     ? undefined
-                    //     : () => currentPatient?.assignAssessment(assessment.assessmentId),
+                    onClick: assessment.assigned
+                        ? undefined
+                        : () => currentPatient?.assignAssessment(assessment.assessmentId),
                 } as IActionButton,
             ].concat(
                 assessment.assigned
                     ? [
-                          {
-                              icon: <SettingsIcon />,
-                              text: getString('patient_progress_assessment_action_configure'),
-                              // Temporarily disable assignment
-                              //   onClick: handleConfigure,
-                          } as IActionButton,
-                      ]
+                        {
+                            icon: <SettingsIcon />,
+                            text: getString('patient_progress_assessment_action_configure'),
+                            onClick: handleConfigure,
+                        } as IActionButton,
+                    ]
                     : [],
             )}>
             <Grid container alignItems="stretch">

@@ -40,6 +40,12 @@ export const ProgressPage: FunctionComponent = () => {
                             imageSrc={getImage('Progress_mood_button_image')}
                         />
                     </ListItem>
+                    <ListItem disableGutters={true} component={Link} to={Routes.medicationProgress}>
+                        <ListCard
+                            title={getString('Progress_medication_tracking_title')}
+                            imageSrc={getImage('Progress_assessment_medication_button_image')}
+                        />
+                    </ListItem>
                 </List>
             </Section>
         </MainPage>

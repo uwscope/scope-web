@@ -175,8 +175,14 @@ export interface IAssessmentLog extends ILog {
 
     patientSubmitted?: boolean; // NEW
     submittedByProviderId?: string;
-    pointValues: AssessmentData;
+    pointValues?: AssessmentData;
     totalScore?: number;
+
+    // For mediation tracking
+    adherence?: number,
+    medicationQuestion?: boolean,
+    medicationNote?: string,
+
 }
 
 export interface IMoodLog extends ILog {
