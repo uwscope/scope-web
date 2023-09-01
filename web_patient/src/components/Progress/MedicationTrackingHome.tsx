@@ -48,7 +48,6 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
 
     const logs = patientStore.assessmentLogs.filter((a) => a.assessmentId.toLowerCase() == assessmentType);
 
-
     return (
         <DetailPage title={getString(title)} onBack={handleGoBack}>
             <ContentLoader
@@ -71,11 +70,7 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
                                         <TableCell component="th" scope="row">
                                             {`${format(log.recordedDateTime, 'MM/dd')}`}
                                         </TableCell>
-                                        <TableCell>
-                                            {log.adherence == 1
-                                                ? 'Yes'
-                                                : 'No'}
-                                        </TableCell>
+                                        <TableCell>{log.adherence == 1 ? 'Yes' : 'No'}</TableCell>
                                         <TableCell>{log.medicationNote}</TableCell>
                                     </TableRow>
                                 ))}
@@ -92,18 +87,21 @@ export const MedicationTrackingHome: FunctionComponent<{ assessmentType: string 
                                                 <TableCell component="th" scope="row">
                                                     {getString('Assessment_progress_column_date')}
                                                 </TableCell>
-                                                <TableCell>{`${viewState.selectedLog?.recordedDateTime &&
+                                                <TableCell>{`${
+                                                    viewState.selectedLog?.recordedDateTime &&
                                                     format(
                                                         viewState.selectedLog.recordedDateTime,
                                                         'MM/dd/yyyy h:mm aaa',
                                                     )
-                                                    }`}</TableCell>
+                                                }`}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
                                                     {getString('Medication_progress_adherence')}
                                                 </TableCell>
-                                                <TableCell>{viewState.selectedLog?.adherence}</TableCell>
+                                                <TableCell>
+                                                    {viewState.selectedLog?.adherence == 1 ? 'Yes' : 'No'}
+                                                </TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell component="th" scope="row">
