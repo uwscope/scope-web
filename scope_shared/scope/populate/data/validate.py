@@ -53,6 +53,15 @@ def _validate_archive_document_schema(
     """
 
     for document_current in archive.entries.values():
+        # Assert specific schemas for better error messages.
+        # Any failures here would also be caught below.
+        if "_type" in document_current:
+            if document_current["_type"] == "assessmentLog":
+                scope.schema_utils.assert_schema(
+                    data=document_current,
+                    schema=scope.schema.assessment_log_schema,
+                )
+
         # Assert the document schema
         scope.schema_utils.assert_schema(
             data=document_current,
