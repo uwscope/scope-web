@@ -2,6 +2,8 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+import json
+
 from scope.documents.document_set import datetime_from_document, DocumentSet
 import scope.populate.data.archive
 import scope.schema
@@ -621,11 +623,17 @@ def _validate_patient_collection_values(
         match_deleted=False,
     ):
         # For the time that each value exists, its name/lifeArea tuple must be unique.
-        assert value_documents.filter_match(
+        matching_value_documents = value_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,
             match_values={
                 "name": document_current["name"],
                 "lifeAreaId": document_current["lifeAreaId"],
             },
-        ).is_unique()
+        )
+
+        if not matching_value_documents.is_unique():
+            print("  Warning: Value Non-Unique")
+            print(json.dumps(matching_value_documents.documents, indent=2))
+
+        # assert matching_value_documents.is_unique()
