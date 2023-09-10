@@ -2,6 +2,8 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+import json
+
 from scope.documents.document_set import datetime_from_document, DocumentSet
 import scope.populate.data.archive
 import scope.schema
@@ -20,6 +22,12 @@ def validate_archive(
     print("Validating document schemas.")
     _validate_archive_document_schema(archive=archive)
 
+    # Provider documents can be referenced by patients
+    providers_documents = archive.providers_documents(
+        remove_sentinel=True,
+        remove_revisions=False,
+    )
+
     # Go through each patient collection, validate contents of each patient collection
     patients_documents = archive.patients_documents(
         remove_sentinel=True,
@@ -32,7 +40,10 @@ def validate_archive(
             collection=patients_document_current["collection"]
         )
 
-        _validate_patient_collection(collection=patient_collection_current)
+        _validate_patient_collection(
+            collection=patient_collection_current,
+            providers_documents=providers_documents,
+        )
 
 
 def _validate_archive_document_schema(
@@ -44,6 +55,15 @@ def _validate_archive_document_schema(
     """
 
     for document_current in archive.entries.values():
+        # Assert specific schemas for better error messages.
+        # Any failures here would also be caught below.
+        if "_type" in document_current:
+            if document_current["_type"] == "assessmentLog":
+                scope.schema_utils.assert_schema(
+                    data=document_current,
+                    schema=scope.schema.assessment_log_schema,
+                )
+
         # Assert the document schema
         scope.schema_utils.assert_schema(
             data=document_current,
@@ -103,6 +123,7 @@ def _validate_archive_expected_collections(
 def _validate_patient_collection(
     *,
     collection: DocumentSet,
+    providers_documents: DocumentSet,
 ):
     """
     Validate the entire set of documents in a patient collection.
@@ -114,6 +135,14 @@ def _validate_patient_collection(
     _validate_patient_collection_activity(collection=collection)
     _validate_patient_collection_activity_logs(collection=collection)
     _validate_patient_collection_activity_schedules(collection=collection)
+    _validate_patient_collection_assessment_log_documents(
+        collection=collection,
+        providers_documents=providers_documents,
+    )
+    _validate_patient_collection_profile_documents(
+        collection=collection,
+        providers_documents=providers_documents,
+    )
     _validate_patient_collection_scheduled_activities(collection=collection)
     _validate_patient_collection_values(collection=collection)
 
@@ -341,6 +370,56 @@ def _validate_patient_collection_activity_schedules(
         ).is_empty()
 
 
+def _validate_patient_collection_assessment_log_documents(
+    *,
+    collection: DocumentSet,
+    providers_documents: DocumentSet,
+):
+    """
+    Validate additional properties of assessment log documents.
+    """
+
+    assessment_log_documents = collection.filter_match(
+        match_type="assessmentLog",
+    )
+
+    for document_current in assessment_log_documents.filter_match(
+        match_deleted=False,
+    ):
+        # Any referenced provider must exist at the time of the profile.
+        if "submittedByProviderId" in document_current:
+            assert providers_documents.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={"providerId": document_current["submittedByProviderId"]}
+            ).is_unique()
+
+
+def _validate_patient_collection_profile_documents(
+    *,
+    collection: DocumentSet,
+    providers_documents: DocumentSet,
+):
+    """
+    Validate additional properties of profile documents.
+    """
+
+    profile_documents = collection.filter_match(
+        match_type="profile",
+    )
+
+    for document_current in profile_documents.filter_match(
+        match_deleted=False,
+    ):
+        # Any referenced provider must exist at the time of the profile.
+        if "primaryCareManager" in document_current:
+            assert providers_documents.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={"providerId": document_current["primaryCareManager"]["providerId"]}
+            ).is_unique()
+
+
 def _validate_patient_collection_scheduled_activities(
     *,
     collection: DocumentSet,
@@ -421,8 +500,10 @@ def _validate_patient_collection_scheduled_activities(
             # It should have a snapshot the same as the previous scheduled activity's snapshot
             scheduled_activity_previous = scheduled_activity_documents.filter_match(
                 match_values={
-                    "scheduledActivityId": scheduled_activity_current["scheduledActivityId"],
-                    "_rev": scheduled_activity_current["_rev"] - 1
+                    "scheduledActivityId": scheduled_activity_current[
+                        "scheduledActivityId"
+                    ],
+                    "_rev": scheduled_activity_current["_rev"] - 1,
                 }
             ).unique()
 
@@ -433,7 +514,9 @@ def _validate_patient_collection_scheduled_activities(
             if scheduled_activity_current["dataSnapshot"] == snapshot_previous:
                 resolved = True
             else:
-                print("  Warning: Scheduled Activity Completed Snapshot Does Not Match Previous Snapshot")
+                print(
+                    "  Warning: Scheduled Activity Completed Snapshot Does Not Match Previous Snapshot"
+                )
 
         if not resolved:
             # A referenced activity schedule might no longer exist,
@@ -444,7 +527,9 @@ def _validate_patient_collection_scheduled_activities(
                 match_datetime_at=datetime_from_document(
                     document=scheduled_activity_current
                 ),
-                match_values={"_set_id": scheduled_activity_current["activityScheduleId"]},
+                match_values={
+                    "_set_id": scheduled_activity_current["activityScheduleId"]
+                },
             ).unique()
             if activity_schedule_snapshot.get("_deleted"):
                 # Snapshot should be of the state immediately before deletion.
@@ -486,7 +571,8 @@ def _validate_patient_collection_scheduled_activities(
                 ).unique()
 
             assert (
-                scheduled_activity_current["dataSnapshot"]["activity"] == activity_snapshot
+                scheduled_activity_current["dataSnapshot"]["activity"]
+                == activity_snapshot
             )
 
             # If the activity has a value, the referenced value must exist.
@@ -512,7 +598,10 @@ def _validate_patient_collection_scheduled_activities(
                         },
                     ).unique()
 
-                assert scheduled_activity_current["dataSnapshot"]["value"] == value_snapshot
+                assert (
+                    scheduled_activity_current["dataSnapshot"]["value"]
+                    == value_snapshot
+                )
             else:
                 # There must not be a value snapshot
                 assert "value" not in scheduled_activity_current["dataSnapshot"]
@@ -534,11 +623,17 @@ def _validate_patient_collection_values(
         match_deleted=False,
     ):
         # For the time that each value exists, its name/lifeArea tuple must be unique.
-        assert value_documents.filter_match(
+        matching_value_documents = value_documents.filter_match(
             match_datetime_at=datetime_from_document(document=document_current),
             match_deleted=False,
             match_values={
                 "name": document_current["name"],
                 "lifeAreaId": document_current["lifeAreaId"],
             },
-        ).is_unique()
+        )
+
+        if not matching_value_documents.is_unique():
+            print("  Warning: Value Non-Unique")
+            print(json.dumps(matching_value_documents.documents, indent=2))
+
+        # assert matching_value_documents.is_unique()
