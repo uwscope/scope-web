@@ -421,8 +421,10 @@ def _validate_patient_collection_scheduled_activities(
             # It should have a snapshot the same as the previous scheduled activity's snapshot
             scheduled_activity_previous = scheduled_activity_documents.filter_match(
                 match_values={
-                    "scheduledActivityId": scheduled_activity_current["scheduledActivityId"],
-                    "_rev": scheduled_activity_current["_rev"] - 1
+                    "scheduledActivityId": scheduled_activity_current[
+                        "scheduledActivityId"
+                    ],
+                    "_rev": scheduled_activity_current["_rev"] - 1,
                 }
             ).unique()
 
@@ -433,7 +435,9 @@ def _validate_patient_collection_scheduled_activities(
             if scheduled_activity_current["dataSnapshot"] == snapshot_previous:
                 resolved = True
             else:
-                print("  Warning: Scheduled Activity Completed Snapshot Does Not Match Previous Snapshot")
+                print(
+                    "  Warning: Scheduled Activity Completed Snapshot Does Not Match Previous Snapshot"
+                )
 
         if not resolved:
             # A referenced activity schedule might no longer exist,
@@ -444,7 +448,9 @@ def _validate_patient_collection_scheduled_activities(
                 match_datetime_at=datetime_from_document(
                     document=scheduled_activity_current
                 ),
-                match_values={"_set_id": scheduled_activity_current["activityScheduleId"]},
+                match_values={
+                    "_set_id": scheduled_activity_current["activityScheduleId"]
+                },
             ).unique()
             if activity_schedule_snapshot.get("_deleted"):
                 # Snapshot should be of the state immediately before deletion.
@@ -486,7 +492,8 @@ def _validate_patient_collection_scheduled_activities(
                 ).unique()
 
             assert (
-                scheduled_activity_current["dataSnapshot"]["activity"] == activity_snapshot
+                scheduled_activity_current["dataSnapshot"]["activity"]
+                == activity_snapshot
             )
 
             # If the activity has a value, the referenced value must exist.
@@ -512,7 +519,10 @@ def _validate_patient_collection_scheduled_activities(
                         },
                     ).unique()
 
-                assert scheduled_activity_current["dataSnapshot"]["value"] == value_snapshot
+                assert (
+                    scheduled_activity_current["dataSnapshot"]["value"]
+                    == value_snapshot
+                )
             else:
                 # There must not be a value snapshot
                 assert "value" not in scheduled_activity_current["dataSnapshot"]
