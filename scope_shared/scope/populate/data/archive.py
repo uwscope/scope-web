@@ -291,7 +291,7 @@ class Archive:
         *,
         remove_sentinel: bool,
         remove_revisions: bool,
-    ) -> List[dict]:
+    ) -> DocumentSet:
         document_set = self.collection_documents(
             collection="patients",
         )
@@ -300,14 +300,14 @@ class Archive:
         if remove_revisions:
             document_set = document_set.remove_revisions()
 
-        return document_set.documents
+        return document_set
 
     def providers_documents(
         self,
         *,
         remove_sentinel: bool,
         remove_revisions: bool,
-    ) -> List[dict]:
+    ) -> DocumentSet:
         document_set = self.collection_documents(
             collection="providers",
         )
@@ -316,7 +316,7 @@ class Archive:
         if remove_revisions:
             document_set = document_set.remove_revisions()
 
-        return document_set.documents
+        return document_set
 
     def replace_collection_documents(
         self,

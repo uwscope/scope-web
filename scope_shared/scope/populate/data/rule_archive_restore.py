@@ -114,7 +114,7 @@ def _archive_restore(
     )
     _collection_restore(
         collection=database["providers"],
-        restore_documents=restore_providers_documents,
+        restore_documents=restore_providers_documents.documents,
         delete_existing_sentinel=True,
     )
 
@@ -132,7 +132,7 @@ def _archive_restore(
     )
     _collection_restore(
         collection=database["patients"],
-        restore_documents=restore_patients_documents,
+        restore_documents=restore_patients_documents.documents,
         delete_existing_sentinel=True,
     )
 
