@@ -5,6 +5,7 @@ from typing import List, Optional
 import scope.populate.data.archive
 import scope.populate.data.migrations.migration_v0_5_0
 import scope.populate.data.migrations.migration_v0_7_0
+import scope.populate.data.migrations.migration_v0_9_0
 import scope.populate.data.validate
 import scope.schema
 import scope.schema_utils
@@ -120,6 +121,12 @@ def _archive_migrate(
             scope.populate.data.migrations.migration_v0_7_0.archive_migrate_v0_7_0(
                 archive=archive,
                 archive_path=archive_path,
+            )
+        )
+    elif migration == "v0.9.0":
+        archive = (
+            scope.populate.data.migrations.migration_v0_9_0.archive_migrate_v0_9_0(
+                archive=archive,
             )
         )
     else:

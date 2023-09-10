@@ -20,6 +20,12 @@ def validate_archive(
     print("Validating document schemas.")
     _validate_archive_document_schema(archive=archive)
 
+    # Provider documents can be referenced by patients
+    providers_documents = archive.providers_documents(
+        remove_sentinel=True,
+        remove_revisions=False,
+    )
+
     # Go through each patient collection, validate contents of each patient collection
     patients_documents = archive.patients_documents(
         remove_sentinel=True,
@@ -32,7 +38,10 @@ def validate_archive(
             collection=patients_document_current["collection"]
         )
 
-        _validate_patient_collection(collection=patient_collection_current)
+        _validate_patient_collection(
+            collection=patient_collection_current,
+            providers_documents=providers_documents,
+        )
 
 
 def _validate_archive_document_schema(
@@ -103,6 +112,7 @@ def _validate_archive_expected_collections(
 def _validate_patient_collection(
     *,
     collection: DocumentSet,
+    providers_documents: DocumentSet,
 ):
     """
     Validate the entire set of documents in a patient collection.
@@ -114,6 +124,14 @@ def _validate_patient_collection(
     _validate_patient_collection_activity(collection=collection)
     _validate_patient_collection_activity_logs(collection=collection)
     _validate_patient_collection_activity_schedules(collection=collection)
+    _validate_patient_collection_assessment_log_documents(
+        collection=collection,
+        providers_documents=providers_documents,
+    )
+    _validate_patient_collection_profile_documents(
+        collection=collection,
+        providers_documents=providers_documents,
+    )
     _validate_patient_collection_scheduled_activities(collection=collection)
     _validate_patient_collection_values(collection=collection)
 
@@ -339,6 +357,56 @@ def _validate_patient_collection_activity_schedules(
                 "activityScheduleId": activity_schedule_current["activityScheduleId"]
             },
         ).is_empty()
+
+
+def _validate_patient_collection_assessment_log_documents(
+    *,
+    collection: DocumentSet,
+    providers_documents: DocumentSet,
+):
+    """
+    Validate additional properties of assessment log documents.
+    """
+
+    assessment_log_documents = collection.filter_match(
+        match_type="assessmentLog",
+    )
+
+    for document_current in assessment_log_documents.filter_match(
+        match_deleted=False,
+    ):
+        # Any referenced provider must exist at the time of the profile.
+        if "submittedByProviderId" in document_current:
+            assert providers_documents.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={"providerId": document_current["submittedByProviderId"]}
+            ).is_unique()
+
+
+def _validate_patient_collection_profile_documents(
+    *,
+    collection: DocumentSet,
+    providers_documents: DocumentSet,
+):
+    """
+    Validate additional properties of profile documents.
+    """
+
+    profile_documents = collection.filter_match(
+        match_type="profile",
+    )
+
+    for document_current in profile_documents.filter_match(
+        match_deleted=False,
+    ):
+        # Any referenced provider must exist at the time of the profile.
+        if "primaryCareManager" in document_current:
+            assert providers_documents.filter_match(
+                match_deleted=False,
+                match_datetime_at=datetime_from_document(document=document_current),
+                match_values={"providerId": document_current["primaryCareManager"]["providerId"]}
+            ).is_unique()
 
 
 def _validate_patient_collection_scheduled_activities(
