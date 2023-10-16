@@ -1,0 +1,23 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://uwscope.org/schemas/documents/notification-permissions",
+    "title": "INotificationPermissions",
+    "description": "INotificationPermissions Type",
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string"
+        },
+        "_type": {
+            "const": "notificationPermissions"
+        },
+        "_rev": {
+            "type": "number"
+        },
+        "enablePushNotification": {
+            "type": "boolean"
+        }
+    },
+    "additionalProperties": false,
+    "required": ["_type", "enablePushNotification"]
+}
