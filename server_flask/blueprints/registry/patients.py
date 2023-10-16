@@ -13,6 +13,7 @@ import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
+import scope.database.patient.notification_permissions
 import scope.database.patient.patient_profile
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
@@ -53,8 +54,10 @@ def _construct_patient_document(
     patient_document["activityLogs"] = activity_logs
 
     # Activity Schedules
-    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(
-        collection=patient_collection
+    activity_schedules = (
+        scope.database.patient.activity_schedules.get_activity_schedules(
+            collection=patient_collection
+        )
     )
     patient_document["activitySchedules"] = activity_schedules
 
@@ -88,6 +91,14 @@ def _construct_patient_document(
     )
     patient_document["moodLogs"] = mood_logs
 
+    # Notification Permissions
+    notification_permissions = (
+        scope.database.patient.notification_permissions.get_notification_permissions(
+            collection=patient_collection
+        )
+    )
+    patient_document["notificationPermissions"] = notification_permissions
+
     # Profile
     profile = scope.database.patient.patient_profile.get_patient_profile(
         collection=patient_collection
@@ -101,14 +112,18 @@ def _construct_patient_document(
     patient_document["safetyPlan"] = safety_plan
 
     # Scheduled Assessments
-    scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    scheduled_assessments = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
     patient_document["scheduledAssessments"] = scheduled_assessments
 
     # Scheduled Activities
-    scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities(
-        collection=patient_collection
+    scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
     )
     patient_document["scheduledActivities"] = scheduled_activities
 
@@ -119,9 +134,7 @@ def _construct_patient_document(
     patient_document["sessions"] = sessions
 
     # Values
-    values = scope.database.patient.values.get_values(
-        collection=patient_collection
-    )
+    values = scope.database.patient.values.get_values(collection=patient_collection)
     patient_document["values"] = values
 
     # Values Inventory
