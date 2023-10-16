@@ -31,6 +31,10 @@ from scope.database.patient.mood_logs import (
     post_mood_log,
     put_mood_log,
 )
+from scope.database.patient.notification_permissions import (
+    get_notification_permissions,
+    put_notification_permissions,
+)
 from scope.database.patient.patient_profile import (
     get_patient_profile,
     put_patient_profile,
