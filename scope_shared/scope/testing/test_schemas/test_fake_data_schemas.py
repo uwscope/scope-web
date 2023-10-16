@@ -36,6 +36,7 @@ import scope.testing.fake_data.fixtures_fake_contact
 import scope.testing.fake_data.fixtures_fake_life_area_contents
 import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
+import scope.testing.fake_data.fixtures_fake_notification_permissions
 import scope.testing.fake_data.fixtures_fake_patient_profile
 import scope.testing.fake_data.fixtures_fake_provider_identity
 import scope.testing.fake_data.fixtures_fake_referral_status
@@ -240,6 +241,16 @@ TEST_CONFIGS = [
         data_factory_fixture="data_fake_mood_logs_factory",
         expected_document=False,
         expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="notification-permissions",
+        schema=scope.schema.notification_permissions_schema,
+        data_factory_fixture="data_fake_notification_permissions_factory",
+        expected_document=True,
+        expected_singleton=True,
         expected_set_element=False,
         expected_semantic_set_id=None,
         expected_set_ids=None,
