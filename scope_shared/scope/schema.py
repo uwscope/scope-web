@@ -30,6 +30,7 @@ life_area_contents_schema: Optional[jschon.JSONSchema] = None
 log_schema: Optional[jschon.JSONSchema] = None
 mood_log_schema: Optional[jschon.JSONSchema] = None
 mood_logs_schema: Optional[jschon.JSONSchema] = None
+notification_permissions_schema: Optional[jschon.JSONSchema] = None
 patient_schema: Optional[jschon.JSONSchema] = None
 patients_schema: Optional[jschon.JSONSchema] = None
 patient_identity_schema: Optional[jschon.JSONSchema] = None
@@ -95,6 +96,7 @@ SCHEMAS = {
     "clinical_history_schema": "documents/clinical-history.json",
     "mood_log_schema": "documents/mood-log.json",
     "mood_logs_schema": "documents/mood-logs.json",
+    "notification_permissions_schema": "documents/notification-permissions.json",
     "patient_identity_schema": "documents/patient-identity.json",
     "patient_identities_schema": "documents/patient-identities.json",
     "patient_profile_schema": "documents/patient-profile.json",
