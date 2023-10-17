@@ -40,6 +40,9 @@
             "$ref": "/schemas/documents/patient-profile"
         },
         {
+            "$ref": "/schemas/documents/push-subscription"
+        },
+        {
             "$ref": "/schemas/documents/safety-plan"
         },
         {

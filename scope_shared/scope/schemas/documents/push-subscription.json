@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://uwscope.org/schemas/documents/push-subscription",
+    "title": "IPushSubscription",
+    "description": "IPushSubscription Type",
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string"
+        },
+        "_type": {
+            "const": "pushSubscription"
+        },
+        "_set_id": {
+            "type": "string"
+        },
+        "_rev": {
+            "type": "number"
+        },
+        "pushSubscriptionId": {
+            "type": "string"
+        },
+        "endpoint": {
+            "type": "string"
+        },
+        "expirationTime": {
+            "type": ["number", "null"]
+        },
+        "keys": {
+            "type": "object",
+            "properties": {
+                "p256dh": {
+                    "type": "string"
+                },
+                "auth": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "required": ["p256dh", "auth"]
+        }
+    },
+    "additionalProperties": false,
+    "required": ["_type", "endpoint", "expirationTime", "keys"]
+}

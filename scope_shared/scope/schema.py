@@ -41,6 +41,8 @@ populate_config_schema: Optional[jschon.JSONSchema] = None
 populate_config_account_schema: Optional[jschon.JSONSchema] = None
 provider_identity_schema: Optional[jschon.JSONSchema] = None
 provider_identities_schema: Optional[jschon.JSONSchema] = None
+push_subscription_schema: Optional[jschon.JSONSchema] = None
+push_subscriptions_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
 regexes: Optional[jschon.JSONSchema] = None
 resource_content_schema: Optional[jschon.JSONSchema] = None
@@ -102,6 +104,8 @@ SCHEMAS = {
     "patient_profile_schema": "documents/patient-profile.json",
     "provider_identity_schema": "documents/provider-identity.json",
     "provider_identities_schema": "documents/provider-identities.json",
+    "push_subscription_schema": "documents/push-subscription.json",
+    "push_subscriptions_schema": "documents/push-subscriptions.json",
     "safety_plan_schema": "documents/safety-plan.json",
     "scheduled_activity_schema": "documents/scheduled-activity.json",
     "scheduled_activities_schema": "documents/scheduled-activities.json",

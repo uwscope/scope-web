@@ -9,6 +9,7 @@ import blueprints.identities
 import blueprints.app.config
 import blueprints.patient.summary
 import blueprints.patient.notification_permissions
+import blueprints.patient.push_subscriptions
 import blueprints.registry.activities
 import blueprints.registry.activity_logs
 import blueprints.registry.activity_schedules
@@ -140,6 +141,10 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.assessments.assessments_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.patient.push_subscriptions.push_subscriptions_blueprint,
         url_prefix="/patient/",
     )
     app.register_blueprint(
