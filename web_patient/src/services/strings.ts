@@ -51,6 +51,11 @@ const _strings = {
     Form_mood_submit_success_2_after_link:
         '.',
 
+    Form_medication_logging_medication_question_prompt: 'Do you have questions for your psychosocial care team about any of the medications you are taking?',
+    Form_medication_logging_medication_note_prompt: 'What question about your medications would you like to ask your phsychosocial team?',
+    Form_medication_logging_medication_note_subprompt: '(If this is an emergency, please contact your medical team, call 911, or go to the nearest emergency room)',
+    Form_medication_logging_medication_note_subprompt_helper_text: 'This is a place you can remind yourself of any side effects or other medication questions you would like to discuss with your psychosocial team.',
+
     Form_assessment_checkin_title: 'Check-In',
     Form_assessment_score_column_name: 'Score',
     Form_assessment_comment_prompt: 'Do you have any other notes?',
@@ -162,6 +167,7 @@ const _strings = {
     Progress_gad_assessment_title: 'Anxiety Check-In',
     Progress_activity_tracking_title: 'Activity Tracking',
     Progress_mood_tracking_title: 'Mood Tracking',
+    Progress_medication_tracking_title: 'Medication Check-in',
 
     Activity_tracking_column_date: 'Date',
     Activity_tracking_column_name: 'Activity Name',
@@ -192,8 +198,12 @@ const _strings = {
     Assessment_progress_column_comment: 'Note',
     Assessment_progress_no_data: 'There are no submitted data for this assessment.',
 
+    Medication_progress_adherence: 'Took all meds for last 7 days',
+    Medication_progress_note: 'Question or Comment for Care Team',
+
     Progress_phq_assessment_detail_title: 'Depression Assessment',
     Progress_gad_assessment_detail_title: 'Anxiety Assessment',
+    Progress_medication_assessment_detail_title: 'Medication Assessment',
 
     Careplan_no_tasks: 'There are no planned activities for this day.',
     Careplan_view_calendar: 'Calendar View',

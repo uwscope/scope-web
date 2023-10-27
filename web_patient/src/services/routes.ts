@@ -13,6 +13,7 @@ export const Routes = {
     gadProgress: 'gad',
     activityProgress: 'activities',
     moodProgress: 'mood',
+    medicationProgress: 'medication',
 };
 
 export const Parameters = {
@@ -27,19 +28,20 @@ export const Parameters = {
 
 export const ParameterValues = {
     form: {
-        moodLog: 'log-mood',
-        assessmentLog: 'log-assessment',
         activityLog: 'log-activity',
         addActivity: 'add-activity',
         addActivitySchedule: 'add-activity-schedule',
+        assessmentLog: 'log-assessment',
         editActivity: 'edit-activity',
         editActivitySchedule: 'edit-activity-schedule',
+        medicationLog: 'log-medication',
+        moodLog: 'log-mood',
         safetyPlan: 'safety-plan',
     },
     addSchedule: {
         true: 'true',
         false: 'false',
-    }
+    },
 };
 
 export const getRouteParameter = (paramName: string) => {

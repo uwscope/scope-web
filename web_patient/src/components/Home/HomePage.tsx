@@ -25,6 +25,7 @@ import { getString } from 'src/services/strings';
 import { useStores } from 'src/stores/stores';
 import { getGreeting } from 'src/utils/schedule';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 const CompactList = withTheme(
     styled(List)((props) => ({
@@ -75,6 +76,7 @@ export const HomePage: FunctionComponent = observer(() => {
         navigate(`${Routes.resources}/${Routes.valuesInventory}`);
     });
 
+
     return (
         <MainPage title={getGreeting(new Date())}>
             {!!rootStore.inspirationalQuote ? (
@@ -122,10 +124,18 @@ export const HomePage: FunctionComponent = observer(() => {
                                     <ListItem
                                         button
                                         component={Link}
-                                        to={getFormPath(ParameterValues.form.assessmentLog, {
-                                            [Parameters.taskId]: assessment.scheduledAssessmentId,
-                                            [Parameters.assessmentId]: assessment.assessmentId,
-                                        })}>
+                                        to={
+                                            _.isEqual(assessment.assessmentId, "medication")
+                                                ? getFormPath(ParameterValues.form.medicationLog, {
+                                                    [Parameters.taskId]: assessment.scheduledAssessmentId,
+                                                    [Parameters.assessmentId]: assessment.assessmentId,
+                                                })
+                                                : getFormPath(ParameterValues.form.assessmentLog, {
+                                                    [Parameters.taskId]: assessment.scheduledAssessmentId,
+                                                    [Parameters.assessmentId]: assessment.assessmentId,
+                                                })
+                                        }
+                                    >
                                         <ListItemAvatar>
                                             <Avatar
                                                 variant="square"
