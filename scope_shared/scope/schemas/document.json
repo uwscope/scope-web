@@ -28,9 +28,6 @@
             "$ref": "/schemas/documents/mood-log"
         },
         {
-            "$ref": "/schemas/documents/notification-permissions"
-        },
-        {
             "$ref": "/schemas/documents/patient-identity"
         },
         {

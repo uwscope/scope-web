@@ -38,9 +38,6 @@
         "moodLogs": {
             "$ref": "/schemas/documents/mood-logs"
         },
-        "notificationPermissions": {
-            "$ref": "/schemas/documents/notification-permissions"
-        },
         "profile": {
             "type": "object",
             "description": "IPatientProfile schema",

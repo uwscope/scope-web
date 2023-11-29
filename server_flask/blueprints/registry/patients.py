@@ -13,8 +13,8 @@ import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
-import scope.database.patient.notification_permissions
 import scope.database.patient.patient_profile
+import scope.database.patient.push_subscriptions
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -91,19 +91,19 @@ def _construct_patient_document(
     )
     patient_document["moodLogs"] = mood_logs
 
-    # Notification Permissions
-    notification_permissions = (
-        scope.database.patient.notification_permissions.get_notification_permissions(
-            collection=patient_collection
-        )
-    )
-    patient_document["notificationPermissions"] = notification_permissions
-
     # Profile
     profile = scope.database.patient.patient_profile.get_patient_profile(
         collection=patient_collection
     )
     patient_document["profile"] = profile
+
+    # Push Subscriptions
+    push_subscriptions = (
+        scope.database.patient.push_subscriptions.get_push_subscriptions(
+            collection=patient_collection
+        )
+    )
+    patient_document["pushSubscriptions"] = push_subscriptions
 
     # Safety Plan
     safety_plan = scope.database.patient.safety_plan.get_safety_plan(

@@ -54,19 +54,6 @@ TEST_CONFIGS = [
             singleton_will_already_exist=True,
         ),
     ),
-    # NOTE: Confirm w/ James where to test this because it should be in patient folder.
-    ConfigTestPatientSingleton(
-        name="notificationpermissions",
-        document_factory_fixture="data_fake_notification_permissions_factory",
-        database_get_function=scope.database.patient.get_notification_permissions,
-        database_unsafe_update_function=scope.database.patient_unsafe_utils.unsafe_update_notification_permissions,
-        database_unsafe_update_document_parameter="notification_permissions",
-        flask_query_type="notificationpermissions",
-        flask_document_key="notificationpermissions",
-        options=ConfigTestPatientSingletonOptions(
-            singleton_will_already_exist=False,
-        ),
-    ),
     ConfigTestPatientSingleton(
         name="profile",
         document_factory_fixture="data_fake_patient_profile_factory",
