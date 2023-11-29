@@ -18,6 +18,7 @@ setuptools.setup(
         "pyjwt",
         "pymongo",
         "pytz",
+        "pywebpush",
         # pyzipper is used in populate scripts
         "pyzipper",
         "requests",
