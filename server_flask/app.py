@@ -8,8 +8,7 @@ from flask_json import FlaskJSON, as_json
 import blueprints.identities
 import blueprints.app.config
 import blueprints.patient.summary
-import blueprints.patient.notification_permissions
-import blueprints.patient.push_subscriptions
+
 import blueprints.registry.activities
 import blueprints.registry.activity_logs
 import blueprints.registry.activity_schedules
@@ -21,6 +20,7 @@ import blueprints.registry.mood_logs
 import blueprints.registry.patient_profile
 import blueprints.registry.patients
 import blueprints.registry.providers
+import blueprints.patient.push_subscriptions
 import blueprints.registry.safety_plan
 import blueprints.registry.sessions
 import blueprints.registry.scheduled_activities
@@ -133,10 +133,6 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.mood_logs.mood_logs_blueprint,
-        url_prefix="/patient/",
-    )
-    app.register_blueprint(
-        blueprints.patient.notification_permissions.notification_permissions_blueprint,
         url_prefix="/patient/",
     )
     app.register_blueprint(
