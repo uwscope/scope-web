@@ -9,6 +9,7 @@ import tasks.database
 import tasks.documentdb
 import tasks.dependencies
 import tasks.notebooks
+import tasks.notifications
 import tasks.server_flask
 import tasks.web_patient
 import tasks.web_registry
@@ -39,6 +40,9 @@ compose_collection(ns, tasks.dependencies.ns, name="depend")
 # Compose from notebooks.py
 compose_collection(ns, tasks.notebooks.ns, name="notebooks")
 
+# Compose from notifications.py
+compose_collection(ns, tasks.notifications.ns, name="notifications")
+
 # Compose from test.py
 compose_collection(ns, tasks.test.ns, name="test")
 
@@ -59,8 +63,12 @@ ns_prod_server = Collection("server")
 # compose_collection(ns_prod_server, tasks.celery.ns.collections["prod"], name="celery")
 
 # Compose from server_flask.py
-compose_collection(ns_dev_server, tasks.server_flask.ns.collections["dev"], name="flask")
-compose_collection(ns_prod_server, tasks.server_flask.ns.collections["prod"], name="flask")
+compose_collection(
+    ns_dev_server, tasks.server_flask.ns.collections["dev"], name="flask"
+)
+compose_collection(
+    ns_prod_server, tasks.server_flask.ns.collections["prod"], name="flask"
+)
 
 compose_collection(ns_dev, ns_dev_server, name="server")
 compose_collection(ns_prod, ns_prod_server, name="server")
