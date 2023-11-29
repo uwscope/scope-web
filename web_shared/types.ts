@@ -316,6 +316,9 @@ export interface IPatient {
 
     // Mood logs
     moodLogs: IMoodLog[];
+
+    // Push Subscriptions
+    pushSubscriptions: IPushSubscription[];
 }
 
 export interface IPatientList {
@@ -352,7 +355,11 @@ export interface IAssessmentContent {
     questions: { question: string; id: string }[];
     options: { text: string; value: number }[];
     interpretationName: string;
-    interpretationTable: { score: string; max: number; interpretation: string }[];
+    interpretationTable: {
+        score: string;
+        max: number;
+        interpretation: string;
+    }[];
 }
 
 export interface ILifeAreaContent {
@@ -370,6 +377,16 @@ export interface IResourceContent {
 export interface IResourceItem {
     name: string;
     filename: string;
+}
+
+export interface IPushSubscription {
+    pushSubscriptionId?: string;
+    endpoint: string;
+    expirationTime: any;
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
 }
 
 export const isSession = (session: ISession | ICaseReview): session is ISession => {

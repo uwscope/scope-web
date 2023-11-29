@@ -11,6 +11,7 @@ import {
     IPatientIdentity,
     IPatientProfile,
     IProviderIdentity,
+    IPushSubscription,
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
@@ -95,6 +96,20 @@ export interface IMoodLogResponse extends IServiceResponse {
 export interface IMoodLogRequest {
     moodlog: IMoodLog;
 }
+
+
+export interface IPushSubscriptionListResponse extends IServiceResponse {
+    pushsubscriptions: IPushSubscription[];
+}
+
+export interface IPushSubscriptionResponse extends IServiceResponse {
+    pushsubscription: IPushSubscription;
+}
+
+export interface IPushSubscriptionRequest {
+    pushsubscription: IPushSubscription;
+}
+
 
 export interface IActivityListResponse extends IServiceResponse {
     activities: IActivity[];

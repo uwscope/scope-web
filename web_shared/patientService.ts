@@ -40,6 +40,9 @@ import {
     IValueRequest,
     IValueResponse,
     IValueListResponse,
+    IPushSubscriptionListResponse,
+    IPushSubscriptionResponse,
+    IPushSubscriptionRequest,
 } from 'shared/serviceTypes';
 import {
     IActivity,
@@ -53,6 +56,7 @@ import {
     IPatient,
     IPatientConfig,
     IPatientProfile,
+    IPushSubscription,
     ISafetyPlan,
     IScheduledActivity,
     IScheduledAssessment,
@@ -115,6 +119,11 @@ export interface IPatientService extends IServiceBase {
 
     getMoodLogs(): Promise<IMoodLog[]>;
     addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
+
+    getPushSubscriptions(): Promise<IPushSubscription[]>;
+    addPushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
+    deletePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
+    updatePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
 
     getValues(): Promise<IValue[]>;
     addValue(value: IValue): Promise<IValue>;
@@ -430,6 +439,46 @@ class PatientService extends ServiceBase implements IPatientService {
             moodlog: moodLog,
         } as IMoodLogRequest);
         return response.data?.moodlog;
+    }
+
+    public async addPushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+        (pushSubscription as any)._type = 'pushSubscription';
+
+        const response = await this.axiosInstance.post<IPushSubscriptionResponse>(`/pushsubscriptions`, {
+            pushsubscription: pushSubscription,
+        } as IPushSubscriptionRequest);
+        return response.data?.pushsubscription;
+    }
+
+    public async getPushSubscriptions(): Promise<IPushSubscription[]> {
+        const response = await this.axiosInstance.get<IPushSubscriptionListResponse>(`/pushsubscriptions`);
+        return response.data?.pushsubscriptions;
+    }
+
+    public async deletePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+        logger.assert((pushSubscription as any)._rev != undefined, '_rev should be in the request data');
+        const response = await this.axiosInstance.delete<IPushSubscriptionResponse>(
+            `/pushsubscription/${pushSubscription.pushSubscriptionId}`,
+            {
+                headers: {
+                    'If-Match': (pushSubscription as any)._rev,
+                },
+            },
+        );
+        return response.data?.pushsubscription;
+    }
+
+    public async updatePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+        (pushSubscription as any)._type = 'pushSubscription';
+        logger.assert((pushSubscription as any)._rev != undefined, '_rev should be in the request data');
+        logger.assert((pushSubscription as any)._set_id != undefined, '_set_id should be in the request data');
+        const response = await this.axiosInstance.put<IPushSubscriptionResponse>(
+            `/pushsubscription/${pushSubscription.pushSubscriptionId}`,
+            {
+                pushsubscription: pushSubscription,
+            } as IPushSubscriptionRequest,
+        );
+        return response.data?.pushsubscription;
     }
 
     public async getValues(): Promise<IValue[]> {
