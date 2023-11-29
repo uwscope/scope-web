@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://uwscope.org/schemas/documents/web-push",
+    "title": "Webpush Details",
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string"
+        },
+        "_type": {
+            "const": "webpushResponse"
+        },
+        "_set_id": {
+            "type": "string"
+        },
+        "_rev": {
+            "type": "number"
+        },
+        "webPushId": {
+            "type": "string"
+        },
+        "message": {
+            "type": "string"
+        },
+        "response": {
+            "type": "string"
+        },
+        "editedDateTime": {
+            "$ref": "/schemas/utils/datetime#/properties/datetime"
+        }
+    },
+    "additionalProperties": false,
+    "required": ["_type", "message", "response", "editedDateTime"]
+}
