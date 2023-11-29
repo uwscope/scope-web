@@ -279,6 +279,8 @@ const _strings = {
     Resources_crisis_resources_subtitle: 'Crisis resources and hotlines',
     Resources_logout_title: 'Log out',
     Resources_logout_subtitle: 'Log out of the app',
+    Resources_notifications_title: 'Notification Preferences',
+    Resources_notifications_subtitle: 'Enable or disable app nofications',
 
     Safetyplan_title: 'Safety Plan',
     Safetyplan_reasons_for_living_title: 'Reasons for living',

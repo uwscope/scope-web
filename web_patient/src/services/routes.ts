@@ -9,6 +9,7 @@ export const Routes = {
     worksheets: 'worksheets',
     aboutus: 'aboutus',
     crisisresources: 'crisisresources',
+    notifications: 'notifications',
     phqProgress: 'phq',
     gadProgress: 'gad',
     activityProgress: 'activities',
