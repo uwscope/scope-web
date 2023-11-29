@@ -7,6 +7,24 @@ DOCUMENT_TYPE = "pushSubscription"
 SEMANTIC_SET_ID = "pushSubscriptionId"
 
 
+def delete_push_subscription(
+    *,
+    collection: pymongo.collection.Collection,
+    set_id: str,
+    rev: int,
+) -> scope.database.collection_utils.SetPutResult:
+    """
+    Delete "push-subscription" document.
+    """
+
+    return scope.database.collection_utils.delete_set_element(
+        collection=collection,
+        document_type=DOCUMENT_TYPE,
+        set_id=set_id,
+        rev=rev,
+    )
+
+
 def get_push_subscriptions(
     *,
     collection: pymongo.collection.Collection,
