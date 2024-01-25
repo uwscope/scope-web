@@ -304,7 +304,7 @@
 		"sessionType": {
 			"type": "string",
 			"description": "SessionType Type",
-			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "Other"]
+			"enum": ["In person", "Telehealth", "Phone", "Group", "Home", "No show", "Other"]
 		},
 		"setType": {
 			"type": "string",
