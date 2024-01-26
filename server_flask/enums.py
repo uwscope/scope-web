@@ -115,6 +115,7 @@ class SessionType(Enum):
     Phone = "Phone"
     Group = "Group"
     Home = "Home"
+    NoShow = "No show"
 
 
 class TreatmentPlan(Enum):
