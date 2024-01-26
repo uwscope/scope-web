@@ -86,7 +86,7 @@ export type Referral = typeof referralValues[number];
 export const referralStatusValues = ['Not Referred', 'Pending', 'Active', 'Completed'] as const;
 export type ReferralStatus = typeof referralStatusValues[number];
 
-export const sessionTypeValues = ['In person', 'Telehealth', 'Phone', 'Group', 'Home'] as const;
+export const sessionTypeValues = ['In person', 'Telehealth', 'Phone', 'Group', 'Home', 'No show'] as const;
 export type SessionType = typeof sessionTypeValues[number] | OtherSpecify;
 
 export const treatmentPlanValues = [
