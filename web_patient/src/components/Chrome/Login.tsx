@@ -37,7 +37,8 @@ const LoginForm: FunctionComponent<{
     const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = () => {
-        onLogin && onLogin(email, password);
+        // Trim the password in case it has a trailing space
+        onLogin && onLogin(email, password.trim());
     };
 
     const togglePassword = () => {
@@ -84,7 +85,9 @@ const LoginForm: FunctionComponent<{
                     onChange={(e) => setPassword(
                         // Password can include an interior space,
                         // but cannot include any other whitespace.
-                        e.target.value.replace(/[\t\r\n\f]/g, '').trim()
+                        // We must allow a right-side space for now,
+                        // as additional typing could turn it into an interior space.
+                        e.target.value.replace(/[\t\r\n\f]/g, '').trimLeft()
                     )}
                     InputLabelProps={{
                         shrink: true,
