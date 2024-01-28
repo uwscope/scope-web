@@ -32,20 +32,20 @@ const LoginForm: FunctionComponent<{
     error?: string;
 }> = (props) => {
     const { onLogin, error } = props;
-    const [email, setEmail] = useState('');
+    const [account, setAccount] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = () => {
         // Trim the password in case it has a trailing space
-        onLogin && onLogin(email, password.trim());
+        onLogin && onLogin(account, password.trim());
     };
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
 
-    const canLogin = !!email && !!password;
+    const canLogin = !!account && !!password;
 
     return (
         <Fragment>
@@ -59,8 +59,8 @@ const LoginForm: FunctionComponent<{
                     required
                     margin="normal"
                     variant="standard"
-                    value={email}
-                    onChange={(e) => setEmail(
+                    value={account}
+                    onChange={(e) => setAccount(
                         // Username cannot include whitespace.
                         e.target.value.replace(/\s/g, '')
                     )}
