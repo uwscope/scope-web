@@ -557,6 +557,12 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const valueValidateName = () => {
+        //
+        // This function effectively duplicates valueValidateName in AddEditActivityForm
+        //
+        // They should be consolidated for avoiding confusion in maintenance
+        //
+
         // Value name must be unique within the life area, accounting for case-insensitive comparisons
         const nameIsUnique: boolean =
             patientStore
@@ -570,8 +576,8 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     return true;
                 })
                 .findIndex((value: IValue): boolean => {
-                    // Search for a case-insensitive match
-                    return value.name.toLocaleLowerCase() == viewState.name.toLocaleLowerCase();
+                    // Search for a case-insensitive match, trimming any whitespace
+                    return value.name.toLocaleLowerCase().trim() == viewState.name.toLocaleLowerCase().trim();
                 }) < 0;
 
         return nameIsUnique;
