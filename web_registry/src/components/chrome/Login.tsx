@@ -88,7 +88,7 @@ const LoginForm: FunctionComponent<{
                         // We must allow a right-side space for now,
                         // as additional typing could turn it into an interior space.
                         // We will then trim the string whenever extracting it from this field.
-                        e.target.value.replace(/[\t\r\n\f]/g, '').trimLeft()
+                        e.target.value.replace(/[\t\r\n\f]/g, '').trimStart()
                     )}
                     InputLabelProps={{
                         shrink: true,
