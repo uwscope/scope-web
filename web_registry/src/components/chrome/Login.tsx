@@ -32,19 +32,20 @@ const LoginForm: FunctionComponent<{
     error?: string;
 }> = (props) => {
     const { onLogin, error } = props;
-    const [email, setEmail] = useState('');
+    const [account, setAccount] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = () => {
-        onLogin && onLogin(email, password);
+        // Trim the password in case it has a trailing space
+        onLogin && onLogin(account, password.trim());
     };
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
 
-    const canLogin = !!email && !!password;
+    const canLogin = !!account && !!password;
 
     return (
         <Fragment>
@@ -58,8 +59,11 @@ const LoginForm: FunctionComponent<{
                     required
                     margin="normal"
                     variant="standard"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={account}
+                    onChange={(e) => setAccount(
+                        // Username cannot include whitespace.
+                        e.target.value.replace(/\s/g, '')
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -78,7 +82,14 @@ const LoginForm: FunctionComponent<{
                     variant="standard"
                     margin="normal"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(
+                        // Password can include an interior space,
+                        // but cannot include any other whitespace.
+                        // We must allow a right-side space for now,
+                        // as additional typing could turn it into an interior space.
+                        // We will then trim the string whenever extracting it from this field.
+                        e.target.value.replace(/[\t\r\n\f]/g, '').trimStart()
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -123,15 +134,40 @@ const PasswordUpdateForm: FunctionComponent<{
     const [passwordRepeat, setPasswordRepeat] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
+    const validPassword =
+        // Password exists
+        !!password &&
+        // Allowable length
+        (password.length >= 8) &&
+        (password.length <= 128) &&
+        // No space (e.g., no interior space)
+        // Cognito will allow an interior space, but we will not
+        !!password.match(/^\S+$/) &&
+        // Require uppercase
+        !!password.match(/(?=.*[A-Z])/) &&
+        // Require lowercase
+        !!password.match(/(?=.*[a-z])/) &&
+        // Require digit
+        !!password.match(/(?=.*[0-9])/) &&
+        // Require symbol
+        // Defined by Cognito as ^ $ * . [ ] { } ( ) ? " ! @ # % & / \ , > < ' : ; | _ ~ ` = + -
+        // https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-policies.html
+        !!password.match(/(?=.*[\^$*.\[\]{}\(\)?“!@#%&/\\,><\’:;|_~`=+\-])/);
+
+    const canSubmit: boolean =
+        validPassword &&
+        // Passwords must match
+        // Trim any trailing space before comparing
+        // Should not matter because of trim on change
+        (password.trim() === passwordRepeat.trim());
+
     const onSubmit = () => {
-        onUpdate && onUpdate(password);
+        canSubmit && !!onUpdate && onUpdate(password.trim());
     };
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
-
-    const canSubmit = !!password && password === passwordRepeat;
 
     return (
         <Fragment>
@@ -154,6 +190,9 @@ const PasswordUpdateForm: FunctionComponent<{
                 <li>
                     <Typography variant="caption">Must contain symbol characters</Typography>
                 </li>
+                <li>
+                    <Typography variant="caption">Must not include spaces</Typography>
+                </li>
             </ul>
             <FormControl error={!!error} fullWidth>
                 <TextField
@@ -165,7 +204,14 @@ const PasswordUpdateForm: FunctionComponent<{
                     variant="standard"
                     margin="normal"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(
+                        // Cognito allows passwords to include an interior space,
+                        // but that is confusing and causes issues with temporarily allowing trailing spaces.
+                        // We will decide to not allow creation of passwords including an interior space.
+                        // Continuously trim input so spaces are not added,
+                        // then we will separately validate lack of spaces to handle the copy-paste scenario.
+                        e.target.value.trim()
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -180,17 +226,25 @@ const PasswordUpdateForm: FunctionComponent<{
                             </InputAdornment>
                         ),
                     }}
+                    error={!validPassword}
                 />
                 <TextField
-                    label="Password-retype"
-                    placeholder="Retype password"
+                    label="Confirm Password"
+                    placeholder="Confirm password"
                     type="password"
                     fullWidth
                     required
                     variant="standard"
                     margin="normal"
                     value={passwordRepeat}
-                    onChange={(e) => setPasswordRepeat(e.target.value)}
+                    onChange={(e) => setPasswordRepeat(
+                        // Cognito allows passwords to include an interior space,
+                        // but that is confusing and causes issues with temporarily allowing trailing spaces.
+                        // We will decide to not allow creation of passwords including an interior space.
+                        // Continuously trim input so spaces are not added,
+                        // then we will separately validate lack of spaces to handle the copy-paste scenario.
+                        e.target.value.trim()
+                    )}
                     InputLabelProps={{
                         shrink: true,
                     }}
