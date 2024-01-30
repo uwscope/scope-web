@@ -5,6 +5,7 @@ import {
     GridCellParams,
     GridColDef,
     GridColumnHeaderParams,
+    GridComparatorFn,
     GridRowParams,
 } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
@@ -105,6 +106,31 @@ export interface ICaseloadTableProps {
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
     const { patients, onPatientClick } = props;
 
+    const renderedDateComparator: GridComparatorFn = (v1, v2) => {
+        const v1String = (v1 as string);
+        const v2String = (v2 as string);
+
+        const regexpRenderedDate = /(\d\d)\/(\d\d)\/(\d\d)/;
+
+        if (v1String === NA || v2String === NA) {
+            if (v1String !== NA) {
+                return 1;
+            } else if (v2String !== NA) {
+                return -1;
+            } else {
+                return 0;
+            }
+        } else {
+            const v1Parsed = v1String.match(regexpRenderedDate) as string[];
+            const v2Parsed = v2String.match(regexpRenderedDate) as string[];
+
+            const v1SortKey = `${v1Parsed[3]}/${v1Parsed[1]}/${v1Parsed[2]}`;
+            const v2SortKey = `${v2Parsed[3]}/${v2Parsed[1]}/${v2Parsed[2]}`;
+
+            return v1SortKey.localeCompare(v2SortKey);
+        }
+    }
+
     const onRowClick = (param: GridRowParams) => {
         if (!!onPatientClick) {
             const mrn = param.row['MRN'];
@@ -162,6 +188,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: renderedDateComparator,
         },
         {
             field: 'recentSession',
@@ -171,6 +198,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: renderedDateComparator,
         },
         {
             field: 'recentCaseReview',
@@ -180,6 +208,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: renderedDateComparator,
         },
         {
             field: 'nextSessionDue',
@@ -189,6 +218,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: renderedDateComparator,
         },
         {
             field: 'totalSessions',
@@ -242,6 +272,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderHeader,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: renderedDateComparator,
         },
         {
             field: 'initialGAD',
@@ -277,6 +308,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderHeader,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: renderedDateComparator,
         },
     ];
 
