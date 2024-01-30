@@ -398,6 +398,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: 'name', sort: 'asc'}]
+                    }
+                }}
             />
         </TableContainer>
     );
