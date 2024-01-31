@@ -123,6 +123,10 @@ const renderFlagCell = (props: GridCellParams) => {
     );
 };
 
+const rowDefaultComparator = (v1: { name: string; }, v2: { name: string; }) => {
+    return v1.name.localeCompare(v2.name);
+}
+
 const NA = '--';
 
 export interface ICaseloadTableProps {
@@ -388,7 +392,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             initialAtRisk,
             lastAtRisk,
         };
-    });
+    }).sort(rowDefaultComparator);
 
     return (
         <TableContainer>
