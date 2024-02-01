@@ -294,6 +294,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: renderChangeCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'lastPHQDate',
@@ -333,6 +334,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: renderChangeCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'lastGADDate',
