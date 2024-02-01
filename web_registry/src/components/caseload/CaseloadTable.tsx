@@ -9,6 +9,7 @@ import {
     GridRowParams,
     GridValueFormatterParams,
     gridDateComparator,
+    gridNumberComparator,
 } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
 import React, { FunctionComponent } from 'react';
@@ -84,7 +85,7 @@ const dateValueComparator: GridComparatorFn = (v1, v2) => {
 
         return gridDateComparator(v1Date, v2Date);
     }
-}
+};
 
 const dateValueFormatter = (params: GridValueFormatterParams) => {
     if (params.value === null) {
@@ -92,7 +93,24 @@ const dateValueFormatter = (params: GridValueFormatterParams) => {
     }
 
     return formatDateOnly(params.value as Date, 'MM/dd/yy');
-}
+};
+
+const numericValueComparator: GridComparatorFn = (v1, v2, cellParams1, cellParams2) => {
+	if (v1 === NA || v2 === NA) {
+		if (v1 !== NA) {
+			return -1;
+		} else if (v2 !== NA) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else {
+		const v1Number = v1 as Number;
+		const v2Number = v2 as Number;
+
+		return gridNumberComparator(v1Number, v2Number, cellParams1, cellParams2);
+	}
+};
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
@@ -256,6 +274,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: (props) => renderPHQCell(props, 'initialAtRisk'),
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'lastPHQ',
@@ -265,6 +284,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: (props) => renderPHQCell(props, 'lastAtRisk'),
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'changePHQ',
@@ -293,6 +313,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: renderGADCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'lastGAD',
@@ -302,6 +323,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             renderCell: renderGADCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: numericValueComparator,
         },
         {
             field: 'changeGAD',
