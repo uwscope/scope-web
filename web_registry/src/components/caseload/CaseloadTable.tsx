@@ -96,20 +96,20 @@ const dateValueFormatter = (params: GridValueFormatterParams) => {
 };
 
 const numericValueComparator: GridComparatorFn = (v1, v2, cellParams1, cellParams2) => {
-	if (v1 === NA || v2 === NA) {
-		if (v1 !== NA) {
-			return -1;
-		} else if (v2 !== NA) {
-			return 1;
-		} else {
-			return 0;
-		}
-	} else {
-		const v1Number = v1 as Number;
-		const v2Number = v2 as Number;
+    if (v1 === NA || v2 === NA) {
+        if (v1 !== NA) {
+            return -1;
+        } else if (v2 !== NA) {
+            return 1;
+        } else {
+            return 0;
+        }
+    } else {
+        const v1Number = v1 as Number;
+        const v2Number = v2 as Number;
 
-		return gridNumberComparator(v1Number, v2Number, cellParams1, cellParams2);
-	}
+        return gridNumberComparator(v1Number, v2Number, cellParams1, cellParams2);
+    }
 };
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
