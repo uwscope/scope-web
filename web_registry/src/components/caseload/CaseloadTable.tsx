@@ -70,45 +70,14 @@ const YellowFlag = withTheme(
     })),
 );
 
-const dateValueComparator: GridComparatorFn = (v1, v2) => {
-    if (v1 === null || v2 === null) {
-        if (v1 !== null) {
-            return -1;
-        } else if (v2 !== null) {
-            return 1;
-        } else {
-            return 0;
         }
-    } else {
-        const v1Date = v1 as Date;
-        const v2Date = v2 as Date;
-
-        return gridDateComparator(v1Date, v2Date);
-    }
-};
-
-const dateValueFormatter = (params: GridValueFormatterParams) => {
-    if (params.value === null) {
-        return NA;
     }
 
-    return formatDateOnly(params.value as Date, 'MM/dd/yy');
-};
+    }
 
-const numericValueComparator: GridComparatorFn = (v1, v2, cellParams1, cellParams2) => {
-    if (v1 === NA || v2 === NA) {
-        if (v1 !== NA) {
-            return -1;
-        } else if (v2 !== NA) {
-            return 1;
         } else {
-            return 0;
         }
-    } else {
-        const v1Number = v1 as Number;
-        const v2Number = v2 as Number;
 
-        return gridNumberComparator(v1Number, v2Number, cellParams1, cellParams2);
     }
 };
 
