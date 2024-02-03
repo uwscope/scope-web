@@ -186,6 +186,9 @@ const renderFlagCell = (props: GridCellParams) => {
 };
 
 const rowDefaultComparator = (v1: { name: string; }, v2: { name: string; }) => {
+    // This comparator is applied to sort rows before they are provided to the grid.
+    // When no sort is selected in the grid, this controls the rendering order.
+    // When a sort is selected in the grid, this becomes the secondary sorting criterion.
     return v1.name.localeCompare(v2.name);
 }
 
