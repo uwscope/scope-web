@@ -47,7 +47,7 @@
         "@types/react-router": "5.1.x",
         "@types/react-router-dom": "5.3.x",
         "@types/react-vis": "1.11.x",
-        "@types/styled-components": "5.1.x",
+        "@types/styled-components": "5.1.21",
         "babel-loader": "8.2.x",
         "copy-webpack-plugin": "9.1.x",
         "express": "4.17.x",
