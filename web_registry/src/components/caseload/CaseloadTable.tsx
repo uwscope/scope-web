@@ -3,13 +3,16 @@ import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import {
     GridCellParams,
+    GridCellValue,
     GridColDef,
     GridColumnHeaderParams,
     GridComparatorFn,
+    GridRenderCellParams,
     GridRowParams,
     GridValueFormatterParams,
     gridDateComparator,
     gridNumberComparator,
+    gridStringOrNumberComparator,
 } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
 import React, { FunctionComponent } from 'react';
@@ -18,6 +21,7 @@ import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
 import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
 import styled from 'styled-components';
+import {DiscussionFlags} from "shared/enums";
 
 const TableContainer = styled.div({
     flexGrow: 1,
