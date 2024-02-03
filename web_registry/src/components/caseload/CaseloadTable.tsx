@@ -316,7 +316,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
-            sortComparator: nullUndefinedComparator("first", gridNumberComparator),
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
             valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
@@ -327,7 +327,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
-            sortComparator: nullUndefinedComparator("first", gridNumberComparator),
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
             valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
@@ -547,6 +547,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
+                sortingOrder={['asc', 'desc']}
                 initialState={{
                     sorting: {
                         sortModel: [{ field: 'name', sort: 'asc'}]
