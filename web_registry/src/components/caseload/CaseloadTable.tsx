@@ -113,8 +113,15 @@ const nullUndefinedFormatter: (formatter: ((params: GridValueFormatterParams) =>
     }
 }
 
+const nullUndefinedRenderCell: (renderer: ((params: GridRenderCellParams) => React.ReactNode)) => ((params: GridRenderCellParams) => React.ReactNode) = (renderer) => {
+    return (params: GridRenderCellParams) => {
+        if (params.value === null || params.value === undefined) {
+            return NA;
         } else {
+            return renderer(params);
         }
+    }
+}
 
     }
 };
