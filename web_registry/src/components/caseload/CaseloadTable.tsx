@@ -70,6 +70,36 @@ const YellowFlag = withTheme(
     })),
 );
 
+const nullUndefinedComparator: (order: "first" | "last", comparator: GridComparatorFn) => GridComparatorFn =
+    (order, comparator) => {
+        // Grid's default comparators appear to sort undefined, but not null.
+        // Direction of those comparators is also not configurable.
+        // This wraps a provided comparator to configure sorting of both undefined and null.
+        return (v1, v2, cellParams1, cellParams2) => {
+            if (v1 === null || v1 === undefined || v2 === null || v2 === undefined) {
+                // At least one value is not defined
+                if (v1 !== null && v1 !== undefined) {
+                    // v1 is defined, but v2 is not
+                    if (order === "first") {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                } else if (v2 !== null && v2 !== undefined) {
+                    // v2 is defined, but v1 is not
+                    if (order === "first") {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    // Neither value is defined
+                    return 0;
+                }
+            } else {
+                // Both are defined
+                return comparator(v1, v2, cellParams1, cellParams2);
+            }
         }
     }
 
