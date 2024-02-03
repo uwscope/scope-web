@@ -124,7 +124,13 @@ const nullUndefinedRenderCell: (renderer: ((params: GridRenderCellParams) => Rea
 }
 
     }
+const dateFormatter: (params: GridValueFormatterParams) => string = (params) => {
+    return formatDateOnly(params.value as Date, 'MM/dd/yy');
 };
+
+const stringOrNumberFormatter: (params: GridValueFormatterParams) => string = (params) => {
+    return `${params.value}`;
+}
 
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
