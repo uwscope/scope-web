@@ -349,72 +349,125 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
     ];
 
     const data = patients.map((p) => {
-        const initialSessionDate = p.sessions?.length > 0 ? p.sessions[0].date : null;
-        const recentSessionDate = p.sessions?.length > 0 ? p.sessions[p.sessions.length - 1].date : null;
-        const recentReviewDate = p.caseReviews?.length > 0 ? p.caseReviews[p.caseReviews.length - 1].date : null;
+        const initialSessionDate = p.sessions?.length > 0
+            ? p.sessions[0].date
+            : undefined;
+        const recentSessionDate = p.sessions?.length > 0
+            ? p.sessions[p.sessions.length - 1].date
+            : undefined;
+        const recentReviewDate = p.caseReviews?.length > 0
+            ? p.caseReviews[p.caseReviews.length - 1].date
+            : undefined;
+        const nextSessionDueDate = recentSessionDate && p.profile.followupSchedule
+            ? addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule))
+            : undefined;
 
-        const phq9 = p.assessmentLogs
+        const totalSessionsCount =
+            p.sessions && p.sessions.length > 0
+            ? p.sessions.length
+            : undefined;
+        const treatmentWeeksCount = initialSessionDate && recentSessionDate
+            ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
+            : undefined;
+
+        const phq9Entries =
+            p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'phq-9')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
-        const gad7 = p.assessmentLogs
+        const gad7Entries =
+            p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'gad-7')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
 
-        const initialAtRisk = phq9 && phq9.length > 0 && phq9[0].pointValues && !!phq9[0].pointValues['Suicide'];
+        const initialPHQScore =
+            phq9Entries &&
+            phq9Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(phq9Entries[0])
+            : undefined;
+        const recentPHQScore =
+            phq9Entries &&
+            phq9Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(phq9Entries[phq9Entries.length - 1])
+            : undefined;
+        const recentPHQDate =
+            phq9Entries &&
+            phq9Entries?.length > 0
+            ? phq9Entries[phq9Entries.length - 1].recordedDateTime
+            : undefined;
+        const changePHQ =
+            initialPHQScore && recentPHQScore
+            ? Math.round(((recentPHQScore - initialPHQScore) / initialPHQScore) * 100)
+            : undefined;
 
-        const lastAtRisk =
-            phq9 &&
-            phq9.length > 0 &&
-            phq9[phq9.length - 1].pointValues &&
-            !!phq9[phq9.length - 1].pointValues['Suicide'];
+        const initialGADScore =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(gad7Entries[0])
+            : undefined;
+        const recentGADScore =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(gad7Entries[gad7Entries.length - 1])
+            : undefined;
+        const recentGADDate =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? gad7Entries[gad7Entries.length - 1].recordedDateTime
+            : undefined;
+        const changeGAD =
+            initialGADScore && recentGADScore
+            ? Math.round(((recentGADScore - initialGADScore) / initialGADScore) * 100)
+            : undefined;
 
-        const initialPHQScore = phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[0]) : undefined;
-        const initialGADScore = gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[0]) : undefined;
+        const initialAtRisk =
+            phq9Entries &&
+            phq9Entries.length > 0 &&
+            phq9Entries[0].pointValues &&
+            !!phq9Entries[0].pointValues['Suicide'];
+        const recentAtRisk =
+            phq9Entries &&
+            phq9Entries.length > 0 &&
+            phq9Entries[phq9Entries.length - 1].pointValues &&
+            !!phq9Entries[phq9Entries.length - 1].pointValues['Suicide'];
 
         return {
-            ...p,
-            ...p.profile,
+            //
+            // Row ID used by Grid
+            //
             id: p.profile.MRN,
+            //
+            // Needed for row click
+            //
+            MRN: p.profile.MRN,
+            //
+            // Rendered columns
+            //
+            discussionFlags: p.profile.discussionFlag,
+            depressionTreatmentStatus: p.profile.depressionTreatmentStatus,
+            name: p.profile.name,
+            clinicCode: p.profile.clinicCode,
+            site: p.profile.site,
             initialSession: initialSessionDate,
             recentSession: recentSessionDate,
             recentCaseReview: recentReviewDate,
-            nextSessionDue: recentSessionDate && p.profile.followupSchedule
-                ? addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule))
-                : null,
-            totalSessions: p.sessions ? p.sessions.length : 0,
-            treatmentWeeks:
-                initialSessionDate && recentSessionDate
-                    ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
-                    : 0,
-            initialPHQ: phq9 && phq9.length > 0 ? initialPHQScore : NA,
-            lastPHQ: phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) : NA,
-            changePHQ:
-                initialPHQScore && initialPHQScore
-                    ? Math.round(
-                          ((getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) - initialPHQScore) /
-                              initialPHQScore) *
-                              100,
-                      )
-                    : NA,
-            lastPHQDate:
-                phq9 && phq9?.length > 0 ? phq9[phq9.length - 1].recordedDateTime : null,
-
-            initialGAD: gad7 && gad7.length > 0 ? initialGADScore : NA,
-            lastGAD: gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) : NA,
-            changeGAD:
-                initialGADScore && initialGADScore > 0
-                    ? Math.round(
-                          ((getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) - initialGADScore) /
-                              initialGADScore) *
-                              100,
-                      )
-                    : NA,
-            lastGADDate:
-                gad7 && gad7.length > 0 ? gad7[gad7.length - 1].recordedDateTime : null,
-            initialAtRisk,
-            lastAtRisk,
+            nextSessionDue: nextSessionDueDate,
+            totalSessions: totalSessionsCount,
+            treatmentWeeks: treatmentWeeksCount,
+            initialPHQ: initialPHQScore,
+            recentPHQ: recentPHQScore,
+            recentPHQDate: recentPHQDate,
+            changePHQ: changePHQ,
+            initialGAD: initialGADScore,
+            recentGAD: recentGADScore,
+            changeGAD: changeGAD,
+            recentGADDate: recentGADDate,
+            //
+            // Not rendered, used by other columns
+            //
+            initialAtRisk: initialAtRisk,
+            recentAtRisk: recentAtRisk,
         };
     }).sort(rowDefaultComparator);
 
