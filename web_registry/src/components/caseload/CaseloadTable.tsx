@@ -103,7 +103,15 @@ const nullUndefinedComparator: (order: "first" | "last", comparator: GridCompara
         }
     }
 
+const nullUndefinedFormatter: (formatter: ((params: GridValueFormatterParams) => GridCellValue)) => ((params: GridValueFormatterParams) => GridCellValue) = (formatter) => {
+    return (params) => {
+        if (params.value === null || params.value === undefined) {
+            return NA;
+        } else {
+            return formatter(params);
+        }
     }
+}
 
         } else {
         }
