@@ -123,7 +123,30 @@ const nullUndefinedRenderCell: (renderer: ((params: GridRenderCellParams) => Rea
     }
 }
 
+const flagsComparator: GridComparatorFn = (v1, v2) => {
+    const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionFlags)?.['Flag as safety risk'];
+    const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionFlags)?.['Flag as safety risk'];
+
+    if (v1FlaggedForSafety && !v2FlaggedForSafety) {
+        return -1;
     }
+    if (v2FlaggedForSafety && !v1FlaggedForSafety) {
+        return 1;
+    }
+
+    const v1FlaggedForDiscussion = !!(v1?.valueOf() as DiscussionFlags)?.['Flag for discussion'];
+    const v2FlaggedForDiscussion = !!(v2?.valueOf() as DiscussionFlags)?.['Flag for discussion'];
+
+    if (v1FlaggedForDiscussion && !v2FlaggedForDiscussion) {
+        return -1;
+    }
+    if (v2FlaggedForDiscussion && !v1FlaggedForDiscussion) {
+        return 1;
+    }
+
+    return 0;
+}
+
 const dateFormatter: (params: GridValueFormatterParams) => string = (params) => {
     return formatDateOnly(params.value as Date, 'MM/dd/yy');
 };
@@ -149,6 +172,7 @@ const renderChangeCell = (props: GridCellParams) => (
 const renderFlagCell = (props: GridCellParams) => {
     const flaggedForDiscussion = !!props.value?.['Flag for discussion'];
     const flaggedForSafety = !!props.value?.['Flag as safety risk'];
+
     return (
         <div>
             <Tooltip title="Flagged for safety">
