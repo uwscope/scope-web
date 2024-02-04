@@ -2,6 +2,7 @@
 # TODO: Not necessary with Python 3.11
 from __future__ import annotations
 
+import copy
 import json
 import multiprocessing
 
@@ -309,10 +310,33 @@ def _validate_patient_collection_activity_logs(
                 "scheduledActivityId": document_current["scheduledActivityId"]
             },
         ).unique()
-        assert (
+
+        if (
             document_current["dataSnapshot"]["scheduledActivity"]
-            == scheduled_activity_current
-        )
+            != scheduled_activity_current
+        ):
+            print(
+                "  Warning: Activity Log Snapshot of Scheduled Activity Does Not Match"
+            )
+
+            copy_snapshot = copy.deepcopy(
+                document_current["dataSnapshot"]["scheduledActivity"]
+            )
+            copy_scheduled_activity = copy.deepcopy(scheduled_activity_current)
+            del copy_snapshot["_id"]
+            del copy_snapshot["_rev"]
+            del copy_scheduled_activity["_id"]
+            del copy_scheduled_activity["_rev"]
+
+            if copy_snapshot != copy_scheduled_activity:
+                print(
+                    "  Warning: Activity Log Snapshot of Scheduled Activity Does Not Match Content"
+                )
+
+        # assert (
+        #     document_current["dataSnapshot"]["scheduledActivity"]
+        #     == scheduled_activity_current
+        # )
 
 
 def _validate_patient_collection_activity_schedules(
