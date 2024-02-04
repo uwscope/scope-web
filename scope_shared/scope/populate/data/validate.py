@@ -394,7 +394,7 @@ def _validate_patient_collection_assessment_log_documents(
             assert providers_documents.filter_match(
                 match_deleted=False,
                 match_datetime_at=datetime_from_document(document=document_current),
-                match_values={"providerId": document_current["submittedByProviderId"]}
+                match_values={"providerId": document_current["submittedByProviderId"]},
             ).is_unique()
 
 
@@ -419,7 +419,9 @@ def _validate_patient_collection_profile_documents(
             assert providers_documents.filter_match(
                 match_deleted=False,
                 match_datetime_at=datetime_from_document(document=document_current),
-                match_values={"providerId": document_current["primaryCareManager"]["providerId"]}
+                match_values={
+                    "providerId": document_current["primaryCareManager"]["providerId"]
+                },
             ).is_unique()
 
 
