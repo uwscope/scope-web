@@ -240,11 +240,25 @@ export const AddEditValueDialog: FunctionComponent<{
     examples: string[];
     error?: boolean;
     loading?: boolean;
+    nameIsUnique: () => boolean;
     handleChange: (change: string) => void;
     handleCancel: () => void;
     handleSave: () => void;
 }> = (props) => {
-    const { open, isEdit, lifeArea, value, examples, error, loading, handleCancel, handleChange, handleSave } = props;
+    const {
+        open,
+        isEdit,
+        lifeArea,
+        value,
+        examples,
+        error,
+        loading,
+        nameIsUnique,
+        handleCancel,
+        handleChange,
+        handleSave,
+    } = props;
+
     return (
         <StatefulDialog
             open={open}
@@ -267,13 +281,17 @@ export const AddEditValueDialog: FunctionComponent<{
                         value={value}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(event.target.value)}
                         fullWidth
+                        error={!nameIsUnique()}
+                        helperText={
+                            !nameIsUnique() && getString('Values_inventory_dialog_value_name_validation_not_unique')
+                        }
                     />
                 </Stack>
             }
             handleCancel={handleCancel}
             //handleDelete={handleDelete}
             handleSave={handleSave}
-            disableSave={!value}
+            disableSave={!value || !nameIsUnique()}
         />
     );
 };
@@ -445,13 +463,14 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
     });
 
     const handleSaveValue = action(async () => {
+        const valueName = viewState.name.trim();
         if (viewState.modeState.mode == 'add') {
             // TODO Activity Refactor: check that our 'add' is valid
             // Defer until this is more cleanly-organized
             // is a unique name
 
             await patientStore.addValue({
-                name: viewState.name,
+                name: valueName,
                 lifeAreaId: lifeAreaId,
                 editedDateTime: new Date(),
             });
@@ -463,7 +482,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
 
             await patientStore.updateValue({
                 ...viewState.modeState.editValue,
-                name: viewState.name,
+                name: valueName,
                 editedDateTime: new Date(),
             });
         }
@@ -536,6 +555,33 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
             }),
         );
     });
+
+    const valueValidateName = () => {
+        //
+        // This function effectively duplicates valueValidateName in AddEditActivityForm
+        //
+        // They should be consolidated for avoiding confusion in maintenance
+        //
+
+        // Value name must be unique within the life area, accounting for case-insensitive comparisons
+        const nameIsUnique: boolean =
+            patientStore
+                .getValuesByLifeAreaId(lifeAreaId)
+                .filter((value: IValue): boolean => {
+                    // In case of edit, do not validate against the value being edited
+                    if (viewState.modeState.mode == 'edit') {
+                        return viewState.modeState.editValue?.valueId != value.valueId;
+                    }
+
+                    return true;
+                })
+                .findIndex((value: IValue): boolean => {
+                    // Search for a case-insensitive match, trimming any whitespace
+                    return value.name.toLocaleLowerCase().trim() == viewState.name.toLocaleLowerCase().trim();
+                }) < 0;
+
+        return nameIsUnique;
+    };
 
     const displayLifeAreaName: string = (() => {
         if (lifeAreaId == LifeAreaIdOther) {
@@ -685,6 +731,7 @@ export const LifeAreaDetail: FunctionComponent = observer(() => {
                     examples={displayValueExamples}
                     error={patientStore.loadValuesInventoryState.error}
                     loading={patientStore.loadValuesInventoryState.pending}
+                    nameIsUnique={valueValidateName}
                     handleCancel={handleCancelValue}
                     handleChange={handleChangeValue}
                     handleSave={handleSaveValue}

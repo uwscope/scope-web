@@ -423,9 +423,9 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
 
     const handleAddValueSave = action(async () => {
         activityViewState.addValueOpen = false;
-
+        const valueName = activityViewState.addValueName.trim();
         const createValue: IValue = {
-            name: activityViewState.addValueName,
+            name: valueName,
             lifeAreaId: activityViewState.lifeAreaId,
             editedDateTime: new Date(),
         };
@@ -435,6 +435,25 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
             activityViewState.valueId = createdValue.valueId as string;
         }
     });
+
+    const valueValidateName = () => {
+        //
+        // This function effectively duplicates valueValidateName in LifeAreaDetail
+        //
+        // They should be consolidated for avoiding confusion in maintenance
+        //
+
+        // Value name must be unique within a life area,
+        // accounting for case-insensitive comparisons,
+        // and trimming any whitespace
+        const nameIsUnique: boolean =
+            patientStore.getValuesByLifeAreaId(activityViewState.lifeAreaId).findIndex((value: IValue): boolean => {
+                // Search for a case-insensitive match, trimming any whitespace
+                return value.name.toLocaleLowerCase().trim() == activityViewState.addValueName.toLocaleLowerCase().trim();
+            }) < 0;
+
+        return nameIsUnique;
+    };
 
     const handleActivityChangeName = action((event: React.ChangeEvent<HTMLInputElement>) => {
         // DisplayedName can only trimStart because full trim means never being able to add a space
@@ -1022,6 +1041,7 @@ export const AddEditActivityForm: FunctionComponent<IAddEditActivityFormProps> =
                 })()}
                 error={patientStore.loadValuesInventoryState.error}
                 loading={patientStore.loadValuesInventoryState.pending}
+                nameIsUnique={valueValidateName}
                 handleCancel={handleAddValueCancel}
                 handleChange={handleAddValueChange}
                 handleSave={handleAddValueSave}
