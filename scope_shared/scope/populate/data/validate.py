@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import multiprocessing
 
 from scope.documents.document_set import datetime_from_document, DocumentSet
 import scope.populate.data.archive
@@ -46,6 +47,34 @@ def validate_archive(
         )
 
 
+def _validate_archive_document_schema_worker(document_current: dict) -> None:
+    # # Assert specific schemas for better error messages.
+    # # Any failures here would also be caught below.
+    # if "_type" in document_current:
+    #     if document_current["_type"] == "assessmentLog":
+    #         scope.schema_utils.assert_schema(
+    #             data=document_current,
+    #             schema=scope.schema.assessment_log_schema,
+    #         )
+
+    # Assert the document schema
+    scope.schema_utils.assert_schema(
+        data=document_current,
+        schema=scope.schema.document_schema,
+    )
+
+    # These are currently not enforced by the schema
+    if not document_current.get("_deleted"):
+        if document_current["_type"] == "activityLog":
+            # Cannot be included because of test framework
+            assert "scheduledActivity" in document_current["dataSnapshot"]
+            # Should always be true but not tested by schema
+            assert document_current["dataSnapshot"]["scheduledActivity"]["completed"]
+        if document_current["_type"] == "scheduledActivity":
+            # Cannot be included because of test framework
+            assert "activity" in document_current["dataSnapshot"]
+
+
 def _validate_archive_document_schema(
     *,
     archive: scope.populate.data.archive.Archive,
@@ -54,34 +83,8 @@ def _validate_archive_document_schema(
     Validate every document matches the document schema.
     """
 
-    for document_current in archive.entries.values():
-        # Assert specific schemas for better error messages.
-        # Any failures here would also be caught below.
-        if "_type" in document_current:
-            if document_current["_type"] == "assessmentLog":
-                scope.schema_utils.assert_schema(
-                    data=document_current,
-                    schema=scope.schema.assessment_log_schema,
-                )
-
-        # Assert the document schema
-        scope.schema_utils.assert_schema(
-            data=document_current,
-            schema=scope.schema.document_schema,
-        )
-
-        # These are currently not enforced by the schema
-        if not document_current.get("_deleted"):
-            if document_current["_type"] == "activityLog":
-                # Cannot be included because of test framework
-                assert "scheduledActivity" in document_current["dataSnapshot"]
-                # Should always be true but not tested by schema
-                assert document_current["dataSnapshot"]["scheduledActivity"][
-                    "completed"
-                ]
-            if document_current["_type"] == "scheduledActivity":
-                # Cannot be included because of test framework
-                assert "activity" in document_current["dataSnapshot"]
+    with multiprocessing.Pool() as pool:
+        pool.map(_validate_archive_document_schema_worker, archive.entries.values())
 
 
 def _validate_archive_expected_collections(
