@@ -6,6 +6,7 @@ import scope.populate.data.archive
 import scope.populate.data.migrations.migration_v0_5_0
 import scope.populate.data.migrations.migration_v0_7_0
 import scope.populate.data.migrations.migration_v0_9_0
+import scope.populate.data.migrations.migration_v0_10_0
 import scope.populate.data.validate
 import scope.schema
 import scope.schema_utils
@@ -126,6 +127,12 @@ def _archive_migrate(
     elif migration == "v0.9.0":
         archive = (
             scope.populate.data.migrations.migration_v0_9_0.archive_migrate_v0_9_0(
+                archive=archive,
+            )
+        )
+    elif migration == "v0.10.0":
+        archive = (
+            scope.populate.data.migrations.migration_v0_10_0.archive_migrate_v0_10_0(
                 archive=archive,
             )
         )
