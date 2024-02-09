@@ -3,9 +3,17 @@ import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
 import {
     GridCellParams,
+    GridCellValue,
     GridColDef,
     GridColumnHeaderParams,
+    GridComparatorFn,
+    GridRenderCellParams,
     GridRowParams,
+    // GridSortModel,
+    GridValueFormatterParams,
+    gridDateComparator,
+    gridNumberComparator,
+    gridStringOrNumberComparator,
 } from '@mui/x-data-grid';
 import { addWeeks, compareAsc, differenceInWeeks } from 'date-fns';
 import React, { FunctionComponent } from 'react';
@@ -14,6 +22,7 @@ import { Table } from 'src/components/common/Table';
 import { IPatientStore } from 'src/stores/PatientStore';
 import { getAssessmentScoreColorName, getAssessmentScoreFromAssessmentLog } from 'src/utils/assessment';
 import styled from 'styled-components';
+import {DiscussionFlags} from "shared/enums";
 
 const TableContainer = styled.div({
     flexGrow: 1,
@@ -66,6 +75,91 @@ const YellowFlag = withTheme(
     })),
 );
 
+const nullUndefinedComparator: (order: "first" | "last", comparator: GridComparatorFn) => GridComparatorFn =
+    (order, comparator) => {
+        // Grid's default comparators appear to sort undefined, but not null.
+        // Direction of those comparators is also not configurable.
+        // This wraps a provided comparator to configure sorting of both undefined and null.
+        return (v1, v2, cellParams1, cellParams2) => {
+            if (v1 === null || v1 === undefined || v2 === null || v2 === undefined) {
+                // At least one value is not defined
+                if (v1 !== null && v1 !== undefined) {
+                    // v1 is defined, but v2 is not
+                    if (order === "first") {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                } else if (v2 !== null && v2 !== undefined) {
+                    // v2 is defined, but v1 is not
+                    if (order === "first") {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    // Neither value is defined
+                    return 0;
+                }
+            } else {
+                // Both are defined
+                return comparator(v1, v2, cellParams1, cellParams2);
+            }
+        }
+    }
+
+const nullUndefinedFormatter: (formatter: ((params: GridValueFormatterParams) => GridCellValue)) => ((params: GridValueFormatterParams) => GridCellValue) = (formatter) => {
+    return (params) => {
+        if (params.value === null || params.value === undefined) {
+            return NA;
+        } else {
+            return formatter(params);
+        }
+    }
+}
+
+const nullUndefinedRenderCell: (renderer: ((params: GridRenderCellParams) => React.ReactNode)) => ((params: GridRenderCellParams) => React.ReactNode) = (renderer) => {
+    return (params: GridRenderCellParams) => {
+        if (params.value === null || params.value === undefined) {
+            return NA;
+        } else {
+            return renderer(params);
+        }
+    }
+}
+
+const flagsComparator: GridComparatorFn = (v1, v2) => {
+    const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionFlags)?.['Flag as safety risk'];
+    const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionFlags)?.['Flag as safety risk'];
+
+    if (v1FlaggedForSafety && !v2FlaggedForSafety) {
+        return -1;
+    }
+    if (v2FlaggedForSafety && !v1FlaggedForSafety) {
+        return 1;
+    }
+
+    const v1FlaggedForDiscussion = !!(v1?.valueOf() as DiscussionFlags)?.['Flag for discussion'];
+    const v2FlaggedForDiscussion = !!(v2?.valueOf() as DiscussionFlags)?.['Flag for discussion'];
+
+    if (v1FlaggedForDiscussion && !v2FlaggedForDiscussion) {
+        return -1;
+    }
+    if (v2FlaggedForDiscussion && !v1FlaggedForDiscussion) {
+        return 1;
+    }
+
+    return 0;
+}
+
+const dateFormatter: (params: GridValueFormatterParams) => string = (params) => {
+    return formatDateOnly(params.value as Date, 'MM/dd/yy');
+};
+
+const stringOrNumberFormatter: (params: GridValueFormatterParams) => string = (params) => {
+    return `${params.value}`;
+}
+
 const renderHeader = (props: GridColumnHeaderParams) => <ColumnHeader>{props.colDef.headerName}</ColumnHeader>;
 
 const renderPHQCell = (props: GridCellParams, atRiskId: string) => (
@@ -83,6 +177,7 @@ const renderChangeCell = (props: GridCellParams) => (
 const renderFlagCell = (props: GridCellParams) => {
     const flaggedForDiscussion = !!props.value?.['Flag for discussion'];
     const flaggedForSafety = !!props.value?.['Flag as safety risk'];
+
     return (
         <div>
             <Tooltip title="Flagged for safety">
@@ -95,6 +190,13 @@ const renderFlagCell = (props: GridCellParams) => {
     );
 };
 
+const rowDefaultComparator = (v1: { name: string; }, v2: { name: string; }) => {
+    // This comparator is applied to sort rows before they are provided to the grid.
+    // When no sort is selected in the grid, this controls the rendering order.
+    // When a sort is selected in the grid, this becomes the secondary sorting criterion.
+    return v1.name.localeCompare(v2.name);
+}
+
 const NA = '--';
 
 export interface ICaseloadTableProps {
@@ -104,6 +206,15 @@ export interface ICaseloadTableProps {
 
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
     const { patients, onPatientClick } = props;
+
+    // const defaultSortModel: GridSortModel = [
+    //     {
+    //         field: 'name',
+    //         sort: 'asc',
+    //     },
+    // ];
+    //
+    // const [sortModel, setSortModel] = React.useState<GridSortModel>(defaultSortModel);
 
     const onRowClick = (param: GridRowParams) => {
         if (!!onPatientClick) {
@@ -116,14 +227,23 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         }
     };
 
+    // const onSortModelChange: (sortModelUpdate: GridSortModel) => void = (sortModelUpdate) => {
+    //     if (sortModelUpdate.length === 0) {
+    //         sortModelUpdate = defaultSortModel;
+    //     }
+    //
+    //     setSortModel(sortModelUpdate);
+    // }
+
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
         {
-            field: 'discussionFlag',
+            field: 'discussionFlags',
             headerName: 'Flags',
             width: 25,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: flagsComparator,
             renderCell: renderFlagCell,
         },
         {
@@ -132,6 +252,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             minWidth: 120,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridStringOrNumberComparator),
+            valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
             field: 'name',
@@ -139,6 +261,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             minWidth: 240,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: gridStringOrNumberComparator,
+            valueFormatter: stringOrNumberFormatter,
         },
         {
             field: 'clinicCode',
@@ -146,6 +270,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             minWidth: 120,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridStringOrNumberComparator),
+            valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
             field: 'site',
@@ -153,6 +279,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             minWidth: 120,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridStringOrNumberComparator),
+            valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
             field: 'initialSession',
@@ -162,6 +290,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
         {
             field: 'recentSession',
@@ -171,6 +301,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
         {
             field: 'recentCaseReview',
@@ -180,6 +312,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
         {
             field: 'nextSessionDue',
@@ -189,6 +323,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
         {
             field: 'totalSessions',
@@ -198,6 +334,8 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
             field: 'treatmentWeeks',
@@ -207,152 +345,213 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             align: 'center',
             headerAlign: 'center',
             filterable: false,
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            valueFormatter: nullUndefinedFormatter(stringOrNumberFormatter),
         },
         {
             field: 'initialPHQ',
             headerName: 'Initial PHQ-9',
             width: 50,
             renderHeader,
-            renderCell: (props) => renderPHQCell(props, 'initialAtRisk'),
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell((props) => renderPHQCell(props, 'initialAtRisk')),
         },
         {
-            field: 'lastPHQ',
+            field: 'recentPHQ',
             headerName: 'Last PHQ-9',
             width: 50,
             renderHeader,
-            renderCell: (props) => renderPHQCell(props, 'lastAtRisk'),
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell((props) => renderPHQCell(props, 'recentAtRisk')),
         },
         {
             field: 'changePHQ',
             headerName: 'Change',
             width: 60,
             renderHeader,
-            renderCell: renderChangeCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell(renderChangeCell),
         },
         {
-            field: 'lastPHQDate',
+            field: 'recentPHQDate',
             headerName: 'Last PHQ-9 Date',
             width: 85,
             renderHeader,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
         {
             field: 'initialGAD',
             headerName: 'Initial GAD-7',
             width: 50,
             renderHeader,
-            renderCell: renderGADCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell(renderGADCell),
         },
         {
-            field: 'lastGAD',
+            field: 'recentGAD',
             headerName: 'Last GAD-7',
             width: 50,
             renderHeader,
-            renderCell: renderGADCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell(renderGADCell),
         },
         {
             field: 'changeGAD',
             headerName: 'Change',
             width: 60,
             renderHeader,
-            renderCell: renderChangeCell,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridNumberComparator),
+            renderCell: nullUndefinedRenderCell(renderChangeCell),
         },
         {
-            field: 'lastGADDate',
+            field: 'recentGADDate',
             headerName: 'Last GAD-7 Date',
             width: 85,
             renderHeader,
             align: 'center',
             headerAlign: 'center',
+            sortComparator: nullUndefinedComparator("last", gridDateComparator),
+            valueFormatter: nullUndefinedFormatter(dateFormatter),
         },
     ];
 
     const data = patients.map((p) => {
-        const initialSessionDate = p.sessions?.length > 0 ? p.sessions[0].date : null;
-        const recentSessionDate = p.sessions?.length > 0 ? p.sessions[p.sessions.length - 1].date : null;
-        const recentReviewDate = p.caseReviews?.length > 0 ? p.caseReviews[p.caseReviews.length - 1].date : null;
+        const initialSessionDate = p.sessions?.length > 0
+            ? p.sessions[0].date
+            : undefined;
+        const recentSessionDate = p.sessions?.length > 0
+            ? p.sessions[p.sessions.length - 1].date
+            : undefined;
+        const recentReviewDate = p.caseReviews?.length > 0
+            ? p.caseReviews[p.caseReviews.length - 1].date
+            : undefined;
+        const nextSessionDueDate = recentSessionDate && p.profile.followupSchedule
+            ? addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule))
+            : undefined;
 
-        const phq9 = p.assessmentLogs
+        const totalSessionsCount =
+            p.sessions && p.sessions.length > 0
+            ? p.sessions.length
+            : undefined;
+        const treatmentWeeksCount = initialSessionDate && recentSessionDate
+            ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
+            : undefined;
+
+        const phq9Entries =
+            p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'phq-9')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
-        const gad7 = p.assessmentLogs
+        const gad7Entries =
+            p.assessmentLogs
             ?.filter((a) => a.assessmentId == 'gad-7')
             .slice()
             .sort((a, b) => compareAsc(a.recordedDateTime, b.recordedDateTime));
 
-        const initialAtRisk = phq9 && phq9.length > 0 && phq9[0].pointValues && !!phq9[0].pointValues['Suicide'];
+        const initialPHQScore =
+            phq9Entries &&
+            phq9Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(phq9Entries[0])
+            : undefined;
+        const recentPHQScore =
+            phq9Entries &&
+            phq9Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(phq9Entries[phq9Entries.length - 1])
+            : undefined;
+        const recentPHQDate =
+            phq9Entries &&
+            phq9Entries?.length > 0
+            ? phq9Entries[phq9Entries.length - 1].recordedDateTime
+            : undefined;
+        const changePHQ =
+            initialPHQScore && recentPHQScore
+            ? Math.round(((recentPHQScore - initialPHQScore) / initialPHQScore) * 100)
+            : undefined;
 
-        const lastAtRisk =
-            phq9 &&
-            phq9.length > 0 &&
-            phq9[phq9.length - 1].pointValues &&
-            !!phq9[phq9.length - 1].pointValues['Suicide'];
+        const initialGADScore =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(gad7Entries[0])
+            : undefined;
+        const recentGADScore =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? getAssessmentScoreFromAssessmentLog(gad7Entries[gad7Entries.length - 1])
+            : undefined;
+        const recentGADDate =
+            gad7Entries &&
+            gad7Entries.length > 0
+            ? gad7Entries[gad7Entries.length - 1].recordedDateTime
+            : undefined;
+        const changeGAD =
+            initialGADScore && recentGADScore
+            ? Math.round(((recentGADScore - initialGADScore) / initialGADScore) * 100)
+            : undefined;
 
-        const initialPHQScore = phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[0]) : undefined;
-        const initialGADScore = gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[0]) : undefined;
+        const initialAtRisk =
+            phq9Entries &&
+            phq9Entries.length > 0 &&
+            phq9Entries[0].pointValues &&
+            !!phq9Entries[0].pointValues['Suicide'];
+        const recentAtRisk =
+            phq9Entries &&
+            phq9Entries.length > 0 &&
+            phq9Entries[phq9Entries.length - 1].pointValues &&
+            !!phq9Entries[phq9Entries.length - 1].pointValues['Suicide'];
 
         return {
-            ...p,
-            ...p.profile,
+            //
+            // Row ID used by Grid
+            //
             id: p.profile.MRN,
-            initialSession: initialSessionDate ? formatDateOnly(initialSessionDate, 'MM/dd/yy') : NA,
-            recentSession: recentSessionDate ? formatDateOnly(recentSessionDate, 'MM/dd/yy') : NA,
-            recentCaseReview: recentReviewDate ? formatDateOnly(recentReviewDate, 'MM/dd/yy') : NA,
-            nextSessionDue:
-                recentSessionDate && p.profile.followupSchedule
-                    ? formatDateOnly(
-                          addWeeks(recentSessionDate, getFollowupWeeks(p.profile.followupSchedule)),
-                          'MM/dd/yy',
-                      )
-                    : NA,
-            totalSessions: p.sessions ? p.sessions.length : 0,
-            treatmentWeeks:
-                initialSessionDate && recentSessionDate
-                    ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
-                    : 0,
-            initialPHQ: phq9 && phq9.length > 0 ? initialPHQScore : NA,
-            lastPHQ: phq9 && phq9.length > 0 ? getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) : NA,
-            changePHQ:
-                initialPHQScore && initialPHQScore
-                    ? Math.round(
-                          ((getAssessmentScoreFromAssessmentLog(phq9[phq9.length - 1]) - initialPHQScore) /
-                              initialPHQScore) *
-                              100,
-                      )
-                    : NA,
-            lastPHQDate:
-                phq9 && phq9?.length > 0 ? formatDateOnly(phq9[phq9.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
-
-            initialGAD: gad7 && gad7.length > 0 ? initialGADScore : NA,
-            lastGAD: gad7 && gad7.length > 0 ? getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) : NA,
-            changeGAD:
-                initialGADScore && initialGADScore > 0
-                    ? Math.round(
-                          ((getAssessmentScoreFromAssessmentLog(gad7[gad7.length - 1]) - initialGADScore) /
-                              initialGADScore) *
-                              100,
-                      )
-                    : NA,
-            lastGADDate:
-                gad7 && gad7.length > 0 ? formatDateOnly(gad7[gad7.length - 1].recordedDateTime, 'MM/dd/yyyy') : NA,
-            initialAtRisk,
-            lastAtRisk,
+            //
+            // Needed for row click
+            //
+            MRN: p.profile.MRN,
+            //
+            // Rendered columns
+            //
+            discussionFlags: p.profile.discussionFlag,
+            depressionTreatmentStatus: p.profile.depressionTreatmentStatus,
+            name: p.profile.name,
+            clinicCode: p.profile.clinicCode,
+            site: p.profile.site,
+            initialSession: initialSessionDate,
+            recentSession: recentSessionDate,
+            recentCaseReview: recentReviewDate,
+            nextSessionDue: nextSessionDueDate,
+            totalSessions: totalSessionsCount,
+            treatmentWeeks: treatmentWeeksCount,
+            initialPHQ: initialPHQScore,
+            recentPHQ: recentPHQScore,
+            recentPHQDate: recentPHQDate,
+            changePHQ: changePHQ,
+            initialGAD: initialGADScore,
+            recentGAD: recentGADScore,
+            changeGAD: changeGAD,
+            recentGADDate: recentGADDate,
+            //
+            // Not rendered, used by other columns
+            //
+            initialAtRisk: initialAtRisk,
+            recentAtRisk: recentAtRisk,
         };
-    });
+    }).sort(rowDefaultComparator);
 
     return (
         <TableContainer>
@@ -366,6 +565,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
+                // sortModel={sortModel}
+                // onSortModelChange={onSortModelChange}
+                sortingOrder={['asc', 'desc', null]}
             />
         </TableContainer>
     );
