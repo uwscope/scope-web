@@ -9,6 +9,7 @@ import {
     GridComparatorFn,
     GridRenderCellParams,
     GridRowParams,
+    GridSortModel,
     GridValueFormatterParams,
     gridDateComparator,
     gridNumberComparator,
@@ -206,6 +207,15 @@ export interface ICaseloadTableProps {
 export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
     const { patients, onPatientClick } = props;
 
+    const defaultSortModel: GridSortModel = [
+        {
+            field: 'name',
+            sort: 'asc',
+        },
+    ];
+
+    const [sortModel, setSortModel] = React.useState<GridSortModel>(defaultSortModel);
+
     const onRowClick = (param: GridRowParams) => {
         if (!!onPatientClick) {
             const mrn = param.row['MRN'];
@@ -216,6 +226,14 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             }
         }
     };
+
+    const onSortModelChange: (sortModelUpdate: GridSortModel) => void = (sortModelUpdate) => {
+        if (sortModelUpdate.length === 0) {
+            sortModelUpdate = defaultSortModel;
+        }
+
+        setSortModel(sortModelUpdate);
+    }
 
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
@@ -547,12 +565,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
-                sortingOrder={['asc', 'desc']}
-                initialState={{
-                    sorting: {
-                        sortModel: [{ field: 'name', sort: 'asc'}]
-                    }
-                }}
+                sortModel={sortModel}
+                onSortModelChange={onSortModelChange}
+                sortingOrder={['asc', 'desc', null]}
             />
         </TableContainer>
     );
