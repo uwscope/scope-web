@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
@@ -204,7 +205,7 @@ export interface ICaseloadTableProps {
     onPatientClick?: (recordId: string) => void;
 }
 
-export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
+export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
     const { patients, onPatientClick } = props;
 
     const defaultSortModel: GridSortModel = [
@@ -571,6 +572,6 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
             />
         </TableContainer>
     );
-};
+});
 
 export default CaseloadTable;
