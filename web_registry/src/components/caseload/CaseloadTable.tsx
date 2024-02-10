@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import withTheme from '@mui/styles/withTheme';
@@ -9,7 +10,7 @@ import {
     GridComparatorFn,
     GridRenderCellParams,
     GridRowParams,
-    // GridSortModel,
+    GridSortModel,
     GridValueFormatterParams,
     gridDateComparator,
     gridNumberComparator,
@@ -204,17 +205,17 @@ export interface ICaseloadTableProps {
     onPatientClick?: (recordId: string) => void;
 }
 
-export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => {
+export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer((props) => {
     const { patients, onPatientClick } = props;
 
-    // const defaultSortModel: GridSortModel = [
-    //     {
-    //         field: 'name',
-    //         sort: 'asc',
-    //     },
-    // ];
-    //
-    // const [sortModel, setSortModel] = React.useState<GridSortModel>(defaultSortModel);
+    const defaultSortModel: GridSortModel = [
+        {
+            field: 'name',
+            sort: 'asc',
+        },
+    ];
+
+    const [sortModel, setSortModel] = React.useState<GridSortModel>(defaultSortModel);
 
     const onRowClick = (param: GridRowParams) => {
         if (!!onPatientClick) {
@@ -227,13 +228,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
         }
     };
 
-    // const onSortModelChange: (sortModelUpdate: GridSortModel) => void = (sortModelUpdate) => {
-    //     if (sortModelUpdate.length === 0) {
-    //         sortModelUpdate = defaultSortModel;
-    //     }
-    //
-    //     setSortModel(sortModelUpdate);
-    // }
+    const onSortModelChange: (sortModelUpdate: GridSortModel) => void = (sortModelUpdate) => {
+        if (sortModelUpdate.length === 0) {
+            sortModelUpdate = defaultSortModel;
+        }
+
+        setSortModel(sortModelUpdate);
+    }
 
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
@@ -565,12 +566,12 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = (props) => 
                 isRowSelectable={() => false}
                 pagination
                 disableColumnMenu
-                // sortModel={sortModel}
-                // onSortModelChange={onSortModelChange}
+                sortModel={sortModel}
+                onSortModelChange={onSortModelChange}
                 sortingOrder={['asc', 'desc', null]}
             />
         </TableContainer>
     );
-};
+});
 
 export default CaseloadTable;
