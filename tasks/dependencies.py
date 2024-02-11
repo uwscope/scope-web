@@ -16,6 +16,7 @@ DEPENDENCIES = {
             "./server_flask",
         ],
         yarn_dirs=[
+            ".",
             "./web_patient",
             "./web_registry",
             "./web_shared",
@@ -24,14 +25,11 @@ DEPENDENCIES = {
     "javascript": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=None,
         yarn_dirs=[
+            ".",
             "./web_patient",
             "./web_registry",
             "./web_shared",
         ],
-    ),
-    "notebooks": aws_infrastructure.tasks.library.dependencies.Dependency(
-        pipfile_dirs=["./notebooks"],
-        yarn_dirs=None,
     ),
     "python": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=[
@@ -39,6 +37,14 @@ DEPENDENCIES = {
             "./notebooks",
             "./server_flask",
         ],
+        yarn_dirs=None,
+    ),
+    "format": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=None,
+        yarn_dirs=["."],
+    ),
+    "notebooks": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=["./notebooks"],
         yarn_dirs=None,
     ),
     "root": aws_infrastructure.tasks.library.dependencies.Dependency(

@@ -22,6 +22,17 @@ def format(context):
         ),
     )
 
+    context.run(
+        command=" ".join(
+            [
+                "pipenv",
+                "run",
+                "yarn",
+                "format",
+            ]
+        ),
+    )
+
 
 # Build task collection
 ns = Collection("format")

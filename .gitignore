@@ -1,3 +1,6 @@
+# Javascript Environment
+/node_modules/
+
 # IDE Configuration
 **/.idea/
 /.vscode/launch.json

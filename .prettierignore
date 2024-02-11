@@ -1,0 +1,33 @@
+# Defaults to applying all ignore patterns in .gitignore.
+# Only considers the root .gitignore sibling to this .prettierignore.
+# Additional ignore patterns can be specified here.
+
+#
+# Build directories
+#
+/web_registry/build
+/web_registry/dist
+/web_patient/build
+/web_patient/dist
+
+#
+# Data dirctories
+#
+/secrets/configuration
+/secrets/data
+
+#
+# Temporary directories
+#
+/notebooks/.jupyter/serverconfig
+**/.pytest_cache
+
+#
+# Generated files
+#
+**/Pipfile.lock
+
+#
+# Markdown
+#
+**/*.md
