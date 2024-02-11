@@ -58,8 +58,12 @@ ns_dev_server = Collection("server")
 ns_prod_server = Collection("server")
 
 # Compose from server_flask.py
-compose_collection(ns_dev_server, tasks.server_flask.ns.collections["dev"], name="flask")
-compose_collection(ns_prod_server, tasks.server_flask.ns.collections["prod"], name="flask")
+compose_collection(
+    ns_dev_server, tasks.server_flask.ns.collections["dev"], name="flask"
+)
+compose_collection(
+    ns_prod_server, tasks.server_flask.ns.collections["prod"], name="flask"
+)
 
 compose_collection(ns_dev, ns_dev_server, name="server")
 compose_collection(ns_prod, ns_prod_server, name="server")
