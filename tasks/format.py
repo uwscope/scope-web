@@ -22,16 +22,26 @@ def format(context):
         ),
     )
 
-    context.run(
+    result = context.run(
         command=" ".join(
             [
-                "pipenv",
-                "run",
                 "yarn",
-                "format",
+                "prettier",
+                ".",
+                "--list-different",
             ]
         ),
+        warn=True,
     )
+    if result.exited > 0:
+        result = context.run(
+            command=" ".join(
+                [
+                    "yarn",
+                    "format",
+                ]
+            ),
+        )
 
 
 # Build task collection
