@@ -1,45 +1,45 @@
 {
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://uwscope.org/schemas/documents/activity",
-	"title": "Activity Template",
-	"description": "Activity Template",
-	"type": "object",
-	"properties": {
-		"_id": {
-			"type": "string"
-		},
-		"_type": {
-			"const": "activity"
-		},
-		"_set_id": {
-			"type": "string"
-		},
-		"_rev": {
-			"type": "number"
-		},
-		"activityId": {
-			"type": "string"
-		},
-		"name": {
-			"type": "string"
-		},
-		"editedDateTime": {
-			"$ref": "/schemas/utils/datetime#/properties/datetime"
-		},
-		"enjoyment": {
-			"type": "integer",
-			"minimum": 0,
-			"maximum": 10
-		},
-		"importance": {
-			"type": "integer",
-			"minimum": 0,
-			"maximum": 10
-		},
-		"valueId": {
-			"type": "string"
-		}
-	},
-	"additionalProperties": false,
-	"required": ["_type", "name", "editedDateTime"]
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uwscope.org/schemas/documents/activity",
+  "title": "Activity Template",
+  "description": "Activity Template",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string"
+    },
+    "_type": {
+      "const": "activity"
+    },
+    "_set_id": {
+      "type": "string"
+    },
+    "_rev": {
+      "type": "number"
+    },
+    "activityId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "editedDateTime": {
+      "$ref": "/schemas/utils/datetime#/properties/datetime"
+    },
+    "enjoyment": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "importance": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "valueId": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["_type", "name", "editedDateTime"]
 }

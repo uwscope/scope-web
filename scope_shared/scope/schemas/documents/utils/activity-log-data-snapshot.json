@@ -1,13 +1,13 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://uwscope.org/schemas/documents/utils/activity-log-data-snapshot",
-    "type": "object",
-    "properties": {
-        "scheduledActivity": {
-            "$ref": "/schemas/documents/scheduled-activity"
-        }
-    },
-    "additionalProperties": false,
-    "$comment": "TODO Activity Refactor: scheduledActivity should be required if text fixtures allowed that",
-    "required": []
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uwscope.org/schemas/documents/utils/activity-log-data-snapshot",
+  "type": "object",
+  "properties": {
+    "scheduledActivity": {
+      "$ref": "/schemas/documents/scheduled-activity"
+    }
+  },
+  "additionalProperties": false,
+  "$comment": "TODO Activity Refactor: scheduledActivity should be required if text fixtures allowed that",
+  "required": []
 }

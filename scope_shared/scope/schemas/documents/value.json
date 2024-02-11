@@ -1,44 +1,44 @@
 {
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://uwscope.org/schemas/documents/value",
-	"title": "Value",
-	"description": "Value Type",
-	"type": "object",
-	"$comment": [
-		"name:",
-		"  - Display text of the value.",
-		"lifeAreaId:",
-		"  - ID of associated life area.",
-		"editedDateTime:",
-		"  - DateTime when this value was created or edited.",
-		"  - Used for determining when an overall values inventory was last edited."
-	],
-	"properties": {
-		"_id": {
-			"type": "string"
-		},
-		"_type": {
-			"const": "value"
-		},
-		"_set_id": {
-			"type": "string"
-		},
-		"_rev": {
-			"type": "number"
-		},
-		"valueId": {
-			"type": "string"
-		},
-		"name": {
-			"type": "string"
-		},
-		"lifeAreaId": {
-			"$ref": "/schemas/utils/enums#/properties/lifeAreaId"
-		},
-		"editedDateTime": {
-			"$ref": "/schemas/utils/datetime#/properties/datetime"
-		}
-	},
-	"additionalProperties": false,
-	"required": ["_type", "name", "editedDateTime", "lifeAreaId"]
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uwscope.org/schemas/documents/value",
+  "title": "Value",
+  "description": "Value Type",
+  "type": "object",
+  "$comment": [
+    "name:",
+    "  - Display text of the value.",
+    "lifeAreaId:",
+    "  - ID of associated life area.",
+    "editedDateTime:",
+    "  - DateTime when this value was created or edited.",
+    "  - Used for determining when an overall values inventory was last edited."
+  ],
+  "properties": {
+    "_id": {
+      "type": "string"
+    },
+    "_type": {
+      "const": "value"
+    },
+    "_set_id": {
+      "type": "string"
+    },
+    "_rev": {
+      "type": "number"
+    },
+    "valueId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "lifeAreaId": {
+      "$ref": "/schemas/utils/enums#/properties/lifeAreaId"
+    },
+    "editedDateTime": {
+      "$ref": "/schemas/utils/datetime#/properties/datetime"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["_type", "name", "editedDateTime", "lifeAreaId"]
 }
