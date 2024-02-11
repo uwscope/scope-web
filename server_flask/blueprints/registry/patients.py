@@ -53,8 +53,10 @@ def _construct_patient_document(
     patient_document["activityLogs"] = activity_logs
 
     # Activity Schedules
-    activity_schedules = scope.database.patient.activity_schedules.get_activity_schedules(
-        collection=patient_collection
+    activity_schedules = (
+        scope.database.patient.activity_schedules.get_activity_schedules(
+            collection=patient_collection
+        )
     )
     patient_document["activitySchedules"] = activity_schedules
 
@@ -101,14 +103,18 @@ def _construct_patient_document(
     patient_document["safetyPlan"] = safety_plan
 
     # Scheduled Assessments
-    scheduled_assessments = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    scheduled_assessments = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
     patient_document["scheduledAssessments"] = scheduled_assessments
 
     # Scheduled Activities
-    scheduled_activities = scope.database.patient.scheduled_activities.get_scheduled_activities(
-        collection=patient_collection
+    scheduled_activities = (
+        scope.database.patient.scheduled_activities.get_scheduled_activities(
+            collection=patient_collection
+        )
     )
     patient_document["scheduledActivities"] = scheduled_activities
 
@@ -119,9 +125,7 @@ def _construct_patient_document(
     patient_document["sessions"] = sessions
 
     # Values
-    values = scope.database.patient.values.get_values(
-        collection=patient_collection
-    )
+    values = scope.database.patient.values.get_values(collection=patient_collection)
     patient_document["values"] = values
 
     # Values Inventory
