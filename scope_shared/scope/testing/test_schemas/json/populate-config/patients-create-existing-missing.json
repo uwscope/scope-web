@@ -1,7 +1,7 @@
 {
-	"patients": {},
-	"providers": {
-		"create": [],
-		"existing": []
-	}
+  "patients": {},
+  "providers": {
+    "create": [],
+    "existing": []
+  }
 }
