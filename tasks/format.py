@@ -16,8 +16,8 @@ def format(context):
             [
                 "pipenv",
                 "run",
-                "echo",
-                "format",
+                "black",
+                ".",
             ]
         ),
     )

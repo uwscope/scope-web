@@ -1,0 +1,11 @@
+[tool.black]
+target-version = ['py39']
+
+# .gitignore exclusions are also excluded.
+extend-exclude = '''
+(
+  ^/web_patient |
+  ^/web_registry |
+  ^/web_shared
+)
+'''
