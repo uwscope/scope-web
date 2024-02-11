@@ -34,11 +34,15 @@ def format(context):
         warn=True,
     )
     if result.exited > 0:
-        result = context.run(
+        context.run(
             command=" ".join(
                 [
                     "yarn",
-                    "format",
+                    "prettier",
+                    ".",
+                    "--write",
+                    "--log-level",
+                    "warn",
                 ]
             ),
         )
