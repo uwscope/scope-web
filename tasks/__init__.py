@@ -4,6 +4,7 @@ import aws_infrastructure.tasks.library.aws_configure
 from invoke import Collection
 
 import tasks.aws
+import tasks.format
 import tasks.database
 import tasks.documentdb
 import tasks.dependencies
@@ -34,6 +35,9 @@ compose_collection(ns, tasks.documentdb.ns, name="documentdb")
 
 # Compose from dependencies.py
 compose_collection(ns, tasks.dependencies.ns, name="depend")
+
+# Compose from format.py
+compose_collection(ns, tasks.format.ns, sub=False)
 
 # Compose from notebooks.py
 compose_collection(ns, tasks.notebooks.ns, name="notebooks")
