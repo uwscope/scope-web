@@ -13,7 +13,6 @@ DEPENDENCIES = {
         pipfile_dirs=[
             ".",
             "./notebooks",
-            "./server_celery",
             "./server_flask",
         ],
         yarn_dirs=[
@@ -38,17 +37,12 @@ DEPENDENCIES = {
         pipfile_dirs=[
             ".",
             "./notebooks",
-            "./server_celery",
             "./server_flask",
         ],
         yarn_dirs=None,
     ),
     "root": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=["."],
-        yarn_dirs=None,
-    ),
-    "server_celery": aws_infrastructure.tasks.library.dependencies.Dependency(
-        pipfile_dirs=["./server_celery"],
         yarn_dirs=None,
     ),
     "server_flask": aws_infrastructure.tasks.library.dependencies.Dependency(

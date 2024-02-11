@@ -4,7 +4,6 @@ import aws_infrastructure.tasks.library.aws_configure
 from invoke import Collection
 
 import tasks.aws
-import tasks.celery
 import tasks.database
 import tasks.documentdb
 import tasks.dependencies
@@ -53,10 +52,6 @@ ns_prod = Collection("prod")
 #
 ns_dev_server = Collection("server")
 ns_prod_server = Collection("server")
-
-# Compose from celery.py
-# compose_collection(ns_dev_server, tasks.celery.ns.collections["dev"], name="celery")
-# compose_collection(ns_prod_server, tasks.celery.ns.collections["prod"], name="celery")
 
 # Compose from server_flask.py
 compose_collection(ns_dev_server, tasks.server_flask.ns.collections["dev"], name="flask")

@@ -42,12 +42,10 @@ Available tasks:
 
   database.forward          Forward the database cluster, listening on `localhost:5000`.
   depend.install.all        Install all dependencies.
-  depend.install.celery     Install celery dependencies.
   depend.install.flask      Install flask dependencies.
   depend.install.registry   Install registry dependencies.
   depend.install.tasks      Install tasks dependencies.
   depend.update.all         Update all dependencies.
-  depend.update.celery      Update celery dependencies.
   depend.update.flask       Update flask dependencies.
   depend.update.registry    Update registry dependencies.
   depend.update.tasks       Update tasks dependencies.
