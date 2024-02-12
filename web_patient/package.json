@@ -1,5 +1,5 @@
 {
-    "name": "scope-patient",
+    "name": "web-patient",
     "@comment dependencies": [],
     "dependencies": {
         "@babel/polyfill": "7.12.x",
