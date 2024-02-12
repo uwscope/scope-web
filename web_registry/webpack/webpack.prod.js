@@ -1,23 +1,22 @@
-const paths = require('./paths');
-const webpack = require('webpack');
+const paths = require("./paths");
+const webpack = require("webpack");
 
-const { merge } = require('webpack-merge');
-const common = require('./webpack.common.js');
+const { merge } = require("webpack-merge");
+const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
-    mode: 'production',
-    bail: true,
-    devtool: 'source-map',
+  mode: "production",
+  bail: true,
+  devtool: "source-map",
 
-    // Disable minification for easier debugging
-    optimization: {
-        minimize: false,
-    },
+  // Disable minification for easier debugging
+  optimization: {
+    minimize: false,
+  },
 
-    output: {
-        path: paths.appBuildProd,
-    },
+  output: {
+    path: paths.appBuildProd,
+  },
 
-    plugins: [
-    ],
+  plugins: [],
 });

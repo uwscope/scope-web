@@ -20,20 +20,20 @@ def pre_save_remove_output(model, **kwargs):
     # logging.debug(json.dumps(model))
 
     # Only run on notebooks
-    if model['type'] != 'notebook':
+    if model["type"] != "notebook":
         return
 
     # Only run on nbformat v4
-    assert model['content']['nbformat'] == 4
-    if model['content']['nbformat'] != 4:
+    assert model["content"]["nbformat"] == 4
+    if model["content"]["nbformat"] != 4:
         return
 
     # Review all cells in the notebook
-    for cell in model['content']['cells']:
+    for cell in model["content"]["cells"]:
         # In every code cell, remove any output
-        if cell['cell_type'] == 'code':
-            cell['outputs'] = []
-            cell['execution_count'] = None
+        if cell["cell_type"] == "code":
+            cell["outputs"] = []
+            cell["execution_count"] = None
 
 
 c.FileContentsManager.pre_save_hook = pre_save_remove_output

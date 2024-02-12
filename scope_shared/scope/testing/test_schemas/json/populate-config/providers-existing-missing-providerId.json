@@ -1,15 +1,15 @@
 {
-	"patients": {
-		"create": [],
-		"existing": []
-	},
-	"providers": {
-		"create": [],
-		"existing": [
-			{
-				"name": "Ravi Karkar",
-				"role": "studyStaff"
-			}
-		]
-	}
+  "patients": {
+    "create": [],
+    "existing": []
+  },
+  "providers": {
+    "create": [],
+    "existing": [
+      {
+        "name": "Ravi Karkar",
+        "role": "studyStaff"
+      }
+    ]
+  }
 }

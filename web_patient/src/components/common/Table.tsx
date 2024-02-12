@@ -1,13 +1,12 @@
-import { TableCell, TableRow } from '@mui/material';
-
-import styled from 'styled-components';
+import { TableCell, TableRow } from "@mui/material";
+import styled from "styled-components";
 
 export const ClickableTableRow = styled(TableRow)({
-    '&:hover': {
-        cursor: 'pointer',
-    },
+  "&:hover": {
+    cursor: "pointer",
+  },
 });
 
 export const WordBreakTableCell = styled(TableCell)({
-    wordBreak: 'break-word',
+  wordBreak: "break-word",
 });

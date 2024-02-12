@@ -4,5 +4,5 @@
  * Designed for script to be replaced in deployed containers.
  */
 const CLIENT_CONFIG = {
-  "flaskBaseUrl": "http://127.0.0.1:4000/"
+  flaskBaseUrl: "http://127.0.0.1:4000/",
 };
