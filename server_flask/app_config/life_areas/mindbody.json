@@ -1,68 +1,68 @@
 {
-    "id": "mindbody",
-    "name": "Mind/Body/Spirituality",
-    "sortKey": 4,
-    "examples": [
+  "id": "mindbody",
+  "name": "Mind/Body/Spirituality",
+  "sortKey": 4,
+  "examples": [
+    {
+      "name": "Being physically healthy",
+      "activities": [
         {
-            "name": "Being physically healthy",
-            "activities": [
-                {
-                    "name": "Go to a doctor for a physical/check-up"
-                },
-                {
-                    "name": "Eat fruit everyday"
-                },
-                {
-                    "name": "Take my medication as prescribed"
-                }
-            ]
+          "name": "Go to a doctor for a physical/check-up"
         },
         {
-            "name": "Talking to someone about your problems and feelings",
-            "activities": [
-                {
-                    "name": "Ask someone to lunch to talk"
-                },
-                {
-                    "name": "Write in a journal"
-                }
-            ]
+          "name": "Eat fruit everyday"
         },
         {
-            "name": "Developing your religious/spiritual views",
-            "activities": [
-                {
-                    "name": "Talk with a religious figure"
-                },
-                {
-                    "name": "Talk to others with religious beliefs you are interested in"
-                }
-            ]
-        },
-        {
-            "name": "Living a spiritual life",
-            "activities": [
-                {
-                    "name": "Pray everyday"
-                },
-                {
-                    "name": "Read my religious material"
-                },
-                {
-                    "name": "Attend a religious service"
-                }
-            ]
-        },
-        {
-            "name": "Being tolerant, non-judgmental, accepting of others differences",
-            "activities": [
-                {
-                    "name": "Talk to someone with a different background"
-                },
-                {
-                    "name": "Read a book about a different culture"
-                }
-            ]
+          "name": "Take my medication as prescribed"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Talking to someone about your problems and feelings",
+      "activities": [
+        {
+          "name": "Ask someone to lunch to talk"
+        },
+        {
+          "name": "Write in a journal"
+        }
+      ]
+    },
+    {
+      "name": "Developing your religious/spiritual views",
+      "activities": [
+        {
+          "name": "Talk with a religious figure"
+        },
+        {
+          "name": "Talk to others with religious beliefs you are interested in"
+        }
+      ]
+    },
+    {
+      "name": "Living a spiritual life",
+      "activities": [
+        {
+          "name": "Pray everyday"
+        },
+        {
+          "name": "Read my religious material"
+        },
+        {
+          "name": "Attend a religious service"
+        }
+      ]
+    },
+    {
+      "name": "Being tolerant, non-judgmental, accepting of others differences",
+      "activities": [
+        {
+          "name": "Talk to someone with a different background"
+        },
+        {
+          "name": "Read a book about a different culture"
+        }
+      ]
+    }
+  ]
 }

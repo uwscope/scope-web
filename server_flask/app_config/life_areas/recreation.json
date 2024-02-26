@@ -1,54 +1,54 @@
 {
-    "id": "recreation",
-    "name": "Recreation/Interests/Creativity",
-    "sortKey": 3,
-    "examples": [
+  "id": "recreation",
+  "name": "Recreation/Interests/Creativity",
+  "sortKey": 3,
+  "examples": [
+    {
+      "name": "Being active",
+      "activities": [
         {
-            "name": "Being active",
-            "activities": [
-                {
-                    "name": "Go to the park with my son"
-                },
-                {
-                    "name": "Take a walk outside"
-                },
-                {
-                    "name": "Play football on Saturday"
-                }
-            ]
+          "name": "Go to the park with my son"
         },
         {
-            "name": "Being artistic and creative",
-            "activities": [
-                {
-                    "name": "Take painting classes"
-                },
-                {
-                    "name": "Make crafts"
-                }
-            ]
+          "name": "Take a walk outside"
         },
         {
-            "name": "Making a sacrifice for something you believe in",
-            "activities": [
-                {
-                    "name": "Start a petition"
-                },
-                {
-                    "name": "Spend time helping at my place of worship"
-                }
-            ]
-        },
-        {
-            "name": "Helping others less fortunate or who need help",
-            "activities": [
-                {
-                    "name": "Donate clothes"
-                },
-                {
-                    "name": "Spend 30 minutes helping an elderly person"
-                }
-            ]
+          "name": "Play football on Saturday"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Being artistic and creative",
+      "activities": [
+        {
+          "name": "Take painting classes"
+        },
+        {
+          "name": "Make crafts"
+        }
+      ]
+    },
+    {
+      "name": "Making a sacrifice for something you believe in",
+      "activities": [
+        {
+          "name": "Start a petition"
+        },
+        {
+          "name": "Spend time helping at my place of worship"
+        }
+      ]
+    },
+    {
+      "name": "Helping others less fortunate or who need help",
+      "activities": [
+        {
+          "name": "Donate clothes"
+        },
+        {
+          "name": "Spend 30 minutes helping an elderly person"
+        }
+      ]
+    }
+  ]
 }

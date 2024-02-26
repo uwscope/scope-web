@@ -12,13 +12,7 @@ TEST_CONFIGS = {
     "all": aws_infrastructure.tasks.library.tests.TestConfig(
         pipenv_pytest_dirs=[
             ".",
-            "./server_celery",
             "./server_flask",
-        ],
-    ),
-    "celery": aws_infrastructure.tasks.library.tests.TestConfig(
-        pipenv_pytest_dirs=[
-            "./server_celery",
         ],
     ),
     "flask": aws_infrastructure.tasks.library.tests.TestConfig(

@@ -1,18 +1,18 @@
 {
-    "_type": "activitySchedule",
-    "activityId": "activityId",
-    "editedDateTime": "2022-03-16T04:16:52.563Z",
-    "date": "2022-03-16T00:00:00.000Z",
-    "timeOfDay": 9,
-    "hasReminder": false,
-    "hasRepetition": false,
-    "repeatDayFlags": {
-        "Monday": false,
-        "Tuesday": false,
-        "Wednesday": false,
-        "Thursday": false,
-        "Friday": false,
-        "Saturday": false,
-        "Sunday": false
-    }
+  "_type": "activitySchedule",
+  "activityId": "activityId",
+  "editedDateTime": "2022-03-16T04:16:52.563Z",
+  "date": "2022-03-16T00:00:00.000Z",
+  "timeOfDay": 9,
+  "hasReminder": false,
+  "hasRepetition": false,
+  "repeatDayFlags": {
+    "Monday": false,
+    "Tuesday": false,
+    "Wednesday": false,
+    "Thursday": false,
+    "Friday": false,
+    "Saturday": false,
+    "Sunday": false
+  }
 }

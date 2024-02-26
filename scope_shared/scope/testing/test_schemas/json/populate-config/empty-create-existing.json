@@ -1,10 +1,10 @@
 {
-	"patients": {
-		"create": [],
-		"existing": []
-	},
-	"providers": {
-		"create": [],
-		"existing": []
-	}
+  "patients": {
+    "create": [],
+    "existing": []
+  },
+  "providers": {
+    "create": [],
+    "existing": []
+  }
 }

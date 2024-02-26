@@ -1,0 +1,11 @@
+{
+  "name": "scope-web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.x",
+    "prettier": "3.x",
+    "prettier-plugin-packagejson": "2.x"
+  }
+}

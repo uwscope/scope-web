@@ -1,194 +1,194 @@
 import {
-    IActivity,
-    IActivityLog,
-    IActivitySchedule,
-    IAssessment,
-    IAssessmentLog,
-    ICaseReview,
-    IClinicalHistory,
-    IMoodLog,
-    IPatient,
-    IPatientIdentity,
-    IPatientProfile,
-    IProviderIdentity,
-    ISafetyPlan,
-    IScheduledActivity,
-    IScheduledAssessment,
-    ISession,
-    IValue,
-    IValuesInventory,
-} from 'shared/types';
+  IActivity,
+  IActivityLog,
+  IActivitySchedule,
+  IAssessment,
+  IAssessmentLog,
+  ICaseReview,
+  IClinicalHistory,
+  IMoodLog,
+  IPatient,
+  IPatientIdentity,
+  IPatientProfile,
+  IProviderIdentity,
+  ISafetyPlan,
+  IScheduledActivity,
+  IScheduledAssessment,
+  ISession,
+  IValue,
+  IValuesInventory,
+} from "shared/types";
 
 interface IServiceResponse {
-    status: number;
-    message?: string;
+  status: number;
+  message?: string;
 }
 
 export interface IPatientListResponse extends IServiceResponse {
-    patients: IPatient[];
+  patients: IPatient[];
 }
 
 export interface IPatientResponse extends IServiceResponse {
-    patient: IPatient;
+  patient: IPatient;
 }
 
 export interface IPatientProfileRequest {
-    profile: IPatientProfile;
+  profile: IPatientProfile;
 }
 
 export interface IPatientProfileResponse extends IServiceResponse {
-    profile: IPatientProfile;
+  profile: IPatientProfile;
 }
 
 export interface IClinicalHistoryRequest {
-    clinicalhistory: IClinicalHistory;
+  clinicalhistory: IClinicalHistory;
 }
 
 export interface IClinicalHistoryResponse extends IServiceResponse {
-    clinicalhistory: IClinicalHistory;
+  clinicalhistory: IClinicalHistory;
 }
 
 export interface IValuesInventoryRequest {
-    valuesinventory: IValuesInventory;
+  valuesinventory: IValuesInventory;
 }
 
 export interface IValuesInventoryResponse extends IServiceResponse {
-    valuesinventory: IValuesInventory;
+  valuesinventory: IValuesInventory;
 }
 
 export interface IQuoteResponse extends IServiceResponse {
-    quote: string;
+  quote: string;
 }
 
 export interface ISessionListResponse extends IServiceResponse {
-    sessions: ISession[];
+  sessions: ISession[];
 }
 
 export interface ISessionResponse extends IServiceResponse {
-    session: ISession;
+  session: ISession;
 }
 
 export interface ISessionRequest {
-    session: ISession;
+  session: ISession;
 }
 
 export interface ICaseReviewListResponse extends IServiceResponse {
-    casereviews: ICaseReview[];
+  casereviews: ICaseReview[];
 }
 
 export interface ICaseReviewResponse extends IServiceResponse {
-    casereview: ICaseReview;
+  casereview: ICaseReview;
 }
 
 export interface ICaseReviewRequest {
-    casereview: ICaseReview;
+  casereview: ICaseReview;
 }
 
 export interface IMoodLogListResponse extends IServiceResponse {
-    moodlogs: IMoodLog[];
+  moodlogs: IMoodLog[];
 }
 
 export interface IMoodLogResponse extends IServiceResponse {
-    moodlog: IMoodLog;
+  moodlog: IMoodLog;
 }
 
 export interface IMoodLogRequest {
-    moodlog: IMoodLog;
+  moodlog: IMoodLog;
 }
 
 export interface IActivityListResponse extends IServiceResponse {
-    activities: IActivity[];
+  activities: IActivity[];
 }
 
 export interface IActivityResponse extends IServiceResponse {
-    activity: IActivity;
+  activity: IActivity;
 }
 
 export interface IActivityRequest {
-    activity: IActivity;
+  activity: IActivity;
 }
 
 export interface IActivityScheduleListResponse extends IServiceResponse {
-    activityschedules: IActivitySchedule[];
+  activityschedules: IActivitySchedule[];
 }
 
 export interface IActivityScheduleResponse extends IServiceResponse {
-    activityschedule: IActivitySchedule;
+  activityschedule: IActivitySchedule;
 }
 
 export interface IActivityScheduleRequest {
-    activityschedule: IActivitySchedule;
+  activityschedule: IActivitySchedule;
 }
 
 export interface IProviderIdentityListResponse extends IServiceResponse {
-    providers: IProviderIdentity[];
+  providers: IProviderIdentity[];
 }
 
 export interface IAssessmentListResponse extends IServiceResponse {
-    assessments: IAssessment[];
+  assessments: IAssessment[];
 }
 
 export interface IAssessmentResponse extends IServiceResponse {
-    assessment: IAssessment;
+  assessment: IAssessment;
 }
 
 export interface IAssessmentRequest {
-    assessment: IAssessment;
+  assessment: IAssessment;
 }
 
 export interface IAssessmentLogListResponse extends IServiceResponse {
-    assessmentlogs: IAssessmentLog[];
+  assessmentlogs: IAssessmentLog[];
 }
 
 export interface IAssessmentLogResponse extends IServiceResponse {
-    assessmentlog: IAssessmentLog;
+  assessmentlog: IAssessmentLog;
 }
 
 export interface IAssessmentLogRequest {
-    assessmentlog: IAssessmentLog;
+  assessmentlog: IAssessmentLog;
 }
 
 export interface ISafetyPlanRequest {
-    safetyplan: ISafetyPlan;
+  safetyplan: ISafetyPlan;
 }
 
 export interface ISafetyPlanResponse extends IServiceResponse {
-    safetyplan: ISafetyPlan;
+  safetyplan: ISafetyPlan;
 }
 
 export interface IScheduledActivityListResponse extends IServiceResponse {
-    scheduledactivities: IScheduledActivity[];
+  scheduledactivities: IScheduledActivity[];
 }
 
 export interface IScheduledAssessmentListResponse extends IServiceResponse {
-    scheduledassessments: IScheduledAssessment[];
+  scheduledassessments: IScheduledAssessment[];
 }
 
 export interface IActivityLogListResponse extends IServiceResponse {
-    activitylogs: IActivityLog[];
+  activitylogs: IActivityLog[];
 }
 
 export interface IActivityLogResponse extends IServiceResponse {
-    activitylog: IActivityLog;
+  activitylog: IActivityLog;
 }
 
 export interface IActivityLogRequest {
-    activitylog: IActivityLog;
+  activitylog: IActivityLog;
 }
 
 export interface IIdentityResponse extends IServiceResponse {
-    providerIdentity: IProviderIdentity;
-    patientIdentity: IPatientIdentity;
+  providerIdentity: IProviderIdentity;
+  patientIdentity: IPatientIdentity;
 }
 
 export interface IValueRequest {
-    value: IValue;
+  value: IValue;
 }
 
 export interface IValueResponse extends IServiceResponse {
-    value: IValue;
+  value: IValue;
 }
 
 export interface IValueListResponse extends IServiceResponse {
-    values: IValue[];
+  values: IValue[];
 }
