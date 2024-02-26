@@ -48,8 +48,7 @@ def documentdb_forward(context):
                     ssh_port_forward.local_port,
                     "&".join(
                         [
-                            "tls=true",
-                            "tlsInsecure=true",
+                            "ssl=true",
                             "directConnection=true",
                             "serverSelectionTimeoutMS=5000",
                             "connectTimeoutMS=10000",

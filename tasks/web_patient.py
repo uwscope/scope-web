@@ -9,7 +9,7 @@ from invoke import Collection
 from invoke import task
 from pathlib import Path
 
-WEB_PATIENT_PATH = './web_patient'
+WEB_PATIENT_PATH = "./web_patient"
 
 
 @task
@@ -25,10 +25,12 @@ def dev_serve(context):
     if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
         with context.cd(Path(WEB_PATIENT_PATH)):
             context.run(
-                command=' '.join([
-                    'yarn',
-                    'dev_serve',
-                ])
+                command=" ".join(
+                    [
+                        "yarn",
+                        "dev_serve",
+                    ]
+                )
             )
 
 
@@ -47,10 +49,12 @@ def prod_build(context):
 
     with context.cd(Path(WEB_PATIENT_PATH)):
         context.run(
-            command=' '.join([
-                'yarn',
-                'prod_build',
-            ])
+            command=" ".join(
+                [
+                    "yarn",
+                    "prod_build",
+                ]
+            )
         )
 
 
@@ -67,22 +71,24 @@ def prod_serve(context):
 
     with context.cd(Path(WEB_PATIENT_PATH)):
         context.run(
-            command=' '.join([
-                'yarn',
-                'prod_serve',
-            ])
+            command=" ".join(
+                [
+                    "yarn",
+                    "prod_serve",
+                ]
+            )
         )
 
 
 # Build task collection
-ns = Collection('registry')
+ns = Collection("registry")
 
-ns_dev = Collection('dev')
-ns_dev.add_task(dev_serve, name='serve')
+ns_dev = Collection("dev")
+ns_dev.add_task(dev_serve, name="serve")
 
-ns_prod = Collection('prod')
-ns_prod.add_task(prod_build, 'build')
-ns_prod.add_task(prod_serve, 'serve')
+ns_prod = Collection("prod")
+ns_prod.add_task(prod_build, "build")
+ns_prod.add_task(prod_serve, "serve")
 
-compose_collection(ns, ns_dev, name='dev')
-compose_collection(ns, ns_prod, name='prod')
+compose_collection(ns, ns_dev, name="dev")
+compose_collection(ns, ns_prod, name="prod")

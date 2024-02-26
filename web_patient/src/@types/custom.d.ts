@@ -1,11 +1,11 @@
-declare module '*.png' {
-    const content: any;
-    export default content;
+declare module "*.png" {
+  const content: any;
+  export default content;
 }
 
-declare module '*.jpeg' {
-    const content: any;
-    export default content;
+declare module "*.jpeg" {
+  const content: any;
+  export default content;
 }
 
 // NodeJS overrides
@@ -14,6 +14,6 @@ declare function clearTimeout(timeoutId: number): void;
 
 // Expected client configuration
 declare var CLIENT_CONFIG: {
-    flaskBaseUrl: string;
-    vapidPublicKey: string;
+  flaskBaseUrl: string;
+  vapidPublicKey: string;
 };

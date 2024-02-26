@@ -1,7 +1,7 @@
 {
-	"_type": "profile",
-	"_rev": 1,
-	"name": "Paul Atreides",
-	"MRN": "MRN",
-	"birthdate": "1991-01-30T00:00:00Z"
+  "_type": "profile",
+  "_rev": 1,
+  "name": "Paul Atreides",
+  "MRN": "MRN",
+  "birthdate": "1991-01-30T00:00:00Z"
 }

@@ -1,73 +1,73 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://uwscope.org/schemas/document",
-    "title": "Document Schema",
-    "oneOf": [
-        {
-            "$ref": "/schemas/documents/activity-log"
-        },
-        {
-            "$ref": "/schemas/documents/activity"
-        },
-        {
-            "$ref": "/schemas/documents/activity-schedule"
-        },
-        {
-            "$ref": "/schemas/documents/assessment-log"
-        },
-        {
-            "$ref": "/schemas/documents/assessment"
-        },
-        {
-            "$ref": "/schemas/documents/case-review"
-        },
-        {
-            "$ref": "/schemas/documents/clinical-history"
-        },
-        {
-            "$ref": "/schemas/documents/mood-log"
-        },
-        {
-            "$ref": "/schemas/documents/patient-identity"
-        },
-        {
-            "$ref": "/schemas/documents/provider-identity"
-        },
-        {
-            "$ref": "/schemas/documents/patient-profile"
-        },
-        {
-            "$ref": "/schemas/documents/push-subscription"
-        },
-        {
-            "$ref": "/schemas/documents/safety-plan"
-        },
-        {
-            "$ref": "/schemas/documents/scheduled-activity"
-        },
-        {
-            "$ref": "/schemas/documents/scheduled-assessment"
-        },
-        {
-            "$ref": "/schemas/documents/sentinel"
-        },
-        {
-            "$ref": "/schemas/documents/session"
-        },
-        {
-            "$ref": "/schemas/documents/set-tombstone"
-        },
-        {
-            "$ref": "/schemas/documents/value"
-        },
-        {
-            "$ref": "/schemas/documents/values-inventory"
-        },
-        {
-            "$ref": "/schemas/documents/utils/contact"
-        },
-        {
-            "$ref": "/schemas/documents/utils/referral-status"
-        }
-    ]
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uwscope.org/schemas/document",
+  "title": "Document Schema",
+  "oneOf": [
+    {
+      "$ref": "/schemas/documents/activity-log"
+    },
+    {
+      "$ref": "/schemas/documents/activity"
+    },
+    {
+      "$ref": "/schemas/documents/activity-schedule"
+    },
+    {
+      "$ref": "/schemas/documents/assessment-log"
+    },
+    {
+      "$ref": "/schemas/documents/assessment"
+    },
+    {
+      "$ref": "/schemas/documents/case-review"
+    },
+    {
+      "$ref": "/schemas/documents/clinical-history"
+    },
+    {
+      "$ref": "/schemas/documents/mood-log"
+    },
+    {
+      "$ref": "/schemas/documents/patient-identity"
+    },
+    {
+      "$ref": "/schemas/documents/provider-identity"
+    },
+    {
+      "$ref": "/schemas/documents/patient-profile"
+    },
+    {
+      "$ref": "/schemas/documents/push-subscription"
+    },
+    {
+      "$ref": "/schemas/documents/safety-plan"
+    },
+    {
+      "$ref": "/schemas/documents/scheduled-activity"
+    },
+    {
+      "$ref": "/schemas/documents/scheduled-assessment"
+    },
+    {
+      "$ref": "/schemas/documents/sentinel"
+    },
+    {
+      "$ref": "/schemas/documents/session"
+    },
+    {
+      "$ref": "/schemas/documents/set-tombstone"
+    },
+    {
+      "$ref": "/schemas/documents/value"
+    },
+    {
+      "$ref": "/schemas/documents/values-inventory"
+    },
+    {
+      "$ref": "/schemas/documents/utils/contact"
+    },
+    {
+      "$ref": "/schemas/documents/utils/referral-status"
+    }
+  ]
 }

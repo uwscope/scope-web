@@ -24,7 +24,9 @@ def dev_serve(context):
     """
 
     if aws_infrastructure.tasks.terminal.spawn_new_terminal(context):
-        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(INSTANCE_SSH_CONFIG_PATH)
+        ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
+            INSTANCE_SSH_CONFIG_PATH
+        )
         documentdb_config = (
             aws_infrastructure.tasks.library.documentdb.DocumentDBConfig.load(
                 DOCUMENTDB_CONFIG_PATH

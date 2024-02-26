@@ -1,52 +1,52 @@
 {
-    "id": "relationship",
-    "name": "Relationships/Social Life",
-    "sortKey": 1,
-    "examples": [
+  "id": "relationship",
+  "name": "Relationships/Social Life",
+  "sortKey": 1,
+  "examples": [
+    {
+      "name": "Being a loving parent",
+      "activities": [
         {
-            "name": "Being a loving parent",
-            "activities": [
-                {
-                    "name": "Tell my child I love them every day"
-                },
-                {
-                    "name": "Make a special breakfast for my child on Saturday"
-                },
-                {
-                    "name": "Take my child to the park on Saturday"
-                },
-                {
-                    "name": "Pick up my child from school promptly each day"
-                }
-            ]
+          "name": "Tell my child I love them every day"
         },
         {
-            "name": "Being an attentive and caring friend",
-            "activities": [
-                {
-                    "name": "Call my friend once per week"
-                },
-                {
-                    "name": "Text my friend"
-                },
-                {
-                    "name": "Ask my friend about his/her week"
-                }
-            ]
+          "name": "Make a special breakfast for my child on Saturday"
         },
         {
-            "name": "Caring for the needs of your spouse",
-            "activities": [
-                {
-                    "name": "Make special plans with spouse"
-                },
-                {
-                    "name": "Tell spouse I love them every day"
-                },
-                {
-                    "name": "Buy my partner a surprise gift"
-                }
-            ]
+          "name": "Take my child to the park on Saturday"
+        },
+        {
+          "name": "Pick up my child from school promptly each day"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Being an attentive and caring friend",
+      "activities": [
+        {
+          "name": "Call my friend once per week"
+        },
+        {
+          "name": "Text my friend"
+        },
+        {
+          "name": "Ask my friend about his/her week"
+        }
+      ]
+    },
+    {
+      "name": "Caring for the needs of your spouse",
+      "activities": [
+        {
+          "name": "Make special plans with spouse"
+        },
+        {
+          "name": "Tell spouse I love them every day"
+        },
+        {
+          "name": "Buy my partner a surprise gift"
+        }
+      ]
+    }
+  ]
 }

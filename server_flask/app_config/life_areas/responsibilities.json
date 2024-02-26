@@ -1,49 +1,49 @@
 {
-    "id": "responsibilities",
-    "name": "Responsibilities",
-    "sortKey": 5,
-    "examples": [
+  "id": "responsibilities",
+  "name": "Responsibilities",
+  "sortKey": 5,
+  "examples": [
+    {
+      "name": "Being someone others can depend upon",
+      "activities": [
         {
-            "name": "Being someone others can depend upon",
-            "activities": [
-                {
-                    "name": "Arrive at work on time"
-                },
-                {
-                    "name": "Offer to help someone who is very busy"
-                },
-                {
-                    "name": "Repay a debt"
-                }
-            ]
+          "name": "Arrive at work on time"
         },
         {
-            "name": "Taking care of your belongings",
-            "activities": [
-                {
-                    "name": "Complete a much-needed household repair"
-                },
-                {
-                    "name": "Wash your clothes/shoes"
-                },
-                {
-                    "name": "Clean the house"
-                }
-            ]
+          "name": "Offer to help someone who is very busy"
         },
         {
-            "name": "Being organized",
-            "activities": [
-                {
-                    "name": "Review my days activities the night before"
-                },
-                {
-                    "name": "Use a calendar to record dates and meetings"
-                },
-                {
-                    "name": "Develop a filing system for important paperwork"
-                }
-            ]
+          "name": "Repay a debt"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Taking care of your belongings",
+      "activities": [
+        {
+          "name": "Complete a much-needed household repair"
+        },
+        {
+          "name": "Wash your clothes/shoes"
+        },
+        {
+          "name": "Clean the house"
+        }
+      ]
+    },
+    {
+      "name": "Being organized",
+      "activities": [
+        {
+          "name": "Review my days activities the night before"
+        },
+        {
+          "name": "Use a calendar to record dates and meetings"
+        },
+        {
+          "name": "Develop a filing system for important paperwork"
+        }
+      ]
+    }
+  ]
 }

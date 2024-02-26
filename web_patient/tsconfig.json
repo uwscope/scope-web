@@ -1,29 +1,42 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "es6",
-
-        "baseUrl": ".",
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "forceConsistentCasingInFileNames": true,
-        "jsx": "react",
-        "lib": ["ES2020.Promise", "DOM", "webworker"], // Necessary for accessing window, document, promise for service worker
-        "moduleResolution": "node",
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "outDir": "./build/",
-        "paths": {
-            "src/*": ["src/*"],
-            "shared/*": ["../web_shared/*"],
-            "@mui/styled-engine": ["./node_modules/@mui/styled-engine-sc"]
-        },
-        "sourceMap": true,
-        "strict": true
+  "compilerOptions": {
+    "target": "es6",
+    "module": "es6",
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "lib": [
+      "ES2020.Promise",
+      "DOM",
+      "webworker"
+    ], // Necessary for accessing window, document, promise for service worker
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./build/",
+    "paths": {
+      "src/*": [
+        "src/*"
+      ],
+      "shared/*": [
+        "../web_shared/*"
+      ],
+      "@mui/styled-engine": [
+        "./node_modules/@mui/styled-engine-sc"
+      ]
     },
-
-    "include": ["src/**/*", "../web_shared/**/*"],
-    "exclude": ["node_modules"]
+    "sourceMap": true,
+    "strict": true
+  },
+  "include": [
+    "src/**/*",
+    "../web_shared/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

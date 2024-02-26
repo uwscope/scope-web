@@ -13,10 +13,10 @@ DEPENDENCIES = {
         pipfile_dirs=[
             ".",
             "./notebooks",
-            "./server_celery",
             "./server_flask",
         ],
         yarn_dirs=[
+            ".",
             "./web_patient",
             "./web_registry",
             "./web_shared",
@@ -25,30 +25,30 @@ DEPENDENCIES = {
     "javascript": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=None,
         yarn_dirs=[
+            ".",
             "./web_patient",
             "./web_registry",
             "./web_shared",
         ],
     ),
-    "notebooks": aws_infrastructure.tasks.library.dependencies.Dependency(
-        pipfile_dirs=["./notebooks"],
-        yarn_dirs=None,
-    ),
     "python": aws_infrastructure.tasks.library.dependencies.Dependency(
         pipfile_dirs=[
             ".",
             "./notebooks",
-            "./server_celery",
             "./server_flask",
         ],
         yarn_dirs=None,
     ),
-    "root": aws_infrastructure.tasks.library.dependencies.Dependency(
-        pipfile_dirs=["."],
+    "format": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=None,
+        yarn_dirs=["."],
+    ),
+    "notebooks": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=["./notebooks"],
         yarn_dirs=None,
     ),
-    "server_celery": aws_infrastructure.tasks.library.dependencies.Dependency(
-        pipfile_dirs=["./server_celery"],
+    "root": aws_infrastructure.tasks.library.dependencies.Dependency(
+        pipfile_dirs=["."],
         yarn_dirs=None,
     ),
     "server_flask": aws_infrastructure.tasks.library.dependencies.Dependency(

@@ -1,44 +1,44 @@
 {
-    "_type": "activityLog",
-    "scheduledActivityId": "1",
-    "dataSnapshot": {
-        "scheduledActivity": {
-            "_type": "scheduledActivity",
-            "activityScheduleId": "activityScheduleId",
-            "completed": false,
-            "dataSnapshot": {
-                "activity": {
-                    "_type": "activity",
-                    "activityId": "activityId",
-                    "editedDateTime": "2022-01-16T19:07:28.193Z",
-                    "name": "some activity name",
-                    "valueId": "valueId"
-                },
-                "activitySchedule": {
-                    "_type": "activitySchedule",
-                    "activityId": "activityId",
-                    "activityScheduleId": "activityScheduleId",
-                    "date": "2022-02-16T00:00:00.000Z",
-                    "editedDateTime": "2022-02-16T18:58:56.778Z",
-                    "hasReminder": false,
-                    "hasRepetition": false,
-                    "timeOfDay": 9
-                },
-                "value": {
-                    "_type": "value",
-                    "editedDateTime": "2022-01-16T18:01:56.813Z",
-                    "lifeAreaId": "relationship",
-                    "name": "some value name",
-                    "valueId": "valueId"
-                }
-            },
-            "dueDate": "2023-02-16T00:00:00.000Z",
-            "dueDateTime": "2023-02-16T17:00:00.000Z",
-            "dueTimeOfDay": 9,
-            "scheduledActivityId": "scheduledActivityId"
+  "_type": "activityLog",
+  "scheduledActivityId": "1",
+  "dataSnapshot": {
+    "scheduledActivity": {
+      "_type": "scheduledActivity",
+      "activityScheduleId": "activityScheduleId",
+      "completed": false,
+      "dataSnapshot": {
+        "activity": {
+          "_type": "activity",
+          "activityId": "activityId",
+          "editedDateTime": "2022-01-16T19:07:28.193Z",
+          "name": "some activity name",
+          "valueId": "valueId"
+        },
+        "activitySchedule": {
+          "_type": "activitySchedule",
+          "activityId": "activityId",
+          "activityScheduleId": "activityScheduleId",
+          "date": "2022-02-16T00:00:00.000Z",
+          "editedDateTime": "2022-02-16T18:58:56.778Z",
+          "hasReminder": false,
+          "hasRepetition": false,
+          "timeOfDay": 9
+        },
+        "value": {
+          "_type": "value",
+          "editedDateTime": "2022-01-16T18:01:56.813Z",
+          "lifeAreaId": "relationship",
+          "name": "some value name",
+          "valueId": "valueId"
         }
-    },
-    "recordedDateTime": "2022-03-20T14:48:08.000Z",
-    "success": "No",
-    "alternative": "alternative"
+      },
+      "dueDate": "2023-02-16T00:00:00.000Z",
+      "dueDateTime": "2023-02-16T17:00:00.000Z",
+      "dueTimeOfDay": 9,
+      "scheduledActivityId": "scheduledActivityId"
+    }
+  },
+  "recordedDateTime": "2022-03-20T14:48:08.000Z",
+  "success": "No",
+  "alternative": "alternative"
 }
