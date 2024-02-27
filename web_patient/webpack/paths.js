@@ -10,6 +10,9 @@ module.exports = {
   appBuildProd: resolveProject("dist"),
   appIndex: resolveProject("src/index.tsx"),
   appIndexTemplate: resolveProject("public/index.html"),
+  serviceWorkerWorkbox: resolveProject(
+    "service-worker/serviceWorkerWorkbox.ts",
+  ),
   tsconfig: resolveProject("tsconfig.json"),
   webpackConfigDev: resolveProject("webpack/webpack.dev.js"),
   webpackConfigProd: resolveProject("webpack/webpack.prod.js"),

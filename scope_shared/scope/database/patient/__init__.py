@@ -35,6 +35,12 @@ from scope.database.patient.patient_profile import (
     get_patient_profile,
     put_patient_profile,
 )
+from scope.database.patient.push_subscriptions import (
+    get_push_subscriptions,
+    get_push_subscription,
+    post_push_subscription,
+    put_push_subscription,
+)
 from scope.database.patient.scheduled_activities import (
     get_scheduled_activities,
     get_scheduled_activity,

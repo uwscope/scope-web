@@ -16,6 +16,7 @@ import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
+import scope.database.patient.push_subscriptions
 import scope.database.patient.sessions
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -190,6 +191,24 @@ TEST_CONFIGS = [
         flask_document_set_key="moodlogs",
         flask_query_set_element_type="moodlog",
         flask_document_set_element_key="moodlog",
+    ),
+    ConfigTestPatientSet(
+        name="pushsubscriptions",
+        semantic_set_id=scope.database.patient.push_subscriptions.SEMANTIC_SET_ID,
+        document_factory_fixture_set_element="data_fake_push_subscription_factory",
+        document_factory_fixture_set="data_fake_push_subscriptions_factory",
+        database_get_set_function=scope.database.patient.push_subscriptions.get_push_subscriptions,
+        database_get_function=scope.database.patient.push_subscriptions.get_push_subscription,
+        database_post_function=scope.database.patient.push_subscriptions.post_push_subscription,
+        database_unsafe_update_function=None,
+        database_document_parameter_name="push_subscription",
+        flask_query_set_type="pushsubscriptions",
+        flask_document_set_key="pushsubscriptions",
+        flask_query_set_element_type="pushsubscription",
+        flask_document_set_element_key="pushsubscription",
+        options=ConfigTestPatientSetOptions(
+            set_supports_deletion=True,
+        ),
     ),
     ConfigTestPatientSet(
         name="sessions",

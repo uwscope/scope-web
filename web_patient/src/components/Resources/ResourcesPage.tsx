@@ -71,6 +71,18 @@ export const ResourcesPage: FunctionComponent = () => {
               imageSrc={getImage("Resources_crisis_resources_button_image")}
             />
           </ListItem>
+          <ListItem
+            alignItems="flex-start"
+            disableGutters={true}
+            component={Link}
+            to={Routes.notifications}
+          >
+            <ListCard
+              title={getString("Resources_notifications_title")}
+              subtitle={getString("Resources_notifications_subtitle")}
+              imageSrc={getImage("Resources_notifications_button_image")}
+            />
+          </ListItem>
           <Divider />
           <ListItem
             alignItems="flex-start"

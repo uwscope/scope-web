@@ -15,4 +15,5 @@ declare function clearTimeout(timeoutId: number): void;
 // Expected client configuration
 declare var CLIENT_CONFIG: {
   flaskBaseUrl: string;
+  vapidPublicKey: string;
 };

@@ -1,18 +1,19 @@
 import { useLocation } from "react-router";
 
 export const Routes = {
-  home: "home",
-  careplan: "careplan",
-  progress: "progress",
-  resources: "resources",
-  valuesInventory: "inventory",
-  worksheets: "worksheets",
-  aboutus: "aboutus",
-  crisisresources: "crisisresources",
-  phqProgress: "phq",
-  gadProgress: "gad",
-  activityProgress: "activities",
-  moodProgress: "mood",
+  home: 'home',
+  careplan: 'careplan',
+  progress: 'progress',
+  resources: 'resources',
+  valuesInventory: 'inventory',
+  worksheets: 'worksheets',
+  aboutus: 'aboutus',
+  crisisresources: 'crisisresources',
+  notifications: 'notifications',
+  phqProgress: 'phq',
+  gadProgress: 'gad',
+  activityProgress: 'activities',
+  moodProgress: 'mood',
 };
 
 export const Parameters = {

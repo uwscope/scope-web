@@ -316,6 +316,9 @@ export interface IPatient {
 
   // Mood logs
   moodLogs: IMoodLog[];
+
+  // Push Subscriptions
+  pushSubscriptions: IPushSubscription[];
 }
 
 export interface IPatientList {
@@ -370,6 +373,26 @@ export interface IResourceContent {
 export interface IResourceItem {
   name: string;
   filename: string;
+}
+
+export interface IPushSubscription {
+  pushSubscriptionId?: string;
+  endpoint: string;
+  expirationTime: any;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
+export interface IPushSubscription {
+  pushSubscriptionId?: string;
+  endpoint: string;
+  expirationTime: any;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
 
 export const isSession = (

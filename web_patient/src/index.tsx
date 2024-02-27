@@ -14,6 +14,8 @@ import { isDev } from "shared/env";
 import App from "src/App";
 import createAppTheme from "src/styles/theme";
 
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+
 declare module "@mui/styles/defaultTheme" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {}
@@ -45,6 +47,8 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root"),
 );
+
+serviceWorkerRegistration.register();
 
 // Enable hot reloading
 declare let module: any;

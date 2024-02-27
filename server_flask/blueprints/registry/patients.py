@@ -14,6 +14,7 @@ import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
 import scope.database.patient.patient_profile
+import scope.database.patient.push_subscriptions
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -95,6 +96,14 @@ def _construct_patient_document(
         collection=patient_collection
     )
     patient_document["profile"] = profile
+
+    # Push Subscriptions
+    push_subscriptions = (
+        scope.database.patient.push_subscriptions.get_push_subscriptions(
+            collection=patient_collection
+        )
+    )
+    patient_document["pushSubscriptions"] = push_subscriptions
 
     # Safety Plan
     safety_plan = scope.database.patient.safety_plan.get_safety_plan(

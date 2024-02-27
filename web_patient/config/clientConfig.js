@@ -5,4 +5,5 @@
  */
 const CLIENT_CONFIG = {
   flaskBaseUrl: "http://127.0.0.1:4000/",
+  vapidPublicKey: "Insert your VAPID public key here",
 };

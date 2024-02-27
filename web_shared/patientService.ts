@@ -2,45 +2,48 @@ import _ from "lodash";
 import { getLogger } from "shared/logger";
 import { IServiceBase, ServiceBase } from "shared/serviceBase";
 import {
-  IActivityListResponse,
-  IActivityLogListResponse,
-  IActivityLogRequest,
-  IActivityLogResponse,
-  IActivityRequest,
-  IActivityResponse,
-  IActivityScheduleListResponse,
-  IActivityScheduleRequest,
-  IActivityScheduleResponse,
-  IAssessmentListResponse,
-  IAssessmentLogListResponse,
-  IAssessmentLogRequest,
-  IAssessmentLogResponse,
-  IAssessmentRequest,
-  IAssessmentResponse,
-  ICaseReviewListResponse,
-  ICaseReviewRequest,
-  ICaseReviewResponse,
-  IClinicalHistoryRequest,
-  IClinicalHistoryResponse,
-  IMoodLogListResponse,
-  IMoodLogRequest,
-  IMoodLogResponse,
   IPatientProfileRequest,
   IPatientProfileResponse,
   IPatientResponse,
-  ISafetyPlanRequest,
-  ISafetyPlanResponse,
-  IScheduledActivityListResponse,
-  IScheduledAssessmentListResponse,
+  IValuesInventoryResponse,
+  IValuesInventoryRequest,
+  IClinicalHistoryRequest,
+  IClinicalHistoryResponse,
   ISessionListResponse,
-  ISessionRequest,
   ISessionResponse,
-  IValueListResponse,
+  ICaseReviewListResponse,
+  ISessionRequest,
+  ICaseReviewResponse,
+  ICaseReviewRequest,
+  IAssessmentLogListResponse,
+  IAssessmentListResponse,
+  IAssessmentLogRequest,
+  IAssessmentLogResponse,
+  IAssessmentResponse,
+  IAssessmentRequest,
+  ISafetyPlanResponse,
+  ISafetyPlanRequest,
+  IScheduledActivityListResponse,
+  IActivityRequest,
+  IActivityResponse,
+  IActivityListResponse,
+  IActivityLogListResponse,
+  IActivityLogResponse,
+  IActivityLogRequest,
+  IActivityScheduleRequest,
+  IActivityScheduleResponse,
+  IActivityScheduleListResponse,
+  IMoodLogRequest,
+  IMoodLogResponse,
+  IMoodLogListResponse,
+  IScheduledAssessmentListResponse,
   IValueRequest,
   IValueResponse,
-  IValuesInventoryRequest,
-  IValuesInventoryResponse,
-} from "shared/serviceTypes";
+  IValueListResponse,
+  IPushSubscriptionListResponse,
+  IPushSubscriptionResponse,
+  IPushSubscriptionRequest,
+} from 'shared/serviceTypes';
 import {
   IActivity,
   IActivityLog,
@@ -53,13 +56,14 @@ import {
   IPatient,
   IPatientConfig,
   IPatientProfile,
+  IPushSubscription,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
   ISession,
   IValue,
   IValuesInventory,
-} from "shared/types";
+} from 'shared/types';
 
 export interface IPatientService extends IServiceBase {
   // Dynamic
@@ -121,6 +125,11 @@ export interface IPatientService extends IServiceBase {
 
   getMoodLogs(): Promise<IMoodLog[]>;
   addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
+
+  getPushSubscriptions(): Promise<IPushSubscription[]>;
+  addPushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
+  deletePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
+  updatePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription>;
 
   getValues(): Promise<IValue[]>;
   addValue(value: IValue): Promise<IValue>;
@@ -572,13 +581,50 @@ class PatientService extends ServiceBase implements IPatientService {
   public async addMoodLog(moodLog: IMoodLog): Promise<IMoodLog> {
     (moodLog as any)._type = "moodLog";
 
-    const response = await this.axiosInstance.post<IMoodLogResponse>(
-      `/moodlogs`,
-      {
-        moodlog: moodLog,
-      } as IMoodLogRequest,
-    );
+    const response = await this.axiosInstance.post<IMoodLogResponse>(`/moodlogs`, {
+      moodlog: moodLog,
+    } as IMoodLogRequest);
     return response.data?.moodlog;
+  }
+
+  public async addPushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+    (pushSubscription as any)._type = 'pushSubscription';
+
+    const response = await this.axiosInstance.post<IPushSubscriptionResponse>(`/pushsubscriptions`, {
+      pushsubscription: pushSubscription,
+    } as IPushSubscriptionRequest);
+    return response.data?.pushsubscription;
+  }
+
+  public async getPushSubscriptions(): Promise<IPushSubscription[]> {
+    const response = await this.axiosInstance.get<IPushSubscriptionListResponse>(`/pushsubscriptions`);
+    return response.data?.pushsubscriptions;
+  }
+
+  public async deletePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+    logger.assert((pushSubscription as any)._rev != undefined, '_rev should be in the request data');
+    const response = await this.axiosInstance.delete<IPushSubscriptionResponse>(
+      `/pushsubscription/${pushSubscription.pushSubscriptionId}`,
+      {
+        headers: {
+          'If-Match': (pushSubscription as any)._rev,
+        },
+      },
+    );
+    return response.data?.pushsubscription;
+  }
+
+  public async updatePushSubscription(pushSubscription: IPushSubscription): Promise<IPushSubscription> {
+    (pushSubscription as any)._type = 'pushSubscription';
+    logger.assert((pushSubscription as any)._rev != undefined, '_rev should be in the request data');
+    logger.assert((pushSubscription as any)._set_id != undefined, '_set_id should be in the request data');
+    const response = await this.axiosInstance.put<IPushSubscriptionResponse>(
+      `/pushsubscription/${pushSubscription.pushSubscriptionId}`,
+      {
+        pushsubscription: pushSubscription,
+      } as IPushSubscriptionRequest,
+    );
+    return response.data?.pushsubscription;
   }
 
   public async getValues(): Promise<IValue[]> {

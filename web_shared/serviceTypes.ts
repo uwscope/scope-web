@@ -11,13 +11,14 @@ import {
   IPatientIdentity,
   IPatientProfile,
   IProviderIdentity,
+  IPushSubscription,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
   ISession,
   IValue,
   IValuesInventory,
-} from "shared/types";
+} from 'shared/types';
 
 interface IServiceResponse {
   status: number;
@@ -95,6 +96,20 @@ export interface IMoodLogResponse extends IServiceResponse {
 export interface IMoodLogRequest {
   moodlog: IMoodLog;
 }
+
+
+export interface IPushSubscriptionListResponse extends IServiceResponse {
+  pushsubscriptions: IPushSubscription[];
+}
+
+export interface IPushSubscriptionResponse extends IServiceResponse {
+  pushsubscription: IPushSubscription;
+}
+
+export interface IPushSubscriptionRequest {
+  pushsubscription: IPushSubscription;
+}
+
 
 export interface IActivityListResponse extends IServiceResponse {
   activities: IActivity[];
