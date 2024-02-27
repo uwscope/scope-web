@@ -9,9 +9,60 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-black = "*"
-pymongo = "*"
-pytest = "*"
+########################################
+#
+# Core packages used in development.
+#
+########################################
+black = "22.8"
+
+# These are < 1.0, pin a specific version.
+
+# These are not semver, pin a specific version.
+
+########################################
+#
+# Dependencies of scope.
+#
+########################################
+boto3 = "1.24.*"
+faker = "13.15.*"
+numpy = "1.23.*"
+pyjwt = "2.4.*"
+pymongo = "4.2.*"
+pytest = "7.1.*"
+requests = "2.31.*"
+
+# These are < 1.0, pin a specific version.
+jschon = "0.8.3"
+lorem = "0.1.1"
+pyzipper = "0.3.6"
+"ruamel.yaml" = "0.17.21"
+
+# These are not semver, pin a specific version.
+pytz = "2024.1"
+
+########################################
+#
+# Dependencies of aws_infrastructure.
+#
+########################################
+
+invoke = "1.7.*"
+paramiko = "2.11.*"
+pipenv = "2023.12.*"
+
+# These are < 1.0, pin a specific version.
+colorama = "0.4.6"
+python-dotenv = "0.20.0"
+
+# These are not semver, pin a specific version.
+
+########################################
+#
+# scope and aws_infrastructure.
+#
+########################################
 
 [packages.scope]
 editable = true
@@ -23,7 +74,7 @@ subdirectory = "aws_infrastructure"
 editable = true
 
 ################################################################################
-# When co-developing aws-infrastructure, helpful to point at a branch.
+# When co-developing aws-infrastructure, it can be helpful to point at a branch.
 ################################################################################
 # git = "https://github.com/<accountname>/aws-infrastructure.git"
 # ref = "<branchname>"
