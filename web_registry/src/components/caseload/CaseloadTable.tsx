@@ -17,7 +17,12 @@ import {
   gridStringOrNumberComparator,
   GridValueFormatterParams,
 } from "@mui/x-data-grid";
-import { addWeeks, compareAsc, differenceInWeeks } from "date-fns";
+import {
+  addWeeks,
+  compareAsc,
+  differenceInMonths,
+  differenceInWeeks,
+} from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
 import { formatDateOnly, getFollowupWeeks } from "shared/time";
@@ -74,6 +79,15 @@ const ChangeCell = withTheme(
     textAlign: "center",
     backgroundColor:
       props.change <= -50 && props.theme.customPalette.scoreColors["good"],
+  })),
+);
+
+const HiglightedCell = withTheme(
+  styled.div<{ scoreColorKey: string }>((props) => ({
+    width: "100%",
+    padding: props.theme.spacing(2),
+    textAlign: "center",
+    backgroundColor: props.theme.customPalette.scoreColors[props.scoreColorKey],
   })),
 );
 
@@ -213,6 +227,20 @@ const renderGADCell = (props: GridCellParams) => (
 const renderChangeCell = (props: GridCellParams) => (
   <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
 );
+
+const renderCellLastCaseReview = (props: GridCellParams) => {
+  const overdue = props.row["recentCaseReviewOverdue"] as boolean;
+
+  if (overdue) {
+    return (
+      <HiglightedCell scoreColorKey="warning">
+        {props.formattedValue}
+      </HiglightedCell>
+    );
+  } else {
+    return props.formattedValue;
+  }
+};
 
 const renderFlagCell = (props: GridCellParams) => {
   const flaggedForDiscussion = !!props.value?.["Flag for discussion"];
@@ -367,6 +395,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         filterable: false,
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
+        renderCell: renderCellLastCaseReview,
       },
       {
         field: "nextSessionDue",
@@ -565,6 +594,28 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
               )
             : undefined;
 
+        const recentReviewOverdue = ((): boolean => {
+          if (p.profile.depressionTreatmentStatus === "CoCM") {
+            // CoCM is overdue if no review or after 1 month
+            const today = new Date();
+
+            return (
+              !recentReviewDate ||
+              differenceInMonths(today, recentReviewDate) >= 1
+            );
+          } else if (p.profile.depressionTreatmentStatus === "CoCM RP") {
+            // CoCM RP is overdue if no review or after 2 months
+            const today = new Date();
+
+            return (
+              !recentReviewDate ||
+              differenceInMonths(today, recentReviewDate) >= 2
+            );
+          }
+
+          // Nothing else can be overdue
+          return false;
+        })();
         const initialAtRisk =
           phq9Entries &&
           phq9Entries.length > 0 &&
@@ -610,6 +661,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           //
           // Not rendered, used by other columns
           //
+          recentCaseReviewOverdue: recentReviewOverdue,
           initialAtRisk: initialAtRisk,
           recentAtRisk: recentAtRisk,
         };
