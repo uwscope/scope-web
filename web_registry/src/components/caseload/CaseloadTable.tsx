@@ -25,7 +25,7 @@ import {
 } from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
-import { formatDateOnly, getFollowupWeeks } from "shared/time";
+import { formatDateOnly, getFollowupWeeks, toUTCDateOnly } from "shared/time";
 import { Table } from "src/components/common/Table";
 import { IPatientStore } from "src/stores/PatientStore";
 import {
@@ -594,22 +594,19 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
               )
             : undefined;
 
+        const todayDateUtc = toUTCDateOnly(new Date());
         const recentReviewOverdue = ((): boolean => {
           if (p.profile.depressionTreatmentStatus === "CoCM") {
             // CoCM is overdue if no review or after 1 month
-            const today = new Date();
-
             return (
               !recentReviewDate ||
-              differenceInMonths(today, recentReviewDate) >= 1
+              differenceInMonths(todayDateUtc, recentReviewDate) >= 1
             );
           } else if (p.profile.depressionTreatmentStatus === "CoCM RP") {
             // CoCM RP is overdue if no review or after 2 months
-            const today = new Date();
-
             return (
               !recentReviewDate ||
-              differenceInMonths(today, recentReviewDate) >= 2
+              differenceInMonths(todayDateUtc, recentReviewDate) >= 2
             );
           }
 
