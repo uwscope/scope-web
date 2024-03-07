@@ -80,6 +80,7 @@ export interface IPatientStore extends IPatient {
 
   // Assignments
   assignAssessment(assessmentId: string): void;
+  cancelAssessment(assessmentId: string): void;
   assignSafetyPlan(): void;
   assignValuesInventory(): void;
 
@@ -631,6 +632,24 @@ export class PatientStore implements IPatientStore {
         assignedDateTime: new Date(),
         frequency: found.frequency || "Every 2 weeks",
         dayOfWeek: found.dayOfWeek || "Monday",
+      });
+    }
+  }
+
+  @action.bound
+  public async cancelAssessment(assessmentId: string) {
+    const found = this.assessments.find((a) => a.assessmentId == assessmentId);
+
+    console.assert(!!found, "Assessment not found");
+
+    if (found) {
+      return this.updateAssessment({
+        ...toJS(found),
+        assessmentId,
+        assigned: false,
+        assignedDateTime: new Date(),
+        frequency: undefined,
+        dayOfWeek: undefined,
       });
     }
   }
