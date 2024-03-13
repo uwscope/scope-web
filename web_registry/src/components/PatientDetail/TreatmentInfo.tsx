@@ -47,7 +47,7 @@ export const TreatmentInfo: FunctionComponent = observer(() => {
     Other: false,
   };
 
-  currentPatient.sessions.forEach((s) => {
+  currentPatient.sessionsSortedByDate.forEach((s) => {
     Object.keys(s.behavioralStrategyChecklist).forEach((k) => {
       if (
         !!s.behavioralStrategyChecklist[k as BehavioralStrategyChecklistItem]
