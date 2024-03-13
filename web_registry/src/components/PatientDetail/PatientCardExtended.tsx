@@ -37,14 +37,13 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
   });
 
   const sessionCount = patient.sessionsSortedByDate.length;
-  const firstSession =
+  const firstSessionDate =
     sessionCount > 0
       ? formatDateOnly(patient.sessionsSortedByDate[0].date, "MM/dd/yyyy")
       : "--";
-  const lastSession =
-    sessionCount > 0
-      ? formatDateOnly(patient.sessionsSortedByDate[sessionCount - 1].date, "MM/dd/yyyy")
-      : "--";
+  const lastSessionDate = patient.latestSession
+    ? formatDateOnly(patient.latestSession.date, "MM/dd/yyyy")
+    : "--";
 
   const flaggedForDiscussion =
     !!profile.discussionFlag?.["Flag for discussion"];
@@ -55,8 +54,8 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
       {sessionCount > 0 ? (
         <div>
           <LabeledField label="Session #" value={sessionCount} />
-          <LabeledField label="First Session" value={firstSession} />
-          <LabeledField label="Last Session" value={lastSession} />
+          <LabeledField label="First Session" value={firstSessionDate} />
+          <LabeledField label="Last Session" value={lastSessionDate} />
           <br />
         </div>
       ) : null}
