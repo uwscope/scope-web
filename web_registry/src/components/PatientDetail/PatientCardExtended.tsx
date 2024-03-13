@@ -36,14 +36,14 @@ export const PatientCardExtended: FunctionComponent = observer((_) => {
     state.open = false;
   });
 
-  const sessionCount = patient.sessions.length;
+  const sessionCount = patient.sessionsSortedByDate.length;
   const firstSession =
     sessionCount > 0
-      ? formatDateOnly(patient.sessions[0].date, "MM/dd/yyyy")
+      ? formatDateOnly(patient.sessionsSortedByDate[0].date, "MM/dd/yyyy")
       : "--";
   const lastSession =
     sessionCount > 0
-      ? formatDateOnly(patient.sessions[sessionCount - 1].date, "MM/dd/yyyy")
+      ? formatDateOnly(patient.sessionsSortedByDate[sessionCount - 1].date, "MM/dd/yyyy")
       : "--";
 
   const flaggedForDiscussion =
