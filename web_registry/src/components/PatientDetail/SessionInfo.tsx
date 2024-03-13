@@ -544,7 +544,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
     }));
 
-  const sessionDates = currentPatient.sessions
+  const sessionDates = currentPatient.sessionsSortedByDate
     .filter((s) => !!s.sessionId)
     .map((s) => ({
       date: s.date,
