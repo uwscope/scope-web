@@ -430,9 +430,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
   });
 
   const handleEditSession = action((sessionId: string) => {
-    const session = currentPatient.sessions.find(
-      (s) => s.sessionId == sessionId,
-    );
+    const session = currentPatient.getSessionById(sessionId);
 
     state.session = { ...getDefaultSession(), ...session };
     state.open = true;
