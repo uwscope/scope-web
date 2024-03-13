@@ -13,6 +13,7 @@ import {
   IPatientService,
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
+import { sortSessionsByDate } from "shared/sorting";
 import {
   getLoadAndLogQuery,
   onArrayConflict,
@@ -63,6 +64,9 @@ export interface IPatientStore extends IPatient {
   readonly loadSessionsState: IPromiseQueryState;
   readonly loadValuesState: IPromiseQueryState;
   readonly loadValuesInventoryState: IPromiseQueryState;
+
+  // Sorted properties
+  readonly sessionsSortedByDate: ISession[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
@@ -319,6 +323,10 @@ export class PatientStore implements IPatientStore {
 
   @computed get sessions() {
     return this.loadSessionsQuery.value || [];
+  }
+
+  @computed get sessionsSortedByDate() {
+    return sortSessionsByDate(this.sessions.slice());
   }
 
   @computed public get values() {
