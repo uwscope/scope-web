@@ -519,10 +519,10 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
     const data = patients
       .map((p) => {
         const initialSessionDate =
-          p.sessions?.length > 0 ? p.sessions[0].date : undefined;
+          p.sessionsSortedByDate?.length > 0 ? p.sessionsSortedByDate[0].date : undefined;
         const recentSessionDate =
-          p.sessions?.length > 0
-            ? p.sessions[p.sessions.length - 1].date
+          p.sessionsSortedByDate?.length > 0
+            ? p.sessionsSortedByDate[p.sessionsSortedByDate.length - 1].date
             : undefined;
         const recentReviewDate =
           p.caseReviews?.length > 0
@@ -537,7 +537,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
             : undefined;
 
         const totalSessionsCount =
-          p.sessions && p.sessions.length > 0 ? p.sessions.length : undefined;
+          p.sessionsSortedByDate && p.sessionsSortedByDate.length > 0 ? p.sessionsSortedByDate.length : undefined;
         const treatmentWeeksCount =
           initialSessionDate && recentSessionDate
             ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
