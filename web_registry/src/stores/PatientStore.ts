@@ -72,6 +72,7 @@ export interface IPatientStore extends IPatient {
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
   // Data load/save
@@ -436,6 +437,10 @@ export class PatientStore implements IPatientStore {
     return this.activities.filter((a) => {
       return !a.valueId;
     });
+  }
+
+  public getSessionById(sessionId: string) {
+    return this.sessions.find((v) => v.sessionId == sessionId);
   }
 
   public getValueById(valueId: string) {
