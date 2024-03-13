@@ -289,8 +289,8 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get latestSession() {
-    if (this.sessions.length > 0) {
-      return this.sessions[this.sessions.length - 1];
+    if (this.sessionsSortedByDate.length > 0) {
+      return this.sessionsSortedByDate[this.sessionsSortedByDate.length - 1];
     }
 
     return undefined;
