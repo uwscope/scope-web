@@ -407,7 +407,6 @@ export class PatientStore implements IPatientStore {
   }
 
   // Helpers
-  @action.bound
   public getActivitiesByLifeAreaId(lifeAreaId: string) {
     return this.activities.filter((a) => {
       if (!a.valueId) {
@@ -423,7 +422,6 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @action.bound
   public getActivitiesByValueId(valueId: string) {
     return this.activities.filter((a) => {
       if (!a.valueId) {
@@ -434,14 +432,13 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @action.bound
   public getActivitiesWithoutValueId() {
     return this.activities.filter((a) => {
       return !a.valueId;
     });
   }
 
-  @action.bound getValueById(valueId: string) {
+  public getValueById(valueId: string) {
     return this.values.find((v) => v.valueId == valueId);
   }
 
