@@ -836,9 +836,9 @@ export class PatientStore implements IPatientStore {
         ),
       })
       .then((updatedSession) => {
-        const existing = this.sessions.find(
-          (s) => s.sessionId == updatedSession.sessionId,
-        );
+        const existing = !!updatedSession.sessionId
+          ? this.getSessionById(updatedSession.sessionId)
+          : undefined;
         logger.assert(!!existing, "Session not found when expected");
 
         if (!!existing) {
