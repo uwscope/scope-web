@@ -42,14 +42,11 @@ def test_patients_get(
     )
     assert response.ok
 
+    # Assert the response includes patients
     assert "patients" in response.json()
     patient_documents = response.json()["patients"]
-    for patient_document_current in patient_documents:
-        schema_utils.assert_schema(
-            data=patient_document_current,
-            schema=scope.schema.patient_schema,
-        )
 
+    # Assert all of our created test patients are present
     retrieved_ids = [
         patient_document_current["identity"][
             scope.database.patients.PATIENT_IDENTITY_SEMANTIC_SET_ID
@@ -58,6 +55,73 @@ def test_patients_get(
     ]
     assert all(patient_id in retrieved_ids for patient_id in created_ids)
 
+    # Assert each individual patient document is a valid document
+    for patient_document_current in patient_documents:
+        # Assert each piece of the document is valid
+        schema_utils.assert_schema(
+            data=patient_document_current["activities"],
+            schema=scope.schema.activities_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["activityLogs"],
+            schema=scope.schema.activity_logs_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["assessments"],
+            schema=scope.schema.assessments_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["assessmentLogs"],
+            schema=scope.schema.assessment_logs_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["caseReviews"],
+            schema=scope.schema.case_reviews_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["clinicalHistory"],
+            schema=scope.schema.clinical_history_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["moodLogs"],
+            schema=scope.schema.mood_logs_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["profile"],
+            schema=scope.schema.patient_profile_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["safetyPlan"],
+            schema=scope.schema.safety_plan_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["scheduledAssessments"],
+            schema=scope.schema.scheduled_assessments_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["scheduledActivities"],
+            schema=scope.schema.scheduled_activities_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["sessions"],
+            schema=scope.schema.sessions_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["values"],
+            schema=scope.schema.values_schema,
+        )
+        schema_utils.assert_schema(
+            data=patient_document_current["valuesInventory"],
+            schema=scope.schema.values_inventory_schema,
+        )
+
+        # Assert the combination is a valid patient document
+        schema_utils.assert_schema(
+            data=patient_document_current,
+            schema=scope.schema.patient_schema,
+        )
+
+    # Assert the overall combination of patients is a valid document
     schema_utils.assert_schema(
         data=response.json()["patients"],
         schema=scope.schema.patients_schema,
