@@ -15,6 +15,8 @@ def get_sessions(
     Get list of "session" documents.
     """
 
+    # patients.py/_construct_patient_document
+    # currently assumes this access does nothing to retrieved documents.
     return scope.database.collection_utils.get_set(
         collection=collection,
         document_type=DOCUMENT_TYPE,

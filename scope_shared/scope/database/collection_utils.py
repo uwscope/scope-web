@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import pymongo.collection
 import pymongo.errors
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 import uuid
 
 import scope.database.document_utils as document_utils
@@ -181,6 +181,74 @@ def ensure_index(
             unique=True,
             name=PRIMARY_COLLECTION_INDEX_NAME,
         )
+
+
+def get_multiple_types(
+    *,
+    collection: pymongo.collection.Collection,
+    singleton_types: List[str],
+    set_types: List[str],
+) -> Dict[str, Union[List[dict], Optional[dict]]]:
+    # Combine the document types
+    combined_document_types = singleton_types + set_types
+
+    # Parameters in query pipeline
+    query_document_types = combined_document_types
+
+    # Query pipeline
+    pipeline = [
+        # Obtain all documents of the desired "_type"
+        {"$match": {"_type": {"$in": query_document_types}}},
+        # Sort by "_rev",
+        # store the most recent "_rev" in "result",
+        # move forward with that version
+        {"$sort": {"_rev": pymongo.DESCENDING}},
+        {
+            "$group": {
+                "_id": {"_type": "$_type", "_set_id": "$_set_id"},
+                "result": {"$first": "$$ROOT"},
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$result"}},
+        # Filter any document with "_deleted"
+        {"$match": {"_deleted": {"$exists": False}}},
+    ]
+
+    # Create a result dictionary with a key for each type
+    documents_by_type = {}
+    for type_current in combined_document_types:
+        documents_by_type[type_current] = []
+
+    # Execute pipeline, obtain list of results
+    with collection.aggregate(pipeline) as pipeline_result:
+        # Confirm a result was found
+        documents = []
+        if pipeline_result.alive:
+            documents = list(pipeline_result)
+
+    # Put each document with its type
+    # TODO this could probably be accomplished in the above query
+    for document_current in documents:
+        documents_by_type[document_current["_type"]].append(document_current)
+
+    # Normalize each type's list of documents
+    for type_current in combined_document_types:
+        documents_by_type[type_current] = document_utils.normalize_documents(
+            documents=documents_by_type[type_current]
+        )
+
+    # Restore singleton types to a single item instead of a list
+    if singleton_types:
+        for type_singleton_current in singleton_types:
+            result_documents_current = documents_by_type[type_singleton_current]
+            if len(result_documents_current) == 0:
+                documents_by_type[type_singleton_current] = None
+            elif len(result_documents_current) == 1:
+                documents_by_type[type_singleton_current] = result_documents_current[0]
+            else:
+                assert False
+
+    return documents_by_type
 
 
 def get_set(

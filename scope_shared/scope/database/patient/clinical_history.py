@@ -12,6 +12,8 @@ def get_clinical_history(
     *,
     collection: pymongo.collection.Collection,
 ) -> Optional[dict]:
+    # patients.py/_construct_patient_document
+    # currently assumes this access does nothing to retrieved documents.
     return scope.database.collection_utils.get_singleton(
         collection=collection,
         document_type=DOCUMENT_TYPE,
