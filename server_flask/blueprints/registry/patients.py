@@ -5,6 +5,7 @@ import pymongo.collection
 
 import request_utils
 import request_context
+import scope.database.collection_utils
 import scope.database.patient.activities
 import scope.database.patient.activity_logs
 import scope.database.patient.activity_schedules
@@ -40,99 +41,106 @@ def _construct_patient_document(
     # Identity
     patient_document["identity"] = copy.deepcopy(patient_identity)
 
-    # Activities
-    activities = scope.database.patient.activities.get_activities(
-        collection=patient_collection
+    # Get multiple document types simultaneously
+    documents_by_type = scope.database.collection_utils.get_multiple_types(
+        collection=patient_collection,
+        singleton_types=[
+            scope.database.patient.clinical_history.DOCUMENT_TYPE,
+            scope.database.patient.patient_profile.DOCUMENT_TYPE,
+            scope.database.patient.safety_plan.DOCUMENT_TYPE,
+            scope.database.patient.values_inventory.DOCUMENT_TYPE,
+        ],
+        set_types=[
+            scope.database.patient.activities.DOCUMENT_TYPE,
+            scope.database.patient.activity_logs.DOCUMENT_TYPE,
+            scope.database.patient.activity_schedules.DOCUMENT_TYPE,
+            scope.database.patient.assessments.DOCUMENT_TYPE,
+            scope.database.patient.assessment_logs.DOCUMENT_TYPE,
+            scope.database.patient.case_reviews.DOCUMENT_TYPE,
+            scope.database.patient.mood_logs.DOCUMENT_TYPE,
+            scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
+            scope.database.patient.sessions.DOCUMENT_TYPE,
+            scope.database.patient.values.DOCUMENT_TYPE,
+        ],
     )
-    patient_document["activities"] = activities
+
+    # Activities
+    patient_document["activities"] = documents_by_type[
+        scope.database.patient.activities.DOCUMENT_TYPE
+    ]
 
     # Activity Logs
-    activity_logs = scope.database.patient.activity_logs.get_activity_logs(
-        collection=patient_collection
-    )
-    patient_document["activityLogs"] = activity_logs
+    patient_document["activityLogs"] = documents_by_type[
+        scope.database.patient.activity_logs.DOCUMENT_TYPE
+    ]
 
     # Activity Schedules
-    activity_schedules = (
-        scope.database.patient.activity_schedules.get_activity_schedules(
-            collection=patient_collection
-        )
-    )
-    patient_document["activitySchedules"] = activity_schedules
+    patient_document["activitySchedules"] = documents_by_type[
+        scope.database.patient.activity_schedules.DOCUMENT_TYPE
+    ]
 
     # Assessments
-    assessments = scope.database.patient.assessments.get_assessments(
-        collection=patient_collection
-    )
-    patient_document["assessments"] = assessments
+    patient_document["assessments"] = documents_by_type[
+        scope.database.patient.assessments.DOCUMENT_TYPE
+    ]
 
     # Assessment Logs
-    assessment_logs = scope.database.patient.assessment_logs.get_assessment_logs(
-        collection=patient_collection
-    )
-    patient_document["assessmentLogs"] = assessment_logs
+    patient_document["assessmentLogs"] = documents_by_type[
+        scope.database.patient.assessment_logs.DOCUMENT_TYPE
+    ]
 
     # Case Reviews
-    case_reviews = scope.database.patient.case_reviews.get_case_reviews(
-        collection=patient_collection
-    )
-    patient_document["caseReviews"] = case_reviews
+    patient_document["caseReviews"] = documents_by_type[
+        scope.database.patient.case_reviews.DOCUMENT_TYPE
+    ]
 
     # Clinical History
-    clinical_history = scope.database.patient.clinical_history.get_clinical_history(
-        collection=patient_collection
-    )
-    patient_document["clinicalHistory"] = clinical_history
+    patient_document["clinicalHistory"] = documents_by_type[
+        scope.database.patient.clinical_history.DOCUMENT_TYPE
+    ]
 
     # Mood Logs
-    mood_logs = scope.database.patient.mood_logs.get_mood_logs(
-        collection=patient_collection
-    )
-    patient_document["moodLogs"] = mood_logs
+    patient_document["moodLogs"] = documents_by_type[
+        scope.database.patient.mood_logs.DOCUMENT_TYPE
+    ]
 
     # Profile
-    profile = scope.database.patient.patient_profile.get_patient_profile(
-        collection=patient_collection
-    )
-    patient_document["profile"] = profile
+    patient_document["profile"] = documents_by_type[
+        scope.database.patient.patient_profile.DOCUMENT_TYPE
+    ]
 
     # Safety Plan
-    safety_plan = scope.database.patient.safety_plan.get_safety_plan(
-        collection=patient_collection
-    )
-    patient_document["safetyPlan"] = safety_plan
+    patient_document["safetyPlan"] = documents_by_type[
+        scope.database.patient.safety_plan.DOCUMENT_TYPE
+    ]
 
     # Scheduled Assessments
-    scheduled_assessments = (
-        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-            collection=patient_collection
-        )
+    # TODO: this access currently modifies documents, cannot be replaced
+    patient_document[
+        "scheduledAssessments"
+    ] = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+        collection=patient_collection
     )
-    patient_document["scheduledAssessments"] = scheduled_assessments
 
     # Scheduled Activities
-    scheduled_activities = (
-        scope.database.patient.scheduled_activities.get_scheduled_activities(
-            collection=patient_collection
-        )
-    )
-    patient_document["scheduledActivities"] = scheduled_activities
+    patient_document["scheduledActivities"] = documents_by_type[
+        scope.database.patient.scheduled_activities.DOCUMENT_TYPE
+    ]
 
     # Sessions
-    sessions = scope.database.patient.sessions.get_sessions(
-        collection=patient_collection
-    )
-    patient_document["sessions"] = sessions
+    patient_document["sessions"] = documents_by_type[
+        scope.database.patient.sessions.DOCUMENT_TYPE
+    ]
 
     # Values
-    values = scope.database.patient.values.get_values(collection=patient_collection)
-    patient_document["values"] = values
+    patient_document["values"] = documents_by_type[
+        scope.database.patient.values.DOCUMENT_TYPE
+    ]
 
     # Values Inventory
-    values_inventory = scope.database.patient.values_inventory.get_values_inventory(
-        collection=patient_collection
-    )
-    patient_document["valuesInventory"] = values_inventory
+    patient_document["valuesInventory"] = documents_by_type[
+        scope.database.patient.values_inventory.DOCUMENT_TYPE
+    ]
 
     return patient_document
 
