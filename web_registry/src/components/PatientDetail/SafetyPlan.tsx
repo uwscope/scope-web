@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import { Grid } from "@mui/material";
 import { format } from "date-fns";
 import { observer } from "mobx-react-lite";
@@ -58,7 +58,11 @@ export const SafetyPlan: FunctionComponent = observer(() => {
       error={currentPatient?.loadSafetyPlanState.error}
       actionButtons={[
         {
-          icon: assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
+          icon: assigned ? (
+            <AssignmentTurnedInOutlinedIcon />
+          ) : (
+            <AssignmentOutlinedIcon />
+          ),
           text: assigned
             ? getString("patient_safety_plan_assigned_button")
             : getString("patient_safety_plan_assign_button"),
