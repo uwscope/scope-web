@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import ContentPasteOffOutlinedIcon from "@mui/icons-material/ContentPasteOffOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
@@ -344,7 +344,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
                   currentPatient?.cancelAssessment(assessment.assessmentId),
               } as IActionButton)
             : ({
-                icon: <AssignmentIcon />,
+                icon: <AssignmentOutlinedIcon />,
                 text: getString("patient_progress_assessment_assign_button"),
                 onClick: () =>
                   currentPatient?.assignAssessment(assessment.assessmentId),

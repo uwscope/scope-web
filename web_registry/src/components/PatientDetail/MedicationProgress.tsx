@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Button,
@@ -145,9 +145,9 @@ export const MedicationProgress: FunctionComponent<IMedicationProgressProps> =
         actionButtons={[
           {
             icon: assessment.assigned ? (
-              <AssignmentTurnedInIcon />
+              <AssignmentTurnedInOutlinedIcon />
             ) : (
-              <AssignmentIcon />
+              <AssignmentOutlinedIcon />
             ),
             text: assessment.assigned
               ? getString("patient_progress_assessment_assigned_button")

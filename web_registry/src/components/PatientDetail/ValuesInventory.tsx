@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Grid,
   Table,
@@ -126,7 +126,11 @@ export const ValuesInventory: FunctionComponent = observer(() => {
       error={currentPatient?.loadValuesInventoryState.error}
       actionButtons={[
         {
-          icon: assigned ? <AssignmentTurnedInIcon /> : <AssignmentIcon />,
+          icon: assigned ? (
+            <AssignmentTurnedInOutlinedIcon />
+          ) : (
+            <AssignmentOutlinedIcon />
+          ),
           text: assigned
             ? getString("patient_values_inventory_assigned_button")
             : getString("patient_values_inventory_assign_button"),
