@@ -1,6 +1,11 @@
 import { compareAsc } from "date-fns";
 import { toLocalDateTime } from "shared/time";
-import { IActivity, IActivitySchedule, ISession } from "shared/types";
+import {
+  IActivity,
+  IActivitySchedule,
+  ICaseReview,
+  ISession,
+} from "shared/types";
 
 export const compareActivityByName: (
   compareA: IActivity,
@@ -20,6 +25,13 @@ export const compareActivityScheduleByDateAndTime: (
   const compareDateB = toLocalDateTime(compareB.date, compareB.timeOfDay);
 
   return compareAsc(compareDateA, compareDateB);
+};
+
+export const compareCaseReviewsByDate: (
+  compareA: ICaseReview,
+  compareB: ICaseReview,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.date, compareB.date);
 };
 
 export const compareSessionsByDate: (
@@ -50,6 +62,12 @@ export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
 ): IActivitySchedule[] {
   return activitySchedules.slice().sort(compareActivityScheduleByDateAndTime);
+};
+
+export const sortCaseReviewsByDate: (
+  caseReviews: ICaseReview[],
+) => ICaseReview[] = function (caseReviews) {
+  return caseReviews.slice().sort(compareCaseReviewsByDate);
 };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
