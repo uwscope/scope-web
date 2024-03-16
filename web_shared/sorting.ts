@@ -10,17 +10,14 @@ import {
 export const compareActivityByName: (
   compareA: IActivity,
   compareB: IActivity,
-) => number = function (compareA: IActivity, compareB: IActivity): number {
+) => number = function (compareA, compareB) {
   return compareStringCaseInsensitive(compareA.name, compareB.name);
 };
 
 export const compareActivityScheduleByDateAndTime: (
   compareA: IActivitySchedule,
   compareB: IActivitySchedule,
-) => number = function (
-  compareA: IActivitySchedule,
-  compareB: IActivitySchedule,
-): number {
+) => number = function (compareA, compareB) {
   const compareDateA = toLocalDateTime(compareA.date, compareA.timeOfDay);
   const compareDateB = toLocalDateTime(compareB.date, compareB.timeOfDay);
 
@@ -37,14 +34,14 @@ export const compareCaseReviewsByDate: (
 export const compareSessionsByDate: (
   compareA: ISession,
   compareB: ISession,
-) => number = function (compareA: ISession, compareB: ISession): number {
+) => number = function (compareA, compareB) {
   return compareAsc(compareA.date, compareB.date);
 };
 
 export const compareStringCaseInsensitive: (
   compareA: string,
   compareB: string,
-) => number = function (compareA: string, compareB: string): number {
+) => number = function (compareA, compareB) {
   const compareInsensitiveA = compareA.toLocaleLowerCase();
   const compareInsensitiveB = compareB.toLocaleLowerCase();
 
@@ -52,15 +49,13 @@ export const compareStringCaseInsensitive: (
 };
 
 export const sortActivitiesByName: (activities: IActivity[]) => IActivity[] =
-  function (activities: IActivity[]): IActivity[] {
+  function (activities) {
     return activities.slice().sort(compareActivityByName);
   };
 
 export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
-) => IActivitySchedule[] = function (
-  activitySchedules: IActivitySchedule[],
-): IActivitySchedule[] {
+) => IActivitySchedule[] = function (activitySchedules) {
   return activitySchedules.slice().sort(compareActivityScheduleByDateAndTime);
 };
 
@@ -71,11 +66,11 @@ export const sortCaseReviewsByDate: (
 };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
-  function (sessions: ISession[]): ISession[] {
+  function (sessions) {
     return sessions.slice().sort(compareSessionsByDate);
   };
 
 export const sortStringsCaseInsensitive: (strings: string[]) => string[] =
-  function (strings: string[]): string[] {
+  function (strings) {
     return strings.slice().sort(compareStringCaseInsensitive);
   };
