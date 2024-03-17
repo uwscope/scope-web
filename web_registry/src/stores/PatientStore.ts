@@ -13,6 +13,7 @@ import {
   IPatientService,
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
+import { sortSessionsByDate } from "shared/sorting";
 import {
   getLoadAndLogQuery,
   onArrayConflict,
@@ -64,10 +65,14 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesState: IPromiseQueryState;
   readonly loadValuesInventoryState: IPromiseQueryState;
 
+  // Sorted properties
+  readonly sessionsSortedByDate: ISession[];
+
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
   // Data load/save
@@ -285,8 +290,8 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get latestSession() {
-    if (this.sessions.length > 0) {
-      return this.sessions[this.sessions.length - 1];
+    if (this.sessionsSortedByDate.length > 0) {
+      return this.sessionsSortedByDate[this.sessionsSortedByDate.length - 1];
     }
 
     return undefined;
@@ -319,6 +324,10 @@ export class PatientStore implements IPatientStore {
 
   @computed get sessions() {
     return this.loadSessionsQuery.value || [];
+  }
+
+  @computed get sessionsSortedByDate() {
+    return sortSessionsByDate(this.sessions.slice());
   }
 
   @computed public get values() {
@@ -399,7 +408,6 @@ export class PatientStore implements IPatientStore {
   }
 
   // Helpers
-  @action.bound
   public getActivitiesByLifeAreaId(lifeAreaId: string) {
     return this.activities.filter((a) => {
       if (!a.valueId) {
@@ -415,7 +423,6 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @action.bound
   public getActivitiesByValueId(valueId: string) {
     return this.activities.filter((a) => {
       if (!a.valueId) {
@@ -426,14 +433,17 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @action.bound
   public getActivitiesWithoutValueId() {
     return this.activities.filter((a) => {
       return !a.valueId;
     });
   }
 
-  @action.bound getValueById(valueId: string) {
+  public getSessionById(sessionId: string) {
+    return this.sessions.find((v) => v.sessionId == sessionId);
+  }
+
+  public getValueById(valueId: string) {
     return this.values.find((v) => v.valueId == valueId);
   }
 
@@ -826,9 +836,9 @@ export class PatientStore implements IPatientStore {
         ),
       })
       .then((updatedSession) => {
-        const existing = this.sessions.find(
-          (s) => s.sessionId == updatedSession.sessionId,
-        );
+        const existing = !!updatedSession.sessionId
+          ? this.getSessionById(updatedSession.sessionId)
+          : undefined;
         logger.assert(!!existing, "Session not found when expected");
 
         if (!!existing) {

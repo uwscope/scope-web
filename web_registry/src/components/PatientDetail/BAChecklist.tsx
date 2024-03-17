@@ -12,7 +12,6 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { compareAsc } from "date-fns";
 import { observer } from "mobx-react";
 import {
   BehavioralActivationChecklistItem,
@@ -31,9 +30,7 @@ export const BAChecklist: FunctionComponent = observer(() => {
   const currentPatient = usePatient();
 
   const baCompletion: { [key: string]: Date | undefined } = {};
-  currentPatient?.sessions
-    .slice()
-    .sort((a, b) => compareAsc(a.date, b.date))
+  currentPatient?.sessionsSortedByDate
     .map((s) => s as ISession)
     .forEach((s) => {
       Object.keys(s.behavioralActivationChecklist).forEach((key) => {

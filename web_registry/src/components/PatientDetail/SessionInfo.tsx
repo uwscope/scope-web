@@ -430,9 +430,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
   });
 
   const handleEditSession = action((sessionId: string) => {
-    const session = currentPatient.sessions.find(
-      (s) => s.sessionId == sessionId,
-    );
+    const session = currentPatient.getSessionById(sessionId);
 
     state.session = { ...getDefaultSession(), ...session };
     state.open = true;
@@ -546,7 +544,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
     }));
 
-  const sessionDates = currentPatient.sessions
+  const sessionDates = currentPatient.sessionsSortedByDate
     .filter((s) => !!s.sessionId)
     .map((s) => ({
       date: s.date,
