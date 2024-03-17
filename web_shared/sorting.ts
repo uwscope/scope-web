@@ -31,6 +31,13 @@ export const compareCaseReviewsByDate: (
   return compareAsc(compareA.date, compareB.date);
 };
 
+export const compareCaseReviewsOrSessionsByDate: (
+  compareA: ICaseReview | ISession,
+  compareB: ICaseReview | ISession,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.date, compareB.date);
+};
+
 export const compareSessionsByDate: (
   compareA: ISession,
   compareB: ISession,
@@ -63,6 +70,12 @@ export const sortCaseReviewsByDate: (
   caseReviews: ICaseReview[],
 ) => ICaseReview[] = function (caseReviews) {
   return caseReviews.slice().sort(compareCaseReviewsByDate);
+};
+
+export const sortCaseReviewsOrSessionsByDate: (
+  caseReviewsOrSessions: (ICaseReview | ISession)[],
+) => (ICaseReview | ISession)[] = function (caseReviewsOrSessions) {
+  return caseReviewsOrSessions.slice().sort(compareCaseReviewsOrSessionsByDate);
 };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
