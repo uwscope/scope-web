@@ -765,9 +765,9 @@ export class PatientStore implements IPatientStore {
         },
       })
       .then((updatedReview) => {
-        const existing = this.caseReviews.find(
-          (r) => r.caseReviewId == updatedReview.caseReviewId,
-        );
+        const existing = !!updatedReview.caseReviewId
+          ? this.getCaseReviewById(updatedReview.caseReviewId)
+          : undefined;
         logger.assert(!!existing, "Case review not found when expected");
 
         if (!!existing) {
