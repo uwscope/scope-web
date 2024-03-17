@@ -13,7 +13,11 @@ import {
   IPatientService,
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
-import { sortSessionsByDate } from "shared/sorting";
+import {
+  sortCaseReviewsByDate,
+  sortCaseReviewsOrSessionsByDate,
+  sortSessionsByDate,
+} from "shared/sorting";
 import {
   getLoadAndLogQuery,
   onArrayConflict,
@@ -43,6 +47,7 @@ const logger = getLogger("PatientStore");
 export interface IPatientStore extends IPatient {
   readonly age: number;
   readonly name: string;
+  readonly latestCaseReview: ICaseReview | undefined;
   readonly latestSession: ISession | undefined;
   readonly recordId: string;
 
@@ -66,12 +71,15 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly caseReviewsSortedByDate: ICaseReview[];
+  readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
   readonly sessionsSortedByDate: ISession[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
@@ -285,8 +293,30 @@ export class PatientStore implements IPatientStore {
     return this.loadCaseReviewsQuery.value || [];
   }
 
+  @computed get caseReviewsSortedByDate() {
+    return sortCaseReviewsByDate(this.caseReviews);
+  }
+
+  @computed get caseReviewsOrSessionsSortedByDate() {
+    const caseReviewsOrSessions = (
+      this.caseReviews.slice() as (ICaseReview | ISession)[]
+    ).concat(this.sessions);
+
+    return sortCaseReviewsOrSessionsByDate(caseReviewsOrSessions);
+  }
+
   @computed get clinicalHistory() {
     return this.loadClinicalHistoryQuery.value || {};
+  }
+
+  @computed get latestCaseReview() {
+    if (this.caseReviewsSortedByDate.length > 0) {
+      return this.caseReviewsSortedByDate[
+        this.caseReviewsSortedByDate.length - 1
+      ];
+    }
+
+    return undefined;
   }
 
   @computed get latestSession() {
@@ -327,7 +357,7 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get sessionsSortedByDate() {
-    return sortSessionsByDate(this.sessions.slice());
+    return sortSessionsByDate(this.sessions);
   }
 
   @computed public get values() {
@@ -409,12 +439,12 @@ export class PatientStore implements IPatientStore {
 
   // Helpers
   public getActivitiesByLifeAreaId(lifeAreaId: string) {
-    return this.activities.filter((a) => {
-      if (!a.valueId) {
+    return this.activities.filter((current) => {
+      if (!current.valueId) {
         return false;
       }
 
-      const value = this.getValueById(a.valueId);
+      const value = this.getValueById(current.valueId);
       if (!value) {
         return false;
       }
@@ -424,27 +454,33 @@ export class PatientStore implements IPatientStore {
   }
 
   public getActivitiesByValueId(valueId: string) {
-    return this.activities.filter((a) => {
-      if (!a.valueId) {
+    return this.activities.filter((current) => {
+      if (!current.valueId) {
         return false;
       }
 
-      return a.valueId == valueId;
+      return current.valueId == valueId;
     });
   }
 
   public getActivitiesWithoutValueId() {
-    return this.activities.filter((a) => {
-      return !a.valueId;
+    return this.activities.filter((current) => {
+      return !current.valueId;
     });
   }
 
+  public getCaseReviewById(caseReviewId: string) {
+    return this.caseReviews.find(
+      (current) => current.caseReviewId == caseReviewId,
+    );
+  }
+
   public getSessionById(sessionId: string) {
-    return this.sessions.find((v) => v.sessionId == sessionId);
+    return this.sessions.find((current) => current.sessionId == sessionId);
   }
 
   public getValueById(valueId: string) {
-    return this.values.find((v) => v.valueId == valueId);
+    return this.values.find((current) => current.valueId == valueId);
   }
 
   // Data load/save
