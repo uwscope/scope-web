@@ -523,10 +523,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
             ? p.sessionsSortedByDate[0].date
             : undefined;
         const recentSessionDate = p.latestSession?.date;
-        const recentReviewDate =
-          p.caseReviews?.length > 0
-            ? p.caseReviews[p.caseReviews.length - 1].date
-            : undefined;
+        const recentReviewDate = p.latestCaseReview?.date;
         const nextSessionDueDate =
           recentSessionDate && p.profile.followupSchedule
             ? addWeeks(
