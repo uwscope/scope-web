@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
 import { Grid } from "@mui/material";
-import { compareAsc, compareDesc } from "date-fns";
+import { compareAsc } from "date-fns";
 import { action, runInAction } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import {
@@ -85,7 +85,6 @@ const getDefaultReview = () =>
 interface IState {
   open: boolean;
   isNew: boolean;
-  dateAsc: boolean;
   entryType: EntryType;
   session: ISession;
   review: ICaseReview;
@@ -97,7 +96,6 @@ const getDefaultState = () =>
   ({
     open: false,
     isNew: false,
-    dateAsc: false,
     session: getDefaultSession(),
     review: getDefaultReview(),
     entryType: "Session",
@@ -525,7 +523,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     .concat(currentPatient.caseReviews)
     .slice()
     .sort((a, b) =>
-      state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date),
+      compareAsc(a.date, b.date),
     );
 
   const phqScores = currentPatient.assessmentLogs
