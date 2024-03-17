@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
 import { Grid } from "@mui/material";
-import { compareAsc, compareDesc } from "date-fns";
 import { action, runInAction } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import {
@@ -16,13 +15,7 @@ import {
   sessionTypeValues,
 } from "shared/enums";
 import { clearTime, toLocalDateOnly, toUTCDateOnly } from "shared/time";
-import {
-  ICaseReview,
-  IReferralStatus,
-  ISession,
-  ISessionOrCaseReview,
-  KeyedMap,
-} from "shared/types";
+import { ICaseReview, IReferralStatus, ISession, KeyedMap } from "shared/types";
 import ActionPanel, { IActionButton } from "src/components/common/ActionPanel";
 import {
   GridDateField,
@@ -85,7 +78,6 @@ const getDefaultReview = () =>
 interface IState {
   open: boolean;
   isNew: boolean;
-  dateAsc: boolean;
   entryType: EntryType;
   session: ISession;
   review: ICaseReview;
@@ -97,7 +89,6 @@ const getDefaultState = () =>
   ({
     open: false,
     isNew: false,
-    dateAsc: false,
     session: getDefaultSession(),
     review: getDefaultReview(),
     entryType: "Session",
@@ -444,9 +435,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
   });
 
   const handleEditReview = action((caseReviewId: string) => {
-    const review = currentPatient.caseReviews.find(
-      (s) => s.caseReviewId == caseReviewId,
-    );
+    const review = currentPatient.getCaseReviewById(caseReviewId);
 
     state.review = { ...getDefaultReview(), ...review };
     state.open = true;
@@ -519,15 +508,6 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
   });
 
-  const sortedSessionOrReviews = (
-    currentPatient.sessions as ISessionOrCaseReview[]
-  )
-    .concat(currentPatient.caseReviews)
-    .slice()
-    .sort((a, b) =>
-      state.dateAsc ? compareAsc(a.date, b.date) : compareDesc(a.date, b.date),
-    );
-
   const phqScores = currentPatient.assessmentLogs
     .filter((log) => log.assessmentId == "phq-9")
     .map((log) => ({
@@ -551,7 +531,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
       id: s.sessionId as string,
     }));
 
-  const reviewDates = currentPatient.caseReviews
+  const reviewDates = currentPatient.caseReviewsSortedByDate
     .filter((r) => !!r.caseReviewId)
     .map((r) => ({
       date: r.date,
@@ -592,12 +572,12 @@ export const SessionInfo: FunctionComponent = observer(() => {
     >
       <Grid container alignItems="stretch">
         <SessionReviewTable
-          sessionOrReviews={sortedSessionOrReviews}
+          sessionOrReviews={currentPatient.caseReviewsOrSessionsSortedByDate}
           onReviewClick={handleEditReview}
           onSessionClick={handleEditSession}
         />
         {currentPatient.assessmentLogs.length > 0 &&
-          sortedSessionOrReviews.length > 0 && (
+          currentPatient.caseReviewsOrSessionsSortedByDate.length > 0 && (
             <Grid item xs={12}>
               <SessionProgressVis
                 phqScores={phqScores}
