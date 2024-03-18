@@ -50,6 +50,7 @@ const EditPatientProfileContent: FunctionComponent<
     primaryCareManager,
     availableCareManagerNames,
     site,
+    enrollmentDate,
     onValueChange,
     onCareManagerChange,
   } = props;
@@ -149,11 +150,17 @@ const EditPatientProfileContent: FunctionComponent<
         "depressionTreatmentStatus",
       )}
       {getDropdownField(
-        "Follow-up Schedule",
+        "Follow-Up Schedule",
         followupSchedule || "",
         followupScheduleValues,
         "followupSchedule",
       )}
+      <GridDateField
+        editable
+        label="Enrollment Date"
+        value={enrollmentDate}
+        onChange={(text) => onValueChange("enrollmentDate", text)}
+      />
     </Grid>
   );
 };
@@ -194,6 +201,11 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
       if (profile.birthdate != undefined) {
         existingProfile.birthdate = toLocalDateOnly(profile.birthdate);
       }
+      if (profile.enrollmentDate != undefined) {
+        existingProfile.enrollmentDate = toLocalDateOnly(
+          profile.enrollmentDate,
+        );
+      }
 
       return existingProfile;
     });
@@ -205,8 +217,19 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
     const onSave = action(() => {
       const updatedProfile = { ...state };
 
-      if (state.birthdate != undefined) {
-        updatedProfile.birthdate = toUTCDateOnly(state.birthdate);
+      if (!updatedProfile.birthdate) {
+        // Necessary because an empty date is ""
+        updatedProfile.birthdate = undefined;
+      } else if (state.birthdate != undefined) {
+        updatedProfile.birthdate = toUTCDateOnly(updatedProfile.birthdate);
+      }
+      if (!updatedProfile.enrollmentDate) {
+        // Necessary because an empty date is ""
+        updatedProfile.enrollmentDate = undefined;
+      } else if (state.enrollmentDate != undefined) {
+        updatedProfile.enrollmentDate = toUTCDateOnly(
+          updatedProfile.enrollmentDate,
+        );
       }
 
       onSavePatient(updatedProfile);

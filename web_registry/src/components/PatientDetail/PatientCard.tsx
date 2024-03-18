@@ -178,6 +178,14 @@ export const PatientCard: FunctionComponent<IPatientCardProps> = observer(
               label="follow-up schedule"
               value={patient.profile.followupSchedule}
             />
+            <LabeledField
+              label="Enrollment Date"
+              value={
+                !!patient.profile.enrollmentDate
+                  ? formatDateOnly(patient.profile.enrollmentDate, "MM/dd/yyyy")
+                  : "--"
+              }
+            />
           </Grid>
           {state.open && (
             <EditPatientProfileDialog
