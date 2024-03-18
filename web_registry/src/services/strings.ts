@@ -49,8 +49,8 @@ const _strings = {
   patient_progress_assessment_dialog_cancel_button: "Cancel",
 
   patient_progress_assessment_dialog_add_administered_date_label:
-    "Administered date",
-  patient_progress_assessment_dialog_add_submitted_date_label: "Submitted date",
+    "Administered Date",
+  patient_progress_assessment_dialog_add_submitted_date_label: "Submitted Date",
   patient_progress_assessment_dialog_add_total_score_label:
     "Submit total score only",
   patient_progress_assessment_dialog_comment_label: "Note",
