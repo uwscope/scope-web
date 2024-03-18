@@ -158,23 +158,6 @@ const EditPatientProfileContent: FunctionComponent<
   );
 };
 
-const emptyProfile = {
-  name: "",
-  MRN: "",
-  clinicCode: undefined,
-  birthdate: undefined,
-  race: undefined,
-  ethnicity: undefined,
-  sex: undefined,
-  gender: undefined,
-  pronoun: undefined,
-  primaryOncologyProvider: undefined,
-  primaryCareManager: undefined,
-  depressionTreatmentStatus: undefined,
-  followupSchedule: undefined,
-  site: undefined,
-} as IPatientProfile;
-
 interface IDialogProps {
   open: boolean;
   error?: boolean;
@@ -192,52 +175,6 @@ export interface IAddPatientProfileDialogProps extends IDialogProps {
   careManagers: IProviderIdentity[];
   onAddPatient: (patient: IPatientProfile) => void;
 }
-
-export const AddPatientProfileDialog: FunctionComponent<IAddPatientProfileDialogProps> =
-  observer((props) => {
-    const { onAddPatient, open, error, loading, onClose, careManagers } = props;
-
-    const state = useLocalObservable<IPatientProfile>(() => emptyProfile);
-
-    const onValueChange = action((key: string, value: any) => {
-      (state as any)[key] = value;
-    });
-
-    const onCareManagerChange = action((name: string) => {
-      const found = careManagers.find((c) => c.name == name);
-      if (!!name && found) {
-        state.primaryCareManager = found;
-      } else {
-        state.primaryCareManager = undefined;
-      }
-    });
-
-    const onSave = action(() => {
-      onAddPatient(state);
-    });
-
-    const availableCareManagerNames = careManagers.map((c) => c.name);
-
-    return (
-      <StatefulDialog
-        open={open}
-        error={error}
-        loading={loading}
-        title="Add Patient"
-        content={
-          <EditPatientProfileContent
-            {...state}
-            availableCareManagerNames={availableCareManagerNames}
-            onValueChange={onValueChange}
-            onCareManagerChange={onCareManagerChange}
-          />
-        }
-        handleCancel={onClose}
-        handleSave={onSave}
-        disableSave={!state.name || !state.MRN}
-      />
-    );
-  });
 
 export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDialogProps> =
   observer((props) => {
