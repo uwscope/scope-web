@@ -208,6 +208,7 @@ export interface IPatientProfile {
   followupSchedule?: FollowupSchedule;
   depressionTreatmentStatus?: DepressionTreatmentStatus;
   site?: Site;
+  enrollmentDate?: Date;
 }
 
 export interface IClinicalHistory {
