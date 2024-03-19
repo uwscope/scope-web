@@ -514,6 +514,17 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
       },
+      {
+        field: "enrollmentDate",
+        headerName: "Enrollment Date",
+        width: 85,
+        renderHeader,
+        align: "center",
+        headerAlign: "center",
+        filterable: false,
+        sortComparator: nullUndefinedComparator("last", gridDateComparator),
+        valueFormatter: nullUndefinedFormatter(dateFormatter),
+      },
     ];
 
     const data = patients
@@ -653,6 +664,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           recentGAD: recentGADScore,
           changeGAD: changeGAD,
           recentGADDate: recentGADDate,
+          enrollmentDate: p.profile.enrollmentDate,
           //
           // Not rendered, used by other columns
           //
