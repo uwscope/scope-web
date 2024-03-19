@@ -217,7 +217,7 @@ export const GridDateField: FunctionComponent<IGridDateFieldProps> = (
       <Grid item xs={xs || 12} sm={sm || 6}>
         <DatePicker
           label={`${label}${required ? "*" : ""}`}
-          value={value}
+          value={!!value ? value : null}
           onChange={handleChange}
           renderInput={(params) => (
             <TextField

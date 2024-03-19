@@ -60,6 +60,9 @@
     },
     "site": {
       "$ref": "/schemas/utils/enums#/properties/site"
+    },
+    "enrollmentDate": {
+      "$ref": "/schemas/utils/datetime#/properties/date"
     }
   },
   "additionalProperties": false,
