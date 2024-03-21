@@ -34,7 +34,7 @@
                 "type": "string"
               },
               "migration": {
-                "enum": ["v0.5.0", "v0.7.0", "v0.9.0", "v0.10.0"]
+                "enum": ["v0.5.0", "v0.7.0", "v0.9.0", "v0.10.0", "v0.13.0"]
               },
               "dry_run": {
                 "type": "boolean"
