@@ -76,7 +76,7 @@ const LoginForm: FunctionComponent<{
           value={account}
           onChange={(e) =>
             setAccount(
-              // Username cannot include whitespace.
+              // Account cannot include whitespace.
               e.target.value.replace(/\s/g, ""),
             )
           }
