@@ -277,7 +277,7 @@ const PasswordUpdateForm: FunctionComponent<{
         <TextField
           label="Confirm Password"
           placeholder="Confirm password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           fullWidth
           required
           variant="standard"
@@ -302,6 +302,23 @@ const PasswordUpdateForm: FunctionComponent<{
             }
           }}
           error={!canSubmit}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                {showPassword ? (
+                  <VisibilityIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={togglePassword}
+                  />
+                ) : (
+                  <VisibilityOffIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={togglePassword}
+                  />
+                )}
+              </InputAdornment>
+            ),
+          }}
         />
         {error && (
           <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
