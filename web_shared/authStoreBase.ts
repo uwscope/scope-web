@@ -22,7 +22,7 @@ import { IAppAuthConfig, IIdentity } from "shared/types";
 export enum AuthState {
   Initialized,
   NewPasswordRequired,
-  ResetPasswordRequired,
+  ResetPasswordInProgress,
   Authenticated,
   AuthenticationFailed,
 }
@@ -34,6 +34,7 @@ export interface IAuthStoreBase<T extends IIdentity> {
   authStateDetail?: string;
 
   currentUserIdentity?: T;
+
   initialize: () => void;
   login(username: string, password: string): Promise<void>;
   updateTempPassword(newPassword: string): Promise<void>;
@@ -43,6 +44,8 @@ export interface IAuthStoreBase<T extends IIdentity> {
   logout(): void;
 
   getToken(): string | undefined;
+
+  clearDetail(): void;
 }
 
 const logger = getLogger("AuthStore");
@@ -54,7 +57,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   public authState = AuthState.Initialized;
 
   @observable
-  public authStateDetail = "";
+  public authStateDetail?: string = undefined;
 
   // Promise queries
   private readonly authQuery: PromiseQuery<T>;
@@ -145,7 +148,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   public async login(username: string, password: string) {
     // Clear states
     this.authState = AuthState.Initialized;
-    this.authStateDetail = "";
+    this.clearDetail();
 
     const authUser = new CognitoUser({
       Username: username,
@@ -177,7 +180,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
             runInAction(() => {
               this.authUser = authUser;
               this.authStateDetail = err.message;
-              this.authState = AuthState.ResetPasswordRequired;
+              this.authState = AuthState.ResetPasswordInProgress;
             });
           } else {
             logger.error(err, { username });
@@ -236,7 +239,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @action.bound
   public async updateTempPassword(password: string) {
     // Clear states
-    this.authStateDetail = "";
+    this.clearDetail();
 
     const promise = new Promise<CognitoUserSession>((resolve, reject) => {
       this.authUser?.completeNewPasswordChallenge(
@@ -277,7 +280,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @action.bound
   public async sendResetPasswordCode(username: string) {
     // Clear states
-    this.authStateDetail = "";
+    this.clearDetail();
 
     const authUser = new CognitoUser({
       Username: username,
@@ -299,10 +302,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
 
             runInAction(() => {
               this.authUser = authUser;
-              this.authStateDetail = `Password reset code was sent successfully by ${deliveryDetails.DeliveryMedium.toLowerCase()} to ${
-                deliveryDetails.Destination
-              }. Please use the reset code to reset your password.`;
-              this.authState = AuthState.ResetPasswordRequired;
+              this.authState = AuthState.ResetPasswordInProgress;
             });
             resolve(undefined);
           }),
@@ -326,7 +326,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @action.bound
   public async resetPassword(resetCode: string, password: string) {
     // Clear states
-    this.authStateDetail = "";
+    this.clearDetail();
 
     const promise = new Promise<CognitoUserSession | undefined>(
       (resolve, reject) => {
@@ -352,7 +352,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
               this.authState =
                 err.code == "NotAuthorizedException"
                   ? AuthState.AuthenticationFailed
-                  : AuthState.ResetPasswordRequired;
+                  : AuthState.ResetPasswordInProgress;
             });
             reject(err);
           }),
@@ -372,6 +372,11 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
     this.authUser = undefined;
 
     logger.event("UserLoggedOut", { ...this.authQuery.value });
+  }
+
+  @action.bound
+  public clearDetail() {
+    this.authStateDetail = undefined;
   }
 
   private getIdentityFromSession(promise: Promise<CognitoUserSession>) {
