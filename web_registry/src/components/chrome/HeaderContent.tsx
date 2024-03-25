@@ -73,7 +73,7 @@ export const HeaderContent: FunctionComponent = observer(() => {
           open={Boolean(state.anchorEl)}
           onClose={() => handleClose()}
         >
-          <MenuItem onClick={(_) => handleLogout()}>Log out</MenuItem>
+          <MenuItem onClick={(_) => handleLogout()}>Sign Out</MenuItem>
         </Menu>
         <Button color="inherit" onClick={(e) => handleClickName(e)}>
           {rootStore.authStore.currentUserIdentity?.name}
