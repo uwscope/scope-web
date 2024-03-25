@@ -162,10 +162,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 <a href="tel:2066163032" target="_blank">
                   206-616-3032
                 </a>
-                &nbsp;or&nbsp;
+                &nbsp;or&nbsp; &lt;
                 <a href="mailto:scopestudy@uw.edu" target="_blank">
                   scopestudy@uw.edu
                 </a>
+                &gt;.
               </Typography>
             </FailureContainer>
           )}
