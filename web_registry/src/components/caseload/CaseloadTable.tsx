@@ -20,6 +20,7 @@ import {
 import {
   addWeeks,
   compareAsc,
+  differenceInDays,
   differenceInMonths,
   differenceInWeeks,
 } from "date-fns";
@@ -228,6 +229,20 @@ const renderChangeCell = (props: GridCellParams) => (
   <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
 );
 
+const renderCellFollowUpDue = (props: GridCellParams) => {
+  const overdue = props.row["nextSessionOverdue"] as boolean;
+
+  if (overdue) {
+    return (
+      <HiglightedCell scoreColorKey="warning">
+        {props.formattedValue}
+      </HiglightedCell>
+    );
+  } else {
+    return props.formattedValue;
+  }
+};
+
 const renderCellLastCaseReview = (props: GridCellParams) => {
   const overdue = props.row["recentCaseReviewOverdue"] as boolean;
 
@@ -399,7 +414,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
       },
       {
         field: "nextSessionDue",
-        headerName: "Follow-up Due",
+        headerName: "Follow-Up Due",
         width: 85,
         renderHeader,
         align: "center",
@@ -407,6 +422,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         filterable: false,
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
+        renderCell: renderCellFollowUpDue,
       },
       {
         field: "totalSessions",
@@ -622,6 +638,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           // Nothing else can be overdue
           return false;
         })();
+        const nextSessionOverdue =
+          nextSessionDueDate &&
+          differenceInDays(todayDateUtc, nextSessionDueDate) >= 1;
         const initialAtRisk =
           phq9Entries &&
           phq9Entries.length > 0 &&
@@ -669,6 +688,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           // Not rendered, used by other columns
           //
           recentCaseReviewOverdue: recentReviewOverdue,
+          nextSessionOverdue: nextSessionOverdue,
           initialAtRisk: initialAtRisk,
           recentAtRisk: recentAtRisk,
         };
