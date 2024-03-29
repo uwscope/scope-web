@@ -572,7 +572,9 @@ export const SessionInfo: FunctionComponent = observer(() => {
     >
       <Grid container alignItems="stretch">
         <SessionReviewTable
-          sessionOrReviews={currentPatient.caseReviewsOrSessionsSortedByDate}
+          sessionOrReviews={
+            currentPatient.caseReviewsOrSessionsSortedByDateDescending
+          }
           onReviewClick={handleEditReview}
           onSessionClick={handleEditSession}
         />
