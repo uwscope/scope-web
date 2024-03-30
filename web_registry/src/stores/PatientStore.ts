@@ -16,6 +16,7 @@ import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
+  SortDirection,
   sortSessionsByDate,
 } from "shared/sorting";
 import {
@@ -73,6 +74,10 @@ export interface IPatientStore extends IPatient {
   // Sorted properties
   readonly caseReviewsSortedByDate: ICaseReview[];
   readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
+  readonly caseReviewsOrSessionsSortedByDateDescending: (
+    | ICaseReview
+    | ISession
+  )[];
   readonly sessionsSortedByDate: ISession[];
 
   // Helpers
@@ -303,6 +308,17 @@ export class PatientStore implements IPatientStore {
     ).concat(this.sessions);
 
     return sortCaseReviewsOrSessionsByDate(caseReviewsOrSessions);
+  }
+
+  @computed get caseReviewsOrSessionsSortedByDateDescending() {
+    const caseReviewsOrSessions = (
+      this.caseReviews.slice() as (ICaseReview | ISession)[]
+    ).concat(this.sessions);
+
+    return sortCaseReviewsOrSessionsByDate(
+      caseReviewsOrSessions,
+      SortDirection.DESCENDING,
+    );
   }
 
   @computed get clinicalHistory() {

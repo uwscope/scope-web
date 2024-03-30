@@ -7,6 +7,26 @@ import {
   ISession,
 } from "shared/types";
 
+export const enum SortDirection {
+  ASCENDING,
+  DESCENDING,
+}
+
+export const sortingDirectionComparator: <T>(
+  comparator: (compareA: T, compareB: T) => number,
+  sortingDirection: SortDirection,
+) => (compareA: T, compareB: T) => number = function (
+  comparator,
+  sortingDirection,
+) {
+  switch (sortingDirection) {
+    case SortDirection.ASCENDING:
+      return comparator;
+    case SortDirection.DESCENDING:
+      return (compareA, compareB) => comparator(compareB, compareA);
+  }
+};
+
 export const compareActivityByName: (
   compareA: IActivity,
   compareB: IActivity,
@@ -74,8 +94,19 @@ export const sortCaseReviewsByDate: (
 
 export const sortCaseReviewsOrSessionsByDate: (
   caseReviewsOrSessions: (ICaseReview | ISession)[],
-) => (ICaseReview | ISession)[] = function (caseReviewsOrSessions) {
-  return caseReviewsOrSessions.slice().sort(compareCaseReviewsOrSessionsByDate);
+  sortingDirection?: SortDirection,
+) => (ICaseReview | ISession)[] = function (
+  caseReviewsOrSessions,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return caseReviewsOrSessions
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareCaseReviewsOrSessionsByDate,
+        sortingDirection,
+      ),
+    );
 };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
