@@ -132,7 +132,7 @@ const LoginForm: FunctionComponent<{
           }}
         />
         {error && (
-          <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "User does not exist."
               ? "Account not found."
               : error == "Incorrect username or password."
@@ -200,9 +200,8 @@ const PasswordResetForm: FunctionComponent<{
         alignItems="flex-start"
       >
         <Typography variant="subtitle2">
-          To reset your password, enter your SCOPE account below. We will
-          send a password reset code to the email address associated with that
-          account.
+          To reset your password, enter your SCOPE account below. We will send a
+          password reset code to the email address associated with that account.
         </Typography>
         <Typography variant="subtitle2">
           If you cannot receive this code, or need other help signing in,
@@ -238,11 +237,7 @@ const PasswordResetForm: FunctionComponent<{
           }}
         />
         {error && (
-          <FormHelperText
-            error={true}
-            // id="component-error-text"
-            sx={{ lineHeight: 1 }}
-          >
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "Username/client id combination not found."
               ? "Account not found."
               : error == "Attempt limit exceeded, please try after some time."
@@ -374,7 +369,8 @@ const PasswordUpdateForm: FunctionComponent<{
   return (
     <Fragment>
       <Avatar alt="Scope logo" src={Logo} />
-      <h2>Update Password</h2>
+      {isReset && <h2>Reset Password</h2>}
+      {isUpdate && <h2>Update Password</h2>}
       <Stack
         direction="column"
         spacing={2}
@@ -543,12 +539,10 @@ const PasswordUpdateForm: FunctionComponent<{
           }}
         />
         {error && (
-          <FormHelperText
-            // id="component-error-text"
-            error={true}
-            sx={{ lineHeight: 1 }}
-          >
-            {error}
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
+            {error == "Invalid verification code provided, please try again."
+              ? "Invalid password reset code."
+              : error}
           </FormHelperText>
         )}
         <Stack

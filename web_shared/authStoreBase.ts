@@ -417,8 +417,8 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
           runInAction(() => {
             this.authState = AuthState.AuthenticationFailed;
             this.authStateDetail = unauthorized
-              ? "Sorry, you are not authorized to access this service"
-              : "Sorry, there was an issue accessing the service";
+              ? "Sorry, you are not authorized to access this service."
+              : "Sorry, there was an issue accessing the service.";
           });
         }
       });
