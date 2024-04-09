@@ -21,8 +21,10 @@ import { IAppAuthConfig, IIdentity } from "shared/types";
 
 export enum AuthState {
   Initialized,
-  NewPasswordRequired,
+  UpdatePasswordInProgress,
+  ResetPasswordPrompt,
   ResetPasswordInProgress,
+  ResetPasswordComplete,
   Authenticated,
   AuthenticationFailed,
 }
@@ -196,7 +198,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
           logger.event("newPasswordRequired", data);
           runInAction(() => {
             this.authUser = authUser;
-            this.authState = AuthState.NewPasswordRequired;
+            this.authState = AuthState.UpdatePasswordInProgress;
           });
           reject("newPasswordRequired");
         }),
@@ -262,7 +264,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
               this.authState =
                 err.code == "NotAuthorizedException"
                   ? AuthState.AuthenticationFailed
-                  : AuthState.NewPasswordRequired;
+                  : AuthState.UpdatePasswordInProgress;
             });
             reject(err);
           }),
@@ -338,8 +340,8 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
             });
 
             this.authStateDetail =
-              "Password reset successful. Please log in again using the new password.";
-            this.authState = AuthState.Initialized;
+              "Password reset successful. Sign in using the new password.";
+            this.authState = AuthState.ResetPasswordComplete;
             resolve(undefined);
           }),
           onFailure: action((err: any) => {

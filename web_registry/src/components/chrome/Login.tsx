@@ -580,8 +580,6 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
   (props) => {
     const { authStore } = props;
 
-    const [showResetPassword, setShowResetPassword] = useState(false);
-
     const onLogin = (username: string, password: string) => {
       authStore.login(username, password);
     };
@@ -600,12 +598,11 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
 
     return (
       <Container>
-        {authStore.authState == AuthState.NewPasswordRequired ||
+        {authStore.authState == AuthState.UpdatePasswordInProgress ||
         authStore.authState == AuthState.ResetPasswordInProgress ? (
           <PasswordUpdateForm
             onCancelPasswordChange={() => {
               authStore.authState = AuthState.Initialized;
-              setShowResetPassword(false);
             }}
             onReset={
               authStore.authState == AuthState.ResetPasswordInProgress
@@ -613,17 +610,17 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
                 : undefined
             }
             onUpdate={
-              authStore.authState == AuthState.NewPasswordRequired
+              authStore.authState == AuthState.UpdatePasswordInProgress
                 ? onUpdate
                 : undefined
             }
             error={authStore.authStateDetail}
           />
-        ) : showResetPassword ? (
+        ) : authStore.authState == AuthState.ResetPasswordPrompt ? (
           <PasswordResetForm
             onCancelResetPassword={() => {
+              authStore.authState = AuthState.Initialized;
               authStore.clearDetail();
-              setShowResetPassword(false);
             }}
             onSendResetCode={onSendResetCode}
             error={authStore.authStateDetail}
@@ -631,8 +628,8 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
         ) : (
           <LoginForm
             onShowResetPassword={() => {
+              authStore.authState = AuthState.ResetPasswordPrompt;
               authStore.clearDetail();
-              setShowResetPassword(true);
             }}
             onLogin={onLogin}
             error={authStore.authStateDetail}
