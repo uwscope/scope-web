@@ -169,7 +169,12 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
           </ImageContainer>
           <LoginContainer>
             {!!state.store ? (
-              <Login authStore={state.store.authStore} />
+              // When already authenticated,
+              // do not render the Login component.
+              // This also ensures all Login state is cleared.
+              !state.store.authStore.isAuthenticated && (
+                <Login authStore={state.store.authStore} />
+              )
             ) : !state.failed ? (
               <ProgressContainer>
                 <CircularProgress />

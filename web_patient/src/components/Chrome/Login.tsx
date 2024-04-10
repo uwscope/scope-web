@@ -338,7 +338,7 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
 
     return (
       <Container>
-        {authStore.authState == AuthState.NewPasswordRequired ? (
+        {authStore.authState == AuthState.UpdatePasswordInProgress ? (
           <PasswordUpdateForm
             onUpdate={onUpdate}
             error={authStore.authStateDetail}

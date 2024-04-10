@@ -25,8 +25,8 @@ export enum AuthState {
   ResetPasswordPrompt,
   ResetPasswordInProgress,
   ResetPasswordComplete,
-  Authenticated,
   AuthenticationFailed,
+  Authenticated,
 }
 
 export interface IAuthStoreBase<T extends IIdentity> {
