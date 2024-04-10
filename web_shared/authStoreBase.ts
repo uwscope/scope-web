@@ -340,7 +340,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
             });
 
             this.authStateDetail =
-              "Password reset successful. Sign in using the new password.";
+              "Reset successful. Sign in using the new password.";
             this.authState = AuthState.ResetPasswordComplete;
             resolve(undefined);
           }),
