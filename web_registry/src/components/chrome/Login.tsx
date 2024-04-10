@@ -33,14 +33,24 @@ const Container = withTheme(
 );
 
 const LoginForm: FunctionComponent<{
+  account: string;
+  setAccount: (account: string) => void;
+  showPassword: boolean;
+  setShowPassword: (showPassword: boolean) => void;
   onShowResetPassword: () => void;
   onLogin: (username: string, password: string) => void;
   error?: string;
 }> = (props) => {
-  const { onShowResetPassword, onLogin, error } = props;
-  const [account, setAccount] = useState("");
+  const {
+    account,
+    setAccount,
+    showPassword,
+    setShowPassword,
+    onShowResetPassword,
+    onLogin,
+    error,
+  } = props;
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = () => {
     // Trim the password in case it has a trailing space
@@ -171,12 +181,14 @@ const LoginForm: FunctionComponent<{
 };
 
 const PasswordResetForm: FunctionComponent<{
+  account: string;
+  setAccount: (account: string) => void;
   onCancelResetPassword: () => void;
   onSendResetCode: (username: string) => void;
   error?: string;
 }> = (props) => {
-  const { onCancelResetPassword, onSendResetCode, error } = props;
-  const [account, setAccount] = useState("");
+  const { account, setAccount, onCancelResetPassword, onSendResetCode, error } =
+    props;
 
   const onSubmit = () => {
     onSendResetCode(account);
@@ -278,16 +290,24 @@ const PasswordResetForm: FunctionComponent<{
 };
 
 const PasswordUpdateForm: FunctionComponent<{
+  showPassword: boolean;
+  setShowPassword: (showPassword: boolean) => void;
   onCancelPasswordChange: () => void;
   onReset?: (resetCode: string, password: string) => void;
   onUpdate?: (password: string) => void;
   error?: string;
 }> = (props) => {
-  const { onCancelPasswordChange, onReset, onUpdate, error } = props;
+  const {
+    showPassword,
+    setShowPassword,
+    onCancelPasswordChange,
+    onReset,
+    onUpdate,
+    error,
+  } = props;
   const [resetCode, setResetCode] = useState("");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [resetCodeHasFocus, setResetCodeHasFocus] = useState(false);
   const [resetCodeGotFocus, setResetCodeGotFocus] = useState(false);
   const [passwordGotFocus, setPasswordGotFocus] = useState(false);
@@ -580,6 +600,9 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
   (props) => {
     const { authStore } = props;
 
+    const [account, setAccount] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
     const onLogin = (username: string, password: string) => {
       authStore.login(username, password);
     };
@@ -601,6 +624,8 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
         {authStore.authState == AuthState.UpdatePasswordInProgress ||
         authStore.authState == AuthState.ResetPasswordInProgress ? (
           <PasswordUpdateForm
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             onCancelPasswordChange={() => {
               authStore.authState = AuthState.Initialized;
             }}
@@ -618,6 +643,8 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
           />
         ) : authStore.authState == AuthState.ResetPasswordPrompt ? (
           <PasswordResetForm
+            account={account}
+            setAccount={setAccount}
             onCancelResetPassword={() => {
               authStore.authState = AuthState.Initialized;
               authStore.clearDetail();
@@ -627,6 +654,10 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
           />
         ) : (
           <LoginForm
+            account={account}
+            setAccount={setAccount}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             onShowResetPassword={() => {
               authStore.authState = AuthState.ResetPasswordPrompt;
               authStore.clearDetail();
