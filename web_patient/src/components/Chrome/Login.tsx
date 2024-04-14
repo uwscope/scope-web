@@ -141,6 +141,21 @@ const LoginForm: FunctionComponent<{
             ),
           }}
         />
+        <Stack
+          direction="row"
+          justifyContent="end"
+          alignItems="center"
+        >
+          <Button
+            type="button"
+            color="primary"
+            variant="text"
+            size="small"
+            onClick={onShowResetPassword}
+          >
+            Forgot Password?
+          </Button>
+        </Stack>
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "User does not exist."
@@ -153,18 +168,9 @@ const LoginForm: FunctionComponent<{
         <Stack
           sx={{ paddingTop: 4 }}
           direction="row"
-          spacing={2}
-          justifyContent="space-between"
+          justifyContent="end"
           alignItems="center"
         >
-          <Button
-            type="button"
-            color="primary"
-            variant="text"
-            onClick={onShowResetPassword}
-          >
-            Forgot Password
-          </Button>
           <Button
             type="submit"
             color="primary"
@@ -272,7 +278,7 @@ const PasswordResetForm: FunctionComponent<{
             variant="text"
             onClick={onCancelResetPassword}
           >
-            Cancel Reset
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -281,7 +287,7 @@ const PasswordResetForm: FunctionComponent<{
             onClick={onSubmit}
             disabled={!canSubmit}
           >
-            Send Reset Code
+            Send Code
           </Button>
         </Stack>
       </FormControl>
@@ -424,8 +430,10 @@ const PasswordUpdateForm: FunctionComponent<{
         <ul style={{ alignSelf: "flex-start", marginTop: 2 }}>
           {passwordCriteria.map((current, index) => (
             <Fragment key={index}>
-              <li>
+              <li style={{marginLeft: "-15px"}}>
                 <Typography
+                  variant="subtitle2"
+                  component="span"
                   sx={{
                     color:
                       passwordGotFocus && !!password.trim() && !current.valid
@@ -588,8 +596,7 @@ const PasswordUpdateForm: FunctionComponent<{
             variant="text"
             onClick={onCancelPasswordChange}
           >
-            {isReset && "Cancel Reset"}
-            {isUpdate && "Cancel Sign In"}
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -598,7 +605,8 @@ const PasswordUpdateForm: FunctionComponent<{
             onClick={onSubmit}
             disabled={!canSubmit}
           >
-            Update Password
+            {isReset && "Reset"}
+            {isUpdate && "Update"}
           </Button>
         </Stack>
       </FormControl>
