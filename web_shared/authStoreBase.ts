@@ -312,8 +312,6 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
             logger.error(err);
             runInAction(() => {
               this.authStateDetail = err.message;
-
-              this.authState = AuthState.AuthenticationFailed;
             });
             reject(err);
           }),

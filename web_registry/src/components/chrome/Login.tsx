@@ -144,7 +144,7 @@ const LoginForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "User does not exist."
-              ? "Account not found."
+              ? "Account incorrect."
               : error == "Incorrect username or password."
                 ? "Password incorrect."
                 : error}
@@ -251,7 +251,7 @@ const PasswordResetForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "Username/client id combination not found."
-              ? "Account not found."
+              ? "Account incorrect."
               : error == "Attempt limit exceeded, please try after some time."
                 ? "Reset attempt limit exceeded. Try again later."
                 : error == "User password cannot be reset in the current state."
@@ -571,7 +571,7 @@ const PasswordUpdateForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "Invalid verification code provided, please try again."
-              ? "Invalid password reset code."
+              ? "Password reset code incorrect."
               : error}
           </FormHelperText>
         )}
@@ -638,6 +638,7 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
             setShowPassword={setShowPassword}
             onCancelPasswordChange={() => {
               authStore.authState = AuthState.Initialized;
+              authStore.clearDetail();
             }}
             onReset={
               authStore.authState == AuthState.ResetPasswordInProgress
