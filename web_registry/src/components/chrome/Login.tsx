@@ -217,7 +217,7 @@ const PasswordResetForm: FunctionComponent<{
         </Typography>
         <Typography variant="subtitle2">
           If you cannot receive this code, or need other help signing in,
-          contact us at &nbsp;&lt;
+          contact us at &lt;
           <a href="mailto:scopestudy@uw.edu" target="_blank">
             scopestudy@uw.edu
           </a>
@@ -398,10 +398,20 @@ const PasswordUpdateForm: FunctionComponent<{
         alignItems="flex-start"
       >
         {isReset && (
-          <Typography variant="subtitle2">
-            We have sent a password reset code to the email address associated
-            with your SCOPE account. The reset code will expire after 1 hour.
-          </Typography>
+          <React.Fragment>
+            <Typography variant="subtitle2">
+              We have sent a password reset code to the email address associated
+              with your SCOPE account. The reset code will expire after 1 hour.
+            </Typography>
+            <Typography variant="subtitle2">
+              If you cannot receive this code, or need other help signing in,
+              contact us at &lt;
+              <a href="mailto:scopestudy@uw.edu" target="_blank">
+                scopestudy@uw.edu
+              </a>
+              &gt;.
+            </Typography>
+          </React.Fragment>
         )}
         {isUpdate && (
           <Typography variant="subtitle2">
