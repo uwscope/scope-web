@@ -44,6 +44,7 @@ const LoginContainer = withTheme(
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "auto",
     [props.theme.breakpoints.down("md")]: {
       width: "100%",
       position: "absolute",
