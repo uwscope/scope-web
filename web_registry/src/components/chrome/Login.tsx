@@ -141,11 +141,7 @@ const LoginForm: FunctionComponent<{
             ),
           }}
         />
-        <Stack
-          direction="row"
-          justifyContent="end"
-          alignItems="center"
-        >
+        <Stack direction="row" justifyContent="end" alignItems="center">
           <Button
             type="button"
             color="primary"
@@ -430,7 +426,7 @@ const PasswordUpdateForm: FunctionComponent<{
         <ul style={{ alignSelf: "flex-start", marginTop: 2 }}>
           {passwordCriteria.map((current, index) => (
             <Fragment key={index}>
-              <li style={{marginLeft: "-15px"}}>
+              <li style={{ marginLeft: "-15px" }}>
                 <Typography
                   variant="subtitle2"
                   component="span"
