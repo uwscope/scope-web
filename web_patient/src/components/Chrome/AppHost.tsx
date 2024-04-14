@@ -22,6 +22,7 @@ const LoginContainer = withTheme(
     width: "100%",
     height: "100%",
     display: "flex",
+    alignItems: "flex-start",
     justifyContent: "center",
     overflow: "auto",
     [props.theme.breakpoints.down("md")]: {
