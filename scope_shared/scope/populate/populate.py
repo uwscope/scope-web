@@ -12,6 +12,7 @@ from typing import List, Optional
 import scope.config
 import scope.populate.cognito.rule_create_cognito_account
 import scope.populate.cognito.rule_reset_cognito_password
+import scope.populate.cognito.rule_update_cognito_email
 import scope.populate.data.rule_archive_export
 import scope.populate.data.rule_archive_migrate
 import scope.populate.data.rule_archive_restore
@@ -218,6 +219,7 @@ def _populate_rules_create() -> List[PopulateRule]:
         #
         scope.populate.cognito.rule_create_cognito_account.CreateCognitoAccount(),
         scope.populate.cognito.rule_reset_cognito_password.ResetCognitoPassword(),
+        scope.populate.cognito.rule_update_cognito_email.UpdateCognitoEmail(),
         #
         # Patient creation rules
         # - These are in reverse order so creation will be depth-first.
