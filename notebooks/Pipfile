@@ -4,35 +4,86 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-jupyterlab = "*"
+########################################
+#
+# Core packages used in development.
+#
+########################################
+jupyterlab = "4.1.*"
+jupyterlab-lsp = "5.1.*"
+python-lsp-server = {extras = ["all"], version = "1.10.*"}
 
-jupyterlab-lsp = "*"
-python-lsp-server = {extras = ["all"], version = "*"}
+pandas = "2.2.*"
 
-jupyter-dash = "*"
-numpy = "*"
-pandas = "*"
+jupyterlab-code-formatter = "2.2.*"
+black = "22.8"
+isort = "5.13.*"
 
-jupyterlab-code-formatter = "*"
-black = "*"
-isort = "*"
+jupytext = "1.16.*"
+nbconvert = "7.16.*"
 
-jupytext = "*"
-nbconvert = "*"
+# These are < 1.0, pin a specific version.
+jupyter-dash = "0.4.2"
 
-# TODO: scope has gotten to a point where it can't import without this
-pytest = "*"
+# These are not semver, pin a specific version.
 
+########################################
+#
 # Needed for Mac environment
-appnope = {version = "*", sys_platform = "== 'darwin'"}
-pexpect = {version = "*", sys_platform = "== 'darwin'"}
-ptyprocess = {version = "*", sys_platform = "== 'darwin'"}
+#
+########################################
+appnope = {version = "0.1.4", sys_platform = "== 'darwin'"}
+pexpect = {version = "4.9.*", sys_platform = "== 'darwin'"}
+ptyprocess = {version = "0.7.0", sys_platform = "== 'darwin'"}
+
+########################################
+#
+# Dependencies of scope.
+#
+########################################
+boto3 = "1.24.*"
+faker = "13.15.*"
+numpy = "1.23.*"
+pyjwt = "2.4.*"
+pymongo = "4.2.*"
+pytest = "7.1.*"
+requests = "2.31.*"
+
+# These are < 1.0, pin a specific version.
+jschon = "0.8.3"
+lorem = "0.1.1"
+pyzipper = "0.3.6"
+"ruamel.yaml" = "0.17.21"
+
+# These are not semver, pin a specific version.
+pytz = "2024.1"
+
+########################################
+#
+# Dependencies of aws_infrastructure.
+#
+########################################
+
+invoke = "1.7.*"
+paramiko = "2.11.*"
+pipenv = "2023.12.*"
+
+# These are < 1.0, pin a specific version.
+colorama = "0.4.6"
+python-dotenv = "0.20.0"
+
+# These are not semver, pin a specific version.
+
+########################################
+#
+# scope and aws_infrastructure.
+#
+########################################
 
 [packages.scope]
 editable = true
 path = "../scope_shared"
 
-# TODO: scope has gotten to a point where it can't import without this
 [packages.aws_infrastructure]
 git = "https://github.com/fogies/aws-infrastructure.git"
 subdirectory = "aws_infrastructure"

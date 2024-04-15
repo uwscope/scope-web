@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import ContentPasteOffOutlinedIcon from "@mui/icons-material/ContentPasteOffOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Button,
@@ -336,19 +336,19 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
         }
         error={currentPatient?.loadAssessmentLogsState.error}
         actionButtons={[
-          {
-            icon: assessment.assigned ? (
-              <AssignmentTurnedInIcon />
-            ) : (
-              <AssignmentIcon />
-            ),
-            text: assessment.assigned
-              ? getString("patient_progress_assessment_assigned_button")
-              : getString("patient_progress_assessment_assign_button"),
-            onClick: assessment.assigned
-              ? undefined
-              : () => currentPatient?.assignAssessment(assessment.assessmentId),
-          } as IActionButton,
+          assessment.assigned
+            ? ({
+                icon: <ContentPasteOffOutlinedIcon />,
+                text: getString("patient_progress_assessment_cancel_button"),
+                onClick: () =>
+                  currentPatient?.cancelAssessment(assessment.assessmentId),
+              } as IActionButton)
+            : ({
+                icon: <AssignmentOutlinedIcon />,
+                text: getString("patient_progress_assessment_assign_button"),
+                onClick: () =>
+                  currentPatient?.assignAssessment(assessment.assessmentId),
+              } as IActionButton),
         ]
           .concat(
             assessment.assigned

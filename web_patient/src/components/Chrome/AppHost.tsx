@@ -22,8 +22,9 @@ const LoginContainer = withTheme(
     width: "100%",
     height: "100%",
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
+    overflow: "auto",
     [props.theme.breakpoints.down("md")]: {
       width: "100%",
       position: "absolute",
@@ -162,10 +163,11 @@ export const AppHost: FunctionComponent<IAppHost> = observer((props) => {
                 <a href="tel:2066163032" target="_blank">
                   206-616-3032
                 </a>
-                &nbsp;or&nbsp;
+                &nbsp;or&nbsp; &lt;
                 <a href="mailto:scopestudy@uw.edu" target="_blank">
                   scopestudy@uw.edu
                 </a>
+                &gt;.
               </Typography>
             </FailureContainer>
           )}

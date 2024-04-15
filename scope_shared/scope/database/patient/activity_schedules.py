@@ -244,6 +244,8 @@ def get_activity_schedules(
     Get list of "activity-schedule" documents.
     """
 
+    # patients.py/_construct_patient_document
+    # currently assumes this access does nothing to retrieved documents.
     return scope.database.collection_utils.get_set(
         collection=collection,
         document_type=DOCUMENT_TYPE,

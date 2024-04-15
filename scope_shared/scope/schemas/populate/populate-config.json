@@ -34,7 +34,7 @@
                 "type": "string"
               },
               "migration": {
-                "enum": ["v0.5.0", "v0.7.0", "v0.9.0", "v0.10.0"]
+                "enum": ["v0.5.0", "v0.7.0", "v0.9.0", "v0.10.0", "v0.13.0"]
               },
               "dry_run": {
                 "type": "boolean"
@@ -96,9 +96,10 @@
                 "items": {
                   "type": "string",
                   "enum": [
-                    "reset_cognito_password",
                     "populate_default_data",
                     "populate_generated_data",
+                    "reset_cognito_password",
+                    "update_cognito_email",
                     "update_patient_identity_cognito_account"
                   ]
                 }
@@ -131,9 +132,10 @@
                 "items": {
                   "type": "string",
                   "enum": [
-                    "reset_cognito_password",
                     "populate_default_data",
                     "populate_generated_data",
+                    "reset_cognito_password",
+                    "update_cognito_email",
                     "update_patient_identity_cognito_account"
                   ]
                 }
@@ -180,6 +182,7 @@
                   "type": "string",
                   "enum": [
                     "reset_cognito_password",
+                    "update_cognito_email",
                     "update_provider_identity_cognito_account"
                   ]
                 }
@@ -213,6 +216,7 @@
                   "type": "string",
                   "enum": [
                     "reset_cognito_password",
+                    "update_cognito_email",
                     "update_provider_identity_cognito_account"
                   ]
                 }

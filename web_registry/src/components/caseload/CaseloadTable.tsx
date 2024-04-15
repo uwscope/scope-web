@@ -17,10 +17,15 @@ import {
   gridStringOrNumberComparator,
   GridValueFormatterParams,
 } from "@mui/x-data-grid";
-import { addWeeks, compareAsc, differenceInWeeks } from "date-fns";
+import {
+  addWeeks,
+  compareAsc,
+  differenceInMonths,
+  differenceInWeeks,
+} from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
-import { formatDateOnly, getFollowupWeeks } from "shared/time";
+import { formatDateOnly, getFollowupWeeks, toUTCDateOnly } from "shared/time";
 import { Table } from "src/components/common/Table";
 import { IPatientStore } from "src/stores/PatientStore";
 import {
@@ -74,6 +79,15 @@ const ChangeCell = withTheme(
     textAlign: "center",
     backgroundColor:
       props.change <= -50 && props.theme.customPalette.scoreColors["good"],
+  })),
+);
+
+const HiglightedCell = withTheme(
+  styled.div<{ scoreColorKey: string }>((props) => ({
+    width: "100%",
+    padding: props.theme.spacing(2),
+    textAlign: "center",
+    backgroundColor: props.theme.customPalette.scoreColors[props.scoreColorKey],
   })),
 );
 
@@ -213,6 +227,20 @@ const renderGADCell = (props: GridCellParams) => (
 const renderChangeCell = (props: GridCellParams) => (
   <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
 );
+
+const renderCellLastCaseReview = (props: GridCellParams) => {
+  const overdue = props.row["recentCaseReviewOverdue"] as boolean;
+
+  if (overdue) {
+    return (
+      <HiglightedCell scoreColorKey="warning">
+        {props.formattedValue}
+      </HiglightedCell>
+    );
+  } else {
+    return props.formattedValue;
+  }
+};
 
 const renderFlagCell = (props: GridCellParams) => {
   const flaggedForDiscussion = !!props.value?.["Flag for discussion"];
@@ -367,6 +395,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         filterable: false,
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
+        renderCell: renderCellLastCaseReview,
       },
       {
         field: "nextSessionDue",
@@ -485,20 +514,27 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
       },
+      {
+        field: "enrollmentDate",
+        headerName: "Enrollment Date",
+        width: 85,
+        renderHeader,
+        align: "center",
+        headerAlign: "center",
+        filterable: false,
+        sortComparator: nullUndefinedComparator("last", gridDateComparator),
+        valueFormatter: nullUndefinedFormatter(dateFormatter),
+      },
     ];
 
     const data = patients
       .map((p) => {
         const initialSessionDate =
-          p.sessions?.length > 0 ? p.sessions[0].date : undefined;
-        const recentSessionDate =
-          p.sessions?.length > 0
-            ? p.sessions[p.sessions.length - 1].date
+          p.sessionsSortedByDate?.length > 0
+            ? p.sessionsSortedByDate[0].date
             : undefined;
-        const recentReviewDate =
-          p.caseReviews?.length > 0
-            ? p.caseReviews[p.caseReviews.length - 1].date
-            : undefined;
+        const recentSessionDate = p.latestSession?.date;
+        const recentReviewDate = p.latestCaseReview?.date;
         const nextSessionDueDate =
           recentSessionDate && p.profile.followupSchedule
             ? addWeeks(
@@ -508,7 +544,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
             : undefined;
 
         const totalSessionsCount =
-          p.sessions && p.sessions.length > 0 ? p.sessions.length : undefined;
+          p.sessionsSortedByDate && p.sessionsSortedByDate.length > 0
+            ? p.sessionsSortedByDate.length
+            : undefined;
         const treatmentWeeksCount =
           initialSessionDate && recentSessionDate
             ? differenceInWeeks(recentSessionDate, initialSessionDate) + 1
@@ -565,6 +603,25 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
               )
             : undefined;
 
+        const todayDateUtc = toUTCDateOnly(new Date());
+        const recentReviewOverdue = ((): boolean => {
+          if (p.profile.depressionTreatmentStatus === "CoCM") {
+            // CoCM is overdue if no review or after 1 month
+            return (
+              !recentReviewDate ||
+              differenceInMonths(todayDateUtc, recentReviewDate) >= 1
+            );
+          } else if (p.profile.depressionTreatmentStatus === "CoCM RP") {
+            // CoCM RP is overdue if no review or after 2 months
+            return (
+              !recentReviewDate ||
+              differenceInMonths(todayDateUtc, recentReviewDate) >= 2
+            );
+          }
+
+          // Nothing else can be overdue
+          return false;
+        })();
         const initialAtRisk =
           phq9Entries &&
           phq9Entries.length > 0 &&
@@ -607,9 +664,11 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           recentGAD: recentGADScore,
           changeGAD: changeGAD,
           recentGADDate: recentGADDate,
+          enrollmentDate: p.profile.enrollmentDate,
           //
           // Not rendered, used by other columns
           //
+          recentCaseReviewOverdue: recentReviewOverdue,
           initialAtRisk: initialAtRisk,
           recentAtRisk: recentAtRisk,
         };

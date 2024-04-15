@@ -61,6 +61,9 @@ def fake_patient_profile_factory(
             "depressionTreatmentStatus": fake_utils.fake_enum_value(
                 scope.enums.DepressionTreatmentStatus
             ),
+            "enrollmentDate": date_utils.format_date(
+                faker_factory.date_between(start_date="-1y"),
+            ),
         }
 
         # Remove a randomly sampled subset of optional parameters.

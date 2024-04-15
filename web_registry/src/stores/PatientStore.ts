@@ -14,6 +14,12 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortCaseReviewsByDate,
+  sortCaseReviewsOrSessionsByDate,
+  SortDirection,
+  sortSessionsByDate,
+} from "shared/sorting";
+import {
   getLoadAndLogQuery,
   onArrayConflict,
   onSingletonConflict,
@@ -42,6 +48,7 @@ const logger = getLogger("PatientStore");
 export interface IPatientStore extends IPatient {
   readonly age: number;
   readonly name: string;
+  readonly latestCaseReview: ICaseReview | undefined;
   readonly latestSession: ISession | undefined;
   readonly recordId: string;
 
@@ -64,10 +71,21 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesState: IPromiseQueryState;
   readonly loadValuesInventoryState: IPromiseQueryState;
 
+  // Sorted properties
+  readonly caseReviewsSortedByDate: ICaseReview[];
+  readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
+  readonly caseReviewsOrSessionsSortedByDateDescending: (
+    | ICaseReview
+    | ISession
+  )[];
+  readonly sessionsSortedByDate: ISession[];
+
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
   // Data load/save
@@ -80,6 +98,7 @@ export interface IPatientStore extends IPatient {
 
   // Assignments
   assignAssessment(assessmentId: string): void;
+  cancelAssessment(assessmentId: string): void;
   assignSafetyPlan(): void;
   assignValuesInventory(): void;
 
@@ -279,13 +298,46 @@ export class PatientStore implements IPatientStore {
     return this.loadCaseReviewsQuery.value || [];
   }
 
+  @computed get caseReviewsSortedByDate() {
+    return sortCaseReviewsByDate(this.caseReviews);
+  }
+
+  @computed get caseReviewsOrSessionsSortedByDate() {
+    const caseReviewsOrSessions = (
+      this.caseReviews.slice() as (ICaseReview | ISession)[]
+    ).concat(this.sessions);
+
+    return sortCaseReviewsOrSessionsByDate(caseReviewsOrSessions);
+  }
+
+  @computed get caseReviewsOrSessionsSortedByDateDescending() {
+    const caseReviewsOrSessions = (
+      this.caseReviews.slice() as (ICaseReview | ISession)[]
+    ).concat(this.sessions);
+
+    return sortCaseReviewsOrSessionsByDate(
+      caseReviewsOrSessions,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get clinicalHistory() {
     return this.loadClinicalHistoryQuery.value || {};
   }
 
+  @computed get latestCaseReview() {
+    if (this.caseReviewsSortedByDate.length > 0) {
+      return this.caseReviewsSortedByDate[
+        this.caseReviewsSortedByDate.length - 1
+      ];
+    }
+
+    return undefined;
+  }
+
   @computed get latestSession() {
-    if (this.sessions.length > 0) {
-      return this.sessions[this.sessions.length - 1];
+    if (this.sessionsSortedByDate.length > 0) {
+      return this.sessionsSortedByDate[this.sessionsSortedByDate.length - 1];
     }
 
     return undefined;
@@ -318,6 +370,10 @@ export class PatientStore implements IPatientStore {
 
   @computed get sessions() {
     return this.loadSessionsQuery.value || [];
+  }
+
+  @computed get sessionsSortedByDate() {
+    return sortSessionsByDate(this.sessions);
   }
 
   @computed public get values() {
@@ -398,14 +454,13 @@ export class PatientStore implements IPatientStore {
   }
 
   // Helpers
-  @action.bound
   public getActivitiesByLifeAreaId(lifeAreaId: string) {
-    return this.activities.filter((a) => {
-      if (!a.valueId) {
+    return this.activities.filter((current) => {
+      if (!current.valueId) {
         return false;
       }
 
-      const value = this.getValueById(a.valueId);
+      const value = this.getValueById(current.valueId);
       if (!value) {
         return false;
       }
@@ -414,26 +469,34 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @action.bound
   public getActivitiesByValueId(valueId: string) {
-    return this.activities.filter((a) => {
-      if (!a.valueId) {
+    return this.activities.filter((current) => {
+      if (!current.valueId) {
         return false;
       }
 
-      return a.valueId == valueId;
+      return current.valueId == valueId;
     });
   }
 
-  @action.bound
   public getActivitiesWithoutValueId() {
-    return this.activities.filter((a) => {
-      return !a.valueId;
+    return this.activities.filter((current) => {
+      return !current.valueId;
     });
   }
 
-  @action.bound getValueById(valueId: string) {
-    return this.values.find((v) => v.valueId == valueId);
+  public getCaseReviewById(caseReviewId: string) {
+    return this.caseReviews.find(
+      (current) => current.caseReviewId == caseReviewId,
+    );
+  }
+
+  public getSessionById(sessionId: string) {
+    return this.sessions.find((current) => current.sessionId == sessionId);
+  }
+
+  public getValueById(valueId: string) {
+    return this.values.find((current) => current.valueId == valueId);
   }
 
   // Data load/save
@@ -636,6 +699,24 @@ export class PatientStore implements IPatientStore {
   }
 
   @action.bound
+  public async cancelAssessment(assessmentId: string) {
+    const found = this.assessments.find((a) => a.assessmentId == assessmentId);
+
+    console.assert(!!found, "Assessment not found");
+
+    if (found) {
+      return this.updateAssessment({
+        ...toJS(found),
+        assessmentId,
+        assigned: false,
+        assignedDateTime: new Date(),
+        frequency: undefined,
+        dayOfWeek: undefined,
+      });
+    }
+  }
+
+  @action.bound
   public async assignSafetyPlan() {
     const promise = this.patientService.updateSafetyPlan({
       ...toJS(this.safetyPlan),
@@ -700,9 +781,9 @@ export class PatientStore implements IPatientStore {
         },
       })
       .then((updatedReview) => {
-        const existing = this.caseReviews.find(
-          (r) => r.caseReviewId == updatedReview.caseReviewId,
-        );
+        const existing = !!updatedReview.caseReviewId
+          ? this.getCaseReviewById(updatedReview.caseReviewId)
+          : undefined;
         logger.assert(!!existing, "Case review not found when expected");
 
         if (!!existing) {
@@ -807,9 +888,9 @@ export class PatientStore implements IPatientStore {
         ),
       })
       .then((updatedSession) => {
-        const existing = this.sessions.find(
-          (s) => s.sessionId == updatedSession.sessionId,
-        );
+        const existing = !!updatedSession.sessionId
+          ? this.getSessionById(updatedSession.sessionId)
+          : undefined;
         logger.assert(!!existing, "Session not found when expected");
 
         if (!!existing) {
