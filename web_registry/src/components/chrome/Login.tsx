@@ -8,6 +8,7 @@ import {
   FormControl,
   FormHelperText,
   InputAdornment,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -31,23 +32,29 @@ const Container = withTheme(
   })),
 );
 
-const ButtonContainer = styled.div({
-  alignSelf: "flex-end",
-  paddingTop: 20,
-});
-
 const LoginForm: FunctionComponent<{
+  account: string;
+  setAccount: (account: string) => void;
+  showPassword: boolean;
+  setShowPassword: (showPassword: boolean) => void;
+  onShowResetPassword: () => void;
   onLogin: (username: string, password: string) => void;
   error?: string;
 }> = (props) => {
-  const { onLogin, error } = props;
-  const [account, setAccount] = useState("");
+  const {
+    account,
+    setAccount,
+    showPassword,
+    setShowPassword,
+    onShowResetPassword,
+    onLogin,
+    error,
+  } = props;
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = () => {
     // Trim the password in case it has a trailing space
-    onLogin && onLogin(account, password.trim());
+    onLogin(account, password.trim());
   };
 
   const togglePassword = () => {
@@ -67,8 +74,8 @@ const LoginForm: FunctionComponent<{
       <h2>Welcome!</h2>
       <FormControl error={!!error} fullWidth>
         <TextField
-          label="Username"
-          placeholder="Enter username"
+          label="Account"
+          placeholder="Enter account"
           fullWidth
           required
           margin="normal"
@@ -76,7 +83,7 @@ const LoginForm: FunctionComponent<{
           value={account}
           onChange={(e) =>
             setAccount(
-              // Username cannot include whitespace.
+              // Account cannot include whitespace.
               e.target.value.replace(/\s/g, ""),
             )
           }
@@ -134,12 +141,32 @@ const LoginForm: FunctionComponent<{
             ),
           }}
         />
+        <Stack direction="row" justifyContent="end" alignItems="center">
+          <Button
+            type="button"
+            color="primary"
+            variant="text"
+            size="small"
+            onClick={onShowResetPassword}
+          >
+            Forgot Password?
+          </Button>
+        </Stack>
         {error && (
-          <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
-            {error}
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
+            {error == "User does not exist."
+              ? "Account incorrect."
+              : error == "Incorrect username or password."
+                ? "Password incorrect."
+                : error}
           </FormHelperText>
         )}
-        <ButtonContainer>
+        <Stack
+          sx={{ paddingTop: 4 }}
+          direction="row"
+          justifyContent="end"
+          alignItems="center"
+        >
           <Button
             type="submit"
             color="primary"
@@ -147,44 +174,202 @@ const LoginForm: FunctionComponent<{
             onClick={onSubmit}
             disabled={!canLogin}
           >
-            Sign in
+            Sign In
           </Button>
-        </ButtonContainer>
+        </Stack>
+      </FormControl>
+    </Fragment>
+  );
+};
+
+const PasswordResetForm: FunctionComponent<{
+  account: string;
+  setAccount: (account: string) => void;
+  onCancelResetPassword: () => void;
+  onSendResetCode: (username: string) => void;
+  error?: string;
+}> = (props) => {
+  const { account, setAccount, onCancelResetPassword, onSendResetCode, error } =
+    props;
+
+  const onSubmit = () => {
+    onSendResetCode(account);
+  };
+
+  const canSubmit = !!account;
+
+  return (
+    <Fragment>
+      <Avatar
+        alt="Scope logo"
+        src={Logo}
+        sx={{ width: 64, height: 64 }}
+        variant="square"
+      />
+      <h2>Forgot Password?</h2>
+      <Stack
+        direction="column"
+        spacing={2}
+        justifyContent="flex-start"
+        alignItems="flex-start"
+      >
+        <Typography variant="subtitle2">
+          To reset your password, enter your SCOPE account below. We will send a
+          password reset code to the email address associated with that account.
+        </Typography>
+        <Typography variant="subtitle2">
+          If you cannot receive this code, or need other help signing in,
+          contact us at &lt;
+          <a href="mailto:scopestudy@uw.edu" target="_blank">
+            scopestudy@uw.edu
+          </a>
+          &gt;.
+        </Typography>
+      </Stack>
+      <FormControl error={!!error} fullWidth>
+        <TextField
+          label="Account"
+          placeholder="Enter account"
+          fullWidth
+          required
+          margin="normal"
+          variant="standard"
+          value={account}
+          onChange={(e) =>
+            setAccount(
+              // Account cannot include whitespace.
+              e.target.value.replace(/\s/g, ""),
+            )
+          }
+          InputLabelProps={{
+            shrink: true,
+          }}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" && canSubmit) {
+              onSubmit();
+            }
+          }}
+        />
+        {error && (
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
+            {error == "Username/client id combination not found."
+              ? "Account incorrect."
+              : error == "Attempt limit exceeded, please try after some time."
+                ? "Reset attempt limit exceeded. Try again later."
+                : error == "User password cannot be reset in the current state."
+                  ? "Reset code not available. Contact study team."
+                  : error}
+          </FormHelperText>
+        )}
+        <Stack
+          sx={{ paddingTop: 4 }}
+          direction="row"
+          spacing={2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Button
+            type="button"
+            color="primary"
+            variant="text"
+            onClick={onCancelResetPassword}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            variant="contained"
+            onClick={onSubmit}
+            disabled={!canSubmit}
+          >
+            Send Code
+          </Button>
+        </Stack>
       </FormControl>
     </Fragment>
   );
 };
 
 const PasswordUpdateForm: FunctionComponent<{
-  onUpdate: (password: string) => void;
+  showPassword: boolean;
+  setShowPassword: (showPassword: boolean) => void;
+  onCancelPasswordChange: () => void;
+  onReset?: (resetCode: string, password: string) => void;
+  onUpdate?: (password: string) => void;
   error?: string;
 }> = (props) => {
-  const { onUpdate, error } = props;
+  const {
+    showPassword,
+    setShowPassword,
+    onCancelPasswordChange,
+    onReset,
+    onUpdate,
+    error,
+  } = props;
+  const [resetCode, setResetCode] = useState("");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [resetCodeHasFocus, setResetCodeHasFocus] = useState(false);
+  const [resetCodeGotFocus, setResetCodeGotFocus] = useState(false);
+  const [passwordGotFocus, setPasswordGotFocus] = useState(false);
+  const [confirmPasswordGotFocus, setConfirmPasswordGotFocus] = useState(false);
+
+  const isReset = !!onReset;
+  const isUpdate = !!onUpdate;
+
+  const passwordCriteria: { description: string; valid: boolean }[] = [
+    {
+      // Allowable length
+      description: "At least 8 characters.",
+      valid: password.length >= 8 && password.length <= 128,
+    },
+    {
+      // Require uppercase
+      description: "Must contain an uppercase letter.",
+      valid: !!password.match(/(?=.*[A-Z])/),
+    },
+    {
+      // Require lowercase
+      description: "Must contain a lowercase letter.",
+      valid: !!password.match(/(?=.*[a-z])/),
+    },
+    {
+      // Require digit
+      description: "Must contain a digit.",
+      valid: !!password.match(/(?=.*[0-9])/),
+    },
+    {
+      // Require symbol
+      // Defined by Cognito as ^ $ * . [ ] { } ( ) ? " ! @ # % & / \ , > < ' : ; | _ ~ ` = + -
+      // https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-policies.html
+      description: "Must contain a symbol character.",
+      valid: !!password.match(
+        /(?=.*[\^$*.\[\]{}\(\)?“!@#%&/\\,><\’:;|_~`=+\-])/,
+      ),
+    },
+    {
+      // No space (e.g., no interior space)
+      // Cognito will allow an interior space, but we will not
+      description: "Must not include a space.",
+      valid: !!password.match(/^\S*$/),
+    },
+  ];
 
   const validPassword =
     // Password exists
     !!password &&
-    // Allowable length
-    password.length >= 8 &&
-    password.length <= 128 &&
-    // No space (e.g., no interior space)
-    // Cognito will allow an interior space, but we will not
-    !!password.match(/^\S+$/) &&
-    // Require uppercase
-    !!password.match(/(?=.*[A-Z])/) &&
-    // Require lowercase
-    !!password.match(/(?=.*[a-z])/) &&
-    // Require digit
-    !!password.match(/(?=.*[0-9])/) &&
-    // Require symbol
-    // Defined by Cognito as ^ $ * . [ ] { } ( ) ? " ! @ # % & / \ , > < ' : ; | _ ~ ` = + -
-    // https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-policies.html
-    !!password.match(/(?=.*[\^$*.\[\]{}\(\)?“!@#%&/\\,><\’:;|_~`=+\-])/);
+    // Meets all criteria
+    passwordCriteria.reduce((combinedValid, current) => {
+      return combinedValid && current.valid;
+    }, true);
 
   const canSubmit: boolean =
+    // Update does not require a code
+    (isUpdate ||
+      // Reset requires a code
+      (isReset && !!resetCode)) &&
+    // Password must be valid
     validPassword &&
     // Passwords must match
     // Trim any trailing space before comparing
@@ -192,7 +377,11 @@ const PasswordUpdateForm: FunctionComponent<{
     password.trim() === passwordRepeat.trim();
 
   const onSubmit = () => {
-    canSubmit && !!onUpdate && onUpdate(password.trim());
+    if (isUpdate) {
+      canSubmit && !!onUpdate && onUpdate(password.trim());
+    } else if (isReset) {
+      canSubmit && !!onReset && onReset(resetCode.trim(), password.trim());
+    }
   };
 
   const togglePassword = () => {
@@ -202,37 +391,90 @@ const PasswordUpdateForm: FunctionComponent<{
   return (
     <Fragment>
       <Avatar alt="Scope logo" src={Logo} />
-      <h2>Update password</h2>
-      <Typography variant="subtitle2">
-        Please generate a password that meets the following criteria:
-      </Typography>
-      <ul style={{ alignSelf: "flex-start" }}>
-        <li>
-          <Typography variant="caption">At least 8 characters</Typography>
-        </li>
-        <li>
-          <Typography variant="caption">
-            Must contain uppercase letters
+      {isReset && <h2>Reset Password</h2>}
+      {isUpdate && <h2>Update Password</h2>}
+      <Stack
+        direction="column"
+        spacing={2}
+        justifyContent="flex-start"
+        alignItems="flex-start"
+      >
+        {isReset && (
+          <React.Fragment>
+            <Typography variant="subtitle2">
+              We have sent a password reset code to the email address associated
+              with your SCOPE account. The reset code will expire after 1 hour.
+            </Typography>
+            <Typography variant="subtitle2">
+              If you cannot receive this code, or need other help signing in,
+              contact us at &lt;
+              <a href="mailto:scopestudy@uw.edu" target="_blank">
+                scopestudy@uw.edu
+              </a>
+              &gt;.
+            </Typography>
+          </React.Fragment>
+        )}
+        {isUpdate && (
+          <Typography variant="subtitle2">
+            Sign in requires updating your SCOPE password.
           </Typography>
-        </li>
-        <li>
-          <Typography variant="caption">
-            Must contain lowercase letters
-          </Typography>
-        </li>
-        <li>
-          <Typography variant="caption">Must contain digits</Typography>
-        </li>
-        <li>
-          <Typography variant="caption">
-            Must contain symbol characters
-          </Typography>
-        </li>
-        <li>
-          <Typography variant="caption">Must not include spaces</Typography>
-        </li>
-      </ul>
+        )}
+        <Typography variant="subtitle2">
+          Create a password that meets the following criteria:
+        </Typography>
+        <ul style={{ alignSelf: "flex-start", marginTop: 2 }}>
+          {passwordCriteria.map((current, index) => (
+            <Fragment key={index}>
+              <li style={{ marginLeft: "-15px" }}>
+                <Typography
+                  variant="subtitle2"
+                  component="span"
+                  sx={{
+                    color:
+                      passwordGotFocus && !!password.trim() && !current.valid
+                        ? "error.main"
+                        : undefined,
+                    marginBottom: 1,
+                  }}
+                >
+                  {current.description}
+                </Typography>
+              </li>
+            </Fragment>
+          ))}
+        </ul>
+      </Stack>
       <FormControl error={!!error} fullWidth>
+        {isReset && (
+          <TextField
+            label="Reset Code"
+            placeholder="Enter reset code"
+            type="text"
+            fullWidth
+            required
+            variant="standard"
+            margin="normal"
+            value={resetCode}
+            onFocus={() => {
+              setResetCodeHasFocus(true);
+              setResetCodeGotFocus(true);
+            }}
+            onBlur={() => {
+              setResetCodeHasFocus(false);
+            }}
+            onChange={(e) =>
+              setResetCode(
+                // Not allowing spaces
+                e.target.value.trim(),
+              )
+            }
+            InputLabelProps={{
+              shrink: true,
+            }}
+            error={!resetCodeHasFocus && resetCodeGotFocus && !resetCode.trim()}
+          />
+        )}
         <TextField
           label="Password"
           placeholder="Enter password"
@@ -242,6 +484,9 @@ const PasswordUpdateForm: FunctionComponent<{
           variant="standard"
           margin="normal"
           value={password}
+          onFocus={() => {
+            setPasswordGotFocus(true);
+          }}
           onChange={(e) =>
             setPassword(
               // Cognito allows passwords to include an interior space,
@@ -272,17 +517,20 @@ const PasswordUpdateForm: FunctionComponent<{
               </InputAdornment>
             ),
           }}
-          error={!validPassword}
+          error={passwordGotFocus && !!password.trim() && !validPassword}
         />
         <TextField
           label="Confirm Password"
           placeholder="Confirm password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           fullWidth
           required
           variant="standard"
           margin="normal"
           value={passwordRepeat}
+          onFocus={() => {
+            setConfirmPasswordGotFocus(true);
+          }}
           onChange={(e) =>
             setPasswordRepeat(
               // Cognito allows passwords to include an interior space,
@@ -301,14 +549,51 @@ const PasswordUpdateForm: FunctionComponent<{
               onSubmit();
             }
           }}
-          error={!canSubmit}
+          error={
+            confirmPasswordGotFocus &&
+            !!passwordRepeat.trim() &&
+            (!validPassword || password.trim() != passwordRepeat.trim())
+          }
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                {showPassword ? (
+                  <VisibilityIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={togglePassword}
+                  />
+                ) : (
+                  <VisibilityOffIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={togglePassword}
+                  />
+                )}
+              </InputAdornment>
+            ),
+          }}
         />
         {error && (
-          <FormHelperText id="component-error-text" sx={{ lineHeight: 1 }}>
-            {error}
+          <FormHelperText error={true} sx={{ lineHeight: 1 }}>
+            {error == "Invalid verification code provided, please try again."
+              ? "Password reset code incorrect."
+              : error}
           </FormHelperText>
         )}
-        <ButtonContainer>
+        <Stack
+          sx={{ paddingTop: 4 }}
+          direction="row"
+          spacing={2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Button
+            type="button"
+            color="primary"
+            variant="text"
+            onClick={onCancelPasswordChange}
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             color="primary"
@@ -316,9 +601,10 @@ const PasswordUpdateForm: FunctionComponent<{
             onClick={onSubmit}
             disabled={!canSubmit}
           >
-            Update password
+            {isReset && "Reset"}
+            {isUpdate && "Update"}
           </Button>
-        </ButtonContainer>
+        </Stack>
       </FormControl>
     </Fragment>
   );
@@ -328,6 +614,9 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
   (props) => {
     const { authStore } = props;
 
+    const [account, setAccount] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
     const onLogin = (username: string, password: string) => {
       authStore.login(username, password);
     };
@@ -336,15 +625,61 @@ export const Login: FunctionComponent<{ authStore: IAuthStore }> = observer(
       authStore.updateTempPassword(password);
     };
 
+    const onSendResetCode = (username: string) => {
+      authStore.sendResetPasswordCode(username);
+    };
+
+    const onReset = (code: string, password: string) => {
+      authStore.resetPassword(code, password);
+    };
+
     return (
       <Container>
-        {authStore.authState == AuthState.NewPasswordRequired ? (
+        {authStore.authState == AuthState.UpdatePasswordInProgress ||
+        authStore.authState == AuthState.ResetPasswordInProgress ? (
           <PasswordUpdateForm
-            onUpdate={onUpdate}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            onCancelPasswordChange={() => {
+              authStore.authState = AuthState.Initialized;
+              authStore.clearDetail();
+            }}
+            onReset={
+              authStore.authState == AuthState.ResetPasswordInProgress
+                ? onReset
+                : undefined
+            }
+            onUpdate={
+              authStore.authState == AuthState.UpdatePasswordInProgress
+                ? onUpdate
+                : undefined
+            }
+            error={authStore.authStateDetail}
+          />
+        ) : authStore.authState == AuthState.ResetPasswordPrompt ? (
+          <PasswordResetForm
+            account={account}
+            setAccount={setAccount}
+            onCancelResetPassword={() => {
+              authStore.authState = AuthState.Initialized;
+              authStore.clearDetail();
+            }}
+            onSendResetCode={onSendResetCode}
             error={authStore.authStateDetail}
           />
         ) : (
-          <LoginForm onLogin={onLogin} error={authStore.authStateDetail} />
+          <LoginForm
+            account={account}
+            setAccount={setAccount}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            onShowResetPassword={() => {
+              authStore.authState = AuthState.ResetPasswordPrompt;
+              authStore.clearDetail();
+            }}
+            onLogin={onLogin}
+            error={authStore.authStateDetail}
+          />
         )}
       </Container>
     );

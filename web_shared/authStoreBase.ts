@@ -1,5 +1,6 @@
 import {
   AuthenticationDetails,
+  CodeDeliveryDetails,
   CognitoRefreshToken,
   CognitoUser,
   CognitoUserPool,
@@ -20,9 +21,12 @@ import { IAppAuthConfig, IIdentity } from "shared/types";
 
 export enum AuthState {
   Initialized,
-  NewPasswordRequired,
-  Authenticated,
+  UpdatePasswordInProgress,
+  ResetPasswordPrompt,
+  ResetPasswordInProgress,
+  ResetPasswordComplete,
   AuthenticationFailed,
+  Authenticated,
 }
 
 export interface IAuthStoreBase<T extends IIdentity> {
@@ -32,13 +36,18 @@ export interface IAuthStoreBase<T extends IIdentity> {
   authStateDetail?: string;
 
   currentUserIdentity?: T;
+
   initialize: () => void;
   login(username: string, password: string): Promise<void>;
   updateTempPassword(newPassword: string): Promise<void>;
+  sendResetPasswordCode(username: string): Promise<void>;
+  resetPassword(resetCode: string, newPassword: string): Promise<void>;
   refreshToken(): Promise<void>;
   logout(): void;
 
   getToken(): string | undefined;
+
+  clearDetail(): void;
 }
 
 const logger = getLogger("AuthStore");
@@ -49,11 +58,12 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @observable
   public authState = AuthState.Initialized;
 
+  @observable
+  public authStateDetail?: string = undefined;
+
   // Promise queries
   private readonly authQuery: PromiseQuery<T>;
   private readonly sessionQuery: PromiseQuery<CognitoUserSession>;
-
-  private errorDetail = "";
 
   // This is only used to keep state for temp password change
   private authUser?: CognitoUser;
@@ -82,14 +92,6 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @computed
   public get isAuthenticating() {
     return this.authQuery.pending || this.sessionQuery.pending;
-  }
-
-  @computed
-  public get authStateDetail() {
-    return this.authState == AuthState.AuthenticationFailed ||
-      this.authState == AuthState.NewPasswordRequired
-      ? this.errorDetail
-      : undefined;
   }
 
   @action.bound
@@ -148,7 +150,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   public async login(username: string, password: string) {
     // Clear states
     this.authState = AuthState.Initialized;
-    this.errorDetail = "";
+    this.clearDetail();
 
     const authUser = new CognitoUser({
       Username: username,
@@ -175,19 +177,28 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
           });
         }),
         onFailure: action((err: any) => {
-          logger.error(err, { username });
-          runInAction(() => {
-            this.authUser = undefined;
-            this.errorDetail = err.message;
-            this.authState = AuthState.AuthenticationFailed;
-          });
+          if (err.code == "PasswordResetRequiredException") {
+            logger.event("passwordResetRequired", err);
+            runInAction(() => {
+              this.authUser = authUser;
+              this.authStateDetail = err.message;
+              this.authState = AuthState.ResetPasswordInProgress;
+            });
+          } else {
+            logger.error(err, { username });
+            runInAction(() => {
+              this.authUser = undefined;
+              this.authStateDetail = err.message;
+              this.authState = AuthState.AuthenticationFailed;
+            });
+          }
           reject(err);
         }),
         newPasswordRequired: action((data: any) => {
           logger.event("newPasswordRequired", data);
           runInAction(() => {
             this.authUser = authUser;
-            this.authState = AuthState.NewPasswordRequired;
+            this.authState = AuthState.UpdatePasswordInProgress;
           });
           reject("newPasswordRequired");
         }),
@@ -230,7 +241,7 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   @action.bound
   public async updateTempPassword(password: string) {
     // Clear states
-    this.errorDetail = "";
+    this.clearDetail();
 
     const promise = new Promise<CognitoUserSession>((resolve, reject) => {
       this.authUser?.completeNewPasswordChallenge(
@@ -248,12 +259,12 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
               username: this.authUser?.getUsername() || "unknown",
             });
             runInAction(() => {
-              this.errorDetail = err.message;
+              this.authStateDetail = err.message;
 
               this.authState =
                 err.code == "NotAuthorizedException"
                   ? AuthState.AuthenticationFailed
-                  : AuthState.NewPasswordRequired;
+                  : AuthState.UpdatePasswordInProgress;
             });
             reject(err);
           }),
@@ -269,6 +280,91 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
   }
 
   @action.bound
+  public async sendResetPasswordCode(username: string) {
+    // Clear states
+    this.clearDetail();
+
+    const authUser = new CognitoUser({
+      Username: username,
+      Pool: new CognitoUserPool({
+        UserPoolId: this.authConfig.poolid,
+        ClientId: this.authConfig.clientid,
+      }),
+    });
+
+    const promise = new Promise<CognitoUserSession | undefined>(
+      (resolve, reject) => {
+        authUser.forgotPassword({
+          onSuccess: action((data: any) => {
+            const deliveryDetails =
+              data.CodeDeliveryDetails as CodeDeliveryDetails;
+            logger.event("onForgotPasswordSuccess", {
+              ...deliveryDetails,
+            });
+
+            runInAction(() => {
+              this.authUser = authUser;
+              this.authState = AuthState.ResetPasswordInProgress;
+            });
+            resolve(undefined);
+          }),
+          onFailure: action((err: any) => {
+            logger.error(err);
+            runInAction(() => {
+              this.authStateDetail = err.message;
+            });
+            reject(err);
+          }),
+        });
+      },
+    );
+
+    const loadAndLogQuery = getLoadAndLogQuery(logger);
+    await loadAndLogQuery(() => promise, this.sessionQuery);
+  }
+
+  @action.bound
+  public async resetPassword(resetCode: string, password: string) {
+    // Clear states
+    this.clearDetail();
+
+    const promise = new Promise<CognitoUserSession | undefined>(
+      (resolve, reject) => {
+        this.authUser?.confirmPassword(resetCode, password, {
+          onSuccess: action((success: string) => {
+            logger.event("onResetPasswordSuccess", {
+              username: this.authUser?.getUsername() || "unknown",
+              success,
+            });
+
+            this.authStateDetail =
+              "Reset successful. Sign in using the new password.";
+            this.authState = AuthState.ResetPasswordComplete;
+            resolve(undefined);
+          }),
+          onFailure: action((err: any) => {
+            logger.error(err, {
+              username: this.authUser?.getUsername() || "unknown",
+            });
+            runInAction(() => {
+              this.authStateDetail = err.message;
+
+              this.authState =
+                err.code == "NotAuthorizedException"
+                  ? AuthState.AuthenticationFailed
+                  : AuthState.ResetPasswordInProgress;
+            });
+            reject(err);
+          }),
+        });
+      },
+    );
+
+    const loadAndLogQuery = getLoadAndLogQuery(logger);
+    await loadAndLogQuery(() => promise, this.sessionQuery);
+  }
+
+  @action.bound
   public logout() {
     window.localStorage.clear();
     this.authUser?.signOut();
@@ -276,6 +372,11 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
     this.authUser = undefined;
 
     logger.event("UserLoggedOut", { ...this.authQuery.value });
+  }
+
+  @action.bound
+  public clearDetail() {
+    this.authStateDetail = undefined;
   }
 
   private getIdentityFromSession(promise: Promise<CognitoUserSession>) {
@@ -315,9 +416,9 @@ export class AuthStoreBase<T extends IIdentity> implements IAuthStoreBase<T> {
 
           runInAction(() => {
             this.authState = AuthState.AuthenticationFailed;
-            this.errorDetail = unauthorized
-              ? "Sorry, you are not authorized to access this service"
-              : "Sorry, there was an issue accessing the service";
+            this.authStateDetail = unauthorized
+              ? "Sorry, you are not authorized to access this service."
+              : "Sorry, there was an issue accessing the service.";
           });
         }
       });
