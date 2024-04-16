@@ -158,7 +158,9 @@ const LoginForm: FunctionComponent<{
               ? "Account incorrect."
               : error == "Incorrect username or password."
                 ? "Password incorrect."
-                : error}
+                : error == "Password attempts exceeded"
+                  ? "Password attempt limit exceeded. Try again later."
+                  : error}
           </FormHelperText>
         )}
         <Stack
