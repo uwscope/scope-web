@@ -14,6 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortAssessmentLogsByDate,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
@@ -72,6 +73,8 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly assessmentLogsSortedByDate: IAssessmentLog[];
+  readonly assessmentLogsSortedByDateDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
   readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
   readonly caseReviewsOrSessionsSortedByDateDescending: (
@@ -275,6 +278,14 @@ export class PatientStore implements IPatientStore {
 
   @computed get assessmentLogs() {
     return this.loadAssessmentLogsQuery.value || [];
+  }
+
+  @computed get assessmentLogsSortedByDate() {
+    return sortAssessmentLogsByDate(this.assessmentLogs);
+  }
+
+  @computed get assessmentLogsSortedByDateDescending() {
+    return sortAssessmentLogsByDate(this.assessmentLogs, SortDirection.DESCENDING,);
   }
 
   @computed get identity() {
@@ -840,10 +851,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-            name: patientProfile.primaryCareManager?.name,
-            providerId: patientProfile.primaryCareManager?.providerId,
-            role: patientProfile.primaryCareManager?.role,
-          }
+          name: patientProfile.primaryCareManager?.name,
+          providerId: patientProfile.primaryCareManager?.providerId,
+          role: patientProfile.primaryCareManager?.role,
+        }
         : undefined,
     });
 

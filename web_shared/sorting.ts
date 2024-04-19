@@ -3,6 +3,7 @@ import { toLocalDateTime } from "shared/time";
 import {
   IActivity,
   IActivitySchedule,
+  IAssessmentLog,
   ICaseReview,
   ISession,
 } from "shared/types";
@@ -19,13 +20,13 @@ export const sortingDirectionComparator: <T>(
   comparator,
   sortingDirection,
 ) {
-  switch (sortingDirection) {
-    case SortDirection.ASCENDING:
-      return comparator;
-    case SortDirection.DESCENDING:
-      return (compareA, compareB) => comparator(compareB, compareA);
-  }
-};
+    switch (sortingDirection) {
+      case SortDirection.ASCENDING:
+        return comparator;
+      case SortDirection.DESCENDING:
+        return (compareA, compareB) => comparator(compareB, compareA);
+    }
+  };
 
 export const compareActivityByName: (
   compareA: IActivity,
@@ -42,6 +43,13 @@ export const compareActivityScheduleByDateAndTime: (
   const compareDateB = toLocalDateTime(compareB.date, compareB.timeOfDay);
 
   return compareAsc(compareDateA, compareDateB);
+};
+
+export const compareAssessmentLogsByDate: (
+  compareA: IAssessmentLog,
+  compareB: IAssessmentLog,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
 export const compareCaseReviewsByDate: (
@@ -86,6 +94,16 @@ export const sortActivitySchedulesByDateAndTime: (
   return activitySchedules.slice().sort(compareActivityScheduleByDateAndTime);
 };
 
+export const sortAssessmentLogsByDate: (
+  assessmentLogs: IAssessmentLog[],
+  sortingDirection?: SortDirection,
+) => IAssessmentLog[] = function (assessmentLogs, sortingDirection = SortDirection.ASCENDING,) {
+  return assessmentLogs.slice().sort(sortingDirectionComparator(
+    compareAssessmentLogsByDate,
+    sortingDirection,
+  ),);
+};
+
 export const sortCaseReviewsByDate: (
   caseReviews: ICaseReview[],
 ) => ICaseReview[] = function (caseReviews) {
@@ -99,15 +117,15 @@ export const sortCaseReviewsOrSessionsByDate: (
   caseReviewsOrSessions,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return caseReviewsOrSessions
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareCaseReviewsOrSessionsByDate,
-        sortingDirection,
-      ),
-    );
-};
+    return caseReviewsOrSessions
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareCaseReviewsOrSessionsByDate,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
   function (sessions) {

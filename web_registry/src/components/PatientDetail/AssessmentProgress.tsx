@@ -16,7 +16,7 @@ import {
 import withTheme from "@mui/styles/withTheme";
 import { GridCellParams, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { compareAsc, format } from "date-fns";
-import compareDesc from "date-fns/compareDesc";
+//import compareDesc from "date-fns/compareDesc";
 import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import {
@@ -236,7 +236,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
 
     const tableData = assessmentLogs
       .slice()
-      .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime))
+      // .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime))
       .map((a) => {
         return {
           date: format(a.recordedDateTime, "MM/dd/yy"),
