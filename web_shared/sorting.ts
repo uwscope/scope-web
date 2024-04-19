@@ -20,13 +20,13 @@ export const sortingDirectionComparator: <T>(
   comparator,
   sortingDirection,
 ) {
-    switch (sortingDirection) {
-      case SortDirection.ASCENDING:
-        return comparator;
-      case SortDirection.DESCENDING:
-        return (compareA, compareB) => comparator(compareB, compareA);
-    }
-  };
+  switch (sortingDirection) {
+    case SortDirection.ASCENDING:
+      return comparator;
+    case SortDirection.DESCENDING:
+      return (compareA, compareB) => comparator(compareB, compareA);
+  }
+};
 
 export const compareActivityByName: (
   compareA: IActivity,
@@ -97,11 +97,15 @@ export const sortActivitySchedulesByDateAndTime: (
 export const sortAssessmentLogsByDate: (
   assessmentLogs: IAssessmentLog[],
   sortingDirection?: SortDirection,
-) => IAssessmentLog[] = function (assessmentLogs, sortingDirection = SortDirection.ASCENDING,) {
-  return assessmentLogs.slice().sort(sortingDirectionComparator(
-    compareAssessmentLogsByDate,
-    sortingDirection,
-  ),);
+) => IAssessmentLog[] = function (
+  assessmentLogs,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return assessmentLogs
+    .slice()
+    .sort(
+      sortingDirectionComparator(compareAssessmentLogsByDate, sortingDirection),
+    );
 };
 
 export const sortCaseReviewsByDate: (
@@ -117,15 +121,15 @@ export const sortCaseReviewsOrSessionsByDate: (
   caseReviewsOrSessions,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-    return caseReviewsOrSessions
-      .slice()
-      .sort(
-        sortingDirectionComparator(
-          compareCaseReviewsOrSessionsByDate,
-          sortingDirection,
-        ),
-      );
-  };
+  return caseReviewsOrSessions
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareCaseReviewsOrSessionsByDate,
+        sortingDirection,
+      ),
+    );
+};
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
   function (sessions) {

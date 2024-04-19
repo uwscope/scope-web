@@ -285,7 +285,10 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get assessmentLogsSortedByDateDescending() {
-    return sortAssessmentLogsByDate(this.assessmentLogs, SortDirection.DESCENDING,);
+    return sortAssessmentLogsByDate(
+      this.assessmentLogs,
+      SortDirection.DESCENDING,
+    );
   }
 
   @computed get identity() {
@@ -851,10 +854,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
