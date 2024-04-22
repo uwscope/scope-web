@@ -3,6 +3,7 @@ import ActivityProgressImageSrc from "src/assets/activity_pencil.png";
 import GadAssessmentImageSrc from "src/assets/assessment_gad7_anxiety.png";
 import PhqAssessmentImageSrc from "src/assets/assessment_phq9_depression.png";
 import CrisisResourcesImageSrc from "src/assets/crisis_resources_icon.png";
+import HowToVideosImageSrc from "src/assets/how_to_videos_icon.png";
 import LogoutImageSrc from "src/assets/log_out_icon.png";
 import MissingImageSrc from "src/assets/missingimage.png";
 import MoodLoggingImageSrc from "src/assets/mood_smiley.png";
@@ -15,6 +16,7 @@ const _images = {
   Home_safety_button_image: MySafetyPlanImageSrc,
   Home_mood_button_image: MoodLoggingImageSrc,
   Resources_values_button_image: MyValuesInventoryImageSrc,
+  Resources_howtovideos_button_image: HowToVideosImageSrc,
   Resources_safety_button_image: MySafetyPlanImageSrc,
   Resources_worksheets_button_image: MyWorksheetsImageSrc,
   Resources_about_us_button_image: AboutUsImageSrc,
