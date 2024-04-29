@@ -74,8 +74,8 @@ const LoginForm: FunctionComponent<{
       <h2>Welcome!</h2>
       <FormControl error={!!error} fullWidth>
         <TextField
-          label="Account"
-          placeholder="Enter account"
+          label="Username"
+          placeholder="Enter username"
           fullWidth
           required
           margin="normal"
@@ -155,11 +155,11 @@ const LoginForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "User does not exist."
-              ? "Account incorrect."
+              ? "Username incorrect."
               : error == "Incorrect username or password."
-                ? "Password incorrect."
+                ? "Username incorrect."
                 : error == "Password attempts exceeded"
-                  ? "Password attempt limit exceeded. Try again later."
+                  ? "Username attempt limit exceeded. Try again later."
                   : error}
           </FormHelperText>
         )}
@@ -216,8 +216,8 @@ const PasswordResetForm: FunctionComponent<{
         alignItems="flex-start"
       >
         <Typography variant="subtitle2">
-          To reset your password, enter your SCOPE account below. We will send a
-          password reset code to the email address associated with that account.
+          To reset your password, enter your SCOPE username below. We will send a
+          password reset code to the email address associated with that username.
         </Typography>
         <Typography variant="subtitle2">
           If you cannot receive this code, or need other help signing in,
@@ -230,8 +230,8 @@ const PasswordResetForm: FunctionComponent<{
       </Stack>
       <FormControl error={!!error} fullWidth>
         <TextField
-          label="Account"
-          placeholder="Enter account"
+          label="Username"
+          placeholder="Enter username"
           fullWidth
           required
           margin="normal"
@@ -255,7 +255,7 @@ const PasswordResetForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "Username/client id combination not found."
-              ? "Account incorrect."
+              ? "Username incorrect."
               : error == "Attempt limit exceeded, please try after some time."
                 ? "Reset attempt limit exceeded. Try again later."
                 : error == "User password cannot be reset in the current state."
@@ -405,7 +405,7 @@ const PasswordUpdateForm: FunctionComponent<{
           <React.Fragment>
             <Typography variant="subtitle2">
               We have sent a password reset code to the email address associated
-              with your SCOPE account. The reset code will expire after 1 hour.
+              with your SCOPE username. The reset code will expire after 1 hour.
             </Typography>
             <Typography variant="subtitle2">
               If you cannot receive this code, or need other help signing in,
