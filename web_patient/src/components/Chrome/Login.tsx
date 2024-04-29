@@ -216,8 +216,9 @@ const PasswordResetForm: FunctionComponent<{
         alignItems="flex-start"
       >
         <Typography variant="subtitle2">
-          To reset your password, enter your SCOPE username below. We will send a
-          password reset code to the email address associated with that username.
+          To reset your password, enter your SCOPE username below. We will send
+          a password reset code to the email address associated with that
+          username.
         </Typography>
         <Typography variant="subtitle2">
           If you cannot receive this code, or need other help signing in,
