@@ -2,8 +2,7 @@ import React, { FunctionComponent } from "react";
 
 import { Grid, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
-import { compareAsc, format } from "date-fns";
-import compareDesc from "date-fns/compareDesc";
+import { format } from "date-fns";
 import { observer } from "mobx-react";
 import { IAssessment, IMoodLog } from "shared/types";
 import ActionPanel from "src/components/common/ActionPanel";
@@ -15,7 +14,8 @@ import { usePatient, useStores } from "src/stores/stores";
 export interface IMoodProgressProps {
   assessment: IAssessment;
   maxValue: number;
-  moodLogs: IMoodLog[];
+  moodLogsSortedByDate: IMoodLog[];
+  moodLogsSortedByDateDescending: IMoodLog[];
 }
 
 export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
@@ -23,17 +23,18 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
     const currentPatient = usePatient();
     const rootStore = useStores();
 
-    const { moodLogs, assessment, maxValue } = props;
+    const {
+      moodLogsSortedByDate,
+      moodLogsSortedByDateDescending,
+      assessment,
+      maxValue,
+    } = props;
 
     const assessmentContent = rootStore.getAssessmentContent(
       assessment.assessmentId,
     );
 
-    const sortedMoodLogs = moodLogs
-      ?.slice()
-      .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
-
-    const tableData = sortedMoodLogs?.map((a) => {
+    const tableData = moodLogsSortedByDateDescending?.map((a) => {
       return {
         date: format(a.recordedDateTime, "MM/dd/yy"),
         time: format(a.recordedDateTime, "hh:mm aa"),
@@ -95,7 +96,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
         error={currentPatient?.loadMoodLogsState.error}
       >
         <Grid container alignItems="stretch">
-          {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
+          {!!moodLogsSortedByDate && moodLogsSortedByDate.length > 0 && (
             <Table
               rows={tableData}
               columns={columns.map((c) => ({
@@ -112,24 +113,19 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
               pagination
             />
           )}
-          {!!sortedMoodLogs && sortedMoodLogs.length > 0 && (
+          {!!moodLogsSortedByDate && moodLogsSortedByDate.length > 0 && (
             <Grid item xs={12}>
               <AssessmentVis
-                data={moodLogs
-                  .slice()
-                  .sort((a, b) =>
-                    compareAsc(a.recordedDateTime, b.recordedDateTime),
-                  )
-                  .map((log) => ({
-                    recordedDateTime: log.recordedDateTime,
-                    pointValues: { Mood: log.mood },
-                  }))}
+                data={moodLogsSortedByDate.map((log) => ({
+                  recordedDateTime: log.recordedDateTime,
+                  pointValues: { Mood: log.mood },
+                }))}
                 maxValue={maxValue}
                 useTime={true}
               />
             </Grid>
           )}
-          {(!sortedMoodLogs || sortedMoodLogs.length == 0) && (
+          {(!moodLogsSortedByDate || moodLogsSortedByDate.length == 0) && (
             <Grid item xs={12}>
               <Typography>
                 {getString("patient_progress_mood_empty")}
