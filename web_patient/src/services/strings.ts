@@ -310,8 +310,7 @@ const _strings = {
   Resources_crisis_resources_title: "Crisis Help",
   Resources_crisis_resources_subtitle: "Crisis resources and hotlines",
   Resources_howtovideos_title: "Introductory/Howto Videos",
-  Resources_howtodovideos_subtitle:
-    "Learn about how to use this app",
+  Resources_howtodovideos_subtitle: "Learn about how to use this app",
   Resources_logout_title: "Sign Out",
   Resources_logout_subtitle: "Sign out of the app",
 
