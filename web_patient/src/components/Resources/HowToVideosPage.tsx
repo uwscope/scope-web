@@ -190,7 +190,7 @@ export const HowToVideosPage: FunctionComponent = () => {
         </React.Fragment>
       ))}
       {/* This is needed to make the video work */}
-      <script src="https://player.vimeo.com/api/player.js"></script>{" "}
+      <script src="https://player.vimeo.com/api/player.js"></script>
     </DetailPage>
   );
 };
