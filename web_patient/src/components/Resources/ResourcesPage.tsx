@@ -51,6 +51,18 @@ export const ResourcesPage: FunctionComponent = () => {
             alignItems="flex-start"
             disableGutters={true}
             component={Link}
+            to={Routes.howtovideos}
+          >
+            <ListCard
+              title={getString("Resources_howtovideos_title")}
+              subtitle={getString("Resources_howtodovideos_subtitle")}
+              imageSrc={getImage("Resources_howtovideos_button_image")}
+            />
+          </ListItem>
+          <ListItem
+            alignItems="flex-start"
+            disableGutters={true}
+            component={Link}
             to={getFormPath(ParameterValues.form.safetyPlan)}
           >
             <ListCard
