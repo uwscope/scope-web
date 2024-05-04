@@ -9,40 +9,42 @@ import { DetailPage } from "src/components/common/DetailPage";
 import { getString } from "src/services/strings";
 import styled from "styled-components";
 
-export interface IVideo {
+interface IVideo {
   videoTitle: string;
   videoUrl: string;
 }
 
-export interface IScreen {
+interface IVideoGroup {
   screenTitle: string;
   screenVideos: IVideo[];
 }
 
-export interface IHowToVideosPageState {
-  mainVideoTitle: string;
-  mainVideoUrl: string;
-  screens: IScreen[];
+interface IIntroductoryVideos {
+  groups: IVideoGroup[];
 }
 
-const getHowToVideosPageState = () =>
+const getIntroductoryVideosPageState = () =>
   ({
-    mainVideoTitle: "Introduction to the SCOPE App",
-    mainVideoUrl:
-      "https://player.vimeo.com/video/914972830?h=33273f2aec&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
-    screens: [
+    groups: [
+      {
+        screenTitle: "Introduction",
+        screenVideos: [
+          {
+            videoTitle: "The SCOPE App",
+            videoUrl: "https://player.vimeo.com/video/914972830?h=33273f2aec",
+          },
+        ],
+      },
       {
         screenTitle: "Home Screen",
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl:
-              "https://player.vimeo.com/video/915380014?h=4a48066509&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/915380014?h=4a48066509",
           },
           {
             videoTitle: "Your Plan for the Day",
-            videoUrl:
-              "https://player.vimeo.com/video/915381092?h=d7086e3c14&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/915381092?h=d7086e3c14",
           },
         ],
       },
@@ -51,13 +53,11 @@ const getHowToVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl:
-              "https://player.vimeo.com/video/915383443?h=566180773e&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/915383443?h=566180773e",
           },
           {
             videoTitle: "Your Values & Activities Inventory",
-            videoUrl:
-              "https://player.vimeo.com/video/915383866?h=1dcb2b203e&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/915383866?h=1dcb2b203e",
           },
         ],
       },
@@ -66,13 +66,11 @@ const getHowToVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl:
-              "https://player.vimeo.com/video/916144650?h=62540f2b85&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/916144650?h=62540f2b85",
           },
           {
             videoTitle: "Updating Your Activities",
-            videoUrl:
-              "https://player.vimeo.com/video/916145231?h=cd5411fc7a&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/916145231?h=cd5411fc7a",
           },
         ],
       },
@@ -81,18 +79,16 @@ const getHowToVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl:
-              "https://player.vimeo.com/video/916145616?h=0d5efd9c97&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/916145616?h=0d5efd9c97",
           },
           {
             videoTitle: "Tracking Your Progress",
-            videoUrl:
-              "https://player.vimeo.com/video/916146002?h=fdd65f0f53&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479",
+            videoUrl: "https://player.vimeo.com/video/916146002?h=fdd65f0f53",
           },
         ],
       },
     ],
-  }) as IHowToVideosPageState;
+  }) as IIntroductoryVideos;
 
 export const HeaderText = withTheme(
   styled.div((props) => ({
@@ -110,7 +106,6 @@ const IFrameDiv = styled.div({
 });
 
 const IFrame = styled.iframe({
-  allow: "autoplay; fullscreen; picture-in-picture; clipboard-write",
   position: "absolute",
   top: 0,
   left: 0,
@@ -119,13 +114,25 @@ const IFrame = styled.iframe({
   border: 0,
 });
 
+const iframeAllow: string = "fullscreen";
+
+const playerOptions: string =
+  "&" +
+  [
+    "byline=false",
+    "dnt=true",
+    "pip=false",
+    "playsinline=false",
+    "title=false",
+  ].join("&");
+
 export const HowToVideosPage: FunctionComponent = () => {
   const navigate = useNavigate();
 
-  // Default value of expanded is "main-panel" which is the Introduction to the SCOPE App video.
-  const [expanded, setExpanded] = React.useState<string | false>("main-panel");
+  // Initially, no video is expanded.
+  const [expanded, setExpanded] = React.useState<string | false>("none");
 
-  const data = getHowToVideosPageState();
+  const data = getIntroductoryVideosPageState();
 
   const handleChange =
     (panel: string) => (_event: React.SyntheticEvent, newExpanded: boolean) => {
@@ -141,46 +148,28 @@ export const HowToVideosPage: FunctionComponent = () => {
       title={getString("Resources_howtovideos_title")}
       onBack={handleGoBack}
     >
-      <Accordion
-        expanded={expanded === `main-panel`}
-        onChange={handleChange(`main-panel`)}
-      >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          {data.mainVideoTitle}
-        </AccordionSummary>
-        <AccordionDetails>
-          <IFrameDiv>
-            <IFrame
-              src={data.mainVideoUrl}
-              title={data.mainVideoTitle}
-            ></IFrame>
-          </IFrameDiv>
-        </AccordionDetails>
-      </Accordion>
-      {data.screens.map((screen, screenIdx) => (
+      {data.groups.map((screen, screenIdx) => (
         <React.Fragment key={screenIdx}>
           <HeaderText>{screen.screenTitle}</HeaderText>
           {screen.screenVideos.map((video, videoIdx) => (
             <Accordion
               key={videoIdx}
-              expanded={expanded === `panel-${screenIdx + 1}-${videoIdx + 1}`}
-              onChange={handleChange(`panel-${screenIdx + 1}-${videoIdx + 1}`)}
+              disableGutters
+              expanded={expanded === `panel-${screenIdx}-${videoIdx}`}
+              onChange={handleChange(`panel-${screenIdx}-${videoIdx}`)}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel-${screenIdx + 1}-${videoIdx + 1}-content`}
-                id={`panel-${screenIdx + 1}-${videoIdx + 1}-header`}
+                aria-controls={`panel-${screenIdx}-${videoIdx}-content`}
+                id={`panel-${screenIdx}-${videoIdx}-header`}
               >
                 {video.videoTitle}
               </AccordionSummary>
-              <AccordionDetails>
+              <AccordionDetails sx={{ padding: 0 }}>
                 <IFrameDiv>
                   <IFrame
-                    src={video.videoUrl}
+                    allow={iframeAllow}
+                    src={video.videoUrl + playerOptions}
                     title={video.videoTitle}
                   ></IFrame>
                 </IFrameDiv>
@@ -189,7 +178,7 @@ export const HowToVideosPage: FunctionComponent = () => {
           ))}
         </React.Fragment>
       ))}
-      {/* This is needed to make the video work */}
+      {/* This is needed for the video player */}
       <script src="https://player.vimeo.com/api/player.js"></script>
     </DetailPage>
   );
