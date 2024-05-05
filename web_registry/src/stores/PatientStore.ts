@@ -14,7 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
-  sortAssessmentLogsByDate,
+  sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
@@ -73,8 +73,8 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
-  readonly assessmentLogsSortedByDate: IAssessmentLog[];
-  readonly assessmentLogsSortedByDateDescending: IAssessmentLog[];
+  readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
+  readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
   readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
   readonly caseReviewsOrSessionsSortedByDateDescending: (
@@ -280,12 +280,12 @@ export class PatientStore implements IPatientStore {
     return this.loadAssessmentLogsQuery.value || [];
   }
 
-  @computed get assessmentLogsSortedByDate() {
-    return sortAssessmentLogsByDate(this.assessmentLogs);
+  @computed get assessmentLogsSortedByDateAndTime() {
+    return sortAssessmentLogsByDateAndTime(this.assessmentLogs);
   }
 
-  @computed get assessmentLogsSortedByDateDescending() {
-    return sortAssessmentLogsByDate(
+  @computed get assessmentLogsSortedByDateAndTimeDescending() {
+    return sortAssessmentLogsByDateAndTime(
       this.assessmentLogs,
       SortDirection.DESCENDING,
     );

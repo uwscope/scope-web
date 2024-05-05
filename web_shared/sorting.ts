@@ -45,7 +45,7 @@ export const compareActivityScheduleByDateAndTime: (
   return compareAsc(compareDateA, compareDateB);
 };
 
-export const compareAssessmentLogsByDate: (
+export const compareAssessmentLogsByDateAndTime: (
   compareA: IAssessmentLog,
   compareB: IAssessmentLog,
 ) => number = function (compareA, compareB): number {
@@ -94,7 +94,7 @@ export const sortActivitySchedulesByDateAndTime: (
   return activitySchedules.slice().sort(compareActivityScheduleByDateAndTime);
 };
 
-export const sortAssessmentLogsByDate: (
+export const sortAssessmentLogsByDateAndTime: (
   assessmentLogs: IAssessmentLog[],
   sortingDirection?: SortDirection,
 ) => IAssessmentLog[] = function (
@@ -104,7 +104,7 @@ export const sortAssessmentLogsByDate: (
   return assessmentLogs
     .slice()
     .sort(
-      sortingDirectionComparator(compareAssessmentLogsByDate, sortingDirection),
+      sortingDirectionComparator(compareAssessmentLogsByDateAndTime, sortingDirection),
     );
 };
 
