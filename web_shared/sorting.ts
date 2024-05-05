@@ -104,7 +104,10 @@ export const sortAssessmentLogsByDateAndTime: (
   return assessmentLogs
     .slice()
     .sort(
-      sortingDirectionComparator(compareAssessmentLogsByDateAndTime, sortingDirection),
+      sortingDirectionComparator(
+        compareAssessmentLogsByDateAndTime,
+        sortingDirection,
+      ),
     );
 };
 
