@@ -80,7 +80,10 @@ export const ProgressInformation: FunctionComponent = observer(() => {
             <MoodProgress
               assessment={assessment}
               maxValue={assessmentMax}
-              moodLogs={currentPatient?.moodLogs || []}
+              moodLogsSortedByDate={currentPatient?.moodLogsSortedByDate || []}
+              moodLogsSortedByDateDescending={
+                currentPatient?.moodLogsSortedByDateDescending || []
+              }
             />
           </Grid>
         );
