@@ -35,9 +35,14 @@ export const ProgressInformation: FunctionComponent = observer(() => {
         assigned: false,
       } as IAssessment);
 
-    const assessmentLogs = currentPatient?.assessmentLogs.filter(
-      (l) => l.assessmentId == assessmentId,
-    );
+    const assessmentLogsSortedByDateAndTime =
+      currentPatient?.assessmentLogsSortedByDateAndTime.filter(
+        (l) => l.assessmentId == assessmentId,
+      );
+    const assessmentLogsSortedByDateAndTimeDescending =
+      currentPatient?.assessmentLogsSortedByDateAndTimeDescending.filter(
+        (l) => l.assessmentId == assessmentId,
+      );
 
     // if (!!assessment) {
     switch (assessmentId) {
@@ -47,7 +52,10 @@ export const ProgressInformation: FunctionComponent = observer(() => {
           <Grid item xs={12} sm={12} key={assessmentId}>
             <AssessmentProgress
               assessment={assessment}
-              assessmentLogs={assessmentLogs}
+              assessmentLogsSortedByDate={assessmentLogsSortedByDateAndTime}
+              assessmentLogsSortedByDateDescending={
+                assessmentLogsSortedByDateAndTimeDescending
+              }
               assessmentName={assessmentContent.name}
               instruction={assessmentContent.instruction}
               questions={assessmentContent.questions}
@@ -62,7 +70,7 @@ export const ProgressInformation: FunctionComponent = observer(() => {
           <Grid item xs={12} sm={12} key={assessmentId}>
             <MedicationProgress
               assessment={assessment}
-              assessmentLogs={assessmentLogs}
+              assessmentLogs={assessmentLogsSortedByDateAndTime}
             />
           </Grid>
         );

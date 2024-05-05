@@ -14,6 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
@@ -72,6 +73,8 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
+  readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
   readonly caseReviewsOrSessionsSortedByDate: (ICaseReview | ISession)[];
   readonly caseReviewsOrSessionsSortedByDateDescending: (
@@ -84,6 +87,7 @@ export interface IPatientStore extends IPatient {
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
@@ -275,6 +279,17 @@ export class PatientStore implements IPatientStore {
 
   @computed get assessmentLogs() {
     return this.loadAssessmentLogsQuery.value || [];
+  }
+
+  @computed get assessmentLogsSortedByDateAndTime() {
+    return sortAssessmentLogsByDateAndTime(this.assessmentLogs);
+  }
+
+  @computed get assessmentLogsSortedByDateAndTimeDescending() {
+    return sortAssessmentLogsByDateAndTime(
+      this.assessmentLogs,
+      SortDirection.DESCENDING,
+    );
   }
 
   @computed get identity() {
@@ -483,6 +498,12 @@ export class PatientStore implements IPatientStore {
     return this.activities.filter((current) => {
       return !current.valueId;
     });
+  }
+
+  public getAssessmentLogById(assessmentLogId: string) {
+    return this.assessmentLogs.find(
+      (current) => current.assessmentLogId == assessmentLogId,
+    );
   }
 
   public getCaseReviewById(caseReviewId: string) {

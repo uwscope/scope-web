@@ -15,8 +15,7 @@ import {
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
 import { GridCellParams, GridColDef, GridRowParams } from "@mui/x-data-grid";
-import { compareAsc, format } from "date-fns";
-import compareDesc from "date-fns/compareDesc";
+import { format } from "date-fns";
 import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import {
@@ -81,7 +80,8 @@ export interface IAssessmentProgressProps {
   options: { text: string; value: number }[];
   maxValue: number;
   assessment: IAssessment;
-  assessmentLogs: IAssessmentLog[];
+  assessmentLogsSortedByDate: IAssessmentLog[];
+  assessmentLogsSortedByDateDescending: IAssessmentLog[];
   canAdd?: boolean;
   useTime?: boolean;
 }
@@ -99,7 +99,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       options,
       assessment,
       assessmentName,
-      assessmentLogs,
+      assessmentLogsSortedByDate,
+      assessmentLogsSortedByDateDescending,
       maxValue,
       canAdd,
       useTime,
@@ -234,18 +235,15 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
 
     const questionIds = questions.map((q) => q.id);
 
-    const tableData = assessmentLogs
-      .slice()
-      .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime))
-      .map((a) => {
-        return {
-          date: format(a.recordedDateTime, "MM/dd/yy"),
-          total: getAssessmentScoreFromAssessmentLog(a),
-          id: a.assessmentLogId,
-          ...a.pointValues,
-          comment: a.comment,
-        };
-      });
+    const tableData = assessmentLogsSortedByDateDescending.map((a) => {
+      return {
+        date: format(a.recordedDateTime, "MM/dd/yy"),
+        total: getAssessmentScoreFromAssessmentLog(a),
+        id: a.assessmentLogId,
+        ...a.pointValues,
+        comment: a.comment,
+      };
+    });
 
     const recurrence =
       assessment.assigned && assessment.assignedDateTime
@@ -309,7 +307,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
 
     const onRowClick = action((param: GridRowParams) => {
       const id = param.row["id"] as string;
-      const data = assessmentLogs.find((a) => a.assessmentLogId == id);
+      const data = currentPatient.getAssessmentLogById(id);
       if (!!data) {
         logState.openEdit = true;
         logState.log = { ...data };
@@ -376,39 +374,36 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
           )}
       >
         <Grid container alignItems="stretch">
-          {assessment.assessmentId != "mood" && assessmentLogs.length > 0 && (
-            <Table
-              rows={tableData}
-              columns={columns.map((c) => ({
-                sortable: false,
-                filterable: false,
-                editable: false,
-                hideSortIcons: true,
-                disableColumnMenu: true,
-                ...c,
-              }))}
-              headerHeight={36}
-              autoHeight={true}
-              onRowClick={onRowClick}
-              isRowSelectable={() => false}
-              pagination
-            />
-          )}
-          {assessmentLogs.length > 0 && (
+          {assessment.assessmentId != "mood" &&
+            assessmentLogsSortedByDate.length > 0 && (
+              <Table
+                rows={tableData}
+                columns={columns.map((c) => ({
+                  sortable: false,
+                  filterable: false,
+                  editable: false,
+                  hideSortIcons: true,
+                  disableColumnMenu: true,
+                  ...c,
+                }))}
+                headerHeight={36}
+                autoHeight={true}
+                onRowClick={onRowClick}
+                isRowSelectable={() => false}
+                pagination
+              />
+            )}
+          {assessmentLogsSortedByDate.length > 0 && (
             <Grid item xs={12}>
               <AssessmentVis
-                data={assessmentLogs
-                  .slice()
-                  .sort((a, b) =>
-                    compareAsc(a.recordedDateTime, b.recordedDateTime),
-                  )}
+                data={assessmentLogsSortedByDate}
                 maxValue={maxValue}
                 useTime={useTime}
                 scaleOrder={questions.map((q) => q.id)}
               />
             </Grid>
           )}
-          {assessmentLogs.length == 0 && (
+          {assessmentLogsSortedByDate.length == 0 && (
             <Grid item xs={12}>
               <Typography>{`There are no ${assessmentName} scores submitted for this patient`}</Typography>
             </Grid>
