@@ -3,6 +3,7 @@ import { toLocalDateTime } from "shared/time";
 import {
   IActivity,
   IActivitySchedule,
+  IAssessmentLog,
   ICaseReview,
   ISession,
 } from "shared/types";
@@ -42,6 +43,13 @@ export const compareActivityScheduleByDateAndTime: (
   const compareDateB = toLocalDateTime(compareB.date, compareB.timeOfDay);
 
   return compareAsc(compareDateA, compareDateB);
+};
+
+export const compareAssessmentLogsByDate: (
+  compareA: IAssessmentLog,
+  compareB: IAssessmentLog,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
 export const compareCaseReviewsByDate: (
@@ -84,6 +92,20 @@ export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
 ) => IActivitySchedule[] = function (activitySchedules) {
   return activitySchedules.slice().sort(compareActivityScheduleByDateAndTime);
+};
+
+export const sortAssessmentLogsByDate: (
+  assessmentLogs: IAssessmentLog[],
+  sortingDirection?: SortDirection,
+) => IAssessmentLog[] = function (
+  assessmentLogs,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return assessmentLogs
+    .slice()
+    .sort(
+      sortingDirectionComparator(compareAssessmentLogsByDate, sortingDirection),
+    );
 };
 
 export const sortCaseReviewsByDate: (
