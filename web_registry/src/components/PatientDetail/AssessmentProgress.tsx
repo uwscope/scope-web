@@ -307,9 +307,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
 
     const onRowClick = action((param: GridRowParams) => {
       const id = param.row["id"] as string;
-      const data = assessmentLogsSortedByDate.find(
-        (a) => a.assessmentLogId == id,
-      );
+      const data = currentPatient.getAssessmentLogById(id);
       if (!!data) {
         logState.openEdit = true;
         logState.log = { ...data };

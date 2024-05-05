@@ -87,6 +87,7 @@ export interface IPatientStore extends IPatient {
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
@@ -497,6 +498,12 @@ export class PatientStore implements IPatientStore {
     return this.activities.filter((current) => {
       return !current.valueId;
     });
+  }
+
+  public getAssessmentLogById(assessmentLogId: string) {
+    return this.assessmentLogs.find(
+      (current) => current.assessmentLogId == assessmentLogId,
+    );
   }
 
   public getCaseReviewById(caseReviewId: string) {
