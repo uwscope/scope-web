@@ -16,22 +16,19 @@ import { getLatestScore } from "src/utils/assessment";
 export const TreatmentInfo: FunctionComponent = observer(() => {
   const currentPatient = usePatient();
 
-  const sortedAssessmentLogs = currentPatient?.assessmentLogs
-    .slice()
-    .sort((a, b) => compareDesc(a.recordedDateTime, b.recordedDateTime));
-
-  const latestPhqLog = sortedAssessmentLogs.filter(
+  const latestPhqLog = currentPatient?.assessmentLogsSortedByDateAndTimeDescending.filter(
     (a) => a.assessmentId == "phq-9",
   )[0];
   const latestPhqScore = getLatestScore(
-    currentPatient?.assessmentLogs,
+    currentPatient?.assessmentLogsSortedByDateAndTimeDescending,
     "phq-9",
   );
-  const latestGadLog = sortedAssessmentLogs.filter(
+  
+  const latestGadLog = currentPatient?.assessmentLogsSortedByDateAndTimeDescending.filter(
     (a) => a.assessmentId == "gad-7",
   )[0];
   const latestGadScore = getLatestScore(
-    currentPatient?.assessmentLogs,
+    currentPatient?.assessmentLogsSortedByDateAndTimeDescending,
     "gad-7",
   );
 
