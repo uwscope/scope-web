@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import { Grid } from "@mui/material";
-import { compareDesc, format } from "date-fns";
+import { format } from "date-fns";
 import { observer } from "mobx-react";
 import {
   BehavioralStrategyChecklistFlags,
