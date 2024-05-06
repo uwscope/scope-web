@@ -5,6 +5,7 @@ import {
   IActivitySchedule,
   IAssessmentLog,
   ICaseReview,
+  IMoodLog,
   ISession,
 } from "shared/types";
 
@@ -64,6 +65,13 @@ export const compareCaseReviewsOrSessionsByDate: (
   compareB: ICaseReview | ISession,
 ) => number = function (compareA, compareB): number {
   return compareAsc(compareA.date, compareB.date);
+};
+
+export const compareMoodLogsByDateAndTime: (
+  compareA: IMoodLog,
+  compareB: IMoodLog,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
 export const compareSessionsByDate: (
@@ -129,6 +137,23 @@ export const sortCaseReviewsOrSessionsByDate: (
     .sort(
       sortingDirectionComparator(
         compareCaseReviewsOrSessionsByDate,
+        sortingDirection,
+      ),
+    );
+};
+
+export const sortMoodLogsByDateAndTime: (
+  moodLogs: IMoodLog[],
+  sortingDirection?: SortDirection,
+) => IMoodLog[] = function (
+  moodLogs,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return moodLogs
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareMoodLogsByDateAndTime,
         sortingDirection,
       ),
     );

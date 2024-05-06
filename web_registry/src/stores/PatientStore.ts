@@ -18,6 +18,7 @@ import {
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
+  sortMoodLogsByDateAndTime,
   sortSessionsByDate,
 } from "shared/sorting";
 import {
@@ -82,6 +83,8 @@ export interface IPatientStore extends IPatient {
     | ISession
   )[];
   readonly sessionsSortedByDate: ISession[];
+  readonly moodLogsSortedByDateAndTime: IMoodLog[];
+  readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
@@ -303,6 +306,14 @@ export class PatientStore implements IPatientStore {
 
   @computed get moodLogs() {
     return this.loadMoodLogsQuery.value || [];
+  }
+
+  @computed get moodLogsSortedByDateAndTime() {
+    return sortMoodLogsByDateAndTime(this.moodLogs);
+  }
+
+  @computed get moodLogsSortedByDateAndTimeDescending() {
+    return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
   @computed get name() {
