@@ -67,7 +67,7 @@ export const compareCaseReviewsOrSessionsByDate: (
   return compareAsc(compareA.date, compareB.date);
 };
 
-export const compareMoodLogsByDate: (
+export const compareMoodLogsByDateAndTime: (
   compareA: IMoodLog,
   compareB: IMoodLog,
 ) => number = function (compareA, compareB): number {
@@ -142,7 +142,7 @@ export const sortCaseReviewsOrSessionsByDate: (
     );
 };
 
-export const sortMoodLogsByDate: (
+export const sortMoodLogsByDateAndTime: (
   moodLogs: IMoodLog[],
   sortingDirection?: SortDirection,
 ) => IMoodLog[] = function (
@@ -151,7 +151,12 @@ export const sortMoodLogsByDate: (
 ) {
   return moodLogs
     .slice()
-    .sort(sortingDirectionComparator(compareMoodLogsByDate, sortingDirection));
+    .sort(
+      sortingDirectionComparator(
+        compareMoodLogsByDateAndTime,
+        sortingDirection,
+      ),
+    );
 };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
