@@ -155,9 +155,9 @@ const LoginForm: FunctionComponent<{
         {error && (
           <FormHelperText error={true} sx={{ lineHeight: 1 }}>
             {error == "User does not exist."
-              ? "Username incorrect."
+              ? "Username or password incorrect."
               : error == "Incorrect username or password."
-                ? "Username incorrect."
+                ? "Username or password incorrect."
                 : error == "Password attempts exceeded"
                   ? "Username attempt limit exceeded. Try again later."
                   : error}
