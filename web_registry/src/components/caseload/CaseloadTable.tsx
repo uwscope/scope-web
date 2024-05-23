@@ -242,6 +242,20 @@ const renderCellLastCaseReview = (props: GridCellParams) => {
   }
 };
 
+const renderCellEnrollmentDate = (props: GridCellParams) => {
+  const highlight = props.row["enrollmentDateHighlight"] as boolean;
+
+  if (highlight) {
+    return (
+      <HiglightedCell scoreColorKey="warning">
+        {props.formattedValue}
+      </HiglightedCell>
+    );
+  } else {
+    return props.formattedValue;
+  }
+};
+
 const renderFlagCell = (props: GridCellParams) => {
   const flaggedForDiscussion = !!props.value?.["Flag for discussion"];
   const flaggedForSafety = !!props.value?.["Flag as safety risk"];
@@ -524,6 +538,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         filterable: false,
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
+        renderCell: renderCellEnrollmentDate,
       },
     ];
 
@@ -632,6 +647,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           phq9Entries.length > 0 &&
           phq9Entries[phq9Entries.length - 1].pointValues &&
           !!phq9Entries[phq9Entries.length - 1].pointValues["Suicide"];
+        const enrollmentDateHighlight =
+          p.profile.enrollmentDate &&
+          differenceInMonths(todayDateUtc, p.profile.enrollmentDate) >= 9;
 
         return {
           //
@@ -671,6 +689,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           recentCaseReviewOverdue: recentReviewOverdue,
           initialAtRisk: initialAtRisk,
           recentAtRisk: recentAtRisk,
+          enrollmentDateHighlight: enrollmentDateHighlight,
         };
       })
       .sort(rowDefaultComparator);
