@@ -26,7 +26,7 @@ import {
 } from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
-import { formatDateOnly, getFollowupWeeks, toUTCDateOnly } from "shared/time";
+import { formatDateOnly, getFollowUpWeeks, toUTCDateOnly } from "shared/time";
 import { Table } from "src/components/common/Table";
 import { IPatientStore } from "src/stores/PatientStore";
 import {
@@ -567,10 +567,10 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         const recentSessionDate = p.latestSession?.date;
         const recentReviewDate = p.latestCaseReview?.date;
         const nextSessionDueDate =
-          recentSessionDate && p.profile.followupSchedule
+          recentSessionDate && p.profile.followupSchedule && p.profile.followupSchedule != "As needed"
             ? addWeeks(
                 recentSessionDate,
-                getFollowupWeeks(p.profile.followupSchedule),
+                getFollowUpWeeks(p.profile.followupSchedule),
               )
             : undefined;
 
