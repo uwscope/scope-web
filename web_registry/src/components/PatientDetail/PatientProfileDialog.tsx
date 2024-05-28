@@ -5,6 +5,7 @@ import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
 import {
   clinicCodeValues,
+  DepressionTreatmentStatus,
   depressionTreatmentStatusValues,
   followupScheduleValues,
   patientEthnicityValues,
@@ -28,6 +29,9 @@ import StatefulDialog from "src/components/common/StatefulDialog";
 interface IEditPatientProfileContentProps extends Partial<IPatientProfile> {
   availableCareManagerNames: string[];
   onCareManagerChange: (providerName: string) => void;
+  onDepressionTreatmentStatusChange: (
+    depressionTreatmentStatus?: DepressionTreatmentStatus,
+  ) => void;
   onValueChange: (key: string, value: any) => void;
 }
 
@@ -53,6 +57,7 @@ const EditPatientProfileContent: FunctionComponent<
     enrollmentDate,
     onValueChange,
     onCareManagerChange,
+    onDepressionTreatmentStatusChange,
   } = props;
 
   const sortedAvailableCareManagerNames = sortStringsCaseInsensitive(
@@ -143,12 +148,15 @@ const EditPatientProfileContent: FunctionComponent<
         options={sortedAvailableCareManagerNames}
         onChange={(text) => onCareManagerChange(text as string)}
       />
-      {getDropdownField(
-        "Treatment Status",
-        depressionTreatmentStatus || "",
-        depressionTreatmentStatusValues,
-        "depressionTreatmentStatus",
-      )}
+      <GridDropdownField
+        editable
+        label={"Treatment Status"}
+        value={depressionTreatmentStatus || ""}
+        options={depressionTreatmentStatusValues}
+        onChange={(text) =>
+          onDepressionTreatmentStatusChange(text as DepressionTreatmentStatus)
+        }
+      />
       {getDropdownField(
         "Follow-Up Schedule",
         followupSchedule || "",
@@ -244,6 +252,18 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
       }
     });
 
+    const onDepressionTreatmentStatusChange = action(
+      (depressionTreatmentStatus?: DepressionTreatmentStatus) => {
+        state.depressionTreatmentStatus = depressionTreatmentStatus;
+
+        if (depressionTreatmentStatus) {
+          if (["D/C"].includes(depressionTreatmentStatus)) {
+            state.followupSchedule = "As needed";
+          }
+        }
+      },
+    );
+
     const availableCareManagerNames = careManagers.map((c) => c.name);
 
     return (
@@ -258,6 +278,9 @@ export const EditPatientProfileDialog: FunctionComponent<IEditPatientProfileDial
             availableCareManagerNames={availableCareManagerNames}
             onValueChange={onValueChange}
             onCareManagerChange={onCareManagerChange}
+            onDepressionTreatmentStatusChange={
+              onDepressionTreatmentStatusChange
+            }
           />
         }
         handleCancel={onClose}

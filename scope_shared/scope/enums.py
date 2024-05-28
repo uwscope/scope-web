@@ -79,6 +79,7 @@ class FollowupSchedule(Enum):
     FourWeeks = "4-week follow-up"
     SixWeeks = "6-week follow-up"
     EightWeeks = "8-week follow-up"
+    AsNeeded = "As needed"
 
 
 class DiscussionFlag(Enum):

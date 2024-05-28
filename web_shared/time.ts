@@ -106,7 +106,9 @@ export const getDayOfWeek = (date: Date): DayOfWeek => {
   return daysOfWeekValues[(date.getDay() + 7 - 1) % 7];
 };
 
-export const getFollowupWeeks = (schedule: FollowupSchedule) => {
+export const getFollowUpWeeks = (
+  schedule: Exclude<FollowupSchedule, "As needed">,
+) => {
   switch (schedule) {
     case "1-week follow-up":
       return 1;
@@ -120,8 +122,6 @@ export const getFollowupWeeks = (schedule: FollowupSchedule) => {
       return 6;
     case "8-week follow-up":
       return 8;
-    default:
-      return 0;
   }
 };
 

@@ -75,6 +75,7 @@ export const followupScheduleValues = [
   "4-week follow-up",
   "6-week follow-up",
   "8-week follow-up",
+  "As needed",
 ] as const;
 export type FollowupSchedule = (typeof followupScheduleValues)[number];
 

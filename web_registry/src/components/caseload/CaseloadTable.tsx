@@ -20,12 +20,13 @@ import {
 import {
   addWeeks,
   compareAsc,
+  differenceInDays,
   differenceInMonths,
   differenceInWeeks,
 } from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
-import { formatDateOnly, getFollowupWeeks, toUTCDateOnly } from "shared/time";
+import { formatDateOnly, getFollowUpWeeks, toUTCDateOnly } from "shared/time";
 import { Table } from "src/components/common/Table";
 import { IPatientStore } from "src/stores/PatientStore";
 import {
@@ -228,6 +229,20 @@ const renderChangeCell = (props: GridCellParams) => (
   <ChangeCell change={props.value as number}>{`${props.value}%`}</ChangeCell>
 );
 
+const renderCellFollowUpDue = (props: GridCellParams) => {
+  const overdue = props.row["nextSessionOverdue"] as boolean;
+
+  if (overdue) {
+    return (
+      <HiglightedCell scoreColorKey="warning">
+        {props.formattedValue}
+      </HiglightedCell>
+    );
+  } else {
+    return props.formattedValue;
+  }
+};
+
 const renderCellLastCaseReview = (props: GridCellParams) => {
   const overdue = props.row["recentCaseReviewOverdue"] as boolean;
 
@@ -413,7 +428,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
       },
       {
         field: "nextSessionDue",
-        headerName: "Follow-up Due",
+        headerName: "Follow-Up Due",
         width: 85,
         renderHeader,
         align: "center",
@@ -421,6 +436,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         filterable: false,
         sortComparator: nullUndefinedComparator("last", gridDateComparator),
         valueFormatter: nullUndefinedFormatter(dateFormatter),
+        renderCell: renderCellFollowUpDue,
       },
       {
         field: "totalSessions",
@@ -551,10 +567,12 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         const recentSessionDate = p.latestSession?.date;
         const recentReviewDate = p.latestCaseReview?.date;
         const nextSessionDueDate =
-          recentSessionDate && p.profile.followupSchedule
+          recentSessionDate &&
+          p.profile.followupSchedule &&
+          p.profile.followupSchedule != "As needed"
             ? addWeeks(
                 recentSessionDate,
-                getFollowupWeeks(p.profile.followupSchedule),
+                getFollowUpWeeks(p.profile.followupSchedule),
               )
             : undefined;
 
@@ -637,6 +655,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           // Nothing else can be overdue
           return false;
         })();
+        const nextSessionOverdue =
+          nextSessionDueDate &&
+          differenceInDays(todayDateUtc, nextSessionDueDate) >= 1;
         const initialAtRisk =
           phq9Entries &&
           phq9Entries.length > 0 &&
@@ -687,6 +708,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           // Not rendered, used by other columns
           //
           recentCaseReviewOverdue: recentReviewOverdue,
+          nextSessionOverdue: nextSessionOverdue,
           initialAtRisk: initialAtRisk,
           recentAtRisk: recentAtRisk,
           enrollmentDateHighlight: enrollmentDateHighlight,
