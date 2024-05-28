@@ -95,6 +95,10 @@ const LoginForm: FunctionComponent<{
               onSubmit();
             }
           }}
+          // Caution: InputProps and inputProps are different
+          inputProps={{
+            autoCapitalize: "none",
+          }}
         />
         <TextField
           label="Password"
@@ -122,6 +126,10 @@ const LoginForm: FunctionComponent<{
             if (e.key === "Enter" && canLogin) {
               onSubmit();
             }
+          }}
+          // Caution: InputProps and inputProps are different
+          inputProps={{
+            autoCapitalize: "none",
           }}
           InputProps={{
             endAdornment: (
@@ -251,6 +259,10 @@ const PasswordResetForm: FunctionComponent<{
             if (e.key === "Enter" && canSubmit) {
               onSubmit();
             }
+          }}
+          // Caution: InputProps and inputProps are different
+          inputProps={{
+            autoCapitalize: "none",
           }}
         />
         {error && (
@@ -503,6 +515,10 @@ const PasswordUpdateForm: FunctionComponent<{
           InputLabelProps={{
             shrink: true,
           }}
+          // Caution: InputProps and inputProps are different
+          inputProps={{
+            autoCapitalize: "none",
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -557,6 +573,10 @@ const PasswordUpdateForm: FunctionComponent<{
             !!passwordRepeat.trim() &&
             (!validPassword || password.trim() != passwordRepeat.trim())
           }
+          // Caution: InputProps and inputProps are different
+          inputProps={{
+            autoCapitalize: "none",
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
