@@ -20,7 +20,6 @@ import {
 import {
   addWeeks,
   compareAsc,
-  differenceInDays,
   differenceInMonths,
   differenceInWeeks,
 } from "date-fns";
@@ -657,7 +656,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         })();
         const nextSessionOverdue =
           nextSessionDueDate &&
-          differenceInDays(todayDateUtc, nextSessionDueDate) >= 1;
+          differenceInMonths(todayDateUtc, nextSessionDueDate) >= 1;
         const initialAtRisk =
           phq9Entries &&
           phq9Entries.length > 0 &&
