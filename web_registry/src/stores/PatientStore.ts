@@ -92,6 +92,7 @@ export interface IPatientStore extends IPatient {
   getActivitiesWithoutValueId: () => IActivity[];
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getMostRecentPatientInteractionDate: () => Date;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
@@ -521,6 +522,13 @@ export class PatientStore implements IPatientStore {
     return this.caseReviews.find(
       (current) => current.caseReviewId == caseReviewId,
     );
+  }
+
+  public getMostRecentPatientInteractionDate() {
+    // Initially, stub the function to return now minus a week.
+    let mostRecentDate = new Date();
+    mostRecentDate.setDate(mostRecentDate.getDate() - 7);
+    return mostRecentDate;
   }
 
   public getSessionById(sessionId: string) {
