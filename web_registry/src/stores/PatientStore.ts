@@ -54,6 +54,16 @@ export interface IPatientStore extends IPatient {
   readonly latestSession: ISession | undefined;
   readonly recordId: string;
 
+  // Recent patient interaction properties
+  readonly mostRecentPatientInteractionDate: Date;
+  readonly recentActivities: IActivity[] | undefined;
+  readonly recentActivityLogs: IActivityLog[] | undefined;
+  readonly recentActivitySchedules: IActivitySchedule[] | undefined;
+  readonly recentAssessmentLogs: IAssessmentLog[] | undefined;
+  readonly recentMoodLogs: IMoodLog[] | undefined;
+  readonly recentSafetyPlan: ISafetyPlan | undefined;
+  readonly recentValues: IValue[] | undefined;
+
   // UI states
   readonly loadPatientState: IPromiseQueryState;
 
@@ -369,6 +379,13 @@ export class PatientStore implements IPatientStore {
     return undefined;
   }
 
+  @computed get mostRecentPatientInteractionDate() {
+    // Initially, stub the function to return now minus a week.
+    let mostRecentDate = new Date();
+    mostRecentDate.setDate(mostRecentDate.getDate() - 7);
+    return mostRecentDate;
+  }
+
   @computed get profile() {
     return (
       this.loadProfileQuery.value || {
@@ -380,6 +397,53 @@ export class PatientStore implements IPatientStore {
 
   @computed get recordId() {
     return this.identity.patientId;
+  }
+
+  @computed get recentActivities() {
+    return this.activities.filter((a) => {
+      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+    });
+  }
+
+  @computed get recentActivityLogs() {
+    return this.activityLogs.filter((a) => {
+      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+    });
+  }
+
+  @computed get recentActivitySchedules() {
+    return this.activitySchedules.filter((a) => {
+      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+    });
+  }
+
+  @computed get recentAssessmentLogs() {
+    return this.assessmentLogs.filter((a) => {
+      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+    });
+  }
+
+  @computed get recentMoodLogs() {
+    return this.moodLogs.filter((a) => {
+      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+    });
+  }
+
+  @computed get recentSafetyPlan() {
+    if (
+      !!this.safetyPlan.lastUpdatedDateTime &&
+      this.safetyPlan.lastUpdatedDateTime >=
+        this.mostRecentPatientInteractionDate
+    ) {
+      return this.safetyPlan;
+    }
+    return undefined;
+  }
+
+  @computed get recentValues() {
+    return this.values.filter((a) => {
+      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+    });
   }
 
   @computed get safetyPlan() {
