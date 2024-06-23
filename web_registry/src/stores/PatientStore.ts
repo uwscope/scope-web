@@ -1,4 +1,7 @@
-import { differenceInYears } from "date-fns";
+import {
+  differenceInYears,
+  subDays
+} from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -379,13 +382,6 @@ export class PatientStore implements IPatientStore {
     return undefined;
   }
 
-  @computed get recentInteractionCutoffDateTime() {
-    // Initially, stub the function to return now minus two weeks.
-    let mostRecentDate = new Date();
-    mostRecentDate.setDate(mostRecentDate.getDate() - 14);
-    return mostRecentDate;
-  }
-
   @computed get profile() {
     return (
       this.loadProfileQuery.value || {
@@ -393,6 +389,15 @@ export class PatientStore implements IPatientStore {
         MRN: "",
       }
     );
+  }
+
+  @computed get recentInteractionCutoffDateTime() {
+    // Initially, stub the function to return now minus two weeks.
+    // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
+    let cutoffDateTime = new Date();
+    cutoffDateTime = subDays(cutoffDateTime, 14)
+
+    return cutoffDateTime;
   }
 
   @computed get recordId() {
