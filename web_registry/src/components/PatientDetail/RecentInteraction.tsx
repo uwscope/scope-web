@@ -34,7 +34,7 @@ export const RecentInteraction: FunctionComponent = observer(() => {
         <GridTextField
           sm={12}
           label="Patient Interaction Date"
-          value={currentPatient.mostRecentPatientInteractionDate}
+          value={currentPatient.recentInteractionCutoffDateTime}
         />
         <GridTextField
           sm={3}

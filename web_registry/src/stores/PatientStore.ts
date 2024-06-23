@@ -1,4 +1,7 @@
-import { differenceInYears } from "date-fns";
+import {
+  differenceInYears,
+  subDays
+} from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -55,7 +58,7 @@ export interface IPatientStore extends IPatient {
   readonly recordId: string;
 
   // Recent patient interaction properties
-  readonly mostRecentPatientInteractionDate: Date;
+  readonly recentInteractionCutoffDateTime: Date;
   readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogs: IActivityLog[] | undefined;
   readonly recentActivitySchedules: IActivitySchedule[] | undefined;
@@ -379,13 +382,6 @@ export class PatientStore implements IPatientStore {
     return undefined;
   }
 
-  @computed get mostRecentPatientInteractionDate() {
-    // Initially, stub the function to return now minus a week.
-    let mostRecentDate = new Date();
-    mostRecentDate.setDate(mostRecentDate.getDate() - 7);
-    return mostRecentDate;
-  }
-
   @computed get profile() {
     return (
       this.loadProfileQuery.value || {
@@ -395,37 +391,46 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  @computed get recentInteractionCutoffDateTime() {
+    // Initially, stub the function to return now minus two weeks.
+    // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
+    let cutoffDateTime = new Date();
+    cutoffDateTime = subDays(cutoffDateTime, 14)
+
+    return cutoffDateTime;
+  }
+
   @computed get recordId() {
     return this.identity.patientId;
   }
 
   @computed get recentActivities() {
     return this.activities.filter((a) => {
-      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
   @computed get recentActivityLogs() {
     return this.activityLogs.filter((a) => {
-      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
   @computed get recentActivitySchedules() {
     return this.activitySchedules.filter((a) => {
-      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
   @computed get recentAssessmentLogs() {
     return this.assessmentLogs.filter((a) => {
-      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
   @computed get recentMoodLogs() {
     return this.moodLogs.filter((a) => {
-      return a.recordedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
@@ -433,7 +438,7 @@ export class PatientStore implements IPatientStore {
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-        this.mostRecentPatientInteractionDate
+      this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -442,7 +447,7 @@ export class PatientStore implements IPatientStore {
 
   @computed get recentValues() {
     return this.values.filter((a) => {
-      return a.editedDateTime >= this.mostRecentPatientInteractionDate;
+      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
     });
   }
 
@@ -936,10 +941,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-            name: patientProfile.primaryCareManager?.name,
-            providerId: patientProfile.primaryCareManager?.providerId,
-            role: patientProfile.primaryCareManager?.role,
-          }
+          name: patientProfile.primaryCareManager?.name,
+          providerId: patientProfile.primaryCareManager?.providerId,
+          role: patientProfile.primaryCareManager?.role,
+        }
         : undefined,
     });
 
