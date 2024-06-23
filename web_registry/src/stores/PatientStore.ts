@@ -1,7 +1,4 @@
-import {
-  differenceInYears,
-  subDays
-} from "date-fns";
+import { differenceInYears, subDays } from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -395,7 +392,7 @@ export class PatientStore implements IPatientStore {
     // Initially, stub the function to return now minus two weeks.
     // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
     let cutoffDateTime = new Date();
-    cutoffDateTime = subDays(cutoffDateTime, 14)
+    cutoffDateTime = subDays(cutoffDateTime, 14);
 
     return cutoffDateTime;
   }
@@ -434,7 +431,7 @@ export class PatientStore implements IPatientStore {
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-      this.recentInteractionCutoffDateTime
+        this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -941,10 +938,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
