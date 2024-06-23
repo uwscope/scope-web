@@ -96,7 +96,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     },
     {
       hash: "treatment",
-      label: "Treatment information",
+      label: "Treatment Information",
     },
   ] as IContent[];
   contentMenu.push.apply(contentMenu, patientInfoMenu);
