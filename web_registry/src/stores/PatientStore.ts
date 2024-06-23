@@ -400,10 +400,6 @@ export class PatientStore implements IPatientStore {
     return cutoffDateTime;
   }
 
-  @computed get recordId() {
-    return this.identity.patientId;
-  }
-
   @computed get recentActivities() {
     return this.activities.filter((a) => {
       return a.editedDateTime >= this.recentInteractionCutoffDateTime;
@@ -449,6 +445,10 @@ export class PatientStore implements IPatientStore {
     return this.values.filter((a) => {
       return a.editedDateTime >= this.recentInteractionCutoffDateTime;
     });
+  }
+
+  @computed get recordId() {
+    return this.identity.patientId;
   }
 
   @computed get safetyPlan() {
