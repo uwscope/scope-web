@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import {
+  Badge,
   List,
   ListItem,
   ListItemProps,
@@ -18,6 +19,19 @@ const TitleContainer = withTheme(
   styled.div((props) => ({
     padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
   })),
+);
+
+const ContentListBadge = withTheme(
+  styled(Badge)(
+    () =>
+      ({
+        // This seems to work well enough, but I do not understand it.
+        "& .MuiBadge-badge": {
+          right: "-20px",
+          top: "50%",
+        },
+      }) as CSSObject,
+  ),
 );
 
 const ContentListItem = withTheme(
@@ -43,6 +57,7 @@ const ContentListItem = withTheme(
 export interface IContentItem {
   hash: string;
   label: string;
+  recentInteractionBadgeContent?: React.ReactNode;
   top?: boolean;
 }
 
@@ -200,7 +215,12 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
           onClick={action(() => handleClick(content.hash))}
         >
           <ListItemText disableTypography={true}>
-            <Typography variant="body2">{content.label}</Typography>
+            <ContentListBadge
+              badgeContent={content.recentInteractionBadgeContent}
+              color={"primary"}
+            >
+              <Typography variant="body2">{content.label}</Typography>
+            </ContentListBadge>
           </ListItemText>
         </ContentListItem>
       );
