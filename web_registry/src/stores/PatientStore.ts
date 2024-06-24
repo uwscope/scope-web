@@ -55,6 +55,7 @@ export interface IPatientStore extends IPatient {
   readonly recordId: string;
 
   // Recent patient interaction properties
+  readonly recentInteractionCaseloadSummary: string | undefined;
   readonly recentInteractionCutoffDateTime: Date;
   readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogs: IActivityLog[] | undefined;
@@ -386,6 +387,12 @@ export class PatientStore implements IPatientStore {
         MRN: "",
       }
     );
+  }
+
+  @computed get recentInteractionCaseloadSummary() {
+    const recentInteraction: boolean = this.recentMoodLogs.length > 0;
+
+    return recentInteraction ? "New" : undefined;
   }
 
   @computed get recentInteractionCutoffDateTime() {
