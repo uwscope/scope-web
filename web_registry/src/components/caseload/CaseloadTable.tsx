@@ -295,13 +295,14 @@ const renderDiscussionAndInteractionFlagsCell = (props: GridCellParams) => {
 
   return (
     <Stack direction="row">
-      <Tooltip title="Flagged for safety">
+      <Tooltip title="Flagged for Safety">
         <RedFlag $on={flaggedForSafety} fontSize="small" />
       </Tooltip>
-      <Tooltip title="Flagged for discussion">
+      <Tooltip title="Flagged for Discussion">
         <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
       </Tooltip>
       {flaggedForInteraction && (
+      <Tooltip title="Recent Patient Activity">
         <Badge
           badgeContent={props.value?.interactionFlag}
           color={"primary"}
@@ -315,6 +316,7 @@ const renderDiscussionAndInteractionFlagsCell = (props: GridCellParams) => {
             }
           }
         />
+      </Tooltip>
       )}
     </Stack>
   );
