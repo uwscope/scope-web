@@ -14,6 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortActivityLogsByDateAndTime,
   sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
@@ -56,9 +57,11 @@ export interface IPatientStore extends IPatient {
 
   // Recent patient interaction properties
   readonly recentInteractionCutoffDateTime: Date;
-  readonly recentActivities: IActivity[] | undefined;
-  readonly recentActivityLogs: IActivityLog[] | undefined;
-  readonly recentActivitySchedules: IActivitySchedule[] | undefined;
+  //readonly recentActivities: IActivity[] | undefined;
+  readonly recentActivityLogsSortedByDateAndTimeDescending:
+    | IActivityLog[]
+    | undefined;
+  // readonly recentActivitySchedules: IActivitySchedule[] | undefined;
   readonly recentAssessmentLogs: IAssessmentLog[] | undefined;
   readonly recentMoodLogs: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
@@ -84,6 +87,7 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly activityLogsSortedByDateAndTimeDescending: IActivityLog[];
   readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
   readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
@@ -261,6 +265,13 @@ export class PatientStore implements IPatientStore {
     return this.loadActivityLogsQuery.value || [];
   }
 
+  @computed get activityLogsSortedByDateAndTimeDescending() {
+    return sortActivityLogsByDateAndTime(
+      this.activityLogs,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get activitySchedules(): IActivitySchedule[] {
     return this.loadActivitySchedulesQuery.value || [];
 
@@ -399,23 +410,26 @@ export class PatientStore implements IPatientStore {
     return this.identity.patientId;
   }
 
-  @computed get recentActivities() {
-    return this.activities.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+  // @computed get recentActivities() {
+  //   return this.activities.filter((a) => {
+  //     return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+  //   });
+  // }
+
+  @computed get recentActivityLogsSortedByDateAndTimeDescending() {
+    return this.activityLogsSortedByDateAndTimeDescending.slice(
+      0,
+      this.activityLogsSortedByDateAndTimeDescending.findIndex(
+        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      ),
+    );
   }
 
-  @computed get recentActivityLogs() {
-    return this.activityLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
-  }
-
-  @computed get recentActivitySchedules() {
-    return this.activitySchedules.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
-  }
+  // @computed get recentActivitySchedules() {
+  //   return this.activitySchedules.filter((a) => {
+  //     return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+  //   });
+  // }
 
   @computed get recentAssessmentLogs() {
     return this.assessmentLogs.filter((a) => {
@@ -433,7 +447,7 @@ export class PatientStore implements IPatientStore {
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-      this.recentInteractionCutoffDateTime
+        this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -936,10 +950,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
