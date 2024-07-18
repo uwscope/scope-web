@@ -2,6 +2,7 @@ import { compareAsc } from "date-fns";
 import { toLocalDateTime } from "shared/time";
 import {
   IActivity,
+  IActivityLog,
   IActivitySchedule,
   IAssessmentLog,
   ICaseReview,
@@ -21,19 +22,26 @@ export const sortingDirectionComparator: <T>(
   comparator,
   sortingDirection,
 ) {
-  switch (sortingDirection) {
-    case SortDirection.ASCENDING:
-      return comparator;
-    case SortDirection.DESCENDING:
-      return (compareA, compareB) => comparator(compareB, compareA);
-  }
-};
+    switch (sortingDirection) {
+      case SortDirection.ASCENDING:
+        return comparator;
+      case SortDirection.DESCENDING:
+        return (compareA, compareB) => comparator(compareB, compareA);
+    }
+  };
 
 export const compareActivityByName: (
   compareA: IActivity,
   compareB: IActivity,
 ) => number = function (compareA, compareB) {
   return compareStringCaseInsensitive(compareA.name, compareB.name);
+};
+
+export const compareActivityLogsByDateAndTime: (
+  compareA: IActivityLog,
+  compareB: IActivityLog,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
 export const compareActivityScheduleByDateAndTime: (
@@ -96,6 +104,23 @@ export const sortActivitiesByName: (activities: IActivity[]) => IActivity[] =
     return activities.slice().sort(compareActivityByName);
   };
 
+export const sortActivityLogsByDateAndTime: (
+  activityLogs: IActivityLog[],
+  sortingDirection?: SortDirection,
+) => IActivityLog[] = function (
+  activityLogs,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+    return activityLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareActivityLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
+
 export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
 ) => IActivitySchedule[] = function (activitySchedules) {
@@ -109,15 +134,15 @@ export const sortAssessmentLogsByDateAndTime: (
   assessmentLogs,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return assessmentLogs
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareAssessmentLogsByDateAndTime,
-        sortingDirection,
-      ),
-    );
-};
+    return assessmentLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareAssessmentLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortCaseReviewsByDate: (
   caseReviews: ICaseReview[],
@@ -132,15 +157,15 @@ export const sortCaseReviewsOrSessionsByDate: (
   caseReviewsOrSessions,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return caseReviewsOrSessions
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareCaseReviewsOrSessionsByDate,
-        sortingDirection,
-      ),
-    );
-};
+    return caseReviewsOrSessions
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareCaseReviewsOrSessionsByDate,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortMoodLogsByDateAndTime: (
   moodLogs: IMoodLog[],
@@ -149,15 +174,15 @@ export const sortMoodLogsByDateAndTime: (
   moodLogs,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return moodLogs
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareMoodLogsByDateAndTime,
-        sortingDirection,
-      ),
-    );
-};
+    return moodLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareMoodLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
   function (sessions) {
