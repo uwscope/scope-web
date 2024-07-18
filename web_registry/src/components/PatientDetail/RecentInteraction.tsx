@@ -23,6 +23,9 @@ export const RecentInteraction: FunctionComponent = observer(() => {
     currentPatient?.loadSessionsState.error ||
     currentPatient?.loadAssessmentLogsState.error;
 
+  console.log(currentPatient.activityLogsSortedByDateAndTimeDescending);
+  console.log(currentPatient.recentActivityLogsSortedByDateAndTimeDescending);
+
   return (
     <ActionPanel
       id="recent-interaction"
@@ -36,7 +39,7 @@ export const RecentInteraction: FunctionComponent = observer(() => {
           label="Patient Interaction Date"
           value={currentPatient.recentInteractionCutoffDateTime}
         />
-        <GridTextField
+        {/* <GridTextField
           sm={3}
           label="Activities Count"
           value={
@@ -44,15 +47,15 @@ export const RecentInteraction: FunctionComponent = observer(() => {
               ? currentPatient.recentActivities.length
               : "No Recent Activities"
           }
-        />
-        <GridTextField
+        /> */}
+        {/* <GridTextField
           sm={3}
           label="Activities"
           value={currentPatient.recentActivities
             ?.map((activity) => activity.name)
             .join(", ")}
           multiline={true}
-        />
+        /> */}
         <GridTextField
           sm={3}
           label="Values Count"
@@ -70,44 +73,28 @@ export const RecentInteraction: FunctionComponent = observer(() => {
             .join(", ")}
           multiline={true}
         />
+        <GridTextField
+          sm={3}
+          label="Activity Logs Counts"
+          value={
+            currentPatient.recentActivityLogsSortedByDateAndTimeDescending
+              ?.length
+          }
+        />
         {/* <GridTextField
-          sm={9}
-          label="Activity Logs"
-          value={currentPatient.recentActivityLogs
-            ?.map(
-              (activityLog) =>
-                activityLog.dataSnapshot.scheduledActivity.dataSnapshot.activity
-                  .name,
-            )
-            .join(", ")}
-          multiline={true}
+          sm={3}
+          label="Activity Schedules Count"
+          value={currentPatient.recentActivitySchedules?.length}
         /> */}
         <GridTextField
           sm={3}
-          label="Activity Schedules Count"
-          value={
-            currentPatient.recentActivitySchedules
-              ? currentPatient.recentActivitySchedules.length
-              : "No Recent Activity Schedules"
-          }
-        />
-        <GridTextField
-          sm={3}
           label="Assessment Logs Count"
-          value={
-            currentPatient.recentAssessmentLogs
-              ? currentPatient.recentAssessmentLogs.length
-              : "No Recent Assessment Logs"
-          }
+          value={currentPatient.recentAssessmentLogs?.length}
         />
         <GridTextField
           sm={3}
           label="Mood Logs Count"
-          value={
-            currentPatient.recentMoodLogs
-              ? currentPatient.recentMoodLogs.length
-              : "No Recent Mood Logs"
-          }
+          value={currentPatient.recentMoodLogs?.length}
         />
         <GridTextField
           sm={3}
