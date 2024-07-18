@@ -64,7 +64,7 @@ export interface IPatientStore extends IPatient {
     | undefined;
   // readonly recentActivitySchedules: IActivitySchedule[] | undefined;
   readonly recentAssessmentLogs: IAssessmentLog[] | undefined;
-  readonly recentMoodLogs: IMoodLog[] | undefined;
+  readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
   readonly recentValues: IValue[] | undefined;
 
@@ -401,7 +401,8 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentInteractionCaseloadSummary() {
-    const recentInteraction: boolean = this.recentMoodLogs.length > 0;
+    const recentInteraction: boolean =
+      this.recentMoodLogsSortedByDateAndTimeDescending.length > 0;
 
     return recentInteraction ? "New" : undefined;
   }
@@ -442,10 +443,13 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  @computed get recentMoodLogs() {
-    return this.moodLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+  @computed get recentMoodLogsSortedByDateAndTimeDescending() {
+    return this.moodLogsSortedByDateAndTimeDescending.slice(
+      0,
+      this.moodLogsSortedByDateAndTimeDescending.findIndex(
+        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      ),
+    );
   }
 
   @computed get recentSafetyPlan() {

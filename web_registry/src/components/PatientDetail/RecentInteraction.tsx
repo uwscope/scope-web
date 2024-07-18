@@ -94,12 +94,14 @@ export const RecentInteraction: FunctionComponent = observer(() => {
         <GridTextField
           sm={3}
           label="Mood Logs Count"
-          value={currentPatient.recentMoodLogs?.length}
+          value={
+            currentPatient.recentMoodLogsSortedByDateAndTimeDescending?.length
+          }
         />
         <GridTextField
           sm={3}
           label="Mood Log Scores"
-          value={currentPatient.recentMoodLogs
+          value={currentPatient.recentMoodLogsSortedByDateAndTimeDescending
             ?.map((moodLog) => moodLog.mood)
             .join(", ")}
           multiline={true}
