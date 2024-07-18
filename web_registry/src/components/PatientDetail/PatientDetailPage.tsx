@@ -96,7 +96,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     },
     {
       hash: "treatment",
-      label: "Treatment information",
+      label: "Treatment Information",
     },
   ] as IContent[];
   contentMenu.push.apply(contentMenu, patientInfoMenu);
@@ -130,11 +130,18 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
       .slice()
       .sort(sortAssessmentContent)
       .map(
-        (a) =>
-          ({
-            hash: a.id,
-            label: a.name,
-          }) as IContent,
+        (a): IContent => ({
+          hash: a.id,
+          label: a.name,
+          recentInteractionBadgeContent: ((): React.ReactNode => {
+            switch (a.id) {
+              case "mood":
+                return currentPatient?.recentMoodLogs?.length;
+              default:
+                return undefined;
+            }
+          })(),
+        }),
       ),
   );
 
