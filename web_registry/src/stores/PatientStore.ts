@@ -60,10 +60,10 @@ export interface IPatientStore extends IPatient {
   readonly recentInteractionCutoffDateTime: Date;
   //readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogsSortedByDateAndTimeDescending:
-    | IActivityLog[]
-    | undefined;
+  | IActivityLog[]
+  | undefined;
   // readonly recentActivitySchedules: IActivitySchedule[] | undefined;
-  readonly recentAssessmentLogs: IAssessmentLog[] | undefined;
+  readonly recentAssessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[] | undefined;
   readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
   readonly recentValues: IValue[] | undefined;
@@ -437,10 +437,13 @@ export class PatientStore implements IPatientStore {
   //   });
   // }
 
-  @computed get recentAssessmentLogs() {
-    return this.assessmentLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+  @computed get recentAssessmentLogsSortedByDateAndTimeDescending() {
+    return this.assessmentLogsSortedByDateAndTimeDescending.slice(
+      0,
+      this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
+        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      ),
+    );
   }
 
   @computed get recentMoodLogsSortedByDateAndTimeDescending() {
@@ -456,7 +459,7 @@ export class PatientStore implements IPatientStore {
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-        this.recentInteractionCutoffDateTime
+      this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -963,10 +966,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-            name: patientProfile.primaryCareManager?.name,
-            providerId: patientProfile.primaryCareManager?.providerId,
-            role: patientProfile.primaryCareManager?.role,
-          }
+          name: patientProfile.primaryCareManager?.name,
+          providerId: patientProfile.primaryCareManager?.providerId,
+          role: patientProfile.primaryCareManager?.role,
+        }
         : undefined,
     });
 

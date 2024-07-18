@@ -89,7 +89,10 @@ export const RecentInteraction: FunctionComponent = observer(() => {
         <GridTextField
           sm={3}
           label="Assessment Logs Count"
-          value={currentPatient.recentAssessmentLogs?.length}
+          value={
+            currentPatient.recentAssessmentLogsSortedByDateAndTimeDescending
+              ?.length
+          }
         />
         <GridTextField
           sm={3}
