@@ -302,21 +302,21 @@ const renderDiscussionAndInteractionFlagsCell = (props: GridCellParams) => {
         <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
       </Tooltip>
       {flaggedForInteraction && (
-      <Tooltip title="Recent Patient Activity">
-        <Badge
-          badgeContent={props.value?.interactionFlag}
-          color={"primary"}
-          sx={
-            // This seems to work well enough, but I do not understand it.
-            {
-              "& .MuiBadge-badge": {
-                top: "50%",
-                right: "-20px",
-              },
+        <Tooltip title="Recent Patient Activity">
+          <Badge
+            badgeContent={props.value?.interactionFlag}
+            color={"primary"}
+            sx={
+              // This seems to work well enough, but I do not understand it.
+              {
+                "& .MuiBadge-badge": {
+                  top: "50%",
+                  right: "-20px",
+                },
+              }
             }
-          }
-        />
-      </Tooltip>
+          />
+        </Tooltip>
       )}
     </Stack>
   );
