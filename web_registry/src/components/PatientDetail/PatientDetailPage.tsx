@@ -135,6 +135,14 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
           label: a.name,
           recentInteractionBadgeContent: ((): React.ReactNode => {
             switch (a.id) {
+              case "gad-7":
+                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                  "gad-7",
+                )?.length;
+              case "phq-9":
+                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                  "phq-9",
+                )?.length;
               case "mood":
                 return currentPatient
                   ?.recentMoodLogsSortedByDateAndTimeDescending?.length;
@@ -149,6 +157,8 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
   progressMenu.push({
     hash: getString("patient_progress_activity_hash"),
     label: getString("patient_progress_activity_name"),
+    recentInteractionBadgeContent:
+      currentPatient?.recentActivityLogsSortedByDateAndTimeDescending?.length,
   } as IContent);
 
   contentMenu.push.apply(contentMenu, progressMenu);
@@ -167,10 +177,19 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_values_inventory_hash"),
       label: getString("patient_detail_subsection_values_inventory_title"),
+      recentInteractionBadgeContent: currentPatient?.recentActivities
+        ? currentPatient?.recentActivities?.length +
+          (currentPatient?.recentValues
+            ? currentPatient?.recentValues?.length
+            : 0)
+        : currentPatient?.recentValues?.length,
     },
     {
       hash: getString("patient_detail_subsection_safety_plan_hash"),
       label: getString("patient_detail_subsection_safety_plan_title"),
+      recentInteractionBadgeContent: currentPatient?.recentSafetyPlan
+        ? "New"
+        : undefined,
     },
   ] as IContent[];
   contentMenu.push.apply(contentMenu, baMenu);
