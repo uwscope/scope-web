@@ -58,11 +58,10 @@ export interface IPatientStore extends IPatient {
   // Recent patient interaction properties
   readonly recentInteractionCaseloadSummary: string | undefined;
   readonly recentInteractionCutoffDateTime: Date;
-  //readonly recentActivities: IActivity[] | undefined;
+  readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogsSortedByDateAndTimeDescending:
   | IActivityLog[]
   | undefined;
-  // readonly recentActivitySchedules: IActivitySchedule[] | undefined;
   readonly recentAssessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[] | undefined;
   readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
@@ -416,11 +415,11 @@ export class PatientStore implements IPatientStore {
     return cutoffDateTime;
   }
 
-  // @computed get recentActivities() {
-  //   return this.activities.filter((a) => {
-  //     return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-  //   });
-  // }
+  @computed get recentActivities() {
+    return this.activities.filter((a) => {
+      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+    });
+  }
 
   @computed get recentActivityLogsSortedByDateAndTimeDescending() {
     return this.activityLogsSortedByDateAndTimeDescending.slice(
@@ -430,12 +429,6 @@ export class PatientStore implements IPatientStore {
       ),
     );
   }
-
-  // @computed get recentActivitySchedules() {
-  //   return this.activitySchedules.filter((a) => {
-  //     return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-  //   });
-  // }
 
   @computed get recentAssessmentLogsSortedByDateAndTimeDescending() {
     return this.assessmentLogsSortedByDateAndTimeDescending.slice(
