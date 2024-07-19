@@ -7,6 +7,7 @@ import {
   IAssessmentLog,
   ICaseReview,
   IMoodLog,
+  IScheduledActivity,
   ISession,
 } from "shared/types";
 
@@ -22,13 +23,13 @@ export const sortingDirectionComparator: <T>(
   comparator,
   sortingDirection,
 ) {
-  switch (sortingDirection) {
-    case SortDirection.ASCENDING:
-      return comparator;
-    case SortDirection.DESCENDING:
-      return (compareA, compareB) => comparator(compareB, compareA);
-  }
-};
+    switch (sortingDirection) {
+      case SortDirection.ASCENDING:
+        return comparator;
+      case SortDirection.DESCENDING:
+        return (compareA, compareB) => comparator(compareB, compareA);
+    }
+  };
 
 export const compareActivityByName: (
   compareA: IActivity,
@@ -82,6 +83,13 @@ export const compareMoodLogsByDateAndTime: (
   return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
+export const compareScheduledActivitiesByDateAndTime: (
+  compareA: IScheduledActivity,
+  compareB: IScheduledActivity,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.dueDateTime, compareB.dueDateTime);
+};
+
 export const compareSessionsByDate: (
   compareA: ISession,
   compareB: ISession,
@@ -111,15 +119,15 @@ export const sortActivityLogsByDateAndTime: (
   activityLogs,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return activityLogs
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareActivityLogsByDateAndTime,
-        sortingDirection,
-      ),
-    );
-};
+    return activityLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareActivityLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
@@ -134,15 +142,15 @@ export const sortAssessmentLogsByDateAndTime: (
   assessmentLogs,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return assessmentLogs
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareAssessmentLogsByDateAndTime,
-        sortingDirection,
-      ),
-    );
-};
+    return assessmentLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareAssessmentLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortCaseReviewsByDate: (
   caseReviews: ICaseReview[],
@@ -157,15 +165,15 @@ export const sortCaseReviewsOrSessionsByDate: (
   caseReviewsOrSessions,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return caseReviewsOrSessions
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareCaseReviewsOrSessionsByDate,
-        sortingDirection,
-      ),
-    );
-};
+    return caseReviewsOrSessions
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareCaseReviewsOrSessionsByDate,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortMoodLogsByDateAndTime: (
   moodLogs: IMoodLog[],
@@ -174,15 +182,32 @@ export const sortMoodLogsByDateAndTime: (
   moodLogs,
   sortingDirection = SortDirection.ASCENDING,
 ) {
-  return moodLogs
-    .slice()
-    .sort(
-      sortingDirectionComparator(
-        compareMoodLogsByDateAndTime,
-        sortingDirection,
-      ),
-    );
-};
+    return moodLogs
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareMoodLogsByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
+
+export const sortScheduledActivitiesByDateAndTime: (
+  scheduledActivities: IScheduledActivity[],
+  sortingDirection?: SortDirection,
+) => IScheduledActivity[] = function (
+  scheduledActivities,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+    return scheduledActivities
+      .slice()
+      .sort(
+        sortingDirectionComparator(
+          compareScheduledActivitiesByDateAndTime,
+          sortingDirection,
+        ),
+      );
+  };
 
 export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
   function (sessions) {
