@@ -39,7 +39,7 @@ export const RecentInteraction: FunctionComponent = observer(() => {
           label="Patient Interaction Date"
           value={currentPatient.recentInteractionCutoffDateTime}
         />
-        {/* <GridTextField
+        <GridTextField
           sm={3}
           label="Activities Count"
           value={
@@ -47,15 +47,15 @@ export const RecentInteraction: FunctionComponent = observer(() => {
               ? currentPatient.recentActivities.length
               : "No Recent Activities"
           }
-        /> */}
-        {/* <GridTextField
+        />
+        <GridTextField
           sm={3}
           label="Activities"
           value={currentPatient.recentActivities
             ?.map((activity) => activity.name)
             .join(", ")}
           multiline={true}
-        /> */}
+        />
         <GridTextField
           sm={3}
           label="Values Count"
@@ -81,11 +81,6 @@ export const RecentInteraction: FunctionComponent = observer(() => {
               ?.length
           }
         />
-        {/* <GridTextField
-          sm={3}
-          label="Activity Schedules Count"
-          value={currentPatient.recentActivitySchedules?.length}
-        /> */}
         <GridTextField
           sm={3}
           label="Assessment Logs Count"
