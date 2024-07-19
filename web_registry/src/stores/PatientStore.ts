@@ -20,6 +20,7 @@ import {
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
+  sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
 } from "shared/sorting";
 import {
@@ -65,6 +66,7 @@ export interface IPatientStore extends IPatient {
   readonly recentAssessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[] | undefined;
   readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
+  readonly recentScheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[] | undefined;
   readonly recentValues: IValue[] | undefined;
 
   // UI states
@@ -99,6 +101,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
+  readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
@@ -337,6 +340,10 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
+  @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
+    return sortScheduledActivitiesByDateAndTime(this.scheduledActivities, SortDirection.DESCENDING);
+  }
+
   @computed get name() {
     return this.profile.name || this.identity.name;
   }
@@ -457,6 +464,15 @@ export class PatientStore implements IPatientStore {
       return this.safetyPlan;
     }
     return undefined;
+  }
+
+  @computed get recentScheduledActivitiesSortedByDateAndTimeDescending() {
+    return this.scheduledActivitiesSortedByDateAndTimeDescending.slice(
+      0,
+      this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
+        (a) => a.dueDateTime < this.recentInteractionCutoffDateTime,
+      ),
+    );
   }
 
   @computed get recentValues() {
