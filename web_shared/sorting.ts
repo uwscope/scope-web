@@ -2,10 +2,12 @@ import { compareAsc } from "date-fns";
 import { toLocalDateTime } from "shared/time";
 import {
   IActivity,
+  IActivityLog,
   IActivitySchedule,
   IAssessmentLog,
   ICaseReview,
   IMoodLog,
+  IScheduledActivity,
   ISession,
 } from "shared/types";
 
@@ -34,6 +36,13 @@ export const compareActivityByName: (
   compareB: IActivity,
 ) => number = function (compareA, compareB) {
   return compareStringCaseInsensitive(compareA.name, compareB.name);
+};
+
+export const compareActivityLogsByDateAndTime: (
+  compareA: IActivityLog,
+  compareB: IActivityLog,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
 export const compareActivityScheduleByDateAndTime: (
@@ -74,6 +83,13 @@ export const compareMoodLogsByDateAndTime: (
   return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
+export const compareScheduledActivitiesByDateAndTime: (
+  compareA: IScheduledActivity,
+  compareB: IScheduledActivity,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.dueDateTime, compareB.dueDateTime);
+};
+
 export const compareSessionsByDate: (
   compareA: ISession,
   compareB: ISession,
@@ -95,6 +111,23 @@ export const sortActivitiesByName: (activities: IActivity[]) => IActivity[] =
   function (activities) {
     return activities.slice().sort(compareActivityByName);
   };
+
+export const sortActivityLogsByDateAndTime: (
+  activityLogs: IActivityLog[],
+  sortingDirection?: SortDirection,
+) => IActivityLog[] = function (
+  activityLogs,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return activityLogs
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareActivityLogsByDateAndTime,
+        sortingDirection,
+      ),
+    );
+};
 
 export const sortActivitySchedulesByDateAndTime: (
   activitySchedules: IActivitySchedule[],
@@ -154,6 +187,23 @@ export const sortMoodLogsByDateAndTime: (
     .sort(
       sortingDirectionComparator(
         compareMoodLogsByDateAndTime,
+        sortingDirection,
+      ),
+    );
+};
+
+export const sortScheduledActivitiesByDateAndTime: (
+  scheduledActivities: IScheduledActivity[],
+  sortingDirection?: SortDirection,
+) => IScheduledActivity[] = function (
+  scheduledActivities,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return scheduledActivities
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareScheduledActivitiesByDateAndTime,
         sortingDirection,
       ),
     );

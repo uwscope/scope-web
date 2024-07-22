@@ -14,11 +14,13 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortActivityLogsByDateAndTime,
   sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
+  sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
 } from "shared/sorting";
 import {
@@ -58,11 +60,17 @@ export interface IPatientStore extends IPatient {
   readonly recentInteractionCaseloadSummary: string | undefined;
   readonly recentInteractionCutoffDateTime: Date;
   readonly recentActivities: IActivity[] | undefined;
-  readonly recentActivityLogs: IActivityLog[] | undefined;
-  readonly recentActivitySchedules: IActivitySchedule[] | undefined;
-  readonly recentAssessmentLogs: IAssessmentLog[] | undefined;
-  readonly recentMoodLogs: IMoodLog[] | undefined;
+  readonly recentActivityLogsSortedByDateAndTimeDescending:
+    | IActivityLog[]
+    | undefined;
+  readonly recentAssessmentLogsSortedByDateAndTimeDescending:
+    | IAssessmentLog[]
+    | undefined;
+  readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
+  readonly recentScheduledActivitiesSortedByDateAndTimeDescending:
+    | IScheduledActivity[]
+    | undefined;
   readonly recentValues: IValue[] | undefined;
 
   // UI states
@@ -85,6 +93,7 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly activityLogsSortedByDateAndTimeDescending: IActivityLog[];
   readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
   readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
@@ -96,6 +105,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
+  readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
@@ -262,6 +272,13 @@ export class PatientStore implements IPatientStore {
     return this.loadActivityLogsQuery.value || [];
   }
 
+  @computed get activityLogsSortedByDateAndTimeDescending() {
+    return sortActivityLogsByDateAndTime(
+      this.activityLogs,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get activitySchedules(): IActivitySchedule[] {
     return this.loadActivitySchedulesQuery.value || [];
 
@@ -327,6 +344,13 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
+  @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
+    return sortScheduledActivitiesByDateAndTime(
+      this.scheduledActivities,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get name() {
     return this.profile.name || this.identity.name;
   }
@@ -390,7 +414,19 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentInteractionCaseloadSummary() {
-    const recentInteraction: boolean = this.recentMoodLogs.length > 0;
+    const recentInteraction: boolean =
+      (!!this.recentActivities && this.recentActivities.length > 0) ||
+      (!!this.recentActivityLogsSortedByDateAndTimeDescending &&
+        this.recentActivityLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentAssessmentLogsSortedByDateAndTimeDescending &&
+        this.recentAssessmentLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentMoodLogsSortedByDateAndTimeDescending &&
+        this.recentMoodLogsSortedByDateAndTimeDescending.length > 0) ||
+      !!this.recentSafetyPlan ||
+      (!!this.recentScheduledActivitiesSortedByDateAndTimeDescending &&
+        this.recentScheduledActivitiesSortedByDateAndTimeDescending.length >
+          0) ||
+      (!!this.recentValues && this.recentValues.length > 0);
 
     return recentInteraction ? "New" : undefined;
   }
@@ -405,36 +441,62 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentActivities() {
-    return this.activities.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+    if (this.activities.length === 0) {
+      return undefined;
+    } else {
+      return this.activities.filter((a) => {
+        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+      });
+    }
   }
 
-  @computed get recentActivityLogs() {
-    return this.activityLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+  @computed get recentActivityLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+    );
+
+    if (indexEnd < 0) {
+      return this.activityLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.activityLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
   }
 
-  @computed get recentActivitySchedules() {
-    return this.activitySchedules.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+  @computed get recentAssessmentLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+    );
+
+    if (indexEnd < 0) {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
   }
 
-  @computed get recentAssessmentLogs() {
-    return this.assessmentLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
-  }
+  @computed get recentMoodLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+    );
 
-  @computed get recentMoodLogs() {
-    return this.moodLogs.filter((a) => {
-      return a.recordedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+    if (indexEnd < 0) {
+      return this.moodLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.moodLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
   }
 
   @computed get recentSafetyPlan() {
+    // The default empty safety plan will not have a lastUpdatedDateTime
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
@@ -445,10 +507,32 @@ export class PatientStore implements IPatientStore {
     return undefined;
   }
 
+  @computed get recentScheduledActivitiesSortedByDateAndTimeDescending() {
+    const indexEnd =
+      this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
+        (a) => a.dueDateTime < this.recentInteractionCutoffDateTime,
+      );
+
+    if (indexEnd < 0) {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
+  }
+
   @computed get recentValues() {
-    return this.values.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+    if (this.values.length === 0) {
+      return undefined;
+    } else {
+      return this.values.filter((a) => {
+        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+      });
+    }
   }
 
   @computed get recordId() {

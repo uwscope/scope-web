@@ -70,49 +70,33 @@ export const RecentInteraction: FunctionComponent = observer(() => {
             .join(", ")}
           multiline={true}
         />
-        {/* <GridTextField
-          sm={9}
-          label="Activity Logs"
-          value={currentPatient.recentActivityLogs
-            ?.map(
-              (activityLog) =>
-                activityLog.dataSnapshot.scheduledActivity.dataSnapshot.activity
-                  .name,
-            )
-            .join(", ")}
-          multiline={true}
-        /> */}
         <GridTextField
           sm={3}
-          label="Activity Schedules Count"
+          label="Activity Logs Counts"
           value={
-            currentPatient.recentActivitySchedules
-              ? currentPatient.recentActivitySchedules.length
-              : "No Recent Activity Schedules"
+            currentPatient.recentActivityLogsSortedByDateAndTimeDescending
+              ?.length
           }
         />
         <GridTextField
           sm={3}
           label="Assessment Logs Count"
           value={
-            currentPatient.recentAssessmentLogs
-              ? currentPatient.recentAssessmentLogs.length
-              : "No Recent Assessment Logs"
+            currentPatient.recentAssessmentLogsSortedByDateAndTimeDescending
+              ?.length
           }
         />
         <GridTextField
           sm={3}
           label="Mood Logs Count"
           value={
-            currentPatient.recentMoodLogs
-              ? currentPatient.recentMoodLogs.length
-              : "No Recent Mood Logs"
+            currentPatient.recentMoodLogsSortedByDateAndTimeDescending?.length
           }
         />
         <GridTextField
           sm={3}
           label="Mood Log Scores"
-          value={currentPatient.recentMoodLogs
+          value={currentPatient.recentMoodLogsSortedByDateAndTimeDescending
             ?.map((moodLog) => moodLog.mood)
             .join(", ")}
           multiline={true}
