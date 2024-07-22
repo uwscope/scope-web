@@ -323,6 +323,14 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       }
     });
 
+    const getRowClassName = action((param: GridRowParams) => {
+      const id = param.row["id"] as string;
+      const data = currentPatient.getRecentAssessmentLogById(id);
+      if (!!data) {
+        return `recentRow`;
+      }
+    });
+
     return (
       <ActionPanel
         id={assessment.assessmentId}
@@ -391,6 +399,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
                 onRowClick={onRowClick}
                 isRowSelectable={() => false}
                 pagination
+                getRowClassName={getRowClassName}
               />
             )}
           {assessmentLogsSortedByDate.length > 0 && (
