@@ -323,13 +323,13 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       }
     });
 
-    const getRowClassName = action((param: GridRowParams) => {
+    const getRowClassName = (param: GridRowParams) => {
       const id = param.row["id"] as string;
       const data = currentPatient.getRecentAssessmentLogById(id);
       if (!!data) {
         return `recentRow`;
       }
-    });
+    };
 
     return (
       <ActionPanel
