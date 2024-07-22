@@ -1,9 +1,10 @@
 import React, { FunctionComponent } from "react";
 
 import { Grid, Typography } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { format, isBefore } from "date-fns";
 import compareDesc from "date-fns/compareDesc";
+import { action } from "mobx";
 import { observer } from "mobx-react";
 import { ActivitySuccessType } from "shared/enums";
 import { IActivityLog } from "shared/types";
@@ -122,6 +123,14 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     },
   ];
 
+  const getRowClassName = action((param: GridRowParams) => {
+    const id = param.row["id"] as string;
+    const data = currentPatient.getRecentScheduledActivityById(id);
+    if (!!data && data.completed) {
+      return `recentRow`;
+    }
+  });
+
   return (
     <ActionPanel
       id={getString("patient_progress_activity_hash")}
@@ -148,6 +157,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
             autoHeight={true}
             isRowSelectable={() => false}
             pagination
+            getRowClassName={getRowClassName}
           />
         )}
         {(!logs || logs.length == 0) && (
