@@ -101,11 +101,15 @@ export const HeaderText = withTheme(
 );
 
 const IFrameDivHorizontal = styled.div({
+  // These magic numbers come from the Vimeo embed code.
+  // Accessed via Vimeo website / Share / Embed.
   padding: "56.25% 0 0 0",
   position: "relative",
 });
 
 const IFrameDivVertical = styled.div({
+  // These magic numbers come from the Vimeo embed code.
+  // Accessed via Vimeo website / Share / Embed.
   padding: "177.78% 0 0 0",
   position: "relative",
 });
