@@ -23,9 +23,6 @@ export const RecentInteraction: FunctionComponent = observer(() => {
     currentPatient?.loadSessionsState.error ||
     currentPatient?.loadAssessmentLogsState.error;
 
-  console.log(currentPatient.activityLogsSortedByDateAndTimeDescending);
-  console.log(currentPatient.recentActivityLogsSortedByDateAndTimeDescending);
-
   return (
     <ActionPanel
       id="recent-interaction"
