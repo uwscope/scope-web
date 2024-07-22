@@ -40,11 +40,11 @@ const getIntroductoryVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl: "https://player.vimeo.com/video/915380014?h=4a48066509",
+            videoUrl: "https://player.vimeo.com/video/982276011?h=7050644cc3",
           },
           {
             videoTitle: "Your Plan for the Day",
-            videoUrl: "https://player.vimeo.com/video/915381092?h=d7086e3c14",
+            videoUrl: "https://player.vimeo.com/video/987300353?h=3dcaac827c",
           },
         ],
       },
@@ -53,11 +53,11 @@ const getIntroductoryVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl: "https://player.vimeo.com/video/915383443?h=566180773e",
+            videoUrl: "https://player.vimeo.com/video/983395476?h=cd4e7cc121",
           },
           {
             videoTitle: "Your Values & Activities Inventory",
-            videoUrl: "https://player.vimeo.com/video/915383866?h=1dcb2b203e",
+            videoUrl: "https://player.vimeo.com/video/983396619?h=eea48f7336",
           },
         ],
       },
@@ -66,11 +66,11 @@ const getIntroductoryVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl: "https://player.vimeo.com/video/916144650?h=62540f2b85",
+            videoUrl: "https://player.vimeo.com/video/983397109?h=1db15c4cf1",
           },
           {
             videoTitle: "Updating Your Activities",
-            videoUrl: "https://player.vimeo.com/video/916145231?h=cd5411fc7a",
+            videoUrl: "https://player.vimeo.com/video/983397565?h=8e2988c218",
           },
         ],
       },
@@ -79,11 +79,11 @@ const getIntroductoryVideosPageState = () =>
         screenVideos: [
           {
             videoTitle: "Introduction",
-            videoUrl: "https://player.vimeo.com/video/916145616?h=0d5efd9c97",
+            videoUrl: "https://player.vimeo.com/video/983399829?h=37532ea668",
           },
           {
             videoTitle: "Tracking Your Progress",
-            videoUrl: "https://player.vimeo.com/video/916146002?h=fdd65f0f53",
+            videoUrl: "https://player.vimeo.com/video/983400112?h=1b857fe3bb",
           },
         ],
       },
@@ -100,8 +100,17 @@ export const HeaderText = withTheme(
   })),
 );
 
-const IFrameDiv = styled.div({
+const IFrameDivHorizontal = styled.div({
+  // These magic numbers come from the Vimeo embed code.
+  // Accessed via Vimeo website / Share / Embed.
   padding: "56.25% 0 0 0",
+  position: "relative",
+});
+
+const IFrameDivVertical = styled.div({
+  // These magic numbers come from the Vimeo embed code.
+  // Accessed via Vimeo website / Share / Embed.
+  padding: "177.78% 0 0 0",
   position: "relative",
 });
 
@@ -166,13 +175,23 @@ export const HowToVideosPage: FunctionComponent = () => {
                 {video.videoTitle}
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
-                <IFrameDiv>
-                  <IFrame
-                    allow={iframeAllow}
-                    src={video.videoUrl + playerOptions}
-                    title={video.videoTitle}
-                  ></IFrame>
-                </IFrameDiv>
+                {screen.screenTitle === "Introduction" ? (
+                  <IFrameDivHorizontal>
+                    <IFrame
+                      allow={iframeAllow}
+                      src={video.videoUrl + playerOptions}
+                      title={video.videoTitle}
+                    ></IFrame>
+                  </IFrameDivHorizontal>
+                ) : (
+                  <IFrameDivVertical>
+                    <IFrame
+                      allow={iframeAllow}
+                      src={video.videoUrl + playerOptions}
+                      title={video.videoTitle}
+                    ></IFrame>
+                  </IFrameDivVertical>
+                )}
               </AccordionDetails>
             </Accordion>
           ))}
