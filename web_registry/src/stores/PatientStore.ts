@@ -61,16 +61,16 @@ export interface IPatientStore extends IPatient {
   readonly recentInteractionCutoffDateTime: Date;
   readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogsSortedByDateAndTimeDescending:
-  | IActivityLog[]
-  | undefined;
+    | IActivityLog[]
+    | undefined;
   readonly recentAssessmentLogsSortedByDateAndTimeDescending:
-  | IAssessmentLog[]
-  | undefined;
+    | IAssessmentLog[]
+    | undefined;
   readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
   readonly recentScheduledActivitiesSortedByDateAndTimeDescending:
-  | IScheduledActivity[]
-  | undefined;
+    | IScheduledActivity[]
+    | undefined;
   readonly recentValues: IValue[] | undefined;
 
   // UI states
@@ -416,13 +416,18 @@ export class PatientStore implements IPatientStore {
 
   @computed get recentInteractionCaseloadSummary() {
     const recentInteraction: boolean =
-      this.recentActivities.length > 0 ||
-      this.recentActivityLogsSortedByDateAndTimeDescending.length > 0 ||
-      this.recentAssessmentLogsSortedByDateAndTimeDescending.length > 0 ||
-      this.recentMoodLogsSortedByDateAndTimeDescending.length > 0 ||
+      (!!this.recentActivities && this.recentActivities.length > 0) ||
+      (!!this.recentActivityLogsSortedByDateAndTimeDescending &&
+        this.recentActivityLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentAssessmentLogsSortedByDateAndTimeDescending &&
+        this.recentAssessmentLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentMoodLogsSortedByDateAndTimeDescending &&
+        this.recentMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentSafetyPlan ||
-      this.recentScheduledActivitiesSortedByDateAndTimeDescending.length > 0 ||
-      this.recentValues.length > 0;
+      (!!this.recentScheduledActivitiesSortedByDateAndTimeDescending &&
+        this.recentScheduledActivitiesSortedByDateAndTimeDescending.length >
+          0) ||
+      (!!this.recentValues && this.recentValues.length > 0);
 
     return recentInteraction ? "New" : undefined;
   }
@@ -437,43 +442,66 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentActivities() {
-    return this.activities.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+    if (this.activities.length === 0) {
+      return undefined;
+    } else {
+      return this.activities.filter((a) => {
+        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+      });
+    }
   }
 
   @computed get recentActivityLogsSortedByDateAndTimeDescending() {
-    return this.activityLogsSortedByDateAndTimeDescending.slice(
-      0,
-      this.activityLogsSortedByDateAndTimeDescending.findIndex(
-        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
-      ),
+    const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
     );
+
+    if (indexEnd < 0) {
+      return this.activityLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.activityLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
   }
 
   @computed get recentAssessmentLogsSortedByDateAndTimeDescending() {
-    return this.assessmentLogsSortedByDateAndTimeDescending.slice(
-      0,
-      this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
-        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
-      ),
+    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
     );
+
+    if (indexEnd < 0) {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
   }
 
   @computed get recentMoodLogsSortedByDateAndTimeDescending() {
-    return this.moodLogsSortedByDateAndTimeDescending.slice(
-      0,
-      this.moodLogsSortedByDateAndTimeDescending.findIndex(
-        (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
-      ),
+    const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
     );
+
+    if (indexEnd < 0) {
+      return this.moodLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.moodLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
   }
 
   @computed get recentSafetyPlan() {
+    // The default empty safety plan will not have a lastUpdatedDateTime
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-      this.recentInteractionCutoffDateTime
+        this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -481,18 +509,31 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentScheduledActivitiesSortedByDateAndTimeDescending() {
-    return this.scheduledActivitiesSortedByDateAndTimeDescending.slice(
-      0,
+    const indexEnd =
       this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
         (a) => a.dueDateTime < this.recentInteractionCutoffDateTime,
-      ),
-    );
+      );
+
+    if (indexEnd < 0) {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
   }
 
   @computed get recentValues() {
-    return this.values.filter((a) => {
-      return a.editedDateTime >= this.recentInteractionCutoffDateTime;
-    });
+    if (this.values.length === 0) {
+      return undefined;
+    } else {
+      return this.values.filter((a) => {
+        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+      });
+    }
   }
 
   @computed get recordId() {
@@ -995,10 +1036,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
