@@ -39,10 +39,10 @@ export const Table = withTheme(
       backgroundColor: "rgba(0,0,0,0.05)",
       overflow: "hidden",
     },
-    ".recentRow": {
+    ".recentEntryRow": {
       backgroundColor: "rgba(53, 186, 246, 1)",
     },
-    ".recentRow:hover": {
+    ".recentEntryRow:hover": {
       backgroundColor: "rgba(3, 169, 244, 1)",
     },
   })),

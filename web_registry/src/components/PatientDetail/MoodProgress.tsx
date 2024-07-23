@@ -89,7 +89,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       const id = param.row["id"] as string;
       const data = currentPatient.getRecentMoodLogById(id);
       if (!!data) {
-        return `recentRow`;
+        return `recentEntryRow`;
       }
     };
 

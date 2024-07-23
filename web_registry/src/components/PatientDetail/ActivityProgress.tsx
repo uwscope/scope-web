@@ -126,7 +126,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     const id = param.row["id"] as string;
     const data = currentPatient.getRecentScheduledActivityById(id);
     if (!!data && data.completed) {
-      return `recentRow`;
+      return `recentEntryRow`;
     }
   };
 
