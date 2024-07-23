@@ -116,7 +116,7 @@ export interface IPatientStore extends IPatient {
   getRecentAssessmentLogById: (
     assessmentLogId: string,
   ) => IAssessmentLog | undefined;
-  getRecentAssessmentLogsByAssessmentId: (
+  recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
     assessmentId: string,
   ) => IAssessmentLog[] | undefined;
   getRecentMoodLogById: (moodLogId: string) => IMoodLog | undefined;
@@ -696,7 +696,9 @@ export class PatientStore implements IPatientStore {
     );
   }
 
-  public getRecentAssessmentLogsByAssessmentId(assessmentId: string) {
+  public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+    assessmentId: string,
+  ) {
     return this.recentAssessmentLogsSortedByDateAndTimeDescending?.filter(
       (l) => l.assessmentId == assessmentId,
     );

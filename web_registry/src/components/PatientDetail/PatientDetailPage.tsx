@@ -136,11 +136,11 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
           recentInteractionBadgeContent: ((): React.ReactNode => {
             switch (a.id) {
               case "gad-7":
-                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "gad-7",
                 )?.length;
               case "phq-9":
-                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "phq-9",
                 )?.length;
               case "mood":
