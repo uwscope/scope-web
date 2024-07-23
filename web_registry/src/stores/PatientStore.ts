@@ -113,6 +113,16 @@ export interface IPatientStore extends IPatient {
   getActivitiesWithoutValueId: () => IActivity[];
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getRecentAssessmentLogById: (
+    assessmentLogId: string,
+  ) => IAssessmentLog | undefined;
+  recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
+    assessmentId: string,
+  ) => IAssessmentLog[] | undefined;
+  getRecentMoodLogById: (moodLogId: string) => IMoodLog | undefined;
+  getRecentScheduledActivityById: (
+    scheduledActivityId: string,
+  ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
@@ -677,6 +687,32 @@ export class PatientStore implements IPatientStore {
   public getCaseReviewById(caseReviewId: string) {
     return this.caseReviews.find(
       (current) => current.caseReviewId == caseReviewId,
+    );
+  }
+
+  public getRecentAssessmentLogById(assessmentLogId: string) {
+    return this.recentAssessmentLogsSortedByDateAndTimeDescending?.find(
+      (current) => current.assessmentLogId == assessmentLogId,
+    );
+  }
+
+  public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+    assessmentId: string,
+  ) {
+    return this.recentAssessmentLogsSortedByDateAndTimeDescending?.filter(
+      (l) => l.assessmentId == assessmentId,
+    );
+  }
+
+  public getRecentMoodLogById(moodLogId: string) {
+    return this.recentMoodLogsSortedByDateAndTimeDescending?.find(
+      (current) => current.moodLogId == moodLogId,
+    );
+  }
+
+  public getRecentScheduledActivityById(scheduledActivityId: string) {
+    return this.recentScheduledActivitiesSortedByDateAndTimeDescending?.find(
+      (current) => current.scheduledActivityId == scheduledActivityId,
     );
   }
 
