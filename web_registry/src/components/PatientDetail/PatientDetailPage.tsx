@@ -177,12 +177,13 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_values_inventory_hash"),
       label: getString("patient_detail_subsection_values_inventory_title"),
-      recentInteractionBadgeContent: currentPatient?.recentActivities
-        ? currentPatient?.recentActivities?.length +
-          (currentPatient?.recentValues
-            ? currentPatient?.recentValues?.length
-            : 0)
-        : currentPatient?.recentValues?.length,
+      recentInteractionBadgeContent:
+        (currentPatient?.recentActivities
+          ? currentPatient?.recentActivities?.length
+          : 0) +
+        (currentPatient?.recentValues
+          ? currentPatient?.recentValues?.length
+          : 0),
     },
     {
       hash: getString("patient_detail_subsection_safety_plan_hash"),
