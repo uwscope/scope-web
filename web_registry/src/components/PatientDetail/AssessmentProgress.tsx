@@ -327,7 +327,9 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       const id = param.row["id"] as string;
       const data = currentPatient.getRecentAssessmentLogById(id);
       if (!!data) {
-        return `recentEntryRow`;
+        return "recentEntryRow";
+      } else {
+        return "";
       }
     };
 
