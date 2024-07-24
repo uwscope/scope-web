@@ -118,10 +118,16 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
-  getRecentAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
-  getRecentAssessmentLogsByAssessmentId: (assessmentId: string) => IAssessmentLog[] | undefined;
+  getRecentAssessmentLogById: (
+    assessmentLogId: string,
+  ) => IAssessmentLog | undefined;
+  recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
+    assessmentId: string,
+  ) => IAssessmentLog[] | undefined;
   getRecentMoodLogById: (moodLogId: string) => IMoodLog | undefined;
-  getRecentScheduledActivityById: (scheduledActivityId: string) => IScheduledActivity | undefined;
+  getRecentScheduledActivityById: (
+    scheduledActivityId: string,
+  ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
   getValuesWithoutActivity: () => IValue[] | undefined;
@@ -714,7 +720,9 @@ export class PatientStore implements IPatientStore {
     );
   }
 
-  public getRecentAssessmentLogsByAssessmentId(assessmentId: string) {
+  public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+    assessmentId: string,
+  ) {
     return this.recentAssessmentLogsSortedByDateAndTimeDescending?.filter(
       (l) => l.assessmentId == assessmentId,
     );

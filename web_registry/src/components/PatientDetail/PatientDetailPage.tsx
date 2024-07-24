@@ -136,11 +136,11 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
           recentInteractionBadgeContent: ((): React.ReactNode => {
             switch (a.id) {
               case "gad-7":
-                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "gad-7",
                 )?.length;
               case "phq-9":
-                return currentPatient?.getRecentAssessmentLogsByAssessmentId(
+                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "phq-9",
                 )?.length;
               case "mood":
@@ -177,12 +177,13 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_values_inventory_hash"),
       label: getString("patient_detail_subsection_values_inventory_title"),
-      recentInteractionBadgeContent: currentPatient?.recentActivities
-        ? currentPatient?.recentActivities?.length +
-          (currentPatient?.recentValues
-            ? currentPatient?.recentValues?.length
-            : 0)
-        : currentPatient?.recentValues?.length,
+      recentInteractionBadgeContent:
+        (currentPatient?.recentActivities
+          ? currentPatient?.recentActivities?.length
+          : 0) +
+        (currentPatient?.recentValues
+          ? currentPatient?.recentValues?.length
+          : 0),
     },
     {
       hash: getString("patient_detail_subsection_safety_plan_hash"),
