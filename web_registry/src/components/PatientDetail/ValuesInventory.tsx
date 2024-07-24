@@ -4,6 +4,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Grid,
+  SxProps,
   Table,
   TableBody,
   TableCell,
@@ -183,6 +184,23 @@ export const ValuesInventory: FunctionComponent = observer(() => {
       .slice()
       .sort(compareActivitiesAndValuesWithoutActivity);
 
+  const getTableRowSxProps = (activityOrValue: IActivity | IValue): SxProps => {
+    if ("activityId" in activityOrValue && !!activityOrValue.activityId) {
+      const data = currentPatient.getRecentActivityById(
+        activityOrValue.activityId,
+      );
+      if (!!data) {
+        return { backgroundColor: "rgba(197, 202, 233, 1)" };
+      }
+    } else if (!!activityOrValue.valueId) {
+      const data = currentPatient.getRecentValueById(activityOrValue.valueId);
+      if (!!data) {
+        return { backgroundColor: "rgba(197, 202, 233, 1)" };
+      }
+    }
+    return {};
+  };
+
   return (
     <ActionPanel
       id={getString("patient_detail_subsection_values_inventory_hash")}
@@ -263,7 +281,10 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                     );
 
                     return (
-                      <TableRow key={idx}>
+                      <TableRow
+                        key={idx}
+                        sx={getTableRowSxProps(activityOrValue)}
+                      >
                         <TableCell component="th" scope="row">
                           {!!lifeAreaContent ? lifeAreaContent.name : "-"}
                         </TableCell>

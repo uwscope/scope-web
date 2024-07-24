@@ -118,9 +118,15 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getRecentActivityById: (
+    activityId: string,
+  ) => IActivity | undefined;
   getRecentAssessmentLogById: (
     assessmentLogId: string,
   ) => IAssessmentLog | undefined;
+  getRecentValueById: (
+    valueId: string,
+  ) => IValue | undefined;
   recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
     assessmentId: string,
   ) => IAssessmentLog[] | undefined;
@@ -714,9 +720,21 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  public getRecentActivityById(activityId: string) {
+    return this.recentActivities?.find(
+      (current) => current.activityId == activityId,
+    );
+  }
+
   public getRecentAssessmentLogById(assessmentLogId: string) {
     return this.recentAssessmentLogsSortedByDateAndTimeDescending?.find(
       (current) => current.assessmentLogId == assessmentLogId,
+    );
+  }
+
+  public getRecentValueById(valueId: string) {
+    return this.recentValues?.find(
+      (current) => current.valueId == valueId,
     );
   }
 
