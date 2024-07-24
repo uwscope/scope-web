@@ -106,14 +106,6 @@ export interface IActivity {
   editedDateTime: Date;
 }
 
-export interface IValue {
-  valueId?: string; // TODO: Why is this optional?
-
-  name: string;
-  lifeAreaId: string;
-
-  editedDateTime: Date;
-}
 export interface IActivitySchedule {
   activityScheduleId?: string;
 
@@ -260,7 +252,14 @@ export interface IValuesInventory {
   assignedDateTime?: Date;
 }
 
+export interface IValue {
+  valueId?: string;
 
+  name: string;
+  lifeAreaId: string;
+
+  editedDateTime: Date;
+}
 
 export interface ILifeAreaContent {
   id: string;
