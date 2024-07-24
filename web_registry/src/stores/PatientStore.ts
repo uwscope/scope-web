@@ -14,6 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortActivitiesByDateAndTime,
   sortActivityLogsByDateAndTime,
   sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
@@ -22,6 +23,7 @@ import {
   sortMoodLogsByDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
+  sortValuesByDateAndTime,
 } from "shared/sorting";
 import {
   getLoadAndLogQuery,
@@ -93,6 +95,7 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly activitiesSortedByDateAndTimeDescending: IActivity[];
   readonly activityLogsSortedByDateAndTimeDescending: IActivityLog[];
   readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
   readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
@@ -106,11 +109,13 @@ export interface IPatientStore extends IPatient {
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
+  readonly valuesSortedByDateAndTimeDescending: IValue[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
   getActivitiesWithoutValueId: () => IActivity[];
+  getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
   getRecentAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
@@ -119,6 +124,7 @@ export interface IPatientStore extends IPatient {
   getRecentScheduledActivityById: (scheduledActivityId: string) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
+  getValuesWithoutActivity: () => IValue[] | undefined;
 
   // Data load/save
   load(getToken?: () => string | undefined, onUnauthorized?: () => void): void;
@@ -276,6 +282,13 @@ export class PatientStore implements IPatientStore {
     return this.loadActivityLogsQuery.value || [];
   }
 
+  @computed get activitiesSortedByDateAndTimeDescending() {
+    return sortActivitiesByDateAndTime(
+      this.activities,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get activityLogsSortedByDateAndTimeDescending() {
     return sortActivityLogsByDateAndTime(
       this.activityLogs,
@@ -351,6 +364,13 @@ export class PatientStore implements IPatientStore {
   @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
     return sortScheduledActivitiesByDateAndTime(
       this.scheduledActivities,
+      SortDirection.DESCENDING,
+    );
+  }
+
+  @computed get valuesSortedByDateAndTimeDescending() {
+    return sortValuesByDateAndTime(
+      this.values,
       SortDirection.DESCENDING,
     );
   }
@@ -672,6 +692,10 @@ export class PatientStore implements IPatientStore {
     });
   }
 
+  public getActivityById(activityId: string) {
+    return this.activities.find((current) => current.activityId == activityId);;
+  }
+
   public getAssessmentLogById(assessmentLogId: string) {
     return this.assessmentLogs.find(
       (current) => current.assessmentLogId == assessmentLogId,
@@ -714,6 +738,11 @@ export class PatientStore implements IPatientStore {
 
   public getValueById(valueId: string) {
     return this.values.find((current) => current.valueId == valueId);
+  }
+
+  public getValuesWithoutActivity() {
+    // NOTE: Verify why .valueId is optional.
+    return this.values.filter((value) => this.getActivitiesByValueId(value.valueId as string).length === 0);
   }
 
   // Data load/save
