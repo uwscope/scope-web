@@ -75,6 +75,17 @@ export const ValuesInventory: FunctionComponent = observer(() => {
           : "",
   );
 
+  const activityFromActivityOrValue: (
+    activityOrValue: IActivity | IValue,
+  ) => IActivity | undefined = (activityOrValue) => {
+    return "activityId" in activityOrValue ? activityOrValue : undefined;
+  };
+
+  const valueFromActivityOrValue: (
+    activityOrValue: IActivity | IValue,
+  ) => IValue | undefined = (activityOrValue) => {
+    return "lifeAreaId" in activityOrValue ? activityOrValue : undefined;
+  };
 
   const compareActivitiesAndValuesWithoutActivity = (
     activityOrValueWithoutActivityA: IActivity | IValue,
