@@ -135,6 +135,9 @@ export interface IPatientStore extends IPatient {
   getRecentEntryScheduledActivityById: (
     scheduledActivityId: string,
   ) => IScheduledActivity | undefined;
+  getScheduledActivityById: (
+    scheduledActivityId: string,
+  ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
@@ -721,7 +724,7 @@ export class PatientStore implements IPatientStore {
     );
   }
 
-  public getRecentAssessmentLogById(assessmentLogId: string) {
+  public getRecentEntryAssessmentLogById(assessmentLogId: string) {
     return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.find(
       (current) => current.assessmentLogId == assessmentLogId,
     );
@@ -749,6 +752,12 @@ export class PatientStore implements IPatientStore {
 
   public getRecentEntryScheduledActivityById(scheduledActivityId: string) {
     return this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending?.find(
+      (current) => current.scheduledActivityId == scheduledActivityId,
+    );
+  }
+
+  public getScheduledActivityById(scheduledActivityId: string) {
+    return this.scheduledActivities.find(
       (current) => current.scheduledActivityId == scheduledActivityId,
     );
   }

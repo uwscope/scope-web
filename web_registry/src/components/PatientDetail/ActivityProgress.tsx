@@ -1,14 +1,25 @@
 import React, { FunctionComponent } from "react";
 
 import { Grid, Typography } from "@mui/material";
-import { GridColDef, GridRowParams } from "@mui/x-data-grid";
-import { format, isBefore } from "date-fns";
+import {
+  GridColDef,
+  GridRowHeightParams,
+  GridRowParams,
+} from "@mui/x-data-grid";
+import { isBefore } from "date-fns";
 import compareDesc from "date-fns/compareDesc";
 import { observer } from "mobx-react";
 import { ActivitySuccessType } from "shared/enums";
 import { IActivityLog } from "shared/types";
 import ActionPanel from "src/components/common/ActionPanel";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  dateFormatter,
+  nullUndefinedFormatter,
+  renderMultilineCell,
+  Table,
+  TableRowHeight_2RowsNoScroll,
+  TableRowHeight_3RowsNoScroll,
+} from "src/components/common/Table";
 import { getString } from "src/services/strings";
 import { usePatient } from "src/stores/stores";
 
@@ -46,11 +57,14 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     return {
       id: log.scheduledActivityId,
       name: log.dataSnapshot.activity.name,
-      dueDate: format(log.dueDateTime, "MM/dd/yyyy"),
-      recordedDateTime:
-        log.completed && activityLog?.recordedDateTime
-          ? format(activityLog?.recordedDateTime, "MM/dd/yyyy")
-          : "--",
+      dueDate: log.dueDateTime,
+      // format(log.dueDateTime, "MM/dd/yyyy"),
+      recordedDateTime: log.completed
+        ? activityLog?.recordedDateTime
+        : undefined,
+      // log.completed && activityLog?.recordedDateTime
+      //   ? format(activityLog?.recordedDateTime, "MM/dd/yyyy")
+      //   : "--",
       completed:
         log.completed && activityLog?.success
           ? getCompleted(activityLog?.success)
@@ -72,57 +86,69 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     {
       field: "dueDate",
       headerName: getString("patient_progress_activity_header_due_date"),
-      width: 100,
-      sortable: true,
-      hideSortIcons: false,
+      width: 65,
+      align: "center",
+      headerAlign: "center",
+      valueFormatter: nullUndefinedFormatter(dateFormatter),
     },
     {
       field: "recordedDateTime",
       headerName: getString("patient_progress_activity_header_submitted_date"),
-      width: 100,
-      sortable: true,
-      hideSortIcons: false,
+      width: 65,
+      align: "center",
+      headerAlign: "center",
+      valueFormatter: nullUndefinedFormatter(dateFormatter),
     },
     {
       field: "name",
       headerName: getString("patient_progress_activity_header_activity"),
-      width: 300,
+      width: 200,
+      align: "left",
+      headerAlign: "center",
       renderCell: renderMultilineCell,
     },
     {
       field: "completed",
       headerName: getString("patient_progress_activity_header_success"),
-      width: 200,
-      sortable: true,
-      hideSortIcons: false,
+      width: 125,
+      align: "left",
+      headerAlign: "center",
+      renderCell: renderMultilineCell,
     },
     {
       field: "alternative",
       headerName: getString("patient_progress_activity_header_alternative"),
-      width: 200,
-      sortable: false,
-      hideSortIcons: false,
+      width: 150,
+      align: "left",
+      headerAlign: "center",
       renderCell: renderMultilineCell,
     },
     {
       field: "pleasure",
       headerName: getString("patient_progress_activity_header_pleasure"),
-      width: 100,
+      width: 65,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "accomplishment",
       headerName: getString("patient_progress_activity_header_accomplishment"),
-      width: 100,
+      width: 65,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "comment",
       headerName: getString("patient_progress_activity_header_comment"),
       width: 200,
+      flex: 1,
+      align: "left",
+      headerAlign: "center",
       renderCell: renderMultilineCell,
     },
   ];
 
-  const getRowClassName = (param: GridRowParams) => {
+  const getRowClassName = React.useCallback((param: GridRowParams) => {
     const id = param.row["id"] as string;
     const data = currentPatient.getRecentEntryScheduledActivityById(id);
     if (!!data && data.completed) {
@@ -130,7 +156,33 @@ export const ActivityProgress: FunctionComponent = observer(() => {
     } else {
       return "";
     }
-  };
+  }, []);
+
+  const getRowHeight = React.useCallback(
+    (param: GridRowHeightParams) => {
+      const id = param.id as string;
+
+      const data = currentPatient.getScheduledActivityById(id);
+      if (data) {
+        const log = logMap.get(data.scheduledActivityId);
+
+        if (data.dataSnapshot.activity.name.length > 100) {
+          return TableRowHeight_3RowsNoScroll;
+        }
+
+        if (!!log && !!log.alternative && log.alternative.length >= 50) {
+          return TableRowHeight_3RowsNoScroll;
+        }
+
+        if (!!log && !!log.comment && log.comment.length >= 50) {
+          return TableRowHeight_3RowsNoScroll;
+        }
+      }
+
+      return undefined;
+    },
+    [logMap],
+  );
 
   return (
     <ActionPanel
@@ -154,10 +206,22 @@ export const ActivityProgress: FunctionComponent = observer(() => {
               disableColumnMenu: true,
               ...c,
             }))}
+            // These heights are similar to a 'density' of 'compact'.
+            // But density is multiplied against these, so do not also apply it.
             headerHeight={36}
+            // Default to allow 2 rows.
+            rowHeight={TableRowHeight_2RowsNoScroll}
+            // getRowHeight aims to detect situations where more height is needed.
+            getRowHeight={getRowHeight}
             autoHeight={true}
             isRowSelectable={() => false}
             pagination
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            initialState={{
+              pagination: {
+                pageSize: 25,
+              },
+            }}
             getRowClassName={getRowClassName}
           />
         )}
