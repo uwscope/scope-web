@@ -759,7 +759,10 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
         <Table
           rows={data}
           columns={columns}
+          // These heights are similar to a 'density' of 'compact'.
+          // But density is multiplied against these, so do not also apply it.
           headerHeight={36}
+          // Caseload overview text is never multi-row, so this 36 is sufficient.
           rowHeight={36}
           onRowClick={onRowClick}
           autoHeight={true}
