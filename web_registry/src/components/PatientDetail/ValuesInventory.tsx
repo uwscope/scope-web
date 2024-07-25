@@ -75,10 +75,6 @@ export const ValuesInventory: FunctionComponent = observer(() => {
           : "",
   );
 
-  const activitiesAndValuesWithoutActivity = [
-    ...activities,
-    ...currentPatient.valuesWithoutActivity,
-  ];
 
   const compareActivitiesAndValuesWithoutActivity = (
     activityOrValueWithoutActivityA: IActivity | IValue,
@@ -178,10 +174,10 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     return compare;
   };
 
-  const sortedActivitiesAndValuesWithoutActivity =
-    activitiesAndValuesWithoutActivity
-      .slice()
-      .sort(compareActivitiesAndValuesWithoutActivity);
+  const sortedActivitiesAndValuesWithoutActivity = [
+    ...activities,
+    ...currentPatient.valuesWithoutActivity,
+  ].sort(compareActivitiesAndValuesWithoutActivity);
 
   const getTableRowSxProps = (activityOrValue: IActivity | IValue): SxProps => {
     if ("activityId" in activityOrValue && !!activityOrValue.activityId) {
