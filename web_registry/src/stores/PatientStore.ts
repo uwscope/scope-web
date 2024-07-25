@@ -111,10 +111,12 @@ export interface IPatientStore extends IPatient {
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
   readonly valuesSortedByDateAndTimeDescending: IValue[];
 
+  // Filters
+  readonly valuesWithoutActivity: IValue[];
+
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
-  getActivitiesWithoutValueId: () => IActivity[];
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
@@ -132,7 +134,6 @@ export interface IPatientStore extends IPatient {
   ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
-  getValuesWithoutActivity: () => IValue[] | undefined;
 
   // Data load/save
   load(getToken?: () => string | undefined, onUnauthorized?: () => void): void;
@@ -691,12 +692,6 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  public getActivitiesWithoutValueId() {
-    return this.activities.filter((current) => {
-      return !current.valueId;
-    });
-  }
-
   public getActivityById(activityId: string) {
     return this.activities.find((current) => current.activityId == activityId);
   }
@@ -757,11 +752,12 @@ export class PatientStore implements IPatientStore {
     return this.values.find((current) => current.valueId == valueId);
   }
 
-  public getValuesWithoutActivity() {
-    // NOTE: Verify why .valueId is optional.
+  // Filters
+  @computed public get valuesWithoutActivity(): IValue[] {
     return this.values.filter(
       (value) =>
-        this.getActivitiesByValueId(value.valueId as string).length === 0,
+        !value.valueId ||
+        this.getActivitiesByValueId(value.valueId).length === 0,
     );
   }
 

@@ -75,11 +75,10 @@ export const ValuesInventory: FunctionComponent = observer(() => {
           : "",
   );
 
-  const valuesWithoutActivity = currentPatient.getValuesWithoutActivity();
-
-  const activitiesAndValuesWithoutActivity = activities.concat(
-    valuesWithoutActivity || [],
-  );
+  const activitiesAndValuesWithoutActivity = [
+    ...activities,
+    ...currentPatient.valuesWithoutActivity,
+  ];
 
   const compareActivitiesAndValuesWithoutActivity = (
     activityOrValueWithoutActivityA: IActivity | IValue,
