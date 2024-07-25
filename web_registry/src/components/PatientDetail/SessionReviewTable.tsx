@@ -17,7 +17,12 @@ import {
   isSession,
   KeyedMap,
 } from "shared/types";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_3RowsNoScroll,
+  TableRowHeight_5RowsNoScroll,
+} from "src/components/common/Table";
 import { usePatient } from "src/stores/stores";
 import styled from "styled-components";
 
@@ -224,7 +229,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
     })();
 
     if (data.otherRecommendations.length > 200 || data.note.length > 400) {
-      return 100;
+      return TableRowHeight_5RowsNoScroll;
     }
 
     return undefined;
@@ -245,8 +250,8 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
         // These heights are similar to a 'density' of 'compact'.
         // But density is multiplied against these, so do not also apply it.
         headerHeight={36}
-        // Row height of 60 allows display of 3 rows of text.
-        rowHeight={60}
+        // Default to allow 3 rows.
+        rowHeight={TableRowHeight_3RowsNoScroll}
         // getRowHeight aims to detect situations where more height is needed.
         getRowHeight={getRowHeight}
         onRowClick={onRowClick}

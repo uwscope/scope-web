@@ -5,7 +5,6 @@ import { Badge, Stack, Tooltip } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
 import {
   GridCellParams,
-  GridCellValue,
   GridColDef,
   GridColumnHeaderParams,
   GridComparatorFn,
@@ -25,8 +24,13 @@ import {
 } from "date-fns";
 import { observer } from "mobx-react";
 import { DiscussionFlags } from "shared/enums";
-import { formatDateOnly, getFollowUpWeeks, toUTCDateOnly } from "shared/time";
-import { Table } from "src/components/common/Table";
+import { getFollowUpWeeks, toUTCDateOnly } from "shared/time";
+import {
+  dateFormatter,
+  NA,
+  nullUndefinedFormatter,
+  Table,
+} from "src/components/common/Table";
 import { IPatientStore } from "src/stores/PatientStore";
 import {
   getAssessmentScoreColorName,
@@ -147,18 +151,6 @@ const nullUndefinedComparator: (
   };
 };
 
-const nullUndefinedFormatter: (
-  formatter: (params: GridValueFormatterParams) => GridCellValue,
-) => (params: GridValueFormatterParams) => GridCellValue = (formatter) => {
-  return (params) => {
-    if (params.value === null || params.value === undefined) {
-      return NA;
-    } else {
-      return formatter(params);
-    }
-  };
-};
-
 const nullUndefinedRenderCell: (
   renderer: (params: GridRenderCellParams) => React.ReactNode,
 ) => (params: GridRenderCellParams) => React.ReactNode = (renderer) => {
@@ -212,12 +204,6 @@ const discussionAndRecentEntryFlagsComparator: GridComparatorFn = (v1, v2) => {
   }
 
   return 0;
-};
-
-const dateFormatter: (params: GridValueFormatterParams) => string = (
-  params,
-) => {
-  return formatDateOnly(params.value as Date, "MM/dd/yy");
 };
 
 const stringOrNumberFormatter: (params: GridValueFormatterParams) => string = (
@@ -328,8 +314,6 @@ const rowDefaultComparator = (v1: { name: string }, v2: { name: string }) => {
   // When a sort is selected in the grid, this becomes the secondary sorting criterion.
   return v1.name.localeCompare(v2.name);
 };
-
-const NA = "--";
 
 export interface ICaseloadTableProps {
   patients: ReadonlyArray<IPatientStore>;

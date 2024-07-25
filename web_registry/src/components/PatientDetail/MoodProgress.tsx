@@ -11,7 +11,12 @@ import { observer } from "mobx-react";
 import { IAssessment, IMoodLog } from "shared/types";
 import ActionPanel from "src/components/common/ActionPanel";
 import { AssessmentVis } from "src/components/common/AssessmentVis";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_2RowsNoScroll,
+  TableRowHeight_3RowsNoScroll,
+} from "src/components/common/Table";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
 
@@ -96,7 +101,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       const data = currentPatient.getMoodLogById(id);
 
       if (!!data && !!data.comment && data.comment.length >= 200) {
-        return 60;
+        return TableRowHeight_3RowsNoScroll;
       }
 
       return undefined;
@@ -128,8 +133,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
                 // These heights are similar to a 'density' of 'compact'.
                 // But density is multiplied against these, so do not also apply it.
                 headerHeight={36}
-                // Row height of 40 allows display of 2 rows of text.
-                rowHeight={40}
+                // Default to allow 2 rows.
+                rowHeight={TableRowHeight_2RowsNoScroll}
                 // getRowHeight aims to detect situations where more height is needed.
                 getRowHeight={getRowHeight}
                 autoHeight={true}

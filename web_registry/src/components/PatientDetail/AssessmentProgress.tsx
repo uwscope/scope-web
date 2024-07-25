@@ -35,7 +35,12 @@ import { AssessmentVis } from "src/components/common/AssessmentVis";
 import { GridDropdownField } from "src/components/common/GridField";
 import Questionnaire from "src/components/common/Questionnaire";
 import StatefulDialog from "src/components/common/StatefulDialog";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_2RowsNoScroll,
+  TableRowHeight_3RowsNoScroll,
+} from "src/components/common/Table";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
 import {
@@ -341,7 +346,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       const data = currentPatient.getAssessmentLogById(id);
 
       if (!!data && !!data.comment && data.comment.length >= 100) {
-        return 60;
+        return TableRowHeight_3RowsNoScroll;
       }
 
       return undefined;
@@ -413,8 +418,8 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
                 // These heights are similar to a 'density' of 'compact'.
                 // But density is multiplied against these, so do not also apply it.
                 headerHeight={36}
-                // Row height of 40 allows display of 2 rows of text.
-                rowHeight={40}
+                // Default to allow 2 rows.
+                rowHeight={TableRowHeight_2RowsNoScroll}
                 // getRowHeight aims to detect situations where more height is needed.
                 getRowHeight={getRowHeight}
                 autoHeight={true}
