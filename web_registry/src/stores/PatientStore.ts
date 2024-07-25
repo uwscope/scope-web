@@ -63,16 +63,16 @@ export interface IPatientStore extends IPatient {
   readonly recentInteractionCutoffDateTime: Date;
   readonly recentActivities: IActivity[] | undefined;
   readonly recentActivityLogsSortedByDateAndTimeDescending:
-  | IActivityLog[]
-  | undefined;
+    | IActivityLog[]
+    | undefined;
   readonly recentAssessmentLogsSortedByDateAndTimeDescending:
-  | IAssessmentLog[]
-  | undefined;
+    | IAssessmentLog[]
+    | undefined;
   readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
   readonly recentSafetyPlan: ISafetyPlan | undefined;
   readonly recentScheduledActivitiesSortedByDateAndTimeDescending:
-  | IScheduledActivity[]
-  | undefined;
+    | IScheduledActivity[]
+    | undefined;
   readonly recentValues: IValue[] | undefined;
 
   // UI states
@@ -118,15 +118,11 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
-  getRecentActivityById: (
-    activityId: string,
-  ) => IActivity | undefined;
+  getRecentActivityById: (activityId: string) => IActivity | undefined;
   getRecentAssessmentLogById: (
     assessmentLogId: string,
   ) => IAssessmentLog | undefined;
-  getRecentValueById: (
-    valueId: string,
-  ) => IValue | undefined;
+  getRecentValueById: (valueId: string) => IValue | undefined;
   recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
     assessmentId: string,
   ) => IAssessmentLog[] | undefined;
@@ -381,10 +377,7 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get valuesSortedByDateAndTimeDescending() {
-    return sortValuesByDateAndTime(
-      this.values,
-      SortDirection.DESCENDING,
-    );
+    return sortValuesByDateAndTime(this.values, SortDirection.DESCENDING);
   }
 
   @computed get name() {
@@ -461,7 +454,7 @@ export class PatientStore implements IPatientStore {
       !!this.recentSafetyPlan ||
       (!!this.recentScheduledActivitiesSortedByDateAndTimeDescending &&
         this.recentScheduledActivitiesSortedByDateAndTimeDescending.length >
-        0) ||
+          0) ||
       (!!this.recentValues && this.recentValues.length > 0);
 
     return recentInteraction ? "New" : undefined;
@@ -536,7 +529,7 @@ export class PatientStore implements IPatientStore {
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
       this.safetyPlan.lastUpdatedDateTime >=
-      this.recentInteractionCutoffDateTime
+        this.recentInteractionCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -705,7 +698,7 @@ export class PatientStore implements IPatientStore {
   }
 
   public getActivityById(activityId: string) {
-    return this.activities.find((current) => current.activityId == activityId);;
+    return this.activities.find((current) => current.activityId == activityId);
   }
 
   public getAssessmentLogById(assessmentLogId: string) {
@@ -733,9 +726,7 @@ export class PatientStore implements IPatientStore {
   }
 
   public getRecentValueById(valueId: string) {
-    return this.recentValues?.find(
-      (current) => current.valueId == valueId,
-    );
+    return this.recentValues?.find((current) => current.valueId == valueId);
   }
 
   public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
@@ -768,7 +759,10 @@ export class PatientStore implements IPatientStore {
 
   public getValuesWithoutActivity() {
     // NOTE: Verify why .valueId is optional.
-    return this.values.filter((value) => this.getActivitiesByValueId(value.valueId as string).length === 0);
+    return this.values.filter(
+      (value) =>
+        this.getActivitiesByValueId(value.valueId as string).length === 0,
+    );
   }
 
   // Data load/save
@@ -1112,10 +1106,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
