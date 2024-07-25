@@ -91,65 +91,54 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     activityOrValueWithoutActivityA: IActivity | IValue,
     activityOrValueWithoutActivityB: IActivity | IValue,
   ) => {
-    let compare = 0;
+    const activityA = activityFromActivityOrValue(
+      activityOrValueWithoutActivityA,
+    );
+    const valueA = (() => {
+      if (!!activityA) {
+        if (!!activityA.valueId) {
+          return currentPatient.getValueById(activityA.valueId);
+        } else {
+          return undefined;
+        }
+      } else {
+        return valueFromActivityOrValue(activityOrValueWithoutActivityA);
+      }
+    })();
 
-    const activityA =
-      "activityId" in activityOrValueWithoutActivityA &&
-      !!activityOrValueWithoutActivityA.activityId
-        ? activityOrValueWithoutActivityA
-        : undefined;
-
-    const activityB =
-      "activityId" in activityOrValueWithoutActivityB &&
-      !!activityOrValueWithoutActivityB.activityId
-        ? activityOrValueWithoutActivityB
-        : undefined;
-
-    const valueA = !!activityOrValueWithoutActivityA.valueId
-      ? currentPatient.getValueById(activityOrValueWithoutActivityA.valueId)
-      : undefined;
-    const valueB = !!activityOrValueWithoutActivityB.valueId
-      ? currentPatient.getValueById(activityOrValueWithoutActivityB.valueId)
-      : undefined;
+    const activityB = activityFromActivityOrValue(
+      activityOrValueWithoutActivityB,
+    );
+    const valueB = (() => {
+      if (!!activityB) {
+        if (!!activityB.valueId) {
+          return currentPatient.getValueById(activityB.valueId);
+        } else {
+          return undefined;
+        }
+      } else {
+        return valueFromActivityOrValue(activityOrValueWithoutActivityB);
+      }
+    })();
 
     console.assert(
       !((!activityA && !valueA) || (!activityB && !valueB)),
       `Document without activity or value: ${activityOrValueWithoutActivityA} ${activityOrValueWithoutActivityB}`,
     );
 
-    if (!!valueA) {
-      if (!!activityA) {
-        // "Activities with a Value" sort before "Activities without a Value" and "Values without an Activity".
-        if ((!!activityB && !valueB) || (!!valueB && !activityB)) {
-          compare = -1;
-        } else if (!!valueB && !!activityB) {
-          compare = 0;
-        }
+    let compare = 0;
+
+    if (compare === 0) {
+      // All values sort to the beginning, activities without a value sort to the end.
+      if (!!valueA) {
+        compare = !!valueB ? 0 : -1;
       } else {
-        // "Values without an Activity" sort before "Activities without a Value".
-        if (!!activityB && !valueB) {
-          compare = -1;
-        } else if (!!valueB && !activityB) {
-          compare = 0;
-        }
-        // "Values without an Activity" sort after "Activities with a Value".
-        else {
-          compare = 1;
-        }
-      }
-    } else {
-      if (!!activityA) {
-        // "Activities without a Value" sort after "Values without an Activity" and "Values with an Activity".
-        if (!!valueB) {
-          compare = 1;
-        } else if (!valueB && !!activityB) {
-          compare = 0;
-        }
+        compare = !!valueB ? 1 : 0;
       }
     }
 
     if (compare === 0) {
-      // Sort by life area sort key
+      // Sort values by life area sort key
       if (!!valueA && !!valueB) {
         const lifeAreaContentA = rootStore.getLifeAreaContent(
           valueA.lifeAreaId,
@@ -274,17 +263,22 @@ export const ValuesInventory: FunctionComponent = observer(() => {
               <TableBody>
                 {sortedActivitiesAndValuesWithoutActivity.map(
                   (activityOrValue, idx) => {
-                    const value = currentPatient.getValueById(
-                      activityOrValue.valueId as string,
-                    );
-
-                    const activity = currentPatient.getActivityById(
-                      activityOrValue.activityId as string,
-                    );
-
-                    const lifeAreaContent = rootStore.getLifeAreaContent(
-                      value?.lifeAreaId as string,
-                    );
+                    const activity =
+                      activityFromActivityOrValue(activityOrValue);
+                    const value = (() => {
+                      if (!!activity) {
+                        if (!!activity.valueId) {
+                          return currentPatient.getValueById(activity.valueId);
+                        } else {
+                          return undefined;
+                        }
+                      } else {
+                        return valueFromActivityOrValue(activityOrValue);
+                      }
+                    })();
+                    const lifeArea = !!value
+                      ? rootStore.getLifeAreaContent(value.lifeAreaId)
+                      : undefined;
 
                     return (
                       <TableRow
@@ -292,21 +286,21 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                         sx={getTableRowSxProps(activityOrValue)}
                       >
                         <TableCell component="th" scope="row">
-                          {!!lifeAreaContent ? lifeAreaContent.name : "-"}
+                          {!!lifeArea ? lifeArea.name : "--"}
                         </TableCell>
-                        <TableCell>{!!value ? value.name : "-"}</TableCell>
+                        <TableCell>{!!value ? value.name : "--"}</TableCell>
                         <TableCell>
                           {!!activity ? activity.name : "--"}
                         </TableCell>
                         <TableCell>
-                          {activityOrValue.enjoyment != null
-                            ? activityOrValue.enjoyment
-                            : "-"}
+                          {!!activity && !!activity.enjoyment
+                            ? activity.enjoyment
+                            : "--"}
                         </TableCell>
                         <TableCell>
-                          {activityOrValue.importance != null
-                            ? activityOrValue.importance
-                            : "-"}
+                          {!!activity && !!activity.importance
+                            ? activity.importance
+                            : "--"}
                         </TableCell>
                         <TableCell>
                           {format(activityOrValue.editedDateTime, "MM/dd/yyyy")}
