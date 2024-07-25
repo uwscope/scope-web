@@ -60,7 +60,7 @@ export const MultilineCell = withTheme(
     whiteSpace: "initial",
     lineHeight: "1rem",
     overflowY: "auto",
-    height: "100%",
+    maxHeight: "100%",
     padding: props.theme.spacing(1, 0),
   })),
 );
