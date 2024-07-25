@@ -122,6 +122,7 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getMoodLogById: (moodLogId: string) => IMoodLog | undefined;
   getRecentEntryActivityById: (activityId: string) => IActivity | undefined;
   getRecentEntryAssessmentLogById: (
     assessmentLogId: string,
@@ -710,13 +711,17 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  public getMoodLogById(moodLogId: string) {
+    return this.moodLogs.find((current) => current.moodLogId == moodLogId);
+  }
+
   public getRecentEntryActivityById(activityId: string) {
     return this.recentEntryActivities?.find(
       (current) => current.activityId == activityId,
     );
   }
 
-  public getRecentEntryAssessmentLogById(assessmentLogId: string) {
+  public getRecentAssessmentLogById(assessmentLogId: string) {
     return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.find(
       (current) => current.assessmentLogId == assessmentLogId,
     );
