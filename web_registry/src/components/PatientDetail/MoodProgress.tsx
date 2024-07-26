@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import { Grid, Typography } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { format } from "date-fns";
 import { observer } from "mobx-react";
 import { IAssessment, IMoodLog } from "shared/types";
@@ -85,6 +85,16 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       `loadpatient=${currentPatient?.loadPatientState.pending}, loadmood=${currentPatient?.loadMoodLogsState.pending}`,
     );
 
+    const getRowClassName = (param: GridRowParams) => {
+      const id = param.row["id"] as string;
+      const data = currentPatient.getRecentEntryMoodLogById(id);
+      if (!!data) {
+        return "recentEntryRow";
+      } else {
+        return "";
+      }
+    };
+
     return (
       <ActionPanel
         id={assessment.assessmentId}
@@ -111,6 +121,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
               autoHeight={true}
               isRowSelectable={() => false}
               pagination
+              getRowClassName={getRowClassName}
             />
           )}
           {!!moodLogsSortedByDate && moodLogsSortedByDate.length > 0 && (

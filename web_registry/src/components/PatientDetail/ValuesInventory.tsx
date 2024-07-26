@@ -4,6 +4,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Grid,
+  SxProps,
   Table,
   TableBody,
   TableCell,
@@ -12,9 +13,9 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { compareDesc, format } from "date-fns";
+import { format, max } from "date-fns";
 import { observer } from "mobx-react-lite";
-import { IActivity } from "shared/types";
+import { IActivity, IValue } from "shared/types";
 import ActionPanel, { IActionButton } from "src/components/common/ActionPanel";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
@@ -23,7 +24,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
   const rootStore = useStores();
   const currentPatient = usePatient();
   // const { lifeAreas } = rootStore.appContentConfig;
-  const { activities, valuesInventory } = currentPatient;
+  const { activities, values, valuesInventory } = currentPatient;
   const { assigned, assignedDateTime } = valuesInventory;
 
   var dateStrings: string[] = [];
@@ -32,87 +33,158 @@ export const ValuesInventory: FunctionComponent = observer(() => {
       `${getString("patient_values_inventory_assigned_date")} ${format(assignedDateTime, "MM/dd/yyyy")}`,
     );
   }
-  if (activities.length > 0) {
-    const mostRecentlyEditedActivityWithValue = activities
-      .filter((activity) => {
-        return !!activity.valueId;
-      })
-      .reduce((mostRecent: IActivity | undefined, current: IActivity) => {
-        if (!mostRecent) {
-          return current;
-        }
 
-        return compareDesc(mostRecent.editedDateTime, current.editedDateTime) <
-          0
-          ? mostRecent
-          : current;
-      }, undefined);
-
-    if (mostRecentlyEditedActivityWithValue) {
-      dateStrings.push(
-        `${getString("patient_values_inventory_activity_date_header")} ${format(
-          mostRecentlyEditedActivityWithValue.editedDateTime as Date,
-          "MM/dd/yyyy",
-        )}`,
-      );
+  const mostRecentlyEditedActivity =
+    !!currentPatient.activitiesSortedByDateAndTimeDescending
+      ? currentPatient.activitiesSortedByDateAndTimeDescending[0]
+      : undefined;
+  const mostRecentlyEditedValue =
+    !!currentPatient.valuesSortedByDateAndTimeDescending
+      ? currentPatient.valuesSortedByDateAndTimeDescending[0]
+      : undefined;
+  const mostRecentlyEditedActivityOrValueDateTime = (() => {
+    if (!!mostRecentlyEditedActivity && !mostRecentlyEditedValue) {
+      return mostRecentlyEditedActivity.editedDateTime;
+    } else if (!!mostRecentlyEditedValue && !mostRecentlyEditedActivity) {
+      return mostRecentlyEditedValue.editedDateTime;
+    } else if (!!mostRecentlyEditedActivity && !!mostRecentlyEditedValue) {
+      return max([
+        mostRecentlyEditedActivity.editedDateTime,
+        mostRecentlyEditedValue.editedDateTime,
+      ]);
+    } else {
+      return undefined;
     }
+  })();
+
+  if (!!mostRecentlyEditedActivityOrValueDateTime) {
+    dateStrings.push(
+      `${getString("patient_values_inventory_activity_date_header")} ${format(mostRecentlyEditedActivityOrValueDateTime, "MM/dd/yyyy")}`,
+    );
   }
 
-  const sortedActivities = ((): IActivity[] => {
-    return activities.slice().sort((activityA, activityB) => {
-      let compare = 0;
+  const activityFromActivityOrValue: (
+    activityOrValue: IActivity | IValue,
+  ) => IActivity | undefined = (activityOrValue) => {
+    return "activityId" in activityOrValue ? activityOrValue : undefined;
+  };
 
-      const valueA = !!activityA.valueId
-        ? currentPatient.getValueById(activityA.valueId)
-        : undefined;
-      const valueB = !!activityB.valueId
-        ? currentPatient.getValueById(activityB.valueId)
-        : undefined;
+  const valueFromActivityOrValue: (
+    activityOrValue: IActivity | IValue,
+  ) => IValue | undefined = (activityOrValue) => {
+    return "lifeAreaId" in activityOrValue ? activityOrValue : undefined;
+  };
 
-      if (compare == 0) {
-        // Activities without a value sort after activities with a value
-        if (!!valueA) {
-          compare = !!valueB ? 0 : -1;
+  const compareActivitiesAndValuesWithoutActivity = (
+    activityOrValueWithoutActivityA: IActivity | IValue,
+    activityOrValueWithoutActivityB: IActivity | IValue,
+  ) => {
+    const activityA = activityFromActivityOrValue(
+      activityOrValueWithoutActivityA,
+    );
+    const valueA = (() => {
+      if (!!activityA) {
+        if (!!activityA.valueId) {
+          return currentPatient.getValueById(activityA.valueId);
         } else {
-          compare = !!valueB ? 1 : 0;
+          return undefined;
+        }
+      } else {
+        return valueFromActivityOrValue(activityOrValueWithoutActivityA);
+      }
+    })();
+
+    const activityB = activityFromActivityOrValue(
+      activityOrValueWithoutActivityB,
+    );
+    const valueB = (() => {
+      if (!!activityB) {
+        if (!!activityB.valueId) {
+          return currentPatient.getValueById(activityB.valueId);
+        } else {
+          return undefined;
+        }
+      } else {
+        return valueFromActivityOrValue(activityOrValueWithoutActivityB);
+      }
+    })();
+
+    console.assert(
+      !((!activityA && !valueA) || (!activityB && !valueB)),
+      `Document without activity or value: ${activityOrValueWithoutActivityA} ${activityOrValueWithoutActivityB}`,
+    );
+
+    let compare = 0;
+
+    if (compare === 0) {
+      // All values sort to the beginning, activities without a value sort to the end.
+      if (!!valueA) {
+        compare = !!valueB ? 0 : -1;
+      } else {
+        compare = !!valueB ? 1 : 0;
+      }
+    }
+
+    if (compare === 0) {
+      // Sort values by life area sort key
+      if (!!valueA && !!valueB) {
+        const lifeAreaContentA = rootStore.getLifeAreaContent(
+          valueA.lifeAreaId,
+        );
+        const lifeAreaContentB = rootStore.getLifeAreaContent(
+          valueB.lifeAreaId,
+        );
+
+        if (!!lifeAreaContentA && !!lifeAreaContentB) {
+          compare = lifeAreaContentA.sortKey - lifeAreaContentB.sortKey;
         }
       }
+    }
 
-      if (compare === 0) {
-        // Sort by life area sort key
-        if (!!valueA && !!valueB) {
-          const lifeAreaContentA = rootStore.getLifeAreaContent(
-            valueA.lifeAreaId,
-          );
-          const lifeAreaContentB = rootStore.getLifeAreaContent(
-            valueB.lifeAreaId,
-          );
-
-          if (!!lifeAreaContentA && !!lifeAreaContentB) {
-            compare = lifeAreaContentA.sortKey - lifeAreaContentB.sortKey;
-          }
-        }
+    if (compare === 0) {
+      // Sort by value name
+      if (!!valueA && !!valueB) {
+        compare = valueA.name.localeCompare(valueB.name, undefined, {
+          sensitivity: "base",
+        });
       }
+    }
 
-      if (compare === 0) {
-        // Sort by value name
-        if (!!valueA && !!valueB) {
-          compare = valueA.name.localeCompare(valueB.name, undefined, {
-            sensitivity: "base",
-          });
-        }
-      }
-
-      if (compare === 0) {
-        // Sort by activity name, which is unique
+    if (compare === 0) {
+      // Sort by activity name, which is unique
+      if (!!activityA && !!activityB) {
         compare = activityA.name.localeCompare(activityB.name, undefined, {
           sensitivity: "base",
         });
       }
+    }
 
-      return compare;
-    });
-  })();
+    return compare;
+  };
+
+  const sortedActivitiesAndValuesWithoutActivity = [
+    ...activities,
+    ...currentPatient.valuesWithoutActivity,
+  ].sort(compareActivitiesAndValuesWithoutActivity);
+
+  const getTableRowSxProps = (activityOrValue: IActivity | IValue): SxProps => {
+    if ("activityId" in activityOrValue && !!activityOrValue.activityId) {
+      const data = currentPatient.getRecentEntryActivityById(
+        activityOrValue.activityId,
+      );
+      if (!!data) {
+        return { backgroundColor: "rgba(197, 202, 233, 1)" };
+      }
+    } else if (!!activityOrValue.valueId) {
+      const data = currentPatient.getRecentEntryValueById(
+        activityOrValue.valueId,
+      );
+      if (!!data) {
+        return { backgroundColor: "rgba(197, 202, 233, 1)" };
+      }
+    }
+    return {};
+  };
 
   return (
     <ActionPanel
@@ -139,7 +211,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
       ]}
     >
       <Grid container spacing={2} alignItems="stretch">
-        {activities.length == 0 ? (
+        {values.length + activities.length === 0 ? (
           <Grid item xs={12}>
             <Typography>
               {getString("patient_values_inventory_empty")}
@@ -179,35 +251,54 @@ export const ValuesInventory: FunctionComponent = observer(() => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortedActivities.map((activity, idx) => {
-                  const value = currentPatient.getValueById(
-                    activity.valueId as string,
-                  );
-                  const lifeAreaContent = rootStore.getLifeAreaContent(
-                    value?.lifeAreaId as string,
-                  );
+                {sortedActivitiesAndValuesWithoutActivity.map(
+                  (activityOrValue, idx) => {
+                    const activity =
+                      activityFromActivityOrValue(activityOrValue);
+                    const value = (() => {
+                      if (!!activity) {
+                        if (!!activity.valueId) {
+                          return currentPatient.getValueById(activity.valueId);
+                        } else {
+                          return undefined;
+                        }
+                      } else {
+                        return valueFromActivityOrValue(activityOrValue);
+                      }
+                    })();
+                    const lifeArea = !!value
+                      ? rootStore.getLifeAreaContent(value.lifeAreaId)
+                      : undefined;
 
-                  return (
-                    <TableRow key={idx}>
-                      <TableCell component="th" scope="row">
-                        {!!lifeAreaContent ? lifeAreaContent.name : "-"}
-                      </TableCell>
-                      <TableCell>{!!value ? value.name : "-"}</TableCell>
-                      <TableCell>{activity.name}</TableCell>
-                      <TableCell>
-                        {activity.enjoyment != null ? activity.enjoyment : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {activity.importance != null
-                          ? activity.importance
-                          : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {format(activity.editedDateTime, "MM/dd/yyyy")}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                    return (
+                      <TableRow
+                        key={idx}
+                        sx={getTableRowSxProps(activityOrValue)}
+                      >
+                        <TableCell component="th" scope="row">
+                          {!!lifeArea ? lifeArea.name : "--"}
+                        </TableCell>
+                        <TableCell>{!!value ? value.name : "--"}</TableCell>
+                        <TableCell>
+                          {!!activity ? activity.name : "--"}
+                        </TableCell>
+                        <TableCell>
+                          {!!activity && !!activity.enjoyment
+                            ? activity.enjoyment
+                            : "--"}
+                        </TableCell>
+                        <TableCell>
+                          {!!activity && !!activity.importance
+                            ? activity.importance
+                            : "--"}
+                        </TableCell>
+                        <TableCell>
+                          {format(activityOrValue.editedDateTime, "MM/dd/yyyy")}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )}
               </TableBody>
             </Table>
           </TableContainer>

@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 import FlagIcon from "@mui/icons-material/Flag";
-import { Tooltip } from "@mui/material";
+import { Badge, Stack, Tooltip } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
 import {
   GridCellParams,
@@ -33,6 +33,11 @@ import {
   getAssessmentScoreFromAssessmentLog,
 } from "src/utils/assessment";
 import styled from "styled-components";
+
+type DiscussionAndRecentEntryFlags = {
+  discussionFlags?: DiscussionFlags;
+  recentEntryFlag?: string;
+};
 
 const TableContainer = styled.div({
   flexGrow: 1,
@@ -166,13 +171,11 @@ const nullUndefinedRenderCell: (
   };
 };
 
-const flagsComparator: GridComparatorFn = (v1, v2) => {
-  const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionFlags)?.[
-    "Flag as safety risk"
-  ];
-  const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionFlags)?.[
-    "Flag as safety risk"
-  ];
+const discussionAndRecentEntryFlagsComparator: GridComparatorFn = (v1, v2) => {
+  const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionAndRecentEntryFlags)
+    ?.discussionFlags?.["Flag as safety risk"];
+  const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionAndRecentEntryFlags)
+    ?.discussionFlags?.["Flag as safety risk"];
 
   if (v1FlaggedForSafety && !v2FlaggedForSafety) {
     return -1;
@@ -181,17 +184,30 @@ const flagsComparator: GridComparatorFn = (v1, v2) => {
     return 1;
   }
 
-  const v1FlaggedForDiscussion = !!(v1?.valueOf() as DiscussionFlags)?.[
-    "Flag for discussion"
-  ];
-  const v2FlaggedForDiscussion = !!(v2?.valueOf() as DiscussionFlags)?.[
-    "Flag for discussion"
-  ];
+  const v1FlaggedForDiscussion = !!(
+    v1?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.discussionFlags?.["Flag for discussion"];
+  const v2FlaggedForDiscussion = !!(
+    v2?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.discussionFlags?.["Flag for discussion"];
 
   if (v1FlaggedForDiscussion && !v2FlaggedForDiscussion) {
     return -1;
   }
   if (v2FlaggedForDiscussion && !v1FlaggedForDiscussion) {
+    return 1;
+  }
+
+  const v1FlaggedForRecentEntry = !!(
+    v1?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.recentEntryFlag;
+  const v2FlaggedForRecentEntry = !!(
+    v2?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.recentEntryFlag;
+  if (v1FlaggedForRecentEntry && !v2FlaggedForRecentEntry) {
+    return -1;
+  }
+  if (v2FlaggedForRecentEntry && !v1FlaggedForRecentEntry) {
     return 1;
   }
 
@@ -270,19 +286,39 @@ const renderCellEnrollmentDate = (props: GridCellParams) => {
   }
 };
 
-const renderFlagCell = (props: GridCellParams) => {
-  const flaggedForDiscussion = !!props.value?.["Flag for discussion"];
-  const flaggedForSafety = !!props.value?.["Flag as safety risk"];
+const renderDiscussionAndRecentEntryFlagsCell = (props: GridCellParams) => {
+  const flaggedForDiscussion =
+    !!props.value?.discussionFlags?.["Flag for discussion"];
+  const flaggedForSafety =
+    !!props.value?.discussionFlags?.["Flag as safety risk"];
+  const flaggedForRecentEntry = !!props.value?.recentEntryFlag;
 
   return (
-    <div>
-      <Tooltip title="Flagged for safety">
+    <Stack direction="row">
+      <Tooltip title="Flagged for Safety">
         <RedFlag $on={flaggedForSafety} fontSize="small" />
       </Tooltip>
-      <Tooltip title="Flagged for discussion">
+      <Tooltip title="Flagged for Discussion">
         <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
       </Tooltip>
-    </div>
+      {flaggedForRecentEntry && (
+        <Tooltip title="New Patient Entry">
+          <Badge
+            badgeContent={props.value?.recentEntryFlag}
+            color={"primary"}
+            sx={
+              // This seems to work well enough, but I do not understand it.
+              {
+                "& .MuiBadge-badge": {
+                  top: "50%",
+                  right: "-20px",
+                },
+              }
+            }
+          />
+        </Tooltip>
+      )}
+    </Stack>
   );
 };
 
@@ -338,18 +374,18 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
       {
-        field: "discussionFlags",
+        field: "discussionAndRecentEntryFlags",
         headerName: "Flags",
-        width: 25,
-        align: "center",
+        width: 75,
+        align: "left",
         headerAlign: "center",
-        sortComparator: flagsComparator,
-        renderCell: renderFlagCell,
+        sortComparator: discussionAndRecentEntryFlagsComparator,
+        renderCell: renderDiscussionAndRecentEntryFlagsCell,
       },
       {
         field: "depressionTreatmentStatus",
         headerName: "Tx Status",
-        minWidth: 120,
+        minWidth: 100,
         align: "center",
         headerAlign: "center",
         sortComparator: nullUndefinedComparator(
@@ -683,7 +719,10 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           //
           // Rendered columns
           //
-          discussionFlags: p.profile.discussionFlag,
+          discussionAndRecentEntryFlags: {
+            discussionFlags: p.profile.discussionFlag,
+            recentEntryFlag: p.recentEntryCaseloadSummary,
+          },
           depressionTreatmentStatus: p.profile.depressionTreatmentStatus,
           name: p.profile.name,
           clinicCode: p.profile.clinicCode,

@@ -1,4 +1,4 @@
-import { differenceInYears } from "date-fns";
+import { differenceInYears, subDays } from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -14,12 +14,16 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortActivitiesByDateAndTime,
+  sortActivityLogsByDateAndTime,
   sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
+  sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
+  sortValuesByDateAndTime,
 } from "shared/sorting";
 import {
   getLoadAndLogQuery,
@@ -54,6 +58,25 @@ export interface IPatientStore extends IPatient {
   readonly latestSession: ISession | undefined;
   readonly recordId: string;
 
+  // Recent patient entry properties
+  readonly recentEntryCaseloadSummary: string | undefined;
+  readonly recentEntryCutoffDateTime: Date;
+  readonly recentEntryActivities: IActivity[] | undefined;
+  readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
+    | IActivityLog[]
+    | undefined;
+  readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
+    | IAssessmentLog[]
+    | undefined;
+  readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
+    | IMoodLog[]
+    | undefined;
+  readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
+  readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
+    | IScheduledActivity[]
+    | undefined;
+  readonly recentEntryValues: IValue[] | undefined;
+
   // UI states
   readonly loadPatientState: IPromiseQueryState;
 
@@ -74,6 +97,8 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly activitiesSortedByDateAndTimeDescending: IActivity[];
+  readonly activityLogsSortedByDateAndTimeDescending: IActivityLog[];
   readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
   readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
   readonly caseReviewsSortedByDate: ICaseReview[];
@@ -85,13 +110,30 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
+  readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
+  readonly valuesSortedByDateAndTimeDescending: IValue[];
+
+  // Filters
+  readonly valuesWithoutActivity: IValue[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
-  getActivitiesWithoutValueId: () => IActivity[];
+  getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getRecentEntryActivityById: (activityId: string) => IActivity | undefined;
+  getRecentEntryAssessmentLogById: (
+    assessmentLogId: string,
+  ) => IAssessmentLog | undefined;
+  getRecentEntryValueById: (valueId: string) => IValue | undefined;
+  getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
+    assessmentId: string,
+  ) => IAssessmentLog[] | undefined;
+  getRecentEntryMoodLogById: (moodLogId: string) => IMoodLog | undefined;
+  getRecentEntryScheduledActivityById: (
+    scheduledActivityId: string,
+  ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
   getValueById: (valueId: string) => IValue | undefined;
 
@@ -251,6 +293,20 @@ export class PatientStore implements IPatientStore {
     return this.loadActivityLogsQuery.value || [];
   }
 
+  @computed get activitiesSortedByDateAndTimeDescending() {
+    return sortActivitiesByDateAndTime(
+      this.activities,
+      SortDirection.DESCENDING,
+    );
+  }
+
+  @computed get activityLogsSortedByDateAndTimeDescending() {
+    return sortActivityLogsByDateAndTime(
+      this.activityLogs,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get activitySchedules(): IActivitySchedule[] {
     return this.loadActivitySchedulesQuery.value || [];
 
@@ -316,6 +372,17 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
+  @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
+    return sortScheduledActivitiesByDateAndTime(
+      this.scheduledActivities,
+      SortDirection.DESCENDING,
+    );
+  }
+
+  @computed get valuesSortedByDateAndTimeDescending() {
+    return sortValuesByDateAndTime(this.values, SortDirection.DESCENDING);
+  }
+
   @computed get name() {
     return this.profile.name || this.identity.name;
   }
@@ -376,6 +443,128 @@ export class PatientStore implements IPatientStore {
         MRN: "",
       }
     );
+  }
+
+  @computed get recentEntryCaseloadSummary() {
+    const recentEntry: boolean =
+      (!!this.recentEntryActivities && this.recentEntryActivities.length > 0) ||
+      (!!this.recentEntryActivityLogsSortedByDateAndTimeDescending &&
+        this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
+        this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
+          0) ||
+      (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
+        this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
+      !!this.recentEntrySafetyPlan ||
+      (!!this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending &&
+        this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending
+          .length > 0) ||
+      (!!this.recentEntryValues && this.recentEntryValues.length > 0);
+
+    return recentEntry ? "New" : undefined;
+  }
+
+  @computed get recentEntryCutoffDateTime() {
+    // Initially, stub the function to return now minus two weeks.
+    // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
+    let cutoffDateTime = new Date();
+    cutoffDateTime = subDays(cutoffDateTime, 14);
+
+    return cutoffDateTime;
+  }
+
+  @computed get recentEntryActivities() {
+    if (this.activities.length === 0) {
+      return undefined;
+    } else {
+      return this.activities.filter((a) => {
+        return a.editedDateTime >= this.recentEntryCutoffDateTime;
+      });
+    }
+  }
+
+  @computed get recentEntryActivityLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+    );
+
+    if (indexEnd < 0) {
+      return this.activityLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.activityLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
+  }
+
+  @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+    );
+
+    if (indexEnd < 0) {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.assessmentLogsSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
+  }
+
+  @computed get recentEntryMoodLogsSortedByDateAndTimeDescending() {
+    const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+    );
+
+    if (indexEnd < 0) {
+      return this.moodLogsSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.moodLogsSortedByDateAndTimeDescending.slice(0, indexEnd);
+    }
+  }
+
+  @computed get recentEntrySafetyPlan() {
+    // The default empty safety plan will not have a lastUpdatedDateTime
+    if (
+      !!this.safetyPlan.lastUpdatedDateTime &&
+      this.safetyPlan.lastUpdatedDateTime >= this.recentEntryCutoffDateTime
+    ) {
+      return this.safetyPlan;
+    }
+    return undefined;
+  }
+
+  @computed get recentEntryScheduledActivitiesSortedByDateAndTimeDescending() {
+    const indexEnd =
+      this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
+        (a) => a.dueDateTime < this.recentEntryCutoffDateTime,
+      );
+
+    if (indexEnd < 0) {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice();
+    } else if (indexEnd === 0) {
+      return undefined;
+    } else {
+      return this.scheduledActivitiesSortedByDateAndTimeDescending.slice(
+        0,
+        indexEnd,
+      );
+    }
+  }
+
+  @computed get recentEntryValues() {
+    if (this.values.length === 0) {
+      return undefined;
+    } else {
+      return this.values.filter((a) => {
+        return a.editedDateTime >= this.recentEntryCutoffDateTime;
+      });
+    }
   }
 
   @computed get recordId() {
@@ -505,10 +694,8 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  public getActivitiesWithoutValueId() {
-    return this.activities.filter((current) => {
-      return !current.valueId;
-    });
+  public getActivityById(activityId: string) {
+    return this.activities.find((current) => current.activityId == activityId);
   }
 
   public getAssessmentLogById(assessmentLogId: string) {
@@ -523,12 +710,59 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  public getRecentEntryActivityById(activityId: string) {
+    return this.recentEntryActivities?.find(
+      (current) => current.activityId == activityId,
+    );
+  }
+
+  public getRecentEntryAssessmentLogById(assessmentLogId: string) {
+    return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.find(
+      (current) => current.assessmentLogId == assessmentLogId,
+    );
+  }
+
+  public getRecentEntryValueById(valueId: string) {
+    return this.recentEntryValues?.find(
+      (current) => current.valueId == valueId,
+    );
+  }
+
+  public getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+    assessmentId: string,
+  ) {
+    return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.filter(
+      (l) => l.assessmentId == assessmentId,
+    );
+  }
+
+  public getRecentEntryMoodLogById(moodLogId: string) {
+    return this.recentEntryMoodLogsSortedByDateAndTimeDescending?.find(
+      (current) => current.moodLogId == moodLogId,
+    );
+  }
+
+  public getRecentEntryScheduledActivityById(scheduledActivityId: string) {
+    return this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending?.find(
+      (current) => current.scheduledActivityId == scheduledActivityId,
+    );
+  }
+
   public getSessionById(sessionId: string) {
     return this.sessions.find((current) => current.sessionId == sessionId);
   }
 
   public getValueById(valueId: string) {
     return this.values.find((current) => current.valueId == valueId);
+  }
+
+  // Filters
+  @computed public get valuesWithoutActivity(): IValue[] {
+    return this.values.filter(
+      (value) =>
+        !value.valueId ||
+        this.getActivitiesByValueId(value.valueId).length === 0,
+    );
   }
 
   // Data load/save
