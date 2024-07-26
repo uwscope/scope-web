@@ -9,6 +9,7 @@ import {
   IMoodLog,
   IScheduledActivity,
   ISession,
+  IValue,
 } from "shared/types";
 
 export const enum SortDirection {
@@ -36,6 +37,13 @@ export const compareActivityByName: (
   compareB: IActivity,
 ) => number = function (compareA, compareB) {
   return compareStringCaseInsensitive(compareA.name, compareB.name);
+};
+
+export const compareActivitiesByDateAndTime: (
+  compareA: IActivity,
+  compareB: IActivity,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.editedDateTime, compareB.editedDateTime);
 };
 
 export const compareActivityLogsByDateAndTime: (
@@ -97,6 +105,13 @@ export const compareSessionsByDate: (
   return compareAsc(compareA.date, compareB.date);
 };
 
+export const compareValuesByDateAndTime: (
+  compareA: IValue,
+  compareB: IValue,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.editedDateTime, compareB.editedDateTime);
+};
+
 export const compareStringCaseInsensitive: (
   compareA: string,
   compareB: string,
@@ -105,6 +120,23 @@ export const compareStringCaseInsensitive: (
   const compareInsensitiveB = compareB.toLocaleLowerCase();
 
   return compareInsensitiveA.localeCompare(compareInsensitiveB);
+};
+
+export const sortActivitiesByDateAndTime: (
+  activities: IActivity[],
+  sortingDirection?: SortDirection,
+) => IActivity[] = function (
+  activities,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return activities
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareActivitiesByDateAndTime,
+        sortingDirection,
+      ),
+    );
 };
 
 export const sortActivitiesByName: (activities: IActivity[]) => IActivity[] =
@@ -213,6 +245,17 @@ export const sortSessionsByDate: (sessions: ISession[]) => ISession[] =
   function (sessions) {
     return sessions.slice().sort(compareSessionsByDate);
   };
+
+export const sortValuesByDateAndTime: (
+  values: IValue[],
+  sortingDirection?: SortDirection,
+) => IValue[] = function (values, sortingDirection = SortDirection.ASCENDING) {
+  return values
+    .slice()
+    .sort(
+      sortingDirectionComparator(compareValuesByDateAndTime, sortingDirection),
+    );
+};
 
 export const sortStringsCaseInsensitive: (strings: string[]) => string[] =
   function (strings) {

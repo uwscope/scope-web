@@ -14,6 +14,7 @@ import {
 } from "shared/patientService";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import {
+  sortActivitiesByDateAndTime,
   sortActivityLogsByDateAndTime,
   sortAssessmentLogsByDateAndTime,
   sortCaseReviewsByDate,
@@ -22,6 +23,7 @@ import {
   sortMoodLogsByDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
+  sortValuesByDateAndTime,
 } from "shared/sorting";
 import {
   getLoadAndLogQuery,
@@ -93,6 +95,7 @@ export interface IPatientStore extends IPatient {
   readonly loadValuesInventoryState: IPromiseQueryState;
 
   // Sorted properties
+  readonly activitiesSortedByDateAndTimeDescending: IActivity[];
   readonly activityLogsSortedByDateAndTimeDescending: IActivityLog[];
   readonly assessmentLogsSortedByDateAndTime: IAssessmentLog[];
   readonly assessmentLogsSortedByDateAndTimeDescending: IAssessmentLog[];
@@ -106,16 +109,22 @@ export interface IPatientStore extends IPatient {
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
+  readonly valuesSortedByDateAndTimeDescending: IValue[];
+
+  // Filters
+  readonly valuesWithoutActivity: IValue[];
 
   // Helpers
   getActivitiesByLifeAreaId: (lifeAreaId: string) => IActivity[];
   getActivitiesByValueId: (valueId: string) => IActivity[];
-  getActivitiesWithoutValueId: () => IActivity[];
+  getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getRecentActivityById: (activityId: string) => IActivity | undefined;
   getRecentAssessmentLogById: (
     assessmentLogId: string,
   ) => IAssessmentLog | undefined;
+  getRecentValueById: (valueId: string) => IValue | undefined;
   recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
     assessmentId: string,
   ) => IAssessmentLog[] | undefined;
@@ -282,6 +291,13 @@ export class PatientStore implements IPatientStore {
     return this.loadActivityLogsQuery.value || [];
   }
 
+  @computed get activitiesSortedByDateAndTimeDescending() {
+    return sortActivitiesByDateAndTime(
+      this.activities,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get activityLogsSortedByDateAndTimeDescending() {
     return sortActivityLogsByDateAndTime(
       this.activityLogs,
@@ -359,6 +375,10 @@ export class PatientStore implements IPatientStore {
       this.scheduledActivities,
       SortDirection.DESCENDING,
     );
+  }
+
+  @computed get valuesSortedByDateAndTimeDescending() {
+    return sortValuesByDateAndTime(this.values, SortDirection.DESCENDING);
   }
 
   @computed get name() {
@@ -672,10 +692,8 @@ export class PatientStore implements IPatientStore {
     });
   }
 
-  public getActivitiesWithoutValueId() {
-    return this.activities.filter((current) => {
-      return !current.valueId;
-    });
+  public getActivityById(activityId: string) {
+    return this.activities.find((current) => current.activityId == activityId);
   }
 
   public getAssessmentLogById(assessmentLogId: string) {
@@ -690,10 +708,20 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  public getRecentActivityById(activityId: string) {
+    return this.recentActivities?.find(
+      (current) => current.activityId == activityId,
+    );
+  }
+
   public getRecentAssessmentLogById(assessmentLogId: string) {
     return this.recentAssessmentLogsSortedByDateAndTimeDescending?.find(
       (current) => current.assessmentLogId == assessmentLogId,
     );
+  }
+
+  public getRecentValueById(valueId: string) {
+    return this.recentValues?.find((current) => current.valueId == valueId);
   }
 
   public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
@@ -722,6 +750,15 @@ export class PatientStore implements IPatientStore {
 
   public getValueById(valueId: string) {
     return this.values.find((current) => current.valueId == valueId);
+  }
+
+  // Filters
+  @computed public get valuesWithoutActivity(): IValue[] {
+    return this.values.filter(
+      (value) =>
+        !value.valueId ||
+        this.getActivitiesByValueId(value.valueId).length === 0,
+    );
   }
 
   // Data load/save
