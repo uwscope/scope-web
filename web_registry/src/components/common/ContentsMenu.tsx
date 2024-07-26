@@ -57,7 +57,7 @@ const ContentListItem = withTheme(
 export interface IContentItem {
   hash: string;
   label: string;
-  recentInteractionBadgeContent?: React.ReactNode;
+  recentEntryBadgeContent?: React.ReactNode;
   top?: boolean;
 }
 
@@ -216,7 +216,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
         >
           <ListItemText disableTypography={true}>
             <ContentListBadge
-              badgeContent={content.recentInteractionBadgeContent}
+              badgeContent={content.recentEntryBadgeContent}
               color={"primary"}
             >
               <Typography variant="body2">{content.label}</Typography>

@@ -133,7 +133,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
         (a): IContent => ({
           hash: a.id,
           label: a.name,
-          recentInteractionBadgeContent: ((): React.ReactNode => {
+          recentEntryBadgeContent: ((): React.ReactNode => {
             switch (a.id) {
               case "gad-7":
                 return currentPatient?.getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
@@ -157,7 +157,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
   progressMenu.push({
     hash: getString("patient_progress_activity_hash"),
     label: getString("patient_progress_activity_name"),
-    recentInteractionBadgeContent:
+    recentEntryBadgeContent:
       currentPatient?.recentEntryActivityLogsSortedByDateAndTimeDescending
         ?.length,
   } as IContent);
@@ -178,7 +178,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_values_inventory_hash"),
       label: getString("patient_detail_subsection_values_inventory_title"),
-      recentInteractionBadgeContent:
+      recentEntryBadgeContent:
         (currentPatient?.recentEntryActivities
           ? currentPatient?.recentEntryActivities?.length
           : 0) +
@@ -189,7 +189,7 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_safety_plan_hash"),
       label: getString("patient_detail_subsection_safety_plan_title"),
-      recentInteractionBadgeContent: currentPatient?.recentEntrySafetyPlan
+      recentEntryBadgeContent: currentPatient?.recentEntrySafetyPlan
         ? "New"
         : undefined,
     },

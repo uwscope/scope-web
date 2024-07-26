@@ -446,7 +446,7 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCaseloadSummary() {
-    const recentInteraction: boolean =
+    const recentEntry: boolean =
       (!!this.recentEntryActivities && this.recentEntryActivities.length > 0) ||
       (!!this.recentEntryActivityLogsSortedByDateAndTimeDescending &&
         this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
@@ -461,7 +461,7 @@ export class PatientStore implements IPatientStore {
           .length > 0) ||
       (!!this.recentEntryValues && this.recentEntryValues.length > 0);
 
-    return recentInteraction ? "New" : undefined;
+    return recentEntry ? "New" : undefined;
   }
 
   @computed get recentEntryCutoffDateTime() {
