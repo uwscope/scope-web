@@ -221,7 +221,7 @@ export const ValuesInventory: FunctionComponent = observer(() => {
       ]}
     >
       <Grid container spacing={2} alignItems="stretch">
-        {activities.length == 0 ? (
+        {values.length + activities.length === 0 ? (
           <Grid item xs={12}>
             <Typography>
               {getString("patient_values_inventory_empty")}
