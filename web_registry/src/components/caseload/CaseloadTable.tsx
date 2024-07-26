@@ -302,7 +302,7 @@ const renderDiscussionAndRecentEntryFlagsCell = (props: GridCellParams) => {
         <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
       </Tooltip>
       {flaggedForRecentEntry && (
-        <Tooltip title="Recent Patient Activity">
+        <Tooltip title="New Patient Entry">
           <Badge
             badgeContent={props.value?.recentEntryFlag}
             color={"primary"}
