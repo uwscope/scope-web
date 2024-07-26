@@ -721,7 +721,7 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           //
           discussionAndInteractionFlags: {
             discussionFlags: p.profile.discussionFlag,
-            interactionFlag: p.recentInteractionCaseloadSummary,
+            interactionFlag: p.recentEntryCaseloadSummary,
           },
           depressionTreatmentStatus: p.profile.depressionTreatmentStatus,
           name: p.profile.name,

@@ -87,7 +87,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
 
     const getRowClassName = (param: GridRowParams) => {
       const id = param.row["id"] as string;
-      const data = currentPatient.getRecentMoodLogById(id);
+      const data = currentPatient.getRecentEntryMoodLogById(id);
       if (!!data) {
         return "recentEntryRow";
       } else {

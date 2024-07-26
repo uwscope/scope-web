@@ -325,7 +325,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
 
     const getRowClassName = (param: GridRowParams) => {
       const id = param.row["id"] as string;
-      const data = currentPatient.getRecentAssessmentLogById(id);
+      const data = currentPatient.getRecentEntryAssessmentLogById(id);
       if (!!data) {
         return "recentEntryRow";
       } else {
