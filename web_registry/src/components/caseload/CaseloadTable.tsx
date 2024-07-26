@@ -34,9 +34,9 @@ import {
 } from "src/utils/assessment";
 import styled from "styled-components";
 
-type DiscussionAndInteractionFlags = {
+type DiscussionAndRecentEntryFlags = {
   discussionFlags?: DiscussionFlags;
-  interactionFlag?: string;
+  recentEntryFlag?: string;
 };
 
 const TableContainer = styled.div({
@@ -171,10 +171,10 @@ const nullUndefinedRenderCell: (
   };
 };
 
-const discussionAndInteractionFlagsComparator: GridComparatorFn = (v1, v2) => {
-  const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionAndInteractionFlags)
+const discussionAndRecentEntryFlagsComparator: GridComparatorFn = (v1, v2) => {
+  const v1FlaggedForSafety = !!(v1?.valueOf() as DiscussionAndRecentEntryFlags)
     ?.discussionFlags?.["Flag as safety risk"];
-  const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionAndInteractionFlags)
+  const v2FlaggedForSafety = !!(v2?.valueOf() as DiscussionAndRecentEntryFlags)
     ?.discussionFlags?.["Flag as safety risk"];
 
   if (v1FlaggedForSafety && !v2FlaggedForSafety) {
@@ -185,10 +185,10 @@ const discussionAndInteractionFlagsComparator: GridComparatorFn = (v1, v2) => {
   }
 
   const v1FlaggedForDiscussion = !!(
-    v1?.valueOf() as DiscussionAndInteractionFlags
+    v1?.valueOf() as DiscussionAndRecentEntryFlags
   )?.discussionFlags?.["Flag for discussion"];
   const v2FlaggedForDiscussion = !!(
-    v2?.valueOf() as DiscussionAndInteractionFlags
+    v2?.valueOf() as DiscussionAndRecentEntryFlags
   )?.discussionFlags?.["Flag for discussion"];
 
   if (v1FlaggedForDiscussion && !v2FlaggedForDiscussion) {
@@ -198,16 +198,16 @@ const discussionAndInteractionFlagsComparator: GridComparatorFn = (v1, v2) => {
     return 1;
   }
 
-  const v1FlaggedForInteraction = !!(
-    v1?.valueOf() as DiscussionAndInteractionFlags
-  )?.interactionFlag;
-  const v2FlaggedForInteraction = !!(
-    v2?.valueOf() as DiscussionAndInteractionFlags
-  )?.interactionFlag;
-  if (v1FlaggedForInteraction && !v2FlaggedForInteraction) {
+  const v1FlaggedForRecentEntry = !!(
+    v1?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.recentEntryFlag;
+  const v2FlaggedForRecentEntry = !!(
+    v2?.valueOf() as DiscussionAndRecentEntryFlags
+  )?.recentEntryFlag;
+  if (v1FlaggedForRecentEntry && !v2FlaggedForRecentEntry) {
     return -1;
   }
-  if (v2FlaggedForInteraction && !v1FlaggedForInteraction) {
+  if (v2FlaggedForRecentEntry && !v1FlaggedForRecentEntry) {
     return 1;
   }
 
@@ -286,12 +286,12 @@ const renderCellEnrollmentDate = (props: GridCellParams) => {
   }
 };
 
-const renderDiscussionAndInteractionFlagsCell = (props: GridCellParams) => {
+const renderDiscussionAndRecentEntryFlagsCell = (props: GridCellParams) => {
   const flaggedForDiscussion =
     !!props.value?.discussionFlags?.["Flag for discussion"];
   const flaggedForSafety =
     !!props.value?.discussionFlags?.["Flag as safety risk"];
-  const flaggedForInteraction = !!props.value?.interactionFlag;
+  const flaggedForRecentEntry = !!props.value?.recentEntryFlag;
 
   return (
     <Stack direction="row">
@@ -301,10 +301,10 @@ const renderDiscussionAndInteractionFlagsCell = (props: GridCellParams) => {
       <Tooltip title="Flagged for Discussion">
         <YellowFlag $on={flaggedForDiscussion} fontSize="small" />
       </Tooltip>
-      {flaggedForInteraction && (
+      {flaggedForRecentEntry && (
         <Tooltip title="Recent Patient Activity">
           <Badge
-            badgeContent={props.value?.interactionFlag}
+            badgeContent={props.value?.recentEntryFlag}
             color={"primary"}
             sx={
               // This seems to work well enough, but I do not understand it.
@@ -374,13 +374,13 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
     // Column names map to IPatientStore property names
     const columns: GridColDef[] = [
       {
-        field: "discussionAndInteractionFlags",
+        field: "discussionAndRecentEntryFlags",
         headerName: "Flags",
         width: 75,
         align: "left",
         headerAlign: "center",
-        sortComparator: discussionAndInteractionFlagsComparator,
-        renderCell: renderDiscussionAndInteractionFlagsCell,
+        sortComparator: discussionAndRecentEntryFlagsComparator,
+        renderCell: renderDiscussionAndRecentEntryFlagsCell,
       },
       {
         field: "depressionTreatmentStatus",
@@ -719,9 +719,9 @@ export const CaseloadTable: FunctionComponent<ICaseloadTableProps> = observer(
           //
           // Rendered columns
           //
-          discussionAndInteractionFlags: {
+          discussionAndRecentEntryFlags: {
             discussionFlags: p.profile.discussionFlag,
-            interactionFlag: p.recentInteractionCaseloadSummary,
+            recentEntryFlag: p.recentEntryCaseloadSummary,
           },
           depressionTreatmentStatus: p.profile.depressionTreatmentStatus,
           name: p.profile.name,

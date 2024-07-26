@@ -58,22 +58,24 @@ export interface IPatientStore extends IPatient {
   readonly latestSession: ISession | undefined;
   readonly recordId: string;
 
-  // Recent patient interaction properties
-  readonly recentInteractionCaseloadSummary: string | undefined;
-  readonly recentInteractionCutoffDateTime: Date;
-  readonly recentActivities: IActivity[] | undefined;
-  readonly recentActivityLogsSortedByDateAndTimeDescending:
+  // Recent patient entry properties
+  readonly recentEntryCaseloadSummary: string | undefined;
+  readonly recentEntryCutoffDateTime: Date;
+  readonly recentEntryActivities: IActivity[] | undefined;
+  readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
     | IActivityLog[]
     | undefined;
-  readonly recentAssessmentLogsSortedByDateAndTimeDescending:
+  readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
     | IAssessmentLog[]
     | undefined;
-  readonly recentMoodLogsSortedByDateAndTimeDescending: IMoodLog[] | undefined;
-  readonly recentSafetyPlan: ISafetyPlan | undefined;
-  readonly recentScheduledActivitiesSortedByDateAndTimeDescending:
+  readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
+    | IMoodLog[]
+    | undefined;
+  readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
+  readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
     | IScheduledActivity[]
     | undefined;
-  readonly recentValues: IValue[] | undefined;
+  readonly recentEntryValues: IValue[] | undefined;
 
   // UI states
   readonly loadPatientState: IPromiseQueryState;
@@ -120,16 +122,16 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
-  getRecentActivityById: (activityId: string) => IActivity | undefined;
-  getRecentAssessmentLogById: (
+  getRecentEntryActivityById: (activityId: string) => IActivity | undefined;
+  getRecentEntryAssessmentLogById: (
     assessmentLogId: string,
   ) => IAssessmentLog | undefined;
-  getRecentValueById: (valueId: string) => IValue | undefined;
-  recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
+  getRecentEntryValueById: (valueId: string) => IValue | undefined;
+  getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId: (
     assessmentId: string,
   ) => IAssessmentLog[] | undefined;
-  getRecentMoodLogById: (moodLogId: string) => IMoodLog | undefined;
-  getRecentScheduledActivityById: (
+  getRecentEntryMoodLogById: (moodLogId: string) => IMoodLog | undefined;
+  getRecentEntryScheduledActivityById: (
     scheduledActivityId: string,
   ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
@@ -443,25 +445,26 @@ export class PatientStore implements IPatientStore {
     );
   }
 
-  @computed get recentInteractionCaseloadSummary() {
-    const recentInteraction: boolean =
-      (!!this.recentActivities && this.recentActivities.length > 0) ||
-      (!!this.recentActivityLogsSortedByDateAndTimeDescending &&
-        this.recentActivityLogsSortedByDateAndTimeDescending.length > 0) ||
-      (!!this.recentAssessmentLogsSortedByDateAndTimeDescending &&
-        this.recentAssessmentLogsSortedByDateAndTimeDescending.length > 0) ||
-      (!!this.recentMoodLogsSortedByDateAndTimeDescending &&
-        this.recentMoodLogsSortedByDateAndTimeDescending.length > 0) ||
-      !!this.recentSafetyPlan ||
-      (!!this.recentScheduledActivitiesSortedByDateAndTimeDescending &&
-        this.recentScheduledActivitiesSortedByDateAndTimeDescending.length >
+  @computed get recentEntryCaseloadSummary() {
+    const recentEntry: boolean =
+      (!!this.recentEntryActivities && this.recentEntryActivities.length > 0) ||
+      (!!this.recentEntryActivityLogsSortedByDateAndTimeDescending &&
+        this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
+      (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
+        this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
           0) ||
-      (!!this.recentValues && this.recentValues.length > 0);
+      (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
+        this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
+      !!this.recentEntrySafetyPlan ||
+      (!!this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending &&
+        this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending
+          .length > 0) ||
+      (!!this.recentEntryValues && this.recentEntryValues.length > 0);
 
-    return recentInteraction ? "New" : undefined;
+    return recentEntry ? "New" : undefined;
   }
 
-  @computed get recentInteractionCutoffDateTime() {
+  @computed get recentEntryCutoffDateTime() {
     // Initially, stub the function to return now minus two weeks.
     // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
     let cutoffDateTime = new Date();
@@ -470,19 +473,19 @@ export class PatientStore implements IPatientStore {
     return cutoffDateTime;
   }
 
-  @computed get recentActivities() {
+  @computed get recentEntryActivities() {
     if (this.activities.length === 0) {
       return undefined;
     } else {
       return this.activities.filter((a) => {
-        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+        return a.editedDateTime >= this.recentEntryCutoffDateTime;
       });
     }
   }
 
-  @computed get recentActivityLogsSortedByDateAndTimeDescending() {
+  @computed get recentEntryActivityLogsSortedByDateAndTimeDescending() {
     const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -494,9 +497,9 @@ export class PatientStore implements IPatientStore {
     }
   }
 
-  @computed get recentAssessmentLogsSortedByDateAndTimeDescending() {
+  @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
     const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -511,9 +514,9 @@ export class PatientStore implements IPatientStore {
     }
   }
 
-  @computed get recentMoodLogsSortedByDateAndTimeDescending() {
+  @computed get recentEntryMoodLogsSortedByDateAndTimeDescending() {
     const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentInteractionCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -525,22 +528,21 @@ export class PatientStore implements IPatientStore {
     }
   }
 
-  @computed get recentSafetyPlan() {
+  @computed get recentEntrySafetyPlan() {
     // The default empty safety plan will not have a lastUpdatedDateTime
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
-      this.safetyPlan.lastUpdatedDateTime >=
-        this.recentInteractionCutoffDateTime
+      this.safetyPlan.lastUpdatedDateTime >= this.recentEntryCutoffDateTime
     ) {
       return this.safetyPlan;
     }
     return undefined;
   }
 
-  @computed get recentScheduledActivitiesSortedByDateAndTimeDescending() {
+  @computed get recentEntryScheduledActivitiesSortedByDateAndTimeDescending() {
     const indexEnd =
       this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
-        (a) => a.dueDateTime < this.recentInteractionCutoffDateTime,
+        (a) => a.dueDateTime < this.recentEntryCutoffDateTime,
       );
 
     if (indexEnd < 0) {
@@ -555,12 +557,12 @@ export class PatientStore implements IPatientStore {
     }
   }
 
-  @computed get recentValues() {
+  @computed get recentEntryValues() {
     if (this.values.length === 0) {
       return undefined;
     } else {
       return this.values.filter((a) => {
-        return a.editedDateTime >= this.recentInteractionCutoffDateTime;
+        return a.editedDateTime >= this.recentEntryCutoffDateTime;
       });
     }
   }
@@ -708,38 +710,40 @@ export class PatientStore implements IPatientStore {
     );
   }
 
-  public getRecentActivityById(activityId: string) {
-    return this.recentActivities?.find(
+  public getRecentEntryActivityById(activityId: string) {
+    return this.recentEntryActivities?.find(
       (current) => current.activityId == activityId,
     );
   }
 
-  public getRecentAssessmentLogById(assessmentLogId: string) {
-    return this.recentAssessmentLogsSortedByDateAndTimeDescending?.find(
+  public getRecentEntryAssessmentLogById(assessmentLogId: string) {
+    return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.find(
       (current) => current.assessmentLogId == assessmentLogId,
     );
   }
 
-  public getRecentValueById(valueId: string) {
-    return this.recentValues?.find((current) => current.valueId == valueId);
+  public getRecentEntryValueById(valueId: string) {
+    return this.recentEntryValues?.find(
+      (current) => current.valueId == valueId,
+    );
   }
 
-  public recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+  public getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
     assessmentId: string,
   ) {
-    return this.recentAssessmentLogsSortedByDateAndTimeDescending?.filter(
+    return this.recentEntryAssessmentLogsSortedByDateAndTimeDescending?.filter(
       (l) => l.assessmentId == assessmentId,
     );
   }
 
-  public getRecentMoodLogById(moodLogId: string) {
-    return this.recentMoodLogsSortedByDateAndTimeDescending?.find(
+  public getRecentEntryMoodLogById(moodLogId: string) {
+    return this.recentEntryMoodLogsSortedByDateAndTimeDescending?.find(
       (current) => current.moodLogId == moodLogId,
     );
   }
 
-  public getRecentScheduledActivityById(scheduledActivityId: string) {
-    return this.recentScheduledActivitiesSortedByDateAndTimeDescending?.find(
+  public getRecentEntryScheduledActivityById(scheduledActivityId: string) {
+    return this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending?.find(
       (current) => current.scheduledActivityId == scheduledActivityId,
     );
   }

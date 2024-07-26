@@ -133,19 +133,19 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
         (a): IContent => ({
           hash: a.id,
           label: a.name,
-          recentInteractionBadgeContent: ((): React.ReactNode => {
+          recentEntryBadgeContent: ((): React.ReactNode => {
             switch (a.id) {
               case "gad-7":
-                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+                return currentPatient?.getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "gad-7",
                 )?.length;
               case "phq-9":
-                return currentPatient?.recentAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
+                return currentPatient?.getRecentEntryAssessmentLogsSortedByDateAndTimeDescendingByAssessmentId(
                   "phq-9",
                 )?.length;
               case "mood":
                 return currentPatient
-                  ?.recentMoodLogsSortedByDateAndTimeDescending?.length;
+                  ?.recentEntryMoodLogsSortedByDateAndTimeDescending?.length;
               default:
                 return undefined;
             }
@@ -157,8 +157,9 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
   progressMenu.push({
     hash: getString("patient_progress_activity_hash"),
     label: getString("patient_progress_activity_name"),
-    recentInteractionBadgeContent:
-      currentPatient?.recentActivityLogsSortedByDateAndTimeDescending?.length,
+    recentEntryBadgeContent:
+      currentPatient?.recentEntryActivityLogsSortedByDateAndTimeDescending
+        ?.length,
   } as IContent);
 
   contentMenu.push.apply(contentMenu, progressMenu);
@@ -177,18 +178,18 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     {
       hash: getString("patient_detail_subsection_values_inventory_hash"),
       label: getString("patient_detail_subsection_values_inventory_title"),
-      recentInteractionBadgeContent:
-        (currentPatient?.recentActivities
-          ? currentPatient?.recentActivities?.length
+      recentEntryBadgeContent:
+        (currentPatient?.recentEntryActivities
+          ? currentPatient?.recentEntryActivities?.length
           : 0) +
-        (currentPatient?.recentValues
-          ? currentPatient?.recentValues?.length
+        (currentPatient?.recentEntryValues
+          ? currentPatient?.recentEntryValues?.length
           : 0),
     },
     {
       hash: getString("patient_detail_subsection_safety_plan_hash"),
       label: getString("patient_detail_subsection_safety_plan_title"),
-      recentInteractionBadgeContent: currentPatient?.recentSafetyPlan
+      recentEntryBadgeContent: currentPatient?.recentEntrySafetyPlan
         ? "New"
         : undefined,
     },

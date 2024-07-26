@@ -169,14 +169,16 @@ export const ValuesInventory: FunctionComponent = observer(() => {
 
   const getTableRowSxProps = (activityOrValue: IActivity | IValue): SxProps => {
     if ("activityId" in activityOrValue && !!activityOrValue.activityId) {
-      const data = currentPatient.getRecentActivityById(
+      const data = currentPatient.getRecentEntryActivityById(
         activityOrValue.activityId,
       );
       if (!!data) {
         return { backgroundColor: "rgba(197, 202, 233, 1)" };
       }
     } else if (!!activityOrValue.valueId) {
-      const data = currentPatient.getRecentValueById(activityOrValue.valueId);
+      const data = currentPatient.getRecentEntryValueById(
+        activityOrValue.valueId,
+      );
       if (!!data) {
         return { backgroundColor: "rgba(197, 202, 233, 1)" };
       }

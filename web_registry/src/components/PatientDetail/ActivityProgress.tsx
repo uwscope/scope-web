@@ -124,7 +124,7 @@ export const ActivityProgress: FunctionComponent = observer(() => {
 
   const getRowClassName = (param: GridRowParams) => {
     const id = param.row["id"] as string;
-    const data = currentPatient.getRecentScheduledActivityById(id);
+    const data = currentPatient.getRecentEntryScheduledActivityById(id);
     if (!!data && data.completed) {
       return "recentEntryRow";
     } else {
