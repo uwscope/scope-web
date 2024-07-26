@@ -4,6 +4,7 @@ import { Grid } from "@mui/material";
 import {
   GridColDef,
   GridColumnHeaderParams,
+  GridRowHeightParams,
   GridRowParams,
 } from "@mui/x-data-grid";
 import { CaseReviewEntryType, SessionType } from "shared/enums";
@@ -16,7 +17,13 @@ import {
   isSession,
   KeyedMap,
 } from "shared/types";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_3RowsNoScroll,
+  TableRowHeight_5RowsNoScroll,
+} from "src/components/common/Table";
+import { usePatient } from "src/stores/stores";
 import styled from "styled-components";
 
 const ColumnHeader = styled.div({
@@ -54,6 +61,8 @@ export interface ISessionReviewTableProps {
 export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
   props,
 ) => {
+  const currentPatient = usePatient();
+
   const { sessionOrReviews, onSessionClick, onReviewClick } = props;
 
   const onRowClick = (param: GridRowParams) => {
@@ -69,10 +78,10 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
   // Column names map to IPatientStore property names
   const columns: GridColDef[] = [
     {
+      // Hidden by columnVisibilityModel
       field: "id",
       headerName: "Id",
       renderHeader,
-      hide: true,
       headerAlign: "center",
     },
     {
@@ -80,8 +89,6 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
       headerName: "Date",
       width: 65,
       renderHeader,
-      sortable: true,
-      hideSortIcons: false,
       align: "center",
       headerAlign: "center",
     },
@@ -129,7 +136,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
     {
       field: "otherRecommendations",
       headerName: "Other Rec / Action Items",
-      width: 300,
+      width: 200,
       renderHeader,
       renderCell: renderMultilineCell,
       headerAlign: "center",
@@ -137,7 +144,7 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
     {
       field: "note",
       headerName: "Note",
-      minWidth: 150,
+      minWidth: 200,
       flex: 1,
       renderHeader,
       renderCell: renderMultilineCell,
@@ -204,6 +211,30 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
     }
   });
 
+  const getRowHeight = React.useCallback((param: GridRowHeightParams) => {
+    const id = param.id as string;
+
+    const data = (() => {
+      const review = currentPatient.getCaseReviewById(id);
+      if (!!review) {
+        return getReviewData(review);
+      }
+
+      const session = currentPatient.getSessionById(id);
+      if (!!session) {
+        return getSessionData(session);
+      }
+
+      throw new Error("Invalid row id");
+    })();
+
+    if (data.otherRecommendations.length > 200 || data.note.length > 400) {
+      return TableRowHeight_5RowsNoScroll;
+    }
+
+    return undefined;
+  }, []);
+
   return (
     <Grid container alignItems="stretch">
       <Table
@@ -216,11 +247,28 @@ export const SessionReviewTable: FunctionComponent<ISessionReviewTableProps> = (
           disableColumnMenu: true,
           ...c,
         }))}
+        // These heights are similar to a 'density' of 'compact'.
+        // But density is multiplied against these, so do not also apply it.
         headerHeight={36}
+        // Default to allow 3 rows.
+        rowHeight={TableRowHeight_3RowsNoScroll}
+        // getRowHeight aims to detect situations where more height is needed.
+        getRowHeight={getRowHeight}
         onRowClick={onRowClick}
         autoHeight={true}
         isRowSelectable={() => false}
         pagination
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        initialState={{
+          pagination: {
+            pageSize: 25,
+          },
+          columns: {
+            columnVisibilityModel: {
+              id: false,
+            },
+          },
+        }}
       />
     </Grid>
   );

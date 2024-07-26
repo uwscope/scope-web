@@ -14,7 +14,12 @@ import {
   Typography,
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { GridCellParams, GridColDef, GridRowParams } from "@mui/x-data-grid";
+import {
+  GridCellParams,
+  GridColDef,
+  GridRowHeightParams,
+  GridRowParams,
+} from "@mui/x-data-grid";
 import { format } from "date-fns";
 import { action } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
@@ -30,7 +35,12 @@ import { AssessmentVis } from "src/components/common/AssessmentVis";
 import { GridDropdownField } from "src/components/common/GridField";
 import Questionnaire from "src/components/common/Questionnaire";
 import StatefulDialog from "src/components/common/StatefulDialog";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_2RowsNoScroll,
+  TableRowHeight_3RowsNoScroll,
+} from "src/components/common/Table";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
 import {
@@ -271,8 +281,6 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
         field: "date",
         headerName: "Date",
         width: 65,
-        sortable: true,
-        hideSortIcons: false,
         align: "center",
         headerAlign: "center",
       },
@@ -289,7 +297,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
           ({
             field: q,
             headerName: q,
-            width: 60,
+            width: 50,
             align: "center",
             headerAlign: "center",
             renderCell: q == "Suicide" ? renderSuicideCell : undefined,
@@ -323,7 +331,7 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       }
     });
 
-    const getRowClassName = (param: GridRowParams) => {
+    const getRowClassName = React.useCallback((param: GridRowParams) => {
       const id = param.row["id"] as string;
       const data = currentPatient.getRecentEntryAssessmentLogById(id);
       if (!!data) {
@@ -331,7 +339,18 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
       } else {
         return "";
       }
-    };
+    }, []);
+
+    const getRowHeight = React.useCallback((param: GridRowHeightParams) => {
+      const id = param.id as string;
+      const data = currentPatient.getAssessmentLogById(id);
+
+      if (!!data && !!data.comment && data.comment.length >= 100) {
+        return TableRowHeight_3RowsNoScroll;
+      }
+
+      return undefined;
+    }, []);
 
     return (
       <ActionPanel
@@ -396,11 +415,23 @@ export const AssessmentProgress: FunctionComponent<IAssessmentProgressProps> =
                   disableColumnMenu: true,
                   ...c,
                 }))}
+                // These heights are similar to a 'density' of 'compact'.
+                // But density is multiplied against these, so do not also apply it.
                 headerHeight={36}
+                // Default to allow 2 rows.
+                rowHeight={TableRowHeight_2RowsNoScroll}
+                // getRowHeight aims to detect situations where more height is needed.
+                getRowHeight={getRowHeight}
                 autoHeight={true}
                 onRowClick={onRowClick}
                 isRowSelectable={() => false}
                 pagination
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                initialState={{
+                  pagination: {
+                    pageSize: 25,
+                  },
+                }}
                 getRowClassName={getRowClassName}
               />
             )}

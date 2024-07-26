@@ -1,21 +1,30 @@
 import React, { FunctionComponent } from "react";
 
 import { Grid, Typography } from "@mui/material";
-import { GridColDef, GridRowParams } from "@mui/x-data-grid";
+import {
+  GridColDef,
+  GridRowHeightParams,
+  GridRowParams,
+} from "@mui/x-data-grid";
 import { format } from "date-fns";
 import { observer } from "mobx-react";
 import { IAssessment, IMoodLog } from "shared/types";
 import ActionPanel from "src/components/common/ActionPanel";
 import { AssessmentVis } from "src/components/common/AssessmentVis";
-import { renderMultilineCell, Table } from "src/components/common/Table";
+import {
+  renderMultilineCell,
+  Table,
+  TableRowHeight_2RowsNoScroll,
+  TableRowHeight_3RowsNoScroll,
+} from "src/components/common/Table";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
 
 export interface IMoodProgressProps {
   assessment: IAssessment;
   maxValue: number;
-  moodLogsSortedByDate: IMoodLog[];
-  moodLogsSortedByDateDescending: IMoodLog[];
+  moodLogsSortedByDateAndTime: IMoodLog[];
+  moodLogsSortedByDateAndTimeDescending: IMoodLog[];
 }
 
 export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
@@ -24,8 +33,8 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
     const rootStore = useStores();
 
     const {
-      moodLogsSortedByDate,
-      moodLogsSortedByDateDescending,
+      moodLogsSortedByDateAndTime,
+      moodLogsSortedByDateAndTimeDescending,
       assessment,
       maxValue,
     } = props;
@@ -34,7 +43,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       assessment.assessmentId,
     );
 
-    const tableData = moodLogsSortedByDateDescending?.map((a) => {
+    const tableData = moodLogsSortedByDateAndTimeDescending?.map((a) => {
       return {
         date: format(a.recordedDateTime, "MM/dd/yy"),
         time: format(a.recordedDateTime, "hh:mm aa"),
@@ -49,8 +58,6 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
         field: "date",
         headerName: "Date",
         width: 65,
-        sortable: true,
-        hideSortIcons: false,
         align: "center",
         headerAlign: "center",
       },
@@ -58,8 +65,6 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
         field: "time",
         headerName: "Time",
         width: 65,
-        sortable: true,
-        hideSortIcons: false,
         align: "center",
         headerAlign: "center",
       },
@@ -81,11 +86,7 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       },
     ];
 
-    console.log(
-      `loadpatient=${currentPatient?.loadPatientState.pending}, loadmood=${currentPatient?.loadMoodLogsState.pending}`,
-    );
-
-    const getRowClassName = (param: GridRowParams) => {
+    const getRowClassName = React.useCallback((param: GridRowParams) => {
       const id = param.row["id"] as string;
       const data = currentPatient.getRecentEntryMoodLogById(id);
       if (!!data) {
@@ -93,7 +94,18 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
       } else {
         return "";
       }
-    };
+    }, []);
+
+    const getRowHeight = React.useCallback((param: GridRowHeightParams) => {
+      const id = param.id as string;
+      const data = currentPatient.getMoodLogById(id);
+
+      if (!!data && !!data.comment && data.comment.length >= 200) {
+        return TableRowHeight_3RowsNoScroll;
+      }
+
+      return undefined;
+    }, []);
 
     return (
       <ActionPanel
@@ -106,37 +118,52 @@ export const MoodProgress: FunctionComponent<IMoodProgressProps> = observer(
         error={currentPatient?.loadMoodLogsState.error}
       >
         <Grid container alignItems="stretch">
-          {!!moodLogsSortedByDate && moodLogsSortedByDate.length > 0 && (
-            <Table
-              rows={tableData}
-              columns={columns.map((c) => ({
-                sortable: false,
-                filterable: false,
-                editable: false,
-                hideSortIcons: true,
-                disableColumnMenu: true,
-                ...c,
-              }))}
-              headerHeight={36}
-              autoHeight={true}
-              isRowSelectable={() => false}
-              pagination
-              getRowClassName={getRowClassName}
-            />
-          )}
-          {!!moodLogsSortedByDate && moodLogsSortedByDate.length > 0 && (
-            <Grid item xs={12}>
-              <AssessmentVis
-                data={moodLogsSortedByDate.map((log) => ({
-                  recordedDateTime: log.recordedDateTime,
-                  pointValues: { Mood: log.mood },
+          {!!moodLogsSortedByDateAndTime &&
+            moodLogsSortedByDateAndTime.length > 0 && (
+              <Table
+                rows={tableData}
+                columns={columns.map((c) => ({
+                  sortable: false,
+                  filterable: false,
+                  editable: false,
+                  hideSortIcons: true,
+                  disableColumnMenu: true,
+                  ...c,
                 }))}
-                maxValue={maxValue}
-                useTime={true}
+                // These heights are similar to a 'density' of 'compact'.
+                // But density is multiplied against these, so do not also apply it.
+                headerHeight={36}
+                // Default to allow 2 rows.
+                rowHeight={TableRowHeight_2RowsNoScroll}
+                // getRowHeight aims to detect situations where more height is needed.
+                getRowHeight={getRowHeight}
+                autoHeight={true}
+                isRowSelectable={() => false}
+                pagination
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                initialState={{
+                  pagination: {
+                    pageSize: 25,
+                  },
+                }}
+                getRowClassName={getRowClassName}
               />
-            </Grid>
-          )}
-          {(!moodLogsSortedByDate || moodLogsSortedByDate.length == 0) && (
+            )}
+          {!!moodLogsSortedByDateAndTime &&
+            moodLogsSortedByDateAndTime.length > 0 && (
+              <Grid item xs={12}>
+                <AssessmentVis
+                  data={moodLogsSortedByDateAndTime.map((log) => ({
+                    recordedDateTime: log.recordedDateTime,
+                    pointValues: { Mood: log.mood },
+                  }))}
+                  maxValue={maxValue}
+                  useTime={true}
+                />
+              </Grid>
+            )}
+          {(!moodLogsSortedByDateAndTime ||
+            moodLogsSortedByDateAndTime.length == 0) && (
             <Grid item xs={12}>
               <Typography>
                 {getString("patient_progress_mood_empty")}

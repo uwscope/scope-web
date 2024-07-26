@@ -122,6 +122,7 @@ export interface IPatientStore extends IPatient {
   getActivityById: (activityId: string) => IActivity | undefined;
   getAssessmentLogById: (assessmentLogId: string) => IAssessmentLog | undefined;
   getCaseReviewById: (caseReviewId: string) => ICaseReview | undefined;
+  getMoodLogById: (moodLogId: string) => IMoodLog | undefined;
   getRecentEntryActivityById: (activityId: string) => IActivity | undefined;
   getRecentEntryAssessmentLogById: (
     assessmentLogId: string,
@@ -132,6 +133,9 @@ export interface IPatientStore extends IPatient {
   ) => IAssessmentLog[] | undefined;
   getRecentEntryMoodLogById: (moodLogId: string) => IMoodLog | undefined;
   getRecentEntryScheduledActivityById: (
+    scheduledActivityId: string,
+  ) => IScheduledActivity | undefined;
+  getScheduledActivityById: (
     scheduledActivityId: string,
   ) => IScheduledActivity | undefined;
   getSessionById: (sessionId: string) => ISession | undefined;
@@ -710,6 +714,10 @@ export class PatientStore implements IPatientStore {
     );
   }
 
+  public getMoodLogById(moodLogId: string) {
+    return this.moodLogs.find((current) => current.moodLogId == moodLogId);
+  }
+
   public getRecentEntryActivityById(activityId: string) {
     return this.recentEntryActivities?.find(
       (current) => current.activityId == activityId,
@@ -744,6 +752,12 @@ export class PatientStore implements IPatientStore {
 
   public getRecentEntryScheduledActivityById(scheduledActivityId: string) {
     return this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending?.find(
+      (current) => current.scheduledActivityId == scheduledActivityId,
+    );
+  }
+
+  public getScheduledActivityById(scheduledActivityId: string) {
+    return this.scheduledActivities.find(
       (current) => current.scheduledActivityId == scheduledActivityId,
     );
   }

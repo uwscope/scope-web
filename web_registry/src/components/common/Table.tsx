@@ -2,8 +2,20 @@ import React from "react";
 
 import { TableRow } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { DataGrid, GridCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridCellParams,
+  GridCellValue,
+  GridValueFormatterParams,
+} from "@mui/x-data-grid";
+import { formatDateOnly } from "shared/time";
 import styled from "styled-components";
+
+export const NA = "--";
+
+export const TableRowHeight_2RowsNoScroll = 42;
+export const TableRowHeight_3RowsNoScroll = 63;
+export const TableRowHeight_5RowsNoScroll = 105;
 
 export const ClickableTableRow = styled(TableRow)({
   "&:hover": {
@@ -60,7 +72,7 @@ export const MultilineCell = withTheme(
     whiteSpace: "initial",
     lineHeight: "1rem",
     overflowY: "auto",
-    height: "100%",
+    maxHeight: "100%",
     padding: props.theme.spacing(1, 0),
   })),
 );
@@ -68,3 +80,21 @@ export const MultilineCell = withTheme(
 export const renderMultilineCell = (props: GridCellParams) => (
   <MultilineCell>{props.value}</MultilineCell>
 );
+
+export const dateFormatter: (params: GridValueFormatterParams) => string = (
+  params,
+) => {
+  return formatDateOnly(params.value as Date, "MM/dd/yy");
+};
+
+export const nullUndefinedFormatter: (
+  formatter: (params: GridValueFormatterParams) => GridCellValue,
+) => (params: GridValueFormatterParams) => GridCellValue = (formatter) => {
+  return (params) => {
+    if (params.value === null || params.value === undefined) {
+      return NA;
+    } else {
+      return formatter(params);
+    }
+  };
+};

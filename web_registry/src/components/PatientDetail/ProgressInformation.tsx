@@ -80,10 +80,10 @@ export const ProgressInformation: FunctionComponent = observer(() => {
             <MoodProgress
               assessment={assessment}
               maxValue={assessmentMax}
-              moodLogsSortedByDate={
+              moodLogsSortedByDateAndTime={
                 currentPatient?.moodLogsSortedByDateAndTime || []
               }
-              moodLogsSortedByDateDescending={
+              moodLogsSortedByDateAndTimeDescending={
                 currentPatient?.moodLogsSortedByDateAndTimeDescending || []
               }
             />
