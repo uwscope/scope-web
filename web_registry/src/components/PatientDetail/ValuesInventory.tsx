@@ -13,7 +13,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { compareDesc, format } from "date-fns";
+import { format, max } from "date-fns";
 import { observer } from "mobx-react-lite";
 import { IActivity, IValue } from "shared/types";
 import ActionPanel, { IActionButton } from "src/components/common/ActionPanel";
@@ -34,46 +34,34 @@ export const ValuesInventory: FunctionComponent = observer(() => {
     );
   }
 
-  let mostRecentlyEditedActivity: IActivity | undefined;
-  let mostRecentlyEditedValue: IValue | undefined;
-  if (activities.length > 0) {
-    mostRecentlyEditedActivity =
-      !!currentPatient.activitiesSortedByDateAndTimeDescending &&
-      currentPatient.activitiesSortedByDateAndTimeDescending[0];
-  }
-  if (values.length > 0) {
-    mostRecentlyEditedValue =
-      !!currentPatient.valuesSortedByDateAndTimeDescending &&
-      currentPatient.valuesSortedByDateAndTimeDescending[0];
-  }
+  const mostRecentlyEditedActivity =
+    !!currentPatient.activitiesSortedByDateAndTimeDescending
+      ? currentPatient.activitiesSortedByDateAndTimeDescending[0]
+      : undefined;
+  const mostRecentlyEditedValue =
+    !!currentPatient.valuesSortedByDateAndTimeDescending
+      ? currentPatient.valuesSortedByDateAndTimeDescending[0]
+      : undefined;
+  const mostRecentlyEditedActivityOrValueDateTime = (() => {
+    if (!!mostRecentlyEditedActivity && !mostRecentlyEditedValue) {
+      return mostRecentlyEditedActivity.editedDateTime;
+    } else if (!!mostRecentlyEditedValue && !mostRecentlyEditedActivity) {
+      return mostRecentlyEditedValue.editedDateTime;
+    } else if (!!mostRecentlyEditedActivity && !!mostRecentlyEditedValue) {
+      return max([
+        mostRecentlyEditedActivity.editedDateTime,
+        mostRecentlyEditedValue.editedDateTime,
+      ]);
+    } else {
+      return undefined;
+    }
+  })();
 
-  const valuesInventoryActivityDateHeader = getString(
-    "patient_values_inventory_activity_date_header",
-  );
-  const dateFormat = "MM/dd/yyyy";
-  dateStrings.push(
-    !!mostRecentlyEditedActivity && !!mostRecentlyEditedValue
-      ? `${valuesInventoryActivityDateHeader} ${format(
-          compareDesc(
-            mostRecentlyEditedActivity.editedDateTime,
-            mostRecentlyEditedValue.editedDateTime,
-          ) < 0
-            ? mostRecentlyEditedActivity.editedDateTime
-            : mostRecentlyEditedValue.editedDateTime,
-          dateFormat,
-        )}`
-      : !!mostRecentlyEditedActivity
-        ? `${valuesInventoryActivityDateHeader} ${format(
-            mostRecentlyEditedActivity.editedDateTime,
-            dateFormat,
-          )}`
-        : !!mostRecentlyEditedValue
-          ? `${valuesInventoryActivityDateHeader} ${format(
-              mostRecentlyEditedValue.editedDateTime,
-              dateFormat,
-            )}`
-          : "",
-  );
+  if (!!mostRecentlyEditedActivityOrValueDateTime) {
+    dateStrings.push(
+      `${getString("patient_values_inventory_activity_date_header")} ${format(mostRecentlyEditedActivityOrValueDateTime, "MM/dd/yyyy")}`,
+    );
+  }
 
   const activityFromActivityOrValue: (
     activityOrValue: IActivity | IValue,
