@@ -15,12 +15,6 @@ import { action, observable } from "mobx";
 import { observer } from "mobx-react";
 import styled, { CSSObject, ThemedStyledProps } from "styled-components";
 
-const TitleContainer = withTheme(
-  styled.div((props) => ({
-    padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
-  })),
-);
-
 const ContentListBadge = withTheme(
   styled(Badge)(
     () =>
@@ -226,14 +220,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       );
     };
 
-    return (
-      <div>
-        <TitleContainer>
-          <Typography variant="button">Contents</Typography>
-        </TitleContainer>
-        <List dense={true}>{contents.map(createListItem)}</List>
-      </div>
-    );
+    return <List dense={true}>{contents.map(createListItem)}</List>;
   },
 );
 
