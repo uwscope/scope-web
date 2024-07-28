@@ -462,6 +462,12 @@ export class PatientStore implements IPatientStore {
       !!this.recentEntrySafetyPlan ||
       (!!this.recentEntryValues && this.recentEntryValues.length > 0);
 
+      //
+      // These currently do not render, so should not be included in determining "New"
+      //
+      // (!!this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending &&
+      //   this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending.length > 0) ||
+
     return recentEntry ? "New" : undefined;
   }
 
