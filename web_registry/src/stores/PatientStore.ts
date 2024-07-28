@@ -460,10 +460,13 @@ export class PatientStore implements IPatientStore {
       (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
         this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentEntrySafetyPlan ||
-      (!!this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending &&
-        this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending
-          .length > 0) ||
       (!!this.recentEntryValues && this.recentEntryValues.length > 0);
+
+      //
+      // These currently do not render, so should not be included in determining "New"
+      //
+      // (!!this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending &&
+      //   this.recentEntryScheduledActivitiesSortedByDateAndTimeDescending.length > 0) ||
 
     return recentEntry ? "New" : undefined;
   }
