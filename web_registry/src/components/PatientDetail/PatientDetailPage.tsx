@@ -1,17 +1,7 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-// import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import {
-  Divider,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Divider, Grid, Paper, Typography } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { format } from "date-fns";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import { useParams } from "react-router";
@@ -27,12 +17,6 @@ import { getString } from "src/services/strings";
 import { PatientStoreProvider, useStores } from "src/stores/stores";
 import { sortAssessmentContent } from "src/utils/assessment";
 import styled from "styled-components";
-
-const TitleContainer = withTheme(
-  styled.div((props) => ({
-    padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
-  })),
-);
 
 const DetailPageContainer = withTheme(
   styled.div({
@@ -247,57 +231,16 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
                 <Grid item>
                   <Divider variant="middle" />
                 </Grid>
-                {!!currentPatient.recentEntryCaseloadSummary && (
-                  <React.Fragment>
-                    <Grid item>
-                      <TitleContainer>
-                        <Stack
-                          direction={"row"}
-                          justifyContent={"space-between"}
-                        >
-                          <Stack direction={"column"}>
-                            <InputLabel>New Patient Entry</InputLabel>
-                            <FormHelperText>
-                              Since{" "}
-                              {format(
-                                currentPatient.recentEntryCutoffDateTime,
-                                "MM/dd/yyyy h:mm aaa",
-                              )}
-                            </FormHelperText>
-                            {/*
-                            <FormHelperText>
-                              Last Reviewed:
-                            </FormHelperText>
-                            <FormHelperText>
-                              {format(currentPatient.recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-                            </FormHelperText>
-                            */}
-                          </Stack>
-                          <Stack direction={"column"} alignItems={"start"}>
-                            {/*
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              color="primary"
-                              startIcon={<AssignmentTurnedInOutlinedIcon />}
-                              // onClick={onRecentEntryMarkReviewed}
-                            >
-                              Mark Reviewed
-                            </Button>
-                            */}
-                          </Stack>
-                        </Stack>
-                      </TitleContainer>
-                    </Grid>
-                    <Grid item>
-                      <Divider variant="middle" />
-                    </Grid>
-                  </React.Fragment>
-                )}
                 <Grid item>
                   <ContentsMenu
                     contents={contentMenu}
                     contentId="#scroll-content"
+                    recentEntryCutoffDateTime={
+                      currentPatient.recentEntryCutoffDateTime
+                    }
+                    recentEntryBadgeContent={
+                      currentPatient.recentEntryCaseloadSummary
+                    }
                   />
                 </Grid>
               </Grid>
