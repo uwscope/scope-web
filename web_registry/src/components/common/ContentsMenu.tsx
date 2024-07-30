@@ -273,6 +273,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
     //             variant="outlined"
     //             size="small"
     //             color="primary"
+    //             disabled={!recentEntryBadgeContent}
     //             startIcon={<AssignmentTurnedInOutlinedIcon />}
     //             // onClick={onRecentEntryMarkReviewed}
     //           >
