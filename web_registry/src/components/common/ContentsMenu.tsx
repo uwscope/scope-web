@@ -1,19 +1,30 @@
 import React, { FunctionComponent } from "react";
 
+// import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Badge,
+  // Button,
+  FormHelperText,
   List,
   ListItem,
   ListItemProps,
   ListItemText,
+  Stack,
   Typography,
   useTheme,
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
+import { format } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
 import { observer } from "mobx-react";
 import styled, { CSSObject, ThemedStyledProps } from "styled-components";
+
+const TitleContainer = withTheme(
+  styled.div((props) => ({
+    padding: props.theme.spacing(2.5, 2.5, 1, 2.5),
+  })),
+);
 
 const ContentListBadge = withTheme(
   styled(Badge)(
@@ -58,6 +69,8 @@ export interface IContentItem {
 export interface IContentsMenuProps {
   contents: IContentItem[];
   contentId: string;
+  recentEntryCutoffDateTime: Date;
+  recentEntryBadgeContent: React.ReactNode;
 }
 
 const noop = () => {};
@@ -103,7 +116,12 @@ type ContentMenuItem = IContentItem & { node: HTMLElement | null };
 
 export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
   (props) => {
-    const { contents, contentId } = props;
+    const {
+      contents,
+      contentId,
+      recentEntryCutoffDateTime,
+      recentEntryBadgeContent,
+    } = props;
     const theme = useTheme();
 
     const itemsClientRef = React.useRef<ContentMenuItem[]>([]);
@@ -220,7 +238,53 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       );
     };
 
-    return <List dense={true}>{contents.map(createListItem)}</List>;
+    return (
+      <div>
+        <TitleContainer>
+          <Stack direction={"column"}>
+            <Typography>CONTENTS</Typography>
+            {!!recentEntryBadgeContent && (
+              <FormHelperText>
+                New Since:
+                <br />
+                {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+              </FormHelperText>
+            )}
+          </Stack>
+        </TitleContainer>
+        <List dense={true}>{contents.map(createListItem)}</List>
+      </div>
+    );
+
+    // return (
+    //   <div>
+    //     <TitleContainer>
+    //       <Stack direction={"row"} justifyContent={"space-between"}>
+    //         <Stack direction={"column"} alignItems={"start"}>
+    //           <Typography>CONTENTS</Typography>
+    //           <FormHelperText>
+    //             Last Reviewed:
+    //             <br />
+    //             {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+    //           </FormHelperText>
+    //         </Stack>
+    //         <Stack direction={"column"} alignItems={"start"}>
+    //           <Button
+    //             variant="outlined"
+    //             size="small"
+    //             color="primary"
+    //             disabled={!recentEntryBadgeContent}
+    //             startIcon={<AssignmentTurnedInOutlinedIcon />}
+    //             // onClick={onRecentEntryMarkReviewed}
+    //           >
+    //             Mark Reviewed
+    //           </Button>
+    //         </Stack>
+    //       </Stack>
+    //     </TitleContainer>
+    //     <List dense={true}>{contents.map(createListItem)}</List>
+    //   </div>
+    // );
   },
 );
 
