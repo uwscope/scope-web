@@ -125,7 +125,9 @@ export interface IPatientService extends IServiceBase {
   getMoodLogs(): Promise<IMoodLog[]>;
   addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
 
-  addRecentEntryReview(recentEntryReview: IRecentEntryReview): Promise<IRecentEntryReview>;
+  addRecentEntryReview(
+    recentEntryReview: IRecentEntryReview,
+  ): Promise<IRecentEntryReview>;
 
   getValues(): Promise<IValue[]>;
   addValue(value: IValue): Promise<IValue>;
@@ -586,7 +588,9 @@ class PatientService extends ServiceBase implements IPatientService {
     return response.data?.moodlog;
   }
 
-  public async addRecentEntryReview(recentEntryReview: IRecentEntryReview): Promise<IRecentEntryReview> {
+  public async addRecentEntryReview(
+    recentEntryReview: IRecentEntryReview,
+  ): Promise<IRecentEntryReview> {
     (recentEntryReview as any)._type = "recentEntryReview";
 
     const response = await this.axiosInstance.post<IRecentEntryReviewResponse>(

@@ -65,18 +65,18 @@ export interface IPatientStore extends IPatient {
   readonly recentEntryCutoffDateTime: Date | undefined;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
-  | IActivityLog[]
-  | undefined;
+    | IActivityLog[]
+    | undefined;
   readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
-  | IAssessmentLog[]
-  | undefined;
+    | IAssessmentLog[]
+    | undefined;
   readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
-  | IMoodLog[]
-  | undefined;
+    | IMoodLog[]
+    | undefined;
   readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
   readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
-  | IScheduledActivity[]
-  | undefined;
+    | IScheduledActivity[]
+    | undefined;
   readonly recentEntryValues: IValue[] | undefined;
 
   // UI states
@@ -190,7 +190,9 @@ export class PatientStore implements IPatientStore {
   private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
   private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
   private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
-  private readonly loadRecentEntryReviewsQuery: PromiseQuery<IRecentEntryReview[]>;
+  private readonly loadRecentEntryReviewsQuery: PromiseQuery<
+    IRecentEntryReview[]
+  >;
   private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
   private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
   private readonly loadScheduledActivitiesQuery: PromiseQuery<
@@ -393,7 +395,10 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryReviewsSortedByDateAndTimeDescending() {
-    return sortRecentEntryReviewsByDateAndTime(this.recentEntryReviews, SortDirection.DESCENDING);
+    return sortRecentEntryReviewsByDateAndTime(
+      this.recentEntryReviews,
+      SortDirection.DESCENDING,
+    );
   }
 
   @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
@@ -476,7 +481,7 @@ export class PatientStore implements IPatientStore {
         this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
       (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
         this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
-        0) ||
+          0) ||
       (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
         this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentEntrySafetyPlan ||
@@ -501,7 +506,15 @@ export class PatientStore implements IPatientStore {
     //
     // return cutoffDateTime;
 
-    return this.profile.enrollmentDate;
+    // return this.profile.enrollmentDate;
+
+    cutoffDateTime =
+      this.recentEntryReviewsSortedByDateAndTimeDescending.length > 0
+        ? this.recentEntryReviewsSortedByDateAndTimeDescending[0]
+            .effectiveDateTime
+        : subDays(cutoffDateTime, 14);
+
+    return cutoffDateTime;
   }
 
   @computed get recentEntryActivities() {
@@ -913,7 +926,9 @@ export class PatientStore implements IPatientStore {
         );
         this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
         this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
-        this.loadRecentEntryReviewsQuery.fromPromise(Promise.resolve(patient.recentEntryReviews));
+        this.loadRecentEntryReviewsQuery.fromPromise(
+          Promise.resolve(patient.recentEntryReviews),
+        );
         this.loadSafetyPlanQuery.fromPromise(
           Promise.resolve(patient.safetyPlan),
         );
@@ -1214,10 +1229,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
@@ -1240,7 +1255,7 @@ export class PatientStore implements IPatientStore {
     await this.loadAndLogQuery<IRecentEntryReview[]>(
       () => promise,
       this.loadRecentEntryReviewsQuery,
-      this.onRecentEntryReviewConflict
+      this.onRecentEntryReviewConflict,
     );
   }
 

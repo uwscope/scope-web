@@ -123,10 +123,10 @@ def _construct_patient_document(
 
     # Scheduled Assessments
     # TODO: this access currently modifies documents, cannot be replaced
-    patient_document["scheduledAssessments"] = (
-        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-            collection=patient_collection
-        )
+    patient_document[
+        "scheduledAssessments"
+    ] = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+        collection=patient_collection
     )
 
     # Scheduled Activities
