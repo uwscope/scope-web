@@ -13,7 +13,7 @@ import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
-import scope.database.patient.sessions
+import scope.database.patient.recent_entry_reviews
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
@@ -38,6 +38,8 @@ import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
 import scope.testing.fake_data.fixtures_fake_provider_identity
+import scope.testing.fake_data.fixtures_fake_recent_entry_review
+import scope.testing.fake_data.fixtures_fake_recent_entry_reviews
 import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
@@ -271,6 +273,26 @@ TEST_CONFIGS = [
         expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(
+        name="recent-entry-review",
+        schema=scope.schema.recent_entry_review_schema,
+        data_factory_fixture="data_fake_recent_entry_review_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.recent_entry_reviews.SEMANTIC_SET_ID,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="recent-entry-reviews",
+        schema=scope.schema.recent_entry_reviews_schema,
+        data_factory_fixture="data_fake_recent_entry_reviews_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
         name="referral-status",
         schema=scope.schema.referral_status_schema,
         data_factory_fixture="data_fake_referral_status_factory",
@@ -486,9 +508,9 @@ def test_fake_data_schema(
                                 == document_set_element["_set_id"]
                             )
                         else:
-                            document_set_element[
-                                config.expected_semantic_set_id
-                            ] = document_set_element["_set_id"]
+                            document_set_element[config.expected_semantic_set_id] = (
+                                document_set_element["_set_id"]
+                            )
                 else:
                     assert "_set_id" not in document_set_element
                     document_set_element["_set_id"] = collection_utils.generate_set_id()
@@ -497,9 +519,9 @@ def test_fake_data_schema(
                         assert (
                             config.expected_semantic_set_id not in document_set_element
                         )
-                        document_set_element[
-                            config.expected_semantic_set_id
-                        ] = document_set_element["_set_id"]
+                        document_set_element[config.expected_semantic_set_id] = (
+                            document_set_element["_set_id"]
+                        )
 
                 document_set_element = document_utils.normalize_document(
                     document=document_set_element

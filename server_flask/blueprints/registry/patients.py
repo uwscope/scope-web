@@ -15,6 +15,7 @@ import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
 import scope.database.patient.patient_profile
+import scope.database.patient.recent_entry_reviews
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -58,6 +59,7 @@ def _construct_patient_document(
             scope.database.patient.assessment_logs.DOCUMENT_TYPE,
             scope.database.patient.case_reviews.DOCUMENT_TYPE,
             scope.database.patient.mood_logs.DOCUMENT_TYPE,
+            scope.database.patient.recent_entry_reviews.DOCUMENT_TYPE,
             scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
             scope.database.patient.sessions.DOCUMENT_TYPE,
             scope.database.patient.values.DOCUMENT_TYPE,
@@ -109,6 +111,11 @@ def _construct_patient_document(
         scope.database.patient.patient_profile.DOCUMENT_TYPE
     ]
 
+    # Recent Entry Reviews
+    patient_document["recentEntryReviews"] = documents_by_type[
+        scope.database.patient.recent_entry_reviews.DOCUMENT_TYPE
+    ]
+
     # Safety Plan
     patient_document["safetyPlan"] = documents_by_type[
         scope.database.patient.safety_plan.DOCUMENT_TYPE
@@ -116,10 +123,10 @@ def _construct_patient_document(
 
     # Scheduled Assessments
     # TODO: this access currently modifies documents, cannot be replaced
-    patient_document[
-        "scheduledAssessments"
-    ] = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
+    patient_document["scheduledAssessments"] = (
+        scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+            collection=patient_collection
+        )
     )
 
     # Scheduled Activities
