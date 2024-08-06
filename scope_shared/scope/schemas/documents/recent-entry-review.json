@@ -26,10 +26,10 @@
     "effectiveDateTime": {
       "$ref": "/schemas/utils/datetime#/properties/datetime"
     },
-    "providerName": {
+    "providerId": {
       "type": "string"
     }
   },
   "additionalProperties": false,
-  "required": ["_type", "editedDateTime", "effectiveDateTime", "providerName"]
+  "required": ["_type", "editedDateTime", "effectiveDateTime", "providerId"]
 }

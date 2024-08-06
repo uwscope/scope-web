@@ -235,7 +235,7 @@ export interface IContact {
 export interface IRecentEntryReview {
   editedDateTime: Date;
   effectiveDateTime: Date;
-  providerName?: string;
+  providerId?: string;
 }
 
 export interface ISafetyPlan {

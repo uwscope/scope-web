@@ -136,7 +136,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       recentEntryReview: {
         editedDateTime: new Date(),
         effectiveDateTime: new Date(),
-        providerName: authStore.currentUserIdentity?.name,
+        providerId: authStore.currentUserIdentity?.providerId,
       } as IRecentEntryReview,
     }));
 

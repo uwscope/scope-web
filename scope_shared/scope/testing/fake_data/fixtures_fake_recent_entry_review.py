@@ -42,7 +42,7 @@ def fake_recent_entry_review_factory(
                     )
                 )
             ),
-            "providerName": faker_factory.name(),
+            "providerId": faker_factory.name(),
         }
 
         return fake_recent_entry_review
