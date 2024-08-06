@@ -28,6 +28,8 @@ import {
   IPatientProfileRequest,
   IPatientProfileResponse,
   IPatientResponse,
+  IRecentEntryReviewRequest,
+  IRecentEntryReviewResponse,
   ISafetyPlanRequest,
   ISafetyPlanResponse,
   IScheduledActivityListResponse,
@@ -53,6 +55,7 @@ import {
   IPatient,
   IPatientConfig,
   IPatientProfile,
+  IRecentEntryReview,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -121,6 +124,8 @@ export interface IPatientService extends IServiceBase {
 
   getMoodLogs(): Promise<IMoodLog[]>;
   addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
+
+  addRecentEntryReview(recentEntryReview: IRecentEntryReview): Promise<IRecentEntryReview>;
 
   getValues(): Promise<IValue[]>;
   addValue(value: IValue): Promise<IValue>;
@@ -579,6 +584,18 @@ class PatientService extends ServiceBase implements IPatientService {
       } as IMoodLogRequest,
     );
     return response.data?.moodlog;
+  }
+
+  public async addRecentEntryReview(recentEntryReview: IRecentEntryReview): Promise<IRecentEntryReview> {
+    (recentEntryReview as any)._type = "recentEntryReview";
+
+    const response = await this.axiosInstance.post<IRecentEntryReviewResponse>(
+      `/recententryreviews`,
+      {
+        recententryreview: recentEntryReview,
+      } as IRecentEntryReviewRequest,
+    );
+    return response.data?.recententryreview;
   }
 
   public async getValues(): Promise<IValue[]> {

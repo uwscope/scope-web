@@ -232,6 +232,12 @@ export interface IContact {
   emergencyNumber?: string;
 }
 
+export interface IRecentEntryReview {
+  editedDateTime: Date;
+  effectiveDateTime: Date;
+  providerName?: string;
+}
+
 export interface ISafetyPlan {
   assigned: boolean;
   assignedDateTime?: Date;
@@ -299,6 +305,9 @@ export interface IPatient {
 
   // Values
   values: IValue[];
+
+  // Recent entry reviews
+  recentEntryReviews: IRecentEntryReview[];
 
   // Sessions
   sessions: ISession[];

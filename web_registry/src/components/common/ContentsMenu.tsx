@@ -1,9 +1,10 @@
 import React, { FunctionComponent } from "react";
 
-// import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import AssignmentReturnOutlinedIcon from "@mui/icons-material/AssignmentReturnOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Badge,
-  // Button,
+  Button,
   FormHelperText,
   List,
   ListItem,
@@ -17,7 +18,10 @@ import withTheme from "@mui/styles/withTheme";
 import { format } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
-import { observer } from "mobx-react";
+import { observer, useLocalObservable } from "mobx-react";
+import { IRecentEntryReview } from "shared/types";
+import { getString } from "src/services/strings";
+import { usePatient, useStores } from "src/stores/stores";
 import styled, { CSSObject, ThemedStyledProps } from "styled-components";
 
 const TitleContainer = withTheme(
@@ -122,7 +126,39 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       recentEntryCutoffDateTime,
       recentEntryBadgeContent,
     } = props;
+    const currentPatient = usePatient();
+    const { authStore } = useStores();
     const theme = useTheme();
+
+    const markReviewState = useLocalObservable<{
+      recentEntryReview: IRecentEntryReview;
+    }>(() => ({
+      recentEntryReview: {
+        editedDateTime: new Date(),
+        effectiveDateTime: new Date(),
+        providerName: authStore.currentUserIdentity?.name,
+      } as IRecentEntryReview,
+    }));
+
+    const onRecentEntryMarkReviewed = action(() => {
+      const { recentEntryReview } = markReviewState;
+      currentPatient.addRecentEntryReview({
+        ...recentEntryReview,
+        editedDateTime: new Date(),
+        effectiveDateTime: new Date(),
+      });
+    });
+
+    const onRecentEntryMarkUndo = action(() => {
+      const previousRecentEntryReview =
+        currentPatient.recentEntryReviewsSortedByDateAndTimeDescending[1];
+      const { recentEntryReview } = markReviewState;
+      currentPatient.addRecentEntryReview({
+        ...recentEntryReview,
+        editedDateTime: new Date(),
+        effectiveDateTime: previousRecentEntryReview.effectiveDateTime,
+      });
+    });
 
     const itemsClientRef = React.useRef<ContentMenuItem[]>([]);
     React.useEffect(() => {
@@ -238,53 +274,66 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       );
     };
 
-    return (
-      <div>
-        <TitleContainer>
-          <Stack direction={"column"}>
-            <Typography>CONTENTS</Typography>
-            {!!recentEntryCutoffDateTime && !!recentEntryBadgeContent && (
-              <FormHelperText>
-                New Since:
-                <br />
-                {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-              </FormHelperText>
-            )}
-          </Stack>
-        </TitleContainer>
-        <List dense={true}>{contents.map(createListItem)}</List>
-      </div>
-    );
-
     // return (
     //   <div>
     //     <TitleContainer>
-    //       <Stack direction={"row"} justifyContent={"space-between"}>
-    //         <Stack direction={"column"} alignItems={"start"}>
-    //           <Typography>CONTENTS</Typography>
+    //       <Stack direction={"column"}>
+    //         <Typography>CONTENTS</Typography>
+    //         {!!recentEntryCutoffDateTime && !!recentEntryBadgeContent && (
     //           <FormHelperText>
-    //             Last Reviewed:
+    //             New Since:
     //             <br />
     //             {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
     //           </FormHelperText>
-    //         </Stack>
-    //         <Stack direction={"column"} alignItems={"start"}>
-    //           <Button
-    //             variant="outlined"
-    //             size="small"
-    //             color="primary"
-    //             disabled={!recentEntryBadgeContent}
-    //             startIcon={<AssignmentTurnedInOutlinedIcon />}
-    //             // onClick={onRecentEntryMarkReviewed}
-    //           >
-    //             Mark Reviewed
-    //           </Button>
-    //         </Stack>
+    //         )}
     //       </Stack>
     //     </TitleContainer>
     //     <List dense={true}>{contents.map(createListItem)}</List>
     //   </div>
     // );
+
+    return (
+      <div>
+        <TitleContainer>
+          <Stack direction={"row"} justifyContent={"space-between"}>
+            <Stack direction={"column"} alignItems={"start"}>
+              <Typography>CONTENTS</Typography>
+              <FormHelperText>
+                Last Reviewed:
+                <br />
+                {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+              </FormHelperText>
+            </Stack>
+            <Stack direction={"column"} alignItems={"start"} spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                disabled={!recentEntryBadgeContent}
+                startIcon={<AssignmentTurnedInOutlinedIcon />}
+                onClick={onRecentEntryMarkReviewed}
+              >
+                {getString("recent_patient_entry_mark_reviewed")}
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                color="primary"
+                disabled={
+                  currentPatient.recentEntryReviewsSortedByDateAndTimeDescending
+                    .length <= 1
+                }
+                startIcon={<AssignmentReturnOutlinedIcon />}
+                onClick={onRecentEntryMarkUndo}
+              >
+                {getString("recent_patient_entry_undo_previous_mark")}
+              </Button>
+            </Stack>
+          </Stack>
+        </TitleContainer>
+        <List dense={true}>{contents.map(createListItem)}</List>
+      </div>
+    );
   },
 );
 

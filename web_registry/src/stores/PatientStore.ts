@@ -21,6 +21,7 @@ import {
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
+  sortRecentEntryReviewsByDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
   sortValuesByDateAndTime,
@@ -41,6 +42,7 @@ import {
   IMoodLog,
   IPatient,
   IPatientProfile,
+  IRecentEntryReview,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -63,18 +65,18 @@ export interface IPatientStore extends IPatient {
   readonly recentEntryCutoffDateTime: Date | undefined;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
-    | IActivityLog[]
-    | undefined;
+  | IActivityLog[]
+  | undefined;
   readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
-    | IAssessmentLog[]
-    | undefined;
+  | IAssessmentLog[]
+  | undefined;
   readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
-    | IMoodLog[]
-    | undefined;
+  | IMoodLog[]
+  | undefined;
   readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
   readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
-    | IScheduledActivity[]
-    | undefined;
+  | IScheduledActivity[]
+  | undefined;
   readonly recentEntryValues: IValue[] | undefined;
 
   // UI states
@@ -89,6 +91,7 @@ export interface IPatientStore extends IPatient {
   readonly loadClinicalHistoryState: IPromiseQueryState;
   readonly loadMoodLogsState: IPromiseQueryState;
   readonly loadProfileState: IPromiseQueryState;
+  readonly loadRecentEntryReviewsState: IPromiseQueryState;
   readonly loadSafetyPlanState: IPromiseQueryState;
   readonly loadScheduledActivitiesState: IPromiseQueryState;
   readonly loadScheduledAssessmentsState: IPromiseQueryState;
@@ -110,6 +113,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
+  readonly recentEntryReviewsSortedByDateAndTimeDescending: IRecentEntryReview[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
   readonly valuesSortedByDateAndTimeDescending: IValue[];
 
@@ -165,6 +169,9 @@ export interface IPatientStore extends IPatient {
   // Patient profile
   updateProfile(profile: IPatientProfile): Promise<void>;
 
+  // Recent entry review
+  addRecentEntryReview(review: IRecentEntryReview): Promise<void>;
+
   // Session
   addSession(session: ISession): void;
   updateSession(session: ISession): void;
@@ -183,6 +190,7 @@ export class PatientStore implements IPatientStore {
   private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
   private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
   private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
+  private readonly loadRecentEntryReviewsQuery: PromiseQuery<IRecentEntryReview[]>;
   private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
   private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
   private readonly loadScheduledActivitiesQuery: PromiseQuery<
@@ -264,6 +272,10 @@ export class PatientStore implements IPatientStore {
     this.loadProfileQuery = new PromiseQuery<IPatientProfile>(
       patient.profile,
       "loadProfile",
+    );
+    this.loadRecentEntryReviewsQuery = new PromiseQuery<IRecentEntryReview[]>(
+      patient.recentEntryReviews,
+      "loadRecentEntryReviews",
     );
     this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(
       patient.safetyPlan,
@@ -376,6 +388,14 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
+  @computed get recentEntryReviews() {
+    return this.loadRecentEntryReviewsQuery.value || [];
+  }
+
+  @computed get recentEntryReviewsSortedByDateAndTimeDescending() {
+    return sortRecentEntryReviewsByDateAndTime(this.recentEntryReviews, SortDirection.DESCENDING);
+  }
+
   @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
     return sortScheduledActivitiesByDateAndTime(
       this.scheduledActivities,
@@ -456,7 +476,7 @@ export class PatientStore implements IPatientStore {
         this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
       (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
         this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
-          0) ||
+        0) ||
       (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
         this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentEntrySafetyPlan ||
@@ -472,6 +492,15 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
+    // // Initially, stub the function to return now minus two weeks.
+    // // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
+    // let cutoffDateTime = new Date();
+    // //cutoffDateTime = subDays(cutoffDateTime, 14);
+    //
+    // cutoffDateTime = this.recentEntryReviewsSortedByDateAndTimeDescending.length > 0 ? this.recentEntryReviewsSortedByDateAndTimeDescending[0].effectiveDateTime : subDays(cutoffDateTime, 14);
+    //
+    // return cutoffDateTime;
+
     return this.profile.enrollmentDate;
   }
 
@@ -708,6 +737,10 @@ export class PatientStore implements IPatientStore {
     return this.loadProfileQuery;
   }
 
+  @computed get loadRecentEntryReviewsState() {
+    return this.loadRecentEntryReviewsQuery;
+  }
+
   @computed get loadSafetyPlanState() {
     return this.loadSafetyPlanQuery;
   }
@@ -880,6 +913,7 @@ export class PatientStore implements IPatientStore {
         );
         this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
         this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
+        this.loadRecentEntryReviewsQuery.fromPromise(Promise.resolve(patient.recentEntryReviews));
         this.loadSafetyPlanQuery.fromPromise(
           Promise.resolve(patient.safetyPlan),
         );
@@ -1180,10 +1214,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-            name: patientProfile.primaryCareManager?.name,
-            providerId: patientProfile.primaryCareManager?.providerId,
-            role: patientProfile.primaryCareManager?.role,
-          }
+          name: patientProfile.primaryCareManager?.name,
+          providerId: patientProfile.primaryCareManager?.providerId,
+          role: patientProfile.primaryCareManager?.role,
+        }
         : undefined,
     });
 
@@ -1193,6 +1227,23 @@ export class PatientStore implements IPatientStore {
       onSingletonConflict("profile"),
     );
   }
+
+  // Recent Entry Review
+  @action.bound
+  public async addRecentEntryReview(recentEntryReview: IRecentEntryReview) {
+    const promise = this.patientService
+      .addRecentEntryReview(toJS(recentEntryReview))
+      .then((addedReview) => {
+        return this.recentEntryReviews.slice().concat([addedReview]);
+      });
+
+    await this.loadAndLogQuery<IRecentEntryReview[]>(
+      () => promise,
+      this.loadRecentEntryReviewsQuery,
+      this.onRecentEntryReviewConflict
+    );
+  }
+
   // Session
   @action.bound
   public async addSession(session: ISession) {
@@ -1271,6 +1322,15 @@ export class PatientStore implements IPatientStore {
       "casereview",
       "caseReviewId",
       () => this.caseReviews,
+      logger,
+    )(responseData);
+  };
+
+  private onRecentEntryReviewConflict = (responseData?: any) => {
+    return onArrayConflict(
+      "recententryreview",
+      "sesrecentEntryReviewIdsionId",
+      () => this.recentEntryReviews,
       logger,
     )(responseData);
   };
