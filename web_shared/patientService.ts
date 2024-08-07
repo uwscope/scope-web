@@ -28,8 +28,8 @@ import {
   IPatientProfileRequest,
   IPatientProfileResponse,
   IPatientResponse,
-  IRecentEntryReviewRequest,
-  IRecentEntryReviewResponse,
+  IReviewMarkRequest,
+  IReviewMarkResponse,
   ISafetyPlanRequest,
   ISafetyPlanResponse,
   IScheduledActivityListResponse,
@@ -55,7 +55,7 @@ import {
   IPatient,
   IPatientConfig,
   IPatientProfile,
-  IRecentEntryReview,
+  IReviewMark,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -125,9 +125,9 @@ export interface IPatientService extends IServiceBase {
   getMoodLogs(): Promise<IMoodLog[]>;
   addMoodLog(moodLog: IMoodLog): Promise<IMoodLog>;
 
-  addRecentEntryReview(
-    recentEntryReview: IRecentEntryReview,
-  ): Promise<IRecentEntryReview>;
+  addReviewMark(
+    reviewMark: IReviewMark,
+  ): Promise<IReviewMark>;
 
   getValues(): Promise<IValue[]>;
   addValue(value: IValue): Promise<IValue>;
@@ -588,18 +588,18 @@ class PatientService extends ServiceBase implements IPatientService {
     return response.data?.moodlog;
   }
 
-  public async addRecentEntryReview(
-    recentEntryReview: IRecentEntryReview,
-  ): Promise<IRecentEntryReview> {
-    (recentEntryReview as any)._type = "recentEntryReview";
+  public async addReviewMark(
+    reviewMark: IReviewMark,
+  ): Promise<IReviewMark> {
+    (reviewMark as any)._type = "reviewMark";
 
-    const response = await this.axiosInstance.post<IRecentEntryReviewResponse>(
-      `/recententryreviews`,
+    const response = await this.axiosInstance.post<IReviewMarkResponse>(
+      `/reviewmarks`,
       {
-        recententryreview: recentEntryReview,
-      } as IRecentEntryReviewRequest,
+        reviewmark: reviewMark,
+      } as IReviewMarkRequest,
     );
-    return response.data?.recententryreview;
+    return response.data?.reviewmark;
   }
 
   public async getValues(): Promise<IValue[]> {

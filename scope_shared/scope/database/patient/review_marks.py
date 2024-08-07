@@ -3,16 +3,16 @@ from typing import List, Optional
 import pymongo.collection
 import scope.database.collection_utils
 
-DOCUMENT_TYPE = "recentEntryReview"
-SEMANTIC_SET_ID = "recentEntryReviewId"
+DOCUMENT_TYPE = "reviewMark"
+SEMANTIC_SET_ID = "reviewMarkId"
 
 
-def get_recent_entry_reviews(
+def get_review_marks(
     *,
     collection: pymongo.collection.Collection,
 ) -> Optional[List[dict]]:
     """
-    Get list of "recentEntryReview" documents.
+    Get list of "reviewMark" documents.
     """
 
     return scope.database.collection_utils.get_set(
@@ -21,13 +21,13 @@ def get_recent_entry_reviews(
     )
 
 
-def get_recent_entry_review(
+def get_review_mark(
     *,
     collection: pymongo.collection.Collection,
     set_id: str,
 ) -> Optional[dict]:
     """
-    Get "recentEntryReview" document.
+    Get "reviewMark" document.
     """
 
     return scope.database.collection_utils.get_set_element(
@@ -37,31 +37,31 @@ def get_recent_entry_review(
     )
 
 
-def post_recent_entry_review(
+def post_review_mark(
     *,
     collection: pymongo.collection.Collection,
-    recent_entry_review: dict,
+    review_mark: dict,
 ) -> scope.database.collection_utils.SetPostResult:
     """
-    Post "recentEntryReview" document.
+    Post "reviewMark" document.
     """
 
     return scope.database.collection_utils.post_set_element(
         collection=collection,
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
-        document=recent_entry_review,
+        document=review_mark,
     )
 
 
-def put_recent_entry_review(
+def put_review_mark(
     *,
     collection: pymongo.collection.Collection,
-    recent_entry_review: dict,
+    review_mark: dict,
     set_id: str,
 ) -> scope.database.collection_utils.SetPutResult:
     """
-    Put "recentEntryReview" document.
+    Put "reviewMark" document.
     """
 
     return scope.database.collection_utils.put_set_element(
@@ -69,5 +69,5 @@ def put_recent_entry_review(
         document_type=DOCUMENT_TYPE,
         semantic_set_id=SEMANTIC_SET_ID,
         set_id=set_id,
-        document=recent_entry_review,
+        document=review_mark,
     )

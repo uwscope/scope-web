@@ -232,7 +232,7 @@ export interface IContact {
   emergencyNumber?: string;
 }
 
-export interface IRecentEntryReview {
+export interface IReviewMark {
   editedDateTime: Date;
   effectiveDateTime: Date;
   providerId?: string;
@@ -307,7 +307,7 @@ export interface IPatient {
   values: IValue[];
 
   // Recent entry reviews
-  recentEntryReviews: IRecentEntryReview[];
+  reviewMarks: IReviewMark[];
 
   // Sessions
   sessions: ISession[];

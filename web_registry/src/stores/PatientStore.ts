@@ -21,7 +21,7 @@ import {
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
-  sortRecentEntryReviewsByDateAndTime,
+  sortReviewMarksByDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
   sortValuesByDateAndTime,
@@ -42,7 +42,7 @@ import {
   IMoodLog,
   IPatient,
   IPatientProfile,
-  IRecentEntryReview,
+  IReviewMark,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -65,18 +65,18 @@ export interface IPatientStore extends IPatient {
   readonly recentEntryCutoffDateTime: Date | undefined;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
-    | IActivityLog[]
-    | undefined;
+  | IActivityLog[]
+  | undefined;
   readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
-    | IAssessmentLog[]
-    | undefined;
+  | IAssessmentLog[]
+  | undefined;
   readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
-    | IMoodLog[]
-    | undefined;
+  | IMoodLog[]
+  | undefined;
   readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
   readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
-    | IScheduledActivity[]
-    | undefined;
+  | IScheduledActivity[]
+  | undefined;
   readonly recentEntryValues: IValue[] | undefined;
 
   // UI states
@@ -91,7 +91,7 @@ export interface IPatientStore extends IPatient {
   readonly loadClinicalHistoryState: IPromiseQueryState;
   readonly loadMoodLogsState: IPromiseQueryState;
   readonly loadProfileState: IPromiseQueryState;
-  readonly loadRecentEntryReviewsState: IPromiseQueryState;
+  readonly loadReviewMarksState: IPromiseQueryState;
   readonly loadSafetyPlanState: IPromiseQueryState;
   readonly loadScheduledActivitiesState: IPromiseQueryState;
   readonly loadScheduledAssessmentsState: IPromiseQueryState;
@@ -113,7 +113,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
-  readonly recentEntryReviewsSortedByDateAndTimeDescending: IRecentEntryReview[];
+  readonly reviewMarksSortedByDateAndTimeDescending: IReviewMark[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
   readonly valuesSortedByDateAndTimeDescending: IValue[];
 
@@ -170,7 +170,7 @@ export interface IPatientStore extends IPatient {
   updateProfile(profile: IPatientProfile): Promise<void>;
 
   // Recent entry review
-  addRecentEntryReview(review: IRecentEntryReview): Promise<void>;
+  addReviewMark(review: IReviewMark): Promise<void>;
 
   // Session
   addSession(session: ISession): void;
@@ -190,8 +190,8 @@ export class PatientStore implements IPatientStore {
   private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
   private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
   private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
-  private readonly loadRecentEntryReviewsQuery: PromiseQuery<
-    IRecentEntryReview[]
+  private readonly loadReviewMarksQuery: PromiseQuery<
+    IReviewMark[]
   >;
   private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
   private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
@@ -275,9 +275,9 @@ export class PatientStore implements IPatientStore {
       patient.profile,
       "loadProfile",
     );
-    this.loadRecentEntryReviewsQuery = new PromiseQuery<IRecentEntryReview[]>(
-      patient.recentEntryReviews,
-      "loadRecentEntryReviews",
+    this.loadReviewMarksQuery = new PromiseQuery<IReviewMark[]>(
+      patient.reviewMarks,
+      "loadReviewMarks",
     );
     this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(
       patient.safetyPlan,
@@ -390,13 +390,13 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
-  @computed get recentEntryReviews() {
-    return this.loadRecentEntryReviewsQuery.value || [];
+  @computed get reviewMarks() {
+    return this.loadReviewMarksQuery.value || [];
   }
 
-  @computed get recentEntryReviewsSortedByDateAndTimeDescending() {
-    return sortRecentEntryReviewsByDateAndTime(
-      this.recentEntryReviews,
+  @computed get reviewMarksSortedByDateAndTimeDescending() {
+    return sortReviewMarksByDateAndTime(
+      this.reviewMarks,
       SortDirection.DESCENDING,
     );
   }
@@ -481,7 +481,7 @@ export class PatientStore implements IPatientStore {
         this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
       (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
         this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
-          0) ||
+        0) ||
       (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
         this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentEntrySafetyPlan ||
@@ -509,9 +509,9 @@ export class PatientStore implements IPatientStore {
     // return this.profile.enrollmentDate;
 
     cutoffDateTime =
-      this.recentEntryReviewsSortedByDateAndTimeDescending.length > 0
-        ? this.recentEntryReviewsSortedByDateAndTimeDescending[0]
-            .effectiveDateTime
+      this.reviewMarksSortedByDateAndTimeDescending.length > 0
+        ? this.reviewMarksSortedByDateAndTimeDescending[0]
+          .effectiveDateTime
         : subDays(cutoffDateTime, 14);
 
     return cutoffDateTime;
@@ -750,8 +750,8 @@ export class PatientStore implements IPatientStore {
     return this.loadProfileQuery;
   }
 
-  @computed get loadRecentEntryReviewsState() {
-    return this.loadRecentEntryReviewsQuery;
+  @computed get loadReviewMarksState() {
+    return this.loadReviewMarksQuery;
   }
 
   @computed get loadSafetyPlanState() {
@@ -926,8 +926,8 @@ export class PatientStore implements IPatientStore {
         );
         this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
         this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
-        this.loadRecentEntryReviewsQuery.fromPromise(
-          Promise.resolve(patient.recentEntryReviews),
+        this.loadReviewMarksQuery.fromPromise(
+          Promise.resolve(patient.reviewMarks),
         );
         this.loadSafetyPlanQuery.fromPromise(
           Promise.resolve(patient.safetyPlan),
@@ -1229,10 +1229,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-            name: patientProfile.primaryCareManager?.name,
-            providerId: patientProfile.primaryCareManager?.providerId,
-            role: patientProfile.primaryCareManager?.role,
-          }
+          name: patientProfile.primaryCareManager?.name,
+          providerId: patientProfile.primaryCareManager?.providerId,
+          role: patientProfile.primaryCareManager?.role,
+        }
         : undefined,
     });
 
@@ -1245,17 +1245,17 @@ export class PatientStore implements IPatientStore {
 
   // Recent Entry Review
   @action.bound
-  public async addRecentEntryReview(recentEntryReview: IRecentEntryReview) {
+  public async addReviewMark(reviewMark: IReviewMark) {
     const promise = this.patientService
-      .addRecentEntryReview(toJS(recentEntryReview))
+      .addReviewMark(toJS(reviewMark))
       .then((addedReview) => {
-        return this.recentEntryReviews.slice().concat([addedReview]);
+        return this.reviewMarks.slice().concat([addedReview]);
       });
 
-    await this.loadAndLogQuery<IRecentEntryReview[]>(
+    await this.loadAndLogQuery<IReviewMark[]>(
       () => promise,
-      this.loadRecentEntryReviewsQuery,
-      this.onRecentEntryReviewConflict,
+      this.loadReviewMarksQuery,
+      this.onReviewMarkConflict,
     );
   }
 
@@ -1341,11 +1341,11 @@ export class PatientStore implements IPatientStore {
     )(responseData);
   };
 
-  private onRecentEntryReviewConflict = (responseData?: any) => {
+  private onReviewMarkConflict = (responseData?: any) => {
     return onArrayConflict(
-      "recententryreview",
-      "sesrecentEntryReviewIdsionId",
-      () => this.recentEntryReviews,
+      "reviewmark",
+      "reviewMarkId",
+      () => this.reviewMarks,
       logger,
     )(responseData);
   };

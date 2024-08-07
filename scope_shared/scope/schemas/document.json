@@ -37,7 +37,7 @@
       "$ref": "/schemas/documents/patient-profile"
     },
     {
-      "$ref": "/schemas/documents/recent-entry-review"
+      "$ref": "/schemas/documents/review-mark"
     },
     {
       "$ref": "/schemas/documents/safety-plan"

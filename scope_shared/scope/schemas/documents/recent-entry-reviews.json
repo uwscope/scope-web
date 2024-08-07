@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://uwscope.org/schemas/documents/recent-entry-reviews",
-  "title": "IRecentEntryReview[]",
-  "type": "array",
-  "items": {
-    "$ref": "/schemas/documents/recent-entry-review"
-  }
-}

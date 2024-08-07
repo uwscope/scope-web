@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
-import { IRecentEntryReview } from "shared/types";
+import { IReviewMark } from "shared/types";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
 import styled, { CSSObject, ThemedStyledProps } from "styled-components";
@@ -131,32 +131,32 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
     const theme = useTheme();
 
     const markReviewState = useLocalObservable<{
-      recentEntryReview: IRecentEntryReview;
+      reviewMark: IReviewMark;
     }>(() => ({
-      recentEntryReview: {
+      reviewMark: {
         editedDateTime: new Date(),
         effectiveDateTime: new Date(),
         providerId: authStore.currentUserIdentity?.providerId,
-      } as IRecentEntryReview,
+      } as IReviewMark,
     }));
 
     const onRecentEntryMarkReviewed = action(() => {
-      const { recentEntryReview } = markReviewState;
-      currentPatient.addRecentEntryReview({
-        ...recentEntryReview,
+      const { reviewMark } = markReviewState;
+      currentPatient.addReviewMark({
+        ...reviewMark,
         editedDateTime: new Date(),
         effectiveDateTime: new Date(),
       });
     });
 
     const onRecentEntryMarkUndo = action(() => {
-      const previousRecentEntryReview =
-        currentPatient.recentEntryReviewsSortedByDateAndTimeDescending[1];
-      const { recentEntryReview } = markReviewState;
-      currentPatient.addRecentEntryReview({
-        ...recentEntryReview,
+      const previousReviewMark =
+        currentPatient.reviewMarksSortedByDateAndTimeDescending[1];
+      const { reviewMark } = markReviewState;
+      currentPatient.addReviewMark({
+        ...reviewMark,
         editedDateTime: new Date(),
-        effectiveDateTime: previousRecentEntryReview.effectiveDateTime,
+        effectiveDateTime: previousReviewMark.effectiveDateTime,
       });
     });
 
@@ -320,7 +320,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
                 size="small"
                 color="primary"
                 disabled={
-                  currentPatient.recentEntryReviewsSortedByDateAndTimeDescending
+                  currentPatient.reviewMarksSortedByDateAndTimeDescending
                     .length <= 1
                 }
                 startIcon={<AssignmentReturnOutlinedIcon />}

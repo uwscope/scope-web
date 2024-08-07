@@ -42,8 +42,8 @@ provider_identity_schema: Optional[jschon.JSONSchema] = None
 provider_identities_schema: Optional[jschon.JSONSchema] = None
 referral_status_schema: Optional[jschon.JSONSchema] = None
 regexes: Optional[jschon.JSONSchema] = None
-recent_entry_review_schema: Optional[jschon.JSONSchema] = None
-recent_entry_reviews_schema: Optional[jschon.JSONSchema] = None
+review_mark_schema: Optional[jschon.JSONSchema] = None
+review_marks_schema: Optional[jschon.JSONSchema] = None
 resource_content_schema: Optional[jschon.JSONSchema] = None
 resource_contents_schema: Optional[jschon.JSONSchema] = None
 safety_plan_schema: Optional[jschon.JSONSchema] = None
@@ -102,8 +102,8 @@ SCHEMAS = {
     "patient_profile_schema": "documents/patient-profile.json",
     "provider_identity_schema": "documents/provider-identity.json",
     "provider_identities_schema": "documents/provider-identities.json",
-    "recent_entry_review_schema": "documents/recent-entry-review.json",
-    "recent_entry_reviews_schema": "documents/recent-entry-reviews.json",
+    "review_mark_schema": "documents/review-mark.json",
+    "review_marks_schema": "documents/review-marks.json",
     "safety_plan_schema": "documents/safety-plan.json",
     "scheduled_activity_schema": "documents/scheduled-activity.json",
     "scheduled_activities_schema": "documents/scheduled-activities.json",

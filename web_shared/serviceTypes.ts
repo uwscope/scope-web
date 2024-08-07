@@ -11,7 +11,7 @@ import {
   IPatientIdentity,
   IPatientProfile,
   IProviderIdentity,
-  IRecentEntryReview,
+  IReviewMark,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -97,12 +97,12 @@ export interface IMoodLogRequest {
   moodlog: IMoodLog;
 }
 
-export interface IRecentEntryReviewResponse extends IServiceResponse {
-  recententryreview: IRecentEntryReview;
+export interface IReviewMarkResponse extends IServiceResponse {
+  reviewmark: IReviewMark;
 }
 
-export interface IRecentEntryReviewRequest {
-  recententryreview: IRecentEntryReview;
+export interface IReviewMarkRequest {
+  reviewmark: IReviewMark;
 }
 
 export interface IActivityListResponse extends IServiceResponse {
