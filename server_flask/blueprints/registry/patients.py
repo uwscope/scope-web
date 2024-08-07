@@ -111,7 +111,7 @@ def _construct_patient_document(
         scope.database.patient.patient_profile.DOCUMENT_TYPE
     ]
 
-    # Recent Entry Reviews
+    # Review Marks
     patient_document["reviewMarks"] = documents_by_type[
         scope.database.patient.review_marks.DOCUMENT_TYPE
     ]
