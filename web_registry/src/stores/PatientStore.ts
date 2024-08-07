@@ -505,9 +505,14 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
-    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
-    );
+    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending
+      .filter((current) => {
+        if (!!current.submittedByProviderId) {
+          return false;
+        }
+        return true;
+      })
+      .findIndex((a) => a.recordedDateTime < this.recentEntryCutoffDateTime);
 
     if (indexEnd < 0) {
       return this.assessmentLogsSortedByDateAndTimeDescending.slice();
