@@ -63,13 +63,13 @@ def fixture_data_fake_review_mark_factory(
     )
 
     def factory() -> dict:
-        fake_recent_entry = unvalidated_factory()
+        fake_review_mark = unvalidated_factory()
 
         scope.schema_utils.xfail_for_invalid_schema(
             schema=scope.schema.review_mark_schema,
-            data=fake_recent_entry,
+            data=fake_review_mark,
         )
 
-        return fake_recent_entry
+        return fake_review_mark
 
     return factory
