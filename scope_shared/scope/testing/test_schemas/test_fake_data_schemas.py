@@ -508,9 +508,9 @@ def test_fake_data_schema(
                                 == document_set_element["_set_id"]
                             )
                         else:
-                            document_set_element[config.expected_semantic_set_id] = (
-                                document_set_element["_set_id"]
-                            )
+                            document_set_element[
+                                config.expected_semantic_set_id
+                            ] = document_set_element["_set_id"]
                 else:
                     assert "_set_id" not in document_set_element
                     document_set_element["_set_id"] = collection_utils.generate_set_id()
@@ -519,9 +519,9 @@ def test_fake_data_schema(
                         assert (
                             config.expected_semantic_set_id not in document_set_element
                         )
-                        document_set_element[config.expected_semantic_set_id] = (
-                            document_set_element["_set_id"]
-                        )
+                        document_set_element[
+                            config.expected_semantic_set_id
+                        ] = document_set_element["_set_id"]
 
                 document_set_element = document_utils.normalize_document(
                     document=document_set_element

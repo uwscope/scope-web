@@ -65,18 +65,18 @@ export interface IPatientStore extends IPatient {
   readonly recentEntryCutoffDateTime: Date | undefined;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
-  | IActivityLog[]
-  | undefined;
+    | IActivityLog[]
+    | undefined;
   readonly recentEntryAssessmentLogsSortedByDateAndTimeDescending:
-  | IAssessmentLog[]
-  | undefined;
+    | IAssessmentLog[]
+    | undefined;
   readonly recentEntryMoodLogsSortedByDateAndTimeDescending:
-  | IMoodLog[]
-  | undefined;
+    | IMoodLog[]
+    | undefined;
   readonly recentEntrySafetyPlan: ISafetyPlan | undefined;
   readonly recentEntryScheduledActivitiesSortedByDateAndTimeDescending:
-  | IScheduledActivity[]
-  | undefined;
+    | IScheduledActivity[]
+    | undefined;
   readonly recentEntryValues: IValue[] | undefined;
 
   // UI states
@@ -190,9 +190,7 @@ export class PatientStore implements IPatientStore {
   private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
   private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
   private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
-  private readonly loadReviewMarksQuery: PromiseQuery<
-    IReviewMark[]
-  >;
+  private readonly loadReviewMarksQuery: PromiseQuery<IReviewMark[]>;
   private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
   private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
   private readonly loadScheduledActivitiesQuery: PromiseQuery<
@@ -481,7 +479,7 @@ export class PatientStore implements IPatientStore {
         this.recentEntryActivityLogsSortedByDateAndTimeDescending.length > 0) ||
       (!!this.recentEntryAssessmentLogsSortedByDateAndTimeDescending &&
         this.recentEntryAssessmentLogsSortedByDateAndTimeDescending.length >
-        0) ||
+          0) ||
       (!!this.recentEntryMoodLogsSortedByDateAndTimeDescending &&
         this.recentEntryMoodLogsSortedByDateAndTimeDescending.length > 0) ||
       !!this.recentEntrySafetyPlan ||
@@ -510,8 +508,7 @@ export class PatientStore implements IPatientStore {
 
     cutoffDateTime =
       this.reviewMarksSortedByDateAndTimeDescending.length > 0
-        ? this.reviewMarksSortedByDateAndTimeDescending[0]
-          .effectiveDateTime
+        ? this.reviewMarksSortedByDateAndTimeDescending[0].effectiveDateTime
         : subDays(cutoffDateTime, 14);
 
     return cutoffDateTime;
@@ -1229,10 +1226,10 @@ export class PatientStore implements IPatientStore {
       ),
       primaryCareManager: patientProfile.primaryCareManager
         ? {
-          name: patientProfile.primaryCareManager?.name,
-          providerId: patientProfile.primaryCareManager?.providerId,
-          role: patientProfile.primaryCareManager?.role,
-        }
+            name: patientProfile.primaryCareManager?.name,
+            providerId: patientProfile.primaryCareManager?.providerId,
+            role: patientProfile.primaryCareManager?.role,
+          }
         : undefined,
     });
 
