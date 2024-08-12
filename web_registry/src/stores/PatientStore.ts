@@ -505,19 +505,26 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
-    const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending.findIndex(
+    // Assessments submitted by a provider are not considered recent
+    const filteredAssessmentLogs =
+      this.assessmentLogsSortedByDateAndTimeDescending.filter((current) => {
+        if (!!current.submittedByProviderId) {
+          return false;
+        }
+        return true;
+      });
+
+    const indexEnd = filteredAssessmentLogs.findIndex(
       (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
-      return this.assessmentLogsSortedByDateAndTimeDescending.slice();
+      // No need to make a copy, it's already a copy.
+      return filteredAssessmentLogs;
     } else if (indexEnd === 0) {
       return undefined;
     } else {
-      return this.assessmentLogsSortedByDateAndTimeDescending.slice(
-        0,
-        indexEnd,
-      );
+      return filteredAssessmentLogs.slice(0, indexEnd);
     }
   }
 
