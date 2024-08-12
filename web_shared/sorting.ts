@@ -92,7 +92,7 @@ export const compareMoodLogsByDateAndTime: (
   return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
 };
 
-export const compareReviewMarksByDateAndTime: (
+export const compareReviewMarksByEditedDateAndTime: (
   compareA: IReviewMark,
   compareB: IReviewMark,
 ) => number = function (compareA, compareB): number {
@@ -232,7 +232,7 @@ export const sortMoodLogsByDateAndTime: (
     );
 };
 
-export const sortReviewMarksByDateAndTime: (
+export const sortReviewMarksByEditedDateAndTime: (
   reviewMarks: IReviewMark[],
   sortingDirection?: SortDirection,
 ) => IReviewMark[] = function (
@@ -243,7 +243,7 @@ export const sortReviewMarksByDateAndTime: (
     .slice()
     .sort(
       sortingDirectionComparator(
-        compareReviewMarksByDateAndTime,
+        compareReviewMarksByEditedDateAndTime,
         sortingDirection,
       ),
     );

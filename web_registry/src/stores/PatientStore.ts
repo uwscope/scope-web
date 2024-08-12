@@ -21,7 +21,7 @@ import {
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
-  sortReviewMarksByDateAndTime,
+  sortReviewMarksByEditedDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
   sortValuesByDateAndTime,
@@ -113,7 +113,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
-  readonly reviewMarksSortedByDateAndTimeDescending: IReviewMark[];
+  readonly reviewMarksSortedByEditedDateAndTimeDescending: IReviewMark[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
   readonly valuesSortedByDateAndTimeDescending: IValue[];
 
@@ -392,8 +392,8 @@ export class PatientStore implements IPatientStore {
     return this.loadReviewMarksQuery.value || [];
   }
 
-  @computed get reviewMarksSortedByDateAndTimeDescending() {
-    return sortReviewMarksByDateAndTime(
+  @computed get reviewMarksSortedByEditedDateAndTimeDescending() {
+    return sortReviewMarksByEditedDateAndTime(
       this.reviewMarks,
       SortDirection.DESCENDING,
     );
@@ -507,8 +507,8 @@ export class PatientStore implements IPatientStore {
     // return this.profile.enrollmentDate;
 
     cutoffDateTime =
-      this.reviewMarksSortedByDateAndTimeDescending.length > 0
-        ? this.reviewMarksSortedByDateAndTimeDescending[0].effectiveDateTime
+      this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+        ? this.reviewMarksSortedByEditedDateAndTimeDescending[0].effectiveDateTime
         : subDays(cutoffDateTime, 14);
 
     return cutoffDateTime;

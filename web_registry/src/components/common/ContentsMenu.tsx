@@ -151,7 +151,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
 
     const onRecentEntryMarkUndo = action(() => {
       const previousReviewMark =
-        currentPatient.reviewMarksSortedByDateAndTimeDescending[1];
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[1];
       const { reviewMark } = markReviewState;
       currentPatient.addReviewMark({
         ...reviewMark,
@@ -320,7 +320,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
                 size="small"
                 color="primary"
                 disabled={
-                  currentPatient.reviewMarksSortedByDateAndTimeDescending
+                  currentPatient.reviewMarksSortedByEditedDateAndTimeDescending
                     .length <= 1
                 }
                 startIcon={<AssignmentReturnOutlinedIcon />}
