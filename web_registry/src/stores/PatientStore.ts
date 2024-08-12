@@ -169,7 +169,7 @@ export interface IPatientStore extends IPatient {
   // Patient profile
   updateProfile(profile: IPatientProfile): Promise<void>;
 
-  // Recent entry review
+  // Review marks that define recent entry data
   addReviewMark(review: IReviewMark): Promise<void>;
 
   // Session
