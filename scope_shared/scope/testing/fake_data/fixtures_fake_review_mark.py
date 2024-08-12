@@ -2,7 +2,6 @@ import datetime
 import faker
 import pytest
 import pytz
-import random
 from typing import Callable
 
 import scope.database.date_utils as date_utils
@@ -10,7 +9,6 @@ import scope.database.patient.review_marks
 import scope.enums
 import scope.schema
 import scope.schema_utils
-import scope.testing.fake_data.fake_utils as fake_utils
 
 
 def fake_review_mark_factory(
@@ -42,6 +40,7 @@ def fake_review_mark_factory(
                     )
                 )
             ),
+            # TODO: this should be a providerId
             "providerId": faker_factory.name(),
         }
 
