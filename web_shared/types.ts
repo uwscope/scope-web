@@ -234,7 +234,10 @@ export interface IContact {
 
 export interface IReviewMark {
   editedDateTime: Date;
-  effectiveDateTime: Date;
+  // A review mark without an effective date
+  // means the most recent review is undefined.
+  // This can happen if all marks  are reverted by undo.
+  effectiveDateTime?: Date;
   // ID of the provider that submitted the mark
   // If these became more common, it would be necessary to decide
   // on a meaning for "providerId" versus "submittedByProviderId".

@@ -15,7 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { format } from "date-fns";
+import { compareAsc, format } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
@@ -141,6 +141,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
     }));
 
     const onRecentEntryMarkReviewed = action(() => {
+      // Add a new mark effective at the current time
       const { reviewMark } = markReviewState;
       currentPatient.addReviewMark({
         ...reviewMark,
@@ -150,13 +151,50 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
     });
 
     const onRecentEntryMarkUndo = action(() => {
-      const previousReviewMark =
-        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[1];
+      // Undo reverts to the most recent effective time
+      // which is less recent than the current effective time.
+      // If there is no such effective time, it becomes undefined.
+
+      // Determine the current effectiveDateTime
+      const currentEffectiveDateTime = (() => {
+        if (
+          currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length >
+          0
+        ) {
+          // This effectiveDateTime could also be undefined
+          return currentPatient
+            .reviewMarksSortedByEditedDateAndTimeDescending[0]
+            .effectiveDateTime;
+        } else {
+          return undefined;
+        }
+      })();
+      if (!currentEffectiveDateTime) {
+        return;
+      }
+
+      // Find the most recent mark relative to that effectiveDateTime
+      const mostRecentReviewMark =
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.find(
+          (current) => {
+            if (!current.effectiveDateTime) {
+              return false;
+            }
+
+            return (
+              compareAsc(currentEffectiveDateTime, current.effectiveDateTime) >
+              0
+            );
+          },
+        );
+
       const { reviewMark } = markReviewState;
       currentPatient.addReviewMark({
         ...reviewMark,
         editedDateTime: new Date(),
-        effectiveDateTime: previousReviewMark.effectiveDateTime,
+        effectiveDateTime: !!mostRecentReviewMark
+          ? mostRecentReviewMark.effectiveDateTime
+          : undefined,
       });
     });
 
@@ -303,10 +341,26 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
                 variant="text"
                 size="small"
                 color="primary"
-                disabled={
-                  currentPatient.reviewMarksSortedByEditedDateAndTimeDescending
-                    .length <= 1
-                }
+                disabled={((): boolean => {
+                  // Undo requires at least one mark
+                  if (
+                    currentPatient
+                      .reviewMarksSortedByEditedDateAndTimeDescending.length ===
+                    0
+                  ) {
+                    return true;
+                  }
+                  // And that mark must have an effective time
+                  if (
+                    !currentPatient
+                      .reviewMarksSortedByEditedDateAndTimeDescending[0]
+                      .effectiveDateTime
+                  ) {
+                    return true;
+                  }
+
+                  return false;
+                })()}
                 startIcon={<AssignmentReturnOutlinedIcon />}
                 onClick={onRecentEntryMarkUndo}
               >

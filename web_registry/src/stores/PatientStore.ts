@@ -495,10 +495,20 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    if (this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
-      return this.reviewMarksSortedByEditedDateAndTimeDescending[0]
-        .effectiveDateTime;
+    const reviewMarksCurrentEffectiveDateTime = (() => {
+      if (this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
+        // This effectiveDateTime could also be undefined
+        return this.reviewMarksSortedByEditedDateAndTimeDescending[0]
+          .effectiveDateTime;
+      } else {
+        return undefined;
+      }
+    })();
+
+    if (!!reviewMarksCurrentEffectiveDateTime) {
+      return reviewMarksCurrentEffectiveDateTime;
     } else {
+      // This enrollment date could also be undefined
       return this.profile.enrollmentDate;
     }
   }
