@@ -476,25 +476,35 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryActivities() {
-    if (this.activities.length === 0) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (this.activities.length === 0 || !recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
+    const filteredActivities = this.activities.filter(
+      (a) => a.editedDateTime >= recentEntryCutoffDateTime,
+    );
+
+    if (filteredActivities.length === 0) {
       return undefined;
     } else {
-      return this.activities.filter((a) => {
-        return (
-          this.recentEntryCutoffDateTime &&
-          a.editedDateTime >= this.recentEntryCutoffDateTime
-        );
-      });
+      return filteredActivities;
     }
   }
 
   @computed get recentEntryActivityLogsSortedByDateAndTimeDescending() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (
+      this.activityLogsSortedByDateAndTimeDescending.length === 0 ||
+      !recentEntryCutoffDateTime
+    ) {
       return undefined;
     }
 
     const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
+      (a) => a.recordedDateTime < recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -507,21 +517,23 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (
+      this.assessmentLogsSortedByDateAndTimeDescending.length === 0 ||
+      !recentEntryCutoffDateTime
+    ) {
       return undefined;
     }
 
     // Assessments submitted by a provider are not considered recent
     const filteredAssessmentLogs =
-      this.assessmentLogsSortedByDateAndTimeDescending.filter((current) => {
-        if (!!current.submittedByProviderId) {
-          return false;
-        }
-        return true;
-      });
+      this.assessmentLogsSortedByDateAndTimeDescending.filter(
+        (current) => !current.submittedByProviderId,
+      );
 
     const indexEnd = filteredAssessmentLogs.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
+      (a) => a.recordedDateTime < recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -535,12 +547,17 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryMoodLogsSortedByDateAndTimeDescending() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (
+      this.moodLogsSortedByDateAndTimeDescending.length === 0 ||
+      !recentEntryCutoffDateTime
+    ) {
       return undefined;
     }
 
     const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
+      (a) => a.recordedDateTime < recentEntryCutoffDateTime,
     );
 
     if (indexEnd < 0) {
@@ -553,13 +570,16 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntrySafetyPlan() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (!recentEntryCutoffDateTime) {
       return undefined;
     }
+
     // The default empty safety plan will not have a lastUpdatedDateTime
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
-      this.safetyPlan.lastUpdatedDateTime >= this.recentEntryCutoffDateTime
+      this.safetyPlan.lastUpdatedDateTime >= recentEntryCutoffDateTime
     ) {
       return this.safetyPlan;
     }
@@ -567,13 +587,18 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryScheduledActivitiesSortedByDateAndTimeDescending() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (
+      this.scheduledActivitiesSortedByDateAndTimeDescending.length === 0 ||
+      !recentEntryCutoffDateTime
+    ) {
       return undefined;
     }
 
     const indexEnd =
       this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
-        (a) => a.dueDateTime < this.recentEntryCutoffDateTime!,
+        (a) => a.dueDateTime < recentEntryCutoffDateTime,
       );
 
     if (indexEnd < 0) {
@@ -589,16 +614,20 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryValues() {
-    if (!this.recentEntryCutoffDateTime) {
+    const recentEntryCutoffDateTime = this.recentEntryCutoffDateTime;
+
+    if (this.values.length === 0 || !recentEntryCutoffDateTime) {
       return undefined;
     }
 
-    if (this.values.length === 0) {
+    const filteredValues = this.values.filter(
+      (a) => a.editedDateTime >= recentEntryCutoffDateTime,
+    );
+
+    if (filteredValues.length === 0) {
       return undefined;
     } else {
-      return this.values.filter((a) => {
-        return a.editedDateTime >= this.recentEntryCutoffDateTime!;
-      });
+      return filteredValues;
     }
   }
 
