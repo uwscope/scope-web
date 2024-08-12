@@ -1,4 +1,4 @@
-import { differenceInYears, subDays } from "date-fns";
+import { differenceInYears } from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -60,7 +60,7 @@ export interface IPatientStore extends IPatient {
 
   // Recent patient entry properties
   readonly recentEntryCaseloadSummary: string | undefined;
-  readonly recentEntryCutoffDateTime: Date;
+  readonly recentEntryCutoffDateTime: Date | undefined;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
     | IActivityLog[]
@@ -472,12 +472,7 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    // Initially, stub the function to return now minus two weeks.
-    // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
-    let cutoffDateTime = new Date();
-    cutoffDateTime = subDays(cutoffDateTime, 14);
-
-    return cutoffDateTime;
+    return this.profile.enrollmentDate;
   }
 
   @computed get recentEntryActivities() {
@@ -485,14 +480,21 @@ export class PatientStore implements IPatientStore {
       return undefined;
     } else {
       return this.activities.filter((a) => {
-        return a.editedDateTime >= this.recentEntryCutoffDateTime;
+        return (
+          this.recentEntryCutoffDateTime &&
+          a.editedDateTime >= this.recentEntryCutoffDateTime
+        );
       });
     }
   }
 
   @computed get recentEntryActivityLogsSortedByDateAndTimeDescending() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
     const indexEnd = this.activityLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
     );
 
     if (indexEnd < 0) {
@@ -505,6 +507,10 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
     // Assessments submitted by a provider are not considered recent
     const filteredAssessmentLogs =
       this.assessmentLogsSortedByDateAndTimeDescending.filter((current) => {
@@ -515,7 +521,7 @@ export class PatientStore implements IPatientStore {
       });
 
     const indexEnd = filteredAssessmentLogs.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
     );
 
     if (indexEnd < 0) {
@@ -529,8 +535,12 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryMoodLogsSortedByDateAndTimeDescending() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
     const indexEnd = this.moodLogsSortedByDateAndTimeDescending.findIndex(
-      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime,
+      (a) => a.recordedDateTime < this.recentEntryCutoffDateTime!,
     );
 
     if (indexEnd < 0) {
@@ -543,6 +553,9 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntrySafetyPlan() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
     // The default empty safety plan will not have a lastUpdatedDateTime
     if (
       !!this.safetyPlan.lastUpdatedDateTime &&
@@ -554,9 +567,13 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryScheduledActivitiesSortedByDateAndTimeDescending() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
     const indexEnd =
       this.scheduledActivitiesSortedByDateAndTimeDescending.findIndex(
-        (a) => a.dueDateTime < this.recentEntryCutoffDateTime,
+        (a) => a.dueDateTime < this.recentEntryCutoffDateTime!,
       );
 
     if (indexEnd < 0) {
@@ -572,11 +589,15 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryValues() {
+    if (!this.recentEntryCutoffDateTime) {
+      return undefined;
+    }
+
     if (this.values.length === 0) {
       return undefined;
     } else {
       return this.values.filter((a) => {
-        return a.editedDateTime >= this.recentEntryCutoffDateTime;
+        return a.editedDateTime >= this.recentEntryCutoffDateTime!;
       });
     }
   }
