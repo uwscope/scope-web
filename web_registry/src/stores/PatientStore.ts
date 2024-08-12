@@ -495,8 +495,9 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    if(this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
-      return this.reviewMarksSortedByEditedDateAndTimeDescending[0].effectiveDateTime;
+    if (this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
+      return this.reviewMarksSortedByEditedDateAndTimeDescending[0]
+        .effectiveDateTime;
     } else {
       return this.profile.enrollmentDate;
     }

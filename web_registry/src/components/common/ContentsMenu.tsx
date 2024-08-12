@@ -280,13 +280,13 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
           <Stack direction={"row"} justifyContent={"space-between"}>
             <Stack direction={"column"} alignItems={"start"}>
               <Typography>CONTENTS</Typography>
-                {!!recentEntryCutoffDateTime && (
-              <FormHelperText>
-                Last Reviewed:
-                <br />
-                {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-              </FormHelperText>
-                    )}
+              {!!recentEntryCutoffDateTime && (
+                <FormHelperText>
+                  Last Reviewed:
+                  <br />
+                  {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+                </FormHelperText>
+              )}
             </Stack>
             <Stack direction={"column"} alignItems={"start"} spacing={1}>
               <Button
