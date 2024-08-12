@@ -274,35 +274,19 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       );
     };
 
-    // return (
-    //   <div>
-    //     <TitleContainer>
-    //       <Stack direction={"column"}>
-    //         <Typography>CONTENTS</Typography>
-    //         {!!recentEntryCutoffDateTime && !!recentEntryBadgeContent && (
-    //           <FormHelperText>
-    //             New Since:
-    //             <br />
-    //             {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-    //           </FormHelperText>
-    //         )}
-    //       </Stack>
-    //     </TitleContainer>
-    //     <List dense={true}>{contents.map(createListItem)}</List>
-    //   </div>
-    // );
-
     return (
       <div>
         <TitleContainer>
           <Stack direction={"row"} justifyContent={"space-between"}>
             <Stack direction={"column"} alignItems={"start"}>
               <Typography>CONTENTS</Typography>
+                {!!recentEntryCutoffDateTime && (
               <FormHelperText>
                 Last Reviewed:
                 <br />
                 {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
               </FormHelperText>
+                    )}
             </Stack>
             <Stack direction={"column"} alignItems={"start"} spacing={1}>
               <Button

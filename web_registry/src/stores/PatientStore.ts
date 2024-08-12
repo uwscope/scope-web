@@ -495,23 +495,11 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    // // Initially, stub the function to return now minus two weeks.
-    // // Eventually, this will be calculated based on when a social worker marks a patient as reviewed.
-    // let cutoffDateTime = new Date();
-    // //cutoffDateTime = subDays(cutoffDateTime, 14);
-    //
-    // cutoffDateTime = this.recentEntryReviewsSortedByDateAndTimeDescending.length > 0 ? this.recentEntryReviewsSortedByDateAndTimeDescending[0].effectiveDateTime : subDays(cutoffDateTime, 14);
-    //
-    // return cutoffDateTime;
-
-    // return this.profile.enrollmentDate;
-
-    cutoffDateTime =
-      this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
-        ? this.reviewMarksSortedByEditedDateAndTimeDescending[0].effectiveDateTime
-        : subDays(cutoffDateTime, 14);
-
-    return cutoffDateTime;
+    if(this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
+      return this.reviewMarksSortedByEditedDateAndTimeDescending[0].effectiveDateTime;
+    } else {
+      return this.profile.enrollmentDate;
+    }
   }
 
   @computed get recentEntryActivities() {
