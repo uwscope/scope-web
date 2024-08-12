@@ -507,6 +507,7 @@ export class PatientStore implements IPatientStore {
   @computed get recentEntryAssessmentLogsSortedByDateAndTimeDescending() {
     const indexEnd = this.assessmentLogsSortedByDateAndTimeDescending
       .filter((current) => {
+    // Assessments submitted by a provider are not considered recent
         if (!!current.submittedByProviderId) {
           return false;
         }
