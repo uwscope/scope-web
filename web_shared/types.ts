@@ -235,7 +235,10 @@ export interface IContact {
 export interface IReviewMark {
   editedDateTime: Date;
   effectiveDateTime: Date;
-  providerId?: string;
+  // ID of the provider that submitted the mark
+  // If these became more common, it would be necessary to decide
+  // on a meaning for "providerId" versus "submittedByProviderId".
+  providerId: string;
 }
 
 export interface ISafetyPlan {
