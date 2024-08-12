@@ -69,7 +69,7 @@ export interface IContentItem {
 export interface IContentsMenuProps {
   contents: IContentItem[];
   contentId: string;
-  recentEntryCutoffDateTime: Date;
+  recentEntryCutoffDateTime: Date | undefined;
   recentEntryBadgeContent: React.ReactNode;
 }
 
@@ -243,7 +243,7 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
         <TitleContainer>
           <Stack direction={"column"}>
             <Typography>CONTENTS</Typography>
-            {!!recentEntryBadgeContent && (
+            {!!recentEntryCutoffDateTime && !!recentEntryBadgeContent && (
               <FormHelperText>
                 New Since:
                 <br />
