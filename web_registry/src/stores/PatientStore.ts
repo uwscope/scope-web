@@ -1,4 +1,4 @@
-import { differenceInYears } from "date-fns";
+import { differenceInYears, max, subDays } from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -31,6 +31,7 @@ import {
   onArrayConflict,
   onSingletonConflict,
 } from "shared/stores";
+import { toLocalDateOnly } from "shared/time";
 import {
   IActivity,
   IActivityLog,
@@ -495,21 +496,53 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    const reviewMarksCurrentEffectiveDateTime = (() => {
-      if (this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0) {
-        // This effectiveDateTime could also be undefined
-        return this.reviewMarksSortedByEditedDateAndTimeDescending[0]
-          .effectiveDateTime;
-      } else {
-        return undefined;
-      }
-    })();
+    // Any current mark.
+    const reviewMarkCurrent =
+      this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+        ? this.reviewMarksSortedByEditedDateAndTimeDescending[0]
+        : undefined;
 
-    if (!!reviewMarksCurrentEffectiveDateTime) {
-      return reviewMarksCurrentEffectiveDateTime;
+    // The effectiveDateTime of any current mark.
+    const reviewMarkEffectiveCutoffDateTime =
+      !!reviewMarkCurrent && !!reviewMarkCurrent.effectiveDateTime
+        ? reviewMarkCurrent.effectiveDateTime
+        : undefined;
+
+    // A dateTime calculated from the stored enrollmentDate.
+    const enrollmentDateCutoffDateTime = !!this.profile.enrollmentDate
+      ? toLocalDateOnly(this.profile.enrollmentDate)
+      : undefined;
+
+    // A default cutoff of 2 weeks before now.
+    // This is already in local time.
+    const twoWeeksCutoffDateTime = subDays(new Date(), 14);
+
+    // If there is a mark that defines an effectiveDateTime, that is the cutoff.
+    if (!!reviewMarkEffectiveCutoffDateTime) {
+      return reviewMarkEffectiveCutoffDateTime;
+    }
+
+    // If there is a mark, but it does not define effectiveDateTime, a person has explicitly reverted.
+    // They want to see "more", so we will go as far back as we are able.
+    // If there is an enrollment date, use that.
+    // If there is not an enrollment date, use the "2 weeks" default.
+    if (!!reviewMarkCurrent) {
+      if (!!enrollmentDateCutoffDateTime) {
+        return enrollmentDateCutoffDateTime;
+      } else {
+        return twoWeeksCutoffDateTime;
+      }
+    }
+
+    // If there is no mark, we are guessing at some default.
+    // Prior to the deployment of marks, that default was "2 weeks".
+    // We do not want to suddenly show all data as "new" just because there is no mark.
+    // So if there is no mark, continue to use the "2 weeks" default.
+    // But if there is an enrollment date which is less than 2 weeks in the past, that is the effective cutoff.
+    if (!!enrollmentDateCutoffDateTime) {
+      return max([enrollmentDateCutoffDateTime, twoWeeksCutoffDateTime]);
     } else {
-      // This enrollment date could also be undefined
-      return this.profile.enrollmentDate;
+      return twoWeeksCutoffDateTime;
     }
   }
 
