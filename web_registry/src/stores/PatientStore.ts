@@ -63,7 +63,7 @@ export interface IPatientStore extends IPatient {
 
   // Recent patient entry properties
   readonly recentEntryCaseloadSummary: string | undefined;
-  readonly recentEntryCutoffDateTime: Date | undefined;
+  readonly recentEntryCutoffDateTime: Date;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
     | IActivityLog[]
