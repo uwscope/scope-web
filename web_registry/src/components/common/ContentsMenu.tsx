@@ -155,38 +155,35 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       // which is less recent than the current effective time.
       // If there is no such effective time, it becomes undefined.
 
-      // Determine the current effectiveDateTime
-      const currentEffectiveDateTime = (() => {
-        if (
-          currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length >
-          0
-        ) {
-          // This effectiveDateTime could also be undefined
-          return currentPatient
-            .reviewMarksSortedByEditedDateAndTimeDescending[0]
-            .effectiveDateTime;
-        } else {
-          return undefined;
-        }
-      })();
-      if (!currentEffectiveDateTime) {
-        return;
-      }
+      // Obtain the current mark, if any
+      const currentMark =
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+          ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[0]
+          : undefined;
 
-      // Find the most recent mark relative to that effectiveDateTime
-      const mostRecentReviewMark =
-        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.find(
-          (current) => {
-            if (!current.effectiveDateTime) {
-              return false;
-            }
+      // Determine the current effectiveDateTime, if any
+      const currentEffectiveDateTime = !!currentMark
+        ? // It is possible that effectiveDateTime is undefined.
+          currentMark.effectiveDateTime
+        : undefined;
 
-            return (
-              compareAsc(currentEffectiveDateTime, current.effectiveDateTime) >
-              0
-            );
-          },
-        );
+      // Obtain the most recent mark relative to that time, if any
+      const mostRecentReviewMark = !!currentEffectiveDateTime
+        ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.find(
+            (current) => {
+              if (!current.effectiveDateTime) {
+                return false;
+              }
+
+              return (
+                compareAsc(
+                  currentEffectiveDateTime,
+                  current.effectiveDateTime,
+                ) > 0
+              );
+            },
+          )
+        : undefined;
 
       const { reviewMark } = markReviewState;
       currentPatient.addReviewMark({
@@ -342,24 +339,29 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
                 size="small"
                 color="primary"
                 disabled={((): boolean => {
-                  // Undo requires at least one mark
+                  // Undo is possible if:
+                  // (1) there is no existing mark
+                  // (2) there is a current mark, with an effectiveDateTime
+
+                  // No existing mark
                   if (
                     currentPatient
                       .reviewMarksSortedByEditedDateAndTimeDescending.length ===
                     0
                   ) {
-                    return true;
+                    return false;
                   }
-                  // And that mark must have an effective time
+
+                  // A current mark, with an effectiveDateTime
                   if (
-                    !currentPatient
+                    !!currentPatient
                       .reviewMarksSortedByEditedDateAndTimeDescending[0]
                       .effectiveDateTime
                   ) {
-                    return true;
+                    return false;
                   }
 
-                  return false;
+                  return true;
                 })()}
                 startIcon={<AssignmentReturnOutlinedIcon />}
                 onClick={onRecentEntryMarkUndo}
