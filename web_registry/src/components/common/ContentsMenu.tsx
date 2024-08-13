@@ -72,7 +72,7 @@ export interface IContentItem {
 export interface IContentsMenuProps {
   contents: IContentItem[];
   contentId: string;
-  recentEntryCutoffDateTime: Date | undefined;
+  recentEntryCutoffDateTime: Date;
   recentEntryBadgeContent: React.ReactNode;
 }
 
