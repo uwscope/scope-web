@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 
-import AssignmentReturnOutlinedIcon from "@mui/icons-material/AssignmentReturnOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Badge,
@@ -317,27 +316,16 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
               <Typography>CONTENTS</Typography>
               {!!recentEntryCutoffDateTime && (
                 <FormHelperText>
-                  Last Reviewed:
+                  Last Marked Reviewed:
                   <br />
                   {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
                 </FormHelperText>
               )}
-            </Stack>
-            <Stack direction={"column"} alignItems={"start"} spacing={1}>
-              <Button
-                variant="outlined"
-                size="small"
-                color="primary"
-                disabled={!recentEntryBadgeContent}
-                startIcon={<AssignmentTurnedInOutlinedIcon />}
-                onClick={onRecentEntryMarkReviewed}
-              >
-                {getString("recent_patient_entry_mark_reviewed")}
-              </Button>
               <Button
                 variant="text"
                 size="small"
                 color="primary"
+                sx={{ marginLeft: "-5px" }}
                 disabled={((): boolean => {
                   // Undo is possible if:
                   // (1) there is no existing mark
@@ -363,10 +351,21 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
 
                   return true;
                 })()}
-                startIcon={<AssignmentReturnOutlinedIcon />}
                 onClick={onRecentEntryMarkUndo}
               >
                 {getString("recent_patient_entry_undo_previous_mark")}
+              </Button>
+            </Stack>
+            <Stack direction={"column"} alignItems={"start"} spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                disabled={!recentEntryBadgeContent}
+                startIcon={<AssignmentTurnedInOutlinedIcon />}
+                onClick={onRecentEntryMarkReviewed}
+              >
+                {getString("recent_patient_entry_mark_reviewed")}
               </Button>
             </Stack>
           </Stack>
