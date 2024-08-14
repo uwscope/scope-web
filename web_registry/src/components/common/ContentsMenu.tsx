@@ -292,7 +292,8 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       const nodesReviewMarkEffectiveCutoff = {
         feedbackNode: (
           <FormHelperText>
-            New Entries
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
             <br />
             Since Previous Mark:
             <br />
@@ -305,7 +306,8 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       const nodesEnrollmentDateCutoff = {
         feedbackNode: (
           <FormHelperText>
-            New Entries
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
             <br />
             Since Enrollment:
             <br />
@@ -318,7 +320,8 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       const nodesEnrollmentDateUnknownCutoff = {
         feedbackNode: (
           <FormHelperText>
-            New Entries
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
             <br />
             Since Enrollment
           </FormHelperText>
@@ -329,7 +332,8 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       const nodesTwoWeeksCutoff = {
         feedbackNode: (
           <FormHelperText>
-            New Entries Since:
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries Since:"}
             <br />
             {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
           </FormHelperText>
