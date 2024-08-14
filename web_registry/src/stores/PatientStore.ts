@@ -496,6 +496,12 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
+    //
+    // The logic of this calculation is directly mirrored in ContentsMenu.tsx's
+    // rendering of feedback via calculation of lastMarkFeedbackNodes.
+    // Any changes here need to be mirrored there.
+    //
+
     // Any current mark.
     const reviewMarkCurrent =
       this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
@@ -508,6 +514,11 @@ export class PatientStore implements IPatientStore {
         ? reviewMarkCurrent.effectiveDateTime
         : undefined;
 
+    // If there is a mark that defines an effectiveDateTime, that is the cutoff.
+    if (!!reviewMarkEffectiveCutoffDateTime) {
+      return reviewMarkEffectiveCutoffDateTime;
+    }
+
     // A dateTime calculated from the stored enrollmentDate.
     const enrollmentDateCutoffDateTime = !!this.profile.enrollmentDate
       ? toLocalDateOnly(this.profile.enrollmentDate)
@@ -517,15 +528,10 @@ export class PatientStore implements IPatientStore {
     // This is already in local time.
     const twoWeeksCutoffDateTime = subDays(new Date(), 14);
 
-    // If there is a mark that defines an effectiveDateTime, that is the cutoff.
-    if (!!reviewMarkEffectiveCutoffDateTime) {
-      return reviewMarkEffectiveCutoffDateTime;
-    }
-
     // If there is a mark, but it does not define effectiveDateTime, a person has explicitly reverted.
     // They want to see "more", so we will go as far back as we are able.
     // If there is an enrollment date, use that.
-    // If there is not an enrollment date, use the "2 weeks" default.
+    // If there is not an enrollment date, use a date from before the study started.
     if (!!reviewMarkCurrent) {
       if (!!enrollmentDateCutoffDateTime) {
         return enrollmentDateCutoffDateTime;

@@ -14,10 +14,11 @@ import {
   useTheme,
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { compareAsc, format } from "date-fns";
+import { compareAsc, format, subDays } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
 import { observer, useLocalObservable } from "mobx-react";
+import { toLocalDateOnly } from "shared/time";
 import { IReviewMark } from "shared/types";
 import { getString } from "src/services/strings";
 import { usePatient, useStores } from "src/stores/stores";
@@ -287,6 +288,112 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       [],
     );
 
+    const lastMarkFeedbackNodes = (() => {
+      const nodesReviewMarkEffectiveCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            New Entries
+            <br />
+            Since Previous Mark:
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+          </FormHelperText>
+        ),
+        undoNode: getString("recent_patient_entry_undo_previous_mark"),
+      };
+
+      const nodesEnrollmentDateCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            New Entries
+            <br />
+            Since Enrollment:
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy")}
+          </FormHelperText>
+        ),
+        undoNode: undefined,
+      };
+
+      const nodesEnrollmentDateUnknownCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            New Entries
+            <br />
+            Since Enrollment
+          </FormHelperText>
+        ),
+        undoNode: undefined,
+      };
+
+      const nodesTwoWeeksCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            New Entries Since:
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+          </FormHelperText>
+        ),
+        undoNode: "Show More",
+      };
+
+      // Any current mark.
+      const reviewMarkCurrent =
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+          ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[0]
+          : undefined;
+
+      // The effectiveDateTime of any current mark.
+      const reviewMarkEffectiveCutoffDateTime =
+        !!reviewMarkCurrent && !!reviewMarkCurrent.effectiveDateTime
+          ? reviewMarkCurrent.effectiveDateTime
+          : undefined;
+
+      // If there is a mark that defines an effectiveDateTime, that defined our the cutoff.
+      if (!!reviewMarkEffectiveCutoffDateTime) {
+        return nodesReviewMarkEffectiveCutoff;
+      }
+
+      // A dateTime calculated from the stored enrollmentDate.
+      const enrollmentDateCutoffDateTime = !!currentPatient.profile
+        .enrollmentDate
+        ? toLocalDateOnly(currentPatient.profile.enrollmentDate)
+        : undefined;
+
+      // A default cutoff of 2 weeks before now.
+      // This is already in local time.
+      const twoWeeksCutoffDateTime = subDays(new Date(), 14);
+
+      // If there is a mark, but it does not define effectiveDateTime, a person has explicitly reverted.
+      // They want to see "more", so we will go as far back as we are able.
+      // If there is an enrollment date, use that.
+      // If there is not an enrollment date, use a date from before the study started.
+      if (!!reviewMarkCurrent) {
+        if (!!enrollmentDateCutoffDateTime) {
+          return nodesEnrollmentDateCutoff;
+        } else {
+          return nodesEnrollmentDateUnknownCutoff;
+        }
+      }
+
+      // If there is no mark, we are guessing at some default.
+      // Prior to the deployment of marks, that default was "2 weeks".
+      // We do not want to suddenly show all data as "new" just because there is no mark.
+      // So if there is no mark, continue to use the "2 weeks" default.
+      // But if there is an enrollment date which is less than 2 weeks in the past, that is the effective cutoff.
+      if (!!enrollmentDateCutoffDateTime) {
+        if (
+          compareAsc(enrollmentDateCutoffDateTime, twoWeeksCutoffDateTime) >= 0
+        ) {
+          return nodesEnrollmentDateCutoff;
+        } else {
+          return nodesTwoWeeksCutoff;
+        }
+      } else {
+        return nodesTwoWeeksCutoff;
+      }
+    })();
+
     const createListItem = (content: IContentItem) => {
       return (
         <ContentListItem
@@ -314,47 +421,43 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
           <Stack direction={"row"} justifyContent={"space-between"}>
             <Stack direction={"column"} alignItems={"start"}>
               <Typography>CONTENTS</Typography>
-              {!!recentEntryCutoffDateTime && (
-                <FormHelperText>
-                  Last Marked Reviewed:
-                  <br />
-                  {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-                </FormHelperText>
+              {lastMarkFeedbackNodes.feedbackNode}
+              {!!lastMarkFeedbackNodes.undoNode && (
+                <Button
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  sx={{ marginLeft: "-5px" }}
+                  disabled={((): boolean => {
+                    // Undo is possible if:
+                    // (1) there is no existing mark
+                    // (2) there is a current mark, with an effectiveDateTime
+
+                    // No existing mark
+                    if (
+                      currentPatient
+                        .reviewMarksSortedByEditedDateAndTimeDescending
+                        .length === 0
+                    ) {
+                      return false;
+                    }
+
+                    // A current mark, with an effectiveDateTime
+                    if (
+                      !!currentPatient
+                        .reviewMarksSortedByEditedDateAndTimeDescending[0]
+                        .effectiveDateTime
+                    ) {
+                      return false;
+                    }
+
+                    return true;
+                  })()}
+                  onClick={onRecentEntryMarkUndo}
+                >
+                  {lastMarkFeedbackNodes.undoNode}
+                </Button>
               )}
-              <Button
-                variant="text"
-                size="small"
-                color="primary"
-                sx={{ marginLeft: "-5px" }}
-                disabled={((): boolean => {
-                  // Undo is possible if:
-                  // (1) there is no existing mark
-                  // (2) there is a current mark, with an effectiveDateTime
-
-                  // No existing mark
-                  if (
-                    currentPatient
-                      .reviewMarksSortedByEditedDateAndTimeDescending.length ===
-                    0
-                  ) {
-                    return false;
-                  }
-
-                  // A current mark, with an effectiveDateTime
-                  if (
-                    !!currentPatient
-                      .reviewMarksSortedByEditedDateAndTimeDescending[0]
-                      .effectiveDateTime
-                  ) {
-                    return false;
-                  }
-
-                  return true;
-                })()}
-                onClick={onRecentEntryMarkUndo}
-              >
-                {getString("recent_patient_entry_undo_previous_mark")}
-              </Button>
             </Stack>
             <Stack direction={"column"} alignItems={"start"} spacing={1}>
               <Button
