@@ -83,6 +83,9 @@ def test_patient_construct_patient_document(
             "profile": scope.database.patient.patient_profile.get_patient_profile(
                 collection=patient_collection_current
             ),
+            "reviewMarks": scope.database.patient.review_marks.get_review_marks(
+                collection=patient_collection_current
+            ),
             "safetyPlan": scope.database.patient.safety_plan.get_safety_plan(
                 collection=patient_collection_current
             ),

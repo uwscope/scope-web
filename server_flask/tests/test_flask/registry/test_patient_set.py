@@ -16,6 +16,7 @@ import scope.database.patient.assessments
 import scope.database.patient.assessment_logs
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
+import scope.database.patient.review_marks
 import scope.database.patient.sessions
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -190,6 +191,21 @@ TEST_CONFIGS = [
         flask_document_set_key="moodlogs",
         flask_query_set_element_type="moodlog",
         flask_document_set_element_key="moodlog",
+    ),
+    ConfigTestPatientSet(
+        name="reviewmarks",
+        semantic_set_id=scope.database.patient.review_marks.SEMANTIC_SET_ID,
+        document_factory_fixture_set_element="data_fake_review_mark_factory",
+        document_factory_fixture_set="data_fake_review_marks_factory",
+        database_get_set_function=scope.database.patient.review_marks.get_review_marks,
+        database_get_function=scope.database.patient.review_marks.get_review_mark,
+        database_post_function=scope.database.patient.review_marks.post_review_mark,
+        database_unsafe_update_function=None,
+        database_document_parameter_name="review_mark",
+        flask_query_set_type="reviewmarks",
+        flask_document_set_key="reviewmarks",
+        flask_query_set_element_type="reviewmark",
+        flask_document_set_element_key="reviewmark",
     ),
     ConfigTestPatientSet(
         name="sessions",

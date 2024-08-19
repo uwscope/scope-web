@@ -7,6 +7,7 @@ import {
   IAssessmentLog,
   ICaseReview,
   IMoodLog,
+  IReviewMark,
   IScheduledActivity,
   ISession,
   IValue,
@@ -89,6 +90,13 @@ export const compareMoodLogsByDateAndTime: (
   compareB: IMoodLog,
 ) => number = function (compareA, compareB): number {
   return compareAsc(compareA.recordedDateTime, compareB.recordedDateTime);
+};
+
+export const compareReviewMarksByEditedDateAndTime: (
+  compareA: IReviewMark,
+  compareB: IReviewMark,
+) => number = function (compareA, compareB): number {
+  return compareAsc(compareA.editedDateTime, compareB.editedDateTime);
 };
 
 export const compareScheduledActivitiesByDateAndTime: (
@@ -219,6 +227,23 @@ export const sortMoodLogsByDateAndTime: (
     .sort(
       sortingDirectionComparator(
         compareMoodLogsByDateAndTime,
+        sortingDirection,
+      ),
+    );
+};
+
+export const sortReviewMarksByEditedDateAndTime: (
+  reviewMarks: IReviewMark[],
+  sortingDirection?: SortDirection,
+) => IReviewMark[] = function (
+  reviewMarks,
+  sortingDirection = SortDirection.ASCENDING,
+) {
+  return reviewMarks
+    .slice()
+    .sort(
+      sortingDirectionComparator(
+        compareReviewMarksByEditedDateAndTime,
         sortingDirection,
       ),
     );

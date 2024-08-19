@@ -11,6 +11,7 @@ import {
   IPatientIdentity,
   IPatientProfile,
   IProviderIdentity,
+  IReviewMark,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -94,6 +95,14 @@ export interface IMoodLogResponse extends IServiceResponse {
 
 export interface IMoodLogRequest {
   moodlog: IMoodLog;
+}
+
+export interface IReviewMarkResponse extends IServiceResponse {
+  reviewmark: IReviewMark;
+}
+
+export interface IReviewMarkRequest {
+  reviewmark: IReviewMark;
 }
 
 export interface IActivityListResponse extends IServiceResponse {

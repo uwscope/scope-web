@@ -232,6 +232,18 @@ export interface IContact {
   emergencyNumber?: string;
 }
 
+export interface IReviewMark {
+  editedDateTime: Date;
+  // A review mark without an effective date
+  // means the most recent review is undefined.
+  // This can happen if all marks  are reverted by undo.
+  effectiveDateTime?: Date;
+  // ID of the provider that submitted the mark
+  // If these became more common, it would be necessary to decide
+  // on a meaning for "providerId" versus "submittedByProviderId".
+  providerId: string;
+}
+
 export interface ISafetyPlan {
   assigned: boolean;
   assignedDateTime?: Date;
@@ -299,6 +311,9 @@ export interface IPatient {
 
   // Values
   values: IValue[];
+
+  // Recent entry reviews
+  reviewMarks: IReviewMark[];
 
   // Sessions
   sessions: ISession[];

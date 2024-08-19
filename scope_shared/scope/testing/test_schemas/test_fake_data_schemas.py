@@ -13,7 +13,7 @@ import scope.database.patient.assessment_logs
 import scope.database.patient.assessments
 import scope.database.patient.case_reviews
 import scope.database.patient.mood_logs
-import scope.database.patient.sessions
+import scope.database.patient.review_marks
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.sessions
@@ -38,6 +38,8 @@ import scope.testing.fake_data.fixtures_fake_mood_log
 import scope.testing.fake_data.fixtures_fake_mood_logs
 import scope.testing.fake_data.fixtures_fake_patient_profile
 import scope.testing.fake_data.fixtures_fake_provider_identity
+import scope.testing.fake_data.fixtures_fake_review_mark
+import scope.testing.fake_data.fixtures_fake_review_marks
 import scope.testing.fake_data.fixtures_fake_referral_status
 import scope.testing.fake_data.fixtures_fake_safety_plan
 import scope.testing.fake_data.fixtures_fake_session
@@ -268,6 +270,26 @@ TEST_CONFIGS = [
         expected_singleton=False,
         expected_set_element=True,
         expected_semantic_set_id=scope.database.providers.PROVIDER_IDENTITY_SEMANTIC_SET_ID,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="review-mark",
+        schema=scope.schema.review_mark_schema,
+        data_factory_fixture="data_fake_review_mark_factory",
+        expected_document=True,
+        expected_singleton=False,
+        expected_set_element=True,
+        expected_semantic_set_id=scope.database.patient.review_marks.SEMANTIC_SET_ID,
+        expected_set_ids=None,
+    ),
+    ConfigTestFakeDataSchema(
+        name="review-marks",
+        schema=scope.schema.review_marks_schema,
+        data_factory_fixture="data_fake_review_marks_factory",
+        expected_document=False,
+        expected_singleton=False,
+        expected_set_element=False,
+        expected_semantic_set_id=None,
         expected_set_ids=None,
     ),
     ConfigTestFakeDataSchema(

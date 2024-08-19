@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uwscope.org/schemas/documents/review-mark",
+  "title": "IReviewMark",
+  "description": "IReviewMark Type",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string"
+    },
+    "_type": {
+      "const": "reviewMark"
+    },
+    "_set_id": {
+      "type": "string"
+    },
+    "_rev": {
+      "type": "number"
+    },
+    "reviewMarkId": {
+      "type": "string"
+    },
+    "editedDateTime": {
+      "$ref": "/schemas/utils/datetime#/properties/datetime"
+    },
+    "effectiveDateTime": {
+      "$ref": "/schemas/utils/datetime#/properties/datetime"
+    },
+    "providerId": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["_type", "editedDateTime", "providerId"]
+}

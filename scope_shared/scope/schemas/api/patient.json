@@ -43,6 +43,9 @@
       "description": "IPatientProfile schema",
       "$ref": "/schemas/documents/patient-profile"
     },
+    "reviewMarks": {
+      "$ref": "/schemas/documents/review-marks"
+    },
     "safetyPlan": {
       "type": "object",
       "description": "ISafetyPlan schema",

@@ -20,6 +20,8 @@ PYTEST_PLUGINS = [
     "scope.testing.fake_data.fixtures_fake_patient_profile",
     "scope.testing.fake_data.fixtures_fake_provider_identity",
     "scope.testing.fake_data.fixtures_fake_referral_status",
+    "scope.testing.fake_data.fixtures_fake_review_mark",
+    "scope.testing.fake_data.fixtures_fake_review_marks",
     "scope.testing.fake_data.fixtures_fake_safety_plan",
     "scope.testing.fake_data.fixtures_fake_session",
     "scope.testing.fake_data.fixtures_fake_sessions",

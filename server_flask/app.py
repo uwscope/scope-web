@@ -19,6 +19,7 @@ import blueprints.registry.mood_logs
 import blueprints.registry.patient_profile
 import blueprints.registry.patients
 import blueprints.registry.providers
+import blueprints.registry.review_marks
 import blueprints.registry.safety_plan
 import blueprints.registry.sessions
 import blueprints.registry.scheduled_activities
@@ -147,6 +148,10 @@ def create_app():
     )
     app.register_blueprint(
         blueprints.registry.values.values_blueprint,
+        url_prefix="/patient/",
+    )
+    app.register_blueprint(
+        blueprints.registry.review_marks.review_marks_blueprint,
         url_prefix="/patient/",
     )
 

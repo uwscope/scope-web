@@ -1,4 +1,4 @@
-import { differenceInYears } from "date-fns";
+import { differenceInYears, max, subDays } from "date-fns";
 import { action, computed, makeAutoObservable, toJS } from "mobx";
 import {
   behavioralActivationChecklistValues,
@@ -21,6 +21,7 @@ import {
   sortCaseReviewsOrSessionsByDate,
   SortDirection,
   sortMoodLogsByDateAndTime,
+  sortReviewMarksByEditedDateAndTime,
   sortScheduledActivitiesByDateAndTime,
   sortSessionsByDate,
   sortValuesByDateAndTime,
@@ -30,6 +31,7 @@ import {
   onArrayConflict,
   onSingletonConflict,
 } from "shared/stores";
+import { toLocalDateOnly } from "shared/time";
 import {
   IActivity,
   IActivityLog,
@@ -41,6 +43,7 @@ import {
   IMoodLog,
   IPatient,
   IPatientProfile,
+  IReviewMark,
   ISafetyPlan,
   IScheduledActivity,
   IScheduledAssessment,
@@ -60,7 +63,7 @@ export interface IPatientStore extends IPatient {
 
   // Recent patient entry properties
   readonly recentEntryCaseloadSummary: string | undefined;
-  readonly recentEntryCutoffDateTime: Date | undefined;
+  readonly recentEntryCutoffDateTime: Date;
   readonly recentEntryActivities: IActivity[] | undefined;
   readonly recentEntryActivityLogsSortedByDateAndTimeDescending:
     | IActivityLog[]
@@ -89,6 +92,7 @@ export interface IPatientStore extends IPatient {
   readonly loadClinicalHistoryState: IPromiseQueryState;
   readonly loadMoodLogsState: IPromiseQueryState;
   readonly loadProfileState: IPromiseQueryState;
+  readonly loadReviewMarksState: IPromiseQueryState;
   readonly loadSafetyPlanState: IPromiseQueryState;
   readonly loadScheduledActivitiesState: IPromiseQueryState;
   readonly loadScheduledAssessmentsState: IPromiseQueryState;
@@ -110,6 +114,7 @@ export interface IPatientStore extends IPatient {
   readonly sessionsSortedByDate: ISession[];
   readonly moodLogsSortedByDateAndTime: IMoodLog[];
   readonly moodLogsSortedByDateAndTimeDescending: IMoodLog[];
+  readonly reviewMarksSortedByEditedDateAndTimeDescending: IReviewMark[];
   readonly scheduledActivitiesSortedByDateAndTimeDescending: IScheduledActivity[];
   readonly valuesSortedByDateAndTimeDescending: IValue[];
 
@@ -165,6 +170,9 @@ export interface IPatientStore extends IPatient {
   // Patient profile
   updateProfile(profile: IPatientProfile): Promise<void>;
 
+  // Review marks that define recent entry data
+  addReviewMark(review: IReviewMark): Promise<void>;
+
   // Session
   addSession(session: ISession): void;
   updateSession(session: ISession): void;
@@ -183,6 +191,7 @@ export class PatientStore implements IPatientStore {
   private readonly loadClinicalHistoryQuery: PromiseQuery<IClinicalHistory>;
   private readonly loadMoodLogsQuery: PromiseQuery<IMoodLog[]>;
   private readonly loadProfileQuery: PromiseQuery<IPatientProfile>;
+  private readonly loadReviewMarksQuery: PromiseQuery<IReviewMark[]>;
   private readonly loadSafetyPlanQuery: PromiseQuery<ISafetyPlan>;
   private readonly loadSessionsQuery: PromiseQuery<ISession[]>;
   private readonly loadScheduledActivitiesQuery: PromiseQuery<
@@ -264,6 +273,10 @@ export class PatientStore implements IPatientStore {
     this.loadProfileQuery = new PromiseQuery<IPatientProfile>(
       patient.profile,
       "loadProfile",
+    );
+    this.loadReviewMarksQuery = new PromiseQuery<IReviewMark[]>(
+      patient.reviewMarks,
+      "loadReviewMarks",
     );
     this.loadSafetyPlanQuery = new PromiseQuery<ISafetyPlan>(
       patient.safetyPlan,
@@ -376,6 +389,17 @@ export class PatientStore implements IPatientStore {
     return sortMoodLogsByDateAndTime(this.moodLogs, SortDirection.DESCENDING);
   }
 
+  @computed get reviewMarks() {
+    return this.loadReviewMarksQuery.value || [];
+  }
+
+  @computed get reviewMarksSortedByEditedDateAndTimeDescending() {
+    return sortReviewMarksByEditedDateAndTime(
+      this.reviewMarks,
+      SortDirection.DESCENDING,
+    );
+  }
+
   @computed get scheduledActivitiesSortedByDateAndTimeDescending() {
     return sortScheduledActivitiesByDateAndTime(
       this.scheduledActivities,
@@ -472,7 +496,60 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed get recentEntryCutoffDateTime() {
-    return this.profile.enrollmentDate;
+    //
+    // The logic of this calculation is directly mirrored in ContentsMenu.tsx's
+    // rendering of feedback via calculation of lastMarkFeedbackNodes.
+    // Any changes here need to be mirrored there.
+    //
+
+    // Any current mark.
+    const reviewMarkCurrent =
+      this.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+        ? this.reviewMarksSortedByEditedDateAndTimeDescending[0]
+        : undefined;
+
+    // The effectiveDateTime of any current mark.
+    const reviewMarkEffectiveCutoffDateTime =
+      !!reviewMarkCurrent && !!reviewMarkCurrent.effectiveDateTime
+        ? reviewMarkCurrent.effectiveDateTime
+        : undefined;
+
+    // If there is a mark that defines an effectiveDateTime, that is the cutoff.
+    if (!!reviewMarkEffectiveCutoffDateTime) {
+      return reviewMarkEffectiveCutoffDateTime;
+    }
+
+    // A dateTime calculated from the stored enrollmentDate.
+    const enrollmentDateCutoffDateTime = !!this.profile.enrollmentDate
+      ? toLocalDateOnly(this.profile.enrollmentDate)
+      : undefined;
+
+    // A default cutoff of 2 weeks before now.
+    // This is already in local time.
+    const twoWeeksCutoffDateTime = subDays(new Date(), 14);
+
+    // If there is a mark, but it does not define effectiveDateTime, a person has explicitly reverted.
+    // They want to see "more", so we will go as far back as we are able.
+    // If there is an enrollment date, use that.
+    // If there is not an enrollment date, use a date from before the study started.
+    if (!!reviewMarkCurrent) {
+      if (!!enrollmentDateCutoffDateTime) {
+        return enrollmentDateCutoffDateTime;
+      } else {
+        return twoWeeksCutoffDateTime;
+      }
+    }
+
+    // If there is no mark, we are guessing at some default.
+    // Prior to the deployment of marks, that default was "2 weeks".
+    // We do not want to suddenly show all data as "new" just because there is no mark.
+    // So if there is no mark, continue to use the "2 weeks" default.
+    // But if there is an enrollment date which is less than 2 weeks in the past, that is the effective cutoff.
+    if (!!enrollmentDateCutoffDateTime) {
+      return max([enrollmentDateCutoffDateTime, twoWeeksCutoffDateTime]);
+    } else {
+      return twoWeeksCutoffDateTime;
+    }
   }
 
   @computed get recentEntryActivities() {
@@ -708,6 +785,10 @@ export class PatientStore implements IPatientStore {
     return this.loadProfileQuery;
   }
 
+  @computed get loadReviewMarksState() {
+    return this.loadReviewMarksQuery;
+  }
+
   @computed get loadSafetyPlanState() {
     return this.loadSafetyPlanQuery;
   }
@@ -880,6 +961,9 @@ export class PatientStore implements IPatientStore {
         );
         this.loadMoodLogsQuery.fromPromise(Promise.resolve(patient.moodLogs));
         this.loadProfileQuery.fromPromise(Promise.resolve(patient.profile));
+        this.loadReviewMarksQuery.fromPromise(
+          Promise.resolve(patient.reviewMarks),
+        );
         this.loadSafetyPlanQuery.fromPromise(
           Promise.resolve(patient.safetyPlan),
         );
@@ -1193,6 +1277,23 @@ export class PatientStore implements IPatientStore {
       onSingletonConflict("profile"),
     );
   }
+
+  // Recent Entry Review
+  @action.bound
+  public async addReviewMark(reviewMark: IReviewMark) {
+    const promise = this.patientService
+      .addReviewMark(toJS(reviewMark))
+      .then((addedReview) => {
+        return this.reviewMarks.slice().concat([addedReview]);
+      });
+
+    await this.loadAndLogQuery<IReviewMark[]>(
+      () => promise,
+      this.loadReviewMarksQuery,
+      this.onReviewMarkConflict,
+    );
+  }
+
   // Session
   @action.bound
   public async addSession(session: ISession) {
@@ -1271,6 +1372,15 @@ export class PatientStore implements IPatientStore {
       "casereview",
       "caseReviewId",
       () => this.caseReviews,
+      logger,
+    )(responseData);
+  };
+
+  private onReviewMarkConflict = (responseData?: any) => {
+    return onArrayConflict(
+      "reviewmark",
+      "reviewMarkId",
+      () => this.reviewMarks,
       logger,
     )(responseData);
   };

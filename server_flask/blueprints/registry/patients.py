@@ -15,6 +15,7 @@ import scope.database.patient.case_reviews
 import scope.database.patient.clinical_history
 import scope.database.patient.mood_logs
 import scope.database.patient.patient_profile
+import scope.database.patient.review_marks
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -58,6 +59,7 @@ def _construct_patient_document(
             scope.database.patient.assessment_logs.DOCUMENT_TYPE,
             scope.database.patient.case_reviews.DOCUMENT_TYPE,
             scope.database.patient.mood_logs.DOCUMENT_TYPE,
+            scope.database.patient.review_marks.DOCUMENT_TYPE,
             scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
             scope.database.patient.sessions.DOCUMENT_TYPE,
             scope.database.patient.values.DOCUMENT_TYPE,
@@ -107,6 +109,11 @@ def _construct_patient_document(
     # Profile
     patient_document["profile"] = documents_by_type[
         scope.database.patient.patient_profile.DOCUMENT_TYPE
+    ]
+
+    # Review Marks
+    patient_document["reviewMarks"] = documents_by_type[
+        scope.database.patient.review_marks.DOCUMENT_TYPE
     ]
 
     # Safety Plan

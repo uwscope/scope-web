@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react";
 
-// import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import {
   Badge,
-  // Button,
+  Button,
   FormHelperText,
   List,
   ListItem,
@@ -14,10 +14,14 @@ import {
   useTheme,
 } from "@mui/material";
 import withTheme from "@mui/styles/withTheme";
-import { format } from "date-fns";
+import { compareAsc, format, subDays } from "date-fns";
 import throttle from "lodash.throttle";
 import { action, observable } from "mobx";
-import { observer } from "mobx-react";
+import { observer, useLocalObservable } from "mobx-react";
+import { toLocalDateOnly } from "shared/time";
+import { IReviewMark } from "shared/types";
+import { getString } from "src/services/strings";
+import { usePatient, useStores } from "src/stores/stores";
 import styled, { CSSObject, ThemedStyledProps } from "styled-components";
 
 const TitleContainer = withTheme(
@@ -69,7 +73,7 @@ export interface IContentItem {
 export interface IContentsMenuProps {
   contents: IContentItem[];
   contentId: string;
-  recentEntryCutoffDateTime: Date | undefined;
+  recentEntryCutoffDateTime: Date;
   recentEntryBadgeContent: React.ReactNode;
 }
 
@@ -122,7 +126,74 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       recentEntryCutoffDateTime,
       recentEntryBadgeContent,
     } = props;
+    const currentPatient = usePatient();
+    const { authStore } = useStores();
     const theme = useTheme();
+
+    const markReviewState = useLocalObservable<{
+      reviewMark: IReviewMark;
+    }>(() => ({
+      reviewMark: {
+        editedDateTime: new Date(),
+        effectiveDateTime: new Date(),
+        providerId: authStore.currentUserIdentity?.providerId,
+      } as IReviewMark,
+    }));
+
+    const onRecentEntryMarkReviewed = action(() => {
+      // Add a new mark effective at the current time
+      const { reviewMark } = markReviewState;
+      currentPatient.addReviewMark({
+        ...reviewMark,
+        editedDateTime: new Date(),
+        effectiveDateTime: new Date(),
+      });
+    });
+
+    const onRecentEntryMarkUndo = action(() => {
+      // Undo reverts to the most recent effective time
+      // which is less recent than the current effective time.
+      // If there is no such effective time, it becomes undefined.
+
+      // Obtain the current mark, if any
+      const currentMark =
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+          ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[0]
+          : undefined;
+
+      // Determine the current effectiveDateTime, if any
+      const currentEffectiveDateTime = !!currentMark
+        ? // It is possible that effectiveDateTime is undefined.
+          currentMark.effectiveDateTime
+        : undefined;
+
+      // Obtain the most recent mark relative to that time, if any
+      const mostRecentReviewMark = !!currentEffectiveDateTime
+        ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.find(
+            (current) => {
+              if (!current.effectiveDateTime) {
+                return false;
+              }
+
+              return (
+                compareAsc(
+                  currentEffectiveDateTime,
+                  current.effectiveDateTime,
+                ) > 0
+              );
+            },
+          )
+        : undefined;
+
+      const { reviewMark } = markReviewState;
+      currentPatient.addReviewMark({
+        ...reviewMark,
+        editedDateTime: new Date(),
+        effectiveDateTime: !!mostRecentReviewMark
+          ? mostRecentReviewMark.effectiveDateTime
+          : undefined,
+      });
+    });
 
     const itemsClientRef = React.useRef<ContentMenuItem[]>([]);
     React.useEffect(() => {
@@ -217,6 +288,116 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
       [],
     );
 
+    const lastMarkFeedbackNodes = (() => {
+      const nodesReviewMarkEffectiveCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
+            <br />
+            Since Previous Mark:
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+          </FormHelperText>
+        ),
+        undoNode: getString("recent_patient_entry_undo_previous_mark"),
+      };
+
+      const nodesEnrollmentDateCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
+            <br />
+            Since Enrollment:
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy")}
+          </FormHelperText>
+        ),
+        undoNode: undefined,
+      };
+
+      const nodesEnrollmentDateUnknownCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries"}
+            <br />
+            Since Enrollment
+          </FormHelperText>
+        ),
+        undoNode: undefined,
+      };
+
+      const nodesTwoWeeksCutoff = {
+        feedbackNode: (
+          <FormHelperText>
+            {(!currentPatient.recentEntryCaseloadSummary ? "No " : "") +
+              "New Entries Since:"}
+            <br />
+            {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
+          </FormHelperText>
+        ),
+        undoNode: "Show More",
+      };
+
+      // Any current mark.
+      const reviewMarkCurrent =
+        currentPatient.reviewMarksSortedByEditedDateAndTimeDescending.length > 0
+          ? currentPatient.reviewMarksSortedByEditedDateAndTimeDescending[0]
+          : undefined;
+
+      // The effectiveDateTime of any current mark.
+      const reviewMarkEffectiveCutoffDateTime =
+        !!reviewMarkCurrent && !!reviewMarkCurrent.effectiveDateTime
+          ? reviewMarkCurrent.effectiveDateTime
+          : undefined;
+
+      // If there is a mark that defines an effectiveDateTime, that defined our the cutoff.
+      if (!!reviewMarkEffectiveCutoffDateTime) {
+        return nodesReviewMarkEffectiveCutoff;
+      }
+
+      // A dateTime calculated from the stored enrollmentDate.
+      const enrollmentDateCutoffDateTime = !!currentPatient.profile
+        .enrollmentDate
+        ? toLocalDateOnly(currentPatient.profile.enrollmentDate)
+        : undefined;
+
+      // A default cutoff of 2 weeks before now.
+      // This is already in local time.
+      const twoWeeksCutoffDateTime = subDays(new Date(), 14);
+
+      // If there is a mark, but it does not define effectiveDateTime, a person has explicitly reverted.
+      // They want to see "more", so we will go as far back as we are able.
+      // If there is an enrollment date, use that.
+      // If there is not an enrollment date, use a date from before the study started.
+      if (!!reviewMarkCurrent) {
+        if (!!enrollmentDateCutoffDateTime) {
+          return nodesEnrollmentDateCutoff;
+        } else {
+          return nodesEnrollmentDateUnknownCutoff;
+        }
+      }
+
+      // If there is no mark, we are guessing at some default.
+      // Prior to the deployment of marks, that default was "2 weeks".
+      // We do not want to suddenly show all data as "new" just because there is no mark.
+      // So if there is no mark, continue to use the "2 weeks" default.
+      // But if there is an enrollment date which is less than 2 weeks in the past, that is the effective cutoff.
+      if (!!enrollmentDateCutoffDateTime) {
+        if (
+          compareAsc(enrollmentDateCutoffDateTime, twoWeeksCutoffDateTime) >= 0
+        ) {
+          return nodesEnrollmentDateCutoff;
+        } else {
+          return nodesTwoWeeksCutoff;
+        }
+      } else {
+        return nodesTwoWeeksCutoff;
+      }
+    })();
+
     const createListItem = (content: IContentItem) => {
       return (
         <ContentListItem
@@ -241,50 +422,39 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
     return (
       <div>
         <TitleContainer>
-          <Stack direction={"column"}>
-            <Typography>CONTENTS</Typography>
-            {!!recentEntryCutoffDateTime && !!recentEntryBadgeContent && (
-              <FormHelperText>
-                New Since:
-                <br />
-                {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-              </FormHelperText>
-            )}
+          <Stack direction={"row"} justifyContent={"space-between"}>
+            <Stack direction={"column"} alignItems={"start"}>
+              <Typography>CONTENTS</Typography>
+              {lastMarkFeedbackNodes.feedbackNode}
+              {!!lastMarkFeedbackNodes.undoNode && (
+                <Button
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  sx={{ marginLeft: "-5px" }}
+                  onClick={onRecentEntryMarkUndo}
+                >
+                  {lastMarkFeedbackNodes.undoNode}
+                </Button>
+              )}
+            </Stack>
+            <Stack direction={"column"} alignItems={"start"} spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                disabled={!recentEntryBadgeContent}
+                startIcon={<AssignmentTurnedInOutlinedIcon />}
+                onClick={onRecentEntryMarkReviewed}
+              >
+                {getString("recent_patient_entry_mark_reviewed")}
+              </Button>
+            </Stack>
           </Stack>
         </TitleContainer>
         <List dense={true}>{contents.map(createListItem)}</List>
       </div>
     );
-
-    // return (
-    //   <div>
-    //     <TitleContainer>
-    //       <Stack direction={"row"} justifyContent={"space-between"}>
-    //         <Stack direction={"column"} alignItems={"start"}>
-    //           <Typography>CONTENTS</Typography>
-    //           <FormHelperText>
-    //             Last Reviewed:
-    //             <br />
-    //             {format(recentEntryCutoffDateTime, "MM/dd/yyyy h:mm aaa")}
-    //           </FormHelperText>
-    //         </Stack>
-    //         <Stack direction={"column"} alignItems={"start"}>
-    //           <Button
-    //             variant="outlined"
-    //             size="small"
-    //             color="primary"
-    //             disabled={!recentEntryBadgeContent}
-    //             startIcon={<AssignmentTurnedInOutlinedIcon />}
-    //             // onClick={onRecentEntryMarkReviewed}
-    //           >
-    //             Mark Reviewed
-    //           </Button>
-    //         </Stack>
-    //       </Stack>
-    //     </TitleContainer>
-    //     <List dense={true}>{contents.map(createListItem)}</List>
-    //   </div>
-    // );
   },
 );
 
