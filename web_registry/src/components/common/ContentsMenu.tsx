@@ -432,31 +432,6 @@ export const ContentsMenu: FunctionComponent<IContentsMenuProps> = observer(
                   size="small"
                   color="primary"
                   sx={{ marginLeft: "-5px" }}
-                  disabled={((): boolean => {
-                    // Undo is possible if:
-                    // (1) there is no existing mark
-                    // (2) there is a current mark, with an effectiveDateTime
-
-                    // No existing mark
-                    if (
-                      currentPatient
-                        .reviewMarksSortedByEditedDateAndTimeDescending
-                        .length === 0
-                    ) {
-                      return false;
-                    }
-
-                    // A current mark, with an effectiveDateTime
-                    if (
-                      !!currentPatient
-                        .reviewMarksSortedByEditedDateAndTimeDescending[0]
-                        .effectiveDateTime
-                    ) {
-                      return false;
-                    }
-
-                    return true;
-                  })()}
                   onClick={onRecentEntryMarkUndo}
                 >
                   {lastMarkFeedbackNodes.undoNode}
