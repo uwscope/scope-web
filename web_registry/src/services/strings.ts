@@ -91,7 +91,7 @@ const _strings = {
     "Relevant Forms and Worksheets",
   patient_behavioral_checklist_not_completed: "Not completed",
   recent_patient_entry_mark_reviewed: "Mark Reviewed",
-  recent_patient_entry_undo_previous_mark: "Undo Previous Mark",
+  recent_patient_entry_undo_previous_mark: "Undo Mark",
 };
 
 type Strings = typeof _strings;
