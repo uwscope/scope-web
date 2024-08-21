@@ -31,5 +31,5 @@
     }
   },
   "additionalProperties": false,
-  "required": ["_type", "editedDateTime", "providerId"]
+  "required": ["_type", "editedDateTime"]
 }
