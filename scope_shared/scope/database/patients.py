@@ -8,6 +8,7 @@ import scope.database.collection_utils
 import scope.database.patient.assessments
 import scope.database.patient.clinical_history
 import scope.database.patient.patient_profile
+import scope.database.patient.review_marks
 import scope.database.patient.safety_plan
 import scope.database.patient.values_inventory
 import scope.enums
@@ -264,6 +265,20 @@ def ensure_patient_documents(
                 set_id=assessment_current,
                 assessment=assessment_document,
             )
+
+    # Default review mark
+    review_mark_documents = scope.database.patient.review_marks.get_review_marks(
+        collection=patient_collection,
+    )
+    if not review_mark_documents:
+        review_mark_document = {
+            "_type": scope.database.patient.review_marks.DOCUMENT_TYPE,
+            "editedDateTime": datetime_assigned,
+        }
+        result = scope.database.patient.review_marks.post_review_mark(
+            collection=patient_collection,
+            review_mark=review_mark_document,
+        )
 
 
 def ensure_patient_identity(

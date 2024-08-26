@@ -1,10 +1,6 @@
-import datetime
 import pymongo.database
-import pytz
 from typing import List, Optional
 
-import scope.database.date_utils as date_utils
-import scope.database.patient.review_marks
 import scope.database.patients
 from scope.populate.types import PopulateAction, PopulateContext, PopulateRule
 
@@ -106,22 +102,3 @@ def _populate_default_data(
 
     # Default population is currently None.
     # Rule left in place for future use.
-
-    def _review_mark():
-        ################################################################################
-        # Store an empty reviwe mark.
-        # - Create an empty mark so new patients that have never been marked will show data back to enrollment.
-        ################################################################################
-        review_mark = {
-            "_type": scope.database.patient.review_marks.DOCUMENT_TYPE,
-            "editedDateTime": date_utils.format_datetime(
-                pytz.utc.localize(datetime.datetime.utcnow())
-            ),
-        }
-
-        scope.database.patient.review_marks.post_review_mark(
-            collection=patient_collection,
-            review_mark=review_mark,
-        )
-
-    _review_mark()
