@@ -508,7 +508,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
     });
   });
 
-  const phqScores = currentPatient.assessmentLogs
+  const phqScores = currentPatient.assessmentLogsSortedByDateAndTime
     .filter((log) => log.assessmentId == "phq-9")
     .map((log) => ({
       date: log.recordedDateTime,
@@ -516,7 +516,7 @@ export const SessionInfo: FunctionComponent = observer(() => {
         log.totalScore || getAssessmentScoreFromPointValues(log.pointValues),
     }));
 
-  const gadScores = currentPatient.assessmentLogs
+  const gadScores = currentPatient.assessmentLogsSortedByDateAndTime
     .filter((log) => log.assessmentId == "gad-7")
     .map((log) => ({
       date: log.recordedDateTime,
