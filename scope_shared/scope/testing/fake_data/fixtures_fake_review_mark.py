@@ -9,6 +9,12 @@ import scope.database.patient.review_marks
 import scope.enums
 import scope.schema
 import scope.schema_utils
+import scope.testing.fake_data.fake_utils as fake_utils
+
+OPTIONAL_KEYS = [
+    "effectiveDateTime",
+    "providerId",
+]
 
 
 def fake_review_mark_factory(
@@ -43,6 +49,12 @@ def fake_review_mark_factory(
             # TODO: this should be a providerId
             "providerId": faker_factory.name(),
         }
+
+        # Remove a randomly sampled subset of optional parameters.
+        fake_review_mark = fake_utils.fake_optional(
+            document=fake_review_mark,
+            optional_keys=OPTIONAL_KEYS,
+        )
 
         return fake_review_mark
 
