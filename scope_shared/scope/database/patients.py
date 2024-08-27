@@ -170,9 +170,9 @@ def ensure_patient_documents(
     Any more complex or meaningful document creation should instead be configured in a populate script.
     """
 
-    # Many documents have a required assignment datetime.
+    # Many documents have a required datetime associated with their creation.
     # Generate a single value to consistently use as necessary
-    datetime_assigned = scope.database.date_utils.format_datetime(
+    datetime_created = scope.database.date_utils.format_datetime(
         pytz.utc.localize(datetime.datetime.utcnow())
     )
 
@@ -218,7 +218,7 @@ def ensure_patient_documents(
         safety_plan_document = {
             "_type": scope.database.patient.safety_plan.DOCUMENT_TYPE,
             "assigned": False,
-            "assignedDateTime": datetime_assigned,
+            "assignedDateTime": datetime_created,
         }
         result = scope.database.patient.safety_plan.put_safety_plan(
             collection=patient_collection,
@@ -235,7 +235,7 @@ def ensure_patient_documents(
         values_inventory_document = {
             "_type": scope.database.patient.values_inventory.DOCUMENT_TYPE,
             "assigned": False,
-            "assignedDateTime": datetime_assigned,
+            "assignedDateTime": datetime_created,
         }
         result = scope.database.patient.values_inventory.put_values_inventory(
             collection=patient_collection,
@@ -258,7 +258,7 @@ def ensure_patient_documents(
                 "_set_id": assessment_current,
                 scope.database.patient.assessments.SEMANTIC_SET_ID: assessment_current,
                 "assigned": False,
-                "assignedDateTime": datetime_assigned,
+                "assignedDateTime": datetime_created,
             }
             result = scope.database.patient.assessments.put_assessment(
                 collection=patient_collection,
@@ -273,7 +273,7 @@ def ensure_patient_documents(
     if not review_mark_documents:
         review_mark_document = {
             "_type": scope.database.patient.review_marks.DOCUMENT_TYPE,
-            "editedDateTime": datetime_assigned,
+            "editedDateTime": datetime_created,
         }
         result = scope.database.patient.review_marks.post_review_mark(
             collection=patient_collection,
