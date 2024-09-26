@@ -363,6 +363,25 @@ def put_patient_identity(
     )
 
 
+def get_patient_collections(
+    *,
+    database: pymongo.database.Database,
+) -> List[pymongo.collection.Collection]:
+    """
+    Retrieve all patient collections.
+    """
+
+    patient_identity_documents = get_patient_identities(database=database)
+
+    patient_collections = []
+    for patient_identity_document in patient_identity_documents:
+        patient_collections.append(
+            database.get_collection(patient_identity_document["collection"])
+        )
+
+    return patient_collections
+
+
 def get_patient_identities(
     *,
     database: pymongo.database.Database,
