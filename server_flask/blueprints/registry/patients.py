@@ -34,6 +34,7 @@ def _construct_patient_document(
     *,
     patient_identity: dict,
     patient_collection: pymongo.collection.Collection,
+    include_complete_details: bool = True,
 ) -> dict:
     patient_document = {}
 
@@ -41,6 +42,29 @@ def _construct_patient_document(
 
     # Identity
     patient_document["identity"] = copy.deepcopy(patient_identity)
+
+    if not include_complete_details:
+        # Get multiple document types simultaneously
+        documents_by_type = scope.database.collection_utils.get_multiple_types(
+            collection=patient_collection,
+            singleton_types=[
+                scope.database.patient.clinical_history.DOCUMENT_TYPE,
+                scope.database.patient.patient_profile.DOCUMENT_TYPE,
+            ],
+            set_types=[],  # No set types
+        )
+
+        # Clinical History
+        patient_document["clinicalHistory"] = documents_by_type[
+            scope.database.patient.clinical_history.DOCUMENT_TYPE
+        ]
+
+        # Profile
+        patient_document["profile"] = documents_by_type[
+            scope.database.patient.patient_profile.DOCUMENT_TYPE
+        ]
+
+        return patient_document
 
     # Get multiple document types simultaneously
     documents_by_type = scope.database.collection_utils.get_multiple_types(
@@ -177,6 +201,7 @@ def get_patients():
             _construct_patient_document(
                 patient_identity=patient_identity_current,
                 patient_collection=patient_collection,
+                include_complete_details=False,
             )
         )
 
@@ -208,6 +233,7 @@ def get_patient(patient_id):
     patient_document = _construct_patient_document(
         patient_identity=patient_identity,
         patient_collection=patient_collection,
+        include_complete_details=True,
     )
 
     return {
