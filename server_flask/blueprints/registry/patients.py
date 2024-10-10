@@ -48,16 +48,10 @@ def _construct_patient_document(
         documents_by_type = scope.database.collection_utils.get_multiple_types(
             collection=patient_collection,
             singleton_types=[
-                scope.database.patient.clinical_history.DOCUMENT_TYPE,
                 scope.database.patient.patient_profile.DOCUMENT_TYPE,
             ],
             set_types=[],  # No set types
         )
-
-        # Clinical History
-        patient_document["clinicalHistory"] = documents_by_type[
-            scope.database.patient.clinical_history.DOCUMENT_TYPE
-        ]
 
         # Profile
         patient_document["profile"] = documents_by_type[
