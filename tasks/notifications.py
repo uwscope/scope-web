@@ -15,7 +15,6 @@ DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 # Build task collection
 ns = Collection("notifications")
 
-
 if Path(DATABASE_DEV_CONFIG_PATH).exists():
     ns_dev = Collection("dev")
     ns_dev.add_task(

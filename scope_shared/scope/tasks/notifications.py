@@ -1,8 +1,10 @@
-import contextlib
-from pathlib import Path
-from typing import Union
 import aws_infrastructure.tasks.ssh
+import contextlib
 from invoke import task
+import json
+from pathlib import Path
+import pymongo
+from typing import Union
 
 import scope.config
 import scope.database.initialize
@@ -13,6 +15,23 @@ import scope.documentdb.client
 import scope.populate
 import scope.schema
 import scope.schema_utils
+
+
+def _patient_email_notification(
+    *, patient_identity: dict, patient_collection: pymongo.collection.Collection
+):
+    # Determine whether the patient Cognito account has been disabled.
+    # If disabled, return without sending anything.
+
+    # Identify document contains the cognitoAccount
+    print(json.dumps(patient_identity, indent=2))
+
+    # Profile contains other information
+    patient_profile = scope.database.patient.get_patient_profile(
+        collection=patient_collection
+    )
+
+    print(json.dumps(patient_profile, indent=2))
 
 
 def task_email(
@@ -47,15 +66,17 @@ def task_email(
                 password=database_config.password,
             )
 
-            patient_collections = scope.database.patients.get_patient_collections(
-                database=database
-            )
-
-            for patient_collection in patient_collections:
-                patient_profile = scope.database.patient.get_patient_profile(
-                    collection=patient_collection
+            # Iterate over every patient
+            patients = scope.database.patients.get_patient_identities(database=database)
+            for patient_identity_current in patients:
+                patient_collection_current = database.get_collection(
+                    patient_identity_current["collection"]
                 )
-                print(patient_profile.get("name"))
+
+                _patient_email_notification(
+                    patient_identity=patient_identity_current,
+                    patient_collection=patient_collection_current,
+                )
 
     email_notifications.__doc__ = email_notifications.__doc__.format(
         database_config.name
