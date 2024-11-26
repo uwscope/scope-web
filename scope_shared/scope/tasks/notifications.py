@@ -20,6 +20,11 @@ import scope.schema_utils
 
 
 def _is_cognito_account_disabled(*, cognito_id: str) -> bool:
+    # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
+    # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
+    boto_session = boto3.Session()
+    boto_userpool = boto_session.client("cognito-idp")
+
     # def _reset_cognito_password(
     #     *,
     #     database: pymongo.database.Database,
@@ -47,6 +52,34 @@ def _is_cognito_account_disabled(*, cognito_id: str) -> bool:
     return random.choice([True, False])
 
 
+def _email_test():
+    # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
+    # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
+    boto_session = boto3.Session()
+    boto_ses = boto_session.client("ses")
+
+    response = boto_ses.send_email(
+        Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+        Destination={
+            "ToAddresses": ["<email@email.org>"],
+            "CcAddresses": ["<email@email.org>"],
+        },
+        ReplyToAddresses=["do-not-reply@uwscope.org"],
+        Message={
+            "Subject": {
+                "Data": "It's an email.",
+                "Charset": "UTF-8",
+            },
+            "Body": {
+                "Text": {
+                    "Data": "It's an email.",
+                    "Charset": "UTF-8",
+                }
+            },
+        },
+    )
+
+
 def _patient_email_notification(
     *,
     patient_identity: dict,
@@ -69,10 +102,10 @@ def _patient_email_notification(
     ):
         return ("Cognito Account Disabled", patient_identity_summary)
 
-    # Identify document contains the cognitoAccount
-    print(json.dumps(patient_identity, indent=2))
-
-    print(json.dumps(patient_profile, indent=2))
+    # # Identify document contains the cognitoAccount
+    # print(json.dumps(patient_identity, indent=2))
+    #
+    # print(json.dumps(patient_profile, indent=2))
 
     return ("Reached End of Function", patient_identity_summary)
 
@@ -129,6 +162,8 @@ def task_email(
                 results_combined[result_current[0]] = results_existing
 
         print(json.dumps(results_combined, indent=2))
+
+        print(_email_test())
 
     email_notifications.__doc__ = email_notifications.__doc__.format(
         database_config.name
