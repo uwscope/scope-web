@@ -6,7 +6,9 @@ import json
 from pathlib import Path
 import pymongo
 import random
-from typing import Union
+import re
+import ruamel.yaml
+from typing import List, Union
 
 import scope.config
 import scope.database.initialize
@@ -19,7 +21,26 @@ import scope.schema
 import scope.schema_utils
 
 
-def _is_cognito_account_disabled(*, cognito_id: str) -> bool:
+def _filter_blocklist(
+    *,
+    blocklist_email_reminder: List[str],
+    patient_id: str,
+    patient_name: str,
+    patient_email: str,
+) -> bool:
+    # A blocklist item can target any of patient_id, patient_name, or patient_email.
+    for block_current in blocklist_email_reminder:
+        if re.fullmatch(block_current, patient_id):
+            return True
+        if re.fullmatch(block_current, patient_name):
+            return True
+        if re.fullmatch(block_current, patient_email):
+            return True
+
+    return False
+
+
+def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
     boto_session = boto3.Session()
@@ -52,7 +73,67 @@ def _is_cognito_account_disabled(*, cognito_id: str) -> bool:
     return random.choice([True, False])
 
 
-def _email_test():
+def _patient_email_notification(
+    *,
+    patient_identity: dict,
+    patient_collection: pymongo.collection.Collection,
+    blocklist_email_reminder: List[str],
+    template_email_body_reminder: str,
+    template_email_body_reminder_testing_header: str,
+):
+    # Profile contains other information.
+    patient_profile = scope.database.patient.get_patient_profile(
+        collection=patient_collection
+    )
+
+    # Key properties of each patient.
+    patient_id = patient_identity["patientId"]
+    patient_name = patient_profile["name"]
+    patient_email = patient_identity["cognitoAccount"]["email"]
+
+    # Use a summary string for patient output.
+    patient_summary = "{} : {} : {}".format(
+        patient_id,
+        patient_name,
+        patient_email,
+    )
+
+    # Filter if the patient appears in a block list.
+    if _filter_blocklist(
+        blocklist_email_reminder=blocklist_email_reminder,
+        patient_id=patient_id,
+        patient_name=patient_name,
+        patient_email=patient_email,
+    ):
+        return {
+            "patient_summary": patient_summary,
+            "result": "Blocklist Matched",
+        }
+
+    # Filter if the patient Cognito account has been disabled.
+    if _filter_cognito_account_disabled(
+        cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
+    ):
+        return {
+            "patient_summary": patient_summary,
+            "result": "Cognito Account Disabled",
+        }
+
+    # Apply an email transformation for testing mode.
+    # Specify an email address here during texting.
+    destination_email = None
+    assert destination_email is not None
+    email_body_testing_header = template_email_body_reminder_testing_header.format(
+        patient_email=patient_email,
+        destination_email=destination_email,
+    )
+
+    # Format an email.
+    email_body = template_email_body_reminder.format(
+        email_body_testing_header=email_body_testing_header,
+        patient_email=patient_email,
+    )
+
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
     boto_session = boto3.Session()
@@ -61,8 +142,8 @@ def _email_test():
     response = boto_ses.send_email(
         Source="SCOPE Reminders <do-not-reply@uwscope.org>",
         Destination={
-            "ToAddresses": ["<email@email.org>"],
-            "CcAddresses": ["<email@email.org>"],
+            "ToAddresses": [destination_email],
+            # "CcAddresses": ["<email@email.org>"],
         },
         ReplyToAddresses=["do-not-reply@uwscope.org"],
         Message={
@@ -71,43 +152,20 @@ def _email_test():
                 "Charset": "UTF-8",
             },
             "Body": {
-                "Text": {
-                    "Data": "It's an email.",
+                "Html": {
+                    "Data": email_body,
                     "Charset": "UTF-8",
                 }
             },
         },
     )
 
+    print(response)
 
-def _patient_email_notification(
-    *,
-    patient_identity: dict,
-    patient_collection: pymongo.collection.Collection,
-):
-    # Profile contains other information
-    patient_profile = scope.database.patient.get_patient_profile(
-        collection=patient_collection
-    )
-
-    # Use a summary string for patient output
-    patient_identity_summary = "{} - {}".format(
-        patient_identity["patientId"],
-        patient_profile["name"],
-    )
-
-    # Determine whether the patient Cognito account has been disabled.
-    if _is_cognito_account_disabled(
-        cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
-    ):
-        return ("Cognito Account Disabled", patient_identity_summary)
-
-    # # Identify document contains the cognitoAccount
-    # print(json.dumps(patient_identity, indent=2))
-    #
-    # print(json.dumps(patient_profile, indent=2))
-
-    return ("Reached End of Function", patient_identity_summary)
+    return {
+        "patient_summary": patient_summary,
+        "result": "Reached End of Function",
+    }
 
 
 def task_email(
@@ -115,12 +173,25 @@ def task_email(
     instance_ssh_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
+    blocklist_email_reminder_path: Union[Path, str],
+    template_email_body_reminder_path: Union[Path, str],
+    template_email_body_reminder_testing_header_path: Union[Path, str],
 ):
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
         instance_ssh_config_path
     )
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
+    blocklist_email_reminder = None
+    with open(blocklist_email_reminder_path) as config_file:
+        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        blocklist_email_reminder = yaml.load(config_file)
+    template_email_body_reminder = None
+    with open(template_email_body_reminder_path, "r") as file_template:
+        template_email_body_reminder = file_template.read()
+    template_email_body_reminder_testing_header = None
+    with open(template_email_body_reminder_testing_header_path, "r") as file_template:
+        template_email_body_reminder_testing_header = file_template.read()
 
     @task
     def email_notifications(context):
@@ -155,15 +226,17 @@ def task_email(
                 result_current = _patient_email_notification(
                     patient_identity=patient_identity_current,
                     patient_collection=patient_collection_current,
+                    blocklist_email_reminder=blocklist_email_reminder,
+                    template_email_body_reminder=template_email_body_reminder,
+                    template_email_body_reminder_testing_header=template_email_body_reminder_testing_header,
                 )
 
-                results_existing = results_combined.get(result_current[0], [])
-                results_existing.append(result_current[1])
-                results_combined[result_current[0]] = results_existing
+                # Aggregrate results for output.
+                results_existing = results_combined.get(result_current["result"], [])
+                results_existing.append(result_current["patient_summary"])
+                results_combined[result_current["result"]] = results_existing
 
         print(json.dumps(results_combined, indent=2))
-
-        print(_email_test())
 
     email_notifications.__doc__ = email_notifications.__doc__.format(
         database_config.name
