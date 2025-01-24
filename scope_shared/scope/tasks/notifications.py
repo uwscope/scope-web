@@ -15,6 +15,7 @@ import scope.database.initialize
 import scope.database.patient
 import scope.database.patients
 import scope.documentdb.client
+import scope.documents.document_set
 
 import scope.populate
 import scope.schema
@@ -76,16 +77,13 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
 def _patient_email_notification(
     *,
     patient_identity: dict,
+    patient_profile: dict,
     patient_collection: pymongo.collection.Collection,
     blocklist_email_reminder: List[str],
+    url_base: str,
     template_email_body_reminder: str,
     template_email_body_reminder_testing_header: str,
 ):
-    # Profile contains other information.
-    patient_profile = scope.database.patient.get_patient_profile(
-        collection=patient_collection
-    )
-
     # Key properties of each patient.
     patient_id = patient_identity["patientId"]
     patient_name = patient_profile["name"]
@@ -120,12 +118,17 @@ def _patient_email_notification(
         }
 
     # Apply an email transformation for testing mode.
-    # Specify an email address here during texting.
+    # Specify an email address here during testing.
     destination_email = None
     assert destination_email is not None
     email_body_testing_header = template_email_body_reminder_testing_header.format(
         patient_email=patient_email,
         destination_email=destination_email,
+    )
+
+    # Obtain all documents related to this patient.
+    patient_document_set = scope.documents.document_set.DocumentSet(
+        documents=patient_collection.find()
     )
 
     # Format an email.
@@ -199,10 +202,23 @@ def task_email(
         Email patient notifications in {} database.
         """
 
-        # Store state about results
+        # Determine a URL base for any links included in emails.
+        url_base = None
+        if database_config.name == "dev":
+            url_base = "https://app.dev.uwscope.org/"
+        elif database_config.name == "demo":
+            url_base = "https://app.demo.uwscope.org/"
+        elif database_config.name == "multicare":
+            url_base = "https://app.multicare.uwscope.org/"
+        elif database_config.name == "scca":
+            url_base = "https://app.fredhutch.uwscope.org/"
+        else:
+            raise ValueError("Unknown database: {}".format(database_config.name))
+
+        # Store state about results.
         results_combined = {}
 
-        # Obtain a database client
+        # Obtain a database client.
         with contextlib.ExitStack() as context_manager:
             database = scope.documentdb.client.documentdb_client_database(
                 context_manager=context_manager,
@@ -216,17 +232,22 @@ def task_email(
                 password=database_config.password,
             )
 
-            # Iterate over every patient
+            # Iterate over every patient.
             patients = scope.database.patients.get_patient_identities(database=database)
             for patient_identity_current in patients:
-                patient_collection_current = database.get_collection(
+                # Obtain needed documents for this patient.
+                patient_collection = database.get_collection(
                     patient_identity_current["collection"]
                 )
-
+                patient_profile = scope.database.patient.get_patient_profile(
+                    collection=patient_collection
+                )
                 result_current = _patient_email_notification(
                     patient_identity=patient_identity_current,
-                    patient_collection=patient_collection_current,
+                    patient_profile=patient_profile,
+                    patient_collection=patient_collection,
                     blocklist_email_reminder=blocklist_email_reminder,
+                    url_base=url_base,
                     template_email_body_reminder=template_email_body_reminder,
                     template_email_body_reminder_testing_header=template_email_body_reminder_testing_header,
                 )
