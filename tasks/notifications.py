@@ -11,11 +11,10 @@ import scope.tasks.notifications
 INSTANCE_SSH_CONFIG_PATH = "./secrets/configuration/instance_ssh.yaml"
 DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
-ALLOWLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/allowlist_email_reminder.yaml"
-DENYLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/denylist_email_reminder.yaml"
-TEMPLATE_EMAIL_BODY_REMINDER_PATH = "./templates/email_body_reminder.html"
+BLOCKLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/blocklist_email_reminder.yaml"
+TEMPLATE_EMAIL_BODY_REMINDER_PATH = "./templates/email_reminder_body.html"
 TEMPLATE_EMAIL_BODY_REMINDER_TESTING_HEADER_PATH = (
-    "./templates/email_body_reminder_testing_header.html"
+    "./templates/testing_email_reminder_body_header.html"
 )
 
 # Build task collection
