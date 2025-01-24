@@ -8,7 +8,7 @@ import pymongo
 import random
 import re
 import ruamel.yaml
-from typing import List, Union
+from typing import List, Optional, Union
 
 import scope.config
 import scope.database.initialize
@@ -61,6 +61,12 @@ def _filter_denylist(
 
 
 def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
+    """
+    Check whether a cognito account is disabled.
+    :param cognito_id:
+    :return: true if disabled, false otherwise.
+    """
+
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
     boto_session = boto3.Session()
@@ -101,8 +107,9 @@ def _patient_email_notification(
     allowlist_email_reminder: List[str],
     denylist_email_reminder: List[str],
     url_base: str,
-    template_email_body_reminder: str,
-    template_email_body_reminder_testing_header: str,
+    template_email_reminder_body: str,
+    testing_destination_email: Optional[str],
+    template_testing_email_reminder_body_header: str,
 ):
     # Key properties of each patient.
     patient_id = patient_identity["patientId"]
@@ -115,6 +122,26 @@ def _patient_email_notification(
         patient_name,
         patient_email,
     )
+
+    # Differentiate destination email from the patient email.
+    # These will be the same in production,
+    # but are differentiated in testing.
+    destination_email = patient_email
+
+    # Apply transformations for testing mode.
+    if testing_destination_email:
+        # Because we are testing, email will instead go to the testing destination.
+        destination_email = testing_destination_email
+        # Because we are testing, populate the testing header.
+        template_testing_email_reminder_body_header = (
+            template_testing_email_reminder_body_header.format(
+                destination_email=destination_email,
+                patient_email=patient_email,
+            )
+        )
+    else:
+        # Because we are not testing, do not apply the testing header in the email body template.
+        template_testing_email_reminder_body_header = ""
 
     # Filter if the patient appears in a deny list.
     if _filter_denylist(
@@ -149,23 +176,14 @@ def _patient_email_notification(
             "result": "Cognito Account Disabled",
         }
 
-    # Apply an email transformation for testing mode.
-    # Specify an email address here during testing.
-    destination_email = None
-    # assert destination_email is not None
-    email_body_testing_header = template_email_body_reminder_testing_header.format(
-        patient_email=patient_email,
-        destination_email=destination_email,
-    )
-
     # Obtain all documents related to this patient.
     patient_document_set = scope.documents.document_set.DocumentSet(
         documents=patient_collection.find()
     )
 
     # Format an email.
-    email_body = template_email_body_reminder.format(
-        email_body_testing_header=email_body_testing_header,
+    email_body = template_email_reminder_body.format(
+        testing_email_reminder_body_header=template_testing_email_reminder_body_header,
         patient_email=patient_email,
     )
 
@@ -174,26 +192,28 @@ def _patient_email_notification(
     # boto_session = boto3.Session()
     # boto_ses = boto_session.client("ses")
 
-    # response = boto_ses.send_email(
-    #     Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-    #     Destination={
-    #         "ToAddresses": [destination_email],
-    #         # "CcAddresses": ["<email@email.org>"],
-    #     },
-    #     ReplyToAddresses=["do-not-reply@uwscope.org"],
-    #     Message={
-    #         "Subject": {
-    #             "Data": "It's an email.",
-    #             "Charset": "UTF-8",
-    #         },
-    #         "Body": {
-    #             "Html": {
-    #                 "Data": email_body,
-    #                 "Charset": "UTF-8",
-    #             }
-    #         },
-    #     },
-    # )
+    # This assertion can be removed when we have an allow list.
+    assert destination_email == "ourself"
+    response = boto_ses.send_email(
+        Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+        Destination={
+            "ToAddresses": [destination_email],
+            # "CcAddresses": ["<email@email.org>"],
+        },
+        ReplyToAddresses=["do-not-reply@uwscope.org"],
+        Message={
+            "Subject": {
+                "Data": "It's an email.",
+                "Charset": "UTF-8",
+            },
+            "Body": {
+                "Html": {
+                    "Data": email_body,
+                    "Charset": "UTF-8",
+                }
+            },
+        },
+    )
 
     # print(response)
 
@@ -229,10 +249,12 @@ def task_email(
     template_email_body_reminder = None
     with open(template_email_body_reminder_path, "r") as file_template:
         template_email_body_reminder = file_template.read()
-    template_email_body_reminder_testing_header = None
+    template_testing_email_body_reminder_header = None
     with open(template_email_body_reminder_testing_header_path, "r") as file_template:
-        template_email_body_reminder_testing_header = file_template.read()
+        template_testing_email_body_reminder_header = file_template.read()
 
+    @task(optional=["production", "testing_destination_email"])
+    def email_notifications(context, production=False, testing_destination_email=None):
     print(allowlist_email_reminder)
     print(denylist_email_reminder)
 
@@ -241,6 +263,16 @@ def task_email(
         """
         Email patient notifications in {} database.
         """
+
+        # Parameters must either:
+        # - Explicitly indicate this is a production execution.
+        # - Provide a testing_email address to which email will be sent.
+        if production:
+            if testing_destination_email:
+                raise ValueError("-production does not allow -testing-email")
+        else:
+            if not testing_destination_email:
+                raise ValueError("Provide either -production or -testing-email")
 
         # Determine a URL base for any links included in emails.
         url_base = None
@@ -289,8 +321,9 @@ def task_email(
                     allowlist_email_reminder=allowlist_email_reminder,
                     denylist_email_reminder=denylist_email_reminder,
                     url_base=url_base,
-                    template_email_body_reminder=template_email_body_reminder,
-                    template_email_body_reminder_testing_header=template_email_body_reminder_testing_header,
+                    template_email_reminder_body=template_email_body_reminder,
+                    testing_destination_email=testing_destination_email,
+                    template_testing_email_reminder_body_header=template_testing_email_body_reminder_header,
                 )
 
                 # Aggregrate results for output.
