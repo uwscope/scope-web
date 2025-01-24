@@ -22,15 +22,34 @@ import scope.schema
 import scope.schema_utils
 
 
-def _filter_blocklist(
+def _filter_allowlist(
     *,
-    blocklist_email_reminder: List[str],
+    allowlist_email_reminder: List[str],
+    patient_id: str,
+    patient_name: str,
+    patient_email: str,
+) -> bool:
+    # An allowlist item can target any of patient_id, patient_name, or patient_email.
+    for allow_current in allowlist_email_reminder:
+        if re.fullmatch(allow_current, patient_id):
+            return True
+        if re.fullmatch(allow_current, patient_name):
+            return True
+        if re.fullmatch(allow_current, patient_email):
+            return True
+
+    return False
+
+
+def _filter_denylist(
+    *,
+    denylist_email_reminder: List[str],
     patient_id: str,
     patient_name: str,
     patient_email: str,
 ) -> bool:
     # A blocklist item can target any of patient_id, patient_name, or patient_email.
-    for block_current in blocklist_email_reminder:
+    for block_current in denylist_email_reminder:
         if re.fullmatch(block_current, patient_id):
             return True
         if re.fullmatch(block_current, patient_name):
@@ -70,7 +89,7 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     #
     #     # Put the temporary password in the config
     #     account_config["temporaryPassword"] = reset_temporary_password
-
+    return False
     return random.choice([True, False])
 
 
@@ -79,7 +98,8 @@ def _patient_email_notification(
     patient_identity: dict,
     patient_profile: dict,
     patient_collection: pymongo.collection.Collection,
-    blocklist_email_reminder: List[str],
+    allowlist_email_reminder: List[str],
+    denylist_email_reminder: List[str],
     url_base: str,
     template_email_body_reminder: str,
     template_email_body_reminder_testing_header: str,
@@ -96,16 +116,28 @@ def _patient_email_notification(
         patient_email,
     )
 
-    # Filter if the patient appears in a block list.
-    if _filter_blocklist(
-        blocklist_email_reminder=blocklist_email_reminder,
+    # Filter if the patient appears in a deny list.
+    if _filter_denylist(
+        denylist_email_reminder=denylist_email_reminder,
         patient_id=patient_id,
         patient_name=patient_name,
         patient_email=patient_email,
     ):
         return {
             "patient_summary": patient_summary,
-            "result": "Blocklist Matched",
+            "result": "Denylist Matched",
+        }
+
+    # Ensure the patient appears in an allow list.
+    if not _filter_allowlist(
+        allowlist_email_reminder=allowlist_email_reminder,
+        patient_id=patient_id,
+        patient_name=patient_name,
+        patient_email=patient_email,
+    ):
+        return {
+            "patient_summary": patient_summary,
+            "result": "Allowlist Not Matched",
         }
 
     # Filter if the patient Cognito account has been disabled.
@@ -120,7 +152,7 @@ def _patient_email_notification(
     # Apply an email transformation for testing mode.
     # Specify an email address here during testing.
     destination_email = None
-    assert destination_email is not None
+    # assert destination_email is not None
     email_body_testing_header = template_email_body_reminder_testing_header.format(
         patient_email=patient_email,
         destination_email=destination_email,
@@ -139,31 +171,31 @@ def _patient_email_notification(
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
-    boto_session = boto3.Session()
-    boto_ses = boto_session.client("ses")
+    # boto_session = boto3.Session()
+    # boto_ses = boto_session.client("ses")
 
-    response = boto_ses.send_email(
-        Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-        Destination={
-            "ToAddresses": [destination_email],
-            # "CcAddresses": ["<email@email.org>"],
-        },
-        ReplyToAddresses=["do-not-reply@uwscope.org"],
-        Message={
-            "Subject": {
-                "Data": "It's an email.",
-                "Charset": "UTF-8",
-            },
-            "Body": {
-                "Html": {
-                    "Data": email_body,
-                    "Charset": "UTF-8",
-                }
-            },
-        },
-    )
+    # response = boto_ses.send_email(
+    #     Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+    #     Destination={
+    #         "ToAddresses": [destination_email],
+    #         # "CcAddresses": ["<email@email.org>"],
+    #     },
+    #     ReplyToAddresses=["do-not-reply@uwscope.org"],
+    #     Message={
+    #         "Subject": {
+    #             "Data": "It's an email.",
+    #             "Charset": "UTF-8",
+    #         },
+    #         "Body": {
+    #             "Html": {
+    #                 "Data": email_body,
+    #                 "Charset": "UTF-8",
+    #             }
+    #         },
+    #     },
+    # )
 
-    print(response)
+    # print(response)
 
     return {
         "patient_summary": patient_summary,
@@ -176,7 +208,8 @@ def task_email(
     instance_ssh_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
-    blocklist_email_reminder_path: Union[Path, str],
+    allowlist_email_reminder_path: Union[Path, str],
+    denylist_email_reminder_path: Union[Path, str],
     template_email_body_reminder_path: Union[Path, str],
     template_email_body_reminder_testing_header_path: Union[Path, str],
 ):
@@ -185,16 +218,23 @@ def task_email(
     )
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
-    blocklist_email_reminder = None
-    with open(blocklist_email_reminder_path) as config_file:
+    allowlist_email_reminder = None
+    denylist_email_reminder = None
+    with open(allowlist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
-        blocklist_email_reminder = yaml.load(config_file)
+        allowlist_email_reminder = yaml.load(config_file)
+    with open(denylist_email_reminder_path, encoding="UTF-8") as config_file:
+        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        denylist_email_reminder = yaml.load(config_file)
     template_email_body_reminder = None
     with open(template_email_body_reminder_path, "r") as file_template:
         template_email_body_reminder = file_template.read()
     template_email_body_reminder_testing_header = None
     with open(template_email_body_reminder_testing_header_path, "r") as file_template:
         template_email_body_reminder_testing_header = file_template.read()
+
+    print(allowlist_email_reminder)
+    print(denylist_email_reminder)
 
     @task
     def email_notifications(context):
@@ -246,7 +286,8 @@ def task_email(
                     patient_identity=patient_identity_current,
                     patient_profile=patient_profile,
                     patient_collection=patient_collection,
-                    blocklist_email_reminder=blocklist_email_reminder,
+                    allowlist_email_reminder=allowlist_email_reminder,
+                    denylist_email_reminder=denylist_email_reminder,
                     url_base=url_base,
                     template_email_body_reminder=template_email_body_reminder,
                     template_email_body_reminder_testing_header=template_email_body_reminder_testing_header,
