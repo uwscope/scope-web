@@ -96,7 +96,6 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     #     # Put the temporary password in the config
     #     account_config["temporaryPassword"] = reset_temporary_password
     return False
-    return random.choice([True, False])
 
 
 def _patient_email_notification(
@@ -181,27 +180,27 @@ def _patient_email_notification(
     # boto_ses = boto_session.client("ses")
 
     # This assertion can be removed when we have an allow list.
-    assert destination_email == "ourself"
-    response = boto_ses.send_email(
-        Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-        Destination={
-            "ToAddresses": [destination_email],
-            # "CcAddresses": ["<email@email.org>"],
-        },
-        ReplyToAddresses=["do-not-reply@uwscope.org"],
-        Message={
-            "Subject": {
-                "Data": "It's an email.",
-                "Charset": "UTF-8",
-            },
-            "Body": {
-                "Html": {
-                    "Data": email_body,
-                    "Charset": "UTF-8",
-                }
-            },
-        },
-    )
+    # assert destination_email == "ourself"
+    # response = boto_ses.send_email(
+    #     Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+    #     Destination={
+    #         "ToAddresses": [destination_email],
+    #         # "CcAddresses": ["<email@email.org>"],
+    #     },
+    #     ReplyToAddresses=["do-not-reply@uwscope.org"],
+    #     Message={
+    #         "Subject": {
+    #             "Data": "It's an email.",
+    #             "Charset": "UTF-8",
+    #         },
+    #         "Body": {
+    #             "Html": {
+    #                 "Data": email_body,
+    #                 "Charset": "UTF-8",
+    #             }
+    #         },
+    #     },
+    # )
 
     # print(response)
 
@@ -290,6 +289,7 @@ def task_email(
             # Iterate over every patient.
             patients = scope.database.patients.get_patient_identities(database=database)
             for patient_identity_current in patients:
+
                 # Obtain needed documents for this patient.
                 patient_collection = database.get_collection(
                     patient_identity_current["collection"]
