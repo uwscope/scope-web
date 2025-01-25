@@ -26,6 +26,22 @@ import scope.schema
 import scope.schema_utils
 
 
+class ScopeInstanceId(Enum):
+    """
+    Based on the string we exect in the database configuration.
+    """
+
+    DEV = "dev"
+    DEMO = "demo"
+    FREDHUTCH = "scca"
+    MULTICARE = "multicare"
+
+
+@dataclass(frozen=True)
+class EmailContentData:
+    link_app: str
+
+
 class EmailProcessStatus(Enum):
     IN_PROGRESS = 0
 
@@ -45,6 +61,8 @@ class EmailProcessData:
     patient_email: str
     cognito_id: str
 
+    content_data: Optional[EmailContentData]
+
     status: EmailProcessStatus
 
     @property
@@ -57,8 +75,25 @@ class EmailProcessData:
         )
 
     @classmethod
+    def from_content_data(
+        cls,
+        *,
+        current: EmailProcessData,
+        content_data: EmailContentData,
+    ):
+        return EmailProcessData(
+            patient_id=current.patient_id,
+            patient_name=current.patient_name,
+            patient_email=current.patient_email,
+            cognito_id=current.cognito_id,
+            content_data=content_data,
+            status=current.status,
+        )
+
+    @classmethod
     def from_patient_data(
         cls,
+        *,
         patient_id: str,
         patient_name: str,
         patient_email: str,
@@ -69,12 +104,14 @@ class EmailProcessData:
             patient_name=patient_name,
             patient_email=patient_email,
             cognito_id=cognito_id,
+            content_data=None,
             status=EmailProcessStatus.IN_PROGRESS,
         )
 
     @classmethod
     def from_status(
         cls,
+        *,
         current: EmailProcessData,
         status: EmailProcessStatus,
     ):
@@ -83,8 +120,25 @@ class EmailProcessData:
             patient_name=current.patient_name,
             patient_email=current.patient_email,
             cognito_id=current.cognito_id,
+            content_data=current.content_data,
             status=status,
         )
+
+
+def _content_link_app(
+    *,
+    scope_instance_id: ScopeInstanceId,
+) -> str:
+    if scope_instance_id == ScopeInstanceId.DEV:
+        return "https://app.dev.uwscope.org/"
+    elif scope_instance_id == ScopeInstanceId.DEMO:
+        return "https://app.demo.uwscope.org/"
+    elif scope_instance_id == ScopeInstanceId.FREDHUTCH:
+        return "https://app.fredhutch.uwscope.org/"
+    elif scope_instance_id == ScopeInstanceId.MULTICARE:
+        return "https://app.multicare.uwscope.org/"
+    else:
+        raise ValueError("Unknown SCOPE Instance: {}".format(scope_instance_id))
 
 
 def _filter_allowlist(
@@ -159,7 +213,23 @@ def _filter_denylist(
     return True
 
 
-def _apply_filter_email_process_data(
+def _patient_calculate_email_content_data(
+    *,
+    email_process_data: EmailProcessData,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+    scope_instance_id: ScopeInstanceId,
+) -> EmailProcessData:
+    return EmailProcessData.from_content_data(
+        current=email_process_data,
+        content_data=EmailContentData(
+            link_app=_content_link_app(
+                scope_instance_id=scope_instance_id,
+            ),
+        ),
+    )
+
+
+def _patient_filter_email_process_data(
     *,
     email_process_data: EmailProcessData,
     denylist_email_reminder: List[str],
@@ -194,17 +264,26 @@ def _patient_email_reminder(
     *,
     email_process_data: EmailProcessData,
     patient_document_set: scope.documents.document_set.DocumentSet,
+    scope_instance_id: ScopeInstanceId,
     allowlist_email_reminder: List[str],
     denylist_email_reminder: List[str],
-    url_base: str,
     template_email_reminder_body: str,
     testing_destination_email: Optional[str],
     template_testing_email_reminder_body_header: str,
 ) -> EmailProcessData:
     # Filter whether this patient receives an email.
-    email_process_data = _apply_filter_email_process_data(
+    email_process_data = _patient_filter_email_process_data(
         email_process_data=email_process_data,
         denylist_email_reminder=denylist_email_reminder,
+    )
+    if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
+        return email_process_data
+
+    # Calculate values needed for an email.
+    email_process_data = _patient_calculate_email_content_data(
+        email_process_data=email_process_data,
+        patient_document_set=patient_document_set,
+        scope_instance_id=scope_instance_id,
     )
     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
         return email_process_data
@@ -237,8 +316,6 @@ def _patient_email_reminder(
             current=email_process_data,
             status=EmailProcessStatus.STOPPED_FAILED_ALLOW_LIST,
         )
-
-    # Calculate values needed for an email.
 
     # Format an email.
     email_body = template_email_reminder_body.format(
@@ -327,17 +404,7 @@ def task_email(
                 raise ValueError("Provide either -production or -testing-email")
 
         # Determine a URL base for any links included in emails.
-        url_base = None
-        if database_config.name == "dev":
-            url_base = "https://app.dev.uwscope.org/"
-        elif database_config.name == "demo":
-            url_base = "https://app.demo.uwscope.org/"
-        elif database_config.name == "multicare":
-            url_base = "https://app.multicare.uwscope.org/"
-        elif database_config.name == "scca":
-            url_base = "https://app.fredhutch.uwscope.org/"
-        else:
-            raise ValueError("Unknown database: {}".format(database_config.name))
+        scope_instance_id = ScopeInstanceId(database_config.name)
 
         # Store state about results.
         email_process_data_results: List[EmailProcessData] = []
@@ -381,9 +448,9 @@ def task_email(
                     patient_document_set=scope.documents.document_set.DocumentSet(
                         documents=patient_collection.find()
                     ),
+                    scope_instance_id=scope_instance_id,
                     allowlist_email_reminder=allowlist_email_reminder,
                     denylist_email_reminder=denylist_email_reminder,
-                    url_base=url_base,
                     template_email_reminder_body=template_email_body_reminder,
                     testing_destination_email=testing_destination_email,
                     template_testing_email_reminder_body_header=template_testing_email_body_reminder_header,
