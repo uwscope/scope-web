@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aws_infrastructure.tasks.ssh
 import boto3
 import contextlib
@@ -24,10 +26,15 @@ import scope.schema
 import scope.schema_utils
 
 
-class PatientEmailResult(Enum):
+class PatientEmailStatus(Enum):
     IN_PROGRESS = 0
+
     STOPPED_MATCHED_DENY_LIST = 1
     STOPPED_COGNITO_ACCOUNT_DISABLED = 2
+    STOPPED_FAILED_ALLOW_LIST = 3
+
+    REACHED_END_OF_FUNCTION = 10
+
     EMAIL_SUCCESS = 12
 
 
@@ -37,9 +44,16 @@ class PatientEmailData:
     patient_name: str
     patient_email: str
 
-    patient_summary: str
+    status: PatientEmailStatus
 
-    result: PatientEmailResult
+    @property
+    def patient_summary(self):
+        # Use a summary string for patient output.
+        return "{} : {} : {}".format(
+            self.patient_id,
+            self.patient_name,
+            self.patient_email,
+        )
 
     @classmethod
     def from_patient_data(
@@ -48,19 +62,24 @@ class PatientEmailData:
         patient_name: str,
         patient_email: str,
     ):
-        # Use a summary string for patient output.
-        patient_summary = "{} : {} : {}".format(
-            patient_id,
-            patient_name,
-            patient_email,
-        )
-
         return PatientEmailData(
             patient_id=patient_id,
             patient_name=patient_name,
             patient_email=patient_email,
-            patient_summary=patient_summary,
-            result=PatientEmailResult.IN_PROGRESS
+            status=PatientEmailStatus.IN_PROGRESS,
+        )
+
+    @classmethod
+    def from_status(
+        cls,
+        current: PatientEmailData,
+        status: PatientEmailStatus,
+    ):
+        return PatientEmailData(
+            patient_id=current.patient_id,
+            patient_name=current.patient_name,
+            patient_email=current.patient_email,
+            status=status,
         )
 
 
@@ -80,18 +99,16 @@ def _filter_allowlist(
 def _filter_denylist(
     *,
     denylist_email_reminder: List[str],
-    patient_id: str,
-    patient_name: str,
-    patient_email: str,
+    patient_email_data: PatientEmailData,
 ) -> bool:
     # A patient that matches any element of this list will be denied.
     # Matching is by name, patient_id, or email.
     for block_current in denylist_email_reminder:
-        if re.fullmatch(block_current, patient_id):
+        if re.fullmatch(block_current, patient_email_data.patient_id):
             return False
-        if re.fullmatch(block_current, patient_name):
+        if re.fullmatch(block_current, patient_email_data.patient_name):
             return False
-        if re.fullmatch(block_current, patient_email):
+        if re.fullmatch(block_current, patient_email_data.patient_email):
             return False
 
     return True
@@ -155,9 +172,8 @@ def _patient_email_reminder(
     )
 
     # Differentiate destination email from the patient email.
-    # These will be the same in production,
-    # but are differentiated in testing.
-    destination_email = patient_email
+    # These will be the same in production, but are differentiated in testing.
+    destination_email = patient_email_data.patient_email
 
     # Apply transformations for testing mode.
     if testing_destination_email:
@@ -167,7 +183,7 @@ def _patient_email_reminder(
         template_testing_email_reminder_body_header = (
             template_testing_email_reminder_body_header.format(
                 destination_email=destination_email,
-                patient_email=patient_email,
+                patient_email=patient_email_data.patient_email,
             )
         )
     else:
@@ -177,17 +193,21 @@ def _patient_email_reminder(
     # Filter if the patient appears in a deny list.
     if not _filter_denylist(
         denylist_email_reminder=denylist_email_reminder,
-        patient_id=patient_id,
-        patient_name=patient_name,
-        patient_email=patient_email,
+        patient_email_data=patient_email_data,
     ):
-        return PatientEmailData(result=PatientEmailResult.STOPPED_MATCHED_DENY_LIST)
+        return PatientEmailData.from_status(
+            current=patient_email_data,
+            status=PatientEmailStatus.STOPPED_MATCHED_DENY_LIST,
+        )
 
     # Filter if the patient Cognito account has been disabled.
     if not _filter_cognito_account_disabled(
         cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
     ):
-        return PatientEmailData(result=PatientEmailResult.STOPPED_COGNITO_ACCOUNT_DISABLED)
+        return PatientEmailData.from_status(
+            current=patient_email_data,
+            status=PatientEmailStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
+        )
 
     # Obtain all documents related to this patient.
     patient_document_set = scope.documents.document_set.DocumentSet(
@@ -197,7 +217,7 @@ def _patient_email_reminder(
     # Format an email.
     email_body = template_email_reminder_body.format(
         testing_email_reminder_body_header=template_testing_email_reminder_body_header,
-        patient_email=patient_email,
+        patient_email=patient_email_data.patient_email,
     )
 
     # Ensure the destination_email appears in an allow list.
@@ -205,10 +225,10 @@ def _patient_email_reminder(
         allowlist_email_reminder=allowlist_email_reminder,
         destination_email=destination_email,
     ):
-        return {
-            "patient_summary": patient_summary,
-            "result": "Allowlist Not Matched",
-        }
+        return PatientEmailData.from_status(
+            current=patient_email_data,
+            status=PatientEmailStatus.STOPPED_FAILED_ALLOW_LIST,
+        )
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
@@ -236,12 +256,12 @@ def _patient_email_reminder(
         },
     )
 
-    print(response)
+    # print(response)
 
-    return {
-        "patient_summary": patient_summary,
-        "result": "Reached End of Function",
-    }
+    return PatientEmailData.from_status(
+        current=patient_email_data,
+        status=PatientEmailStatus.EMAIL_SUCCESS,
+    )
 
 
 def task_email(
@@ -304,7 +324,7 @@ def task_email(
             raise ValueError("Unknown database: {}".format(database_config.name))
 
         # Store state about results.
-        results_combined = {}
+        patient_email_data_results: List[PatientEmailData] = []
 
         # Obtain a database client.
         with contextlib.ExitStack() as context_manager:
@@ -323,7 +343,6 @@ def task_email(
             # Iterate over every patient.
             patients = scope.database.patients.get_patient_identities(database=database)
             for patient_identity_current in patients:
-
                 # Obtain needed documents for this patient.
                 patient_collection = database.get_collection(
                     patient_identity_current["collection"]
@@ -343,12 +362,23 @@ def task_email(
                     template_testing_email_reminder_body_header=template_testing_email_body_reminder_header,
                 )
 
-                # Aggregrate results for output.
-                results_existing = results_combined.get(result_current["result"], [])
-                results_existing.append(result_current["patient_summary"])
-                results_combined[result_current["result"]] = results_existing
+                # Store the result
+                patient_email_data_results.append(result_current)
 
-        print(json.dumps(results_combined, indent=2))
+        for status_current in PatientEmailStatus:
+            matching_results = [
+                patient_email_data
+                for patient_email_data in patient_email_data_results
+                if patient_email_data.status == status_current
+            ]
+
+            if len(matching_results) > 0:
+                print(status_current.name)
+                for patient_email_data in matching_results:
+                    print("  {}".format(patient_email_data.patient_summary))
+                print()
+
+        # print(json.dumps(patient_email_data_results, indent=2))
 
     email_notifications.__doc__ = email_notifications.__doc__.format(
         database_config.name
