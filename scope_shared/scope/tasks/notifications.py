@@ -320,6 +320,7 @@ def _patient_email_reminder(
     # Format an email.
     email_body = template_email_reminder_body.format(
         testing_email_reminder_body_header=template_testing_email_reminder_body_header,
+        link_app=email_process_data.content_data.link_app,
         patient_email=email_process_data.patient_email,
     )
 
