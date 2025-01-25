@@ -43,6 +43,7 @@ class PatientEmailData:
     patient_id: str
     patient_name: str
     patient_email: str
+    cognito_id: str
 
     status: PatientEmailStatus
 
@@ -61,11 +62,13 @@ class PatientEmailData:
         patient_id: str,
         patient_name: str,
         patient_email: str,
+        cognito_id: str,
     ):
         return PatientEmailData(
             patient_id=patient_id,
             patient_name=patient_name,
             patient_email=patient_email,
+            cognito_id=cognito_id,
             status=PatientEmailStatus.IN_PROGRESS,
         )
 
@@ -79,6 +82,7 @@ class PatientEmailData:
             patient_id=current.patient_id,
             patient_name=current.patient_name,
             patient_email=current.patient_email,
+            cognito_id=current.cognito_id,
             status=status,
         )
 
@@ -94,24 +98,6 @@ def _filter_allowlist(
             return True
 
     return False
-
-
-def _filter_denylist(
-    *,
-    denylist_email_reminder: List[str],
-    patient_email_data: PatientEmailData,
-) -> bool:
-    # A patient that matches any element of this list will be denied.
-    # Matching is by name, patient_id, or email.
-    for block_current in denylist_email_reminder:
-        if re.fullmatch(block_current, patient_email_data.patient_id):
-            return False
-        if re.fullmatch(block_current, patient_email_data.patient_name):
-            return False
-        if re.fullmatch(block_current, patient_email_data.patient_email):
-            return False
-
-    return True
 
 
 def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
@@ -152,11 +138,62 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     return True
 
 
+def _filter_denylist(
+    *,
+    denylist_email_reminder: List[str],
+    patient_email_data: PatientEmailData,
+) -> bool:
+    """
+    Filter based on whether a patient appears in the deny list.
+    A patient that matches any element of this list will be denied.
+    Matching is by name, patient_id, or email.
+    """
+    for block_current in denylist_email_reminder:
+        if re.fullmatch(block_current, patient_email_data.patient_id):
+            return False
+        if re.fullmatch(block_current, patient_email_data.patient_name):
+            return False
+        if re.fullmatch(block_current, patient_email_data.patient_email):
+            return False
+
+    return True
+
+
+def _apply_filter_patient_email_data(
+    *,
+    patient_email_data: PatientEmailData,
+    denylist_email_reminder: List[str],
+) -> PatientEmailData:
+    """
+    Apply all filtering criteria.
+    """
+
+    # Filter if the patient appears in a deny list.
+    if not _filter_denylist(
+        denylist_email_reminder=denylist_email_reminder,
+        patient_email_data=patient_email_data,
+    ):
+        return PatientEmailData.from_status(
+            current=patient_email_data,
+            status=PatientEmailStatus.STOPPED_MATCHED_DENY_LIST,
+        )
+
+    # Filter if the patient Cognito account has been disabled.
+    if not _filter_cognito_account_disabled(
+        cognito_id=patient_email_data.cognito_id,
+    ):
+        return PatientEmailData.from_status(
+            current=patient_email_data,
+            status=PatientEmailStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
+        )
+
+    return patient_email_data
+
+
 def _patient_email_reminder(
     *,
-    patient_identity: dict,
-    patient_profile: dict,
-    patient_collection: pymongo.collection.Collection,
+    patient_email_data: PatientEmailData,
+    patient_document_set: scope.documents.document_set.DocumentSet,
     allowlist_email_reminder: List[str],
     denylist_email_reminder: List[str],
     url_base: str,
@@ -164,12 +201,13 @@ def _patient_email_reminder(
     testing_destination_email: Optional[str],
     template_testing_email_reminder_body_header: str,
 ) -> PatientEmailData:
-    # Initialize with properties of this patient.
-    patient_email_data = PatientEmailData.from_patient_data(
-        patient_id=patient_identity["patientId"],
-        patient_name=patient_profile["name"],
-        patient_email=patient_identity["cognitoAccount"]["email"],
+    # Filter whether this patient receives an email.
+    patient_email_data = _apply_filter_patient_email_data(
+        patient_email_data=patient_email_data,
+        denylist_email_reminder=denylist_email_reminder,
     )
+    if patient_email_data.status != PatientEmailStatus.IN_PROGRESS:
+        return patient_email_data
 
     # Differentiate destination email from the patient email.
     # These will be the same in production, but are differentiated in testing.
@@ -190,36 +228,6 @@ def _patient_email_reminder(
         # Because we are not testing, do not apply the testing header in the email body template.
         template_testing_email_reminder_body_header = ""
 
-    # Filter if the patient appears in a deny list.
-    if not _filter_denylist(
-        denylist_email_reminder=denylist_email_reminder,
-        patient_email_data=patient_email_data,
-    ):
-        return PatientEmailData.from_status(
-            current=patient_email_data,
-            status=PatientEmailStatus.STOPPED_MATCHED_DENY_LIST,
-        )
-
-    # Filter if the patient Cognito account has been disabled.
-    if not _filter_cognito_account_disabled(
-        cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
-    ):
-        return PatientEmailData.from_status(
-            current=patient_email_data,
-            status=PatientEmailStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
-        )
-
-    # Obtain all documents related to this patient.
-    patient_document_set = scope.documents.document_set.DocumentSet(
-        documents=patient_collection.find()
-    )
-
-    # Format an email.
-    email_body = template_email_reminder_body.format(
-        testing_email_reminder_body_header=template_testing_email_reminder_body_header,
-        patient_email=patient_email_data.patient_email,
-    )
-
     # Ensure the destination_email appears in an allow list.
     if not _filter_allowlist(
         allowlist_email_reminder=allowlist_email_reminder,
@@ -229,6 +237,12 @@ def _patient_email_reminder(
             current=patient_email_data,
             status=PatientEmailStatus.STOPPED_FAILED_ALLOW_LIST,
         )
+
+    # Format an email.
+    email_body = template_email_reminder_body.format(
+        testing_email_reminder_body_header=template_testing_email_reminder_body_header,
+        patient_email=patient_email_data.patient_email,
+    )
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
@@ -350,10 +364,21 @@ def task_email(
                 patient_profile = scope.database.patient.get_patient_profile(
                     collection=patient_collection
                 )
+
                 result_current = _patient_email_reminder(
-                    patient_identity=patient_identity_current,
-                    patient_profile=patient_profile,
-                    patient_collection=patient_collection,
+                    patient_email_data=PatientEmailData.from_patient_data(
+                        patient_id=patient_identity_current["patientId"],
+                        patient_name=patient_profile["name"],
+                        patient_email=patient_identity_current["cognitoAccount"][
+                            "email"
+                        ],
+                        cognito_id=patient_identity_current["cognitoAccount"][
+                            "cognitoId"
+                        ],
+                    ),
+                    patient_document_set=scope.documents.document_set.DocumentSet(
+                        documents=patient_collection.find()
+                    ),
                     allowlist_email_reminder=allowlist_email_reminder,
                     denylist_email_reminder=denylist_email_reminder,
                     url_base=url_base,
