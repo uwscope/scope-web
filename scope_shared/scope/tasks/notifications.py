@@ -6,10 +6,7 @@ import contextlib
 from dataclasses import dataclass
 from enum import Enum
 from invoke import task
-import json
 from pathlib import Path
-import pymongo
-import random
 import re
 import ruamel.yaml
 from typing import List, Optional, Union
@@ -349,8 +346,6 @@ def _patient_email_reminder(
             },
         },
     )
-
-    # print(response)
 
     return EmailProcessData.from_status(
         current=email_process_data,
