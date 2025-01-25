@@ -1,6 +1,8 @@
 import aws_infrastructure.tasks.ssh
 import boto3
 import contextlib
+from dataclasses import dataclass
+from enum import Enum
 from invoke import task
 import json
 from pathlib import Path
@@ -20,6 +22,46 @@ import scope.documents.document_set
 import scope.populate
 import scope.schema
 import scope.schema_utils
+
+
+class PatientEmailResult(Enum):
+    IN_PROGRESS = 0
+    STOPPED_MATCHED_DENY_LIST = 1
+    STOPPED_COGNITO_ACCOUNT_DISABLED = 2
+    EMAIL_SUCCESS = 12
+
+
+@dataclass(frozen=True)
+class PatientEmailData:
+    patient_id: str
+    patient_name: str
+    patient_email: str
+
+    patient_summary: str
+
+    result: PatientEmailResult
+
+    @classmethod
+    def from_patient_data(
+        cls,
+        patient_id: str,
+        patient_name: str,
+        patient_email: str,
+    ):
+        # Use a summary string for patient output.
+        patient_summary = "{} : {} : {}".format(
+            patient_id,
+            patient_name,
+            patient_email,
+        )
+
+        return PatientEmailData(
+            patient_id=patient_id,
+            patient_name=patient_name,
+            patient_email=patient_email,
+            patient_summary=patient_summary,
+            result=PatientEmailResult.IN_PROGRESS
+        )
 
 
 def _filter_allowlist(
@@ -93,7 +135,7 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     return True
 
 
-def _patient_email_notification(
+def _patient_email_reminder(
     *,
     patient_identity: dict,
     patient_profile: dict,
@@ -104,17 +146,12 @@ def _patient_email_notification(
     template_email_reminder_body: str,
     testing_destination_email: Optional[str],
     template_testing_email_reminder_body_header: str,
-):
-    # Key properties of each patient.
-    patient_id = patient_identity["patientId"]
-    patient_name = patient_profile["name"]
-    patient_email = patient_identity["cognitoAccount"]["email"]
-
-    # Use a summary string for patient output.
-    patient_summary = "{} : {} : {}".format(
-        patient_id,
-        patient_name,
-        patient_email,
+) -> PatientEmailData:
+    # Initialize with properties of this patient.
+    patient_email_data = PatientEmailData.from_patient_data(
+        patient_id=patient_identity["patientId"],
+        patient_name=patient_profile["name"],
+        patient_email=patient_identity["cognitoAccount"]["email"],
     )
 
     # Differentiate destination email from the patient email.
@@ -144,19 +181,13 @@ def _patient_email_notification(
         patient_name=patient_name,
         patient_email=patient_email,
     ):
-        return {
-            "patient_summary": patient_summary,
-            "result": "Denylist Matched",
-        }
+        return PatientEmailData(result=PatientEmailResult.STOPPED_MATCHED_DENY_LIST)
 
     # Filter if the patient Cognito account has been disabled.
     if not _filter_cognito_account_disabled(
         cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
     ):
-        return {
-            "patient_summary": patient_summary,
-            "result": "Cognito Account Disabled",
-        }
+        return PatientEmailData(result=PatientEmailResult.STOPPED_COGNITO_ACCOUNT_DISABLED)
 
     # Obtain all documents related to this patient.
     patient_document_set = scope.documents.document_set.DocumentSet(
@@ -300,7 +331,7 @@ def task_email(
                 patient_profile = scope.database.patient.get_patient_profile(
                     collection=patient_collection
                 )
-                result_current = _patient_email_notification(
+                result_current = _patient_email_reminder(
                     patient_identity=patient_identity_current,
                     patient_profile=patient_profile,
                     patient_collection=patient_collection,
