@@ -3,24 +3,31 @@ from __future__ import annotations
 import aws_infrastructure.tasks.ssh
 import boto3
 import contextlib
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+import datetime
 from enum import Enum
 from invoke import task
+import json
 from pathlib import Path
 import re
 import ruamel.yaml
 from typing import List, Optional, Union
 
 import scope.config
+import scope.database.document_utils
 import scope.database.initialize
 import scope.database.patient
+import scope.database.patient.activities
+import scope.database.patient.safety_plan
+import scope.database.patient.scheduled_assessments
+import scope.database.patient.values_inventory
 import scope.database.patients
 import scope.documentdb.client
 import scope.documents.document_set
-
 import scope.populate
 import scope.schema
 import scope.schema_utils
+import scope.utils.compute_patient_summary
 
 
 class ScopeInstanceId(Enum):
@@ -36,6 +43,10 @@ class ScopeInstanceId(Enum):
 
 @dataclass(frozen=True)
 class EmailContentData:
+    assigned_safety_plan: bool
+    assigned_values_inventory: bool
+    due_check_in_anxiety: bool
+    due_check_in_depression: bool
     link_app: str
 
 
@@ -138,6 +149,78 @@ def _content_link_app(
         raise ValueError("Unknown SCOPE Instance: {}".format(scope_instance_id))
 
 
+@dataclass(frozen=True)
+class _ContentPatientSummaryResult:
+    assigned_values_inventory: bool
+    assigned_safety_plan: bool
+    due_check_in_anxiety: bool
+    due_check_in_depression: bool
+
+
+def _content_patient_summary(
+    *,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+) -> _ContentPatientSummaryResult:
+    current_document_set = patient_document_set.remove_revisions()
+
+    activity_documents = current_document_set.filter_match(
+        match_type=scope.database.patient.activities.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).documents
+
+    safety_plan_document = current_document_set.filter_match(
+        match_type=scope.database.patient.safety_plan.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).unique()
+
+    scheduled_assessment_documents = current_document_set.filter_match(
+        match_type=scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).documents
+
+    values_inventory_document = current_document_set.filter_match(
+        match_type=scope.database.patient.values_inventory.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).unique()
+
+    patient_summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=activity_documents,
+        safety_plan_document=safety_plan_document,
+        scheduled_assessment_documents=scheduled_assessment_documents,
+        values_inventory_document=values_inventory_document,
+        date_due=datetime.date.today(),
+    )
+
+    dueScheduledAssessmentsGad7 = [
+        scheduled_assessment_current
+        for scheduled_assessment_current in patient_summary[
+            "assignedScheduledAssessments"
+        ]
+        if scheduled_assessment_current["assessmentId"] == "gad-7"
+    ]
+    dueScheduledAssessmentsGad7 = scope.database.document_utils.normalize_documents(
+        documents=dueScheduledAssessmentsGad7
+    )
+
+    dueScheduledAssessmentsPhq9 = [
+        scheduled_assessment_current
+        for scheduled_assessment_current in patient_summary[
+            "assignedScheduledAssessments"
+        ]
+        if scheduled_assessment_current["assessmentId"] == "phq-9"
+    ]
+    dueScheduledAssessmentsPhq9 = scope.database.document_utils.normalize_documents(
+        documents=dueScheduledAssessmentsPhq9
+    )
+
+    return _ContentPatientSummaryResult(
+        assigned_safety_plan=patient_summary["assignedSafetyPlan"],
+        assigned_values_inventory=patient_summary["assignedValuesInventory"],
+        due_check_in_anxiety=len(dueScheduledAssessmentsGad7) > 0,
+        due_check_in_depression=len(dueScheduledAssessmentsPhq9) > 0,
+    )
+
+
 def _filter_allowlist(
     *,
     allowlist_email_reminder: List[str],
@@ -216,9 +299,17 @@ def _patient_calculate_email_content_data(
     patient_document_set: scope.documents.document_set.DocumentSet,
     scope_instance_id: ScopeInstanceId,
 ) -> EmailProcessData:
+    content_patient_summary = _content_patient_summary(
+        patient_document_set=patient_document_set
+    )
+
     return EmailProcessData.from_content_data(
         current=email_process_data,
         content_data=EmailContentData(
+            assigned_safety_plan=content_patient_summary.assigned_safety_plan,
+            assigned_values_inventory=content_patient_summary.assigned_values_inventory,
+            due_check_in_anxiety=content_patient_summary.due_check_in_anxiety,
+            due_check_in_depression=content_patient_summary.due_check_in_depression,
             link_app=_content_link_app(
                 scope_instance_id=scope_instance_id,
             ),
