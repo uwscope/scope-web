@@ -26,7 +26,7 @@ import scope.schema
 import scope.schema_utils
 
 
-class PatientEmailStatus(Enum):
+class EmailProcessStatus(Enum):
     IN_PROGRESS = 0
 
     STOPPED_MATCHED_DENY_LIST = 1
@@ -39,13 +39,13 @@ class PatientEmailStatus(Enum):
 
 
 @dataclass(frozen=True)
-class PatientEmailData:
+class EmailProcessData:
     patient_id: str
     patient_name: str
     patient_email: str
     cognito_id: str
 
-    status: PatientEmailStatus
+    status: EmailProcessStatus
 
     @property
     def patient_summary(self):
@@ -64,21 +64,21 @@ class PatientEmailData:
         patient_email: str,
         cognito_id: str,
     ):
-        return PatientEmailData(
+        return EmailProcessData(
             patient_id=patient_id,
             patient_name=patient_name,
             patient_email=patient_email,
             cognito_id=cognito_id,
-            status=PatientEmailStatus.IN_PROGRESS,
+            status=EmailProcessStatus.IN_PROGRESS,
         )
 
     @classmethod
     def from_status(
         cls,
-        current: PatientEmailData,
-        status: PatientEmailStatus,
+        current: EmailProcessData,
+        status: EmailProcessStatus,
     ):
-        return PatientEmailData(
+        return EmailProcessData(
             patient_id=current.patient_id,
             patient_name=current.patient_name,
             patient_email=current.patient_email,
@@ -141,7 +141,7 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
 def _filter_denylist(
     *,
     denylist_email_reminder: List[str],
-    patient_email_data: PatientEmailData,
+    email_process_data: EmailProcessData,
 ) -> bool:
     """
     Filter based on whether a patient appears in the deny list.
@@ -149,21 +149,21 @@ def _filter_denylist(
     Matching is by name, patient_id, or email.
     """
     for block_current in denylist_email_reminder:
-        if re.fullmatch(block_current, patient_email_data.patient_id):
+        if re.fullmatch(block_current, email_process_data.patient_id):
             return False
-        if re.fullmatch(block_current, patient_email_data.patient_name):
+        if re.fullmatch(block_current, email_process_data.patient_name):
             return False
-        if re.fullmatch(block_current, patient_email_data.patient_email):
+        if re.fullmatch(block_current, email_process_data.patient_email):
             return False
 
     return True
 
 
-def _apply_filter_patient_email_data(
+def _apply_filter_email_process_data(
     *,
-    patient_email_data: PatientEmailData,
+    email_process_data: EmailProcessData,
     denylist_email_reminder: List[str],
-) -> PatientEmailData:
+) -> EmailProcessData:
     """
     Apply all filtering criteria.
     """
@@ -171,28 +171,28 @@ def _apply_filter_patient_email_data(
     # Filter if the patient appears in a deny list.
     if not _filter_denylist(
         denylist_email_reminder=denylist_email_reminder,
-        patient_email_data=patient_email_data,
+        email_process_data=email_process_data,
     ):
-        return PatientEmailData.from_status(
-            current=patient_email_data,
-            status=PatientEmailStatus.STOPPED_MATCHED_DENY_LIST,
+        return EmailProcessData.from_status(
+            current=email_process_data,
+            status=EmailProcessStatus.STOPPED_MATCHED_DENY_LIST,
         )
 
     # Filter if the patient Cognito account has been disabled.
     if not _filter_cognito_account_disabled(
-        cognito_id=patient_email_data.cognito_id,
+        cognito_id=email_process_data.cognito_id,
     ):
-        return PatientEmailData.from_status(
-            current=patient_email_data,
-            status=PatientEmailStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
+        return EmailProcessData.from_status(
+            current=email_process_data,
+            status=EmailProcessStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
         )
 
-    return patient_email_data
+    return email_process_data
 
 
 def _patient_email_reminder(
     *,
-    patient_email_data: PatientEmailData,
+    email_process_data: EmailProcessData,
     patient_document_set: scope.documents.document_set.DocumentSet,
     allowlist_email_reminder: List[str],
     denylist_email_reminder: List[str],
@@ -200,18 +200,18 @@ def _patient_email_reminder(
     template_email_reminder_body: str,
     testing_destination_email: Optional[str],
     template_testing_email_reminder_body_header: str,
-) -> PatientEmailData:
+) -> EmailProcessData:
     # Filter whether this patient receives an email.
-    patient_email_data = _apply_filter_patient_email_data(
-        patient_email_data=patient_email_data,
+    email_process_data = _apply_filter_email_process_data(
+        email_process_data=email_process_data,
         denylist_email_reminder=denylist_email_reminder,
     )
-    if patient_email_data.status != PatientEmailStatus.IN_PROGRESS:
-        return patient_email_data
+    if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
+        return email_process_data
 
     # Differentiate destination email from the patient email.
     # These will be the same in production, but are differentiated in testing.
-    destination_email = patient_email_data.patient_email
+    destination_email = email_process_data.patient_email
 
     # Apply transformations for testing mode.
     if testing_destination_email:
@@ -221,7 +221,7 @@ def _patient_email_reminder(
         template_testing_email_reminder_body_header = (
             template_testing_email_reminder_body_header.format(
                 destination_email=destination_email,
-                patient_email=patient_email_data.patient_email,
+                patient_email=email_process_data.patient_email,
             )
         )
     else:
@@ -233,15 +233,17 @@ def _patient_email_reminder(
         allowlist_email_reminder=allowlist_email_reminder,
         destination_email=destination_email,
     ):
-        return PatientEmailData.from_status(
-            current=patient_email_data,
-            status=PatientEmailStatus.STOPPED_FAILED_ALLOW_LIST,
+        return EmailProcessData.from_status(
+            current=email_process_data,
+            status=EmailProcessStatus.STOPPED_FAILED_ALLOW_LIST,
         )
+
+    # Calculate values needed for an email.
 
     # Format an email.
     email_body = template_email_reminder_body.format(
         testing_email_reminder_body_header=template_testing_email_reminder_body_header,
-        patient_email=patient_email_data.patient_email,
+        patient_email=email_process_data.patient_email,
     )
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
@@ -272,9 +274,9 @@ def _patient_email_reminder(
 
     # print(response)
 
-    return PatientEmailData.from_status(
-        current=patient_email_data,
-        status=PatientEmailStatus.EMAIL_SUCCESS,
+    return EmailProcessData.from_status(
+        current=email_process_data,
+        status=EmailProcessStatus.EMAIL_SUCCESS,
     )
 
 
@@ -338,7 +340,7 @@ def task_email(
             raise ValueError("Unknown database: {}".format(database_config.name))
 
         # Store state about results.
-        patient_email_data_results: List[PatientEmailData] = []
+        email_process_data_results: List[EmailProcessData] = []
 
         # Obtain a database client.
         with contextlib.ExitStack() as context_manager:
@@ -366,7 +368,7 @@ def task_email(
                 )
 
                 result_current = _patient_email_reminder(
-                    patient_email_data=PatientEmailData.from_patient_data(
+                    email_process_data=EmailProcessData.from_patient_data(
                         patient_id=patient_identity_current["patientId"],
                         patient_name=patient_profile["name"],
                         patient_email=patient_identity_current["cognitoAccount"][
@@ -388,22 +390,20 @@ def task_email(
                 )
 
                 # Store the result
-                patient_email_data_results.append(result_current)
+                email_process_data_results.append(result_current)
 
-        for status_current in PatientEmailStatus:
+        for status_current in EmailProcessStatus:
             matching_results = [
-                patient_email_data
-                for patient_email_data in patient_email_data_results
-                if patient_email_data.status == status_current
+                email_process_data_current
+                for email_process_data_current in email_process_data_results
+                if email_process_data_current.status == status_current
             ]
 
             if len(matching_results) > 0:
                 print(status_current.name)
-                for patient_email_data in matching_results:
-                    print("  {}".format(patient_email_data.patient_summary))
+                for email_process_data_current in matching_results:
+                    print("  {}".format(email_process_data_current.patient_summary))
                 print()
-
-        # print(json.dumps(patient_email_data_results, indent=2))
 
     email_notifications.__doc__ = email_notifications.__doc__.format(
         database_config.name
