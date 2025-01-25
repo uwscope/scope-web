@@ -25,17 +25,11 @@ import scope.schema_utils
 def _filter_allowlist(
     *,
     allowlist_email_reminder: List[str],
-    patient_id: str,
-    patient_name: str,
-    patient_email: str,
+    destination_email: str,
 ) -> bool:
-    # An allowlist item can target any of patient_id, patient_name, or patient_email.
+    # A destination_email must match an element of this list to be allowed.
     for allow_current in allowlist_email_reminder:
-        if re.fullmatch(allow_current, patient_id):
-            return True
-        if re.fullmatch(allow_current, patient_name):
-            return True
-        if re.fullmatch(allow_current, patient_email):
+        if re.fullmatch(allow_current, destination_email):
             return True
 
     return False
@@ -48,23 +42,24 @@ def _filter_denylist(
     patient_name: str,
     patient_email: str,
 ) -> bool:
-    # A blocklist item can target any of patient_id, patient_name, or patient_email.
+    # A patient that matches any element of this list will be denied.
+    # Matching is by name, patient_id, or email.
     for block_current in denylist_email_reminder:
         if re.fullmatch(block_current, patient_id):
-            return True
+            return False
         if re.fullmatch(block_current, patient_name):
-            return True
+            return False
         if re.fullmatch(block_current, patient_email):
-            return True
+            return False
 
-    return False
+    return True
 
 
 def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     """
-    Check whether a cognito account is disabled.
+    Filter based on whether a Cognito account is disabled.
     :param cognito_id:
-    :return: true if disabled, false otherwise.
+    :return: true if enabled, false if disabled.
     """
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
@@ -95,7 +90,7 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     #
     #     # Put the temporary password in the config
     #     account_config["temporaryPassword"] = reset_temporary_password
-    return False
+    return True
 
 
 def _patient_email_notification(
@@ -143,7 +138,7 @@ def _patient_email_notification(
         template_testing_email_reminder_body_header = ""
 
     # Filter if the patient appears in a deny list.
-    if _filter_denylist(
+    if not _filter_denylist(
         denylist_email_reminder=denylist_email_reminder,
         patient_id=patient_id,
         patient_name=patient_name,
@@ -154,20 +149,8 @@ def _patient_email_notification(
             "result": "Denylist Matched",
         }
 
-    # Ensure the patient appears in an allow list.
-    if not _filter_allowlist(
-        allowlist_email_reminder=allowlist_email_reminder,
-        patient_id=patient_id,
-        patient_name=patient_name,
-        patient_email=patient_email,
-    ):
-        return {
-            "patient_summary": patient_summary,
-            "result": "Allowlist Not Matched",
-        }
-
     # Filter if the patient Cognito account has been disabled.
-    if _filter_cognito_account_disabled(
+    if not _filter_cognito_account_disabled(
         cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
     ):
         return {
@@ -186,35 +169,43 @@ def _patient_email_notification(
         patient_email=patient_email,
     )
 
+    # Ensure the destination_email appears in an allow list.
+    if not _filter_allowlist(
+        allowlist_email_reminder=allowlist_email_reminder,
+        destination_email=destination_email,
+    ):
+        return {
+            "patient_summary": patient_summary,
+            "result": "Allowlist Not Matched",
+        }
+
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
-    # boto_session = boto3.Session()
-    # boto_ses = boto_session.client("ses")
+    boto_session = boto3.Session()
+    boto_ses = boto_session.client("ses")
 
-    # This assertion can be removed when we have an allow list.
-    # assert destination_email == "ourself"
-    # response = boto_ses.send_email(
-    #     Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-    #     Destination={
-    #         "ToAddresses": [destination_email],
-    #         # "CcAddresses": ["<email@email.org>"],
-    #     },
-    #     ReplyToAddresses=["do-not-reply@uwscope.org"],
-    #     Message={
-    #         "Subject": {
-    #             "Data": "It's an email.",
-    #             "Charset": "UTF-8",
-    #         },
-    #         "Body": {
-    #             "Html": {
-    #                 "Data": email_body,
-    #                 "Charset": "UTF-8",
-    #             }
-    #         },
-    #     },
-    # )
+    response = boto_ses.send_email(
+        Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+        Destination={
+            "ToAddresses": [destination_email],
+            # "CcAddresses": ["<email@email.org>"],
+        },
+        ReplyToAddresses=["do-not-reply@uwscope.org"],
+        Message={
+            "Subject": {
+                "Data": "It's an email.",
+                "Charset": "UTF-8",
+            },
+            "Body": {
+                "Html": {
+                    "Data": email_body,
+                    "Charset": "UTF-8",
+                }
+            },
+        },
+    )
 
-    # print(response)
+    print(response)
 
     return {
         "patient_summary": patient_summary,
@@ -238,10 +229,10 @@ def task_email(
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
     allowlist_email_reminder = None
-    denylist_email_reminder = None
     with open(allowlist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         allowlist_email_reminder = yaml.load(config_file)
+    denylist_email_reminder = None
     with open(denylist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         denylist_email_reminder = yaml.load(config_file)
