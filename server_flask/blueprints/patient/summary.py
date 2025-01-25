@@ -1,3 +1,4 @@
+import datetime
 import flask
 import flask_json
 
@@ -65,4 +66,5 @@ def get_patient_summary(patient_id):
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
         values_inventory_document=values_inventory_document,
+        date_due=datetime.date.today(),
     )

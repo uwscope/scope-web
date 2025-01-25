@@ -15,6 +15,7 @@ def compute_patient_summary(
     safety_plan_document: dict,
     scheduled_assessment_documents: List[dict],
     values_inventory_document: dict,
+    date_due: datetime.date,
 ) -> dict:
     """
     {
@@ -61,7 +62,7 @@ def compute_patient_summary(
                 (not scheduled_assessment_current["completed"])
                 and (
                     date_utils.parse_date(scheduled_assessment_current["dueDate"])
-                    <= datetime.date.today()
+                    <= date_due
                 )
             ),
             scheduled_assessment_documents,

@@ -128,6 +128,7 @@ def test_compute_patient_summary_values_inventory(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -147,6 +148,7 @@ def test_compute_patient_summary_values_inventory(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -168,6 +170,7 @@ def test_compute_patient_summary_values_inventory(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -187,6 +190,7 @@ def test_compute_patient_summary_values_inventory(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -210,6 +214,7 @@ def test_compute_patient_summary_safety_plan(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -222,6 +227,7 @@ def test_compute_patient_summary_safety_plan(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -236,6 +242,7 @@ def test_compute_patient_summary_safety_plan(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -250,6 +257,7 @@ def test_compute_patient_summary_safety_plan(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -273,6 +281,7 @@ def test_compute_patient_summary_scheduled_assessments(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -288,6 +297,7 @@ def test_compute_patient_summary_scheduled_assessments(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -303,6 +313,7 @@ def test_compute_patient_summary_scheduled_assessments(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
@@ -318,6 +329,7 @@ def test_compute_patient_summary_scheduled_assessments(
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
