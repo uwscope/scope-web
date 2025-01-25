@@ -22,30 +22,44 @@ import scope.schema
 import scope.schema_utils
 
 
-def _filter_blocklist(
+def _filter_allowlist(
     *,
-    blocklist_email_reminder: List[str],
-    patient_id: str,
-    patient_name: str,
-    patient_email: str,
+    allowlist_email_reminder: List[str],
+    destination_email: str,
 ) -> bool:
-    # A blocklist item can target any of patient_id, patient_name, or patient_email.
-    for block_current in blocklist_email_reminder:
-        if re.fullmatch(block_current, patient_id):
-            return True
-        if re.fullmatch(block_current, patient_name):
-            return True
-        if re.fullmatch(block_current, patient_email):
+    # A destination_email must match an element of this list to be allowed.
+    for allow_current in allowlist_email_reminder:
+        if re.fullmatch(allow_current, destination_email):
             return True
 
     return False
 
 
+def _filter_denylist(
+    *,
+    denylist_email_reminder: List[str],
+    patient_id: str,
+    patient_name: str,
+    patient_email: str,
+) -> bool:
+    # A patient that matches any element of this list will be denied.
+    # Matching is by name, patient_id, or email.
+    for block_current in denylist_email_reminder:
+        if re.fullmatch(block_current, patient_id):
+            return False
+        if re.fullmatch(block_current, patient_name):
+            return False
+        if re.fullmatch(block_current, patient_email):
+            return False
+
+    return True
+
+
 def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     """
-    Check whether a cognito account is disabled.
+    Filter based on whether a Cognito account is disabled.
     :param cognito_id:
-    :return: true if disabled, false otherwise.
+    :return: true if enabled, false if disabled.
     """
 
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
@@ -76,8 +90,7 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     #
     #     # Put the temporary password in the config
     #     account_config["temporaryPassword"] = reset_temporary_password
-
-    return random.choice([True, False])
+    return True
 
 
 def _patient_email_notification(
@@ -85,7 +98,8 @@ def _patient_email_notification(
     patient_identity: dict,
     patient_profile: dict,
     patient_collection: pymongo.collection.Collection,
-    blocklist_email_reminder: List[str],
+    allowlist_email_reminder: List[str],
+    denylist_email_reminder: List[str],
     url_base: str,
     template_email_reminder_body: str,
     testing_destination_email: Optional[str],
@@ -123,20 +137,20 @@ def _patient_email_notification(
         # Because we are not testing, do not apply the testing header in the email body template.
         template_testing_email_reminder_body_header = ""
 
-    # Filter if the patient appears in a block list.
-    if _filter_blocklist(
-        blocklist_email_reminder=blocklist_email_reminder,
+    # Filter if the patient appears in a deny list.
+    if not _filter_denylist(
+        denylist_email_reminder=denylist_email_reminder,
         patient_id=patient_id,
         patient_name=patient_name,
         patient_email=patient_email,
     ):
         return {
             "patient_summary": patient_summary,
-            "result": "Blocklist Matched",
+            "result": "Denylist Matched",
         }
 
     # Filter if the patient Cognito account has been disabled.
-    if _filter_cognito_account_disabled(
+    if not _filter_cognito_account_disabled(
         cognito_id=patient_identity["cognitoAccount"]["cognitoId"]
     ):
         return {
@@ -155,13 +169,21 @@ def _patient_email_notification(
         patient_email=patient_email,
     )
 
+    # Ensure the destination_email appears in an allow list.
+    if not _filter_allowlist(
+        allowlist_email_reminder=allowlist_email_reminder,
+        destination_email=destination_email,
+    ):
+        return {
+            "patient_summary": patient_summary,
+            "result": "Allowlist Not Matched",
+        }
+
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
     boto_session = boto3.Session()
     boto_ses = boto_session.client("ses")
 
-    # This assertion can be removed when we have an allow list.
-    assert destination_email == "ourself"
     response = boto_ses.send_email(
         Source="SCOPE Reminders <do-not-reply@uwscope.org>",
         Destination={
@@ -196,7 +218,8 @@ def task_email(
     instance_ssh_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
-    blocklist_email_reminder_path: Union[Path, str],
+    allowlist_email_reminder_path: Union[Path, str],
+    denylist_email_reminder_path: Union[Path, str],
     template_email_body_reminder_path: Union[Path, str],
     template_email_body_reminder_testing_header_path: Union[Path, str],
 ):
@@ -205,10 +228,14 @@ def task_email(
     )
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
-    blocklist_email_reminder = None
-    with open(blocklist_email_reminder_path) as config_file:
+    allowlist_email_reminder = None
+    with open(allowlist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
-        blocklist_email_reminder = yaml.load(config_file)
+        allowlist_email_reminder = yaml.load(config_file)
+    denylist_email_reminder = None
+    with open(denylist_email_reminder_path, encoding="UTF-8") as config_file:
+        yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        denylist_email_reminder = yaml.load(config_file)
     template_email_body_reminder = None
     with open(template_email_body_reminder_path, "r") as file_template:
         template_email_body_reminder = file_template.read()
@@ -265,6 +292,7 @@ def task_email(
             # Iterate over every patient.
             patients = scope.database.patients.get_patient_identities(database=database)
             for patient_identity_current in patients:
+
                 # Obtain needed documents for this patient.
                 patient_collection = database.get_collection(
                     patient_identity_current["collection"]
@@ -276,7 +304,8 @@ def task_email(
                     patient_identity=patient_identity_current,
                     patient_profile=patient_profile,
                     patient_collection=patient_collection,
-                    blocklist_email_reminder=blocklist_email_reminder,
+                    allowlist_email_reminder=allowlist_email_reminder,
+                    denylist_email_reminder=denylist_email_reminder,
                     url_base=url_base,
                     template_email_reminder_body=template_email_body_reminder,
                     testing_destination_email=testing_destination_email,
