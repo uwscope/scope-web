@@ -32,7 +32,7 @@ import scope.utils.compute_patient_summary
 
 class ScopeInstanceId(Enum):
     """
-    Based on the string we exect in the database configuration.
+    Based on the string we expect in the database configuration.
     """
 
     DEV = "dev"
@@ -130,6 +130,32 @@ class EmailProcessData:
             cognito_id=current.cognito_id,
             content_data=current.content_data,
             status=status,
+        )
+
+
+@dataclass(frozen=True)
+class TemplatesEmailReminder:
+    template_email_reminder_body: str
+    template_email_reminder_testing_header: str
+
+    @classmethod
+    def from_paths(
+        cls,
+        *,
+        template_email_reminder_body_path,
+        template_email_reminder_testing_header_path,
+    ):
+        template_email_reminder_body = None
+        with open(template_email_reminder_body_path, "r") as file_template:
+            template_email_reminder_body = file_template.read()
+
+        template_email_reminder_testing_header = None
+        with open(template_email_reminder_testing_header_path, "r") as file_template:
+            template_email_reminder_testing_header = file_template.read()
+
+        return TemplatesEmailReminder(
+            template_email_reminder_body=template_email_reminder_body,
+            template_email_reminder_testing_header=template_email_reminder_testing_header,
         )
 
 
@@ -355,9 +381,8 @@ def _patient_email_reminder(
     scope_instance_id: ScopeInstanceId,
     allowlist_email_reminder: List[str],
     denylist_email_reminder: List[str],
-    template_email_reminder_body: str,
+    templates_email_reminder: TemplatesEmailReminder,
     testing_destination_email: Optional[str],
-    template_testing_email_reminder_body_header: str,
 ) -> EmailProcessData:
     # Filter whether this patient receives an email.
     email_process_data = _patient_filter_email_process_data(
@@ -386,7 +411,7 @@ def _patient_email_reminder(
         destination_email = testing_destination_email
         # Because we are testing, populate the testing header.
         template_testing_email_reminder_body_header = (
-            template_testing_email_reminder_body_header.format(
+            templates_email_reminder.template_email_reminder_testing_header.format(
                 destination_email=destination_email,
                 patient_email=email_process_data.patient_email,
             )
@@ -406,7 +431,7 @@ def _patient_email_reminder(
         )
 
     # Format an email.
-    email_body = template_email_reminder_body.format(
+    email_body = templates_email_reminder.template_email_reminder_body.format(
         testing_email_reminder_body_header=template_testing_email_reminder_body_header,
         link_app=email_process_data.content_data.link_app,
         patient_email=email_process_data.patient_email,
@@ -451,8 +476,8 @@ def task_email(
     database_config_path: Union[Path, str],
     allowlist_email_reminder_path: Union[Path, str],
     denylist_email_reminder_path: Union[Path, str],
-    template_email_body_reminder_path: Union[Path, str],
-    template_email_body_reminder_testing_header_path: Union[Path, str],
+    template_email_reminder_body_path: Union[Path, str],
+    template_email_reminder_testing_header_path: Union[Path, str],
 ):
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
         instance_ssh_config_path
@@ -467,12 +492,6 @@ def task_email(
     with open(denylist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         denylist_email_reminder = yaml.load(config_file)
-    template_email_body_reminder = None
-    with open(template_email_body_reminder_path, "r") as file_template:
-        template_email_body_reminder = file_template.read()
-    template_testing_email_body_reminder_header = None
-    with open(template_email_body_reminder_testing_header_path, "r") as file_template:
-        template_testing_email_body_reminder_header = file_template.read()
 
     @task(optional=["production", "testing_destination_email"])
     def email_notifications(context, production=False, testing_destination_email=None):
@@ -538,9 +557,11 @@ def task_email(
                     scope_instance_id=scope_instance_id,
                     allowlist_email_reminder=allowlist_email_reminder,
                     denylist_email_reminder=denylist_email_reminder,
-                    template_email_reminder_body=template_email_body_reminder,
+                    templates_email_reminder=TemplatesEmailReminder.from_paths(
+                        template_email_reminder_body_path=template_email_reminder_body_path,
+                        template_email_reminder_testing_header_path=template_email_reminder_testing_header_path,
+                    ),
                     testing_destination_email=testing_destination_email,
-                    template_testing_email_reminder_body_header=template_testing_email_body_reminder_header,
                 )
 
                 # Store the result

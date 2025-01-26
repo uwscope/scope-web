@@ -13,9 +13,9 @@ DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 ALLOWLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/allowlist_email_reminder.yaml"
 DENYLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/denylist_email_reminder.yaml"
-TEMPLATE_EMAIL_BODY_REMINDER_PATH = "./templates/email_reminder_body.html"
-TEMPLATE_EMAIL_BODY_REMINDER_TESTING_HEADER_PATH = (
-    "./templates/testing_email_reminder_body_header.html"
+TEMPLATE_EMAIL_REMINDER_BODY_PATH = "./templates/email_reminder_body.html"
+TEMPLATE_EMAIL_REMINDER_TESTING_HEADER_PATH = (
+    "./templates/email_reminder_testing_header.html"
 )
 
 # Build task collection
@@ -30,8 +30,8 @@ if Path(DATABASE_DEV_CONFIG_PATH).exists():
             database_config_path=DATABASE_DEV_CONFIG_PATH,
             allowlist_email_reminder_path=ALLOWLIST_EMAIL_REMINDER_PATH,
             denylist_email_reminder_path=DENYLIST_EMAIL_REMINDER_PATH,
-            template_email_body_reminder_path=TEMPLATE_EMAIL_BODY_REMINDER_PATH,
-            template_email_body_reminder_testing_header_path=TEMPLATE_EMAIL_BODY_REMINDER_TESTING_HEADER_PATH,
+            template_email_reminder_body_path=TEMPLATE_EMAIL_REMINDER_BODY_PATH,
+            template_email_reminder_testing_header_path=TEMPLATE_EMAIL_REMINDER_TESTING_HEADER_PATH,
         ),
         "email",
     )
