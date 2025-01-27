@@ -9,6 +9,7 @@ from invoke import Collection
 import scope.tasks.notifications
 
 INSTANCE_SSH_CONFIG_PATH = "./secrets/configuration/instance_ssh.yaml"
+COGNITO_CONFIG_PATH = "./secrets/configuration/cognito.yaml"
 DOCUMENTDB_CONFIG_PATH = "./secrets/configuration/documentdb.yaml"
 DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 ALLOWLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/allowlist_email_reminder.yaml"
@@ -30,6 +31,7 @@ if Path(DATABASE_DEV_CONFIG_PATH).exists():
     ns_dev.add_task(
         scope.tasks.notifications.task_email(
             instance_ssh_config_path=INSTANCE_SSH_CONFIG_PATH,
+            cognito_config_path=COGNITO_CONFIG_PATH,
             documentdb_config_path=DOCUMENTDB_CONFIG_PATH,
             database_config_path=DATABASE_DEV_CONFIG_PATH,
             allowlist_email_reminder_path=ALLOWLIST_EMAIL_REMINDER_PATH,

@@ -83,6 +83,7 @@ class EmailProcessData:
     patient_name: str
     patient_email: str
     cognito_id: str
+    pool_id: str
 
     content_data: Optional[EmailContentData]
 
@@ -109,6 +110,7 @@ class EmailProcessData:
             patient_name=current.patient_name,
             patient_email=current.patient_email,
             cognito_id=current.cognito_id,
+            pool_id=current.pool_id,
             content_data=content_data,
             status=current.status,
         )
@@ -121,12 +123,14 @@ class EmailProcessData:
         patient_name: str,
         patient_email: str,
         cognito_id: str,
+        pool_id: str,
     ):
         return EmailProcessData(
             patient_id=patient_id,
             patient_name=patient_name,
             patient_email=patient_email,
             cognito_id=cognito_id,
+            pool_id=pool_id,
             content_data=None,
             status=EmailProcessStatus.IN_PROGRESS,
         )
@@ -143,6 +147,7 @@ class EmailProcessData:
             patient_name=current.patient_name,
             patient_email=current.patient_email,
             cognito_id=current.cognito_id,
+            pool_id=current.pool_id,
             content_data=current.content_data,
             status=status,
         )
@@ -395,10 +400,30 @@ def _filter_allowlist(
     return False
 
 
-def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
+def _get_cognito_user_using_cognito_id(
+    *,
+    boto_userpool,
+    pool_id: str,
+    cognito_id: str,
+) -> dict:
+    """
+    Filter the list of existing Cognito users with cognito_id.
+    """
+    response = boto_userpool.list_users(
+        UserPoolId=pool_id,
+        Filter=f'sub = "{cognito_id}"',
+    )
+
+    if response["Users"]:
+        return response["Users"][0]
+    return None
+
+
+def _filter_cognito_account_disabled(*, pool_id: str, cognito_id: str) -> bool:
     """
     Filter based on whether a Cognito account is disabled.
-    :param cognito_id:
+    :param pool_id: Cognito UserPoolId that is a unique identifier for a user pool.
+    :param cognito_id: Unique identifier assigned to each user within a user pool.
     :return: true if enabled, false if disabled.
     """
 
@@ -407,30 +432,18 @@ def _filter_cognito_account_disabled(*, cognito_id: str) -> bool:
     boto_session = boto3.Session()
     boto_userpool = boto_session.client("cognito-idp")
 
-    # def _reset_cognito_password(
-    #     *,
-    #     database: pymongo.database.Database,
-    #     cognito_config: scope.config.CognitoClientConfig,
-    #     account_config: dict,  # Subset of a patient config or a provider config
-    # ) -> None:
-    #     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
-    #     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
-    #     boto_session = boto3.Session()
-    #     boto_userpool = boto_session.client("cognito-idp")
-    #
-    #     reset_account_name = account_config["accountName"]
-    #     reset_temporary_password = generate_temporary_password()
-    #
-    #     boto_userpool.admin_set_user_password(
-    #         UserPoolId=cognito_config.poolid,
-    #         Username=reset_account_name,
-    #         Password=reset_temporary_password,
-    #         Permanent=False,
-    #     )
-    #
-    #     # Put the temporary password in the config
-    #     account_config["temporaryPassword"] = reset_temporary_password
-    return True
+    cognito_user = _get_cognito_user_using_cognito_id(
+        boto_userpool=boto_userpool,
+        pool_id=pool_id,
+        cognito_id=cognito_id,
+    )
+
+    if not cognito_user:
+        raise ValueError(
+            f"User with cognito_id {cognito_id} not found in pool {pool_id}"
+        )
+
+    return cognito_user.get("Enabled", False)
 
 
 def _filter_denylist(
@@ -668,6 +681,7 @@ def _patient_filter_email_process_data(
 
     # Filter if the patient Cognito account has been disabled.
     if not _filter_cognito_account_disabled(
+        pool_id=email_process_data.pool_id,
         cognito_id=email_process_data.cognito_id,
     ):
         return EmailProcessData.from_status(
@@ -767,6 +781,7 @@ def _patient_email_reminder(
 def task_email(
     *,
     instance_ssh_config_path: Union[Path, str],
+    cognito_config_path: Union[Path, str],
     documentdb_config_path: Union[Path, str],
     database_config_path: Union[Path, str],
     allowlist_email_reminder_path: Union[Path, str],
@@ -776,6 +791,7 @@ def task_email(
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
         instance_ssh_config_path
     )
+    cognito_config = scope.config.CognitoClientConfig.load(cognito_config_path)
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
     allowlist_email_reminder = None
@@ -849,6 +865,7 @@ def task_email(
                         cognito_id=patient_identity_current["cognitoAccount"][
                             "cognitoId"
                         ],
+                        pool_id=cognito_config.poolid,
                     ),
                     patient_document_set=scope.documents.document_set.DocumentSet(
                         documents=patient_collection.find()
