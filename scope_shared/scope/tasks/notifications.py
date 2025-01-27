@@ -586,6 +586,8 @@ def _patient_calculate_email_content_data(
             assigned_values_inventory=content_patient_summary.assigned_values_inventory,
             due_check_in_anxiety=content_patient_summary.due_check_in_anxiety,
             due_check_in_depression=content_patient_summary.due_check_in_depression,
+            scheduled_activities_due_today=content_scheduled_activities.due_today,
+            scheduled_activities_overdue=content_scheduled_activities.overdue,
         ),
     )
 
