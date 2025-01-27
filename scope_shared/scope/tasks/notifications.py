@@ -388,14 +388,10 @@ def _format_email(
             "",
         )
 
-    print(template_subject)
-
     formattted_body = template_body.format_map(vars(email_content_data))
     formatted_subject = template_subject.format_map(
         vars(email_content_data),
     )
-
-    print(formatted_subject)
 
     return _FormatEmailResult(
         body=formattted_body,
