@@ -511,22 +511,22 @@ def _format_email(
     )
     requested_by_provider_formatted = ""
     if requested_by_provider_count > 0:
-        requested_by_provider_formatted += "<h3>Requested by Provider</h3>\n"
+        requested_by_provider_formatted += "<h3>Requested by Provider</h3>"
         requested_by_provider_formatted += (
-            "<p>Your social worker has {} requests:</p>\n".format(
+            "<p>Your social worker has {} requests:</p>".format(
                 requested_by_provider_count
             )
         )
         if email_content_data.assigned_values_inventory:
             requested_by_provider_formatted += (
-                "<p>- Complete Values & Activities Inventory</p>\n"
+                "<p>- Complete Values & Activities Inventory</p>"
             )
         if email_content_data.assigned_safety_plan:
-            requested_by_provider_formatted += "<p>- Complete Safety Plan</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Safety Plan</p>"
         if email_content_data.due_check_in_depression:
-            requested_by_provider_formatted += "<p>- Complete Depression Check-In</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Depression Check-In</p>"
         if email_content_data.due_check_in_anxiety:
-            requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>"
 
     def _format_due_time_of_day(due_time_of_day: int) -> str:
         due_time_of_day_12_hour = due_time_of_day % 12
