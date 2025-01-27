@@ -388,13 +388,48 @@ def _format_email(
             "",
         )
 
-    formattted_body = template_body.format_map(vars(email_content_data))
-    formatted_subject = template_subject.format_map(
-        vars(email_content_data),
+    # Calculate what to display for "Requested by Provider"
+    requested_by_provider_count = len(
+        [
+            request_current
+            for request_current in [
+                email_content_data.assigned_values_inventory,
+                email_content_data.assigned_safety_plan,
+                email_content_data.due_check_in_depression,
+                email_content_data.due_check_in_anxiety,
+            ]
+            if request_current
+        ]
     )
+    requested_by_provider_formatted = ""
+    if requested_by_provider_count > 0:
+        requested_by_provider_formatted += " " * 14 + "<h3>Requested by Provider</h3>\n"
+        requested_by_provider_formatted += (
+            " " * 14
+            + "<p>Your social worker has {} requests:</p>\n".format(
+                requested_by_provider_count
+            )
+        )
+        if email_content_data.assigned_values_inventory:
+            requested_by_provider_formatted += (
+                "<p>- Complete Values & Activities Inventory</p>\n"
+            )
+        if email_content_data.assigned_safety_plan:
+            requested_by_provider_formatted += "<p>- Complete Safety Plan</p>\n"
+        if email_content_data.due_check_in_depression:
+            requested_by_provider_formatted += "<p>- Complete Depression Check-In</p>\n"
+        if email_content_data.due_check_in_anxiety:
+            requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>\n"
+
+    # Provide our email content data and our formatted content.
+    format_params = dict(vars(email_content_data))
+    format_params["requested_by_provider_formatted"] = requested_by_provider_formatted
+
+    formatted_body = template_body.format_map(format_params)
+    formatted_subject = template_subject.format_map(format_params)
 
     return _FormatEmailResult(
-        body=formattted_body,
+        body=formatted_body,
         subject=formatted_subject,
     )
 

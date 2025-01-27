@@ -21,7 +21,7 @@ const _strings = {
 
   Home_quote_title: "Quote of the day",
   Home_things_title: "Requested by provider",
-  Home_values_button_text: "Complete Values and Activities Inventory",
+  Home_values_button_text: "Complete Values & Activities Inventory",
   Home_safety_button_text: "Complete Safety Plan",
   Home_assessment_button_text: "Complete ${assessment} Check-In",
   Home_mood_button_text: "Log your mood",
