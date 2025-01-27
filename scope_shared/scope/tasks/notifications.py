@@ -46,6 +46,9 @@ class EmailContentData:
     patient_email: str
     testing_destination_email: str
 
+    date_today_formatted_subject: str
+    date_today_formatted_body: str
+
     link_app: str
 
     assigned_safety_plan: bool
@@ -385,10 +388,14 @@ def _format_email(
             "",
         )
 
+    print(template_subject)
+
     formattted_body = template_body.format_map(vars(email_content_data))
     formatted_subject = template_subject.format_map(
         vars(email_content_data),
     )
+
+    print(formatted_subject)
 
     return _FormatEmailResult(
         body=formattted_body,
@@ -403,6 +410,8 @@ def _patient_calculate_email_content_data(
     scope_instance_id: ScopeInstanceId,
     testing_destination_email: str,
 ) -> EmailProcessData:
+    date_today = datetime.date.today()
+
     content_patient_summary = _content_patient_summary(
         patient_document_set=patient_document_set
     )
@@ -413,6 +422,17 @@ def _patient_calculate_email_content_data(
             # Email addresses.
             patient_email=email_process_data.patient_email,
             testing_destination_email=testing_destination_email,
+            # Date of today formatted for rendering.
+            date_today_formatted_subject="{} {} {}".format(
+                date_today.strftime(format="%a"),
+                date_today.strftime(format="%b"),
+                date_today.day,
+            ),
+            date_today_formatted_body="{}, {} {}".format(
+                date_today.strftime(format="%A"),
+                date_today.strftime(format="%B"),
+                date_today.day,
+            ),
             # Link to scope app.
             link_app=_content_link_app(
                 scope_instance_id=scope_instance_id,
