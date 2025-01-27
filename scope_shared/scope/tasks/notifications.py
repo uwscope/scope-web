@@ -496,7 +496,7 @@ def _format_email(
             "",
         )
 
-    # Calculate what to display for "Requested by Provider"
+    # Calculate what to display for "Requested by Provider".
     requested_by_provider_count = len(
         [
             request_current
@@ -511,10 +511,9 @@ def _format_email(
     )
     requested_by_provider_formatted = ""
     if requested_by_provider_count > 0:
-        requested_by_provider_formatted += " " * 14 + "<h3>Requested by Provider</h3>\n"
+        requested_by_provider_formatted += "<h3>Requested by Provider</h3>\n"
         requested_by_provider_formatted += (
-            " " * 14
-            + "<p>Your social worker has {} requests:</p>\n".format(
+            "<p>Your social worker has {} requests:</p>\n".format(
                 requested_by_provider_count
             )
         )
@@ -529,9 +528,65 @@ def _format_email(
         if email_content_data.due_check_in_anxiety:
             requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>\n"
 
+    def _format_due_time_of_day(due_time_of_day: int) -> str:
+        due_time_of_day_12_hour = due_time_of_day % 12
+        if due_time_of_day_12_hour == 0:
+            due_time_of_day_12_hour = 12
+
+        due_time_of_day_am_pm = "am"
+        if due_time_of_day >= 12:
+            due_time_of_day_am_pm = "pm"
+
+        return "{}:00 {}".format(due_time_of_day_12_hour, due_time_of_day_am_pm)
+
+    # Calculate what to display for "My Plan for Today".
+    my_plan_for_today_formatted = ""
+    if len(email_content_data.scheduled_activities_due_today) > 0:
+        my_plan_for_today_formatted += "<h3>My Plan for Today</h3>"
+        my_plan_for_today_formatted += "<p>You scheduled the following activities:</p>"
+        for (
+            scheduled_activity_current
+        ) in email_content_data.scheduled_activities_due_today:
+            my_plan_for_today_formatted += "<p>- {}, due {}</p>".format(
+                scheduled_activity_current.activity_name,
+                _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+            )
+
+    # Calculate what to display for "My Past Week".
+    my_past_week_formatted = ""
+    if len(email_content_data.scheduled_activities_overdue) > 0:
+        my_past_week_formatted += "<h3>My Past Week</h3>"
+        my_past_week_formatted += (
+            "<p>"
+            + "To help identify activities most helpful to you, "
+            + "remember to log whether you completed an activity and how it made you feel:"
+            + "</p>"
+        )
+        running_header_due_date = None
+        for (
+            scheduled_activity_current
+        ) in email_content_data.scheduled_activities_overdue:
+            if running_header_due_date != scheduled_activity_current.due_date:
+                running_header_due_date = scheduled_activity_current.due_date
+
+                my_past_week_formatted += "<h4>{}</h4>".format(
+                    "{}, {} {}".format(
+                        running_header_due_date.strftime(format="%A"),
+                        running_header_due_date.strftime(format="%B"),
+                        running_header_due_date.day,
+                    )
+                )
+
+            my_past_week_formatted += "<p>- {}, due {}</p>".format(
+                scheduled_activity_current.activity_name,
+                _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+            )
+
     # Provide our email content data and our formatted content.
     format_params = dict(vars(email_content_data))
     format_params["requested_by_provider_formatted"] = requested_by_provider_formatted
+    format_params["my_plan_for_today_formatted"] = my_plan_for_today_formatted
+    format_params["my_past_week_formatted"] = my_past_week_formatted
 
     formatted_body = template_body.format_map(format_params)
     formatted_subject = template_subject.format_map(format_params)
