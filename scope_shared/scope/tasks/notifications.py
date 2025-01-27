@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import pprint
+
 import aws_infrastructure.tasks.ssh
 import boto3
 import contextlib
@@ -7,18 +10,20 @@ from dataclasses import asdict, dataclass
 import datetime
 from enum import Enum
 from invoke import task
-import json
+import operator
 from pathlib import Path
 import re
 import ruamel.yaml
 from typing import List, Optional, Union
 
 import scope.config
+import scope.database.date_utils
 import scope.database.document_utils
 import scope.database.initialize
 import scope.database.patient
 import scope.database.patient.activities
 import scope.database.patient.safety_plan
+import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
 import scope.database.patients
@@ -55,6 +60,9 @@ class EmailContentData:
     assigned_values_inventory: bool
     due_check_in_anxiety: bool
     due_check_in_depression: bool
+
+    scheduled_activities_due_today: List[_ContentScheduledActivity]
+    scheduled_activities_overdue: List[_ContentScheduledActivity]
 
 
 class EmailProcessStatus(Enum):
@@ -213,7 +221,9 @@ class _ContentPatientSummaryResult:
 def _content_patient_summary(
     *,
     patient_document_set: scope.documents.document_set.DocumentSet,
+    date_due: datetime.date,
 ) -> _ContentPatientSummaryResult:
+    # Work with only the current documents
     current_document_set = patient_document_set.remove_revisions()
 
     activity_documents = current_document_set.filter_match(
@@ -241,7 +251,7 @@ def _content_patient_summary(
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
         values_inventory_document=values_inventory_document,
-        date_due=datetime.date.today(),
+        date_due=date_due,
     )
 
     dueScheduledAssessmentsGad7 = [
@@ -271,6 +281,104 @@ def _content_patient_summary(
         assigned_values_inventory=patient_summary["assignedValuesInventory"],
         due_check_in_anxiety=len(dueScheduledAssessmentsGad7) > 0,
         due_check_in_depression=len(dueScheduledAssessmentsPhq9) > 0,
+    )
+
+
+@dataclass(frozen=True)
+class _ContentScheduledActivity:
+    activity_name: str
+    due_date: datetime.date
+    due_time_of_day: int
+
+
+@dataclass(frozen=True)
+class _ContentScheduledActivitiesResult:
+    due_today: List[_ContentScheduledActivity]
+    overdue: List[_ContentScheduledActivity]
+
+
+def _content_scheduled_activities(
+    *,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+    date_due: datetime.date,
+) -> _ContentScheduledActivitiesResult:
+    # Work with only the current documents.
+    current_document_set = patient_document_set.remove_revisions()
+
+    # Obtain scheduled activities which we have not yet completed.
+    scheduled_activities = current_document_set.filter_match(
+        match_type=scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
+        match_values={"completed": False},
+        match_deleted=False,
+    ).documents
+
+    def _map_content_scheduled_activity(
+        scheduled_activity_document: dict,
+    ) -> _ContentScheduledActivity:
+        return _ContentScheduledActivity(
+            activity_name=scheduled_activity_document["dataSnapshot"]["activity"][
+                "name"
+            ],
+            due_date=scope.database.date_utils.parse_date(
+                scheduled_activity_document["dueDate"]
+            ),
+            due_time_of_day=scheduled_activity_document["dueTimeOfDay"],
+        )
+
+    def _content_scheduled_activity_key(
+        content_scheduled_activity: _ContentScheduledActivity,
+    ):
+        return (
+            content_scheduled_activity.due_date,
+            content_scheduled_activity.due_time_of_day,
+            content_scheduled_activity.activity_name,
+        )
+
+    # Filter and map scheduled activities that are due today.
+    scheduled_activities_due_today = []
+    for scheduled_activity_current in scheduled_activities:
+        scheduled_activity_current_date_due = scope.database.date_utils.parse_date(
+            scheduled_activity_current["dueDate"]
+        )
+
+        if scheduled_activity_current_date_due == date_due:
+            scheduled_activities_due_today.append(
+                _map_content_scheduled_activity(scheduled_activity_current)
+            )
+
+    # Sort the activities that are due today.
+    scheduled_activities_due_today = sorted(
+        scheduled_activities_due_today,
+        key=operator.attrgetter("due_time_of_day", "activity_name"),
+    )
+
+    # Filter and map scheduled activities that are overdue.
+    scheduled_activities_overdue = []
+    for scheduled_activity_current in scheduled_activities:
+        scheduled_activity_current_date_due = scope.database.date_utils.parse_date(
+            scheduled_activity_current["dueDate"]
+        )
+
+        if scheduled_activity_current_date_due < date_due:
+            if scheduled_activity_current_date_due >= date_due - datetime.timedelta(
+                days=7
+            ):
+                scheduled_activities_overdue.append(
+                    _map_content_scheduled_activity(scheduled_activity_current)
+                )
+
+    # Sort the activities that are overdue.
+    scheduled_activities_overdue = sorted(
+        scheduled_activities_overdue,
+        key=operator.attrgetter("due_time_of_day", "activity_name"),
+    )
+    scheduled_activities_overdue = sorted(
+        scheduled_activities_overdue, key=operator.attrgetter("due_date"), reverse=True
+    )
+
+    return _ContentScheduledActivitiesResult(
+        due_today=scheduled_activities_due_today,
+        overdue=scheduled_activities_overdue,
     )
 
 
@@ -388,7 +496,7 @@ def _format_email(
             "",
         )
 
-    # Calculate what to display for "Requested by Provider"
+    # Calculate what to display for "Requested by Provider".
     requested_by_provider_count = len(
         [
             request_current
@@ -403,27 +511,82 @@ def _format_email(
     )
     requested_by_provider_formatted = ""
     if requested_by_provider_count > 0:
-        requested_by_provider_formatted += " " * 14 + "<h3>Requested by Provider</h3>\n"
+        requested_by_provider_formatted += "<h3>Requested by Provider</h3>"
         requested_by_provider_formatted += (
-            " " * 14
-            + "<p>Your social worker has {} requests:</p>\n".format(
+            "<p>Your social worker has {} requests:</p>".format(
                 requested_by_provider_count
             )
         )
         if email_content_data.assigned_values_inventory:
             requested_by_provider_formatted += (
-                "<p>- Complete Values & Activities Inventory</p>\n"
+                "<p>- Complete Values & Activities Inventory</p>"
             )
         if email_content_data.assigned_safety_plan:
-            requested_by_provider_formatted += "<p>- Complete Safety Plan</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Safety Plan</p>"
         if email_content_data.due_check_in_depression:
-            requested_by_provider_formatted += "<p>- Complete Depression Check-In</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Depression Check-In</p>"
         if email_content_data.due_check_in_anxiety:
-            requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>\n"
+            requested_by_provider_formatted += "<p>- Complete Anxiety Check-In</p>"
+
+    def _format_due_time_of_day(due_time_of_day: int) -> str:
+        due_time_of_day_12_hour = due_time_of_day % 12
+        if due_time_of_day_12_hour == 0:
+            due_time_of_day_12_hour = 12
+
+        due_time_of_day_am_pm = "am"
+        if due_time_of_day >= 12:
+            due_time_of_day_am_pm = "pm"
+
+        return "{}:00 {}".format(due_time_of_day_12_hour, due_time_of_day_am_pm)
+
+    # Calculate what to display for "My Plan for Today".
+    my_plan_for_today_formatted = ""
+    if len(email_content_data.scheduled_activities_due_today) > 0:
+        my_plan_for_today_formatted += "<h3>My Plan for Today</h3>"
+        my_plan_for_today_formatted += "<p>You scheduled the following activities:</p>"
+        for (
+            scheduled_activity_current
+        ) in email_content_data.scheduled_activities_due_today:
+            my_plan_for_today_formatted += "<p>- {}, due {}</p>".format(
+                scheduled_activity_current.activity_name,
+                _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+            )
+
+    # Calculate what to display for "My Past Week".
+    my_past_week_formatted = ""
+    if len(email_content_data.scheduled_activities_overdue) > 0:
+        my_past_week_formatted += "<h3>My Past Week</h3>"
+        my_past_week_formatted += (
+            "<p>"
+            + "To help identify activities most helpful to you, "
+            + "remember to log whether you completed an activity and how it made you feel:"
+            + "</p>"
+        )
+        running_header_due_date = None
+        for (
+            scheduled_activity_current
+        ) in email_content_data.scheduled_activities_overdue:
+            if running_header_due_date != scheduled_activity_current.due_date:
+                running_header_due_date = scheduled_activity_current.due_date
+
+                my_past_week_formatted += "<h4>{}</h4>".format(
+                    "{}, {} {}".format(
+                        running_header_due_date.strftime(format="%A"),
+                        running_header_due_date.strftime(format="%B"),
+                        running_header_due_date.day,
+                    )
+                )
+
+            my_past_week_formatted += "<p>- {}, due {}</p>".format(
+                scheduled_activity_current.activity_name,
+                _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+            )
 
     # Provide our email content data and our formatted content.
     format_params = dict(vars(email_content_data))
     format_params["requested_by_provider_formatted"] = requested_by_provider_formatted
+    format_params["my_plan_for_today_formatted"] = my_plan_for_today_formatted
+    format_params["my_past_week_formatted"] = my_past_week_formatted
 
     formatted_body = template_body.format_map(format_params)
     formatted_subject = template_subject.format_map(format_params)
@@ -444,7 +607,12 @@ def _patient_calculate_email_content_data(
     date_today = datetime.date.today()
 
     content_patient_summary = _content_patient_summary(
-        patient_document_set=patient_document_set
+        patient_document_set=patient_document_set,
+        date_due=date_today,
+    )
+    content_scheduled_activities = _content_scheduled_activities(
+        patient_document_set=patient_document_set,
+        date_due=date_today,
     )
 
     return EmailProcessData.from_content_data(
@@ -473,6 +641,8 @@ def _patient_calculate_email_content_data(
             assigned_values_inventory=content_patient_summary.assigned_values_inventory,
             due_check_in_anxiety=content_patient_summary.due_check_in_anxiety,
             due_check_in_depression=content_patient_summary.due_check_in_depression,
+            scheduled_activities_due_today=content_scheduled_activities.due_today,
+            scheduled_activities_overdue=content_scheduled_activities.overdue,
         ),
     )
 

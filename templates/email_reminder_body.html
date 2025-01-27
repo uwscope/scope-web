@@ -13,7 +13,7 @@
         <tr>
         <td align="center" valign="top" width="600">
         <![endif]-->
-        {template_email_reminder_testing_body_header}
+        <div>{template_email_reminder_testing_body_header}</div>
         <table
           border="0"
           cellpadding="0"
@@ -29,7 +29,9 @@
                 <a href="{link_app}" target="_blank">{link_app}</a>
               </p>
               <p>Reminders for {date_today_formatted_body}.</p>
-              {requested_by_provider_formatted}
+              <div>{requested_by_provider_formatted}</div>
+              <div>{my_plan_for_today_formatted}</div>
+              <div>{my_past_week_formatted}</div>
             </td>
           </tr>
           <tr>
