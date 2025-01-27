@@ -612,10 +612,14 @@ def task_email(
     with open(allowlist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         allowlist_email_reminder = yaml.load(config_file)
+        if allowlist_email_reminder == None:
+            allowlist_email_reminder = []
     denylist_email_reminder = None
     with open(denylist_email_reminder_path, encoding="UTF-8") as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         denylist_email_reminder = yaml.load(config_file)
+        if denylist_email_reminder == None:
+            denylist_email_reminder = []
 
     @task(optional=["production", "testing_destination_email"])
     def email_notifications(context, production=False, testing_destination_email=None):
