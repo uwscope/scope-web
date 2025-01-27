@@ -13,7 +13,7 @@
         <tr>
         <td align="center" valign="top" width="600">
         <![endif]-->
-        {testing_email_reminder_body_header}
+        {template_email_reminder_testing_body_header}
         <table
           border="0"
           cellpadding="0"
@@ -23,10 +23,13 @@
         >
           <tr style="background-color: #ffffff">
             <td align="left" valign="top" style="padding: 30px 10px 30px 10px">
+              <h2>SCOPE App Reminders</h2>
               <p>This is a daily reminder of active items in your SCOPE app:</p>
               <p>
                 <a href="{link_app}" target="_blank">{link_app}</a>
               </p>
+              <p>Reminders for {date_today_formatted_body}.</p>
+              {requested_by_provider_formatted}
             </td>
           </tr>
           <tr>
