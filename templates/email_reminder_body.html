@@ -13,7 +13,7 @@
         <tr>
         <td align="center" valign="top" width="600">
         <![endif]-->
-        {testing_email_reminder_body_header}
+        <div>{template_email_reminder_testing_body_header}</div>
         <table
           border="0"
           cellpadding="0"
@@ -23,17 +23,15 @@
         >
           <tr style="background-color: #ffffff">
             <td align="left" valign="top" style="padding: 30px 10px 30px 10px">
+              <h2>SCOPE App Reminders</h2>
+              <p>This is a daily reminder of active items in your SCOPE app:</p>
               <p>
-                This is an email that could provide reminders, but it still
-                needs a structure:
+                <a href="{link_app}" target="_blank">{link_app}</a>
               </p>
-              <p>
-                If you do not want these reminders, contact us at &lt;<a
-                  href="mailto:scopestudy@uw.edu"
-                  target="_blank"
-                  >scopestudy@uw.edu</a
-                >&gt;.
-              </p>
+              <p>Reminders for {date_today_formatted_body}.</p>
+              <div>{requested_by_provider_formatted}</div>
+              <div>{my_plan_for_today_formatted}</div>
+              <div>{my_past_week_formatted}</div>
             </td>
           </tr>
           <tr>
@@ -47,6 +45,13 @@
                   href="mailto:{patient_email}"
                   target="_blank"
                   >{patient_email}</a
+                >&gt;.
+              </p>
+              <p>
+                If you do not want these reminders, contact us at &lt;<a
+                  href="mailto:scopestudy@uw.edu"
+                  target="_blank"
+                  >scopestudy@uw.edu</a
                 >&gt;.
               </p>
               <p>

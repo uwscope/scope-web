@@ -5,7 +5,6 @@ import requests
 from typing import Callable, List
 from urllib.parse import urljoin
 
-import blueprints.patient.summary
 import scope.config
 import scope.database.date_utils as date_utils
 import scope.database.patient.safety_plan
@@ -14,6 +13,7 @@ import scope.database.patient.values_inventory
 import scope.schema
 import scope.schema_utils as schema_utils
 import scope.testing.fixtures_database_temp_patient
+import scope.utils.compute_patient_summary
 
 
 import tests.testing_config
@@ -123,11 +123,12 @@ def test_compute_patient_summary_values_inventory(
     # OPTION 1 - assigned is False.
     values_inventory = data_fake_values_inventory_factory()
     values_inventory["assigned"] = False
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -142,11 +143,12 @@ def test_compute_patient_summary_values_inventory(
     activity = data_fake_activity_factory()
     activity["editedDateTime"] = date_utils.format_datetime(datetime_now)
     activity["valueId"] = "some valueId"
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -163,11 +165,12 @@ def test_compute_patient_summary_values_inventory(
     activity["editedDateTime"] = date_utils.format_datetime(datetime_now)
     if "valueId" in activity:
         del activity["valueId"]
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -182,11 +185,12 @@ def test_compute_patient_summary_values_inventory(
     activity = data_fake_activity_factory()
     activity["editedDateTime"] = date_utils.format_datetime(datetime_before)
     activity["valueId"] = "some valueId"
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedValuesInventory"]
     _patient_summary_assertions(summary=summary)
@@ -205,11 +209,12 @@ def test_compute_patient_summary_safety_plan(
 
     # OPTION 1 - assigned is False.
     safety_plan["assigned"] = False
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -217,11 +222,12 @@ def test_compute_patient_summary_safety_plan(
     # OPTION 2 - assigned is True but lastUpdatedDate = assignedDate
     safety_plan["assigned"] = True
     safety_plan["lastUpdatedDateTime"] = safety_plan["assignedDateTime"]
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -231,11 +237,12 @@ def test_compute_patient_summary_safety_plan(
         date_utils.parse_datetime(safety_plan["assignedDateTime"])
         + datetime.timedelta(days=2)
     )
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert not summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -245,11 +252,12 @@ def test_compute_patient_summary_safety_plan(
         date_utils.parse_datetime(safety_plan["assignedDateTime"])
         - datetime.timedelta(days=2)
     )
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedSafetyPlan"]
     _patient_summary_assertions(summary=summary)
@@ -268,11 +276,12 @@ def test_compute_patient_summary_scheduled_assessments(
     # OPTION 1 - completed is True.
     for scheduled_assessment_current in scheduled_assessments:
         scheduled_assessment_current["completed"] = True
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -283,11 +292,12 @@ def test_compute_patient_summary_scheduled_assessments(
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.date.today() + datetime.timedelta(days=2)
         )
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] == []
     _patient_summary_assertions(summary=summary)
@@ -298,11 +308,12 @@ def test_compute_patient_summary_scheduled_assessments(
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.date.today()
         )
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
@@ -313,11 +324,12 @@ def test_compute_patient_summary_scheduled_assessments(
         scheduled_assessment_current["dueDate"] = date_utils.format_date(
             datetime.date.today() - datetime.timedelta(days=1)
         )
-    summary = blueprints.patient.summary.compute_patient_summary(
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
+        date_due=datetime.date.today(),
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
