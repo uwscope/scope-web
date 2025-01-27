@@ -14,12 +14,12 @@ DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 ALLOWLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/allowlist_email_reminder.yaml"
 DENYLIST_EMAIL_REMINDER_PATH = "./secrets/configuration/denylist_email_reminder.yaml"
 TEMPLATE_EMAIL_REMINDER_BODY_PATH = "./templates/email_reminder_body.html"
-TEMPLATE_EMAIL_REMINDER_SUBJECT_PATH = "./templates/email_reminder_subject.html"
+TEMPLATE_EMAIL_REMINDER_SUBJECT_PATH = "./templates/email_reminder_subject.txt"
 TEMPLATE_EMAIL_REMINDER_TESTING_BODY_HEADER_PATH = (
     "./templates/email_reminder_testing_body_header.html"
 )
 TEMPLATE_EMAIL_REMINDER_TESTING_SUBJECT_PREFIX_PATH = (
-    "./templates/email_reminder_testing_subject_prefix.html"
+    "./templates/email_reminder_testing_subject_prefix.txt"
 )
 
 # Build task collection
