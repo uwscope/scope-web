@@ -16,6 +16,7 @@ import re
 import ruamel.yaml
 from typing import List, Optional, Union
 
+
 import scope.config
 import scope.database.date_utils
 import scope.database.document_utils
@@ -29,6 +30,7 @@ import scope.database.patient.values_inventory
 import scope.database.patients
 import scope.documentdb.client
 import scope.documents.document_set
+import scope.enums
 import scope.populate
 import scope.schema
 import scope.schema_utils
@@ -69,12 +71,12 @@ class EmailProcessStatus(Enum):
     IN_PROGRESS = 0
 
     STOPPED_MATCHED_DENY_LIST = 1
-    STOPPED_COGNITO_ACCOUNT_DISABLED = 2
-    STOPPED_FAILED_ALLOW_LIST = 3
+    STOPPED_COGNITO_ACCOUNT_NOT_ACTIVE = 2
+    STOPPED_TREATMENT_STATUS = 3
+    STOPPED_CONTENT_NOTHING_DUE = 4
+    STOPPED_FAILED_ALLOW_LIST = 5
 
-    REACHED_END_OF_FUNCTION = 10
-
-    EMAIL_SUCCESS = 12
+    EMAIL_SUCCESS = 10
 
 
 @dataclass(frozen=True)
@@ -421,13 +423,13 @@ def _get_cognito_user_using_cognito_id(
     return None
 
 
-def _filter_cognito_account_disabled(
+def _filter_cognito_account_not_active(
     *,
     pool_id: str,
     cognito_id: str,
 ) -> bool:
     """
-    Filter based on whether a Cognito account is disabled.
+    Filter based on whether a Cognito account is not active.
     :param pool_id: Cognito UserPoolId that is a unique identifier for a user pool.
     :param cognito_id: Unique identifier assigned to each user within a user pool.
     :return: true if enabled, false if disabled.
@@ -444,12 +446,69 @@ def _filter_cognito_account_disabled(
         cognito_id=cognito_id,
     )
 
+    # Patient must exist, would be an error if it did not.
     if not cognito_user:
         raise ValueError(
             f"User with cognito_id {cognito_id} not found in pool {pool_id}"
         )
 
-    return cognito_user.get("Enabled", False)
+    # Cognito must have "UserStatus" of "CONFIRMED".
+    # Otherwise it is probably "FORCE_CHANGE_PASSWORD", meaning they have not yet logged in.
+    if cognito_user["UserStatus"] != "CONFIRMED":
+        return False
+
+    # Cognito must be enabled.
+    # Otherwise it has been explicitly disabled.
+    if not cognito_user["Enabled"]:
+        return False
+
+    return True
+
+
+def _filter_content_nothing_due(
+    *,
+    content_data: EmailContentData,
+) -> bool:
+    """
+    Filter if this reminder would not include anything that is due.
+    """
+
+    return any(
+        [
+            content_data.assigned_safety_plan,
+            content_data.assigned_values_inventory,
+            content_data.due_check_in_anxiety,
+            content_data.due_check_in_depression,
+            len(content_data.scheduled_activities_due_today) > 0,
+        ]
+    )
+
+
+def _filter_treatment_status(
+    *,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+) -> bool:
+    """
+    Filter if treatment status is Discharged or End.
+    """
+
+    # Work with only the current documents
+    current_document_set = patient_document_set.remove_revisions()
+
+    patient_profile_document = current_document_set.filter_match(
+        match_type=scope.database.patient.patient_profile.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).unique()
+
+    # If no status is yet assigned, allow reminders.
+    if not "depressionTreatmentStatus" in patient_profile_document:
+        return True
+
+    # Allow reminders if status is not Discharged or End.
+    return patient_profile_document["depressionTreatmentStatus"] not in [
+        scope.enums.DepressionTreatmentStatus.Discharged,
+        scope.enums.DepressionTreatmentStatus.End,
+    ]
 
 
 def _filter_denylist(
@@ -669,6 +728,7 @@ def _patient_calculate_email_content_data(
 def _patient_filter_email_process_data(
     *,
     email_process_data: EmailProcessData,
+    patient_document_set: scope.documents.document_set.DocumentSet,
     denylist_email_reminder: List[str],
 ) -> EmailProcessData:
     """
@@ -686,13 +746,31 @@ def _patient_filter_email_process_data(
         )
 
     # Filter if the patient Cognito account has been disabled.
-    if not _filter_cognito_account_disabled(
+    if not _filter_cognito_account_not_active(
         pool_id=email_process_data.pool_id,
         cognito_id=email_process_data.cognito_id,
     ):
         return EmailProcessData.from_status(
             current=email_process_data,
-            status=EmailProcessStatus.STOPPED_COGNITO_ACCOUNT_DISABLED,
+            status=EmailProcessStatus.STOPPED_COGNITO_ACCOUNT_NOT_ACTIVE,
+        )
+
+    # Filter if treatment status indicates reminders should be disabled.
+    if not _filter_treatment_status(
+        patient_document_set=patient_document_set,
+    ):
+        return EmailProcessData.from_status(
+            current=email_process_data,
+            status=EmailProcessStatus.STOPPED_TREATMENT_STATUS,
+        )
+
+    # Filter if content indicates nothing is currently due for a reminder.
+    if not _filter_content_nothing_due(
+        content_data=email_process_data.content_data,
+    ):
+        return EmailProcessData.from_status(
+            current=email_process_data,
+            status=EmailProcessStatus.STOPPED_CONTENT_NOTHING_DUE,
         )
 
     return email_process_data
@@ -721,6 +799,7 @@ def _patient_email_reminder(
     # Filter whether this patient receives an email.
     email_process_data = _patient_filter_email_process_data(
         email_process_data=email_process_data,
+        patient_document_set=patient_document_set,
         denylist_email_reminder=denylist_email_reminder,
     )
     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
