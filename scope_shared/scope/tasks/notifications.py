@@ -708,20 +708,20 @@ def _patient_email_reminder(
     templates_email_reminder: TemplatesEmailReminder,
     testing_destination_email: Optional[str],
 ) -> EmailProcessData:
-    # Filter whether this patient receives an email.
-    email_process_data = _patient_filter_email_process_data(
-        email_process_data=email_process_data,
-        denylist_email_reminder=denylist_email_reminder,
-    )
-    if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
-        return email_process_data
-
     # Calculate values needed for an email.
     email_process_data = _patient_calculate_email_content_data(
         email_process_data=email_process_data,
         patient_document_set=patient_document_set,
         scope_instance_id=scope_instance_id,
         testing_destination_email=testing_destination_email,
+    )
+    if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
+        return email_process_data
+
+    # Filter whether this patient receives an email.
+    email_process_data = _patient_filter_email_process_data(
+        email_process_data=email_process_data,
+        denylist_email_reminder=denylist_email_reminder,
     )
     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
         return email_process_data
