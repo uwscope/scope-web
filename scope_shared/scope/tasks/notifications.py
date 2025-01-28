@@ -82,8 +82,9 @@ class EmailProcessData:
     patient_id: str
     patient_name: str
     patient_email: str
-    cognito_id: str
+
     pool_id: str
+    cognito_id: str
 
     content_data: Optional[EmailContentData]
 
@@ -109,8 +110,8 @@ class EmailProcessData:
             patient_id=current.patient_id,
             patient_name=current.patient_name,
             patient_email=current.patient_email,
-            cognito_id=current.cognito_id,
             pool_id=current.pool_id,
+            cognito_id=current.cognito_id,
             content_data=content_data,
             status=current.status,
         )
@@ -122,15 +123,15 @@ class EmailProcessData:
         patient_id: str,
         patient_name: str,
         patient_email: str,
-        cognito_id: str,
         pool_id: str,
+        cognito_id: str,
     ):
         return EmailProcessData(
             patient_id=patient_id,
             patient_name=patient_name,
             patient_email=patient_email,
-            cognito_id=cognito_id,
             pool_id=pool_id,
+            cognito_id=cognito_id,
             content_data=None,
             status=EmailProcessStatus.IN_PROGRESS,
         )
@@ -146,8 +147,8 @@ class EmailProcessData:
             patient_id=current.patient_id,
             patient_name=current.patient_name,
             patient_email=current.patient_email,
-            cognito_id=current.cognito_id,
             pool_id=current.pool_id,
+            cognito_id=current.cognito_id,
             content_data=current.content_data,
             status=status,
         )
@@ -405,7 +406,7 @@ def _get_cognito_user_using_cognito_id(
     boto_userpool,
     pool_id: str,
     cognito_id: str,
-) -> dict:
+) -> Optional[dict]:
     """
     Filter the list of existing Cognito users with cognito_id.
     """
@@ -416,10 +417,15 @@ def _get_cognito_user_using_cognito_id(
 
     if response["Users"]:
         return response["Users"][0]
+
     return None
 
 
-def _filter_cognito_account_disabled(*, pool_id: str, cognito_id: str) -> bool:
+def _filter_cognito_account_disabled(
+    *,
+    pool_id: str,
+    cognito_id: str,
+) -> bool:
     """
     Filter based on whether a Cognito account is disabled.
     :param pool_id: Cognito UserPoolId that is a unique identifier for a user pool.
@@ -862,10 +868,10 @@ def task_email(
                         patient_email=patient_identity_current["cognitoAccount"][
                             "email"
                         ],
+                        pool_id=cognito_config.poolid,
                         cognito_id=patient_identity_current["cognitoAccount"][
                             "cognitoId"
                         ],
-                        pool_id=cognito_config.poolid,
                     ),
                     patient_document_set=scope.documents.document_set.DocumentSet(
                         documents=patient_collection.find()
