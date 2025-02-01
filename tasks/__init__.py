@@ -9,7 +9,7 @@ import tasks.database
 import tasks.documentdb
 import tasks.dependencies
 import tasks.notebooks
-import tasks.notifications
+import tasks.reminders
 import tasks.server_flask
 import tasks.web_patient
 import tasks.web_registry
@@ -43,8 +43,8 @@ compose_collection(ns, tasks.format.ns, sub=False)
 # Compose from notebooks.py
 compose_collection(ns, tasks.notebooks.ns, name="notebooks")
 
-# Compose from notifications.py
-compose_collection(ns, tasks.notifications.ns, name="notifications")
+# Compose from reminders.py
+compose_collection(ns, tasks.reminders.ns, name="reminders")
 
 # Compose from test.py
 compose_collection(ns, tasks.test.ns, name="test")
