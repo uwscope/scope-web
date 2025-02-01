@@ -42,7 +42,7 @@ task_email_args = {
 }
 
 # Build task collection
-ns = Collection("notifications")
+ns = Collection("reminders")
 
 database_configs = {
     "demo": DATABASE_DEMO_CONFIG_PATH,
