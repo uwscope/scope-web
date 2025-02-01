@@ -175,6 +175,7 @@ def _validate_patient_collection_documents(
             "assessment",
             "caseReview",
             "moodLog",
+            "reviewMark",
             "scheduledActivity",
             "scheduledAssessment",
             "session",
