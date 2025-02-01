@@ -51,9 +51,9 @@ database_configs = {
     "scca": DATABASE_SCCA_CONFIG_PATH,
 }
 
-for name, config_path in database_configs.items():
+for database_name, config_path in database_configs.items():
     if Path(config_path).exists():
-        ns_collection = Collection(name)
+        ns_collection = Collection(database_name)
         ns_collection.add_task(
             scope.tasks.notifications.task_email(
                 **task_email_args,
@@ -61,4 +61,4 @@ for name, config_path in database_configs.items():
             ),
             "email",
         )
-        compose_collection(ns, ns_collection, name=name)
+        compose_collection(ns, ns_collection, name=database_name)
