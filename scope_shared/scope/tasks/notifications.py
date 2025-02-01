@@ -506,8 +506,8 @@ def _filter_treatment_status(
 
     # Allow reminders if status is not Discharged or End.
     return patient_profile_document["depressionTreatmentStatus"] not in [
-        scope.enums.DepressionTreatmentStatus.Discharged,
-        scope.enums.DepressionTreatmentStatus.End,
+        scope.enums.DepressionTreatmentStatus.Discharged.value,
+        scope.enums.DepressionTreatmentStatus.End.value,
     ]
 
 
