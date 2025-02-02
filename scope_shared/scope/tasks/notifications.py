@@ -625,9 +625,9 @@ def _format_email(
         for (
             scheduled_activity_current
         ) in email_content_data.scheduled_activities_due_today:
-            my_plan_for_today_formatted += "<p>- {}, due {}</p>".format(
-                scheduled_activity_current.activity_name,
+            my_plan_for_today_formatted += "<p>- {}: {}</p>".format(
                 _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+                scheduled_activity_current.activity_name,
             )
     else:
         my_plan_for_today_formatted += (
