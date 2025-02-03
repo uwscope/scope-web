@@ -632,8 +632,8 @@ def _format_email(
     else:
         my_plan_for_today_formatted += (
             "<p>"
-            + "You have no activities scheduled."
-            + "You can use the Values & Activities Inventory in the Tools tab to help brainstorm and schedule pleasant activities."
+            + "You have no activities scheduled. "
+            + "You can use the Values & Activities Inventory in the Tools tab to help brainstorm and schedule pleasant activities. "
             + "You can also use the Activities tab to add and schedule activities.</p>"
         )
 
