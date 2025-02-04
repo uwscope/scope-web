@@ -28,12 +28,12 @@
         >
           <tr style="background-color: #ffffff">
             <td align="left" valign="top" style="padding: 30px 10px 30px 10px">
-              <h2>SCOPE App Reminders</h2>
-              <p>This is a daily reminder of active items in your SCOPE app:</p>
+              <h2>SCOPE App Daily Reminder</h2>
+              <p>This is a reminder of active items in your SCOPE app:</p>
               <p>
                 <a href="{link_app}" target="_blank">{link_app}</a>
               </p>
-              <p>Reminders for {date_today_formatted_body}.</p>
+              <p>{date_today_formatted_body}.</p>
               <div>{requested_by_provider_formatted}</div>
               <div>{my_plan_for_today_formatted}</div>
               <div>{my_past_week_formatted}</div>
@@ -46,17 +46,17 @@
               style="font-size: smaller; padding: 30px 10px 30px 10px"
             >
               <p>
-                This email was sent to &lt;<a
-                  href="mailto:{patient_email}"
-                  target="_blank"
-                  >{patient_email}</a
-                >&gt;.
-              </p>
-              <p>
                 If you do not want these reminders, contact us at &lt;<a
                   href="mailto:scopestudy@uw.edu"
                   target="_blank"
                   >scopestudy@uw.edu</a
+                >&gt;.
+              </p>
+              <p>
+                This email was sent to &lt;<a
+                  href="mailto:{patient_email}"
+                  target="_blank"
+                  >{patient_email}</a
                 >&gt;.
               </p>
               <p>
