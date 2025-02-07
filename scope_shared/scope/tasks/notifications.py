@@ -506,8 +506,8 @@ def _filter_treatment_status(
 
     # Allow reminders if status is not Discharged or End.
     return patient_profile_document["depressionTreatmentStatus"] not in [
-        scope.enums.DepressionTreatmentStatus.Discharged,
-        scope.enums.DepressionTreatmentStatus.End,
+        scope.enums.DepressionTreatmentStatus.Discharged.value,
+        scope.enums.DepressionTreatmentStatus.End.value,
     ]
 
 
@@ -619,16 +619,23 @@ def _format_email(
 
     # Calculate what to display for "My Plan for Today".
     my_plan_for_today_formatted = ""
+    my_plan_for_today_formatted += "<h3>My Plan for Today</h3>"
     if len(email_content_data.scheduled_activities_due_today) > 0:
-        my_plan_for_today_formatted += "<h3>My Plan for Today</h3>"
         my_plan_for_today_formatted += "<p>You scheduled the following activities:</p>"
         for (
             scheduled_activity_current
         ) in email_content_data.scheduled_activities_due_today:
-            my_plan_for_today_formatted += "<p>- {}, due {}</p>".format(
-                scheduled_activity_current.activity_name,
+            my_plan_for_today_formatted += "<p>- {}: {}</p>".format(
                 _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+                scheduled_activity_current.activity_name,
             )
+    else:
+        my_plan_for_today_formatted += (
+            "<p>"
+            + "You have no activities scheduled. "
+            + "You can use the Values & Activities Inventory in the Tools tab to help brainstorm and schedule pleasant activities. "
+            + "You can also use the Activities tab to add and schedule activities.</p>"
+        )
 
     # Calculate what to display for "My Past Week".
     my_past_week_formatted = ""
@@ -637,28 +644,31 @@ def _format_email(
         my_past_week_formatted += (
             "<p>"
             + "To help identify activities most helpful to you, "
-            + "remember to log whether you completed an activity and how it made you feel:"
+            + "remember to log whether you completed an activity and how it made you feel."
             + "</p>"
         )
-        running_header_due_date = None
-        for (
-            scheduled_activity_current
-        ) in email_content_data.scheduled_activities_overdue:
-            if running_header_due_date != scheduled_activity_current.due_date:
-                running_header_due_date = scheduled_activity_current.due_date
-
-                my_past_week_formatted += "<h4>{}</h4>".format(
-                    "{}, {} {}".format(
-                        running_header_due_date.strftime(format="%A"),
-                        running_header_due_date.strftime(format="%B"),
-                        running_header_due_date.day,
-                    )
-                )
-
-            my_past_week_formatted += "<p>- {}, due {}</p>".format(
-                scheduled_activity_current.activity_name,
-                _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
-            )
+        #
+        # Decided not to render which activities are overdue.
+        #
+        # running_header_due_date = None
+        # for (
+        #     scheduled_activity_current
+        # ) in email_content_data.scheduled_activities_overdue:
+        #     if running_header_due_date != scheduled_activity_current.due_date:
+        #         running_header_due_date = scheduled_activity_current.due_date
+        #
+        #         my_past_week_formatted += "<h4>{}</h4>".format(
+        #             "{}, {} {}".format(
+        #                 running_header_due_date.strftime(format="%A"),
+        #                 running_header_due_date.strftime(format="%B"),
+        #                 running_header_due_date.day,
+        #             )
+        #         )
+        #
+        #     my_past_week_formatted += "<p>- {}, due {}</p>".format(
+        #         scheduled_activity_current.activity_name,
+        #         _format_due_time_of_day(scheduled_activity_current.due_time_of_day),
+        #     )
 
     # Provide our email content data and our formatted content.
     format_params = dict(vars(email_content_data))

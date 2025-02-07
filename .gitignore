@@ -9,3 +9,6 @@
 
 # Python caches
 **/__pycache__/
+
+# Batch file for locally executing reminders
+/reminders.bat
