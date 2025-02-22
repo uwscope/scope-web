@@ -206,6 +206,9 @@ TEST_CONFIGS = [
         flask_document_set_key="reviewmarks",
         flask_query_set_element_type="reviewmark",
         flask_document_set_element_key="reviewmark",
+        options=ConfigTestPatientSetOptions(
+            set_element_will_already_exist=True,
+        ),
     ),
     ConfigTestPatientSet(
         name="sessions",
