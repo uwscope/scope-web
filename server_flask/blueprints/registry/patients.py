@@ -185,35 +185,37 @@ def get_patients():
         database=database,
     )
 
-    # Retrieval of information on each patient is IO-bound, so we thread this.
-    def _get_patients_map(patient_identity_current: dict) -> dict:
-        patient_collection = database.get_collection(
-            patient_identity_current["collection"]
-        )
-
-        return _construct_patient_document(
-            patient_identity=patient_identity_current,
-            patient_collection=patient_collection,
-            include_complete_details=True,
-        )
-
-    pool = ThreadPool(4)
-    patient_documents = pool.map(_get_patients_map, patient_identities)
-
-    # # Construct a full patient document for each
-    # patient_documents = []
-    # for patient_identity_current in patient_identities:
+    # Retrieval of each patient is highly IO-bound in development.
+    # An attempt to parallelize did not notably improve performance in production.
+    #
+    # def _get_patients_map(patient_identity_current: dict) -> dict:
     #     patient_collection = database.get_collection(
     #         patient_identity_current["collection"]
     #     )
     #
-    #     patient_documents.append(
-    #         _construct_patient_document(
-    #             patient_identity=patient_identity_current,
-    #             patient_collection=patient_collection,
-    #             include_complete_details=True,
-    #         )
+    #     return _construct_patient_document(
+    #         patient_identity=patient_identity_current,
+    #         patient_collection=patient_collection,
+    #         include_complete_details=True,
     #     )
+    #
+    # pool = ThreadPool(4)
+    # patient_documents = pool.map(_get_patients_map, patient_identities)
+
+    # Construct a full patient document for each
+    patient_documents = []
+    for patient_identity_current in patient_identities:
+        patient_collection = database.get_collection(
+            patient_identity_current["collection"]
+        )
+
+        patient_documents.append(
+            _construct_patient_document(
+                patient_identity=patient_identity_current,
+                patient_collection=patient_collection,
+                include_complete_details=True,
+            )
+        )
 
     return {
         "patients": patient_documents,
