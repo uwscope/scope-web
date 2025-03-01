@@ -198,7 +198,7 @@ def get_patients():
         return _construct_patient_document(
             patient_identity=patient_identity_current,
             patient_collection=patient_collection,
-            include_complete_details=True,
+            include_complete_details=False,
         )
 
     pool = ThreadPool(4)

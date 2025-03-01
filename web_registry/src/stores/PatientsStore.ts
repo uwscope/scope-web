@@ -146,13 +146,38 @@ export class PatientsStore implements IPatientsStore {
     }
 
     const getPatientsPromise = () =>
-      registryService.getPatients().then((patients) =>
-        patients.map((p) => {
-          const patientStore = new PatientStore(p);
-          patientStore.load(getToken, onUnauthorized);
+      registryService.getPatients().then((patients) => {
+        const patientsSorted = patients.slice().sort(
+          (patientA, patientB) => {
+            return patientA.profile.name.localeCompare(patientB.profile.name);
+          }
+        );
+
+        const patientStores = patientsSorted.map((patient) => {
+          const patientStore = new PatientStore(patient);
           return patientStore;
-        }),
-      );
+        });
+
+        var load = Promise.resolve()
+        for (const patientStoreCurrent of patientStores) {
+
+          load = load.then(async () => {
+            await patientStoreCurrent.load(getToken, onUnauthorized);
+          })
+
+
+        }
+
+        Promise.resolve(load);
+
+        return patientStores;
+
+        // return patients.map((p) => {
+        //   const patientStore = new PatientStore(p);
+        //   patientStore.load(getToken, onUnauthorized);
+        //   return patientStore;
+        // });
+      });
 
     await Promise.all([
       this.loadAndLogQuery<IPatientStore[]>(
