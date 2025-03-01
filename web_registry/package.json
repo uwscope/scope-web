@@ -27,6 +27,7 @@
     "amazon-cognito-identity-js": "5.2.x",
     "axios": "0.21.x",
     "date-fns": "2.28.x",
+    "es6-promise-pool": "2.5.x",
     "lodash.debounce": "4.0.x",
     "lodash.throttle": "4.1.x",
     "lorem-ipsum": "2.0.x",
