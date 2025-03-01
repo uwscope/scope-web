@@ -3,7 +3,6 @@ import flask
 import flask_json
 from multiprocessing.dummy import Pool as ThreadPool
 import pymongo.collection
-import timeit
 
 import request_utils
 import request_context
@@ -178,8 +177,6 @@ def _construct_patient_document(
 )
 @flask_json.as_json
 def get_patients():
-    timeit_start = timeit.default_timer()
-
     context = request_context.authorized_for_everything()
     database = context.database
 
@@ -188,45 +185,27 @@ def get_patients():
         database=database,
     )
 
-    # # Retrieval of each patient is highly IO-bound in development.
-    # # An attempt to parallelize did not notably improve performance in production.
-    # #
-    # def _get_patients_map(patient_identity_current: dict) -> dict:
-    #     patient_collection = database.get_collection(
-    #         patient_identity_current["collection"]
-    #     )
-    #
-    #     return _construct_patient_document(
-    #         patient_identity=patient_identity_current,
-    #         patient_collection=patient_collection,
-    #         include_complete_details=True,
-    #     )
-    #
-    # pool = ThreadPool(4)
-    # patient_documents = pool.map(_get_patients_map, patient_identities)
-
-    # Construct a full patient document for each
-    patient_documents = []
-    for patient_identity_current in patient_identities:
+    # PyMongo is thread safe, but not process safe.
+    # Sequential retrieval of each patient is IO-bound.
+    # This is notable in development, and testing with include_complete_details=True
+    # did find some performance differences in a deployment.
+    # Given no clear negative to thread parallelization, we are using that approach.
+    def _get_patients_map(patient_identity_current: dict) -> dict:
         patient_collection = database.get_collection(
             patient_identity_current["collection"]
         )
 
-        patient_documents.append(
-            _construct_patient_document(
-                patient_identity=patient_identity_current,
-                patient_collection=patient_collection,
-                include_complete_details=True,
-            )
+        return _construct_patient_document(
+            patient_identity=patient_identity_current,
+            patient_collection=patient_collection,
+            include_complete_details=True,
         )
 
-    timeit_total = timeit.default_timer() - timeit_start
+    pool = ThreadPool(4)
+    patient_documents = pool.map(_get_patients_map, patient_identities)
 
     return {
         "patients": patient_documents,
-        "_timing": {
-            "total": format(timeit_total, 'f'),
-        },
     }
 
 
