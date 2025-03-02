@@ -5,7 +5,7 @@ import { getLogger } from "shared/logger";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import { sortStringsCaseInsensitive } from "shared/sorting";
 import { getLoadAndLogQuery } from "shared/stores";
-import { IPatient, IProviderIdentity } from "shared/types";
+import { IProviderIdentity } from "shared/types";
 import { useServices } from "src/services/services";
 import { IPatientStore, PatientStore } from "src/stores/PatientStore";
 import { contains } from "src/utils/array";
@@ -36,7 +36,7 @@ export interface IPatientsStore {
     onUnauthorized?: () => void,
   ) => Promise<void>;
 
-  addPatient: (patient: Partial<IPatient>) => void;
+  // addPatient: (patient: Partial<IPatient>) => void;
   getPatientByRecordId: (
     recordId: string | undefined,
   ) => IPatientStore | undefined;
@@ -57,7 +57,7 @@ export class PatientsStore implements IPatientsStore {
 
   private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
-  private readonly addPatientQuery: PromiseQuery<IPatient>;
+  // private readonly addPatientQuery: PromiseQuery<IPatient>;
 
   // The first time the patients store is loaded,
   // track whether we have loaded all of the patient stores that are currently active.
@@ -85,7 +85,7 @@ export class PatientsStore implements IPatientsStore {
 
     this.loadPatientsQuery = new PromiseQuery([], "loadPatients");
     this.loadProvidersQuery = new PromiseQuery([], "loadProviders");
-    this.addPatientQuery = new PromiseQuery<IPatient>(undefined, "addPatient");
+    // this.addPatientQuery = new PromiseQuery<IPatient>(undefined, "addPatient");
 
     makeAutoObservable(this);
   }
@@ -228,16 +228,16 @@ export class PatientsStore implements IPatientsStore {
     ]);
   }
 
-  @action.bound
-  public async addPatient(patient: Partial<IPatient>) {
-    const { registryService } = useServices();
-    const promise = registryService.addPatient(patient);
-    const newPatient = await this.addPatientQuery.fromPromise(promise);
-    action(() => {
-      this.patients.push(new PatientStore(newPatient));
-      this.filterCareManager(this.filteredCareManager);
-    })();
-  }
+  // @action.bound
+  // public async addPatient(patient: Partial<IPatient>) {
+  //   const { registryService } = useServices();
+  //   const promise = registryService.addPatient(patient);
+  //   const newPatient = await this.addPatientQuery.fromPromise(promise);
+  //   action(() => {
+  //     this.patients.push(new PatientStore(newPatient));
+  //     this.filterCareManager(this.filteredCareManager);
+  //   })();
+  // }
 
   @action.bound
   public filterCareManager(careManager: string) {

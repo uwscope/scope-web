@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+// import { AxiosResponse } from "axios";
 import { IServiceBase, ServiceBase } from "shared/serviceBase";
 import {
   IPatientListResponse,
@@ -8,7 +8,7 @@ import { IPatient, IProviderIdentity } from "shared/types";
 
 export interface IRegistryService extends IServiceBase {
   getPatients(): Promise<IPatient[]>;
-  addPatient(patient: Partial<IPatient>): Promise<IPatient>;
+  // addPatient(patient: Partial<IPatient>): Promise<IPatient>;
 
   getProviders(): Promise<IProviderIdentity[]>;
 }
@@ -40,19 +40,19 @@ class RegistryService extends ServiceBase implements IRegistryService {
     return response.data?.patients;
   }
 
-  public async addPatient(patient: Partial<IPatient>): Promise<IPatient> {
-    // Work around since backend doesn't exist
-    try {
-      const response = await this.axiosInstance.post<
-        IPatient,
-        AxiosResponse<IPatient>
-      >("/patients", patient);
-      return response.data;
-    } catch (error) {
-      await new Promise((resolve) => setTimeout(() => resolve(null), 500));
-      return patient as IPatient;
-    }
-  }
+  // public async addPatient(patient: Partial<IPatient>): Promise<IPatient> {
+  //   // Work around since backend doesn't exist
+  //   try {
+  //     const response = await this.axiosInstance.post<
+  //       IPatient,
+  //       AxiosResponse<IPatient>
+  //     >("/patients", patient);
+  //     return response.data;
+  //   } catch (error) {
+  //     await new Promise((resolve) => setTimeout(() => resolve(null), 500));
+  //     return patient as IPatient;
+  //   }
+  // }
 
   public async getProviders(): Promise<IProviderIdentity[]> {
     const response =
