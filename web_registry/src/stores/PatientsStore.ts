@@ -29,13 +29,14 @@ export interface IPatientsStore {
 
   readonly filteredCareManager: string;
   readonly filteredClinic: ClinicCode | AllClinicCode;
-  readonly filteredStudyPatients: boolean;
+  readonly filteredStudyEndedPatients: boolean;
 
   readonly filteredPatients: ReadonlyArray<IPatientStore>;
 
   readonly state: IPromiseQueryState;
 
   readonly loadPatientStoresCompleteInitialActive: boolean;
+  readonly loadPatientStoresCompleteInitialAll: boolean;
 
   load: (
     getToken?: () => string | undefined,
@@ -59,7 +60,7 @@ export class PatientsStore implements IPatientsStore {
   @observable public filteredCareManager: string;
   @observable public filteredClinic: ClinicCode | AllClinicCode;
   // Default to filtering patients who are no longer in the study
-  @observable public filteredStudyPatients: boolean;
+  @observable public filteredStudyEndedPatients: boolean;
 
   private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
@@ -71,7 +72,7 @@ export class PatientsStore implements IPatientsStore {
 
   // In any load of the patients store,
   // track whether we have loaded all of the patient stores.
-  @observable private loadPatientStoresComplete: boolean;
+  @observable public loadPatientStoresCompleteInitialAll: boolean;
 
   private loadAndLogQuery: <T>(
     queryCall: () => Promise<T>,
@@ -82,9 +83,9 @@ export class PatientsStore implements IPatientsStore {
   constructor() {
     this.filteredCareManager = AllCareManagers;
     this.filteredClinic = AllClinics;
-    this.filteredStudyPatients = true;
+    this.filteredStudyEndedPatients = true;
     this.loadPatientStoresCompleteInitialActive = false;
-    this.loadPatientStoresComplete = false;
+    this.loadPatientStoresCompleteInitialAll = false;
 
     const { registryService } = useServices();
     this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
@@ -130,13 +131,10 @@ export class PatientsStore implements IPatientsStore {
   public get state() {
     const error = this.loadPatientsQuery.error || this.loadProvidersQuery.error;
     const pending =
-      this.loadPatientsQuery.pending ||
-      this.loadProvidersQuery.pending ||
-      !this.loadPatientStoresComplete;
+      this.loadPatientsQuery.pending || this.loadProvidersQuery.pending;
     const fulfilled =
       this.loadPatientsQuery.state == "Fulfilled" &&
-      this.loadProvidersQuery.state == "Fulfilled" &&
-      this.loadPatientStoresComplete;
+      this.loadProvidersQuery.state == "Fulfilled";
 
     return {
       state: pending
@@ -152,7 +150,6 @@ export class PatientsStore implements IPatientsStore {
       resetState: () => {
         this.loadPatientsQuery.resetState();
         this.loadProvidersQuery.resetState();
-        this.loadPatientStoresComplete = false;
       },
     } as IPromiseQueryState;
   }
@@ -235,16 +232,21 @@ export class PatientsStore implements IPatientsStore {
             }),
           )
           .then(async () => {
-            await PromisePool.for(patientStoresEnded)
-              .useCorrespondingResults()
-              .withConcurrency(5)
-              .process((patientStoreCurrent) => {
-                return patientStoreCurrent.load(getToken, onUnauthorized);
-              });
+            if (
+              !this.filteredStudyEndedPatients ||
+              !this.loadPatientStoresCompleteInitialAll
+            ) {
+              await PromisePool.for(patientStoresEnded)
+                .useCorrespondingResults()
+                .withConcurrency(5)
+                .process((patientStoreCurrent) => {
+                  return patientStoreCurrent.load(getToken, onUnauthorized);
+                });
+            }
           })
           .then(
             action(() => {
-              this.loadPatientStoresComplete = true;
+              this.loadPatientStoresCompleteInitialAll = true;
             }),
           );
 
@@ -294,7 +296,7 @@ export class PatientsStore implements IPatientsStore {
 
   @action.bound
   public filterStudyPatients(filter: boolean) {
-    this.filteredStudyPatients = filter;
+    this.filteredStudyEndedPatients = filter;
   }
 
   @computed
@@ -312,7 +314,7 @@ export class PatientsStore implements IPatientsStore {
       );
     }
 
-    if (this.filteredStudyPatients) {
+    if (this.filteredStudyEndedPatients) {
       filteredPatients = filteredPatients.filter(
         (p) => p.profile.depressionTreatmentStatus != "End",
       );

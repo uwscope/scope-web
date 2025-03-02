@@ -200,7 +200,11 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     <PageLoader
       state={rootStore.patientsStore.state}
       name="the registry"
-      hasValue={rootStore.patientsStore.loadPatientStoresCompleteInitialActive}
+      hasValue={
+        (rootStore.patientsStore.filteredStudyEndedPatients &&
+          rootStore.patientsStore.loadPatientStoresCompleteInitialActive) ||
+        rootStore.patientsStore.loadPatientStoresCompleteInitialAll
+      }
     >
       {currentPatient && (
         <PatientStoreProvider patient={currentPatient}>
