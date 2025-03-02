@@ -131,10 +131,11 @@ export class PatientsStore implements IPatientsStore {
   public get state() {
     const error = this.loadPatientsQuery.error || this.loadProvidersQuery.error;
     const pending =
-      this.loadPatientsQuery.pending || this.loadProvidersQuery.pending;
+      this.loadPatientsQuery.pending || this.loadProvidersQuery.pending || !this.loadPatientStoresCompleteInitialAll;
     const fulfilled =
       this.loadPatientsQuery.state == "Fulfilled" &&
-      this.loadProvidersQuery.state == "Fulfilled";
+      this.loadProvidersQuery.state == "Fulfilled" &&
+      this.loadPatientStoresCompleteInitialAll;
 
     return {
       state: pending
