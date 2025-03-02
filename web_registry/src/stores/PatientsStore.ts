@@ -1,5 +1,11 @@
 import { PromisePool } from "@supercharge/promise-pool";
-import { action, computed, makeAutoObservable, observable } from "mobx";
+import {
+  action,
+  computed,
+  makeAutoObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { AllClinicCode, ClinicCode, clinicCodeValues } from "shared/enums";
 import { getLogger } from "shared/logger";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
@@ -163,6 +169,8 @@ export class PatientsStore implements IPatientsStore {
       return;
     }
 
+    const priorPatients = this.patients;
+
     const getPatientsPromise = () =>
       registryService.getPatients().then((patients) => {
         const patientsSorted = patients.slice().sort((patientA, patientB) => {
@@ -176,11 +184,38 @@ export class PatientsStore implements IPatientsStore {
           return patient.profile.depressionTreatmentStatus === "End";
         });
 
-        const patientStoresActive = patientsActive.map((patient) => {
-          return new PatientStore(patient);
+        const patientStoresActive = runInAction(() => {
+          return patientsActive.map((patient) => {
+            const existingPatientStore = priorPatients.find(
+              (existingPatientCurrent) => {
+                return (
+                  existingPatientCurrent.identity.patientId ===
+                  patient.identity.patientId
+                );
+              },
+            );
+
+            return !!existingPatientStore
+              ? (existingPatientStore as PatientStore)
+              : new PatientStore(patient);
+          });
         });
-        const patientStoresEnded = patientsEnded.map((patient) => {
-          return new PatientStore(patient);
+
+        const patientStoresEnded = runInAction(() => {
+          return patientsEnded.map((patient) => {
+            const existingPatientStore = priorPatients.find(
+              (existingPatientCurrent) => {
+                return (
+                  existingPatientCurrent.identity.patientId ===
+                  patient.identity.patientId
+                );
+              },
+            );
+
+            return !!existingPatientStore
+              ? (existingPatientStore as PatientStore)
+              : new PatientStore(patient);
+          });
         });
 
         const patientStores = patientStoresActive.concat(patientStoresEnded);
