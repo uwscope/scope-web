@@ -74,6 +74,8 @@ export class PatientsStore implements IPatientsStore {
   // track whether we have loaded all of the patient stores.
   @observable public loadPatientStoresCompleteInitialAll: boolean;
 
+  private loadInProgress: boolean;
+
   private loadAndLogQuery: <T>(
     queryCall: () => Promise<T>,
     promiseQuery: PromiseQuery<T>,
@@ -93,6 +95,8 @@ export class PatientsStore implements IPatientsStore {
     this.loadPatientsQuery = new PromiseQuery([], "loadPatients");
     this.loadProvidersQuery = new PromiseQuery([], "loadProviders");
     // this.addPatientQuery = new PromiseQuery<IPatient>(undefined, "addPatient");
+
+    this.loadInProgress = false;
 
     makeAutoObservable(this);
   }
@@ -165,96 +169,106 @@ export class PatientsStore implements IPatientsStore {
     const { registryService } = useServices();
 
     // Don't load if it's already loading
-    if (this.loadPatientsQuery.pending) {
+    if (this.loadInProgress) {
       return;
     }
 
     const priorPatients = this.patients;
 
     const getPatientsPromise = () =>
-      registryService.getPatients().then((patients) => {
-        const patientsSorted = patients.slice().sort((patientA, patientB) => {
-          return patientA.profile.name.localeCompare(patientB.profile.name);
-        });
-
-        const patientsActive = patientsSorted.filter((patient) => {
-          return patient.profile.depressionTreatmentStatus !== "End";
-        });
-        const patientsEnded = patientsSorted.filter((patient) => {
-          return patient.profile.depressionTreatmentStatus === "End";
-        });
-
-        const patientStoresActive = runInAction(() => {
-          return patientsActive.map((patient) => {
-            const existingPatientStore = priorPatients.find(
-              (existingPatientCurrent) => {
-                return (
-                  existingPatientCurrent.identity.patientId ===
-                  patient.identity.patientId
-                );
-              },
-            );
-
-            return !!existingPatientStore
-              ? (existingPatientStore as PatientStore)
-              : new PatientStore(patient);
+      Promise.resolve()
+        .then(
+          action(() => {
+            this.loadInProgress = true;
+          }),
+        )
+        .then(async () => {
+          return await registryService.getPatients();
+        })
+        .then((patients) => {
+          const patientsSorted = patients.slice().sort((patientA, patientB) => {
+            return patientA.profile.name.localeCompare(patientB.profile.name);
           });
-        });
 
-        const patientStoresEnded = runInAction(() => {
-          return patientsEnded.map((patient) => {
-            const existingPatientStore = priorPatients.find(
-              (existingPatientCurrent) => {
-                return (
-                  existingPatientCurrent.identity.patientId ===
-                  patient.identity.patientId
-                );
-              },
-            );
-
-            return !!existingPatientStore
-              ? (existingPatientStore as PatientStore)
-              : new PatientStore(patient);
+          const patientsActive = patientsSorted.filter((patient) => {
+            return patient.profile.depressionTreatmentStatus !== "End";
           });
-        });
+          const patientsEnded = patientsSorted.filter((patient) => {
+            return patient.profile.depressionTreatmentStatus === "End";
+          });
 
-        const patientStores = patientStoresActive.concat(patientStoresEnded);
+          const patientStoresActive = runInAction(() => {
+            return patientsActive.map((patient) => {
+              const existingPatientStore = priorPatients.find(
+                (existingPatientCurrent) => {
+                  return (
+                    existingPatientCurrent.identity.patientId ===
+                    patient.identity.patientId
+                  );
+                },
+              );
 
-        Promise.resolve()
-          .then(async () => {
-            await PromisePool.for(patientStoresActive)
-              .useCorrespondingResults()
-              .withConcurrency(5)
-              .process((patientStoreCurrent) => {
-                return patientStoreCurrent.load(getToken, onUnauthorized);
-              });
-          })
-          .then(
-            action(() => {
-              this.loadPatientStoresCompleteInitialActive = true;
-            }),
-          )
-          .then(async () => {
-            if (
-              !this.filteredStudyEndedPatients ||
-              !this.loadPatientStoresCompleteInitialAll
-            ) {
-              await PromisePool.for(patientStoresEnded)
+              return !!existingPatientStore
+                ? (existingPatientStore as PatientStore)
+                : new PatientStore(patient);
+            });
+          });
+
+          const patientStoresEnded = runInAction(() => {
+            return patientsEnded.map((patient) => {
+              const existingPatientStore = priorPatients.find(
+                (existingPatientCurrent) => {
+                  return (
+                    existingPatientCurrent.identity.patientId ===
+                    patient.identity.patientId
+                  );
+                },
+              );
+
+              return !!existingPatientStore
+                ? (existingPatientStore as PatientStore)
+                : new PatientStore(patient);
+            });
+          });
+
+          const patientStores = patientStoresActive.concat(patientStoresEnded);
+
+          Promise.resolve()
+            .then(async () => {
+              await PromisePool.for(patientStoresActive)
                 .useCorrespondingResults()
                 .withConcurrency(5)
                 .process((patientStoreCurrent) => {
                   return patientStoreCurrent.load(getToken, onUnauthorized);
                 });
-            }
-          })
-          .then(
-            action(() => {
-              this.loadPatientStoresCompleteInitialAll = true;
-            }),
-          );
+            })
+            .then(
+              action(() => {
+                this.loadPatientStoresCompleteInitialActive = true;
+              }),
+            )
+            .then(async () => {
+              if (
+                !this.filteredStudyEndedPatients ||
+                !this.loadPatientStoresCompleteInitialAll
+              ) {
+                await PromisePool.for(patientStoresEnded)
+                  .useCorrespondingResults()
+                  .withConcurrency(5)
+                  .process((patientStoreCurrent) => {
+                    return patientStoreCurrent.load(getToken, onUnauthorized);
+                  });
+              }
+            })
+            .then(
+              action(() => {
+                this.loadPatientStoresCompleteInitialAll = true;
+                this.loadInProgress = false;
+              }),
+            );
 
-        return patientStores;
-      });
+          return patientStores;
+        });
 
     await Promise.all([
       this.loadAndLogQuery<IPatientStore[]>(
