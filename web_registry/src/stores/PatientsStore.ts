@@ -1,3 +1,4 @@
+import { PromisePool } from "@supercharge/promise-pool";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { AllClinicCode, ClinicCode, clinicCodeValues } from "shared/enums";
 import { getLogger } from "shared/logger";
@@ -50,7 +51,7 @@ export class PatientsStore implements IPatientsStore {
   @observable public filteredCareManager: string;
   @observable public filteredClinic: ClinicCode | AllClinicCode;
   // Default to filtering patients who are no longer in the study
-  @observable public filteredStudyPatients: boolean = true;
+  @observable public filteredStudyPatients: boolean;
 
   private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
@@ -65,6 +66,7 @@ export class PatientsStore implements IPatientsStore {
   constructor() {
     this.filteredCareManager = AllCareManagers;
     this.filteredClinic = AllClinics;
+    this.filteredStudyPatients = true;
 
     const { registryService } = useServices();
     this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
@@ -151,27 +153,42 @@ export class PatientsStore implements IPatientsStore {
           return patientA.profile.name.localeCompare(patientB.profile.name);
         });
 
-        const patientStores = patientsSorted.map((patient) => {
-          const patientStore = new PatientStore(patient);
-          return patientStore;
+        const patientsActive = patientsSorted.filter((patient) => {
+          return patient.profile.depressionTreatmentStatus !== "End";
+        });
+        const patientsEnded = patientsSorted.filter((patient) => {
+          return patient.profile.depressionTreatmentStatus === "End";
         });
 
-        var load = Promise.resolve();
-        for (const patientStoreCurrent of patientStores) {
-          load = load.then(async () => {
-            await patientStoreCurrent.load(getToken, onUnauthorized);
-          });
-        }
+        const patientStoresActive = patientsActive.map((patient) => {
+          return new PatientStore(patient);
+        });
+        const patientStoresEnded = patientsEnded.map((patient) => {
+          return new PatientStore(patient);
+        });
 
-        Promise.resolve(load);
+        const patientStores = patientStoresActive.concat(patientStoresEnded);
+
+        Promise.resolve()
+          .then(async () => {
+            await PromisePool.for(patientStoresActive)
+              .useCorrespondingResults()
+              .withConcurrency(5)
+              .process((patientStoreCurrent) => {
+                return patientStoreCurrent.load(getToken, onUnauthorized);
+              });
+          })
+          .then()
+          .then(async () => {
+            await PromisePool.for(patientStoresEnded)
+              .useCorrespondingResults()
+              .withConcurrency(2)
+              .process((patientStoreCurrent) => {
+                return patientStoreCurrent.load(getToken, onUnauthorized);
+              });
+          });
 
         return patientStores;
-
-        // return patients.map((p) => {
-        //   const patientStore = new PatientStore(p);
-        //   patientStore.load(getToken, onUnauthorized);
-        //   return patientStore;
-        // });
       });
 
     await Promise.all([
