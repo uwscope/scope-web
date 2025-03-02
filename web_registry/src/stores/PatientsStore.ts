@@ -57,6 +57,8 @@ export class PatientsStore implements IPatientsStore {
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
   private readonly addPatientQuery: PromiseQuery<IPatient>;
 
+  @observable private loadPatientsActiveComplete: boolean;
+
   private loadAndLogQuery: <T>(
     queryCall: () => Promise<T>,
     promiseQuery: PromiseQuery<T>,
@@ -67,6 +69,7 @@ export class PatientsStore implements IPatientsStore {
     this.filteredCareManager = AllCareManagers;
     this.filteredClinic = AllClinics;
     this.filteredStudyPatients = true;
+    this.loadPatientsActiveComplete = false;
 
     const { registryService } = useServices();
     this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
@@ -112,10 +115,13 @@ export class PatientsStore implements IPatientsStore {
   public get state() {
     const error = this.loadPatientsQuery.error || this.loadProvidersQuery.error;
     const pending =
-      this.loadPatientsQuery.pending || this.loadProvidersQuery.pending;
+      this.loadPatientsQuery.pending ||
+      this.loadProvidersQuery.pending ||
+      !this.loadPatientsActiveComplete;
     const fulfilled =
       this.loadPatientsQuery.state == "Fulfilled" &&
-      this.loadProvidersQuery.state == "Fulfilled";
+      this.loadProvidersQuery.state == "Fulfilled" &&
+      this.loadPatientsActiveComplete;
 
     return {
       state: pending
@@ -131,6 +137,7 @@ export class PatientsStore implements IPatientsStore {
       resetState: () => {
         this.loadPatientsQuery.resetState();
         this.loadProvidersQuery.resetState();
+        this.loadPatientsActiveComplete = false;
       },
     } as IPromiseQueryState;
   }
@@ -178,7 +185,11 @@ export class PatientsStore implements IPatientsStore {
                 return patientStoreCurrent.load(getToken, onUnauthorized);
               });
           })
-          .then()
+          .then(
+            action(() => {
+              this.loadPatientsActiveComplete = true;
+            }),
+          )
           .then(async () => {
             await PromisePool.for(patientStoresEnded)
               .useCorrespondingResults()

@@ -200,7 +200,11 @@ export const PatientDetailPage: FunctionComponent = observer(() => {
     <PageLoader
       state={rootStore.patientsStore.state}
       name="the registry"
-      hasValue={rootStore.patientsStore.patients.length > 0}
+      // hasValue={rootStore.patientsStore.patients.length > 0}
+      hasValue={
+        rootStore.patientsStore.state.done &&
+        !rootStore.patientsStore.state.error
+      }
     >
       {currentPatient && (
         <PatientStoreProvider patient={currentPatient}>
