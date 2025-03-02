@@ -1,4 +1,3 @@
-// import { AxiosResponse } from "axios";
 import { IServiceBase, ServiceBase } from "shared/serviceBase";
 import {
   IPatientListResponse,
