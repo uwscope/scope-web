@@ -29,6 +29,8 @@ export interface IPatientsStore {
 
   readonly state: IPromiseQueryState;
 
+  readonly loadPatientStoresCompleteInitialActive: boolean;
+
   load: (
     getToken?: () => string | undefined,
     onUnauthorized?: () => void,
@@ -57,7 +59,13 @@ export class PatientsStore implements IPatientsStore {
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
   private readonly addPatientQuery: PromiseQuery<IPatient>;
 
-  @observable private loadPatientsActiveComplete: boolean;
+  // The first time the patients store is loaded,
+  // track whether we have loaded all of the patient stores that are currently active.
+  @observable public loadPatientStoresCompleteInitialActive: boolean;
+
+  // In any load of the patients store,
+  // track whether we have loaded all of the patient stores.
+  @observable private loadPatientStoresComplete: boolean;
 
   private loadAndLogQuery: <T>(
     queryCall: () => Promise<T>,
@@ -69,7 +77,8 @@ export class PatientsStore implements IPatientsStore {
     this.filteredCareManager = AllCareManagers;
     this.filteredClinic = AllClinics;
     this.filteredStudyPatients = true;
-    this.loadPatientsActiveComplete = false;
+    this.loadPatientStoresCompleteInitialActive = false;
+    this.loadPatientStoresComplete = false;
 
     const { registryService } = useServices();
     this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
@@ -117,11 +126,11 @@ export class PatientsStore implements IPatientsStore {
     const pending =
       this.loadPatientsQuery.pending ||
       this.loadProvidersQuery.pending ||
-      !this.loadPatientsActiveComplete;
+      !this.loadPatientStoresComplete;
     const fulfilled =
       this.loadPatientsQuery.state == "Fulfilled" &&
       this.loadProvidersQuery.state == "Fulfilled" &&
-      this.loadPatientsActiveComplete;
+      this.loadPatientStoresComplete;
 
     return {
       state: pending
@@ -137,7 +146,7 @@ export class PatientsStore implements IPatientsStore {
       resetState: () => {
         this.loadPatientsQuery.resetState();
         this.loadProvidersQuery.resetState();
-        this.loadPatientsActiveComplete = false;
+        this.loadPatientStoresComplete = false;
       },
     } as IPromiseQueryState;
   }
@@ -187,17 +196,22 @@ export class PatientsStore implements IPatientsStore {
           })
           .then(
             action(() => {
-              this.loadPatientsActiveComplete = true;
+              this.loadPatientStoresCompleteInitialActive = true;
             }),
           )
           .then(async () => {
             await PromisePool.for(patientStoresEnded)
               .useCorrespondingResults()
-              .withConcurrency(2)
+              .withConcurrency(5)
               .process((patientStoreCurrent) => {
                 return patientStoreCurrent.load(getToken, onUnauthorized);
               });
-          });
+          })
+          .then(
+            action(() => {
+              this.loadPatientStoresComplete = true;
+            }),
+          );
 
         return patientStores;
       });
