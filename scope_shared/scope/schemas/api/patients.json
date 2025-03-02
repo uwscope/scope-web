@@ -4,6 +4,26 @@
   "title": "IPatient[]",
   "type": "array",
   "items": {
-    "$ref": "/schemas/api/patient"
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://uwscope.org/schemas/api/patient",
+    "title": "IPatient",
+    "description": "Holds all the patient data",
+    "type": "object",
+    "properties": {
+      "_type": { "const": "patient" },
+
+      "identity": {
+        "type": "object",
+        "description": "IPatientIdentity schema",
+        "$ref": "/schemas/documents/patient-identity"
+      },
+      "profile": {
+        "type": "object",
+        "description": "IPatientProfile schema",
+        "$ref": "/schemas/documents/patient-profile"
+      }
+    },
+    "additionalProperties": false,
+    "required": ["_type", "identity", "profile"]
   }
 }
