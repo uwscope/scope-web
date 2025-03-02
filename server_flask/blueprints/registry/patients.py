@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import copy
 import flask
 import flask_json
@@ -30,143 +31,174 @@ patients_blueprint = flask.Blueprint(
     __name__,
 )
 
+pool = ThreadPool(4)
+
 
 def _construct_patient_document(
     *,
     patient_identity: dict,
     patient_collection: pymongo.collection.Collection,
-    include_complete_details: bool = True,
+    include_complete_details: bool,
 ) -> dict:
-    patient_document = {}
+    # First obtain all the documents we will obtain.
+    documents_by_type = {}
+    if not include_complete_details:
+        # Obtain only the patient profile.
+        documents_by_type.update(
+            scope.database.collection_utils.get_multiple_types(
+                collection=patient_collection,
+                singleton_types=[
+                    scope.database.patient.patient_profile.DOCUMENT_TYPE,
+                ],
+                set_types=[],
+            )
+        )
+    else:
+        # A worker task that performs the main query.
+        def _task_multiple() -> dict:
+            return scope.database.collection_utils.get_multiple_types(
+                collection=patient_collection,
+                singleton_types=[
+                    scope.database.patient.clinical_history.DOCUMENT_TYPE,
+                    scope.database.patient.patient_profile.DOCUMENT_TYPE,
+                    scope.database.patient.safety_plan.DOCUMENT_TYPE,
+                    scope.database.patient.values_inventory.DOCUMENT_TYPE,
+                ],
+                set_types=[
+                    scope.database.patient.activities.DOCUMENT_TYPE,
+                    scope.database.patient.activity_logs.DOCUMENT_TYPE,
+                    scope.database.patient.activity_schedules.DOCUMENT_TYPE,
+                    scope.database.patient.assessments.DOCUMENT_TYPE,
+                    scope.database.patient.assessment_logs.DOCUMENT_TYPE,
+                    scope.database.patient.case_reviews.DOCUMENT_TYPE,
+                    scope.database.patient.mood_logs.DOCUMENT_TYPE,
+                    scope.database.patient.review_marks.DOCUMENT_TYPE,
+                    scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
+                    scope.database.patient.sessions.DOCUMENT_TYPE,
+                    scope.database.patient.values.DOCUMENT_TYPE,
+                ],
+            )
 
+        # A worker task that obtains scheduled assessments.
+        def _task_scheduled_assessments() -> dict:
+            return {
+                scope.database.patient.scheduled_assessments.DOCUMENT_TYPE: scope.database.patient.scheduled_assessments.get_scheduled_assessments(
+                    collection=patient_collection
+                )
+            }
+
+        # Execute both tasks and combine their results.
+        def _task_execute(task: Callable[[], dict]) -> dict:
+            return task()
+
+        task_results = pool.map(
+            _task_execute, [_task_multiple, _task_scheduled_assessments]
+        )
+        for task_result_current in task_results:
+            documents_by_type.update(task_result_current)
+
+    # Now organize all documents into a patient document.
+    patient_document = {}
     patient_document["_type"] = "patient"
 
     # Identity
     patient_document["identity"] = copy.deepcopy(patient_identity)
 
-    if not include_complete_details:
-        # Obtain only the patient profile
-        documents_by_type = scope.database.collection_utils.get_multiple_types(
-            collection=patient_collection,
-            singleton_types=[
-                scope.database.patient.patient_profile.DOCUMENT_TYPE,
-            ],
-            set_types=[],
-        )
+    # Activities
+    if scope.database.patient.activities.DOCUMENT_TYPE in documents_by_type:
+        patient_document["activities"] = documents_by_type[
+            scope.database.patient.activities.DOCUMENT_TYPE
+        ]
 
-        # Profile
+    # Activity Logs
+    if scope.database.patient.activity_logs.DOCUMENT_TYPE in documents_by_type:
+        patient_document["activityLogs"] = documents_by_type[
+            scope.database.patient.activity_logs.DOCUMENT_TYPE
+        ]
+
+    # Activity Schedules
+    if scope.database.patient.activity_schedules.DOCUMENT_TYPE in documents_by_type:
+        patient_document["activitySchedules"] = documents_by_type[
+            scope.database.patient.activity_schedules.DOCUMENT_TYPE
+        ]
+
+    # Assessments
+    if scope.database.patient.assessments.DOCUMENT_TYPE in documents_by_type:
+        patient_document["assessments"] = documents_by_type[
+            scope.database.patient.assessments.DOCUMENT_TYPE
+        ]
+
+    # Assessment Logs
+    if scope.database.patient.assessment_logs.DOCUMENT_TYPE in documents_by_type:
+        patient_document["assessmentLogs"] = documents_by_type[
+            scope.database.patient.assessment_logs.DOCUMENT_TYPE
+        ]
+
+    # Case Reviews
+    if scope.database.patient.case_reviews.DOCUMENT_TYPE in documents_by_type:
+        patient_document["caseReviews"] = documents_by_type[
+            scope.database.patient.case_reviews.DOCUMENT_TYPE
+        ]
+
+    # Clinical History
+    if scope.database.patient.clinical_history.DOCUMENT_TYPE in documents_by_type:
+        patient_document["clinicalHistory"] = documents_by_type[
+            scope.database.patient.clinical_history.DOCUMENT_TYPE
+        ]
+
+    # Mood Logs
+    if scope.database.patient.mood_logs.DOCUMENT_TYPE in documents_by_type:
+        patient_document["moodLogs"] = documents_by_type[
+            scope.database.patient.mood_logs.DOCUMENT_TYPE
+        ]
+
+    # Profile
+    if scope.database.patient.patient_profile.DOCUMENT_TYPE in documents_by_type:
         patient_document["profile"] = documents_by_type[
             scope.database.patient.patient_profile.DOCUMENT_TYPE
         ]
 
-        return patient_document
-
-    # Get multiple document types simultaneously
-    documents_by_type = scope.database.collection_utils.get_multiple_types(
-        collection=patient_collection,
-        singleton_types=[
-            scope.database.patient.clinical_history.DOCUMENT_TYPE,
-            scope.database.patient.patient_profile.DOCUMENT_TYPE,
-            scope.database.patient.safety_plan.DOCUMENT_TYPE,
-            scope.database.patient.values_inventory.DOCUMENT_TYPE,
-        ],
-        set_types=[
-            scope.database.patient.activities.DOCUMENT_TYPE,
-            scope.database.patient.activity_logs.DOCUMENT_TYPE,
-            scope.database.patient.activity_schedules.DOCUMENT_TYPE,
-            scope.database.patient.assessments.DOCUMENT_TYPE,
-            scope.database.patient.assessment_logs.DOCUMENT_TYPE,
-            scope.database.patient.case_reviews.DOCUMENT_TYPE,
-            scope.database.patient.mood_logs.DOCUMENT_TYPE,
-            scope.database.patient.review_marks.DOCUMENT_TYPE,
-            scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
-            scope.database.patient.sessions.DOCUMENT_TYPE,
-            scope.database.patient.values.DOCUMENT_TYPE,
-        ],
-    )
-
-    # Activities
-    patient_document["activities"] = documents_by_type[
-        scope.database.patient.activities.DOCUMENT_TYPE
-    ]
-
-    # Activity Logs
-    patient_document["activityLogs"] = documents_by_type[
-        scope.database.patient.activity_logs.DOCUMENT_TYPE
-    ]
-
-    # Activity Schedules
-    patient_document["activitySchedules"] = documents_by_type[
-        scope.database.patient.activity_schedules.DOCUMENT_TYPE
-    ]
-
-    # Assessments
-    patient_document["assessments"] = documents_by_type[
-        scope.database.patient.assessments.DOCUMENT_TYPE
-    ]
-
-    # Assessment Logs
-    patient_document["assessmentLogs"] = documents_by_type[
-        scope.database.patient.assessment_logs.DOCUMENT_TYPE
-    ]
-
-    # Case Reviews
-    patient_document["caseReviews"] = documents_by_type[
-        scope.database.patient.case_reviews.DOCUMENT_TYPE
-    ]
-
-    # Clinical History
-    patient_document["clinicalHistory"] = documents_by_type[
-        scope.database.patient.clinical_history.DOCUMENT_TYPE
-    ]
-
-    # Mood Logs
-    patient_document["moodLogs"] = documents_by_type[
-        scope.database.patient.mood_logs.DOCUMENT_TYPE
-    ]
-
-    # Profile
-    patient_document["profile"] = documents_by_type[
-        scope.database.patient.patient_profile.DOCUMENT_TYPE
-    ]
-
     # Review Marks
-    patient_document["reviewMarks"] = documents_by_type[
-        scope.database.patient.review_marks.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.review_marks.DOCUMENT_TYPE in documents_by_type:
+        patient_document["reviewMarks"] = documents_by_type[
+            scope.database.patient.review_marks.DOCUMENT_TYPE
+        ]
 
     # Safety Plan
-    patient_document["safetyPlan"] = documents_by_type[
-        scope.database.patient.safety_plan.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.safety_plan.DOCUMENT_TYPE in documents_by_type:
+        patient_document["safetyPlan"] = documents_by_type[
+            scope.database.patient.safety_plan.DOCUMENT_TYPE
+        ]
 
     # Scheduled Assessments
-    # TODO: this access currently modifies documents, cannot be replaced
-    patient_document[
-        "scheduledAssessments"
-    ] = scope.database.patient.scheduled_assessments.get_scheduled_assessments(
-        collection=patient_collection
-    )
+    if scope.database.patient.scheduled_assessments.DOCUMENT_TYPE in documents_by_type:
+        patient_document["scheduledAssessments"] = documents_by_type[
+            scope.database.patient.scheduled_assessments.DOCUMENT_TYPE
+        ]
 
     # Scheduled Activities
-    patient_document["scheduledActivities"] = documents_by_type[
-        scope.database.patient.scheduled_activities.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.scheduled_activities.DOCUMENT_TYPE in documents_by_type:
+        patient_document["scheduledActivities"] = documents_by_type[
+            scope.database.patient.scheduled_activities.DOCUMENT_TYPE
+        ]
 
     # Sessions
-    patient_document["sessions"] = documents_by_type[
-        scope.database.patient.sessions.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.sessions.DOCUMENT_TYPE in documents_by_type:
+        patient_document["sessions"] = documents_by_type[
+            scope.database.patient.sessions.DOCUMENT_TYPE
+        ]
 
     # Values
-    patient_document["values"] = documents_by_type[
-        scope.database.patient.values.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.values.DOCUMENT_TYPE in documents_by_type:
+        patient_document["values"] = documents_by_type[
+            scope.database.patient.values.DOCUMENT_TYPE
+        ]
 
     # Values Inventory
-    patient_document["valuesInventory"] = documents_by_type[
-        scope.database.patient.values_inventory.DOCUMENT_TYPE
-    ]
+    if scope.database.patient.values_inventory.DOCUMENT_TYPE in documents_by_type:
+        patient_document["valuesInventory"] = documents_by_type[
+            scope.database.patient.values_inventory.DOCUMENT_TYPE
+        ]
 
     return patient_document
 
@@ -201,7 +233,6 @@ def get_patients():
             include_complete_details=False,
         )
 
-    pool = ThreadPool(4)
     patient_documents = pool.map(_get_patients_map, patient_identities)
 
     return {
