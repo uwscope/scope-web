@@ -214,17 +214,17 @@ def get_multiple_types(
         {"$match": {"_deleted": {"$exists": False}}},
     ]
 
-    # Create a result dictionary with a key for each type
-    documents_by_type = {}
-    for type_current in combined_document_types:
-        documents_by_type[type_current] = []
-
     # Execute pipeline, obtain list of results
     with collection.aggregate(pipeline) as pipeline_result:
         # Confirm a result was found
         documents = []
         if pipeline_result.alive:
             documents = list(pipeline_result)
+
+    # Create a result dictionary with a key for each type
+    documents_by_type = {}
+    for type_current in combined_document_types:
+        documents_by_type[type_current] = []
 
     # Put each document with its type
     # TODO this could probably be accomplished in the above query

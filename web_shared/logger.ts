@@ -54,7 +54,7 @@ export const getLogger = (logSource: string): ILogger => {
 
     if (isDev) {
       name = buildMessage(name);
-      console.log(`Event start: ${name}`);
+      // console.log(`Event start: ${name}`);
     }
   };
 
@@ -69,7 +69,7 @@ export const getLogger = (logSource: string): ILogger => {
 
     if (isDev) {
       name = buildMessage(name);
-      console.log(`Event end: ${name}`, properties);
+      // console.log(`Event end: ${name}`, properties);
     }
   };
 
@@ -108,10 +108,11 @@ export const getLogger = (logSource: string): ILogger => {
     const properties = convertToProperties(data);
 
     // TODO: send data to telemetry
+    properties;
 
     if (isDev) {
       name = buildMessage(name);
-      console.log(`Event: ${name}`, properties);
+      // console.log(`Event: ${name}`, properties);
     }
   };
 

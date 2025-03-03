@@ -51,9 +51,10 @@ def test_patient_construct_patient_document(
         document_constructed = _construct_patient_document(
             patient_identity=patient_identity_current,
             patient_collection=patient_collection_current,
+            include_complete_details=True,
         )
 
-        assert document_constructed == {
+        document_test = {
             "_type": "patient",
             "identity": patient_identity_current,
             "activities": scope.database.patient.activities.get_activities(
@@ -105,3 +106,5 @@ def test_patient_construct_patient_document(
                 collection=patient_collection_current
             ),
         }
+
+        assert document_constructed == document_test

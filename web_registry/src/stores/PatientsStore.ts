@@ -1,10 +1,17 @@
-import { action, computed, makeAutoObservable, observable } from "mobx";
+import { PromisePool } from "@supercharge/promise-pool";
+import {
+  action,
+  computed,
+  makeAutoObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { AllClinicCode, ClinicCode, clinicCodeValues } from "shared/enums";
 import { getLogger } from "shared/logger";
 import { IPromiseQueryState, PromiseQuery } from "shared/promiseQuery";
 import { sortStringsCaseInsensitive } from "shared/sorting";
 import { getLoadAndLogQuery } from "shared/stores";
-import { IPatient, IProviderIdentity } from "shared/types";
+import { IProviderIdentity } from "shared/types";
 import { useServices } from "src/services/services";
 import { IPatientStore, PatientStore } from "src/stores/PatientStore";
 import { contains } from "src/utils/array";
@@ -22,18 +29,21 @@ export interface IPatientsStore {
 
   readonly filteredCareManager: string;
   readonly filteredClinic: ClinicCode | AllClinicCode;
-  readonly filteredStudyPatients: boolean;
+  readonly filteredStudyEndedPatients: boolean;
 
   readonly filteredPatients: ReadonlyArray<IPatientStore>;
 
   readonly state: IPromiseQueryState;
+
+  readonly loadPatientStoresCompleteInitialActive: boolean;
+  readonly loadPatientStoresCompleteInitialAll: boolean;
 
   load: (
     getToken?: () => string | undefined,
     onUnauthorized?: () => void,
   ) => Promise<void>;
 
-  addPatient: (patient: Partial<IPatient>) => void;
+  // addPatient: (patient: Partial<IPatient>) => void;
   getPatientByRecordId: (
     recordId: string | undefined,
   ) => IPatientStore | undefined;
@@ -50,11 +60,19 @@ export class PatientsStore implements IPatientsStore {
   @observable public filteredCareManager: string;
   @observable public filteredClinic: ClinicCode | AllClinicCode;
   // Default to filtering patients who are no longer in the study
-  @observable public filteredStudyPatients: boolean = true;
+  @observable public filteredStudyEndedPatients: boolean;
 
   private readonly loadPatientsQuery: PromiseQuery<IPatientStore[]>;
   private readonly loadProvidersQuery: PromiseQuery<IProviderIdentity[]>;
-  private readonly addPatientQuery: PromiseQuery<IPatient>;
+  // private readonly addPatientQuery: PromiseQuery<IPatient>;
+
+  // The first time the patients store is loaded,
+  // track whether we have loaded all of the patient stores that are currently active.
+  @observable public loadPatientStoresCompleteInitialActive: boolean;
+
+  // In any load of the patients store,
+  // track whether we have loaded all of the patient stores.
+  @observable public loadPatientStoresCompleteInitialAll: boolean;
 
   private loadAndLogQuery: <T>(
     queryCall: () => Promise<T>,
@@ -65,13 +83,16 @@ export class PatientsStore implements IPatientsStore {
   constructor() {
     this.filteredCareManager = AllCareManagers;
     this.filteredClinic = AllClinics;
+    this.filteredStudyEndedPatients = true;
+    this.loadPatientStoresCompleteInitialActive = false;
+    this.loadPatientStoresCompleteInitialAll = false;
 
     const { registryService } = useServices();
     this.loadAndLogQuery = getLoadAndLogQuery(logger, registryService);
 
     this.loadPatientsQuery = new PromiseQuery([], "loadPatients");
     this.loadProvidersQuery = new PromiseQuery([], "loadProviders");
-    this.addPatientQuery = new PromiseQuery<IPatient>(undefined, "addPatient");
+    // this.addPatientQuery = new PromiseQuery<IPatient>(undefined, "addPatient");
 
     makeAutoObservable(this);
   }
@@ -110,10 +131,13 @@ export class PatientsStore implements IPatientsStore {
   public get state() {
     const error = this.loadPatientsQuery.error || this.loadProvidersQuery.error;
     const pending =
-      this.loadPatientsQuery.pending || this.loadProvidersQuery.pending;
+      this.loadPatientsQuery.pending ||
+      this.loadProvidersQuery.pending ||
+      !this.loadPatientStoresCompleteInitialAll;
     const fulfilled =
       this.loadPatientsQuery.state == "Fulfilled" &&
-      this.loadProvidersQuery.state == "Fulfilled";
+      this.loadProvidersQuery.state == "Fulfilled" &&
+      this.loadPatientStoresCompleteInitialAll;
 
     return {
       state: pending
@@ -145,14 +169,92 @@ export class PatientsStore implements IPatientsStore {
       return;
     }
 
+    const priorPatients = this.patients;
+
     const getPatientsPromise = () =>
-      registryService.getPatients().then((patients) =>
-        patients.map((p) => {
-          const patientStore = new PatientStore(p);
-          patientStore.load(getToken, onUnauthorized);
-          return patientStore;
-        }),
-      );
+      registryService.getPatients().then((patients) => {
+        const patientsSorted = patients.slice().sort((patientA, patientB) => {
+          return patientA.profile.name.localeCompare(patientB.profile.name);
+        });
+
+        const patientsActive = patientsSorted.filter((patient) => {
+          return patient.profile.depressionTreatmentStatus !== "End";
+        });
+        const patientsEnded = patientsSorted.filter((patient) => {
+          return patient.profile.depressionTreatmentStatus === "End";
+        });
+
+        const patientStoresActive = runInAction(() => {
+          return patientsActive.map((patient) => {
+            const existingPatientStore = priorPatients.find(
+              (existingPatientCurrent) => {
+                return (
+                  existingPatientCurrent.identity.patientId ===
+                  patient.identity.patientId
+                );
+              },
+            );
+
+            return !!existingPatientStore
+              ? (existingPatientStore as PatientStore)
+              : new PatientStore(patient);
+          });
+        });
+
+        const patientStoresEnded = runInAction(() => {
+          return patientsEnded.map((patient) => {
+            const existingPatientStore = priorPatients.find(
+              (existingPatientCurrent) => {
+                return (
+                  existingPatientCurrent.identity.patientId ===
+                  patient.identity.patientId
+                );
+              },
+            );
+
+            return !!existingPatientStore
+              ? (existingPatientStore as PatientStore)
+              : new PatientStore(patient);
+          });
+        });
+
+        const patientStores = patientStoresActive.concat(patientStoresEnded);
+
+        Promise.resolve()
+          .then(async () => {
+            await PromisePool.for(patientStoresActive)
+              .useCorrespondingResults()
+              .withConcurrency(5)
+              .process((patientStoreCurrent) => {
+                return patientStoreCurrent.load(getToken, onUnauthorized);
+              });
+          })
+          .then(
+            action(() => {
+              this.loadPatientStoresCompleteInitialActive = true;
+            }),
+          )
+          .then(async () => {
+            if (
+              !this.filteredStudyEndedPatients ||
+              !this.loadPatientStoresCompleteInitialAll
+            ) {
+              await PromisePool.for(patientStoresEnded)
+                .useCorrespondingResults()
+                .withConcurrency(5)
+                .process((patientStoreCurrent) => {
+                  return patientStoreCurrent.load(getToken, onUnauthorized);
+                });
+            }
+          })
+          .then(
+            action(() => {
+              this.loadPatientStoresCompleteInitialAll = true;
+            }),
+          );
+
+        return patientStores;
+      });
 
     await Promise.all([
       this.loadAndLogQuery<IPatientStore[]>(
@@ -166,16 +268,16 @@ export class PatientsStore implements IPatientsStore {
     ]);
   }
 
-  @action.bound
-  public async addPatient(patient: Partial<IPatient>) {
-    const { registryService } = useServices();
-    const promise = registryService.addPatient(patient);
-    const newPatient = await this.addPatientQuery.fromPromise(promise);
-    action(() => {
-      this.patients.push(new PatientStore(newPatient));
-      this.filterCareManager(this.filteredCareManager);
-    })();
-  }
+  // @action.bound
+  // public async addPatient(patient: Partial<IPatient>) {
+  //   const { registryService } = useServices();
+  //   const promise = registryService.addPatient(patient);
+  //   const newPatient = await this.addPatientQuery.fromPromise(promise);
+  //   action(() => {
+  //     this.patients.push(new PatientStore(newPatient));
+  //     this.filterCareManager(this.filteredCareManager);
+  //   })();
+  // }
 
   @action.bound
   public filterCareManager(careManager: string) {
@@ -197,7 +299,7 @@ export class PatientsStore implements IPatientsStore {
 
   @action.bound
   public filterStudyPatients(filter: boolean) {
-    this.filteredStudyPatients = filter;
+    this.filteredStudyEndedPatients = filter;
   }
 
   @computed
@@ -215,7 +317,7 @@ export class PatientsStore implements IPatientsStore {
       );
     }
 
-    if (this.filteredStudyPatients) {
+    if (this.filteredStudyEndedPatients) {
       filteredPatients = filteredPatients.filter(
         (p) => p.profile.depressionTreatmentStatus != "End",
       );

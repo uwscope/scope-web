@@ -91,7 +91,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
 
   const onToggleFilterPatients = (_: React.ChangeEvent<HTMLInputElement>) => {
     rootStore.patientsStore.filterStudyPatients(
-      !rootStore.patientsStore.filteredStudyPatients,
+      !rootStore.patientsStore.filteredStudyEndedPatients,
     );
   };
 
@@ -99,7 +99,11 @@ export const CaseloadPage: FunctionComponent = observer(() => {
     <PageLoader
       state={rootStore.patientsStore.state}
       name="the registry"
-      hasValue={rootStore.patientsStore.patients.length > 0}
+      hasValue={
+        (rootStore.patientsStore.filteredStudyEndedPatients &&
+          rootStore.patientsStore.loadPatientStoresCompleteInitialActive) ||
+        rootStore.patientsStore.loadPatientStoresCompleteInitialAll
+      }
     >
       <Page>
         <PageHeaderContainer>
@@ -144,7 +148,7 @@ export const CaseloadPage: FunctionComponent = observer(() => {
               label="Hide patients who are no longer in the study"
               control={
                 <Checkbox
-                  checked={rootStore.patientsStore.filteredStudyPatients}
+                  checked={rootStore.patientsStore.filteredStudyEndedPatients}
                   onChange={onToggleFilterPatients}
                 />
               }
