@@ -435,6 +435,11 @@ def _filter_cognito_account_not_active(
     :return: true if enabled, false if disabled.
     """
 
+    # A cognito_id of "DISABLED" has been introduced to
+    # prevent logging in to a specific instance.
+    if cognito_id == "DISABLED":
+        return False
+
     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
     boto_session = boto3.Session()
