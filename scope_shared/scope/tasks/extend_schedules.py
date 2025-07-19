@@ -14,7 +14,7 @@ import operator
 from pathlib import Path
 import re
 import ruamel.yaml
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 
 import scope.config
@@ -48,8 +48,28 @@ class ScopeInstanceId(Enum):
     MULTICARE = "multicare"
 
 
-# @dataclass(frozen=True)
-# class EmailContentData:
+class ScriptAssessmentId(Enum):
+    """
+    Which assessments should the script examine.
+    """
+    PHQ9 = "phq-9"
+    GAD7 = "gad-7"
+
+
+@dataclass(frozen=True)
+class ScriptAssessmentData:
+    assessment_id: str
+
+    assigned: bool
+    assignment_document: dict
+
+    scheduled_assessment_documents: List[dict]
+
+
+@dataclass(frozen=True)
+class ScriptExecutionData:
+    assessment_data: Dict[str, ScriptAssessmentData]
+
 #     patient_email: str
 #     testing_destination_email: str
 #
@@ -87,33 +107,74 @@ class ScriptProcessData:
     pool_id: str
     cognito_id: str
 
-#     content_data: Optional[EmailContentData]
+    execution_data: Optional[ScriptExecutionData]
 
     status: ScriptProcessStatus
 
     @property
-    def patient_summary(self):
-        # Use a summary string for patient output.
-        return "{} : {}".format(
-            self.patient_id,
-            self.patient_name,
+    def patient_summary(self) -> List[str]:
+        summary = []
+
+        # Patient identifier.
+        summary.append(
+            "{} : {}".format(
+                self.patient_id,
+                self.patient_name,
+            )
         )
 
-#     @classmethod
-#     def from_content_data(
-#         cls,
-#         *,
-#         current: EmailProcessData,
-#         content_data: EmailContentData,
-#     ):
-#         return EmailProcessData(
-#             patient_id=current.patient_id,
-#             patient_name=current.patient_name,
-#             pool_id=current.pool_id,
-#             cognito_id=current.cognito_id,
-#             content_data=content_data,
-#             status=current.status,
-#         )
+        # If execution data has been prepared.
+        if self.execution_data:
+            # Go through each assessment.
+            for assessment_current in self.execution_data.assessment_data.values():
+                # Whether the assessment is currently assigned.
+                if assessment_current.assigned:
+                    summary.append(
+                        "  {} : Assigned Since {}".format(
+                            assessment_current.assessment_id.value,
+                            scope.database.date_utils.parse_datetime(
+                                assessment_current.assignment_document["assignedDateTime"]
+                            ).strftime("%Y-%m-%d"),
+                        )
+                    )
+                else:
+                    summary.append(
+                        "  {} : Not Currently Assigned".format(
+                            assessment_current.assessment_id.value,
+                        )
+                    )
+
+                # Existing scheduled assessments.
+                for scheduled_assessment_current in assessment_current.scheduled_assessment_documents:
+                    summary.append(
+                        "    {} : {} : {} : {}".format(
+                            scope.database.date_utils.parse_date(
+                                scheduled_assessment_current["dueDate"]
+                            ).strftime("%Y-%m-%d"),
+                            scheduled_assessment_current["_set_id"],
+                            scheduled_assessment_current["_rev"],
+                            scheduled_assessment_current["completed"]
+                        )
+                    )
+                    # summary.append(pprint.pformat(scheduled_assessment_current))
+
+        return summary
+
+    @classmethod
+    def from_execution_data(
+        cls,
+        *,
+        current: ScriptProcessData,
+        execution_data: ScriptExecutionData,
+    ):
+        return ScriptProcessData(
+            patient_id=current.patient_id,
+            patient_name=current.patient_name,
+            pool_id=current.pool_id,
+            cognito_id=current.cognito_id,
+            execution_data=execution_data,
+            status=current.status,
+        )
 
     @classmethod
     def from_patient_data(
@@ -129,7 +190,7 @@ class ScriptProcessData:
             patient_name=patient_name,
             pool_id=pool_id,
             cognito_id=cognito_id,
-            # content_data=None,
+            execution_data=None,
             status=ScriptProcessStatus.IN_PROGRESS,
         )
 
@@ -145,7 +206,7 @@ class ScriptProcessData:
             patient_name=current.patient_name,
             pool_id=current.pool_id,
             cognito_id=current.cognito_id,
-            # content_data=current.content_data,
+            execution_data=current.execution_data,
             status=status,
         )
 
@@ -654,6 +715,60 @@ def _filter_treatment_status(
 #     )
 #
 #
+
+def _patient_calculate_script_execution_data(
+    *,
+    script_process_data: ScriptProcessData,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+    scope_instance_id: ScopeInstanceId,
+) -> ScriptProcessData:
+    # Iterate over the relevant assessments.
+    assessment_data = {}
+    for assessment_id_current in ScriptAssessmentId:
+        # Obtain assignments of the assessment.
+        assessment_documents = patient_document_set.filter_match(
+            match_type=scope.database.patient.assessments.DOCUMENT_TYPE,
+            match_values={"assessmentId": assessment_id_current.value},
+        )
+
+        # Obtain the most recent version of the assignment.
+        assessment_current = assessment_documents.remove_revisions().unique()
+
+        # Obtain the current version of each existing scheduled assessment.
+        # This will include many in the past, including that have and have not been completed.
+        # It may include in the future.
+        scheduled_assessment_documents = (
+            sorted(
+                patient_document_set.remove_revisions().filter_match(
+                    match_type=scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
+                    match_values={"assessmentId": assessment_id_current.value},
+                    match_deleted=False,
+                ).documents,
+                key=lambda doc: (
+                    scope.database.date_utils.parse_date(
+                        doc["dueDate"]
+                    ).strftime("%Y-%m-%d")
+                ),
+            )
+        )
+
+        # Determine whether the assessment is currently assigned.
+        assessment_data[
+            assessment_id_current
+        ] = ScriptAssessmentData(
+            assessment_id=assessment_id_current,
+            assigned=assessment_current["assigned"],
+            assignment_document=assessment_current,
+            scheduled_assessment_documents=scheduled_assessment_documents,
+        )
+
+    return ScriptProcessData.from_execution_data(
+        current=script_process_data,
+        execution_data=ScriptExecutionData(
+            assessment_data=assessment_data,
+        )
+    )
+
 # def _patient_calculate_email_content_data(
 #     *,
 #     email_process_data: EmailProcessData,
@@ -796,7 +911,16 @@ def _patient_script_extend_schedules(
     if script_process_data.status != ScriptProcessStatus.IN_PROGRESS:
         return script_process_data
 
-#     # Format the actual email.
+    # Calculate documents to be modified.
+    script_process_data = _patient_calculate_script_execution_data(
+        script_process_data=script_process_data,
+        patient_document_set=patient_document_set,
+        scope_instance_id=scope_instance_id,
+    )
+    if script_process_data.status != ScriptProcessStatus.IN_PROGRESS:
+        return script_process_data
+
+    #     # Format the actual email.
 #     format_email_result = _format_email(
 #         email_content_data=email_process_data.content_data,
 #         templates_email_reminder=templates_email_reminder,
@@ -947,7 +1071,8 @@ def task_extend_schedules(
             if len(matching_results) > 0:
                 print(status_current.name)
                 for script_process_data_current in matching_results:
-                    print("  {}".format(script_process_data_current.patient_summary))
+                    for line_current in script_process_data_current.patient_summary:
+                        print("  {}".format(line_current))
                 print()
 
     extend_schedules.__doc__ = extend_schedules.__doc__.format(
