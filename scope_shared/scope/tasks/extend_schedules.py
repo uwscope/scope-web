@@ -12,6 +12,7 @@ from enum import Enum
 from invoke import task
 import operator
 from pathlib import Path
+import pytz
 import re
 import ruamel.yaml
 from typing import Dict, List, Optional, Union
@@ -23,6 +24,7 @@ import scope.database.document_utils
 import scope.database.initialize
 import scope.database.patient
 import scope.database.patient.activities
+import scope.database.patient.assessments
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -58,12 +60,20 @@ class ScriptAssessmentId(Enum):
 
 @dataclass(frozen=True)
 class ScriptAssessmentData:
+    # Id of this assessment.
     assessment_id: str
 
+    # Whether the assignment is currently assigned.
     assigned: bool
-    assignment_document: dict
+    # Full document of the assessment.
+    assessment_document: dict
 
+    # Existing scheduled assessments.
     scheduled_assessment_documents: List[dict]
+
+    # Scheduled assessment documents to be deleted or created.
+    scheduled_assessment_documents_to_delete: List[dict]
+    scheduled_assessment_documents_to_create: List[dict]
 
 
 @dataclass(frozen=True)
@@ -133,7 +143,7 @@ class ScriptProcessData:
                         "  {} : Assigned Since {}".format(
                             assessment_current.assessment_id.value,
                             scope.database.date_utils.parse_datetime(
-                                assessment_current.assignment_document["assignedDateTime"]
+                                assessment_current.assessment_document["assignedDateTime"]
                             ).strftime("%Y-%m-%d"),
                         )
                     )
@@ -144,19 +154,43 @@ class ScriptProcessData:
                         )
                     )
 
-                # Existing scheduled assessments.
-                for scheduled_assessment_current in assessment_current.scheduled_assessment_documents:
-                    summary.append(
-                        "    {} : {} : {} : {}".format(
-                            scope.database.date_utils.parse_date(
-                                scheduled_assessment_current["dueDate"]
-                            ).strftime("%Y-%m-%d"),
+                # Existing and new scheduled assessments.
+                for scheduled_assessment_current in assessment_current.scheduled_assessment_documents + assessment_current.scheduled_assessment_documents_to_create:
+                    _formattedAction = "   "
+                    if scheduled_assessment_current in assessment_current.scheduled_assessment_documents_to_delete:
+                        _formattedAction = "del"
+                    elif scheduled_assessment_current in assessment_current.scheduled_assessment_documents_to_create:
+                        _formattedAction = "add"
+
+                    _formattedDate = scope.database.date_utils.parse_date(
+                        scheduled_assessment_current["dueDate"]
+                    ).strftime("%Y-%m-%d")
+
+                    _formattedIdAndRev = None
+                    if "_set_id" in scheduled_assessment_current:
+                        _formattedIdAndRev = "{} r{}".format(
                             scheduled_assessment_current["_set_id"],
                             scheduled_assessment_current["_rev"],
-                            scheduled_assessment_current["completed"]
+                        )
+
+                    _formattedCompleted = None
+                    if scheduled_assessment_current["completed"]:
+                        _formattedCompleted = "Completed"
+
+                    summary.append(
+                        "    " +
+                        " : ".join(
+                            filter(
+                                None,
+                                [
+                                    _formattedAction,
+                                    _formattedDate,
+                                    _formattedIdAndRev,
+                                    _formattedCompleted
+                                ]
+                            )
                         )
                     )
-                    # summary.append(pprint.pformat(scheduled_assessment_current))
 
         return summary
 
@@ -722,6 +756,9 @@ def _patient_calculate_script_execution_data(
     patient_document_set: scope.documents.document_set.DocumentSet,
     scope_instance_id: ScopeInstanceId,
 ) -> ScriptProcessData:
+    # Time to use in schedule maintenance.
+    maintenance_datetime: datetime.datetime = pytz.utc.localize(datetime.datetime.utcnow())
+
     # Iterate over the relevant assessments.
     assessment_data = {}
     for assessment_id_current in ScriptAssessmentId:
@@ -752,14 +789,34 @@ def _patient_calculate_script_execution_data(
             )
         )
 
-        # Determine whether the assessment is currently assigned.
+        # Determine existing scheduled assessments to delete.
+        scheduled_assessment_documents_to_delete = (
+            scope.database.patient.assessments._calculate_scheduled_assessments_to_delete(
+                scheduled_assessments=scheduled_assessment_documents,
+                assessment_id=assessment_id_current.value,
+                maintenance_datetime=maintenance_datetime,
+            )
+        )
+
+        # New scheduled assessments to create.
+        scheduled_assessment_documents_to_create = (
+            scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
+                assessment_id=assessment_id_current,
+                assessment=assessment_current,
+                maintenance_datetime=maintenance_datetime,
+            )
+        )
+
+        # Store all the resulting documents.
         assessment_data[
             assessment_id_current
         ] = ScriptAssessmentData(
             assessment_id=assessment_id_current,
             assigned=assessment_current["assigned"],
-            assignment_document=assessment_current,
+            assessment_document=assessment_current,
             scheduled_assessment_documents=scheduled_assessment_documents,
+            scheduled_assessment_documents_to_delete=scheduled_assessment_documents_to_delete,
+            scheduled_assessment_documents_to_create=scheduled_assessment_documents_to_create,
         )
 
     return ScriptProcessData.from_execution_data(
@@ -1050,7 +1107,7 @@ def task_extend_schedules(
                         ],
                     ),
                     patient_document_set=scope.documents.document_set.DocumentSet(
-                        documents=patient_collection.find()
+                        documents=scope.database.document_utils.normalize_documents(documents=patient_collection.find())
                     ),
                     scope_instance_id=scope_instance_id,
                     allowlist_patient_id_extend_schedules=allowlist_patient_id_extend_schedules,
