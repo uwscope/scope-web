@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import pprint
 
@@ -67,6 +68,9 @@ class ScriptAssessmentData:
     assigned: bool
     # Full document of the assessment.
     assessment_document: dict
+
+    # Assessment document to create.
+    assessment_document_to_create: dict
 
     # Existing scheduled assessments.
     scheduled_assessment_documents: List[dict]
@@ -139,20 +143,38 @@ class ScriptProcessData:
             for assessment_current in self.execution_data.assessment_data.values():
                 # Whether the assessment is currently assigned.
                 if assessment_current.assigned:
-                    summary.append(
+                    summary.extend([
                         "  {} : Assigned Since {}".format(
                             assessment_current.assessment_id.value,
                             scope.database.date_utils.parse_datetime(
                                 assessment_current.assessment_document["assignedDateTime"]
                             ).strftime("%Y-%m-%d"),
+                        ),
+                        "          {} {}".format(
+                            assessment_current.assessment_document["dayOfWeek"],
+                            assessment_current.assessment_document["frequency"],
                         )
-                    )
+                    ])
                 else:
                     summary.append(
                         "  {} : Not Currently Assigned".format(
                             assessment_current.assessment_id.value,
                         )
                     )
+
+                # Whether the assessment is being re-created to the previous date.
+                if assessment_current.assessment_document_to_create:
+                    summary.extend([
+                        "    add : Re-Create Prior Assignment Since {}".format(
+                            scope.database.date_utils.parse_datetime(
+                                assessment_current.assessment_document_to_create["assignedDateTime"]
+                            ).strftime("%Y-%m-%d"),
+                        ),
+                        "          {} {}".format(
+                            assessment_current.assessment_document_to_create["dayOfWeek"],
+                            assessment_current.assessment_document_to_create["frequency"],
+                        ),
+                    ])
 
                 # Existing and new scheduled assessments.
                 for scheduled_assessment_current in assessment_current.scheduled_assessment_documents + assessment_current.scheduled_assessment_documents_to_create:
@@ -771,6 +793,46 @@ def _patient_calculate_script_execution_data(
         # Obtain the most recent version of the assignment.
         assessment_current = assessment_documents.remove_revisions().unique()
 
+        # July 15 maintenance was done in a rush, see if this is a record to update based on that.
+        assessment_current_needs_update = True
+        assessment_previous = None
+        if assessment_current_needs_update:
+            # Require the assessment is currently assigned.
+            assessment_current_needs_update = assessment_current["assigned"]
+        if assessment_current_needs_update:
+            # Require that assignment happened on July 15 2025.
+            assessment_current_needs_update = scope.database.date_utils.parse_datetime(
+                assessment_current["assignedDateTime"]
+            ).strftime("%Y-%m-%d") == "2025-07-15"
+        if assessment_current_needs_update:
+            # Obtain the most recent assignment prior to July 15 2025.
+            assessment_previous = list(filter(
+                lambda doc: scope.database.date_utils.parse_datetime(
+                    doc["assignedDateTime"]
+                ).strftime("%Y-%m-%d") != "2025-07-15",
+                sorted(
+                    assessment_documents.documents,
+                    key=operator.itemgetter("_rev"),
+                ),
+            ))[-1]
+
+            # Require the previous assignment:
+            # - was an assignment
+            # - was otherwise the same as what did happen on July 15 2025
+            compare_keys = ["dayOfWeek", "frequency"]
+
+            assessment_current_needs_update = (
+                assessment_previous["assigned"] and
+                operator.itemgetter(*compare_keys)(assessment_current) == operator.itemgetter(*compare_keys)(assessment_previous)
+            )
+
+        # Based on the above filter, determine if we are creating an assessment document.
+        assessment_document_to_create = None
+        if assessment_current_needs_update:
+            assessment_document_to_create = copy.deepcopy(assessment_current)
+            assessment_document_to_create["assignedDateTime"] = assessment_previous["assignedDateTime"]
+            del assessment_document_to_create["_id"]
+
         # Obtain the current version of each existing scheduled assessment.
         # This will include many in the past, including that have and have not been completed.
         # It may include in the future.
@@ -814,6 +876,7 @@ def _patient_calculate_script_execution_data(
             assessment_id=assessment_id_current,
             assigned=assessment_current["assigned"],
             assessment_document=assessment_current,
+            assessment_document_to_create=assessment_document_to_create,
             scheduled_assessment_documents=scheduled_assessment_documents,
             scheduled_assessment_documents_to_delete=scheduled_assessment_documents_to_delete,
             scheduled_assessment_documents_to_create=scheduled_assessment_documents_to_create,
