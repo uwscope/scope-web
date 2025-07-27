@@ -15,8 +15,12 @@ DATABASE_DEMO_CONFIG_PATH = "./secrets/configuration/database_demo.yaml"
 DATABASE_DEV_CONFIG_PATH = "./secrets/configuration/database_dev.yaml"
 DATABASE_MULTICARE_CONFIG_PATH = "./secrets/configuration/database_multicare.yaml"
 DATABASE_SCCA_CONFIG_PATH = "./secrets/configuration/database_scca.yaml"
-ALLOWLIST_PATIENT_ID_EXTEND_SCHEDULES_PATH = "./secrets/configuration/allowlist_patient_id_extend_schedules.yaml"
-DENYLIST_PATIENT_ID_EXTEND_SCHEDULES_PATH = "./secrets/configuration/denylist_patient_id_extend_schedules.yaml"
+ALLOWLIST_PATIENT_ID_EXTEND_SCHEDULES_PATH = (
+    "./secrets/configuration/allowlist_patient_id_extend_schedules.yaml"
+)
+DENYLIST_PATIENT_ID_EXTEND_SCHEDULES_PATH = (
+    "./secrets/configuration/denylist_patient_id_extend_schedules.yaml"
+)
 
 
 task_script_args = {

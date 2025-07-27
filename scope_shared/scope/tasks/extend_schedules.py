@@ -55,6 +55,7 @@ class ScriptAssessmentId(Enum):
     """
     Which assessments should the script examine.
     """
+
     PHQ9 = "phq-9"
     GAD7 = "gad-7"
 
@@ -84,6 +85,7 @@ class ScriptAssessmentData:
 class ScriptExecutionData:
     assessment_data: Dict[str, ScriptAssessmentData]
 
+
 #     patient_email: str
 #     testing_destination_email: str
 #
@@ -108,6 +110,8 @@ class ScriptProcessStatus(Enum):
     STOPPED_MATCHED_DENY_LIST = 2
     STOPPED_COGNITO_ACCOUNT_NOT_ACTIVE = 3
     STOPPED_TREATMENT_STATUS = 4
+
+
 #     STOPPED_CONTENT_NOTHING_DUE = 4
 #
 #     EMAIL_SUCCESS = 10
@@ -143,18 +147,22 @@ class ScriptProcessData:
             for assessment_current in self.execution_data.assessment_data.values():
                 # Whether the assessment is currently assigned.
                 if assessment_current.assigned:
-                    summary.extend([
-                        "  {} : Assigned Since {}".format(
-                            assessment_current.assessment_id.value,
-                            scope.database.date_utils.parse_datetime(
-                                assessment_current.assessment_document["assignedDateTime"]
-                            ).strftime("%Y-%m-%d"),
-                        ),
-                        "          {} {}".format(
-                            assessment_current.assessment_document["dayOfWeek"],
-                            assessment_current.assessment_document["frequency"],
-                        )
-                    ])
+                    summary.extend(
+                        [
+                            "  {} : Assigned Since {}".format(
+                                assessment_current.assessment_id.value,
+                                scope.database.date_utils.parse_datetime(
+                                    assessment_current.assessment_document[
+                                        "assignedDateTime"
+                                    ]
+                                ).strftime("%Y-%m-%d"),
+                            ),
+                            "          {} {}".format(
+                                assessment_current.assessment_document["dayOfWeek"],
+                                assessment_current.assessment_document["frequency"],
+                            ),
+                        ]
+                    )
                 else:
                     summary.append(
                         "  {} : Not Currently Assigned".format(
@@ -164,24 +172,41 @@ class ScriptProcessData:
 
                 # Whether the assessment is being re-created to the previous date.
                 if assessment_current.assessment_document_to_create:
-                    summary.extend([
-                        "    add : Re-Create Prior Assignment Since {}".format(
-                            scope.database.date_utils.parse_datetime(
-                                assessment_current.assessment_document_to_create["assignedDateTime"]
-                            ).strftime("%Y-%m-%d"),
-                        ),
-                        "          {} {}".format(
-                            assessment_current.assessment_document_to_create["dayOfWeek"],
-                            assessment_current.assessment_document_to_create["frequency"],
-                        ),
-                    ])
+                    summary.extend(
+                        [
+                            "    add : Re-Create Prior Assignment Since {}".format(
+                                scope.database.date_utils.parse_datetime(
+                                    assessment_current.assessment_document_to_create[
+                                        "assignedDateTime"
+                                    ]
+                                ).strftime("%Y-%m-%d"),
+                            ),
+                            "          {} {}".format(
+                                assessment_current.assessment_document_to_create[
+                                    "dayOfWeek"
+                                ],
+                                assessment_current.assessment_document_to_create[
+                                    "frequency"
+                                ],
+                            ),
+                        ]
+                    )
 
                 # Existing and new scheduled assessments.
-                for scheduled_assessment_current in assessment_current.scheduled_assessment_documents + assessment_current.scheduled_assessment_documents_to_create:
+                for scheduled_assessment_current in (
+                    assessment_current.scheduled_assessment_documents
+                    + assessment_current.scheduled_assessment_documents_to_create
+                ):
                     _formattedAction = "   "
-                    if scheduled_assessment_current in assessment_current.scheduled_assessment_documents_to_delete:
+                    if (
+                        scheduled_assessment_current
+                        in assessment_current.scheduled_assessment_documents_to_delete
+                    ):
                         _formattedAction = "del"
-                    elif scheduled_assessment_current in assessment_current.scheduled_assessment_documents_to_create:
+                    elif (
+                        scheduled_assessment_current
+                        in assessment_current.scheduled_assessment_documents_to_create
+                    ):
                         _formattedAction = "add"
 
                     _formattedDate = scope.database.date_utils.parse_date(
@@ -200,16 +225,16 @@ class ScriptProcessData:
                         _formattedCompleted = "Completed"
 
                     summary.append(
-                        "    " +
-                        " : ".join(
+                        "    "
+                        + " : ".join(
                             filter(
                                 None,
                                 [
                                     _formattedAction,
                                     _formattedDate,
                                     _formattedIdAndRev,
-                                    _formattedCompleted
-                                ]
+                                    _formattedCompleted,
+                                ],
                             )
                         )
                     )
@@ -772,6 +797,7 @@ def _filter_treatment_status(
 #
 #
 
+
 def _patient_calculate_script_execution_data(
     *,
     script_process_data: ScriptProcessData,
@@ -779,7 +805,9 @@ def _patient_calculate_script_execution_data(
     scope_instance_id: ScopeInstanceId,
 ) -> ScriptProcessData:
     # Time to use in schedule maintenance.
-    maintenance_datetime: datetime.datetime = pytz.utc.localize(datetime.datetime.utcnow())
+    maintenance_datetime: datetime.datetime = pytz.utc.localize(
+        datetime.datetime.utcnow()
+    )
 
     # Iterate over the relevant assessments.
     assessment_data = {}
@@ -801,78 +829,85 @@ def _patient_calculate_script_execution_data(
             assessment_current_needs_update = assessment_current["assigned"]
         if assessment_current_needs_update:
             # Require that assignment happened on July 15 2025.
-            assessment_current_needs_update = scope.database.date_utils.parse_datetime(
-                assessment_current["assignedDateTime"]
-            ).strftime("%Y-%m-%d") == "2025-07-15"
+            assessment_current_needs_update = (
+                scope.database.date_utils.parse_datetime(
+                    assessment_current["assignedDateTime"]
+                ).strftime("%Y-%m-%d")
+                == "2025-07-15"
+            )
         if assessment_current_needs_update:
             # Obtain the most recent assignment prior to July 15 2025.
-            assessment_previous = list(filter(
-                lambda doc: scope.database.date_utils.parse_datetime(
-                    doc["assignedDateTime"]
-                ).strftime("%Y-%m-%d") != "2025-07-15",
-                sorted(
-                    assessment_documents.documents,
-                    key=operator.itemgetter("_rev"),
-                ),
-            ))[-1]
+            assessment_previous = list(
+                filter(
+                    lambda doc: scope.database.date_utils.parse_datetime(
+                        doc["assignedDateTime"]
+                    ).strftime("%Y-%m-%d")
+                    != "2025-07-15",
+                    sorted(
+                        assessment_documents.documents,
+                        key=operator.itemgetter("_rev"),
+                    ),
+                )
+            )[-1]
 
             # Require the previous assignment:
             # - was an assignment
             # - was otherwise the same as what did happen on July 15 2025
             compare_keys = ["dayOfWeek", "frequency"]
 
-            assessment_current_needs_update = (
-                assessment_previous["assigned"] and
-                operator.itemgetter(*compare_keys)(assessment_current) == operator.itemgetter(*compare_keys)(assessment_previous)
+            assessment_current_needs_update = assessment_previous[
+                "assigned"
+            ] and operator.itemgetter(*compare_keys)(
+                assessment_current
+            ) == operator.itemgetter(
+                *compare_keys
+            )(
+                assessment_previous
             )
 
         # Based on the above filter, determine if we are creating an assessment document.
         assessment_document_to_create = None
         if assessment_current_needs_update:
             assessment_document_to_create = copy.deepcopy(assessment_current)
-            assessment_document_to_create["assignedDateTime"] = assessment_previous["assignedDateTime"]
+            assessment_document_to_create["assignedDateTime"] = assessment_previous[
+                "assignedDateTime"
+            ]
             del assessment_document_to_create["_id"]
 
         # Obtain the current version of each existing scheduled assessment.
         # This will include many in the past, including that have and have not been completed.
         # It may include in the future.
-        scheduled_assessment_documents = (
-            sorted(
-                patient_document_set.remove_revisions().filter_match(
-                    match_type=scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
-                    match_values={"assessmentId": assessment_id_current.value},
-                    match_deleted=False,
-                ).documents,
-                key=lambda doc: (
-                    scope.database.date_utils.parse_date(
-                        doc["dueDate"]
-                    ).strftime("%Y-%m-%d")
-                ),
+        scheduled_assessment_documents = sorted(
+            patient_document_set.remove_revisions()
+            .filter_match(
+                match_type=scope.database.patient.scheduled_assessments.DOCUMENT_TYPE,
+                match_values={"assessmentId": assessment_id_current.value},
+                match_deleted=False,
             )
+            .documents,
+            key=lambda doc: (
+                scope.database.date_utils.parse_date(doc["dueDate"]).strftime(
+                    "%Y-%m-%d"
+                )
+            ),
         )
 
         # Determine existing scheduled assessments to delete.
-        scheduled_assessment_documents_to_delete = (
-            scope.database.patient.assessments._calculate_scheduled_assessments_to_delete(
-                scheduled_assessments=scheduled_assessment_documents,
-                assessment_id=assessment_id_current.value,
-                maintenance_datetime=maintenance_datetime,
-            )
+        scheduled_assessment_documents_to_delete = scope.database.patient.assessments._calculate_scheduled_assessments_to_delete(
+            scheduled_assessments=scheduled_assessment_documents,
+            assessment_id=assessment_id_current.value,
+            maintenance_datetime=maintenance_datetime,
         )
 
         # New scheduled assessments to create.
-        scheduled_assessment_documents_to_create = (
-            scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
-                assessment_id=assessment_id_current,
-                assessment=assessment_current,
-                maintenance_datetime=maintenance_datetime,
-            )
+        scheduled_assessment_documents_to_create = scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
+            assessment_id=assessment_id_current,
+            assessment=assessment_current,
+            maintenance_datetime=maintenance_datetime,
         )
 
         # Store all the resulting documents.
-        assessment_data[
-            assessment_id_current
-        ] = ScriptAssessmentData(
+        assessment_data[assessment_id_current] = ScriptAssessmentData(
             assessment_id=assessment_id_current,
             assigned=assessment_current["assigned"],
             assessment_document=assessment_current,
@@ -886,8 +921,9 @@ def _patient_calculate_script_execution_data(
         current=script_process_data,
         execution_data=ScriptExecutionData(
             assessment_data=assessment_data,
-        )
+        ),
     )
+
 
 # def _patient_calculate_email_content_data(
 #     *,
@@ -989,14 +1025,14 @@ def _patient_filter_script_process_data(
             status=ScriptProcessStatus.STOPPED_TREATMENT_STATUS,
         )
 
-#     # Filter if content indicates nothing is currently due for a reminder.
-#     if not _filter_content_nothing_due(
-#         content_data=email_process_data.content_data,
-#     ):
-#         return EmailProcessData.from_status(
-#             current=email_process_data,
-#             status=EmailProcessStatus.STOPPED_CONTENT_NOTHING_DUE,
-#         )
+    #     # Filter if content indicates nothing is currently due for a reminder.
+    #     if not _filter_content_nothing_due(
+    #         content_data=email_process_data.content_data,
+    #     ):
+    #         return EmailProcessData.from_status(
+    #             current=email_process_data,
+    #             status=EmailProcessStatus.STOPPED_CONTENT_NOTHING_DUE,
+    #         )
 
     return script_process_data
 
@@ -1011,15 +1047,15 @@ def _patient_script_extend_schedules(
     # templates_email_reminder: TemplatesEmailReminder,
     # testing_destination_email: Optional[str],
 ) -> ScriptProcessData:
-#     # Calculate values needed for an email.
-#     email_process_data = _patient_calculate_email_content_data(
-#         email_process_data=email_process_data,
-#         patient_document_set=patient_document_set,
-#         scope_instance_id=scope_instance_id,
-#         testing_destination_email=testing_destination_email,
-#     )
-#     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
-#         return email_process_data
+    #     # Calculate values needed for an email.
+    #     email_process_data = _patient_calculate_email_content_data(
+    #         email_process_data=email_process_data,
+    #         patient_document_set=patient_document_set,
+    #         scope_instance_id=scope_instance_id,
+    #         testing_destination_email=testing_destination_email,
+    #     )
+    #     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
+    #         return email_process_data
 
     # Filter whether this patient will be processed.
     script_process_data = _patient_filter_script_process_data(
@@ -1041,43 +1077,43 @@ def _patient_script_extend_schedules(
         return script_process_data
 
     #     # Format the actual email.
-#     format_email_result = _format_email(
-#         email_content_data=email_process_data.content_data,
-#         templates_email_reminder=templates_email_reminder,
-#         testing_destination_email=testing_destination_email,
-#     )
-#
-#     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
-#     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
-#     boto_session = boto3.Session()
-#     boto_ses = boto_session.client("ses")
-#
-#     # Send the formatted email.
-#     response = boto_ses.send_email(
-#         Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-#         Destination={
-#             "ToAddresses": [destination_email],
-#             # "CcAddresses": ["<email@email.org>"],
-#         },
-#         ReplyToAddresses=["do-not-reply@uwscope.org"],
-#         Message={
-#             "Subject": {
-#                 "Data": format_email_result.subject,
-#                 "Charset": "UTF-8",
-#             },
-#             "Body": {
-#                 "Html": {
-#                     "Data": format_email_result.body,
-#                     "Charset": "UTF-8",
-#                 }
-#             },
-#         },
-#     )
-#
-#     return EmailProcessData.from_status(
-#         current=email_process_data,
-#         status=EmailProcessStatus.EMAIL_SUCCESS,
-#     )
+    #     format_email_result = _format_email(
+    #         email_content_data=email_process_data.content_data,
+    #         templates_email_reminder=templates_email_reminder,
+    #         testing_destination_email=testing_destination_email,
+    #     )
+    #
+    #     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
+    #     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
+    #     boto_session = boto3.Session()
+    #     boto_ses = boto_session.client("ses")
+    #
+    #     # Send the formatted email.
+    #     response = boto_ses.send_email(
+    #         Source="SCOPE Reminders <do-not-reply@uwscope.org>",
+    #         Destination={
+    #             "ToAddresses": [destination_email],
+    #             # "CcAddresses": ["<email@email.org>"],
+    #         },
+    #         ReplyToAddresses=["do-not-reply@uwscope.org"],
+    #         Message={
+    #             "Subject": {
+    #                 "Data": format_email_result.subject,
+    #                 "Charset": "UTF-8",
+    #             },
+    #             "Body": {
+    #                 "Html": {
+    #                     "Data": format_email_result.body,
+    #                     "Charset": "UTF-8",
+    #                 }
+    #             },
+    #         },
+    #     )
+    #
+    #     return EmailProcessData.from_status(
+    #         current=email_process_data,
+    #         status=EmailProcessStatus.EMAIL_SUCCESS,
+    #     )
 
     return script_process_data
 
@@ -1090,7 +1126,7 @@ def task_extend_schedules(
     database_config_path: Union[Path, str],
     allowlist_patient_id_extend_schedules_path: Union[Path, str],
     denylist_patient_id_extend_schedules_path: Union[Path, str],
-#     templates_email_reminder: TemplatesEmailReminder,
+    #     templates_email_reminder: TemplatesEmailReminder,
 ):
 
     instance_ssh_config = aws_infrastructure.tasks.ssh.SSHConfig.load(
@@ -1100,13 +1136,17 @@ def task_extend_schedules(
     documentdb_config = scope.config.DocumentDBClientConfig.load(documentdb_config_path)
     database_config = scope.config.DatabaseClientConfig.load(database_config_path)
     allowlist_patient_id_extend_schedules = None
-    with open(allowlist_patient_id_extend_schedules_path, encoding="UTF-8") as config_file:
+    with open(
+        allowlist_patient_id_extend_schedules_path, encoding="UTF-8"
+    ) as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         allowlist_patient_id_extend_schedules = yaml.load(config_file)
         if allowlist_patient_id_extend_schedules == None:
             allowlist_patient_id_extend_schedules = []
     denylist_patient_id_extend_schedules = None
-    with open(denylist_patient_id_extend_schedules_path, encoding="UTF-8") as config_file:
+    with open(
+        denylist_patient_id_extend_schedules_path, encoding="UTF-8"
+    ) as config_file:
         yaml = ruamel.yaml.YAML(typ="safe", pure=True)
         denylist_patient_id_extend_schedules = yaml.load(config_file)
         if denylist_patient_id_extend_schedules == None:
@@ -1170,12 +1210,14 @@ def task_extend_schedules(
                         ],
                     ),
                     patient_document_set=scope.documents.document_set.DocumentSet(
-                        documents=scope.database.document_utils.normalize_documents(documents=patient_collection.find())
+                        documents=scope.database.document_utils.normalize_documents(
+                            documents=patient_collection.find()
+                        )
                     ),
                     scope_instance_id=scope_instance_id,
                     allowlist_patient_id_extend_schedules=allowlist_patient_id_extend_schedules,
                     denylist_patient_id_extend_schedules=denylist_patient_id_extend_schedules,
-#                     templates_email_reminder=templates_email_reminder,
+                    #                     templates_email_reminder=templates_email_reminder,
                 )
 
                 # Store the result
@@ -1195,8 +1237,6 @@ def task_extend_schedules(
                         print("  {}".format(line_current))
                 print()
 
-    extend_schedules.__doc__ = extend_schedules.__doc__.format(
-        database_config.name
-    )
+    extend_schedules.__doc__ = extend_schedules.__doc__.format(database_config.name)
 
     return extend_schedules
