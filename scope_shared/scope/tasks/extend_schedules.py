@@ -82,8 +82,31 @@ class ScriptAssessmentData:
 
 
 @dataclass(frozen=True)
+class ScriptActivityScheduleData:
+    # Id of this activity schedule.
+    activity_schedule_id: str
+
+    # Full document of this activity schedule.
+    activity_schedule_document: dict
+
+    # Full document of the corresponding activity.
+    activity_document: dict
+
+    # A determination of whether to extend it.
+    extend_activity_schedule: bool
+
+    # Existing scheduled activities.
+    scheduled_activity_documents: List[dict]
+
+    # Scheduled activity documents to be deleted or created.
+    scheduled_activity_documents_to_delete: List[dict]
+    scheduled_activity_documents_to_create: List[dict]
+
+
+@dataclass(frozen=True)
 class ScriptExecutionData:
     assessment_data: Dict[str, ScriptAssessmentData]
+    activity_schedule_data: Dict[str, ScriptActivityScheduleData]
 
 
 #     patient_email: str
@@ -192,7 +215,7 @@ class ScriptProcessData:
                         ]
                     )
 
-                # Existing and new scheduled assessments.
+                # Scheduled assessments that exist, will be deleted, or will be created.
                 for scheduled_assessment_current in (
                     assessment_current.scheduled_assessment_documents
                     + assessment_current.scheduled_assessment_documents_to_create
@@ -238,6 +261,97 @@ class ScriptProcessData:
                             )
                         )
                     )
+
+            for activity_schedule_current in self.execution_data.activity_schedule_data.values():
+                # Summary of the activity schedule.
+                summary.extend(
+                    filter(None,
+                    [
+                        "  {} : {}".format(
+                            activity_schedule_current.activity_schedule_id,
+                            activity_schedule_current.activity_document["name"]
+                        ),
+                        "                  Scheduled {}{}".format(
+                            scope.database.date_utils.parse_date(
+                                activity_schedule_current.activity_schedule_document[
+                                    "date"
+                                ]
+                            ).strftime("%Y-%m-%d"),
+                            " Repeating Until {}".format(
+                                scope.database.date_utils.parse_date(
+                                    activity_schedule_current.scheduled_activity_documents[-1]["dueDate"]
+                                ).strftime("%Y-%m-%d")
+                            ) if activity_schedule_current.activity_schedule_document["hasRepetition"] else " Non-Repeating",
+                        ),
+                        "                  Extend Activity Schedule" if activity_schedule_current.extend_activity_schedule else None,
+                        "                  Do Not Extend Activity Schedule" if not activity_schedule_current.extend_activity_schedule else None,
+                    ])
+                )
+
+                # Summary of scheduled activities to be deleted.
+                if activity_schedule_current.scheduled_activity_documents_to_delete:
+                    summary.append(
+                        "    "
+                        + "del : {} ScheduledActivity from {} to {}".format(
+                            len(activity_schedule_current.scheduled_activity_documents_to_delete),
+                            scope.database.date_utils.parse_date(
+                                activity_schedule_current.scheduled_activity_documents_to_delete[0]["dueDate"]
+                            ).strftime("%Y-%m-%d"),
+                            scope.database.date_utils.parse_date(
+                                activity_schedule_current.scheduled_activity_documents_to_delete[-1]["dueDate"]
+                            ).strftime("%Y-%m-%d"),
+                        )
+                    )
+
+                # Summary of scheduled activities to be created.
+                if activity_schedule_current.scheduled_activity_documents_to_create:
+                    summary.append(
+                        "    "
+                        + "add : {} ScheduledActivity from {} to {}".format(
+                            len(activity_schedule_current.scheduled_activity_documents_to_create),
+                            scope.database.date_utils.parse_date(
+                                activity_schedule_current.scheduled_activity_documents_to_create[0]["dueDate"]
+                            ).strftime("%Y-%m-%d"),
+                            scope.database.date_utils.parse_date(
+                                activity_schedule_current.scheduled_activity_documents_to_create[-1]["dueDate"]
+                            ).strftime("%Y-%m-%d"),
+                        )
+                    )
+
+                # Scheduled activities that will be deleted or created.
+                # for scheduled_activity_current in (
+                #     activity_schedule_current.scheduled_activity_documents
+                #     + activity_schedule_current.scheduled_activity_documents_to_create
+                # ):
+                #     _formattedAction = "   "
+                #     if (
+                #         scheduled_activity_current
+                #         in activity_schedule_current.scheduled_activity_documents_to_delete
+                #     ):
+                #         _formattedAction = "del"
+                #     elif (
+                #         scheduled_activity_current
+                #         in activity_schedule_current.scheduled_activity_documents_to_create
+                #     ):
+                #         _formattedAction = "add"
+                #
+                #     _formattedDate = scope.database.date_utils.parse_date(
+                #         scheduled_activity_current["dueDate"]
+                #     ).strftime("%Y-%m-%d")
+                #
+                #     if _formattedAction.strip():
+                #         summary.append(
+                #             "    "
+                #             + " : ".join(
+                #                 filter(
+                #                     None,
+                #                     [
+                #                         _formattedAction,
+                #                         _formattedDate,
+                #                     ],
+                #                 )
+                #             )
+                #         )
 
         return summary
 
@@ -798,17 +912,11 @@ def _filter_treatment_status(
 #
 
 
-def _patient_calculate_script_execution_data(
+def _patient_calculate_script_execution_assessment_data(
     *,
-    script_process_data: ScriptProcessData,
     patient_document_set: scope.documents.document_set.DocumentSet,
-    scope_instance_id: ScopeInstanceId,
-) -> ScriptProcessData:
-    # Time to use in schedule maintenance.
-    maintenance_datetime: datetime.datetime = pytz.utc.localize(
-        datetime.datetime.utcnow()
-    )
-
+    maintenance_datetime: datetime.datetime,
+) -> Dict[str, ScriptAssessmentData]:
     # Iterate over the relevant assessments.
     assessment_data = {}
     for assessment_id_current in ScriptAssessmentId:
@@ -901,7 +1009,7 @@ def _patient_calculate_script_execution_data(
 
         # New scheduled assessments to create.
         scheduled_assessment_documents_to_create = scope.database.patient.assessments._calculate_scheduled_assessments_to_create(
-            assessment_id=assessment_id_current,
+            assessment_id=assessment_id_current.value,
             assessment=assessment_current,
             maintenance_datetime=maintenance_datetime,
         )
@@ -917,10 +1025,142 @@ def _patient_calculate_script_execution_data(
             scheduled_assessment_documents_to_create=scheduled_assessment_documents_to_create,
         )
 
+    return assessment_data
+
+
+def _patient_calculate_script_execution_activity_schedule_data(
+    *,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+    maintenance_datetime: datetime.datetime,
+) -> Dict[str, ScriptAssessmentData]:
+    activity_schedule_documents = sorted(
+        patient_document_set.remove_revisions().filter_match(
+            match_type=scope.database.patient.activity_schedules.DOCUMENT_TYPE,
+            match_deleted=False,
+        ).documents,
+        key=lambda doc: (
+            doc["activityId"],
+            scope.database.date_utils.parse_date(
+                doc["date"]
+            ).strftime("%Y-%m-%d")
+        )
+    )
+
+    # Iterate over all activity schedules.
+    activity_schedule_data = {}
+    for activity_schedule_current in activity_schedule_documents:
+        # Extract the id.
+        activity_schedule_id_current = activity_schedule_current["activityScheduleId"]
+
+        # Look up the corresponding activity.
+        activity_current = patient_document_set.remove_revisions().filter_match(
+            match_type=scope.database.patient.activities.DOCUMENT_TYPE,
+            match_values={"activityId": activity_schedule_current["activityId"]},
+            match_deleted=False,
+        ).unique()
+
+        # And the instances of the scheduled activity.
+        scheduled_activity_documents = sorted(
+            patient_document_set.remove_revisions()
+            .filter_match(
+                match_type=scope.database.patient.scheduled_activities.DOCUMENT_TYPE,
+                match_values={"activityScheduleId": activity_schedule_id_current},
+                match_deleted=False,
+            )
+            .documents,
+            key=lambda doc: (
+                scope.database.date_utils.parse_date(doc["dueDate"]).strftime(
+                    "%Y-%m-%d"
+                )
+            ),
+        )
+
+        # By default, we will extend repeating activity schedules.
+        # We will not extend if it seems a patient observed the end of a schedule, then re-scheduled on their own.
+        # Such examples will be manually identified and gathered here.
+        extend_activity_schedule = activity_schedule_current["hasRepetition"] and activity_schedule_id_current not in [
+            # MultiCare Patients
+            # Patient oi7ticuq7prgg
+            "emqwalwmpknde",
+            "ctxlc3drstue2",
+            "a2b5xfxsedupw",
+            "piq5tuolloztw",
+            "ibaavtht77gfm",
+            "w3yu3zxawkn3e",
+            "pdetx7mk733na",
+        ]
+
+        # Determine existing scheduled activities to delete.
+        scheduled_activity_documents_to_delete = []
+        if extend_activity_schedule:
+            scheduled_activity_documents_to_delete = scope.database.patient.activity_schedules._calculate_scheduled_activities_to_delete(
+                scheduled_activities=scheduled_activity_documents,
+                activity_schedule_id=activity_schedule_id_current,
+                maintenance_datetime=maintenance_datetime,
+            )
+
+        # New scheduled assessments to create.
+        scheduled_activity_documents_to_create = []
+        if extend_activity_schedule:
+            scheduled_activity_documents_to_create = scope.database.patient.activity_schedules._calculate_scheduled_activities_to_create(
+                activity_schedule_id=activity_schedule_id_current,
+                activity_schedule=activity_schedule_current,
+                maintenance_datetime=maintenance_datetime,
+            )
+
+            data_snapshot = scope.database.patient.scheduled_activities.build_data_snapshot(
+                activity_schedule_id=activity_schedule_id_current,
+                activity_schedules=[activity_schedule_current],
+                activities=[activity_current],
+                values=patient_document_set.remove_revisions()
+                    .filter_match(
+                        match_type=scope.database.patient.values.DOCUMENT_TYPE,
+                        match_deleted=False,
+                    ).documents
+            )
+
+            for scheduled_activity_current in scheduled_activity_documents_to_create:
+                scheduled_activity_current["dataSnapshot"] = data_snapshot
+
+        activity_schedule_data[activity_schedule_id_current] = ScriptActivityScheduleData(
+            activity_schedule_id=activity_schedule_id_current,
+            activity_schedule_document=activity_schedule_current,
+            activity_document=activity_current,
+            extend_activity_schedule=extend_activity_schedule,
+            scheduled_activity_documents=scheduled_activity_documents,
+            scheduled_activity_documents_to_delete=scheduled_activity_documents_to_delete,
+            scheduled_activity_documents_to_create=scheduled_activity_documents_to_create,
+        )
+
+    return activity_schedule_data
+
+
+def _patient_calculate_script_execution_data(
+    *,
+    script_process_data: ScriptProcessData,
+    patient_document_set: scope.documents.document_set.DocumentSet,
+    scope_instance_id: ScopeInstanceId,
+) -> ScriptProcessData:
+    # Time to use in schedule maintenance.
+    maintenance_datetime: datetime.datetime = pytz.utc.localize(
+        datetime.datetime.utcnow()
+    )
+
+    assessment_data = _patient_calculate_script_execution_assessment_data(
+        patient_document_set=patient_document_set,
+        maintenance_datetime=maintenance_datetime,
+    )
+
+    activity_schedule_data = _patient_calculate_script_execution_activity_schedule_data(
+        patient_document_set=patient_document_set,
+        maintenance_datetime=maintenance_datetime,
+    )
+
     return ScriptProcessData.from_execution_data(
         current=script_process_data,
         execution_data=ScriptExecutionData(
             assessment_data=assessment_data,
+            activity_schedule_data=activity_schedule_data,
         ),
     )
 
@@ -1075,6 +1315,24 @@ def _patient_script_extend_schedules(
     )
     if script_process_data.status != ScriptProcessStatus.IN_PROGRESS:
         return script_process_data
+
+    # Validate that all documents to be created match their corresponding schema.
+    for assessment_data_current in script_process_data.execution_data.assessment_data.values():
+        scope.schema_utils.assert_schema(
+            data=assessment_data_current.assessment_document_to_create,
+            schema=scope.schema.assessment_schema,
+        )
+
+        scope.schema_utils.assert_schema(
+            data=assessment_data_current.scheduled_assessment_documents_to_create,
+            schema=scope.schema.scheduled_assessments_schema,
+        )
+
+    for activity_schedule_data_current in script_process_data.execution_data.activity_schedule_data.values():
+        scope.schema_utils.assert_schema(
+            data=activity_schedule_data_current.scheduled_activity_documents_to_create,
+            schema=scope.schema.scheduled_activities_schema,
+        )
 
     #     # Format the actual email.
     #     format_email_result = _format_email(
