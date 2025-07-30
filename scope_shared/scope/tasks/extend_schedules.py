@@ -262,30 +262,46 @@ class ScriptProcessData:
                         )
                     )
 
-            for activity_schedule_current in self.execution_data.activity_schedule_data.values():
+            for (
+                activity_schedule_current
+            ) in self.execution_data.activity_schedule_data.values():
                 # Summary of the activity schedule.
                 summary.extend(
-                    filter(None,
-                    [
-                        "  {} : {}".format(
-                            activity_schedule_current.activity_schedule_id,
-                            activity_schedule_current.activity_document["name"]
-                        ),
-                        "                  Scheduled {}{}".format(
-                            scope.database.date_utils.parse_date(
-                                activity_schedule_current.activity_schedule_document[
-                                    "date"
-                                ]
-                            ).strftime("%Y-%m-%d"),
-                            " Repeating Until {}".format(
+                    filter(
+                        None,
+                        [
+                            "  {} : {}".format(
+                                activity_schedule_current.activity_schedule_id,
+                                activity_schedule_current.activity_document["name"],
+                            ),
+                            "                  Scheduled {}{}".format(
                                 scope.database.date_utils.parse_date(
-                                    activity_schedule_current.scheduled_activity_documents[-1]["dueDate"]
-                                ).strftime("%Y-%m-%d")
-                            ) if activity_schedule_current.activity_schedule_document["hasRepetition"] else " Non-Repeating",
-                        ),
-                        "                  Extend Activity Schedule" if activity_schedule_current.extend_activity_schedule else None,
-                        "                  Do Not Extend Activity Schedule" if not activity_schedule_current.extend_activity_schedule else None,
-                    ])
+                                    activity_schedule_current.activity_schedule_document[
+                                        "date"
+                                    ]
+                                ).strftime("%Y-%m-%d"),
+                                " Repeating Until {}".format(
+                                    scope.database.date_utils.parse_date(
+                                        activity_schedule_current.scheduled_activity_documents[
+                                            -1
+                                        ][
+                                            "dueDate"
+                                        ]
+                                    ).strftime("%Y-%m-%d")
+                                )
+                                if activity_schedule_current.activity_schedule_document[
+                                    "hasRepetition"
+                                ]
+                                else " Non-Repeating",
+                            ),
+                            "                  Extend Activity Schedule"
+                            if activity_schedule_current.extend_activity_schedule
+                            else None,
+                            "                  Do Not Extend Activity Schedule"
+                            if not activity_schedule_current.extend_activity_schedule
+                            else None,
+                        ],
+                    )
                 )
 
                 # Summary of scheduled activities to be deleted.
@@ -293,12 +309,22 @@ class ScriptProcessData:
                     summary.append(
                         "    "
                         + "del : {} ScheduledActivity from {} to {}".format(
-                            len(activity_schedule_current.scheduled_activity_documents_to_delete),
+                            len(
+                                activity_schedule_current.scheduled_activity_documents_to_delete
+                            ),
                             scope.database.date_utils.parse_date(
-                                activity_schedule_current.scheduled_activity_documents_to_delete[0]["dueDate"]
+                                activity_schedule_current.scheduled_activity_documents_to_delete[
+                                    0
+                                ][
+                                    "dueDate"
+                                ]
                             ).strftime("%Y-%m-%d"),
                             scope.database.date_utils.parse_date(
-                                activity_schedule_current.scheduled_activity_documents_to_delete[-1]["dueDate"]
+                                activity_schedule_current.scheduled_activity_documents_to_delete[
+                                    -1
+                                ][
+                                    "dueDate"
+                                ]
                             ).strftime("%Y-%m-%d"),
                         )
                     )
@@ -308,12 +334,22 @@ class ScriptProcessData:
                     summary.append(
                         "    "
                         + "add : {} ScheduledActivity from {} to {}".format(
-                            len(activity_schedule_current.scheduled_activity_documents_to_create),
+                            len(
+                                activity_schedule_current.scheduled_activity_documents_to_create
+                            ),
                             scope.database.date_utils.parse_date(
-                                activity_schedule_current.scheduled_activity_documents_to_create[0]["dueDate"]
+                                activity_schedule_current.scheduled_activity_documents_to_create[
+                                    0
+                                ][
+                                    "dueDate"
+                                ]
                             ).strftime("%Y-%m-%d"),
                             scope.database.date_utils.parse_date(
-                                activity_schedule_current.scheduled_activity_documents_to_create[-1]["dueDate"]
+                                activity_schedule_current.scheduled_activity_documents_to_create[
+                                    -1
+                                ][
+                                    "dueDate"
+                                ]
                             ).strftime("%Y-%m-%d"),
                         )
                     )
@@ -1023,10 +1059,15 @@ def _patient_calculate_script_execution_assessment_data(
         ]
         for duplicate_current in duplicates:
             ignore_keys = ["_id", "_rev", "_set_id", "scheduledAssessmentId"]
-            assert (
-                {key_current: value_current for key_current, value_current in duplicate_current[0].items() if key_current not in ignore_keys} ==
-                {key_current: value_current for key_current, value_current in duplicate_current[1].items() if key_current not in ignore_keys}
-            )
+            assert {
+                key_current: value_current
+                for key_current, value_current in duplicate_current[0].items()
+                if key_current not in ignore_keys
+            } == {
+                key_current: value_current
+                for key_current, value_current in duplicate_current[1].items()
+                if key_current not in ignore_keys
+            }
 
             scheduled_assessment_documents_to_delete.remove(duplicate_current[0])
             scheduled_assessment_documents_to_create.remove(duplicate_current[1])
@@ -1051,16 +1092,16 @@ def _patient_calculate_script_execution_activity_schedule_data(
     maintenance_datetime: datetime.datetime,
 ) -> Dict[str, ScriptAssessmentData]:
     activity_schedule_documents = sorted(
-        patient_document_set.remove_revisions().filter_match(
+        patient_document_set.remove_revisions()
+        .filter_match(
             match_type=scope.database.patient.activity_schedules.DOCUMENT_TYPE,
             match_deleted=False,
-        ).documents,
+        )
+        .documents,
         key=lambda doc: (
             doc["activityId"],
-            scope.database.date_utils.parse_date(
-                doc["date"]
-            ).strftime("%Y-%m-%d")
-        )
+            scope.database.date_utils.parse_date(doc["date"]).strftime("%Y-%m-%d"),
+        ),
     )
 
     # Iterate over all activity schedules.
@@ -1070,11 +1111,15 @@ def _patient_calculate_script_execution_activity_schedule_data(
         activity_schedule_id_current = activity_schedule_current["activityScheduleId"]
 
         # Look up the corresponding activity.
-        activity_current = patient_document_set.remove_revisions().filter_match(
-            match_type=scope.database.patient.activities.DOCUMENT_TYPE,
-            match_values={"activityId": activity_schedule_current["activityId"]},
-            match_deleted=False,
-        ).unique()
+        activity_current = (
+            patient_document_set.remove_revisions()
+            .filter_match(
+                match_type=scope.database.patient.activities.DOCUMENT_TYPE,
+                match_values={"activityId": activity_schedule_current["activityId"]},
+                match_deleted=False,
+            )
+            .unique()
+        )
 
         # And the instances of the scheduled activity.
         scheduled_activity_documents = sorted(
@@ -1095,7 +1140,9 @@ def _patient_calculate_script_execution_activity_schedule_data(
         # By default, we will extend repeating activity schedules.
         # We will not extend if it seems a patient observed the end of a schedule, then re-scheduled on their own.
         # Such examples will be manually identified and gathered here.
-        extend_activity_schedule = activity_schedule_current["hasRepetition"] and activity_schedule_id_current not in [
+        extend_activity_schedule = activity_schedule_current[
+            "hasRepetition"
+        ] and activity_schedule_id_current not in [
             # MultiCare Patients
             # Patient oi7ticuq7prgg
             "emqwalwmpknde",
@@ -1125,15 +1172,18 @@ def _patient_calculate_script_execution_activity_schedule_data(
                 maintenance_datetime=maintenance_datetime,
             )
 
-            data_snapshot = scope.database.patient.scheduled_activities.build_data_snapshot(
-                activity_schedule_id=activity_schedule_id_current,
-                activity_schedules=[activity_schedule_current],
-                activities=[activity_current],
-                values=patient_document_set.remove_revisions()
+            data_snapshot = (
+                scope.database.patient.scheduled_activities.build_data_snapshot(
+                    activity_schedule_id=activity_schedule_id_current,
+                    activity_schedules=[activity_schedule_current],
+                    activities=[activity_current],
+                    values=patient_document_set.remove_revisions()
                     .filter_match(
                         match_type=scope.database.patient.values.DOCUMENT_TYPE,
                         match_deleted=False,
-                    ).documents
+                    )
+                    .documents,
+                )
             )
 
             for scheduled_activity_current in scheduled_activity_documents_to_create:
@@ -1148,15 +1198,22 @@ def _patient_calculate_script_execution_activity_schedule_data(
         ]
         for duplicate_current in duplicates:
             ignore_keys = ["_id", "_rev", "_set_id", "scheduledActivityId"]
-            assert (
-                {key_current: value_current for key_current, value_current in duplicate_current[0].items() if key_current not in ignore_keys} ==
-                {key_current: value_current for key_current, value_current in duplicate_current[1].items() if key_current not in ignore_keys}
-            )
+            assert {
+                key_current: value_current
+                for key_current, value_current in duplicate_current[0].items()
+                if key_current not in ignore_keys
+            } == {
+                key_current: value_current
+                for key_current, value_current in duplicate_current[1].items()
+                if key_current not in ignore_keys
+            }
 
             scheduled_activity_documents_to_delete.remove(duplicate_current[0])
             scheduled_activity_documents_to_create.remove(duplicate_current[1])
 
-        activity_schedule_data[activity_schedule_id_current] = ScriptActivityScheduleData(
+        activity_schedule_data[
+            activity_schedule_id_current
+        ] = ScriptActivityScheduleData(
             activity_schedule_id=activity_schedule_id_current,
             activity_schedule_document=activity_schedule_current,
             activity_document=activity_current,
@@ -1351,7 +1408,9 @@ def _patient_script_extend_schedules(
         return script_process_data
 
     # Validate that all documents to be created match their corresponding schema.
-    for assessment_data_current in script_process_data.execution_data.assessment_data.values():
+    for (
+        assessment_data_current
+    ) in script_process_data.execution_data.assessment_data.values():
         if assessment_data_current.assessment_document_to_create:
             scope.schema_utils.assert_schema(
                 data=assessment_data_current.assessment_document_to_create,
@@ -1363,7 +1422,9 @@ def _patient_script_extend_schedules(
             schema=scope.schema.scheduled_assessments_schema,
         )
 
-    for activity_schedule_data_current in script_process_data.execution_data.activity_schedule_data.values():
+    for (
+        activity_schedule_data_current
+    ) in script_process_data.execution_data.activity_schedule_data.values():
         scope.schema_utils.assert_schema(
             data=activity_schedule_data_current.scheduled_activity_documents_to_create,
             schema=scope.schema.scheduled_activities_schema,
