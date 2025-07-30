@@ -1014,6 +1014,23 @@ def _patient_calculate_script_execution_assessment_data(
             maintenance_datetime=maintenance_datetime,
         )
 
+        # If we would delete and then re-create a scheduled assessment, skip both.
+        duplicates = [
+            [to_delete, to_create]
+            for to_delete in scheduled_assessment_documents_to_delete
+            for to_create in scheduled_assessment_documents_to_create
+            if to_delete["dueDate"] == to_create["dueDate"]
+        ]
+        for duplicate_current in duplicates:
+            ignore_keys = ["_id", "_rev", "_set_id", "scheduledAssessmentId"]
+            assert (
+                {key_current: value_current for key_current, value_current in duplicate_current[0].items() if key_current not in ignore_keys} ==
+                {key_current: value_current for key_current, value_current in duplicate_current[1].items() if key_current not in ignore_keys}
+            )
+
+            scheduled_assessment_documents_to_delete.remove(duplicate_current[0])
+            scheduled_assessment_documents_to_create.remove(duplicate_current[1])
+
         # Store all the resulting documents.
         assessment_data[assessment_id_current] = ScriptAssessmentData(
             assessment_id=assessment_id_current,
@@ -1099,7 +1116,7 @@ def _patient_calculate_script_execution_activity_schedule_data(
                 maintenance_datetime=maintenance_datetime,
             )
 
-        # New scheduled assessments to create.
+        # New scheduled activities to create.
         scheduled_activity_documents_to_create = []
         if extend_activity_schedule:
             scheduled_activity_documents_to_create = scope.database.patient.activity_schedules._calculate_scheduled_activities_to_create(
@@ -1121,6 +1138,23 @@ def _patient_calculate_script_execution_activity_schedule_data(
 
             for scheduled_activity_current in scheduled_activity_documents_to_create:
                 scheduled_activity_current["dataSnapshot"] = data_snapshot
+
+        # If we would delete and then re-create a scheduled activity, skip both.
+        duplicates = [
+            [to_delete, to_create]
+            for to_delete in scheduled_activity_documents_to_delete
+            for to_create in scheduled_activity_documents_to_create
+            if to_delete["dueDate"] == to_create["dueDate"]
+        ]
+        for duplicate_current in duplicates:
+            ignore_keys = ["_id", "_rev", "_set_id", "scheduledActivityId"]
+            assert (
+                {key_current: value_current for key_current, value_current in duplicate_current[0].items() if key_current not in ignore_keys} ==
+                {key_current: value_current for key_current, value_current in duplicate_current[1].items() if key_current not in ignore_keys}
+            )
+
+            scheduled_activity_documents_to_delete.remove(duplicate_current[0])
+            scheduled_activity_documents_to_create.remove(duplicate_current[1])
 
         activity_schedule_data[activity_schedule_id_current] = ScriptActivityScheduleData(
             activity_schedule_id=activity_schedule_id_current,
@@ -1318,10 +1352,11 @@ def _patient_script_extend_schedules(
 
     # Validate that all documents to be created match their corresponding schema.
     for assessment_data_current in script_process_data.execution_data.assessment_data.values():
-        scope.schema_utils.assert_schema(
-            data=assessment_data_current.assessment_document_to_create,
-            schema=scope.schema.assessment_schema,
-        )
+        if assessment_data_current.assessment_document_to_create:
+            scope.schema_utils.assert_schema(
+                data=assessment_data_current.assessment_document_to_create,
+                schema=scope.schema.assessment_schema,
+            )
 
         scope.schema_utils.assert_schema(
             data=assessment_data_current.scheduled_assessment_documents_to_create,
