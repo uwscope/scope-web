@@ -312,6 +312,14 @@ class ScriptProcessData:
                 #         )
                 #     )
 
+            def _format_repeat_day_flags(repeat_day_flags: dict) -> str:
+                result = ""
+                for day_of_week_current in scope.enums.DayOfWeek:
+                    if repeat_day_flags[day_of_week_current.value]:
+                        result += day_of_week_current.value[0:2]
+
+                return result
+
             for (
                 activity_schedule_current
             ) in self.execution_data.activity_schedule_data.values():
@@ -324,20 +332,28 @@ class ScriptProcessData:
                                 activity_schedule_current.activity_schedule_id,
                                 activity_schedule_current.activity_document["name"],
                             ),
-                            "                  Scheduled {}{}".format(
+                            "                  Scheduled {} {}h{}".format(
                                 scope.database.date_utils.parse_date(
                                     activity_schedule_current.activity_schedule_document[
                                         "date"
                                     ]
                                 ).strftime("%Y-%m-%d"),
-                                " Repeating Until {}".format(
+                                activity_schedule_current.activity_schedule_document[
+                                    "timeOfDay"
+                                ],
+                                " Repeating {} Until {}".format(
+                                    _format_repeat_day_flags(
+                                        activity_schedule_current.activity_schedule_document[
+                                            "repeatDayFlags"
+                                        ]
+                                    ),
                                     scope.database.date_utils.parse_date(
                                         activity_schedule_current.scheduled_activity_documents[
                                             -1
                                         ][
                                             "dueDate"
                                         ]
-                                    ).strftime("%Y-%m-%d")
+                                    ).strftime("%Y-%m-%d"),
                                 )
                                 if activity_schedule_current.activity_schedule_document[
                                     "hasRepetition"
@@ -1193,15 +1209,110 @@ def _patient_calculate_script_execution_activity_schedule_data(
         extend_activity_schedule = activity_schedule_current[
             "hasRepetition"
         ] and activity_schedule_id_current not in [
+            #
+            # Demo Patients
+            #
+            # Patient ul2bsiq2hgcw6
+            "unbg2rpvbakgk",  # Expired and replaced with ckh4hb5kgeigk
+            # Patient hzsrpij2dziki
+            "ryp2h6w7md4es",  # Expired, multiple other activities since scheduled
+            "2twjmfzuuktv6",  # Expired, multiple other activities since scheduled
+            "dz5lrre7sii6k",  # Expired, multiple other activities since scheduled
+            "nral7gigzueba",  # Expired, multiple other activities since scheduled
+            "36ozkfbjqb262",  # Expired, multiple other activities since scheduled
+            "4meuloula2gis",  # Expired, multiple other activities since scheduled
+            "iu44cb5xdr4e6",  # Expired, multiple other activities since scheduled
+            "pmgzcpl7fpnac",  # Expired, multiple other activities since scheduled
+            "2jtirussluw7i",  # Expired, multiple other activities since scheduled
+            "2obf3oiat3xsu",  # Expired, multiple other activities since scheduled
+            "f2izxtmqqvfjs",  # Expired, multiple other activities since scheduled
+            "h55rivlmyc5f4",  # Expired, multiple other activities since scheduled
+            "pxzn2xrhkcynq",  # Expired, multiple other activities since scheduled
+            "75a3gutdu3tso",  # Expired, multiple other activities since scheduled
+            "f7kqqs6jjfx6w",  # Expired, multiple other activities since scheduled
+            "qy5c42pd4tp62",  # Expired and replaced with 34pb3gczmom3e
+            # Patient efvduspqydjdi
+            "jqae7pswphhq2",  # Expired, multiple other activities since scheduled
+            "xxy6tq2xuy7ti",  # Expired, multiple other activities since scheduled
+            "t76yar7zx5ec4",  # Expired, multiple other activities since scheduled
+            # Patient igkafyyklb52o
+            "e6m6kkf6hfvok",  # Expired, multiple other activities since scheduled
+            "oqbd64tqoyc2e",  # Expired, multiple other activities since scheduled
+            "5yrovhhpzzdtk",  # Expired, multiple other activities since scheduled
+            "bossthi266rbe",  # Expired and replaced with 26eszmijiywim
+            "26eszmijiywim",  # Expired, multiple other activities since scheduled
+            "fsi3epurct4cm",  # Expired, multiple other activities since scheduled
+            "tppzcs6mqvqg2",  # Expired, multiple other activities since scheduled
+            "huy2dpemtimpc",  # Expired, multiple other activities since scheduled
+            # Patient k3mxdqrzdpkn4
+            "3wzeu77olvk5q",  # Expired, multiple other activities since scheduled
+            # Patient ieqklfi3tgjfc
+            "w7papkcyh6cbo",  # Expired, multiple other activities since scheduled
+            "kzrrlc7tw7gc6",  # Expired, multiple other activities since scheduled
+            "ax2jo6wau2w7c",  # Expired, multiple other activities since scheduled
+            "uroetxfz42bty",  # Expired, multiple other activities since scheduled
+            "u5uau5pwulzly",  # Expired, multiple other activities since scheduled
+            "3k2767hhtsn5g",  # Expired, multiple other activities since scheduled
+            "64bkgu6rb4fec",  # Expired, multiple other activities since scheduled
+            "st6bi4f3ouhdo",  # Expired, multiple other activities since scheduled
+            "wsksbvmyscz7q",  # Expired, multiple other activities since scheduled
+            "xalzmpcudfama",  # Expired, multiple other activities since scheduled
+            "bsiuxtj2kk2di",  # Expired, multiple other activities since scheduled
+            "znkzi2lroigko",  # Expired and replaced with 465qsm2pgfdmc
+            "uyraybnrxahdw",  # Expired and replaced with 465qsm2pgfdmc
+            "qbts3rfckhnnw",  # Expired, multiple other activities since scheduled
+            "ljowxot2jrutm",  # Expired, multiple other activities since scheduled
+            "ntcaacnis5y4o",  # Expired, multiple other activities since scheduled
+            "hfb7a57jmajpi",  # Expired and replaced with mp2u5dxa2akzy
+            "r24ls6vhvo5za",  # Expired, multiple other activities since scheduled
+            "mgjmmaklodm2i",  # Expired, multiple other activities since scheduled
+            "2xegaodxx3xty",  # Expired, multiple other activities since scheduled
+            "2mfakq4ogtv3a",  # Expired, multiple other activities since scheduled
+            "4ddcq34ha55rq",  # Expired, multiple other activities since scheduled
+            "3yu5jkn443d6y",  # Expired, multiple other activities since scheduled
+            "ffrm6avqqtcfk",  # Expired, multiple other activities since scheduled
+            "m2zjtpgxjbe2y",  # Expired, multiple other activities since scheduled
+            "wtbrb4fjr4luw",  # Expired, multiple other activities since scheduled
+            "rccdwzzni73ae",  # Expired and replaced by 7wrjc6pt2cwsk
+            "57rcuscjvyemo",  # Expired, multiple other activities since scheduled
+            #
             # MultiCare Patients
+            #
             # Patient oi7ticuq7prgg
-            "emqwalwmpknde",
-            "ctxlc3drstue2",
-            "a2b5xfxsedupw",
-            "piq5tuolloztw",
-            "ibaavtht77gfm",
-            "w3yu3zxawkn3e",
-            "pdetx7mk733na",
+            "emqwalwmpknde",  # Expired and replaced with kmc7677pf4rrw
+            "ctxlc3drstue2",  # Expired and replaced with konhauc3zobx4
+            "a2b5xfxsedupw",  # Expired, multiple other activities since scheduled
+            "piq5tuolloztw",  # Expired and replaced with pz3jlbjog6x5q
+            "ibaavtht77gfm",  # Expired and replaced with 3nujaak4mi4ay
+            "w3yu3zxawkn3e",  # Expired and replaced with j4wh2cyrehwtw
+            "pdetx7mk733na",  # Expired, multiple other activities since scheduled
+            #
+            # SCCA/FHCC Patients
+            #
+            # Patient hhbqy5ucx3fck
+            "2xtyqb6x7eutm",  # Expired and replaced with 55ey7abapfvwm
+            "fuej56qlfc5zm",  # Expired and replaced with ylejsxzkvsu4y
+            "qoqcgmq6ty2fu",  # Expired and replaced with ylejsxzkvsu4y
+            "apeproshzhkua",  # Expired and replaced with gmcnq5ibqlr6c
+            # Patient gmrd4pi5cxlhk
+            # Has notable duplicate activity schedules.
+            # Perhaps wanted indication to do activity multiple times per day.
+            # Or perhaps just confused.
+            # They have not expired, so duplicates were all extended for consistency.
+            "434tliezpbs4q",  # Expired and replaced with qb2lrr4xixoek
+            "a6ubz556bs75q",  # Expired and replaced with zswr7lk672uj2
+            "jsajz4uksj6kq",  # Expired, multiple other activities since scheduled
+            "wsjn7vnmlsg7m",  # Expired and replaced with hfwdai4j7bqes and 5saf5xkhv5vgk
+            "e7kbg3whjjriq",  # Expired and replaced with 47wr5oduade52 and chy7jhcxvylry
+            "qymp6gsmyukwk",  # Expired and replaced with kh6arrmr7hbba
+            "as53c3ps6fsmy",  # Expired and replaced with hfdd27podeawm and 4iu4iuhfbn23w
+            # Patient 5a433bxvx4ato
+            # Has notable duplicate activity schedules.
+            # But they had expired, so only extending one of each.
+            "ascszo4p2mmvs",  # Expired and duplicated by iye5t477oao7g
+            "s62q5neu2j37y",  # Expired and duplicated by jlw5vrdqdain2
+            "pd5ulylzcm4gy",  # Expired and duplicated by 225aspetnbvqa
+            "tsk73xpmz6imy",  # Expired and duplicated by fodmekfegra6c
         ]
 
         # Determine existing scheduled activities to delete.
