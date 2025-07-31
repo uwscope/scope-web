@@ -172,7 +172,7 @@ class ScriptProcessData:
                 if assessment_current.assigned:
                     summary.extend(
                         [
-                            "  {} : Assigned Since {}".format(
+                            "          {} : Assigned Since {}".format(
                                 assessment_current.assessment_id.value,
                                 scope.database.date_utils.parse_datetime(
                                     assessment_current.assessment_document[
@@ -180,7 +180,7 @@ class ScriptProcessData:
                                     ]
                                 ).strftime("%Y-%m-%d"),
                             ),
-                            "          {} {}".format(
+                            "                  {} {}".format(
                                 assessment_current.assessment_document["dayOfWeek"],
                                 assessment_current.assessment_document["frequency"],
                             ),
@@ -188,7 +188,7 @@ class ScriptProcessData:
                     )
                 else:
                     summary.append(
-                        "  {} : Not Currently Assigned".format(
+                        "          {} : Not Currently Assigned".format(
                             assessment_current.assessment_id.value,
                         )
                     )
@@ -197,14 +197,14 @@ class ScriptProcessData:
                 if assessment_current.assessment_document_to_create:
                     summary.extend(
                         [
-                            "    add : Re-Create Prior Assignment Since {}".format(
+                            "            add : Re-Create Prior Assignment Since {}".format(
                                 scope.database.date_utils.parse_datetime(
                                     assessment_current.assessment_document_to_create[
                                         "assignedDateTime"
                                     ]
                                 ).strftime("%Y-%m-%d"),
                             ),
-                            "          {} {}".format(
+                            "                  {} {}".format(
                                 assessment_current.assessment_document_to_create[
                                     "dayOfWeek"
                                 ],
@@ -215,52 +215,102 @@ class ScriptProcessData:
                         ]
                     )
 
-                # Scheduled assessments that exist, will be deleted, or will be created.
-                for scheduled_assessment_current in (
-                    assessment_current.scheduled_assessment_documents
-                    + assessment_current.scheduled_assessment_documents_to_create
-                ):
-                    _formattedAction = "   "
-                    if (
-                        scheduled_assessment_current
-                        in assessment_current.scheduled_assessment_documents_to_delete
-                    ):
-                        _formattedAction = "del"
-                    elif (
-                        scheduled_assessment_current
-                        in assessment_current.scheduled_assessment_documents_to_create
-                    ):
-                        _formattedAction = "add"
-
-                    _formattedDate = scope.database.date_utils.parse_date(
-                        scheduled_assessment_current["dueDate"]
-                    ).strftime("%Y-%m-%d")
-
-                    _formattedIdAndRev = None
-                    if "_set_id" in scheduled_assessment_current:
-                        _formattedIdAndRev = "{} r{}".format(
-                            scheduled_assessment_current["_set_id"],
-                            scheduled_assessment_current["_rev"],
-                        )
-
-                    _formattedCompleted = None
-                    if scheduled_assessment_current["completed"]:
-                        _formattedCompleted = "Completed"
-
+                # Summary of scheduled assessments to be deleted.
+                if assessment_current.scheduled_assessment_documents_to_delete:
                     summary.append(
-                        "    "
-                        + " : ".join(
-                            filter(
-                                None,
-                                [
-                                    _formattedAction,
-                                    _formattedDate,
-                                    _formattedIdAndRev,
-                                    _formattedCompleted,
-                                ],
-                            )
+                        "            "
+                        + "del : {} ScheduledAssessment from {} to {}".format(
+                            len(
+                                assessment_current.scheduled_assessment_documents_to_delete
+                            ),
+                            scope.database.date_utils.parse_date(
+                                assessment_current.scheduled_assessment_documents_to_delete[
+                                    0
+                                ][
+                                    "dueDate"
+                                ]
+                            ).strftime("%Y-%m-%d"),
+                            scope.database.date_utils.parse_date(
+                                assessment_current.scheduled_assessment_documents_to_delete[
+                                    -1
+                                ][
+                                    "dueDate"
+                                ]
+                            ).strftime("%Y-%m-%d"),
                         )
                     )
+
+                # Summary of scheduled assessments to be created.
+                if assessment_current.scheduled_assessment_documents_to_create:
+                    summary.append(
+                        "            "
+                        + "add : {} ScheduledAssessment from {} to {}".format(
+                            len(
+                                assessment_current.scheduled_assessment_documents_to_create
+                            ),
+                            scope.database.date_utils.parse_date(
+                                assessment_current.scheduled_assessment_documents_to_create[
+                                    0
+                                ][
+                                    "dueDate"
+                                ]
+                            ).strftime("%Y-%m-%d"),
+                            scope.database.date_utils.parse_date(
+                                assessment_current.scheduled_assessment_documents_to_create[
+                                    -1
+                                ][
+                                    "dueDate"
+                                ]
+                            ).strftime("%Y-%m-%d"),
+                        )
+                    )
+
+                # # Scheduled assessments that exist, will be deleted, or will be created.
+                # for scheduled_assessment_current in (
+                #     assessment_current.scheduled_assessment_documents
+                #     + assessment_current.scheduled_assessment_documents_to_create
+                # ):
+                #     _formattedAction = "   "
+                #     if (
+                #         scheduled_assessment_current
+                #         in assessment_current.scheduled_assessment_documents_to_delete
+                #     ):
+                #         _formattedAction = "del"
+                #     elif (
+                #         scheduled_assessment_current
+                #         in assessment_current.scheduled_assessment_documents_to_create
+                #     ):
+                #         _formattedAction = "add"
+                #
+                #     _formattedDate = scope.database.date_utils.parse_date(
+                #         scheduled_assessment_current["dueDate"]
+                #     ).strftime("%Y-%m-%d")
+                #
+                #     _formattedIdAndRev = None
+                #     if "_set_id" in scheduled_assessment_current:
+                #         _formattedIdAndRev = "{} r{}".format(
+                #             scheduled_assessment_current["_set_id"],
+                #             scheduled_assessment_current["_rev"],
+                #         )
+                #
+                #     _formattedCompleted = None
+                #     if scheduled_assessment_current["completed"]:
+                #         _formattedCompleted = "Completed"
+                #
+                #     summary.append(
+                #         "            "
+                #         + " : ".join(
+                #             filter(
+                #                 None,
+                #                 [
+                #                     _formattedAction,
+                #                     _formattedDate,
+                #                     _formattedIdAndRev,
+                #                     _formattedCompleted,
+                #                 ],
+                #             )
+                #         )
+                #     )
 
             for (
                 activity_schedule_current
@@ -307,7 +357,7 @@ class ScriptProcessData:
                 # Summary of scheduled activities to be deleted.
                 if activity_schedule_current.scheduled_activity_documents_to_delete:
                     summary.append(
-                        "    "
+                        "            "
                         + "del : {} ScheduledActivity from {} to {}".format(
                             len(
                                 activity_schedule_current.scheduled_activity_documents_to_delete
@@ -332,7 +382,7 @@ class ScriptProcessData:
                 # Summary of scheduled activities to be created.
                 if activity_schedule_current.scheduled_activity_documents_to_create:
                     summary.append(
-                        "    "
+                        "            "
                         + "add : {} ScheduledActivity from {} to {}".format(
                             len(
                                 activity_schedule_current.scheduled_activity_documents_to_create
