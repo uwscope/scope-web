@@ -40,7 +40,8 @@ def _calculate_scheduled_assessments_to_create(
         reminder=True,
         reminder_time_of_day=8,
         timezone=timezone,
-        months=3,
+        # Changed to 9 months on 7/31/2025, based on remaining study length
+        months=9,
     )
 
     # Fill in additional data needed for scheduled assessments

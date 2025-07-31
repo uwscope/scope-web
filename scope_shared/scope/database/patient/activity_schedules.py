@@ -29,7 +29,8 @@ def _calculate_scheduled_activities_to_create(
 
     if activity_schedule["hasRepetition"]:
         frequency = scope.enums.ScheduledItemFrequency.Weekly.value
-        months = 3
+        # Changed to 9 months on 7/31/2025, based on remaining study length
+        months = 9
         repeat_day_flags = activity_schedule["repeatDayFlags"]
     else:
         frequency = None
