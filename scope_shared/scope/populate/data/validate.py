@@ -493,9 +493,18 @@ def _validate_patient_collection_scheduled_activities(
             datetime_scheduled_activity - datetime_activity_schedule
         ).total_seconds()
 
-        # This is incredibly slow, most of these are 0 or 1.
-        # Only took this long when running locally against dev, due to database latency.
-        assert timedelta_difference < 60
+        # Migrations were executed that explicitly created new scheduled activities
+        # for existing activity schedules. This will break the temporal relation.
+        if timedelta_difference >= 60:
+            assert datetime_scheduled_activity.strftime("%Y-%m-%d") in [
+                "2025-07-31",
+                "2025-08-01",
+                "2025-08-02",
+            ]
+        else:
+            # This is incredibly slow, most of these are 0 or 1.
+            # Only took this long when running locally against dev, due to database latency.
+            assert timedelta_difference < 60
 
     # Within revisions of a scheduled activity, some fields are not allowed to change.
     for (
