@@ -10,6 +10,8 @@ import contextlib
 from dataclasses import asdict, dataclass
 import datetime
 from enum import Enum
+
+import pymongo.collection
 from invoke import task
 import operator
 from pathlib import Path
@@ -20,6 +22,7 @@ from typing import Dict, List, Optional, Union
 
 
 import scope.config
+import scope.database.collection_utils
 import scope.database.date_utils
 import scope.database.document_utils
 import scope.database.initialize
@@ -134,10 +137,7 @@ class ScriptProcessStatus(Enum):
     STOPPED_COGNITO_ACCOUNT_NOT_ACTIVE = 3
     STOPPED_TREATMENT_STATUS = 4
 
-
-#     STOPPED_CONTENT_NOTHING_DUE = 4
-#
-#     EMAIL_SUCCESS = 10
+    COMPLETE = 10
 
 
 @dataclass(frozen=True)
@@ -173,7 +173,7 @@ class ScriptProcessData:
                     summary.extend(
                         [
                             "          {} : Assigned Since {}".format(
-                                assessment_current.assessment_id.value,
+                                assessment_current.assessment_id,
                                 scope.database.date_utils.parse_datetime(
                                     assessment_current.assessment_document[
                                         "assignedDateTime"
@@ -189,7 +189,7 @@ class ScriptProcessData:
                 else:
                     summary.append(
                         "          {} : Not Currently Assigned".format(
-                            assessment_current.assessment_id.value,
+                            assessment_current.assessment_id,
                         )
                     )
 
@@ -1140,7 +1140,7 @@ def _patient_calculate_script_execution_assessment_data(
 
         # Store all the resulting documents.
         assessment_data[assessment_id_current] = ScriptAssessmentData(
-            assessment_id=assessment_id_current,
+            assessment_id=assessment_id_current.value,
             assigned=assessment_current["assigned"],
             assessment_document=assessment_current,
             assessment_document_to_create=assessment_document_to_create,
@@ -1348,7 +1348,9 @@ def _patient_calculate_script_execution_activity_schedule_data(
             )
 
             for scheduled_activity_current in scheduled_activity_documents_to_create:
-                scheduled_activity_current["dataSnapshot"] = data_snapshot
+                scheduled_activity_current[
+                    scope.database.patient.scheduled_activities.DATA_SNAPSHOT_PROPERTY
+                ] = data_snapshot
 
         # If we would delete and then re-create a scheduled activity, skip both.
         duplicates = [
@@ -1387,6 +1389,32 @@ def _patient_calculate_script_execution_activity_schedule_data(
     return activity_schedule_data
 
 
+def _patient_validate_script_execution_document_schemas(
+    *,
+    execution_data: ScriptExecutionData,
+):
+    # Validate that all documents to be created match their corresponding schema.
+    for assessment_data_current in execution_data.assessment_data.values():
+        if assessment_data_current.assessment_document_to_create:
+            scope.schema_utils.assert_schema(
+                data=assessment_data_current.assessment_document_to_create,
+                schema=scope.schema.assessment_schema,
+            )
+
+        scope.schema_utils.assert_schema(
+            data=assessment_data_current.scheduled_assessment_documents_to_create,
+            schema=scope.schema.scheduled_assessments_schema,
+        )
+
+    for (
+        activity_schedule_data_current
+    ) in execution_data.activity_schedule_data.values():
+        scope.schema_utils.assert_schema(
+            data=activity_schedule_data_current.scheduled_activity_documents_to_create,
+            schema=scope.schema.scheduled_activities_schema,
+        )
+
+
 def _patient_calculate_script_execution_data(
     *,
     script_process_data: ScriptProcessData,
@@ -1408,12 +1436,18 @@ def _patient_calculate_script_execution_data(
         maintenance_datetime=maintenance_datetime,
     )
 
+    execution_data = ScriptExecutionData(
+        assessment_data=assessment_data,
+        activity_schedule_data=activity_schedule_data,
+    )
+
+    _patient_validate_script_execution_document_schemas(
+        execution_data=execution_data,
+    )
+
     return ScriptProcessData.from_execution_data(
         current=script_process_data,
-        execution_data=ScriptExecutionData(
-            assessment_data=assessment_data,
-            activity_schedule_data=activity_schedule_data,
-        ),
+        execution_data=execution_data,
     )
 
 
@@ -1529,26 +1563,14 @@ def _patient_filter_script_process_data(
     return script_process_data
 
 
-def _patient_script_extend_schedules(
+def _patient_script_calculate_execution_data(
     *,
     script_process_data: ScriptProcessData,
     patient_document_set: scope.documents.document_set.DocumentSet,
     scope_instance_id: ScopeInstanceId,
     allowlist_patient_id_extend_schedules: List[str],
     denylist_patient_id_extend_schedules: List[str],
-    # templates_email_reminder: TemplatesEmailReminder,
-    # testing_destination_email: Optional[str],
 ) -> ScriptProcessData:
-    #     # Calculate values needed for an email.
-    #     email_process_data = _patient_calculate_email_content_data(
-    #         email_process_data=email_process_data,
-    #         patient_document_set=patient_document_set,
-    #         scope_instance_id=scope_instance_id,
-    #         testing_destination_email=testing_destination_email,
-    #     )
-    #     if email_process_data.status != EmailProcessStatus.IN_PROGRESS:
-    #         return email_process_data
-
     # Filter whether this patient will be processed.
     script_process_data = _patient_filter_script_process_data(
         script_process_data=script_process_data,
@@ -1568,69 +1590,161 @@ def _patient_script_extend_schedules(
     if script_process_data.status != ScriptProcessStatus.IN_PROGRESS:
         return script_process_data
 
-    # Validate that all documents to be created match their corresponding schema.
+    return script_process_data
+
+
+def _patient_script_execute(
+    *, script_process_data: ScriptProcessData, collection: pymongo.collection.Collection
+):
+    assert script_process_data.status == ScriptProcessStatus.IN_PROGRESS
+
+    print(
+        "{} : {}".format(
+            script_process_data.patient_id,
+            script_process_data.patient_name,
+        )
+    )
+
     for (
         assessment_data_current
     ) in script_process_data.execution_data.assessment_data.values():
-        if assessment_data_current.assessment_document_to_create:
-            scope.schema_utils.assert_schema(
-                data=assessment_data_current.assessment_document_to_create,
-                schema=scope.schema.assessment_schema,
-            )
+        if (
+            assessment_data_current.assessment_document_to_create
+            or assessment_data_current.scheduled_assessment_documents_to_delete
+            or assessment_data_current.scheduled_assessment_documents_to_create
+        ):
+            print("Assessment {}".format(assessment_data_current.assessment_id))
 
-        scope.schema_utils.assert_schema(
-            data=assessment_data_current.scheduled_assessment_documents_to_create,
-            schema=scope.schema.scheduled_assessments_schema,
-        )
+            if assessment_data_current.assessment_document_to_create:
+                print("  Creating assessment document")
+
+                # Modeled on scope.database.patient.assessments.put_assessment
+                scope.database.collection_utils.put_set_element(
+                    collection=collection,
+                    document_type=scope.database.patient.assessments.DOCUMENT_TYPE,
+                    semantic_set_id=scope.database.patient.assessments.SEMANTIC_SET_ID,
+                    set_id=assessment_data_current.assessment_document_to_create[
+                        scope.database.patient.assessments.SEMANTIC_SET_ID
+                    ],
+                    document=assessment_data_current.assessment_document_to_create,
+                )
+
+            if assessment_data_current.scheduled_assessment_documents_to_delete:
+                print(
+                    "  Deleting {} scheduled assessment{}".format(
+                        len(
+                            assessment_data_current.scheduled_assessment_documents_to_delete
+                        ),
+                        "s"
+                        if len(
+                            assessment_data_current.scheduled_assessment_documents_to_delete
+                        )
+                        else "",
+                    )
+                )
+
+                # Modeled on scope.database.patient.assessments._maintain_pending_scheduled_assessments
+                for (
+                    delete_item_current
+                ) in assessment_data_current.scheduled_assessment_documents_to_delete:
+                    scope.database.patient.scheduled_assessments.delete_scheduled_assessment(
+                        collection=collection,
+                        scheduled_assessment=delete_item_current,
+                        set_id=delete_item_current[
+                            scope.database.patient.scheduled_assessments.SEMANTIC_SET_ID
+                        ],
+                    )
+
+            if assessment_data_current.scheduled_assessment_documents_to_create:
+                print(
+                    "  Creating {} scheduled assessment{}".format(
+                        len(
+                            assessment_data_current.scheduled_assessment_documents_to_create
+                        ),
+                        "s"
+                        if len(
+                            assessment_data_current.scheduled_assessment_documents_to_create
+                        )
+                        else "",
+                    )
+                )
+
+                # Modeled on scope.database.patient.assessments._maintain_pending_scheduled_assessments
+                for (
+                    create_item_current
+                ) in assessment_data_current.scheduled_assessment_documents_to_create:
+                    scope.database.patient.scheduled_assessments.post_scheduled_assessment(
+                        collection=collection,
+                        scheduled_assessment=create_item_current,
+                    )
 
     for (
         activity_schedule_data_current
     ) in script_process_data.execution_data.activity_schedule_data.values():
-        scope.schema_utils.assert_schema(
-            data=activity_schedule_data_current.scheduled_activity_documents_to_create,
-            schema=scope.schema.scheduled_activities_schema,
-        )
+        if (
+            activity_schedule_data_current.scheduled_activity_documents_to_delete
+            or activity_schedule_data_current.scheduled_activity_documents_to_create
+        ):
+            print(
+                "Activity Schedule {}".format(
+                    activity_schedule_data_current.activity_schedule_id
+                )
+            )
 
-    #     # Format the actual email.
-    #     format_email_result = _format_email(
-    #         email_content_data=email_process_data.content_data,
-    #         templates_email_reminder=templates_email_reminder,
-    #         testing_destination_email=testing_destination_email,
-    #     )
-    #
-    #     # boto will obtain AWS context from environment variables, but will have obtained those at an unknown time.
-    #     # Creating a boto session ensures it uses the current value of AWS configuration environment variables.
-    #     boto_session = boto3.Session()
-    #     boto_ses = boto_session.client("ses")
-    #
-    #     # Send the formatted email.
-    #     response = boto_ses.send_email(
-    #         Source="SCOPE Reminders <do-not-reply@uwscope.org>",
-    #         Destination={
-    #             "ToAddresses": [destination_email],
-    #             # "CcAddresses": ["<email@email.org>"],
-    #         },
-    #         ReplyToAddresses=["do-not-reply@uwscope.org"],
-    #         Message={
-    #             "Subject": {
-    #                 "Data": format_email_result.subject,
-    #                 "Charset": "UTF-8",
-    #             },
-    #             "Body": {
-    #                 "Html": {
-    #                     "Data": format_email_result.body,
-    #                     "Charset": "UTF-8",
-    #                 }
-    #             },
-    #         },
-    #     )
-    #
-    #     return EmailProcessData.from_status(
-    #         current=email_process_data,
-    #         status=EmailProcessStatus.EMAIL_SUCCESS,
-    #     )
+            if activity_schedule_data_current.scheduled_activity_documents_to_delete:
+                print(
+                    "  Deleting {} scheduled activit{}".format(
+                        len(
+                            activity_schedule_data_current.scheduled_activity_documents_to_delete
+                        ),
+                        "ies"
+                        if len(
+                            activity_schedule_data_current.scheduled_activity_documents_to_delete
+                        )
+                        else "y",
+                    )
+                )
 
-    return script_process_data
+                # Modeled on scope.database.patient.activity_schedules._maintain_pending_scheduled_activities
+                for (
+                    delete_item_current
+                ) in (
+                    activity_schedule_data_current.scheduled_activity_documents_to_delete
+                ):
+                    scope.database.patient.scheduled_activities.delete_scheduled_activity(
+                        collection=collection,
+                        set_id=delete_item_current[
+                            scope.database.patient.scheduled_activities.SEMANTIC_SET_ID
+                        ],
+                        rev=delete_item_current.get("_rev"),
+                    )
+
+            if activity_schedule_data_current.scheduled_activity_documents_to_create:
+                print(
+                    "  Creating {} scheduled activit{}".format(
+                        len(
+                            activity_schedule_data_current.scheduled_activity_documents_to_create
+                        ),
+                        "ies"
+                        if len(
+                            activity_schedule_data_current.scheduled_activity_documents_to_create
+                        )
+                        else "y",
+                    )
+                )
+
+                # Modeled on scope.database.patient.activity_schedules._maintain_pending_scheduled_activities
+                for (
+                    create_item_current
+                ) in (
+                    activity_schedule_data_current.scheduled_activity_documents_to_create
+                ):
+                    scope.database.patient.scheduled_activities.post_scheduled_activity(
+                        collection=collection,
+                        scheduled_activity=create_item_current,
+                    )
+
+    print()
 
 
 def task_extend_schedules(
@@ -1706,7 +1820,6 @@ def task_extend_schedules(
             # Iterate over every patient.
             patients = scope.database.patients.get_patient_identities(database=database)
             for patient_identity_current in patients:
-
                 # Obtain needed documents for this patient.
                 patient_collection = database.get_collection(
                     patient_identity_current["collection"]
@@ -1715,7 +1828,7 @@ def task_extend_schedules(
                     collection=patient_collection
                 )
 
-                result_current = _patient_script_extend_schedules(
+                result_current = _patient_script_calculate_execution_data(
                     script_process_data=ScriptProcessData.from_patient_data(
                         patient_id=patient_identity_current["patientId"],
                         patient_name=patient_profile["name"],
@@ -1732,25 +1845,49 @@ def task_extend_schedules(
                     scope_instance_id=scope_instance_id,
                     allowlist_patient_id_extend_schedules=allowlist_patient_id_extend_schedules,
                     denylist_patient_id_extend_schedules=denylist_patient_id_extend_schedules,
-                    #                     templates_email_reminder=templates_email_reminder,
                 )
 
                 # Store the result
                 script_process_data_results.append(result_current)
 
-        for status_current in ScriptProcessStatus:
-            matching_results = [
-                script_process_data_current
-                for script_process_data_current in script_process_data_results
-                if script_process_data_current.status == status_current
-            ]
+            # Output the expected results of script execution
+            for status_current in ScriptProcessStatus:
+                matching_results = [
+                    script_process_data_current
+                    for script_process_data_current in script_process_data_results
+                    if script_process_data_current.status == status_current
+                ]
 
-            if len(matching_results) > 0:
-                print(status_current.name)
-                for script_process_data_current in matching_results:
-                    for line_current in script_process_data_current.patient_summary:
-                        print("  {}".format(line_current))
-                print()
+                if len(matching_results) > 0:
+                    print(status_current.name)
+                    for script_process_data_current in matching_results:
+                        for line_current in script_process_data_current.patient_summary:
+                            print("  {}".format(line_current))
+                    print()
+
+            # If in production, execute the actual script
+            if production and scope.populate.populate._prompt_to_continue(
+                prompt=["Apply script"]
+            ):
+                for script_process_data_current in script_process_data_results:
+                    patient_identity_current = (
+                        scope.database.patients.get_patient_identity(
+                            database=database,
+                            patient_id=script_process_data_current.patient_id,
+                        )
+                    )
+                    patient_collection = database.get_collection(
+                        patient_identity_current["collection"]
+                    )
+
+                    if (
+                        script_process_data_current.status
+                        == ScriptProcessStatus.IN_PROGRESS
+                    ):
+                        _patient_script_execute(
+                            script_process_data=script_process_data_current,
+                            collection=patient_collection,
+                        )
 
     extend_schedules.__doc__ = extend_schedules.__doc__.format(database_config.name)
 
