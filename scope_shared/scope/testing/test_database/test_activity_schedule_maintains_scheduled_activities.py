@@ -67,7 +67,34 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
         ]
     )
     scheduled_dates.extend(
-        [datetime.date(2022, 6, day) for day in list([6, 7, 13, 14])]
+        [datetime.date(2022, 6, day) for day in list([6, 7, 13, 14, 20, 21, 27, 28])]
+    )
+    scheduled_dates.extend(
+        [datetime.date(2022, 7, day) for day in list([4, 5, 11, 12, 18, 19, 25, 26])]
+    )
+    scheduled_dates.extend(
+        [
+            datetime.date(2022, 8, day)
+            for day in list([1, 2, 8, 9, 15, 16, 22, 23, 29, 30])
+        ]
+    )
+    scheduled_dates.extend(
+        [datetime.date(2022, 9, day) for day in list([5, 6, 12, 13, 19, 20, 26, 27])]
+    )
+    scheduled_dates.extend(
+        [
+            datetime.date(2022, 10, day)
+            for day in list([3, 4, 10, 11, 17, 18, 24, 25, 31])
+        ]
+    )
+    scheduled_dates.extend(
+        [
+            datetime.date(2022, 11, day)
+            for day in list([1, 7, 8, 14, 15, 21, 22, 28, 29])
+        ]
+    )
+    scheduled_dates.extend(
+        [datetime.date(2022, 12, day) for day in list([5, 6, 12, 13])]
     )
 
     assert scheduled_activities == [
@@ -83,7 +110,13 @@ def test_activity_schedule_calculate_scheduled_activities_to_create():
                         scheduled_date_current.year,
                         scheduled_date_current.month,
                         scheduled_date_current.day,
-                        15,
+                        15
+                        if (scheduled_date_current.month < 11)
+                        or (
+                            scheduled_date_current.month == 11
+                            and scheduled_date_current.day < 6
+                        )
+                        else 16,
                     )
                 )
             ),

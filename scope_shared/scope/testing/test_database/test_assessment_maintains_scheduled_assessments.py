@@ -36,7 +36,13 @@ def test_assessment_calculate_scheduled_assessments_to_create():
     scheduled_dates.extend([datetime.date(2022, 3, day) for day in range(14, 31 + 1)])
     scheduled_dates.extend([datetime.date(2022, 4, day) for day in range(1, 30 + 1)])
     scheduled_dates.extend([datetime.date(2022, 5, day) for day in range(1, 31 + 1)])
-    scheduled_dates.extend([datetime.date(2022, 6, day) for day in range(1, 14 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 6, day) for day in range(1, 30 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 7, day) for day in range(1, 31 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 8, day) for day in range(1, 31 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 9, day) for day in range(1, 30 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 10, day) for day in range(1, 31 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 11, day) for day in range(1, 30 + 1)])
+    scheduled_dates.extend([datetime.date(2022, 12, day) for day in range(1, 14 + 1)])
 
     assert scheduled_assessments == [
         {
@@ -51,7 +57,13 @@ def test_assessment_calculate_scheduled_assessments_to_create():
                         scheduled_date_current.year,
                         scheduled_date_current.month,
                         scheduled_date_current.day,
-                        15,
+                        15
+                        if (scheduled_date_current.month < 11)
+                        or (
+                            scheduled_date_current.month == 11
+                            and scheduled_date_current.day < 6
+                        )
+                        else 16,
                     )
                 )
             ),
@@ -63,7 +75,13 @@ def test_assessment_calculate_scheduled_assessments_to_create():
                         scheduled_date_current.year,
                         scheduled_date_current.month,
                         scheduled_date_current.day,
-                        15,
+                        15
+                        if (scheduled_date_current.month < 11)
+                        or (
+                            scheduled_date_current.month == 11
+                            and scheduled_date_current.day < 6
+                        )
+                        else 16,
                     )
                 )
             ),
