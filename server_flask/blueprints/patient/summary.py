@@ -6,6 +6,7 @@ import request_context
 import request_utils
 import scope.database.date_utils as date_utils
 import scope.database.patient.activities
+import scope.database.patient.assessment_logs
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_assessments
 import scope.database.patient.values_inventory
@@ -36,6 +37,13 @@ def get_patient_summary(patient_id):
     )
     activity_documents = activity_documents or []
 
+    assessment_log_documents = (
+        scope.database.patient.assessment_logs.get_assessment_logs(
+            collection=patient_collection
+        )
+    )
+    assessment_log_documents = assessment_log_documents or []
+
     safety_plan_document = scope.database.patient.safety_plan.get_safety_plan(
         collection=patient_collection,
     )
@@ -63,6 +71,7 @@ def get_patient_summary(patient_id):
 
     return scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=activity_documents,
+        assessment_log_documents=assessment_log_documents,
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
         values_inventory_document=values_inventory_document,
