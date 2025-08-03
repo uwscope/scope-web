@@ -1,5 +1,8 @@
 import copy
 import datetime
+import operator
+import pprint
+
 import pytz
 import requests
 from typing import Callable, List
@@ -125,6 +128,7 @@ def test_compute_patient_summary_values_inventory(
     values_inventory["assigned"] = False
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -145,6 +149,7 @@ def test_compute_patient_summary_values_inventory(
     activity["valueId"] = "some valueId"
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -167,6 +172,7 @@ def test_compute_patient_summary_values_inventory(
         del activity["valueId"]
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -187,6 +193,7 @@ def test_compute_patient_summary_values_inventory(
     activity["valueId"] = "some valueId"
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[activity],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -211,6 +218,7 @@ def test_compute_patient_summary_safety_plan(
     safety_plan["assigned"] = False
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -224,6 +232,7 @@ def test_compute_patient_summary_safety_plan(
     safety_plan["lastUpdatedDateTime"] = safety_plan["assignedDateTime"]
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -239,6 +248,7 @@ def test_compute_patient_summary_safety_plan(
     )
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -254,6 +264,7 @@ def test_compute_patient_summary_safety_plan(
     )
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -278,6 +289,7 @@ def test_compute_patient_summary_scheduled_assessments(
         scheduled_assessment_current["completed"] = True
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -294,6 +306,7 @@ def test_compute_patient_summary_scheduled_assessments(
         )
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -310,6 +323,7 @@ def test_compute_patient_summary_scheduled_assessments(
         )
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -326,6 +340,7 @@ def test_compute_patient_summary_scheduled_assessments(
         )
     summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=[],
+        assessment_log_documents=[],
         safety_plan_document=safety_plan,
         scheduled_assessment_documents=scheduled_assessments,
         values_inventory_document=values_inventory,
@@ -333,3 +348,298 @@ def test_compute_patient_summary_scheduled_assessments(
     )
     assert summary["assignedScheduledAssessments"] != []
     _patient_summary_assertions(summary=summary)
+
+
+def test_compute_patient_summary_scheduled_assessments_multiple_due(
+    data_fake_assessment_logs_factory: Callable[[], List[dict]],
+):
+    safety_plan = {
+        "_type": "safetyPlan",
+        "assigned": False,
+        "assignedDateTime": "2025-08-01T00:00:00Z",
+    }
+
+    values_inventory = {
+        "_type": "valuesInventory",
+        "assigned": False,
+        "assignedDateTime": "2025-08-01T00:00:00Z",
+    }
+
+    # Return only the most recent scheduled assessments of each assessmentId.
+    scheduled_assessments = [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-05T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-07-05T00:00:00Z",
+        },
+    ]
+
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=[],
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 1),
+    )
+
+    assert sorted(
+        summary["assignedScheduledAssessments"], key=operator.itemgetter("assessmentId")
+    ) == [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+    ]
+
+    # Be sure that allows assessments that are due on the same day.
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=[],
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 2),
+    )
+
+    assert sorted(
+        summary["assignedScheduledAssessments"], key=operator.itemgetter("assessmentId")
+    ) == [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+    ]
+
+    # Return only scheduled assessments where that most recent is not already marked as completed.
+    scheduled_assessments = [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-05T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-08-02T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": True,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "phq-9",
+            "completed": False,
+            "dueDate": "2025-07-05T00:00:00Z",
+        },
+    ]
+
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=[],
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 1),
+    )
+
+    assert sorted(
+        summary["assignedScheduledAssessments"], key=operator.itemgetter("assessmentId")
+    ) == [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+    ]
+
+    # We have had low confidence in the code which marks completed.
+    # For robustness, explicitly check the lack of a patient-submitted assessmentLog since one was due.
+
+    # In this case, logs are prior to the most recent due date.
+    assessment_logs = [
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-01T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-07T18:30:00Z",
+        },
+    ]
+
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=assessment_logs,
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 1),
+    )
+
+    assert sorted(
+        summary["assignedScheduledAssessments"], key=operator.itemgetter("assessmentId")
+    ) == [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+    ]
+
+    # In this case, a log come after the most recent due date, but was not patient submitted or was the wrong assessment.
+    assessment_logs = [
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-01T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-07T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": False,
+            "recordedDateTime": "2025-07-25T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "phq-9",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-25T18:30:00Z",
+        },
+    ]
+
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=assessment_logs,
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 1),
+    )
+
+    assert sorted(
+        summary["assignedScheduledAssessments"], key=operator.itemgetter("assessmentId")
+    ) == [
+        {
+            "_type": "scheduledAssessment",
+            "assessmentId": "gad-7",
+            "completed": False,
+            "dueDate": "2025-07-19T00:00:00Z",
+        },
+    ]
+
+    # In this case, a log come after the most recent due date and was patient submitted.
+    assessment_logs = [
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-01T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-07T18:30:00Z",
+        },
+        {
+            "_type": "assessmentLog",
+            "assessmentId": "gad-7",
+            "patientSubmitted": True,
+            "recordedDateTime": "2025-07-25T18:30:00Z",
+        },
+    ]
+
+    summary = scope.utils.compute_patient_summary.compute_patient_summary(
+        activity_documents=[],
+        assessment_log_documents=assessment_logs,
+        safety_plan_document=safety_plan,
+        scheduled_assessment_documents=scheduled_assessments,
+        values_inventory_document=values_inventory,
+        date_due=datetime.date(2025, 8, 1),
+    )
+
+    assert (
+        sorted(
+            summary["assignedScheduledAssessments"],
+            key=operator.itemgetter("assessmentId"),
+        )
+        == []
+    )

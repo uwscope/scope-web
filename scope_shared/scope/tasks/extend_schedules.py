@@ -40,7 +40,6 @@ import scope.enums
 import scope.populate
 import scope.schema
 import scope.schema_utils
-import scope.utils.compute_patient_summary
 
 
 class ScopeInstanceId(Enum):

@@ -23,6 +23,7 @@ import scope.database.document_utils
 import scope.database.initialize
 import scope.database.patient
 import scope.database.patient.activities
+import scope.database.patient.assessment_logs
 import scope.database.patient.safety_plan
 import scope.database.patient.scheduled_activities
 import scope.database.patient.scheduled_assessments
@@ -239,6 +240,11 @@ def _content_patient_summary(
         match_deleted=False,
     ).documents
 
+    assessment_log_documents = current_document_set.filter_match(
+        match_type=scope.database.patient.assessment_logs.DOCUMENT_TYPE,
+        match_deleted=False,
+    ).documents
+
     safety_plan_document = current_document_set.filter_match(
         match_type=scope.database.patient.safety_plan.DOCUMENT_TYPE,
         match_deleted=False,
@@ -256,6 +262,7 @@ def _content_patient_summary(
 
     patient_summary = scope.utils.compute_patient_summary.compute_patient_summary(
         activity_documents=activity_documents,
+        assessment_log_documents=assessment_log_documents,
         safety_plan_document=safety_plan_document,
         scheduled_assessment_documents=scheduled_assessment_documents,
         values_inventory_document=values_inventory_document,
