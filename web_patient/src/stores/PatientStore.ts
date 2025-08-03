@@ -240,22 +240,27 @@ export class PatientStore implements IPatientStore {
   }
 
   @computed public get assessmentsToComplete() {
+    // This will use all the server logic to obtain only a valid scheduled assessment.
     const scheduledAssessments =
       this.config?.assignedScheduledAssessments || [];
-    // Returns deduped list of assessments to complete
-    const latestAssessments: IScheduledAssessment[] = [];
-    const assessmentGroups = _.groupBy(
-      scheduledAssessments,
-      (a) => a.assessmentId,
-    );
 
-    for (var assessmentId in assessmentGroups) {
-      const group = assessmentGroups[assessmentId];
-      group.sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
-      latestAssessments.push(group[0]);
-    }
+    return scheduledAssessments;
 
-    return latestAssessments;
+    // Therefore, none of this is needed.
+    // // Returns deduped list of assessments to complete
+    // const latestAssessments: IScheduledAssessment[] = [];
+    // const assessmentGroups = _.groupBy(
+    //   scheduledAssessments,
+    //   (a) => a.assessmentId,
+    // );
+    //
+    // for (var assessmentId in assessmentGroups) {
+    //   const group = assessmentGroups[assessmentId];
+    //   group.sort((a, b) => compareDesc(a.dueDateTime, b.dueDateTime));
+    //   latestAssessments.push(group[0]);
+    // }
+    //
+    // return latestAssessments;
   }
 
   @computed public get assessmentLogs() {
