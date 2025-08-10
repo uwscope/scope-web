@@ -21,6 +21,17 @@ def datetime_from_document(
     document: dict,
 ) -> datetime:
     """
+    Recover the generation time from a document including an _id.
+    """
+
+    return datetime_from_document_id(document_id=document["_id"])
+
+
+def datetime_from_document_id(
+    *,
+    document_id: str,
+) -> datetime:
+    """
     Recover the generation time from an _id.
 
     Format of an ObjectID is documented:
@@ -28,7 +39,7 @@ def datetime_from_document(
     https://www.mongodb.com/docs/manual/reference/bson-types/#std-label-objectid
     """
 
-    return bson.objectid.ObjectId(document["_id"]).generation_time.astimezone(pytz.utc)
+    return bson.objectid.ObjectId(document_id).generation_time.astimezone(pytz.utc)
 
 
 def document_id_from_datetime(
